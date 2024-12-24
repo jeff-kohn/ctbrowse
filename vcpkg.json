@@ -1,14 +1,13 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "ctwin",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "dependencies": [
     "catch2",
     "cxxopts",
     "cpr",
     "frozen",
-    "magic-enum",
-    "wxwidgets"
+    "magic-enum"
   ],
-  "builtin-baseline": "65d5e1300da19ef007978a8c347680cc3e19c44f"
+  "builtin-baseline": "f06267da58f3c06b3a1aff9cbf5c2906e595ebc9"
 }

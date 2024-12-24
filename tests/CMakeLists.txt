@@ -11,7 +11,8 @@ include(Catch)
 
 # ---- Tests ----
 
-add_executable(ctwin_test source/ctwin_test.cpp)
+create_exe_target(ctwin_test)
+target_sources(ctwin_test PRIVATE source/ctwin_test.cpp)
 target_link_libraries(
     ctwin_test PRIVATE
     ctwin_lib

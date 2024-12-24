@@ -2,15 +2,8 @@ include(cmake/folders.cmake)
 
 include(CTest)
 if(BUILD_TESTING)
-  add_subdirectory(test)
+  add_subdirectory(tests)
 endif()
-
-add_custom_target(
-    run-exe
-    COMMAND ctwin_exe
-    VERBATIM
-)
-add_dependencies(run-exe ctwin_exe)
 
 option(BUILD_MCSS_DOCS "Build documentation using Doxygen and m.css" OFF)
 if(BUILD_MCSS_DOCS)
