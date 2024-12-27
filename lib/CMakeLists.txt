@@ -7,11 +7,14 @@ add_library(${PROJECT_NAME}::ctwin_lib ALIAS ctwin_lib)
 
 target_sources(ctwin_lib
    PUBLIC
+      "../include/ctwin/CellarTrackerDownload.h"
       "../include/ctwin/constants.h"
-      "../include/ctwin/environment.h"
+      "../include/ctwin/utility.h"
    PRIVATE
+      "cp1252_to_UTF8.h"
       "windows_includes.h"
-      "environment.cpp"
+      "CellarTrackerDownload.cpp"
+      "utility.cpp"
 )
 
 target_include_directories(ctwin_lib

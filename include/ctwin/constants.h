@@ -12,8 +12,9 @@ namespace ctwin::constants
 {
    inline constexpr const char* APP_NAME = "CT-Win";
 
+   inline constexpr const char* FMT_HTTP_CT_BASE_URL = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
+   inline constexpr const char* HTTP_CELLARTRACKER_URL = "https://www.cellartracker.com/xlquery.asp";
 
-   inline constexpr const char* CT_BASE_URL = "https://www.cellartracker.com/xlquery.asp?User={1}&Password={2}";
    inline constexpr const char* HTTP_HEADER_XCLIENT = "X-Client";
    inline constexpr const char* HTTP_HEADER_XCLIENT_VALUE = "cpr";
    inline constexpr const char* HTTP_PARAM_TABLE = "Table";
