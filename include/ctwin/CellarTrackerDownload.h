@@ -1,31 +1,33 @@
-///
+/// *******************************************************************************
 /// @file CellarTrackerDownload.h
 /// 
 /// @brief this header contains declaration for the CellarTrackerDownload class.
-/// 
+///******************************************************************************** 
 #pragma once
 
+#include "ctwin/Error.h"
+#include "ctwin/CredentialWrapper.h"
+#include "ctwin/HttpStatusCodes.h"
+
+#include "magic_enum/magic_enum.hpp"
+
+#include <filesystem>
 #include <string>
 #include <string_view>
 #include <expected>
 
 namespace ctwin
 {
+   namespace fs = std::filesystem;
 
    ///
    /// @brief CellarTrackerDownload class retrieves user data from the CellarTracker website.
    /// 
-   /// This class downloads table data from the CT website using HTTP requests. Username/passwword
-   /// authentication is used. Supports getting password from an environment variable.
+   /// This class downloads table data from the CT website using HTTP requests. 
    ///  
    class CellarTrackerDownload
    {
    public:
-      
-      CellarTrackerDownload() = default;
-      CellarTrackerDownload(std::string_view user_name, std::string_view pwd);
-
-
       /// @brief enum for the data tables available from CT website
       enum class Table
       {
@@ -53,22 +55,26 @@ namespace ctwin
          csv
       };
 
+      struct CellarTrackerTable
+      {
+         std::string data{};
+         Table table{};
+         Format data_format{};
 
-      /// @brief 
-      /// @param user_name CT username
-      /// @param pwd  CT password, or an environment variable containing the password.
-      void setCredentials(std::string_view user_name, std::string_view pwd);
+         std::string_view tableName() const noexcept  { return magic_enum::enum_name(table);       }
+         std::string_view formatName() const noexcept { return magic_enum::enum_name(data_format); }
+      };
 
-      /// @brief  retreive a data table from CT website
-      /// @param tbl the table to retrieve
-      /// @param fmt the data format to return1
-      /// @return 
-      std::string getTableData(Table tbl, Format fmt);
-      bool 
+      /// @brief the result of a download will the requested data if successful, or an Error object if unsuccessful.
+      using DownloadResult = std::expected<CellarTrackerTable, Error>;
 
-   private:
-      std::string m_user{};
-      std::string m_pwd{};
+
+      /// @brief        retrieve a data table from CT website
+      /// @param cred   the username/password to use for the download
+      /// @param tbl    the table to retrieve
+      /// @param fmt    the data format to return
+      /// @return       expected/successful value is the requested table data, unexpected/error value is HTTP status code
+      DownloadResult getTableData(const CredentialWrapper::Credential& cred, Table tbl, Format fmt);
    };
 
 } // namespace ctwin

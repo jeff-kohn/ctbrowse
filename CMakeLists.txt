@@ -39,6 +39,7 @@ endif()
 include(cmake/dev-mode.cmake)
 
 find_package(cpr CONFIG REQUIRED)
+find_package(magic_enum CONFIG REQUIRED)
 
 add_subdirectory(lib)
 add_subdirectory(src)

@@ -1,12 +1,14 @@
 
 #include "ctwin/constants.h"
-#include "ctwin/utility.h"
+#include "ctwin/CellarTrackerDownload.h"
+#include "ctwin/winapi_util.h"
 
 #include "cpr/cpr.h"
 #include "cpr/util.h"
 
 #include <string>
 #include <print>
+
 
 int main()
 {
@@ -15,21 +17,42 @@ int main()
    try {
       using namespace ctwin;
 
-      auto name = cpr::util::urlEncode("Jeff Kohn");
-      auto pwd = cpr::util::urlEncode(getEnvironmentVar(constants::CT_PASSWORD));
-      cpr::Url url{ std::format(constants::FMT_HTTP_CT_BASE_URL, name, pwd, "csv", "List") };
-      cpr::Header header{ {constants::HTTP_HEADER_XCLIENT, constants::HTTP_HEADER_XCLIENT_VALUE} };
+      CredentialWrapper cred_wrapper{
+         constants::CELLARTRACKER_DOT_COM, true,
+         constants::CELLARTRACKER_LOGON_CAPTION,
+         constants::CELLARTRACKER_LOGON_TITLE
+      };
 
-      auto response = cpr::Get(url, header);
-      if (cpr::status::is_success(response.status_code))
-         saveTextToFile(response.text, fs::path{ "wine_list.csv" }, true);
-      else
-         return -1;
+      // if there's no saved credential, user will be prompted. use a loop since
+      // it may take more than one try before user enters the correct credentials
+      // (or gives up trying).
+      CellarTrackerDownload downloader{};
+      CellarTrackerDownload::DownloadResult result{};
+      bool prompt_again = true;
+      while (prompt_again)
+      {
+         auto cred = cred_wrapper.promptForCredential();
+         if (!cred)
+            throw Error{ "Authentication failed." };
+
+         result = downloader.getTableData(cred.value(), CellarTrackerDownload::Table::Notes, CellarTrackerDownload::Format::csv);
+         if (!result.has_value() && result.error().error_code == static_cast<int>(HttpStatus::Code::Unauthorized))
+            prompt_again = true; // wrong user/pass, try again
+         else 
+            prompt_again = false;
+      }
+
+      if (result.has_value())
+      {
+         auto& data = result.value();
+         util::saveTextToFile(data.data, data.tableName());
+      }
 
       return 0;
    }
-    catch (std::exception&)
+    catch (std::exception& ex)
     {
+       std::println("\r\nException occurred:{}\r\n", ex.what());
     }
 }
 
