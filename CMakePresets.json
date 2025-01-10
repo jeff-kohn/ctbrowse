@@ -10,8 +10,9 @@
       "name": "dev-mode",
       "hidden": true,
       "cacheVariables": {
-        "ctwin_DEVELOPER_MODE": "ON",
-        "VCPKG_MANIFEST_FEATURES": "test"
+         "ct_search_DEVELOPER_MODE": "ON",
+         "VCPKG_MANIFEST_FEATURES": "test",
+         "BUILD_TESTING":  "OFF"
       }
     },
     {
@@ -27,7 +28,7 @@
       "inherits": "vcpkg",
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x64-wxwindows-static",      
-        "CTWIN_MSVC_RUNTIME_LIBRARY" : "$<$<CONFIG:Debug>:MultiThreadedDebug>$<$<CONFIG:Release,RelWithDebInfo>:MultiThreaded>"
+        "CTS_MSVC_RUNTIME_LIBRARY" : "$<$<CONFIG:Debug>:MultiThreadedDebug>$<$<CONFIG:Release,RelWithDebInfo>:MultiThreaded>"
       }
     },
     {

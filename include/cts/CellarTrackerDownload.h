@@ -5,18 +5,17 @@
 ///******************************************************************************** 
 #pragma once
 
-#include "ctwin/Error.h"
-#include "ctwin/CredentialWrapper.h"
-#include "ctwin/HttpStatusCodes.h"
+#include "cts/Error.h"
+#include "cts/CredentialWrapper.h"
 
 #include "magic_enum/magic_enum.hpp"
 
+#include <expected>
 #include <filesystem>
 #include <string>
 #include <string_view>
-#include <expected>
 
-namespace ctwin
+namespace cts
 {
    namespace fs = std::filesystem;
 
@@ -77,4 +76,4 @@ namespace ctwin
       DownloadResult getTableData(const CredentialWrapper::Credential& cred, Table tbl, Format fmt);
    };
 
-} // namespace ctwin
+} // namespace cts

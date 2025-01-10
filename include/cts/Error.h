@@ -1,7 +1,7 @@
 ///
-/// @file ctwin_error.h
+/// @file Error.h
 ///
-/// @brief declaration for the ctwin::Error class
+/// @brief declaration for the cts::Error class
 ///
 #pragma once
 
@@ -12,7 +12,7 @@
 #include <string_view>
 
 
-namespace ctwin
+namespace cts
 {
    /// @brief exception class used for runtime errors
    ///
@@ -84,4 +84,4 @@ namespace ctwin
       ~Error() override = default;
    };
 
-} // namespace ctwin
+} // namespace cts

@@ -4,7 +4,7 @@
 #include <string>
 #include <string_view>
 
-namespace ctwin::util
+namespace cts::util
 {
    namespace fs = std::filesystem;
 
@@ -48,4 +48,4 @@ namespace ctwin::util
    /// @brief just dump some text to a file.
    bool saveTextToFile(std::string_view text, fs::path file_path, bool overwrite = true) noexcept;
 
-}  // namespace ctwin::util
+}  // namespace cts::util

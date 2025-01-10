@@ -1,6 +1,7 @@
-#include "ctwin/CellarTrackerDownload.h"
-#include "ctwin/constants.h"
-#include "ctwin/winapi_util.h"
+#include "cts/CellarTrackerDownload.h"
+#include "cts/constants.h"
+#include "cts/HttpStatusCodes.h"
+#include "cts/winapi_util.h"
 
 #include "cpr/cpr.h"
 #include "cpr/response.h"
@@ -9,7 +10,7 @@
 
 #include <format>
 
-namespace ctwin
+namespace cts
 {
    namespace
    {
@@ -20,8 +21,8 @@ namespace ctwin
 
          if (cpr::status::is_success(response.status_code))
          {
-            // our request was successful, but we need to check if the response text contains an error message
-            if (response.text.starts_with(constants::ERR_INVALID_CELLARTRACKER_LOGON))
+            // our request was successful, but we need to check if the response contains a file or an error message
+            if (response.text == constants::ERR_INVALID_CELLARTRACKER_LOGON)
             {
                error.error_code = static_cast<int64_t>(HttpStatus::Code::Unauthorized);
                error.error_message = constants::ERROR_AUTHENTICATION_FAILED;
@@ -81,4 +82,4 @@ namespace ctwin
       return table_data;
    }
 
-}  // namespace ctwin
+}  // namespace cts

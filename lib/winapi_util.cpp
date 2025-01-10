@@ -1,5 +1,5 @@
-#include "ctwin/winapi_util.h"
-#include "ctwin/constants.h"
+#include "cts/winapi_util.h"
+#include "cts/constants.h"
 
 #include <windows.h>
 #include <shlwapi.h>
@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-namespace ctwin::util
+namespace cts::util
 {
    std::string percentEncode(std::string_view text)
    {
@@ -140,11 +140,11 @@ namespace ctwin::util
       // use binary mode to keep ofstream from inserting extra carriage returns, since
       // we want to preserve whatever linefeeds are already in the file (it may already
       // have cr/lf, in which case we'd end up with extra cr in text mode because
-      // ofstream isn't smart enough to recognize it.
+      // ofstream isn't smart enough to recognize it).
       std::ofstream file_out{ file_path, std::ios_base::out | std::ios_base::binary };
       file_out << text;
       return true;
    }
 
 
-} // namespace ctwin::util
+} // namespace cts::util

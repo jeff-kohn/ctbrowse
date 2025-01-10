@@ -2,7 +2,7 @@
 # depends on being added from it, i.e. the testing is done only from the build
 # tree and is not feasible from an install location
 
-project(ctwinTests LANGUAGES CXX)
+project(ct_searchTests LANGUAGES CXX)
 
 # ---- Dependencies ----
 
@@ -11,16 +11,21 @@ include(Catch)
 
 # ---- Tests ----
 
-create_exe_target(ctwin_test)
-target_sources(ctwin_test PRIVATE source/ctwin_test.cpp)
-target_link_libraries(
-    ctwin_test PRIVATE
-    ctwin_lib
-    Catch2::Catch2WithMain
-)
-target_compile_features(ctwin_test PRIVATE cxx_std_17)
+create_exe_target(cts_test)
 
-catch_discover_tests(ctwin_test)
+target_sources(cts_test
+   PRIVATE
+      "source/cts_test.cpp"
+)
+
+target_link_libraries(cts_test
+   PRIVATE
+      cts_lib
+      Catch2::Catch2WithMain
+)
+
+catch_discover_tests(cts_test)
+
 
 # ---- End-of-file commands ----
 

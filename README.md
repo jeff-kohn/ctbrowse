@@ -1,6 +1,6 @@
-# ctwin
+# ct_search
 
-This is the ctwin project.
+This is the ct_search project.
 
 # Building and installing
 

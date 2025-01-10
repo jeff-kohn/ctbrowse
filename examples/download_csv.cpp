@@ -1,7 +1,8 @@
 
-#include "ctwin/constants.h"
-#include "ctwin/CellarTrackerDownload.h"
-#include "ctwin/winapi_util.h"
+#include "cts/constants.h"
+#include "cts/CellarTrackerDownload.h"
+#include "cts/HttpStatusCodes.h"
+#include "cts/winapi_util.h"
 
 #include "cpr/cpr.h"
 #include "cpr/util.h"
@@ -15,7 +16,7 @@ int main()
    using namespace std::literals;
 
    try {
-      using namespace ctwin;
+      using namespace cts;
 
       CredentialWrapper cred_wrapper{
          constants::CELLARTRACKER_DOT_COM, true,

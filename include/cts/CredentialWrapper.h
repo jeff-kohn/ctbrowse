@@ -13,7 +13,7 @@
 #include <string_view>
 
 
-namespace ctwin
+namespace cts
 {
    /// @brief class to encapsulate using the WinAPI to prompt for (and optionally save) generic username/password credentials.
    ///
@@ -183,4 +183,4 @@ namespace ctwin
    }
 
 
-} // namespace ctwin
+} // namespace cts

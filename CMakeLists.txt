@@ -3,9 +3,9 @@ cmake_minimum_required (VERSION 3.25)
 include(cmake/prelude.cmake)
 
 project(
-    ctwin
+    ct_search
     VERSION 0.1.0
-    DESCRIPTION "CellarTracker Inventory Search"
+    DESCRIPTION "CellarTracker Search"
     LANGUAGES CXX
 )
 
@@ -19,26 +19,27 @@ include(cmake/add_target.cmake)
 
 # Only do these if this is the main project, and not if it is included through add_subdirectory
 if (TOP_LEVEL_PROJECT)
-   # Let's ensure -std=c++xx instead of -std=g++xx
-   set(CMAKE_CXX_EXTENSIONS OFF)
-
    # Let's nicely support folders in IDEs
    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+   #export compile_commands.json for tools like clang-tidy and cppcheck
+   set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 endif()
 
 # ---- Developer mode ----
-if(NOT ctwin_DEVELOPER_MODE)
+if(NOT ct_search_DEVELOPER_MODE)
   return()
 elseif(NOT PROJECT_IS_TOP_LEVEL)
   message(
       AUTHOR_WARNING
-      "Developer mode is intended for developers of ctwin"
+      "Developer mode is intended for developers of ct_search"
   )
 endif()
 
 include(cmake/dev-mode.cmake)
 
 find_package(cpr CONFIG REQUIRED)
+find_package(glaze CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
 
 add_subdirectory(lib)

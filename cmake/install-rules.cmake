@@ -1,6 +1,6 @@
 install(
-    TARGETS ctwin_exe
-    RUNTIME COMPONENT ctwin_Runtime
+    TARGETS ct_search_exe
+    RUNTIME COMPONENT ct_search_Runtime
 )
 
 if(PROJECT_IS_TOP_LEVEL)
