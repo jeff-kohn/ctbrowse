@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "MainFrame.h"
 #include "cts/constants.h"
 
 #include <wx/wx.h>
@@ -37,6 +38,7 @@ namespace cts
       const wxConfigBase& getConfig() const noexcept(false);
 
    private:
+      MainFrame* m_main_frame{};
    };
 
 }  // namespace cts

@@ -37,6 +37,11 @@ namespace cts
 
       ::wxInitAllImageHandlers();
 
+      m_main_frame = new MainFrame{nullptr};
+      SetTopWindow(m_main_frame);
+      m_main_frame->Center();
+      m_main_frame->Show();
+
       return true;
    } 
 
