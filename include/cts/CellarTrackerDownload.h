@@ -1,8 +1,10 @@
-/// *******************************************************************************
-/// @file CellarTrackerDownload.h
-/// 
-/// @brief this header contains declaration for the CellarTrackerDownload class.
-///******************************************************************************** 
+/*********************************************************************
+ * @file       CellarTrackerDownload.h
+ *
+ * @brief      Declaration for the class CellarTrackerDownload
+ *
+ * @copyright  Copyright © 2024 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #pragma once
 
 #include "cts/Error.h"
@@ -54,6 +56,7 @@ namespace cts
          csv
       };
 
+      /// @brief struct that contains data (and metadata) for a downloaded CellarTracker table
       struct CellarTrackerTable
       {
          std::string data{};
@@ -64,7 +67,7 @@ namespace cts
          std::string_view formatName() const noexcept { return magic_enum::enum_name(data_format); }
       };
 
-      /// @brief the result of a download will the requested data if successful, or an Error object if unsuccessful.
+      /// @brief the result of a download will contain the requested data if successful, or an Error object if unsuccessful.
       using DownloadResult = std::expected<CellarTrackerTable, Error>;
 
 

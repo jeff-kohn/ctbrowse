@@ -1,3 +1,11 @@
+/*********************************************************************
+ * @file       App.cpp
+ *
+ * @brief      Implementation for the App class 
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
+
 #include "App.h"
 #include "cts/Error.h"
 

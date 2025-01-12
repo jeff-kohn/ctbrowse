@@ -1,3 +1,11 @@
+/*********************************************************************
+ * @file       TableSyncDialog.cpp
+ *
+ * @brief      Implementation for the class TableSyncDialog
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
+
 #include "TableSyncDialog.h"
 #include "wx_helpers.h"
 
@@ -20,6 +28,7 @@ namespace cts
          return false;
 
       Bind(wxEVT_INIT_DIALOG, &TableSyncDialog::OnInitDialog, this);
+      Bind(wxEVT_UPDATE_UI, &TableSyncDialog::onOkUpdateUI, this, wxID_OK);
 
       return false;
    }
@@ -30,10 +39,14 @@ namespace cts
       // populate table name selection list
       auto table_names = magic_enum::enum_names<CellarTrackerDownload::Table>();
       m_table_selection_ctrl->InsertItems(wxToArrayString(table_names), 0);
-
-      // populate data format combo
-      auto format_names = magic_enum::enum_names<CellarTrackerDownload::Format>();
-      m_data_format_ctrl->Insert(wxToArrayString(format_names), 0);
    }
+
+
+   void TableSyncDialog::onOkUpdateUI([[maybe_unused]] wxUpdateUIEvent& event)
+   {
+      wxArrayInt dummy{};
+      event.Enable(m_table_selection_ctrl->GetCheckedItems(dummy));
+   }
+
 
 }  // namespace cts

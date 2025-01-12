@@ -7,8 +7,6 @@
 
 // clang-format off
 
-#include <wx/button.h>
-#include <wx/sizer.h>
 #include <wx/stattext.h>
 
 #include "TableSyncDlgBase.h"
@@ -23,28 +21,31 @@ bool TableSyncDlgBase::Create(wxWindow* parent, wxWindowID id, const wxString& t
 
     auto* dlg_sizer = new wxBoxSizer(wxVERTICAL);
 
-    auto* static_text2 = new wxStaticText(this, wxID_ANY, "Tables to Synchronize:");
-    dlg_sizer->Add(static_text2, wxSizerFlags().Border(wxALL));
+    auto* box_sizer2 = new wxBoxSizer(wxHORIZONTAL);
+
+    auto* box_sizer3 = new wxBoxSizer(wxVERTICAL);
+
+    auto* static_text2 = new wxStaticText(this, wxID_ANY, "Tables to Download:");
+    box_sizer3->Add(static_text2,
+        wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
 
     m_table_selection_ctrl = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, nullptr,
         wxLB_EXTENDED);
-    dlg_sizer->Add(m_table_selection_ctrl, wxSizerFlags().Expand().Border(wxALL));
+    m_table_selection_ctrl->SetMinSize(ConvertDialogToPixels(wxSize(100, 100)));
+    box_sizer3->Add(m_table_selection_ctrl, wxSizerFlags().Border(wxALL));
 
-    auto* box_sizer = new wxBoxSizer(wxHORIZONTAL);
-
-    auto* static_text = new wxStaticText(this, wxID_ANY, "Format:");
-    box_sizer->Add(static_text, wxSizerFlags().Center().Border(wxALL));
-
-    m_data_format_ctrl = new wxChoice(this, wxID_ANY);
-    box_sizer->Add(m_data_format_ctrl, wxSizerFlags().Center().Border(wxALL));
-
-    dlg_sizer->Add(box_sizer, wxSizerFlags().Border(wxALL));
+    m_startup_sync_ctrl = new wxCheckBox(this, wxID_ANY, "Sync on &Program Startup");
+    box_sizer3->Add(m_startup_sync_ctrl, wxSizerFlags().Border(wxALL));
 
     m_save_default_ctrl = new wxCheckBox(this, wxID_ANY, "Save as &Default");
-    dlg_sizer->Add(m_save_default_ctrl, wxSizerFlags().Border(wxALL));
+    box_sizer3->Add(m_save_default_ctrl, wxSizerFlags().Border(wxALL));
 
-    auto* stdBtn = CreateStdDialogButtonSizer(wxOK|wxCANCEL);
-    dlg_sizer->Add(CreateSeparatedSizer(stdBtn), wxSizerFlags().Expand().Border(wxALL));
+    box_sizer2->Add(box_sizer3, wxSizerFlags().Border(wxALL));
+
+    dlg_sizer->Add(box_sizer2, wxSizerFlags().Expand().Border(wxALL));
+
+    m_std_buttons = CreateStdDialogButtonSizer(wxOK|wxCANCEL);
+    dlg_sizer->Add(CreateSeparatedSizer(m_std_buttons), wxSizerFlags().Expand().Border(wxALL));
 
     SetSizerAndFit(dlg_sizer);
     Centre(wxBOTH);

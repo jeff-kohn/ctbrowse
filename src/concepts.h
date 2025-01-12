@@ -1,3 +1,10 @@
+/*********************************************************************
+ * @file       concepts.h
+ *
+ * @brief      defines some app-specific concept
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #pragma once
 
 #include <concepts>

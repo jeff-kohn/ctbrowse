@@ -1,3 +1,10 @@
+/*********************************************************************
+ * @file       CellarTrackerDownload.cpp
+ *
+ * @brief      Implementation for the class CredentialWrapper
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #include "cts/CellarTrackerDownload.h"
 #include "cts/constants.h"
 #include "cts/HttpStatusCodes.h"

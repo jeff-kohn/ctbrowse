@@ -1,3 +1,10 @@
+/*********************************************************************
+ * @file       winapi_util.cpp
+ *
+ * @brief      helper functions for using the WinAPI
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #include "cts/winapi_util.h"
 #include "cts/constants.h"
 

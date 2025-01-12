@@ -9,11 +9,12 @@
 
 #pragma once
 
+#include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/checklst.h>
-#include <wx/choice.h>
 #include <wx/dialog.h>
 #include <wx/gdicmn.h>
+#include <wx/sizer.h>
 
 namespace cts
 {
@@ -21,24 +22,27 @@ namespace cts
     {
     public:
         TableSyncDlgBase() {}
-        TableSyncDlgBase(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& title = "Sync Table Data",
-            const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+        TableSyncDlgBase(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& title =
+            "Download Table Data from CellarTracker", const wxPoint& pos = wxDefaultPosition, const wxSize& size =
+            wxDefaultSize,
             long style = wxDEFAULT_DIALOG_STYLE, const wxString &name = wxDialogNameStr)
         {
             Create(parent, id, title, pos, size, style, name);
         }
 
-        bool Create(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& title = "Sync Table Data",
-            const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+        bool Create(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& title =
+            "Download Table Data from CellarTracker", const wxPoint& pos = wxDefaultPosition, const wxSize& size =
+            wxDefaultSize,
             long style = wxDEFAULT_DIALOG_STYLE, const wxString &name = wxDialogNameStr);
 
     protected:
 
         // Class member variables
 
-        wxCheckBox* m_save_default_ctrl;  // Whether the current table selection shoudl be remembered for next time
+        wxCheckBox* m_save_default_ctrl;  // Whether the current table selection should be remembered for next time
+        wxCheckBox* m_startup_sync_ctrl;  // If checked, application will sync on startup
         wxCheckListBox* m_table_selection_ctrl;
-        wxChoice* m_data_format_ctrl;
+        wxStdDialogButtonSizer* m_std_buttons;
     };
 } // namespace cts
 

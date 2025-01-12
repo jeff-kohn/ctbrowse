@@ -10,7 +10,7 @@
     <node
       class="wxDialog"
       class_name="TableSyncDlgBase"
-      title="Sync Table Data"
+      title="Download Table Data from CellarTracker"
       base_file="TableSyncDlgBase"
       derived_class_name="TableSyncDialog"
       derived_file="TableSyncDialog">
@@ -20,35 +20,40 @@
         var_name="dlg_sizer"
         flags="wxEXPAND">
         <node
-          class="wxStaticText"
-          class_access="none"
-          label="Tables to Synchronize:"
-          var_name="static_text2" />
-        <node
-          class="wxCheckListBox"
-          type="wxLB_EXTENDED"
-          var_name="m_table_selection_ctrl"
-          flags="wxEXPAND" />
-        <node
-          class="wxBoxSizer">
+          class="wxBoxSizer"
+          var_name="box_sizer2"
+          flags="wxEXPAND">
           <node
-            class="wxStaticText"
-            class_access="none"
-            label="Format:"
-            var_name="static_text"
-            alignment="wxALIGN_CENTER_VERTICAL" />
-          <node
-            class="wxChoice"
-            var_name="m_data_format_ctrl"
-            alignment="wxALIGN_CENTER_VERTICAL" />
+            class="wxBoxSizer"
+            orientation="wxVERTICAL"
+            var_name="box_sizer3">
+            <node
+              class="wxStaticText"
+              class_access="none"
+              label="Tables to Download:"
+              var_name="static_text2"
+              borders="wxLEFT|wxRIGHT|wxTOP" />
+            <node
+              class="wxCheckListBox"
+              type="wxLB_EXTENDED"
+              var_name="m_table_selection_ctrl"
+              minimum_size="100,100d" />
+            <node
+              class="wxCheckBox"
+              label="Sync on &amp;Program Startup"
+              var_comment="If checked, application will sync on startup"
+              var_name="m_startup_sync_ctrl" />
+            <node
+              class="wxCheckBox"
+              label="Save as &amp;Default"
+              var_comment="Whether the current table selection should be remembered for next time"
+              var_name="m_save_default_ctrl" />
+          </node>
         </node>
         <node
-          class="wxCheckBox"
-          label="Save as &amp;Default"
-          var_comment="Whether the current table selection shoudl be remembered for next time"
-          var_name="m_save_default_ctrl" />
-        <node
           class="wxStdDialogButtonSizer"
+          class_access="protected:"
+          var_name="m_std_buttons"
           flags="wxEXPAND" />
       </node>
     </node>

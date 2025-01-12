@@ -3,7 +3,7 @@
  *
  * @brief      Declaration for the class CredentialWrapper
  *
- * @copyright  Copyright © 2024 Jeff Kohn. All rights reserved.
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 #pragma once
 
@@ -28,7 +28,7 @@ namespace cts
    {
    public:
       static inline constexpr int MAX_USERNAME_LENGTH = 513; /// max username length not including null terminator
-      static inline constexpr int MAX_PASSWORD_LENGTH = 256; /// make password length not including null terminator
+      static inline constexpr int MAX_PASSWORD_LENGTH = 256; /// max password length not including null terminator
 
 
       /// @brief struct containing the username and password result from a call to PromptForCredential()
@@ -74,9 +74,8 @@ namespace cts
 
 
       /// @brief              construct a CredentialWrapper by specifying target, message, and caption
-      /// @param target       the name that will be used to save the credential if the user chooses to save it
-      /// @param allow_save   if true, user will have option to save credential, and if a matching credential has
-      ///                     previously been saved it will be used without prompting the user.
+      /// @param target       the name that will be used to save the credential if the user chooses to save it.      ///                     
+      /// @param allow_save   if true, user will have option to save credential 
       /// @param message_text The message that will be displayed in the prompt dialog (if displayed)
       /// @param caption_text The caption that will be displayed in the title bar of the prompt dialog.
       ///
@@ -130,8 +129,10 @@ namespace cts
 
       /// @brief zero-overwrites the username/password stored in this object.
       ///
-      /// any previously-returned Credential objects will be promptForCredential will be impacted by calling this,
-      /// since they contain string_views pointing to the same buffer we're zero-overwriting.
+      /// any Credential objects returned by a previous call to promptForCredential
+      /// will be impacted by calling this, since they contain string_views pointing
+      /// to the same buffer we're zero-overwriting.
+      /// 
       void clear() noexcept;
 
 
@@ -171,8 +172,8 @@ namespace cts
       std::array<char, MAX_PASSWORD_LENGTH + 1> m_password{};
 
       bool m_allow_save{ false }; 
-      bool m_save_checked{ false };        /// true if user checked the "save" box, false otherwise
-      bool m_confirmed{ false };           /// will be true if ConfirmCredential() has been called, regardless of whether true or false was passed.
+      bool m_save_checked{ false };   /// true if user checked the "save" box, false otherwise
+      bool m_confirmed{ false };      /// will be true if ConfirmCredential() has been called, regardless of whether true or false was passed.
    };
 
 

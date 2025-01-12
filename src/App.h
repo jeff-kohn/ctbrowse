@@ -1,11 +1,10 @@
-//---------------------------------------------------------------------------------------------------------------------
-// App.h
-//
-// header for the App class
-//
-// Copyright (c) 2025 Jeff Kohn. All Right Reserved.
-//---------------------------------------------------------------------------------------------------------------------
-
+/*********************************************************************
+ * @file       App.h
+ *
+ * @brief      Declaration for the App class
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #pragma once
 
 #include "MainFrame.h"
@@ -30,10 +29,11 @@ namespace cts
       int OnExit() override;
 
 
-      /// <summary>
-      ///   Get the current config object. Calling this will throw an exception
-      ///   instead of returning nullptr if there's no default config.
-      /// </summary>
+      /// @brief Get the current config object.
+      ///
+      /// Calling this will throw an exception  instead of returning nullptr
+      /// if there's no default config.
+      /// 
       wxConfigBase& getConfig() noexcept(false);
       const wxConfigBase& getConfig() const noexcept(false);
 

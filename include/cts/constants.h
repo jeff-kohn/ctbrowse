@@ -1,12 +1,12 @@
-//---------------------------------------------------------------------------------------------------------------------
-// constants.h
-//
-// Defines various constants used throughout the project.
-//
-// Copyright (c) 2024 Jeff Kohn. All Right Reserved.
-//---------------------------------------------------------------------------------------------------------------------
-
+/*********************************************************************
+ * @file       constants.h
+ *
+ * @brief      Defines various constants used throughout the project.
+ *
+ * @copyright  Copyright © 2024 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #pragma once
+
 
 namespace cts::constants
 {
@@ -33,9 +33,5 @@ namespace cts::constants
    inline constexpr const char* ERROR_AUTHENTICATION_FAILED = "Invalid username/password.";
    inline constexpr const char* ERROR_FMT_CURL_ERROR = "The operation failed with CURL error {}";
    inline constexpr const char* ERROR_FMT_HTTP_STATUS_CODE = "The operation failed with HTTP status code {}";
-
-
-// inline constexpr const char* CONFIG_DEFAULT_LOG_FOLDER = "%LOCALAPPDATA%/ct_search/logs";
-
 
 } // namespace cts::constants

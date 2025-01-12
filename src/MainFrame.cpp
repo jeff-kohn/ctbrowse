@@ -1,3 +1,10 @@
+/*********************************************************************
+ * @file       MainFrame.cpp
+ *
+ * @brief      Implementation for the class MainFrame
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 
 #include "MainFrame.h"  
 #include "TableSyncDialog.h"

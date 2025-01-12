@@ -1,8 +1,10 @@
-///
-/// @file Error.h
-///
-/// @brief declaration for the cts::Error class
-///
+/*********************************************************************
+ * @file       Error.h
+ *
+ * @brief      Declaration for the exception class Error
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #pragma once
 
 #include "magic_enum/magic_enum.hpp"

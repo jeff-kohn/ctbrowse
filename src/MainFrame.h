@@ -1,4 +1,10 @@
-
+/*********************************************************************
+ * @file       MainFrame.h
+ *
+ * @brief      Declaration for the class MainFrame
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #pragma once
 
 #include "generated/MainFrameBase.h"

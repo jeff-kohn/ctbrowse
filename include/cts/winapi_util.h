@@ -1,3 +1,10 @@
+/*********************************************************************
+ * @file       winapi_util.h
+ *
+ * @brief      Declaration for helper functions for using the WinAPI
+ * 
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #pragma once
 
 #include <filesystem>
