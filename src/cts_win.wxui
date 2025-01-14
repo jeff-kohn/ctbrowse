@@ -10,7 +10,7 @@
     <node
       class="wxDialog"
       class_name="TableSyncDlgBase"
-      title="Download Table Data from CellarTracker"
+      title="Download Table Data"
       base_file="TableSyncDlgBase"
       derived_class_name="TableSyncDialog"
       derived_file="TableSyncDialog">
@@ -37,17 +37,20 @@
               class="wxCheckListBox"
               type="wxLB_EXTENDED"
               var_name="m_table_selection_ctrl"
-              minimum_size="100,100d" />
+              validator_variable="m_table_selection_val"
+              minimum_size="112,112d" />
             <node
               class="wxCheckBox"
               label="Sync on &amp;Program Startup"
               var_comment="If checked, application will sync on startup"
-              var_name="m_startup_sync_ctrl" />
+              var_name="m_startup_sync_ctrl"
+              validator_variable="m_startup_sync_val" />
             <node
               class="wxCheckBox"
               label="Save as &amp;Default"
               var_comment="Whether the current table selection should be remembered for next time"
-              var_name="m_save_default_ctrl" />
+              var_name="m_save_default_ctrl"
+              validator_variable="m_save_default_val" />
           </node>
         </node>
         <node

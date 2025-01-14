@@ -22,20 +22,24 @@ namespace cts
     {
     public:
         TableSyncDlgBase() {}
-        TableSyncDlgBase(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& title =
-            "Download Table Data from CellarTracker", const wxPoint& pos = wxDefaultPosition, const wxSize& size =
-            wxDefaultSize,
+        TableSyncDlgBase(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& title = "Download Table Data",
+            const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
             long style = wxDEFAULT_DIALOG_STYLE, const wxString &name = wxDialogNameStr)
         {
             Create(parent, id, title, pos, size, style, name);
         }
 
-        bool Create(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& title =
-            "Download Table Data from CellarTracker", const wxPoint& pos = wxDefaultPosition, const wxSize& size =
-            wxDefaultSize,
+        bool Create(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& title = "Download Table Data",
+            const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
             long style = wxDEFAULT_DIALOG_STYLE, const wxString &name = wxDialogNameStr);
 
     protected:
+
+        // Validator variables
+
+        bool m_save_default_val { false };
+        bool m_startup_sync_val { false };
+        wxArrayInt m_table_selection_val;
 
         // Class member variables
 

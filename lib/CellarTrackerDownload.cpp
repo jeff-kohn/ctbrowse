@@ -17,7 +17,7 @@
 
 #include <format>
 
-namespace cts
+namespace cts::data
 {
    namespace
    {
@@ -57,10 +57,10 @@ namespace cts
 
 
    CellarTrackerDownload::DownloadResult
-      CellarTrackerDownload::getTableData(const CredentialWrapper::Credential& cred, Table tbl, Format fmt)
+      CellarTrackerDownload::getTableData(const CredentialWrapper::Credential& cred, TableId table, DataFormatId format)
    {
-      auto table_name = magic_enum::enum_name(tbl);
-      auto data_format = magic_enum::enum_name(fmt);
+      auto table_name = magic_enum::enum_name(table);
+      auto data_format = magic_enum::enum_name(format);
       cpr::Header header{ {constants::HTTP_HEADER_XCLIENT, constants::HTTP_HEADER_XCLIENT_VALUE} };
 
 
@@ -77,7 +77,7 @@ namespace cts
       if (!request_result.has_value())
          return std::unexpected{ request_result.error() };
 
-      CellarTrackerTable table_data{ std::move(response.text), tbl, fmt };
+      TableData table_data{ std::move(response.text), table, format };
 
       // The returned data is encoded as ISO 8859-1 Latin 1, we need to convert
       // it to UTF-8 before returning it. If the conversion fails, just return the
@@ -89,4 +89,4 @@ namespace cts
       return table_data;
    }
 
-}  // namespace cts
+}  // namespace cts::data

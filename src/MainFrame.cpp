@@ -25,7 +25,6 @@ namespace cts
       TableSyncDialog dlg(this);
       if (dlg.ShowModal() != wxID_OK)
          return;
-
    }
 
 

@@ -8,6 +8,7 @@
 // clang-format off
 
 #include <wx/stattext.h>
+#include <wx/valgen.h>
 
 #include "TableSyncDlgBase.h"
 
@@ -31,13 +32,16 @@ bool TableSyncDlgBase::Create(wxWindow* parent, wxWindowID id, const wxString& t
 
     m_table_selection_ctrl = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, nullptr,
         wxLB_EXTENDED);
-    m_table_selection_ctrl->SetMinSize(ConvertDialogToPixels(wxSize(100, 100)));
+    m_table_selection_ctrl->SetValidator(wxGenericValidator(&m_table_selection_val));
+    m_table_selection_ctrl->SetMinSize(ConvertDialogToPixels(wxSize(112, 112)));
     box_sizer3->Add(m_table_selection_ctrl, wxSizerFlags().Border(wxALL));
 
     m_startup_sync_ctrl = new wxCheckBox(this, wxID_ANY, "Sync on &Program Startup");
+    m_startup_sync_ctrl->SetValidator(wxGenericValidator(&m_startup_sync_val));
     box_sizer3->Add(m_startup_sync_ctrl, wxSizerFlags().Border(wxALL));
 
     m_save_default_ctrl = new wxCheckBox(this, wxID_ANY, "Save as &Default");
+    m_save_default_ctrl->SetValidator(wxGenericValidator(&m_save_default_val));
     box_sizer3->Add(m_save_default_ctrl, wxSizerFlags().Border(wxALL));
 
     box_sizer2->Add(box_sizer3, wxSizerFlags().Border(wxALL));

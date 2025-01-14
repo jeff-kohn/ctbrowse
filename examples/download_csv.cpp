@@ -17,6 +17,7 @@ int main()
 
    try {
       using namespace cts;
+      using namespace cts::data;
 
       CredentialWrapper cred_wrapper{
          constants::CELLARTRACKER_DOT_COM, true,
@@ -36,7 +37,7 @@ int main()
          if (!cred)
             throw Error{ "Authentication failed." };
 
-         result = downloader.getTableData(cred.value(), CellarTrackerDownload::Table::Notes, CellarTrackerDownload::Format::csv);
+         result = downloader.getTableData(cred.value(), data::TableId::Notes, data::DataFormatId::csv);
          if (!result.has_value() && result.error().error_code == static_cast<int>(HttpStatus::Code::Unauthorized))
             prompt_again = true; // wrong user/pass, try again
          else 

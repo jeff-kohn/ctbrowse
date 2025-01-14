@@ -13,9 +13,12 @@
 #include <wx/fileconf.h>
 
 #include <chrono>
+#include <filesystem>
 
 namespace cts
 {
+   namespace fs = std::filesystem;
+
    namespace
    {
       const wxSize g_default_frame_size{ 400, 600 }; // NOLINT(cert-err58-cpp) this ctor doesn't throw it's just not marked noexcept
@@ -28,12 +31,18 @@ namespace cts
 
       // Set up config object to use file even on windows (registry is yuck)
       wxStandardPaths::Get().SetFileLayout(wxStandardPaths::FileLayout::FileLayout_XDG);
-      wxConfigBase::DontCreateOnDemand();
+
       auto cfg = std::make_unique<wxFileConfig>(constants::APP_NAME_SHORT, 
                                                 wxEmptyString, 
                                                 wxEmptyString,  
                                                 wxEmptyString,  
                                                 wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_SUBDIR);
+
+
+      // stupid config object doesn't actually create the folder for the config file if it's missing
+      fs::path config_file_path{ cfg->GetLocalFile(constants::APP_NAME_SHORT, wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_SUBDIR).GetFullPath().wx_str() };
+      fs::create_directories(config_file_path.parent_path());
+
       wxConfigBase::Set(cfg.release());
    } // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks) unfortunately no way around it with wxWindows
 

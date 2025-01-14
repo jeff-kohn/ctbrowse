@@ -13,9 +13,12 @@
 #include <wx/wx.h>
 #include <wx/confbase.h>
 
+#include <filesystem>
+
 
 namespace cts
 {
+   namespace fs = std::filesystem;
 
    /// <summary>
    ///   app object for the OuraCharts applicatin.
@@ -25,9 +28,14 @@ namespace cts
    public:
       App();
 
+      /// @brief called by the framework on app startup, this is the place for program initialization 
       bool OnInit() override;
+
+      /// @brief called by the framework on app shutdown, this is the place for resource cleanup and other shutdown tasks
       int OnExit() override;
 
+      /// @brief  returns the path where the application stores data files.
+      const fs::path& userDataFolder() const noexcept { return m_user_data_folder; }
 
       /// @brief Get the current config object.
       ///
@@ -39,6 +47,7 @@ namespace cts
 
    private:
       MainFrame* m_main_frame{};
+      fs::path m_user_data_folder{ "." }; // safe default but should never actually be used since we set re-initialize it in OnInit()
    };
 
 }  // namespace cts
