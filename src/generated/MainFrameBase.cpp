@@ -31,10 +31,12 @@ bool MainFrameBase::Create(wxWindow* parent, wxWindowID id, const wxString& titl
     m_menubar = new wxMenuBar();
 
     auto* menu_file = new wxMenu();
-    auto* menu_sync_data = new wxMenuItem(menu_file, wxID_ANY, "&Sync Data...");
+    auto* menu_sync_data = new wxMenuItem(menu_file, wxID_ANY, "&Sync Data...",
+        "Download data from CellarTracker", wxITEM_NORMAL);
     menu_file->Append(menu_sync_data);
     menu_file->AppendSeparator();
-    auto* menu_preferences = new wxMenuItem(menu_file, wxID_ANY, "&Preferences");
+    auto* menu_preferences = new wxMenuItem(menu_file, wxID_ANY, "&Preferences", "Configure App Preferences",
+        wxITEM_NORMAL);
     menu_file->Append(menu_preferences);
     menu_file->AppendSeparator();
     auto* menu_quit = new wxMenuItem(menu_file, wxID_EXIT);
@@ -54,7 +56,6 @@ bool MainFrameBase::Create(wxWindow* parent, wxWindowID id, const wxString& titl
 
     // Event handlers
     Bind(wxEVT_MENU, &MainFrameBase::onMenuPreferences, this, menu_preferences->GetId());
-    Bind(wxEVT_MENU, &MainFrameBase::onMenuQuit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &MainFrameBase::onMenuSyncData, this, menu_sync_data->GetId());
 
     return true;

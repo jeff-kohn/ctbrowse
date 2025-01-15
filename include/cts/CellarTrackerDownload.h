@@ -10,6 +10,7 @@
 #include "cts/Error.h"
 #include "cts/CredentialWrapper.h"
 
+#include "cpr/callback.h"
 #include "frozen/map.h"
 #include "magic_enum/magic_enum.hpp"
 #include "magic_enum/magic_enum_containers.hpp"
@@ -73,20 +74,25 @@ namespace cts::data
       /// @brief the result of a download will contain the requested data if successful, or an Error object if unsuccessful.
       using DownloadResult = std::expected<TableData, Error>;
 
+      using ProgressCallback = std::function<bool(cpr::cpr_pf_arg_t downloadTotal, cpr::cpr_pf_arg_t downloadNow,
+                                                  cpr::cpr_pf_arg_t uploadTotal, cpr::cpr_pf_arg_t uploadNow, intptr_t userdata)>;
 
-      /// @brief        retrieve a data table from CT website
-      /// @param cred   the username/password to use for the download
-      /// @param tbl    the table to retrieve
-      /// @param fmt    the data format to return
-      /// @return       expected/successful value is the requested table data, unexpected/error value is HTTP status code
-      DownloadResult getTableData(const CredentialWrapper::Credential& cred, TableId table, DataFormatId format);
+      /// @brief              retrieve a data table from CT website
+      /// @param cred         the username/password to use for the download
+      /// @param tbl          the table to retrieve
+      /// @param fmt          the data format to return
+      /// @param callback_ptr optional callback to receive progress upates
+      /// @return             expected/successful value is the requested table data, unexpected/error value is HTTP status code
+      [[nodiscard]] static DownloadResult getTableData(const CredentialWrapper::Credential& cred,
+                                                     TableId table, DataFormatId format,
+                                                     ProgressCallback* callback = nullptr);
 
 
       using TableDescriptionMap = frozen::map<TableId, std::string_view, magic_enum::enum_count<TableId>()>;
 
       /// @brief map enum values for table id's to their long descriptions
-      static constexpr TableDescriptionMap const& tableDescriptions() { return m_table_descriptions; }
-      static constexpr std::string_view tableDescription(TableId tbl)
+      [[nodiscard]] static constexpr TableDescriptionMap const& tableDescriptions() { return m_table_descriptions; }
+      [[nodiscard]] static constexpr std::string_view tableDescription(TableId tbl)
       {
          auto it = m_table_descriptions.find(tbl);
          return it == m_table_descriptions.end() ? "" : it->second;

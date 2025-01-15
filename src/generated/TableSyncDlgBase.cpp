@@ -26,7 +26,7 @@ bool TableSyncDlgBase::Create(wxWindow* parent, wxWindowID id, const wxString& t
 
     auto* box_sizer3 = new wxBoxSizer(wxVERTICAL);
 
-    auto* static_text2 = new wxStaticText(this, wxID_ANY, "Tables to Download:");
+    auto* static_text2 = new wxStaticText(this, wxID_ANY, "&Tables to Download:");
     box_sizer3->Add(static_text2,
         wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
 
@@ -34,7 +34,8 @@ bool TableSyncDlgBase::Create(wxWindow* parent, wxWindowID id, const wxString& t
         wxLB_EXTENDED);
     m_table_selection_ctrl->SetValidator(wxGenericValidator(&m_table_selection_val));
     m_table_selection_ctrl->SetMinSize(ConvertDialogToPixels(wxSize(112, 112)));
-    box_sizer3->Add(m_table_selection_ctrl, wxSizerFlags().Border(wxALL));
+    box_sizer3->Add(m_table_selection_ctrl,
+        wxSizerFlags().Border(wxLEFT|wxTOP|wxBOTTOM, wxSizerFlags::GetDefaultBorder()));
 
     m_startup_sync_ctrl = new wxCheckBox(this, wxID_ANY, "Sync on &Program Startup");
     m_startup_sync_ctrl->SetValidator(wxGenericValidator(&m_startup_sync_val));
@@ -46,6 +47,18 @@ bool TableSyncDlgBase::Create(wxWindow* parent, wxWindowID id, const wxString& t
 
     box_sizer2->Add(box_sizer3, wxSizerFlags().Border(wxALL));
 
+    auto* box_sizer = new wxBoxSizer(wxVERTICAL);
+
+    box_sizer->AddSpacer(20);
+
+    auto* btn = new wxButton(this, wxID_ANY, "Select &All");
+    box_sizer->Add(btn, wxSizerFlags().Expand().Border(wxTOP, wxSizerFlags::GetDefaultBorder()));
+
+    m_btn2 = new wxButton(this, wxID_ANY, "&Deselect All");
+    box_sizer->Add(m_btn2, wxSizerFlags().Border(wxTOP|wxBOTTOM, FromDIP(wxSize(4, -1)).x));
+
+    box_sizer2->Add(box_sizer, wxSizerFlags().Border(wxALL));
+
     dlg_sizer->Add(box_sizer2, wxSizerFlags().Expand().Border(wxALL));
 
     m_std_buttons = CreateStdDialogButtonSizer(wxOK|wxCANCEL);
@@ -53,6 +66,12 @@ bool TableSyncDlgBase::Create(wxWindow* parent, wxWindowID id, const wxString& t
 
     SetSizerAndFit(dlg_sizer);
     Centre(wxBOTH);
+
+    // Event handlers
+    m_btn2->Bind(wxEVT_BUTTON, &TableSyncDlgBase::onDeselectAll, this);
+    btn->Bind(wxEVT_BUTTON, &TableSyncDlgBase::onSelectAll, this);
+    m_btn2->Bind(wxEVT_UPDATE_UI, &TableSyncDlgBase::onDeselectAllUpdateUI, this);
+    btn->Bind(wxEVT_UPDATE_UI, &TableSyncDlgBase::onSelectAllUpdateUI, this);
 
     return true;
 }

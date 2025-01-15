@@ -32,6 +32,7 @@ namespace cts
          Generic,
          CurlError,
          HttpStatus,
+         OperationCanceled
       };
 
 

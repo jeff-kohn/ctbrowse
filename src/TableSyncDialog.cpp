@@ -14,10 +14,14 @@
 #include "cts/CellarTrackerDownload.h"
 
 #include <magic_enum/magic_enum.hpp>
+
+#include <algorithm>
 #include <sstream>
 
 namespace cts
 {
+   using namespace magic_enum;
+
    inline constexpr auto ENUM_DELIMETER = ';';
 
    namespace {
@@ -102,7 +106,7 @@ namespace cts
       // values that don't map to an enum (should never happen, but best to be
       // prepared since alternative is UB)
       return all(m_table_selection_val)
-         | transform([] (int val) { return magic_enum::enum_cast<EnumT>(val); }) // convert to optional<EnumT>
+         | transform([] (int val) { return enum_cast<EnumT>(val); }) // convert to optional<EnumT>
          | filter([](auto maybe_enum) { return maybe_enum.has_value(); })        // filter only valid values
          | transform([](auto maybe_enum) { return maybe_enum.value(); })         // retrieve actual value from optionals
          | rng::to<std::vector>();
@@ -112,7 +116,8 @@ namespace cts
    void TableSyncDialog::onOkClicked(wxCommandEvent& event)
    {
       if (!TransferDataFromWindow())
-         wxMessageBox(constants::ERROR_DIALOG_TRANSFER_FAILED, constants::ERROR_STR,
+         wxMessageBox(constants::ERROR_DIALOG_TRANSFER_FAILED,
+                      constants::ERROR_STR,
                       wxOK | wxICON_ERROR | wxCENTRE, this);
 
       // Save relevant settings to config
@@ -128,13 +133,41 @@ namespace cts
       EndDialog(wxID_OK);
    }
 
+   void TableSyncDialog::onDeselectAll(wxCommandEvent& event)
+   {
+      for (auto idx = 0u; idx < m_table_selection_ctrl->GetCount(); ++idx)
+      {
+         m_table_selection_ctrl->Check(idx, false);
+      }
+   }
+
+
+   void TableSyncDialog::onDeselectAllUpdateUI(wxUpdateUIEvent & event)
+   {
+      // we already check for at least one selection for OK button, so just piggy back.
+      onOkUpdateUI(event);
+   }
+
+
+   void TableSyncDialog::onSelectAll(wxCommandEvent & event)
+   {
+      for (auto idx = 0u; idx < m_table_selection_ctrl->GetCount(); ++idx)
+      {
+         m_table_selection_ctrl->Check(idx, true);
+      }
+   }
+
+
+   void TableSyncDialog::onSelectAllUpdateUI(wxUpdateUIEvent & event)
+   {
+      event.Enable(checkedTableCount() != m_table_selection_ctrl->GetCount());
+   }
+
 
    void TableSyncDialog::onOkUpdateUI([[maybe_unused]] wxUpdateUIEvent& event)
    {
-      // We don't need the values, just want to know if at least one
-      // item is checked.
-      wxArrayInt dummy{};
-      event.Enable(m_table_selection_ctrl->GetCheckedItems(dummy));
+      // only enabled if at least one is checked
+      event.Enable(checkedTableCount());
    }
 
 

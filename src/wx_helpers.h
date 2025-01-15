@@ -9,6 +9,8 @@
 
 #include "concepts.h"
 
+#include <wx/activityindicator.h>
+#include <chrono>
 
 namespace cts
 {
@@ -43,5 +45,22 @@ namespace cts
       return std::forward<decltype(strings)>(strings) | vws::transform(overloaded)
                                                       | rng::to<wxArrayString>();
    }
+
+   /// @brief  small object that sets a frame window's status text on destruction
+   template <typename Wnd>
+   struct ScopedStatusText
+   {
+      std::string message{};
+      Wnd*        target_ptr{};
+
+      ScopedStatusText() = default;
+      ScopedStatusText(std::string_view msg, Wnd* target) : message{ msg }, target_ptr{ target } {}
+      ~ScopedStatusText()
+      {
+         if (target_ptr)
+            target_ptr->SetStatusText(message);
+      }
+   };
+
 
 } // namespace cts

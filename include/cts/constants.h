@@ -22,7 +22,9 @@ namespace cts::constants
    inline constexpr const char* HTTP_HEADER_XCLIENT_VALUE   = APP_NAME_SHORT;
    inline constexpr const char* HTTP_PARAM_TABLE            = "Table";
    inline constexpr const char* HTTP_PARAM_FORMAT           = "Format";
+   inline constexpr int         HTTP_TIMEOUT_SEC            = 30;
 
+   inline constexpr const char* DATA_FILE_EXTENSION         = "csv";
    inline constexpr int MAX_ENV_VAR_LENGTH                  = 128;
    inline constexpr const char* CT_PASSWORD                 = "CT_PASSWORD";
 
@@ -31,9 +33,10 @@ namespace cts::constants
 
    inline constexpr const char* ERROR_STR                      = "Error";
    inline constexpr const char* ERROR_AUTHENTICATION_FAILED    = "Invalid username/password.";
-   inline constexpr const char* ERROR_FMT_CURL_ERROR           = "The operation failed with CURL error {}";
-   inline constexpr const char* ERROR_FMT_HTTP_STATUS_CODE     = "The operation failed with HTTP status code {}";
    inline constexpr const char* ERROR_DIALOG_TRANSFER_FAILED   = "Unexpected error transferring data to/from dialog.";
+   inline constexpr const char* ERROR_DOWNLOAD_AUTH_FAILURE    = "File download canceled, no valid login was provided.";
+   inline constexpr const char* FMT_ERROR_CURL_ERROR           = "The operation failed with CURL error {}";
+   inline constexpr const char* FMT_ERROR_HTTP_STATUS_CODE     = "The operation failed with HTTP status code {}";
 
    inline constexpr const char* CONFIG_PATH_SYNC                  = "/Preferences/DataSync";
    inline constexpr const char* CONFIG_VALUE_SYNC_ON_STARTUP      = "SyncOnStartup";
@@ -51,5 +54,14 @@ namespace cts::constants
    inline constexpr const char* TABLE_DESCRIPTION_PRO_REVIEW      = "Manually Entered Pro Reviews";
    inline constexpr const char* TABLE_DESCRIPTION_BOTTLES         = "Raw Bottle List";
    inline constexpr const char* TABLE_DESCRIPTION_FOOD_TAGS       = "Food Pairing Tags";
+
+   inline constexpr const char* FMT_STATUS_FILE_DOWNLOADING       = "Downloading file '{}'...";
+   inline constexpr const char* FMT_STATUS_FILE_DOWNLOADED        = "Successfully downloaded file '{}'.";
+   inline constexpr const char* STATUS_DOWNLOAD_COMPLETE          = "Download operation completed.";
+   inline constexpr const char* STATUS_DOWNLOAD_CANCELED          = "Download operation canceled.";
+   inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
+
+
+
 
 } // namespace cts::constants

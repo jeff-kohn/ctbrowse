@@ -38,7 +38,6 @@ namespace cts
         // Virtual event handlers -- override them in your derived class
 
         virtual void onMenuPreferences(wxCommandEvent& event) { event.Skip(); }
-        virtual void onMenuQuit(wxCommandEvent& event) { event.Skip(); }
         virtual void onMenuSyncData(wxCommandEvent& event) { event.Skip(); }
 
         // Class member variables

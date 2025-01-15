@@ -43,7 +43,7 @@ namespace cts
       }
 
       /// @brief retrieve the list of tables the user selected for download
-      std::vector<data::TableId> selectedTables() const;
+      [[nodiscard]] std::vector<data::TableId> selectedTables() const;
 
       /// @brief  indicates whether the user checked "Save as Default" in the dialog
       bool saveAsDefault() const noexcept { return m_save_default_val; }
@@ -54,6 +54,18 @@ namespace cts
    protected:
       void onOkUpdateUI(wxUpdateUIEvent& event);
       void onOkClicked(wxCommandEvent& event);
+      void onDeselectAll(wxCommandEvent& event) override;
+      void onDeselectAllUpdateUI(wxUpdateUIEvent& event) override;
+      void onSelectAll(wxCommandEvent& event) override;
+      void onSelectAllUpdateUI(wxUpdateUIEvent& event) override;
+
+      unsigned int checkedTableCount() const
+      {
+         wxArrayInt dummy{};
+         m_table_selection_ctrl->GetCheckedItems(dummy);
+         return dummy.size();
+      }
+
    };
 
 }

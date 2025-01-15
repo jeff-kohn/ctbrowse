@@ -13,6 +13,7 @@
 #include <wx/checkbox.h>
 #include <wx/checklst.h>
 #include <wx/dialog.h>
+#include <wx/event.h>
 #include <wx/gdicmn.h>
 #include <wx/sizer.h>
 
@@ -35,6 +36,13 @@ namespace cts
 
     protected:
 
+        // Virtual event handlers -- override them in your derived class
+
+        virtual void onDeselectAll(wxCommandEvent& event) { event.Skip(); }
+        virtual void onDeselectAllUpdateUI(wxUpdateUIEvent& event) { event.Skip(); }
+        virtual void onSelectAll(wxCommandEvent& event) { event.Skip(); }
+        virtual void onSelectAllUpdateUI(wxUpdateUIEvent& event) { event.Skip(); }
+
         // Validator variables
 
         bool m_save_default_val { false };
@@ -43,6 +51,7 @@ namespace cts
 
         // Class member variables
 
+        wxButton* m_btn2;
         wxCheckBox* m_save_default_ctrl;  // Whether the current table selection should be remembered for next time
         wxCheckBox* m_startup_sync_ctrl;  // If checked, application will sync on startup
         wxCheckListBox* m_table_selection_ctrl;
