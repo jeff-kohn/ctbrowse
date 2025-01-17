@@ -2,21 +2,20 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "ct-search",
   "version": "0.1.0",
-  "dependencies": [
-    "catch2",
-    "cpr",
-    "cxxopts",
-    "frozen",
-    "glaze",
-    "magic-enum",
-    {
-      "name": "wxwidgets",
-      "features": [
-        "fonts",
-        "media",
-        "example"
-      ]
-    }
-  ],
+   "dependencies": [
+      "catch2",
+      "cpr",
+      "frozen",
+      "glaze",
+      "magic-enum",
+      {
+         "name": "wxwidgets",
+         "features": [
+            "fonts",
+            "media",
+            "example"
+         ]
+      }
+   ],
   "builtin-baseline": "1420fe276fe8f6450565e6239a675271c0869359"
 }

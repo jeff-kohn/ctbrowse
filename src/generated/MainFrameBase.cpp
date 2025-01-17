@@ -52,6 +52,21 @@ bool MainFrameBase::Create(wxWindow* parent, wxWindowID id, const wxString& titl
 
     m_statusBar = CreateStatusBar();
 
+    m_grid = new wxGrid(this, wxID_ANY);
+    {
+        m_grid->CreateGrid(5, 5);
+        m_grid->EnableEditing(false);
+        m_grid->EnableDragGridSize(false);
+        m_grid->SetMargins(0, 0);
+        m_grid->SetLabelBackgroundColour(wxColour("#FFFFFF"));
+        m_grid->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_TOP);
+        m_grid->SetColLabelAlignment(wxALIGN_LEFT, wxALIGN_CENTER);
+        m_grid->SetColLabelSize(wxGRID_AUTOSIZE);
+
+        m_grid->SetRowLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+        m_grid->SetRowLabelSize(wxGRID_AUTOSIZE);
+    }
+
     Centre(wxBOTH);
 
     // Event handlers

@@ -74,6 +74,7 @@ namespace cts::data
       /// @brief the result of a download will contain the requested data if successful, or an Error object if unsuccessful.
       using DownloadResult = std::expected<TableData, Error>;
 
+      /// @brief callback functor. Recieves updates of the request process, and allows cancellation (return false)
       using ProgressCallback = std::function<bool(cpr::cpr_pf_arg_t downloadTotal, cpr::cpr_pf_arg_t downloadNow,
                                                   cpr::cpr_pf_arg_t uploadTotal, cpr::cpr_pf_arg_t uploadNow, intptr_t userdata)>;
 
@@ -108,7 +109,7 @@ namespace cts::data
          { TableId::Pending, "Pending Wine Deliveries" },
          { TableId::Consumed, "Consumed Bottles" },
          { TableId::Availability, "Ready to Drink List" },
-         { TableId::Tag, "Tags" },
+         { TableId::Tag, "Wish List Tags" },
          { TableId::ProReview, "Manually Entered Pro Reviews" },
          { TableId::Bottles, "Raw Bottle List" },
          { TableId::FoodTags, "Food Pairing Tags" }

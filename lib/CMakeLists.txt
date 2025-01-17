@@ -12,8 +12,10 @@ target_sources(cts_lib
       "../include/cts/CredentialWrapper.h"
       "../include/cts/Error.h"
       "../include/cts/winapi_util.h"
+      "../include/cts/data/WineList.h"
 
    PRIVATE
+      "data/WineList.cpp"
       "CellarTrackerDownload.cpp"
       "CredentialWrapper.cpp"
       "winapi_util.cpp"

@@ -6,6 +6,8 @@ target_sources(cts_win
    PRIVATE
      "App.cpp"
      "App.h"
+     "CTGridTable.h"
+     "CTGridTable.cpp"
      "MainFrame.cpp"
      "MainFrame.h"
      "TableSyncDialog.cpp"

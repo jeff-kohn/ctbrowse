@@ -136,6 +136,13 @@
       </node>
       <node
         class="wxStatusBar" />
+      <node
+        class="wxGrid"
+        col_label_horiz_alignment="wxALIGN_LEFT"
+        editing="0"
+        label_bg="#FFFFFF"
+        native_col_labels="0"
+        tab_behaviour="Tab_Wrap" />
     </node>
   </node>
 </wxUiEditorData>

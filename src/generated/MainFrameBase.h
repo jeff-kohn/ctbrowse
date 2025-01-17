@@ -9,10 +9,13 @@
 
 #pragma once
 
+#include <wx/colour.h>
 #include <wx/event.h>
 #include <wx/frame.h>
 #include <wx/gdicmn.h>
+#include <wx/grid.h>
 #include <wx/menu.h>
+#include <wx/settings.h>
 #include <wx/statusbr.h>
 #include <wx/toolbar.h>
 
@@ -42,6 +45,7 @@ namespace cts
 
         // Class member variables
 
+        wxGrid* m_grid;
         wxMenu* m_menu_data;
         wxMenuBar* m_menubar;
         wxStatusBar* m_statusBar;

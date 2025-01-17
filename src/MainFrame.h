@@ -8,8 +8,9 @@
 #pragma once
 
 #include "generated/MainFrameBase.h"
+#include "CtGridTable.h"
+
 #include <format>
-#include <chrono>
 
 
 namespace cts
