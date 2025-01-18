@@ -74,7 +74,7 @@ namespace cts::data
       /// @brief the result of a download will contain the requested data if successful, or an Error object if unsuccessful.
       using DownloadResult = std::expected<TableData, Error>;
 
-      /// @brief callback functor. Recieves updates of the request process, and allows cancellation (return false)
+      /// @brief callback functor. Receives updates of the request process, and allows cancellation (return false)
       using ProgressCallback = std::function<bool(cpr::cpr_pf_arg_t downloadTotal, cpr::cpr_pf_arg_t downloadNow,
                                                   cpr::cpr_pf_arg_t uploadTotal, cpr::cpr_pf_arg_t uploadNow, intptr_t userdata)>;
 
@@ -82,7 +82,7 @@ namespace cts::data
       /// @param cred         the username/password to use for the download
       /// @param tbl          the table to retrieve
       /// @param fmt          the data format to return
-      /// @param callback_ptr optional callback to receive progress upates
+      /// @param callback_ptr optional callback to receive progress updates
       /// @return             expected/successful value is the requested table data, unexpected/error value is HTTP status code
       [[nodiscard]] static DownloadResult getTableData(const CredentialWrapper::Credential& cred,
                                                      TableId table, DataFormatId format,

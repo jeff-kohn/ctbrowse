@@ -9,13 +9,10 @@
 
 #pragma once
 
-#include <wx/colour.h>
 #include <wx/event.h>
 #include <wx/frame.h>
 #include <wx/gdicmn.h>
-#include <wx/grid.h>
 #include <wx/menu.h>
-#include <wx/settings.h>
 #include <wx/statusbr.h>
 #include <wx/toolbar.h>
 
@@ -42,11 +39,10 @@ namespace cts
 
         virtual void onMenuPreferences(wxCommandEvent& event) { event.Skip(); }
         virtual void onMenuSyncData(wxCommandEvent& event) { event.Skip(); }
+        virtual void onMenuWineList(wxCommandEvent& event) { event.Skip(); }
 
         // Class member variables
 
-        wxGrid* m_grid;
-        wxMenu* m_menu_data;
         wxMenuBar* m_menubar;
         wxStatusBar* m_statusBar;
         wxToolBar* m_toolBar;

@@ -9,19 +9,12 @@
 
 #include "concepts.h"
 
+#include "cts/functors.h"
 #include <wx/activityindicator.h>
 #include <chrono>
 
 namespace cts
 {
-
-   /// @brief a functor object that is overloaded for multiple types 
-   template < typename... Ts >
-   struct Overloaded : Ts...
-   {
-      using Ts:: operator()...;
-   };
-
 
    /// @brief convert a range of strings/string_views to a wxArrayString
    template <rng::input_range Rng> requires StringViewCompatible<rng::range_value_t<Rng> >

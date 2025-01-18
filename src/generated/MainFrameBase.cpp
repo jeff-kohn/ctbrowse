@@ -45,33 +45,21 @@ bool MainFrameBase::Create(wxWindow* parent, wxWindowID id, const wxString& titl
     menu_file->Append(menu_quit);
     m_menubar->Append(menu_file, wxGetStockLabel(wxID_FILE));
 
-    m_menu_data = new wxMenu();
-    m_menubar->Append(m_menu_data, "&Data");
+    auto* menu_views = new wxMenu();
+    auto* menu_item = new wxMenuItem(menu_views, wxID_ANY, "&Wine List\tCTRL+W");
+    menu_views->Append(menu_item);
+    m_menubar->Append(menu_views, "&Data");
 
     SetMenuBar(m_menubar);
 
     m_statusBar = CreateStatusBar();
-
-    m_grid = new wxGrid(this, wxID_ANY);
-    {
-        m_grid->CreateGrid(5, 5);
-        m_grid->EnableEditing(false);
-        m_grid->EnableDragGridSize(false);
-        m_grid->SetMargins(0, 0);
-        m_grid->SetLabelBackgroundColour(wxColour("#FFFFFF"));
-        m_grid->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_TOP);
-        m_grid->SetColLabelAlignment(wxALIGN_LEFT, wxALIGN_CENTER);
-        m_grid->SetColLabelSize(wxGRID_AUTOSIZE);
-
-        m_grid->SetRowLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-        m_grid->SetRowLabelSize(wxGRID_AUTOSIZE);
-    }
 
     Centre(wxBOTH);
 
     // Event handlers
     Bind(wxEVT_MENU, &MainFrameBase::onMenuPreferences, this, menu_preferences->GetId());
     Bind(wxEVT_MENU, &MainFrameBase::onMenuSyncData, this, menu_sync_data->GetId());
+    Bind(wxEVT_MENU, &MainFrameBase::onMenuWineList, this, menu_item->GetId());
 
     return true;
 }

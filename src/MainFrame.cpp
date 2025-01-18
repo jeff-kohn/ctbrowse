@@ -11,9 +11,11 @@
 #include "TableSyncDialog.h"
 #include "wx_helpers.h"
 
-#include "cts/HttpStatusCodes.h"
+
 #include "cts/constants.h"
 #include "cts/CredentialWrapper.h"
+
+#include "cts/HttpStatusCodes.h"
 #include "cts/winapi_util.h"
 
 #include <wx/msgdlg.h>
@@ -23,6 +25,15 @@ namespace cts
 {
    using namespace magic_enum;
 
+   MainFrame::MainFrame() : m_data_mgr{ wxGetApp().userDataFolder() }
+   {
+   }
+
+   MainFrame::MainFrame(wxWindow* parent)  : m_data_mgr{ wxGetApp().userDataFolder() }
+   {
+      Create(parent);
+   }
+
    bool MainFrame::Create(wxWindow* parent)
    {
       // give base class a chance set up controls etc
@@ -31,8 +42,10 @@ namespace cts
 
       SetTitle(constants::APP_NAME_LONG);
 
+
       Bind(wxEVT_MENU, &MainFrame::onQuit, this, wxID_EXIT);
-      Bind(wxEVT_IDLE, &MainFrame::onIdle, this);
+
+      Centre(wxBOTH);
 
       return true;
    }
@@ -124,16 +137,30 @@ namespace cts
 
    }
 
+   void MainFrame::onMenuWineList(wxCommandEvent&)
+   {
+      wxBusyCursor busy{};
+
+      // I know this is wrong and a leak. Just a quick test
+      m_wine_list = std::make_shared<data::CtGridTable>(m_data_mgr.getWineList());
+      m_grid = new wxGrid(this, wxID_ANY);
+      m_grid->EnableEditing(false);
+      m_grid->EnableDragGridSize(false);
+      m_grid->SetMargins(0, 0);
+      m_grid->SetLabelBackgroundColour(wxColour("#FFFFFF"));
+      m_grid->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_TOP);
+      m_grid->SetRowLabelSize(0);
+
+      m_grid->SetTable(m_wine_list.get() );
+      Update();
+   }
 
    void MainFrame::onQuit([[maybe_unused]] wxCommandEvent& event)
    {
       Close(true);
    }
 
-   void MainFrame::onIdle([[maybe_unused]] wxIdleEvent& event)
-   {
-      event.Skip();
-   }
+
 
 
 } // namespace cts

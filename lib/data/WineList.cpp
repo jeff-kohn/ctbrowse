@@ -60,4 +60,35 @@ namespace cts::data
       }
    }
 
+   WineListEntry::ValueResult WineListEntry::getProperty(WineListProp prop) const
+   {
+      using enum WineListProp;
+
+      switch (prop)
+      {
+         case iWineID:        return m_rec.iWineID;
+         case WineName:       return m_rec.WineName;
+         case Locale:         return m_rec.Locale;
+         case Vintage:        return m_rec.Vintage;
+         case Quantity:       return m_rec.Quantity;
+         case Pending:        return m_rec.Pending;
+         case Size:           return m_rec.Size;
+         case Price:          return m_rec.Price;
+         case Valuation:      return m_rec.Valuation;
+         case Country:        return m_rec.Country;
+         case Region:         return m_rec.Region;
+         case SubRegion:      return m_rec.SubRegion;
+         case Appellation:    return m_rec.Appellation;
+         case Producer:       return m_rec.Producer;
+         case SortProducer:   return m_rec.SortProducer;
+         case Color:          return m_rec.Color;
+         case Category:       return m_rec.Category;
+         case MasterVarietal: return m_rec.MasterVarietal;
+         case BeginConsume:   return m_rec.BeginConsume;
+         case EndConsume:     return m_rec.EndConsume;
+         default:
+            return std::unexpected{ Error{constants::ERROR_INVALID_PROP_INDEX} };
+      };
+   }
+
 } // namespace cts::data

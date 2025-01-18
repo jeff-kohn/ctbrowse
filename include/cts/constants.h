@@ -35,6 +35,8 @@ namespace cts::constants
    inline constexpr const char* ERROR_AUTHENTICATION_FAILED    = "Invalid username/password.";
    inline constexpr const char* ERROR_DIALOG_TRANSFER_FAILED   = "Unexpected error transferring data to/from dialog.";
    inline constexpr const char* ERROR_DOWNLOAD_AUTH_FAILURE    = "File download canceled, no valid login was provided.";
+   inline constexpr const char* ERROR_INVALID_PROP_INDEX       = "Invalid property index";
+   inline constexpr const char* ERROR_INVALID_ROW_INDEX        = "Invalid row index";
    inline constexpr const char* FMT_ERROR_CURL_ERROR           = "The operation failed with CURL error {}";
    inline constexpr const char* FMT_ERROR_HTTP_STATUS_CODE     = "The operation failed with HTTP status code {}";
 
