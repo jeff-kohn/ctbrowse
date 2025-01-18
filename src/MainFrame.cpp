@@ -42,7 +42,14 @@ namespace cts
 
       SetTitle(constants::APP_NAME_LONG);
 
-
+      m_grid = new wxGrid(this, wxID_ANY);
+      m_grid->EnableEditing(false);
+      m_grid->EnableDragGridSize(false);
+      m_grid->SetMargins(0, 0);
+      m_grid->SetLabelBackgroundColour(wxColour("#FFFFFF"));
+      m_grid->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_TOP);
+      m_grid->SetRowLabelSize(0);
+      m_grid->Refresh();
       Bind(wxEVT_MENU, &MainFrame::onQuit, this, wxID_EXIT);
 
       Centre(wxBOTH);
@@ -141,18 +148,9 @@ namespace cts
    {
       wxBusyCursor busy{};
 
-      // I know this is wrong and a leak. Just a quick test
-      m_wine_list = std::make_shared<data::CtGridTable>(m_data_mgr.getWineList());
-      m_grid = new wxGrid(this, wxID_ANY);
-      m_grid->EnableEditing(false);
-      m_grid->EnableDragGridSize(false);
-      m_grid->SetMargins(0, 0);
-      m_grid->SetLabelBackgroundColour(wxColour("#FFFFFF"));
-      m_grid->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_TOP);
-      m_grid->SetRowLabelSize(0);
-
-      m_grid->SetTable(m_wine_list.get() );
-      Update();
+      auto wine_list = std::make_unique<data::CtGridTable>(m_data_mgr.getWineList());
+      m_grid->SetTable(wine_list.release(), true);
+      m_grid->Refresh();
    }
 
    void MainFrame::onQuit([[maybe_unused]] wxCommandEvent& event)

@@ -121,29 +121,29 @@ namespace cts::data
             return std::unexpected{ Error{constants::ERROR_INVALID_PROP_INDEX} };
       }
 
-      uint64_t wineID() const             { return m_rec.iWineID;          }
-      std::string wineName() const        { return m_rec.WineName;         }
-      std::string locale() const          { return m_rec.Locale;           }
-      uint16_t vintage() const            { return m_rec.Vintage;          }
-      uint16_t qtyAvailable() const       { return m_rec.Quantity;         }
-      uint16_t qtyPending() const         { return m_rec.Pending;          }
-      std::string size() const            { return m_rec.Size;             }
-      double price() const                { return m_rec.Price;            }
-      double valuation() const            { return m_rec.Valuation;        }
-      std::string country() const         { return m_rec.Country;          }
-      std::string region() const          { return m_rec.Region;           }
-      std::string subRegion() const       { return m_rec.SubRegion;        }
-      std::string appellation() const     { return m_rec.Appellation;      }
-      std::string producer() const        { return m_rec.Producer;         }
-      std::string sortProducer() const    { return m_rec.SortProducer;     }
-      std::string color() const           { return m_rec.Color;            }
-      std::string category() const        { return m_rec.Category;         }
-      std::string masterVarietal() const  { return m_rec.MasterVarietal;   }
-      double ctScore() const              { return m_rec.CTScore;          }
-      double myScore() const              { return m_rec.MYScore;          }
-      uint16_t beginConsume() const       { return m_rec.BeginConsume;     }
-      uint16_t endConsume() const         { return m_rec.EndConsume;       }
-
+      uint64_t wineID() const                  { return m_rec.iWineID;          }
+      std::string_view wineName() const        { return m_rec.WineName;         }
+      std::string_view locale() const          { return m_rec.Locale;           }
+      uint16_t vintage() const                 { return m_rec.Vintage;          }
+      uint16_t qtyAvailable() const            { return m_rec.Quantity;         }
+      uint16_t qtyPending() const              { return m_rec.Pending;          }
+      std::string_view size() const            { return m_rec.Size;             }
+      double price() const                     { return m_rec.Price;            }
+      double valuation() const                 { return m_rec.Valuation;        }
+      std::string_view country() const         { return m_rec.Country;          }
+      std::string_view region() const          { return m_rec.Region;           }
+      std::string_view subRegion() const       { return m_rec.SubRegion;        }
+      std::string_view appellation() const     { return m_rec.Appellation;      }
+      std::string_view producer() const        { return m_rec.Producer;         }
+      std::string_view sortProducer() const    { return m_rec.SortProducer;     }
+      std::string_view color() const           { return m_rec.Color;            }
+      std::string_view category() const        { return m_rec.Category;         }
+      std::string_view masterVarietal() const  { return m_rec.MasterVarietal;   }
+      double ctScore() const                   { return m_rec.CTScore;          }
+      double myScore() const                   { return m_rec.MYScore;          }
+      uint16_t beginConsume() const            { return m_rec.BeginConsume;     }
+      uint16_t endConsume() const              { return m_rec.EndConsume;       }
+      
       bool parse(const csv::CSVRow& row);
 
    private:

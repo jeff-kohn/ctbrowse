@@ -44,7 +44,6 @@ namespace cts
 
       wxGrid* m_grid{};
       data::DataManager m_data_mgr;
-      std::shared_ptr<data::CtGridTable> m_wine_list{};
    };
 
 
