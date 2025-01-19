@@ -14,22 +14,21 @@
 
 #include "cts/constants.h"
 #include "cts/CredentialWrapper.h"
-
 #include "cts/HttpStatusCodes.h"
 #include "cts/winapi_util.h"
 
 #include <wx/msgdlg.h>
 #include <wx/progdlg.h>
 
-namespace cts
+namespace cts::ui
 {
    using namespace magic_enum;
 
-   MainFrame::MainFrame() : m_data_mgr{ wxGetApp().userDataFolder() }
+   MainFrame::MainFrame()
    {
    }
 
-   MainFrame::MainFrame(wxWindow* parent)  : m_data_mgr{ wxGetApp().userDataFolder() }
+   MainFrame::MainFrame(wxWindow* parent)   
    {
       Create(parent);
    }
@@ -147,9 +146,8 @@ namespace cts
    void MainFrame::onMenuWineList(wxCommandEvent&)
    {
       wxBusyCursor busy{};
-
-      auto wine_list = std::make_unique<data::CtGridTable>(m_data_mgr.getWineList());
-      m_grid->SetTable(wine_list.release(), true);
+           
+      m_grid->SetTable(wxGetApp().getGridTable(CtGridTableMgr::GridTable::WineList).get(), false);
       m_grid->Refresh();
    }
 

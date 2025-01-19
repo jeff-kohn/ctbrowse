@@ -8,13 +8,11 @@
 #pragma once
 
 #include "generated/MainFrameBase.h"
-#include "CtGridTable.h"
-#include "cts/data/DataManager.h"
-#include "cts/data/WineList.h"
+#include "grids/CtGridTable.h"
 #include <format>
 
 
-namespace cts
+namespace cts::ui
 {
    class MainFrame : public MainFrameBase
    {
@@ -43,7 +41,6 @@ namespace cts
       void onQuit(wxCommandEvent& );
 
       wxGrid* m_grid{};
-      data::DataManager m_data_mgr;
    };
 
 

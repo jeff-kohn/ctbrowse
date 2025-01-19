@@ -9,7 +9,7 @@
 
 #include "MainFrame.h"
 #include "cts/constants.h"
-
+#include "grids/CtGridTable.h"
 #include <wx/wx.h>
 #include <wx/confbase.h>
 
@@ -45,8 +45,11 @@ namespace cts
       wxConfigBase& getConfig() noexcept(false);
       const wxConfigBase& getConfig() const noexcept(false);
 
+      CtGridTableMgr::GridTablePtr getGridTable(CtGridTableMgr::GridTable tbl);
+
    private:
-      MainFrame* m_main_frame{};
+      ui::MainFrame* m_main_frame{};
+      cts::CtGridTableMgr m_grid_tables{};
       fs::path m_user_data_folder{ "." }; // safe default but should never actually be used since we set re-initialize it in OnInit()
    };
 

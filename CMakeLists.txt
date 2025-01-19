@@ -29,7 +29,7 @@ if (PROJECT_IS_TOP_LEVEL)
    include(cmake/folders.cmake)
 endif()
 
-find_path(P_RANAV_CSV2_INCLUDE_DIRS "csv2/mio.hpp")
+find_package(Boost REQUIRED COMPONENTS pfr)
 find_package(cpr CONFIG REQUIRED)
 find_package(glaze CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)

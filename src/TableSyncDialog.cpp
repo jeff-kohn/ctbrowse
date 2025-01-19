@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <sstream>
 
-namespace cts
+namespace cts::ui
 {
    using namespace magic_enum;
 

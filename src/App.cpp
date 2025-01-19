@@ -55,7 +55,7 @@ namespace cts
 
       ::wxInitAllImageHandlers();
 
-      m_main_frame = new MainFrame{nullptr};
+      m_main_frame = new ui::MainFrame{nullptr};
       SetTopWindow(m_main_frame);
       m_main_frame->Center();
       m_main_frame->Show();
@@ -92,6 +92,12 @@ namespace cts
 
       return *config;
    }
+
+   CtGridTableMgr::GridTablePtr App::getGridTable(CtGridTableMgr::GridTable tbl)
+   {
+      return m_grid_tables.getGridTable(tbl);
+   }
+
 
 }  // namespace cts
 

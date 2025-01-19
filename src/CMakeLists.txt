@@ -6,8 +6,8 @@ target_sources(cts_win
    PRIVATE
      "App.cpp"
      "App.h"
-     "CTGridTable.h"
-     "CTGridTable.cpp"
+     "grids/CTGridTable.h"
+     "grids/CTGridTable.cpp"
      "MainFrame.cpp"
      "MainFrame.h"
      "TableSyncDialog.cpp"
@@ -21,6 +21,11 @@ target_sources(cts_win
 
 find_package(wxWidgets CONFIG REQUIRED)
 
+target_include_directories(cts_win 
+   PRIVATE
+      ${CMAKE_CURRENT_LIST_DIR}
+    
+)
 target_link_libraries(cts_win
    PRIVATE
       ct_search::cts_lib

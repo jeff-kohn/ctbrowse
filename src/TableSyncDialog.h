@@ -13,7 +13,7 @@
 
 #include <vector>
 
-namespace cts
+namespace cts::ui
 {
    class TableSyncDialog : public TableSyncDlgBase
    {

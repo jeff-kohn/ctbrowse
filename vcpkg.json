@@ -3,6 +3,7 @@
   "name": "ct-search",
   "version": "0.1.0",
    "dependencies": [
+      "boost-pfr",
       "catch2",
       "cpr",
       "frozen",
