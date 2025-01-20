@@ -1,15 +1,27 @@
 #pragma once
 
+#include "cts/constants.h"
 #include "cts/concepts.h"
+#include "cts/Error.h"
+
+#pragma warning(push)
+#pragma warning(disable: 4365 4464 4702)
+#include "cts/external/csv.hpp"
+#pragma warning(pop)
 
 #include <frozen/map.h>
 #include <magic_enum/magic_enum.hpp>
+#include <algorithm>
 #include <expected>
 #include <filesystem>
+#include <format>
 #include <optional>
+#include <string>
 #include <string_view>
+#include <vector>
 
-namespace cts::data
+
+namespace cts::data_v2
 {
    namespace fs = std::filesystem;
 
@@ -40,6 +52,9 @@ namespace cts::data
       csv
    };
 
+   /// @brief default table format (and currently the only format we support parsing)
+   inline constexpr auto DEFAULT_TABLE_FORMAT =  DataFormatId::csv;
+
 
    /// @brief type alias for a static map of TableId's to display name
    using TableDescriptionMap = frozen::map<TableId, std::string_view, magic_enum::enum_count<TableId>()>;
@@ -66,10 +81,10 @@ namespace cts::data
    /// @brief nullable/optional string_view
    using MaybeStringView = std::optional<std::string_view>;
 
-   /// @brief  returns the 
-   inline MaybeStringView getTableDescription(TableId tbl_id)
+   /// @brief  returns the descriptive name that corresponds to the specified tbl, if found
+   inline MaybeStringView getTableDescription(TableId tbl)
    {
-      auto it = TableDescriptions.find(tbl_id);
+      auto it = TableDescriptions.find(tbl);
       if (it != TableDescriptions.end())
          return MaybeStringView{ it->second };
       else
@@ -77,27 +92,82 @@ namespace cts::data
    }
 
 
-   /// @brief struct that contains data (and metadata) for a downloaded CellarTracker table
-   struct RawTableData
-   {
-      std::string  data{};
-      TableId      table_id{};
-      DataFormatId data_format{};
+   ///// @brief struct that contains data (and metadata) for a downloaded CellarTracker table
+   //struct RawTableData
+   //{
+   //   std::string  data{};
+   //   TableId      table_id{};
+   //   DataFormatId data_format{};
 
-      std::string_view tableName() const noexcept { return magic_enum::enum_name(table_id); }
-      std::string_view formatName() const noexcept { return magic_enum::enum_name(data_format); }
-   };
+   //   constexpr std::string_view tableName() const noexcept { return magic_enum::enum_name(table_id); }
+   //   constexpr std::string_view formatName() const noexcept { return magic_enum::enum_name(data_format); }
+   //};
 
-   /// @brief get a list of available tables in the specified folder
-   inline std::vector<TableId> getAvailableTables(fs::path data_folder, DataFormatId fmt)
+
+   /// @brief  combine enum values to generate a filename.
+   inline std::string getTableFileName(TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT)
    {
       using magic_enum::enum_name;
+      return std::format("{}.{}", enum_name(tbl), enum_name(fmt));
+   }
 
+
+   /// @brief  get the fully qualified path for a table 
+   inline fs::path getTablePath(fs::path data_folder, TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT)
+   {
+      return data_folder / getTableFileName(tbl, fmt);
+   }
+
+
+   /// @brief checks whether the requested table is available at the specified location
+   inline bool isTableFileAvailable(fs::path file_path)
+   {
+      if (fs::exists(file_path))
+         return true;
+   }
+
+
+   /// @brief checks whether the requested table is available at the specified location
+   inline bool isTableAvailable(fs::path data_folder, TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT)
+   {
+      return isTableFileAvailable(getTablePath(data_folder, tbl, fmt));
+   }
+
+
+   /// @brief get a list of available tables in the specified folder
+   inline std::vector<TableId> getAvailableTables(fs::path data_folder, DataFormatId fmt = DataFormatId::csv)
+   {
       std::vector<TableId> ids{};
       rng::for_each(vws::keys(TableDescriptions), [&](TableId tbl)
          {
-            std::string filename = std::format("{}.{}", enum_name(tbl), enum_name(fmt));
+            if (isTableAvailable(data_folder, tbl, fmt))
+               ids.push_back(tbl);
          });
+      return ids;
+   }
+
+
+   /// @brief   load a table object for the given table from disk.
+   /// @returns expected value is the requested table object, unexpected value is Error information if operation failed.
+   /// 
+   /// Note the lack of a "format" parameter, we currently only support parsing CSV files.
+   template <typename TableData>
+   TableData loadTableData(fs::path data_folder, TableId tbl)
+   {
+      auto table_path = getTablePath(data_folder, tbl, DataFormatId::csv);
+      if (not isTableFileAvailable(table_path))
+         return std::unexpected{ Error{ std::format(constants::FMT_ERROR_FILE_NOT_FOUND, table_path) }};
+
+      csv::CSVReader reader{ table_path.generic_string() };
+
+      TableData data{};
+      for (csv::CSVRow& row : reader)
+      {
+         typename TableData::value_type record{};
+         if (record.parse(row))
+            data.emplace_back(std::move(record));
+      }
+      return data;
    }
 
 

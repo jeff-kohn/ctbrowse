@@ -14,9 +14,10 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS OFF)
 
 include(FetchContent)
-include(cmake/add_target.cmake)
+include(cmake/add-target.cmake)
 include(cmake/folders.cmake)
 include(cmake/project-is-top-level.cmake)
+include(cmake/use-clang-tidy.cmake)
 include(cmake/variables.cmake)
 
  #export compile_commands.json for tools like clang-tidy and cppcheck

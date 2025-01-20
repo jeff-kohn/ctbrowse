@@ -1,3 +1,2 @@
 CompileFlags:
-  CompilationDatabase: build/dev
   Add: [-xc++, -std=c++23]
