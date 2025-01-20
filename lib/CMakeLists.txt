@@ -16,6 +16,7 @@ target_sources(cts_lib
 
    PRIVATE
       "data/WineList.cpp"
+      "data/CellarTrackerTables.cpp"
       "CellarTrackerDownload.cpp"
       "CredentialWrapper.cpp"
       "winapi_util.cpp"

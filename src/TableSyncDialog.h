@@ -9,7 +9,7 @@
 
 #include "generated/TableSyncDlgBase.h"
 #include "cts/CellarTrackerDownload.h"
-#include "concepts.h"
+#include "cts/concepts.h"
 
 #include <vector>
 

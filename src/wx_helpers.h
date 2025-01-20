@@ -7,7 +7,7 @@
  *********************************************************************/
 #pragma once
 
-#include "concepts.h"
+#include "cts/concepts.h"
 
 #include "cts/functors.h"
 #include <wx/activityindicator.h>

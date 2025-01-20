@@ -9,7 +9,7 @@
 #include "App.h"
 #include "TableSyncDialog.h"
 #include "wx_helpers.h"
-#include "concepts.h"
+#include "cts/concepts.h"
 
 #include "cts/CellarTrackerDownload.h"
 
