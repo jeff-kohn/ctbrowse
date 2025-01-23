@@ -5,14 +5,14 @@
  *
  * @copyright  Copyright © 2024 Jeff Kohn. All rights reserved.
  *********************************************************************/
-#include "cts/CredentialWrapper.h"
+#include "ctb/CredentialWrapper.h"
 
 #include "windows.h"
 #include "wincred.h"
 
 #include <array>
 
-namespace cts
+namespace ctb
 {
 
    namespace
@@ -133,4 +133,4 @@ namespace cts
    }
 
 
-}  // namespace cts
+}  // namespace ctb

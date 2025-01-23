@@ -7,7 +7,7 @@
  *********************************************************************/
 
 #include "App.h"
-#include "cts/Error.h"
+#include "ctb/Error.h"
 
 #include <wx/stdpaths.h>
 #include <wx/fileconf.h>
@@ -15,7 +15,7 @@
 #include <chrono>
 #include <filesystem>
 
-namespace cts
+namespace ctb
 {
    namespace fs = std::filesystem;
 
@@ -43,6 +43,7 @@ namespace cts
       fs::path config_file_path{ cfg->GetLocalFile(constants::APP_NAME_LONG, wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_SUBDIR).GetFullPath().wx_str() };
       m_user_data_folder = config_file_path.parent_path();
       fs::create_directories(m_user_data_folder);
+      m_grid_tables.setDataFolder(m_user_data_folder);
 
       wxConfigBase::Set(cfg.release());
    } // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks) unfortunately no way around it with wxWindows
@@ -55,7 +56,7 @@ namespace cts
 
       ::wxInitAllImageHandlers();
 
-      m_main_frame = new ui::MainFrame{nullptr};
+      m_main_frame = new MainFrame{nullptr};
       SetTopWindow(m_main_frame);
       m_main_frame->Center();
       m_main_frame->Show();
@@ -93,14 +94,14 @@ namespace cts
       return *config;
    }
 
-   CtGridTableMgr::GridTablePtr App::getGridTable(CtGridTableMgr::GridTable tbl)
+   GridTableMgr::GridTablePtr App::getGridTable(GridTableMgr::GridTableId tbl)
    {
       return m_grid_tables.getGridTable(tbl);
    }
 
 
-}  // namespace cts
+}  // namespace ctb
 
 
 // this needs to be outside the namespace for Linux but not Windows, go figure
-wxIMPLEMENT_APP(cts::App);
+wxIMPLEMENT_APP(ctb::App);

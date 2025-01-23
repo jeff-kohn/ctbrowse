@@ -9,16 +9,14 @@
 #include "App.h"
 #include "TableSyncDialog.h"
 #include "wx_helpers.h"
-#include "cts/concepts.h"
 
-#include "cts/CellarTrackerDownload.h"
+//#include "ctb/data/table_download.h"
 
 #include <magic_enum/magic_enum.hpp>
-
 #include <algorithm>
 #include <sstream>
 
-namespace cts::ui
+namespace ctb
 {
    using namespace magic_enum;
 
@@ -72,7 +70,7 @@ namespace cts::ui
       Bind(wxEVT_BUTTON, &TableSyncDialog::onOkClicked, this, wxID_OK);
 
       // populate table name selection list
-      constexpr auto table_descriptions = vws::all(data::CellarTrackerDownload::tableDescriptions()) | vws::values;
+      constexpr auto table_descriptions = data::TableDescriptions | vws::values;
       m_table_selection_ctrl->InsertItems(wxToArrayString(table_descriptions), 0);
 
       // need to read some defaults from config settings.
@@ -171,4 +169,4 @@ namespace cts::ui
    }
 
 
-}  // namespace cts
+}  // namespace ctb

@@ -1,6 +1,15 @@
-#include "cts/constants.h"
-#include "cts/data/WineList.h"
-#include "cts/Error.h"
+/*******************************************************************
+ * @file parse_csv.cpp
+ *
+ * @brief example program shwoing how to parse a table row from
+ *        a CellarTracker CSV file into the corrsponding C++ class
+ * 
+ * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+ *
+ *******************************************************************/
+#include "ctb/constants.h"
+#include "ctb/data/WineListEntry.h"
+#include "ctb/Error.h"
 
 #include <cassert>
 #include <deque>
@@ -10,14 +19,14 @@
 
 #pragma warning(push)
 #pragma warning(disable: 4365 4464 4702)
-#include "cts/external/csv.hpp"
+#include "external/csv.hpp"
 #pragma warning(pop)
 
 
 int main()
 {
    using namespace std::literals;
-   using namespace cts::data;
+   using namespace ctb::data;
 
    try
    {

@@ -1,11 +1,18 @@
+/*********************************************************************
+ * @file       download_csv.h
+ *
+ * @brief      example showing how to use ctb_lib to download raw
+ *             table data from CellarTracker.com
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
+#include "ctb/constants.h"
+#include "ctb/data/table_download.h"
+#include "ctb/winapi_util.h"
+#include "external/HttpStatusCodes.h"
 
-#include "cts/constants.h"
-#include "cts/CellarTrackerDownload.h"
-#include "cts/HttpStatusCodes.h"
-#include "cts/winapi_util.h"
-
-#include "cpr/cpr.h"
-#include "cpr/util.h"
+#include <cpr/cpr.h>
+#include <cpr/util.h>
 
 #include <string>
 #include <print>
@@ -16,8 +23,8 @@ int main()
    using namespace std::literals;
 
    try {
-      using namespace cts;
-      using namespace cts::data;
+      using namespace ctb;
+      using namespace ctb::data;
 
       CredentialWrapper cred_wrapper{
          constants::CELLARTRACKER_DOT_COM, true,
@@ -28,8 +35,7 @@ int main()
       // if there's no saved credential, user will be prompted. use a loop since
       // it may take more than one try before user enters the correct credentials
       // (or gives up trying).
-      CellarTrackerDownload downloader{};
-      CellarTrackerDownload::DownloadResult result{};
+      DownloadResult result{};
       bool prompt_again = true;
       while (prompt_again)
       {
@@ -37,7 +43,7 @@ int main()
          if (!cred)
             throw Error{ "Authentication failed." };
 
-         result = downloader.getTableData(cred.value(), data::TableId::Notes, data::DataFormatId::csv);
+         result = downloadRawTableData(cred.value(), data::TableId::Notes, data::DataFormatId::csv);
          if (!result.has_value() && result.error().error_code == static_cast<int>(HttpStatus::Code::Unauthorized))
             prompt_again = true; // wrong user/pass, try again
          else 

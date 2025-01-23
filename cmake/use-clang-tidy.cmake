@@ -1,5 +1,5 @@
 # only do the in-built scanning for the presets that request it.
-if(CTS_ENABLE_CLANG_TIDY)
+if(CTB_ENABLE_CLANG_TIDY)
    message(CHECK_START "Looking for clang-tidy")
    find_program(CMAKE_CXX_CLANG_TIDY NAMES clang-tidy clang-tidy.exe)
 

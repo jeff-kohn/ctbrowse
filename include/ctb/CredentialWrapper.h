@@ -13,7 +13,7 @@
 #include <string_view>
 
 
-namespace cts
+namespace ctb
 {
    /// @brief class to encapsulate using the WinAPI to prompt for (and optionally save) generic username/password credentials.
    ///
@@ -37,8 +37,8 @@ namespace cts
       /// in undefined behavior since this object doe not have its own copy of the username nad password.
       struct Credential
       {
-         std::string_view username;
-         std::string_view password;
+         std::string_view username{};
+         std::string_view password{};
       };
 
 
@@ -111,6 +111,8 @@ namespace cts
 
       /// @brief string containing a short message to display in the dialog box (if displayed)
       const std::string& messageText() const { return m_message_text; }
+      
+      /// @brief set a short message to display in the dialog box (if displayed)
       CredentialWrapper& setMessageText(std::string_view text)
       {
          m_message_text = text;
@@ -120,6 +122,8 @@ namespace cts
 
       /// @brief string containing the title for the dialog box (if displayed)
       std::string_view captionText() const { return m_caption_text; }
+
+      /// @brief set the title for the dialog box (if displayed)
       CredentialWrapper& setCaptionText(std::string_view text)
       {
          m_caption_text = text;
@@ -184,4 +188,4 @@ namespace cts
    }
 
 
-} // namespace cts
+} // namespace ctb

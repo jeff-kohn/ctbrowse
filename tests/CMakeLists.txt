@@ -20,7 +20,7 @@ target_sources(cts_test
 
 target_link_libraries(cts_test
    PRIVATE
-      cts_lib
+      ctb_lib
       Catch2::Catch2WithMain
 )
 

@@ -10,17 +10,18 @@
 #include "App.h"
 #include "TableSyncDialog.h"
 #include "wx_helpers.h"
+#include "grids/GridTableWineList.h"
 
-
-#include "cts/constants.h"
-#include "cts/CredentialWrapper.h"
-#include "cts/HttpStatusCodes.h"
-#include "cts/winapi_util.h"
+#include "ctb/CredentialWrapper.h"
+#include "ctb/data/table_download.h"
+#include "ctb/winapi_util.h"
+#include "external/HttpStatusCodes.h"
 
 #include <wx/msgdlg.h>
 #include <wx/progdlg.h>
 
-namespace cts::ui
+
+namespace ctb
 {
    using namespace magic_enum;
 
@@ -28,10 +29,12 @@ namespace cts::ui
    {
    }
 
+
    MainFrame::MainFrame(wxWindow* parent)   
    {
       Create(parent);
    }
+
 
    bool MainFrame::Create(wxWindow* parent)
    {
@@ -41,20 +44,16 @@ namespace cts::ui
 
       SetTitle(constants::APP_NAME_LONG);
 
-      m_grid = new wxGrid(this, wxID_ANY);
-      m_grid->EnableEditing(false);
-      m_grid->EnableDragGridSize(false);
-      m_grid->SetMargins(0, 0);
-      m_grid->SetLabelBackgroundColour(wxColour("#FFFFFF"));
-      m_grid->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_TOP);
-      m_grid->SetRowLabelSize(0);
+      m_grid = new CellarTrackerGrid{ this };
       m_grid->Refresh();
+
       Bind(wxEVT_MENU, &MainFrame::onQuit, this, wxID_EXIT);
 
       Centre(wxBOTH);
 
       return true;
    }
+
    
    void MainFrame::onMenuPreferences(wxCommandEvent& event) 
    {
@@ -63,7 +62,7 @@ namespace cts::ui
 
    void MainFrame::onMenuSyncData(wxCommandEvent& event) 
    {
-      using namespace cts::data;
+      using namespace ctb::data;
 
       TableSyncDialog dlg(this);
       if (dlg.ShowModal() != wxID_OK)
@@ -87,9 +86,9 @@ namespace cts::ui
 
       wxProgressDialog progress_dlg{"Download Progress", "Downloading Data Files", 100, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL };
 
-      CellarTrackerDownload::ProgressCallback progress_callback = [&progress_dlg] (int64_t downloadTotal, int64_t downloadNow,
-                                                                                   int64_t uploadTotal, int64_t uploadNow,
-                                                                                   intptr_t userdata)
+      data::ProgressCallback progress_callback = [&progress_dlg] (int64_t downloadTotal, int64_t downloadNow,
+                                                                  int64_t uploadTotal, int64_t uploadNow,
+                                                                  intptr_t userdata)
                                                                   {
                                                                      return progress_dlg.Pulse();
                                                                   };
@@ -97,10 +96,10 @@ namespace cts::ui
       // For each selected table, download it.
       for (auto tbl : dlg.selectedTables())
       {
-         setStatusText(constants::FMT_STATUS_FILE_DOWNLOADING, CellarTrackerDownload::tableDescription(tbl));
+         setStatusText(constants::FMT_STATUS_FILE_DOWNLOADING, data::getTableDescription(tbl));
 
-         CellarTrackerDownload::DownloadResult result{};
-         result = CellarTrackerDownload::getTableData(cred, tbl, DataFormatId::csv, &progress_callback);
+         data::DownloadResult result{};
+         result = downloadRawTableData(cred, tbl, DataFormatId::csv, &progress_callback);
 
          // we may need to re-prompt 
          while (!result.has_value() && result.error().error_code == enum_index(HttpStatus::Code::Unauthorized))
@@ -138,17 +137,34 @@ namespace cts::ui
          file_path.replace_extension(constants::DATA_FILE_EXTENSION);
          util::saveTextToFile(result->data, file_path);
 
-         setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, CellarTrackerDownload::tableDescription(tbl));
+         setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, data::getTableDescription(tbl));
       }
-
    }
+
 
    void MainFrame::onMenuWineList(wxCommandEvent&)
    {
       wxBusyCursor busy{};
-           
-      m_grid->SetTable(wxGetApp().getGridTable(CtGridTableMgr::GridTable::WineList).get(), false);
-      m_grid->Refresh();
+      try
+      {
+         auto tbl_ptr = std::dynamic_pointer_cast<GridTableWineList>(wxGetApp().getGridTable(GridTableMgr::GridTableId::WineList));
+         assert(tbl_ptr);
+         assert(m_grid);
+
+         m_grid->setGridTable(tbl_ptr);
+         //m_grid->UseNativeColHeader(true);
+         //m_grid->SetTable(tbl_ptr.get(), false);
+         //tbl_ptr->ConfigureColumns(m_grid);
+         //m_grid->SetSelectionMode(wxGrid::wxGridSelectionModes::wxGridSelectRows);
+         //m_grid->SetSortingColumn(0, true);
+         //m_grid->AutoSizeColumns(false);
+         //m_grid->Refresh();
+         Update();
+      }
+      catch(Error& e)
+      {
+         wxMessageBox(e.error_message, constants::ERROR_STR, wxICON_ERROR | wxOK);
+      }
    }
 
    void MainFrame::onQuit([[maybe_unused]] wxCommandEvent& event)
@@ -159,4 +175,4 @@ namespace cts::ui
 
 
 
-} // namespace cts
+} // namespace ctb

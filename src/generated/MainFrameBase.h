@@ -16,7 +16,7 @@
 #include <wx/statusbr.h>
 #include <wx/toolbar.h>
 
-namespace cts
+namespace ctb
 {
     class MainFrameBase : public wxFrame
     {
@@ -47,7 +47,7 @@ namespace cts
         wxStatusBar* m_statusBar;
         wxToolBar* m_toolBar;
     };
-} // namespace cts
+} // namespace ctb
 
 
 // ************* End of generated code ***********

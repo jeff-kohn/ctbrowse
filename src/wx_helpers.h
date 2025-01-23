@@ -7,13 +7,13 @@
  *********************************************************************/
 #pragma once
 
-#include "cts/concepts.h"
+#include "ctb/concepts.h"
+#include "ctb/functors.h"
 
-#include "cts/functors.h"
 #include <wx/activityindicator.h>
 #include <chrono>
 
-namespace cts
+namespace ctb
 {
 
    /// @brief convert a range of strings/string_views to a wxArrayString
@@ -56,4 +56,4 @@ namespace cts
    };
 
 
-} // namespace cts
+} // namespace ctb

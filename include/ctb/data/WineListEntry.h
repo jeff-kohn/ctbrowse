@@ -1,22 +1,30 @@
+/*******************************************************************
+ * @file WineListEntry.h
+ *
+ * @brief Header file for the WineListEntry class
+ * 
+ * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+ *******************************************************************/
 #pragma once
 
-#include "cts/constants.h"
-#include "cts/Error.h"
+#include "ctb/ctb.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4365 4464 4702)
-#include <cts/external/csv.hpp>
+#include "external/csv.hpp"
 #pragma warning(pop)
 
 #include <magic_enum/magic_enum.hpp>
 #include <cstdint>
 #include <deque>
 #include <expected>
+#include <format>
 #include <string>
+#include <string_view>
 #include <variant>
 
 
-namespace cts::data::detail
+namespace ctb::data::detail
 {
    /// @brief  this struct contains the data values read from the CSV file.
    struct WineListRec
@@ -45,11 +53,17 @@ namespace cts::data::detail
       uint16_t EndConsume{};
    };
 
-} // namespace cts::data::detail 
+} // namespace ctb::data::detail 
 
 
-namespace cts::data
+namespace ctb::data
 {
+
+   /// @brief class that encapsulates the data from a row in a CellarTracker 'List' CSV file.
+   ///
+   /// currently the class only support parsing from CSV. Other formats could be supported
+   /// in the future with additional parse() methods.
+   /// 
    class WineListEntry
    {
    public:
@@ -64,8 +78,9 @@ namespace cts::data
       /// @brief these are the fields from the denormalized CSV that we parse and use
       ///
       /// the values map to column indices in the file, while the enum ordering is based
-      /// on the record class layout.
-     enum class Props : uint32_t
+      /// on the record class layout. The enums with values starting at 100 are calculated
+      /// fields, and do not map directly to a column in the file.
+     enum class Prop : uint32_t
      {
          iWineID = 0,
          WineName = 13,
@@ -89,32 +104,42 @@ namespace cts::data
          MYScore = 61,
          BeginConsume = 63,
          EndConsume = 64,
+         WineAndVintage = 100
       };
 
+      // type alias used by template code
+      using RowType = csv::CSVRow;
+
+
       /// @brief static function to get the 0-based index of the last column.
-      static constexpr int maxPropIndex() { return static_cast<int>(Props::EndConsume); }
+      static constexpr int maxPropIndex() { return static_cast<int>(Prop::EndConsume); }
+
 
       /// @brief variant that can hold any of our supported field types.
-      using ValueWrapper = std::variant<uint16_t, uint64_t, double, std::string>;
+      using ValueWrapper = std::variant<uint16_t, uint64_t, double, std::string_view, std::string>;
+
 
       /// @brief used to return a field value or an error
       using ValueResult = std::expected<ValueWrapper, Error>;
 
+
       /// @brief get the property corresponding to the specified enum identifier
-      ValueResult getProperty(Props prop) const;
+      ValueResult getProperty(Prop prop) const;
+
 
       /// @brief array syntax for getting a property value
-      ValueResult operator[](Props prop) const 
+      ValueResult operator[](Prop prop) const 
       {
          return getProperty(prop);
       }
 
-      /// @brief array syntax for getting a
+
+      /// @brief array syntax for getting a property value
       ///
       /// if the specified index doesn't match an enum identifier, an error will be returned.
       ValueResult operator[](int idx) const 
       {
-         auto e = magic_enum::enum_cast<Props>(static_cast<size_t>(idx));
+         auto e = magic_enum::enum_cast<Prop>(static_cast<size_t>(idx));
          if (e)
             return getProperty(e.value());
          else
@@ -144,6 +169,19 @@ namespace cts::data
       uint16_t beginConsume() const            { return m_rec.BeginConsume;     }
       uint16_t endConsume() const              { return m_rec.EndConsume;       }
       
+
+      /// @brief calculated field to show vintage and wine name as a single value
+      std::string wineAndVintage() const
+      {
+         std::string val = std::format("{} {}", vintage(), wineName());
+         return val;
+      }
+
+
+      /// @brief parses data from a row in the CSV file to this object.
+      /// 
+      /// returns false if the row could not be parse, in which case this 
+      /// object may be in an invalid/indeterminate state (but not UB)
       bool parse(const csv::CSVRow& row);
 
    private:

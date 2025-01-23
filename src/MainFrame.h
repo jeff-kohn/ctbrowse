@@ -8,21 +8,27 @@
 #pragma once
 
 #include "generated/MainFrameBase.h"
-#include "grids/CtGridTable.h"
+#include "grids/CellarTrackerGrid.h"
+
 #include <format>
 
 
-namespace cts::ui
+namespace ctb
 {
    class MainFrame : public MainFrameBase
    {
    public:
-      MainFrame();  // If you use this constructor, you must call Create(parent)
+      /// @brief default constructor for 2-phase initialization, must call Create(parent)
+      MainFrame();  
+
+
+      /// @brief constructor for immediate intialization, calls Create(parent for you)
       MainFrame(wxWindow* parent);
+
 
       /// @brief create the window object
       ///
-      /// this should only be called if this object was default-constructed
+      /// this should only be directly called if this object was default-constructed
       bool Create(wxWindow* parent);
 
 
@@ -33,16 +39,15 @@ namespace cts::ui
          SetStatusText(std::format(fmt_str, std::forward<Args>(args)...));
       }
 
-
    private:
       void onMenuPreferences(wxCommandEvent&) override;
       void onMenuSyncData(wxCommandEvent&) override;
       void onMenuWineList(wxCommandEvent&) override;
       void onQuit(wxCommandEvent& );
 
-      wxGrid* m_grid{};
+      CellarTrackerGrid* m_grid{ nullptr };
    };
 
 
-} // namespace cts
+} // namespace ctb
 

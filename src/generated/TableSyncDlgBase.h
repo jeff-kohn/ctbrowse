@@ -17,7 +17,7 @@
 #include <wx/gdicmn.h>
 #include <wx/sizer.h>
 
-namespace cts
+namespace ctb
 {
     class TableSyncDlgBase : public wxDialog
     {
@@ -57,7 +57,7 @@ namespace cts
         wxCheckListBox* m_table_selection_ctrl;
         wxStdDialogButtonSizer* m_std_buttons;
     };
-} // namespace cts
+} // namespace ctb
 
 
 // ************* End of generated code ***********

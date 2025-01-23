@@ -3,9 +3,9 @@ cmake_minimum_required (VERSION 3.30)
 include(cmake/prelude.cmake)
 
 project(
-    ct_search
+    ctbrowse
     VERSION 0.1.0
-    DESCRIPTION "CellarTracker Search"
+    DESCRIPTION "CellarTracker Browse"
     LANGUAGES CXX
 )
 
@@ -30,9 +30,7 @@ if (PROJECT_IS_TOP_LEVEL)
    include(cmake/folders.cmake)
 endif()
 
-find_package(Boost REQUIRED COMPONENTS pfr)
 find_package(cpr CONFIG REQUIRED)
-find_package(glaze CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
 
 add_subdirectory(lib)
@@ -45,7 +43,7 @@ if(NOT ct_search_DEVELOPER_MODE)
 elseif(NOT PROJECT_IS_TOP_LEVEL)
   message(
       AUTHOR_WARNING
-      "Developer mode is intended for developers of ct_search"
+      "Developer mode is intended for developers of ctbrowse"
   )
 endif()
 

@@ -12,7 +12,7 @@
 
 #include "TableSyncDlgBase.h"
 
-using namespace cts;
+using namespace ctb;
 
 bool TableSyncDlgBase::Create(wxWindow* parent, wxWindowID id, const wxString& title,
     const wxPoint& pos, const wxSize& size, long style, const wxString &name)

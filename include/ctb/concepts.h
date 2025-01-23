@@ -1,7 +1,7 @@
 /*********************************************************************
  * @file       concepts.h
  *
- * @brief      defines some app-specific concept
+ * @brief      defines some app-specific concepts
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
@@ -11,7 +11,7 @@
 #include <ranges>
 #include <string_view>
 
-namespace cts
+namespace ctb
 {
    namespace rng = std::ranges;
    namespace vws = rng::views;
@@ -21,4 +21,4 @@ namespace cts
    concept StringViewCompatible = std::convertible_to<T, std::string_view>;
 
 
-} // namespace cts
+} // namespace ctb

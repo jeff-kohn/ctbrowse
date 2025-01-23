@@ -11,12 +11,12 @@ function (create_lib_target TARGET_NAME)
    		OUTPUT_NAME ${TARGET_NAME}
    		COMPILE_PDB_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
    		COMPILE_PDB_NAME ${TARGET_NAME}
-         MSVC_RUNTIME_LIBRARY ${CTS_MSVC_RUNTIME_LIBRARY}
+         MSVC_RUNTIME_LIBRARY ${CTB_MSVC_RUNTIME_LIBRARY}
    )
 
-   target_compile_options(${TARGET_NAME} PRIVATE ${CTS_COMPILE_OPTIONS})
-   target_compile_options(${TARGET_NAME} PRIVATE ${CTS_WARNING_FLAGS})
-   target_compile_definitions(${TARGET_NAME} PRIVATE ${CTS_COMPILE_DEFINITIONS})
+   target_compile_options(${TARGET_NAME} PRIVATE ${CTB_COMPILE_OPTIONS})
+   target_compile_options(${TARGET_NAME} PRIVATE ${CTB_WARNING_FLAGS})
+   target_compile_definitions(${TARGET_NAME} PRIVATE ${CTB_COMPILE_DEFINITIONS})
 endfunction()
 
 
@@ -31,13 +31,13 @@ function (create_exe_target TARGET_NAME)
    		OUTPUT_NAME ${TARGET_NAME}
    		COMPILE_PDB_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
    		COMPILE_PDB_NAME ${TARGET_NAME}
-         MSVC_RUNTIME_LIBRARY ${CTS_MSVC_RUNTIME_LIBRARY}
+         MSVC_RUNTIME_LIBRARY ${CTB_MSVC_RUNTIME_LIBRARY}
    )
 
-   target_compile_options(${TARGET_NAME} PRIVATE ${CTS_COMPILE_OPTIONS})
-   target_compile_options(${TARGET_NAME} PRIVATE ${CTS_WARNING_FLAGS})
-   target_compile_definitions(${TARGET_NAME} PRIVATE ${CTS_COMPILE_DEFINITIONS})
-   target_link_options(${TARGET_NAME} PRIVATE ${CTS_LINK_OPTIONS})
+   target_compile_options(${TARGET_NAME} PRIVATE ${CTB_COMPILE_OPTIONS})
+   target_compile_options(${TARGET_NAME} PRIVATE ${CTB_WARNING_FLAGS})
+   target_compile_definitions(${TARGET_NAME} PRIVATE ${CTB_COMPILE_DEFINITIONS})
+   target_link_options(${TARGET_NAME} PRIVATE ${CTB_LINK_OPTIONS})
    
 endfunction()
 
@@ -53,14 +53,14 @@ function (create_windows_target TARGET_NAME)
    		OUTPUT_NAME ${TARGET_NAME}
    		COMPILE_PDB_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
    		COMPILE_PDB_NAME ${TARGET_NAME}
-         MSVC_RUNTIME_LIBRARY ${CTS_MSVC_RUNTIME_LIBRARY}
+         MSVC_RUNTIME_LIBRARY ${CTB_MSVC_RUNTIME_LIBRARY}
          VS_DPI_AWARE "PerMonitor"
    )
 
-   target_compile_options(${TARGET_NAME} PRIVATE ${CTS_COMPILE_OPTIONS})
-   target_compile_options(${TARGET_NAME} PRIVATE ${CTS_WARNING_FLAGS})
-   target_compile_definitions(${TARGET_NAME} PRIVATE ${CTS_COMPILE_DEFINITIONS})
-   target_link_options(${TARGET_NAME} PRIVATE ${CTS_LINK_OPTIONS})
+   target_compile_options(${TARGET_NAME} PRIVATE ${CTB_COMPILE_OPTIONS})
+   target_compile_options(${TARGET_NAME} PRIVATE ${CTB_WARNING_FLAGS})
+   target_compile_definitions(${TARGET_NAME} PRIVATE ${CTB_COMPILE_DEFINITIONS})
+   target_link_options(${TARGET_NAME} PRIVATE ${CTB_LINK_OPTIONS})
    
 endfunction()
 

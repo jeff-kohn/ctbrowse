@@ -5,14 +5,10 @@
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
-#include "cts/winapi_util.h"
-#include "cts/constants.h"
+#include "ctb/winapi_util.h"
+#include "ctb/constants.h"
 
-#include <windows.h>
-#include <shlwapi.h>
-#include <WinInet.h>
-
-#include "cpr/curlholder.h"
+#include <cpr/curlholder.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
 
@@ -23,7 +19,12 @@
 #include <string>
 #include <vector>
 
-namespace cts::util
+#include <windows.h>
+#include <shlwapi.h>
+#include <WinInet.h>
+
+
+namespace ctb::util
 {
    std::string percentEncode(std::string_view text)
    {
@@ -80,18 +81,12 @@ namespace cts::util
    }
 
 
-   /// <summary>
-   ///   retrieve an environment variable. If the environment variable is not found, or an
-   ///   error occurs, default_val will be returned. Otherwise the variable's value
-   ///   (which could be an empty string) will be returned. Max value length returned
-   ///   is MAX_ENV_VAR_LENGTH, value will be truncted if it's longer than that.
-   /// </summary>
    std::string getEnvironmentVar(const char* var_name, std::string_view default_val)
    {
       if (nullptr == var_name || *var_name == '\0')
          return std::string(default_val);
 
-      // std::getenv() is problematic on Windows so use the WinAPI.
+      // std::getenv() isn't thread safe so use the WinAPI.
       // try with a modestly sized static array first, if it's not big enough
       // we can re-try with a dynamically-sized array
       char buf[constants::MAX_ENV_VAR_LENGTH] = { '\0' };
@@ -133,9 +128,6 @@ namespace cts::util
    }
 
 
-   /// <summary>
-   ///   just dump some text to a file.
-   /// </summary>
    bool saveTextToFile(std::string_view text, fs::path file_path, bool overwrite) noexcept
    {
       if (fs::exists(file_path) && !overwrite)
@@ -145,8 +137,8 @@ namespace cts::util
          fs::create_directories(file_path.parent_path());
 
       // use binary mode to keep ofstream from inserting extra carriage returns, since
-      // we want to preserve whatever linefeeds are already in the file (it may already
-      // have cr/lf, in which case we'd end up with extra cr in text mode because
+      // we want to preserve whatever line feeds are already in the file (it may already
+      // have CR/LF, in which case we'd end up with extra CR in text mode because
       // ofstream isn't smart enough to recognize it).
       std::ofstream file_out{ file_path, std::ios_base::out | std::ios_base::binary };
       file_out << text;
@@ -154,4 +146,4 @@ namespace cts::util
    }
 
 
-} // namespace cts::util
+} // namespace ctb::util

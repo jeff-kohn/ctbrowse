@@ -11,7 +11,7 @@
 #include <string>
 #include <string_view>
 
-namespace cts::util
+namespace ctb::util
 {
    namespace fs = std::filesystem;
 
@@ -55,4 +55,4 @@ namespace cts::util
    /// @brief just dump some text to a file.
    bool saveTextToFile(std::string_view text, fs::path file_path, bool overwrite = true) noexcept;
 
-}  // namespace cts::util
+}  // namespace ctb::util
