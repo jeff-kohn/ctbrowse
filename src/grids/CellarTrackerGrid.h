@@ -7,9 +7,10 @@
  *******************************************************************/
 #pragma once
 
-#include "grids/GridTableMgr.h"
+#include "grids/GridTableBase.h"
 
 #include <wx/grid.h>
+
 
 namespace ctb
 {
@@ -22,7 +23,7 @@ namespace ctb
       CellarTrackerGrid() = delete;
       CellarTrackerGrid(wxWindow* parent);
 
-      void setGridTable(GridTableMgr::GridTablePtr tbl_ptr);
+      void setGridTable(GridTableBase::GridTablePtr tbl_ptr);
 
    protected:
       void InitializeDefaults();

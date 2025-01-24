@@ -8,12 +8,12 @@
 #pragma once
 
 #include "ctb/ctb.h"
-
-#include <wx/grid.h>
+#include "grids/GridTableBase.h"
 
 #include <filesystem>
 #include <memory>
 #include <unordered_map>
+
 
 namespace ctb
 {
@@ -53,7 +53,7 @@ namespace ctb
 
 
       /// @brief the smart-ptr-to-base that this class returns to callers.
-      using GridTablePtr = std::shared_ptr<wxGridTableBase>;
+      using GridTablePtr = GridTableBase::GridTablePtr;
 
 
       /// @brief get the requested grid table

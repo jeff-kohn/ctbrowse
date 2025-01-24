@@ -9,6 +9,7 @@
 #include <magic_enum/magic_enum.hpp>
 #include <magic_enum/magic_enum_switch.hpp>
 
+
 namespace ctb
 {
    using namespace magic_enum;

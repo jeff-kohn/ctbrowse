@@ -13,6 +13,7 @@
 #include <magic_enum/magic_enum.hpp>
 #include <wx/defs.h>
 
+
 namespace ctb
 {
    using magic_enum::enum_name;

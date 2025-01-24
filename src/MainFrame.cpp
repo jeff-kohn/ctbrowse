@@ -152,13 +152,6 @@ namespace ctb
          assert(m_grid);
 
          m_grid->setGridTable(tbl_ptr);
-         //m_grid->UseNativeColHeader(true);
-         //m_grid->SetTable(tbl_ptr.get(), false);
-         //tbl_ptr->ConfigureColumns(m_grid);
-         //m_grid->SetSelectionMode(wxGrid::wxGridSelectionModes::wxGridSelectRows);
-         //m_grid->SetSortingColumn(0, true);
-         //m_grid->AutoSizeColumns(false);
-         //m_grid->Refresh();
          Update();
       }
       catch(Error& e)

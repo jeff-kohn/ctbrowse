@@ -12,6 +12,7 @@ target_sources(ctbrowse_win
      "generated/TableSyncDlgBase.h"
      "grids/CellarTrackerGrid.cpp"
      "grids/CellarTrackerGrid.h"
+     "grids/GridTableBase.h"
      "grids/GridTableMgr.cpp"
      "grids/GridTableMgr.h"
      "grids/GridTableWineList.h"

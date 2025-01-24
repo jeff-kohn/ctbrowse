@@ -70,6 +70,13 @@ namespace ctb::constants
    inline constexpr const char* STATUS_DOWNLOAD_CANCELED          = "Download operation canceled.";
    inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
 
+   inline constexpr const char* LBL_WINE                          = "Wine";
+   inline constexpr const char* LBL_VARIETAL                      = "Varietal";
+   inline constexpr const char* LBL_QTY                           = "Qty";
+   inline constexpr const char* LBL_CT_SCORE                      = "CT Score";
+   inline constexpr const char* LBL_MY_SCORE                      = "My Score";
+   inline constexpr const char* LBL_MY_PRICE                      = "My Price";
+   inline constexpr const char* LBL_DRINK_BY                      = "Drink By";
 
 
 

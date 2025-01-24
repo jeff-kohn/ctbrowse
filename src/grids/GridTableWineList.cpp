@@ -1,9 +1,19 @@
-#include "GridTableWineList.h"
+/*******************************************************************
+ * @file GridTableWineList.cpp
+ *
+ * @brief source file for the girdtableWineList class
+ * 
+ * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+ *******************************************************************/
+#include "grids/GridTableWineList.h"
+#include "grids/CellarTrackerGrid.h"
 
 #include "ctb/functors.h"
 
 #include <magic_enum/magic_enum.hpp>
 #include <cassert>
+#include <memory>
+
 
 namespace ctb
 {
@@ -60,12 +70,19 @@ namespace ctb
    }
 
 
-   void GridTableWineList::ConfigureColumns(wxGrid* grid_ptr) const
+   void GridTableWineList::configureGridColumns(wxGridCellAttrPtr default_attr_ptr)
    {
-      for (auto idx = 0u; idx < m_display_columns.size(); ++idx)
+      auto attr_ptrrov_p = GetAttrProvider();
+      assert(attr_ptrrov_p);
+
+      for (const auto& [idx, disp_col] : vws::enumerate(m_display_columns))
       {
-         auto& disp_col = m_display_columns[idx];
-         grid_ptr->SetColLabelAlignment(std::to_underlying(disp_col.header_align), wxALIGN_CENTRE);
+         auto attr_ptr = attr_ptrrov_p->GetAttrPtr(0, idx, wxGridCellAttr::wxAttrKind::Col);
+         if (!attr_ptr)
+            attr_ptr.reset(default_attr_ptr->Clone());
+
+         attr_ptr->SetAlignment(std::to_underlying(disp_col.col_align), wxALIGN_CENTRE);
+         attr_ptrrov_p->SetColAttr(attr_ptr.release(), idx);
       }
    }
 

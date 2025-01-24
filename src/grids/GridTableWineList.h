@@ -9,6 +9,7 @@
 
 #include "ctb/data/table_data.h"
 #include "ctb/data/WineListEntry.h"
+#include "grids/GridTableBase.h"
 #include "grids/DisplayColumn.h"
 
 #include <magic_enum/magic_enum.hpp>
@@ -20,7 +21,7 @@
 
 namespace ctb
 {
-   class GridTableWineList : public wxGridTableBase
+   class GridTableWineList : public GridTableBase
    {
    public:
       /// @brief type used for describing how to display a column in the grid
@@ -32,15 +33,16 @@ namespace ctb
       {}
 
       static inline const std::array DefaultDisplayColumns { 
-         DisplayColumn{ data::WineListEntry::Prop::WineAndVintage, "Wine" },
-         DisplayColumn{ data::WineListEntry::Prop::MasterVarietal, "Varietal"},
-         DisplayColumn{ data::WineListEntry::Prop::Appellation},
-         DisplayColumn{ data::WineListEntry::Prop::Country},
-         DisplayColumn{ data::WineListEntry::Prop::Quantity, "Qty"},
-         DisplayColumn{ data::WineListEntry::Prop::Pending},
-         DisplayColumn{ data::WineListEntry::Prop::MYScore, DisplayColumn::Format::Decimal, "My Score" },
-         DisplayColumn{ data::WineListEntry::Prop::CTScore, DisplayColumn::Format::Decimal, "CT Score" },
-         DisplayColumn{ data::WineListEntry::Prop::EndConsume, "Drink By"}
+         DisplayColumn{ data::WineListEntry::Prop::WineAndVintage,                              constants::LBL_WINE     },
+         DisplayColumn{ data::WineListEntry::Prop::MasterVarietal,                              constants::LBL_VARIETAL },
+         DisplayColumn{ data::WineListEntry::Prop::Country                                                              },
+         DisplayColumn{ data::WineListEntry::Prop::Appellation                                                          },
+         DisplayColumn{ data::WineListEntry::Prop::Quantity,   DisplayColumn::Format::Number,   constants::LBL_QTY      },
+         DisplayColumn{ data::WineListEntry::Prop::Pending,    DisplayColumn::Format::Number                            },
+         DisplayColumn{ data::WineListEntry::Prop::CTScore,    DisplayColumn::Format::Decimal,  constants::LBL_CT_SCORE },
+         DisplayColumn{ data::WineListEntry::Prop::MYScore,    DisplayColumn::Format::Decimal,  constants::LBL_MY_SCORE },
+         DisplayColumn{ data::WineListEntry::Prop::Price,      DisplayColumn::Format::Currency, constants::LBL_MY_PRICE },
+         DisplayColumn{ data::WineListEntry::Prop::EndConsume, DisplayColumn::Format::Number,   constants::LBL_DRINK_BY }
       };
 
 
@@ -84,8 +86,8 @@ namespace ctb
 
 
       /// @brief this method will configure the column alignment settings for the grid based on the
-      ///        settings in the corresponding DisplayColumn objcts.
-      void ConfigureColumns(wxGrid* grid_ptr) const;
+      ///        settings in the corresponding DisplayColumn objects.
+      void configureGridColumns(wxGridCellAttrPtr default_attr_ptr) override;
 
 
       // object is move-only since copying would be expensive 
