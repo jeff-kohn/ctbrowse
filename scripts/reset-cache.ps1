@@ -10,7 +10,7 @@ param
 $ErrorActionPreference = 'Stop'
 
 $RepoDir = Split-Path $PSScriptRoot
-$BuildDir = Join-Path $RepoDir builds
+$BuildDir = Join-Path $RepoDir build
 
 Write-Output "`nAbout to delete the contents of $BuildDir."
 

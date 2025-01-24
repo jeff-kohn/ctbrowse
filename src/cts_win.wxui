@@ -1,0 +1,149 @@
+<?xml version="1.0"?>
+<wxUiEditorData
+  data_version="16">
+  <node
+    class="Project"
+    base_directory="generated"
+    cmake_varname="wxui_generated"
+    name_space="cts"
+    wxWidgets_version="3.2">
+    <node
+      class="wxDialog"
+      class_name="TableSyncDlgBase"
+      title="Download Table Data"
+      base_file="TableSyncDlgBase"
+      derived_class_name="TableSyncDialog"
+      derived_file="TableSyncDialog">
+      <node
+        class="wxBoxSizer"
+        orientation="wxVERTICAL"
+        var_name="dlg_sizer"
+        flags="wxEXPAND">
+        <node
+          class="wxBoxSizer"
+          var_name="box_sizer2"
+          flags="wxEXPAND">
+          <node
+            class="wxBoxSizer"
+            orientation="wxVERTICAL"
+            var_name="box_sizer3">
+            <node
+              class="wxStaticText"
+              class_access="none"
+              label="&amp;Tables to Download:"
+              var_name="static_text2"
+              borders="wxLEFT|wxRIGHT|wxTOP" />
+            <node
+              class="wxCheckListBox"
+              type="wxLB_EXTENDED"
+              var_name="m_table_selection_ctrl"
+              validator_variable="m_table_selection_val"
+              minimum_size="112,112d"
+              borders="wxTOP|wxBOTTOM|wxLEFT" />
+            <node
+              class="wxCheckBox"
+              label="Sync on &amp;Program Startup"
+              var_comment="If checked, application will sync on startup"
+              var_name="m_startup_sync_ctrl"
+              validator_variable="m_startup_sync_val" />
+            <node
+              class="wxCheckBox"
+              label="Save as &amp;Default"
+              var_comment="Whether the current table selection should be remembered for next time"
+              var_name="m_save_default_ctrl"
+              validator_variable="m_save_default_val" />
+          </node>
+          <node
+            class="wxBoxSizer"
+            orientation="wxVERTICAL">
+            <node
+              class="spacer"
+              height="20" />
+            <node
+              class="wxButton"
+              class_access="none"
+              label="Select &amp;All"
+              var_name="btn"
+              borders="wxTOP"
+              flags="wxEXPAND"
+              wxEVT_BUTTON="onSelectAll"
+              wxEVT_UPDATE_UI="onSelectAllUpdateUI" />
+            <node
+              class="wxButton"
+              label="&amp;Deselect All"
+              var_name="m_btn2"
+              border_size="4"
+              borders="wxTOP|wxBOTTOM"
+              wxEVT_BUTTON="onDeselectAll"
+              wxEVT_UPDATE_UI="onDeselectAllUpdateUI" />
+          </node>
+        </node>
+        <node
+          class="wxStdDialogButtonSizer"
+          class_access="protected:"
+          var_name="m_std_buttons"
+          flags="wxEXPAND" />
+      </node>
+    </node>
+    <node
+      class="wxFrame"
+      class_name="MainFrameBase"
+      base_file="MainFrameBase"
+      system_src_includes="wx/stockitem.h"
+      derived_class_name="MainFrame"
+      derived_file="MainFrame">
+      <node
+        class="wxToolBar" />
+      <node
+        class="wxMenuBar">
+        <node
+          class="wxMenu"
+          class_access="none"
+          label="&amp;File"
+          stock_id="wxID_FILE"
+          var_name="menu_file">
+          <node
+            class="wxMenuItem"
+            help="Download data from CellarTracker"
+            label="&amp;Sync Data..."
+            var_name="menu_sync_data"
+            wxEVT_MENU="onMenuSyncData" />
+          <node
+            class="separator" />
+          <node
+            class="wxMenuItem"
+            help="Configure App Preferences"
+            label="&amp;Preferences"
+            var_comment="Configure application settings"
+            var_name="menu_preferences"
+            wxEVT_MENU="onMenuPreferences" />
+          <node
+            class="separator"
+            var_name="separator2" />
+          <node
+            class="wxMenuItem"
+            bitmap="Art;wxART_QUIT|wxART_MENU"
+            help="Quit this program"
+            id="wxID_EXIT"
+            label="&amp;Quit"
+            stock_id="wxID_EXIT"
+            var_name="menu_quit" />
+        </node>
+        <node
+          class="wxMenu"
+          class_access="none"
+          label="&amp;Data"
+          var_name="menu_views">
+          <node
+            class="wxMenuItem"
+            label="&amp;Wine List"
+            shortcut="CTRL+W"
+            var_comment="Open a view on your personal wine inventory"
+            wxEVT_MENU="onMenuWineList" />
+        </node>
+      </node>
+      <node
+        class="wxStatusBar" />
+    </node>
+  </node>
+</wxUiEditorData>

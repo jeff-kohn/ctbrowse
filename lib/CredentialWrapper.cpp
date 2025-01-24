@@ -5,14 +5,14 @@
  *
  * @copyright  Copyright © 2024 Jeff Kohn. All rights reserved.
  *********************************************************************/
-#include "ctwin/CredentialWrapper.h"
+#include "ctb/CredentialWrapper.h"
 
-#include "Windows.h"
+#include "windows.h"
 #include "wincred.h"
 
 #include <array>
 
-namespace ctwin
+namespace ctb
 {
 
    namespace
@@ -93,7 +93,7 @@ namespace ctwin
    }
 
 
-   [[nodiscard]] CredentialWrapper::CredentialResult CredentialWrapper::promptForCredential(unsigned long auth_error)
+   [[nodiscard]] CredentialWrapper::CredentialResult CredentialWrapper::promptForCredential(unsigned long auth_error_code)
    {
 
       m_confirmed = false;
@@ -111,7 +111,7 @@ namespace ctwin
       cui.pszCaptionText = m_caption_text.c_str();
       cui.hbmBanner = nullptr;
 
-      retval = CredUIPromptForCredentialsA(&cui, m_target.c_str(), nullptr, auth_error,
+      retval = CredUIPromptForCredentialsA(&cui, m_target.c_str(), nullptr, auth_error_code,
                                            m_username.data(), static_cast<ULONG>(m_username.size()),
                                            m_password.data(), static_cast<ULONG>(m_password.size()),
                                            &save, static_cast<DWORD>(flags));
@@ -133,4 +133,4 @@ namespace ctwin
    }
 
 
-}  // namespace ctwin
+}  // namespace ctb
