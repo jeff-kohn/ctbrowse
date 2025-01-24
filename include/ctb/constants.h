@@ -12,7 +12,7 @@
 
 namespace ctb::constants
 {
-   inline constexpr const char* APP_NAME_LONG  = "CellarTracker Browser for Windows";
+   inline constexpr const char* APP_NAME_LONG  = "CellarTracker Browse for Windows";
    inline constexpr const char* APP_NAME_SHORT = "cts_win";
 
    inline constexpr const char* FMT_HTTP_CELLARTRACKER_QUERY_URL = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
