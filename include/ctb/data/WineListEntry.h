@@ -19,45 +19,48 @@
 #include <deque>
 #include <expected>
 #include <format>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <variant>
 
 
-namespace ctb::data::detail
-{
-   /// @brief  this struct contains the data values read from the CSV file.
-   struct WineListRec
-   {
-      uint64_t iWineID{};
-      std::string WineName{};
-      std::string Locale{};
-      uint16_t Vintage{};
-      uint16_t Quantity{};
-      uint16_t Pending{};
-      std::string Size{};
-      double Price{};
-      double Valuation{};
-      std::string Country{};
-      std::string Region{};
-      std::string SubRegion{};
-      std::string Appellation{};
-      std::string Producer{};
-      std::string SortProducer{};
-      std::string Color{};
-      std::string Category{};
-      std::string MasterVarietal{};
-      double CTScore{};
-      double MYScore{};
-      uint16_t BeginConsume{};
-      uint16_t EndConsume{};
-   };
-
-} // namespace ctb::data::detail 
-
-
 namespace ctb::data
 {
+   /// @brief some fields with numeric values may not actually have a value
+   using NullableDouble = std::optional<double>;
+
+   namespace detail
+   {
+      /// @brief  this struct contains the data values read from the CSV file.
+      struct WineListRec
+      {
+         uint64_t iWineID{};
+         std::string WineName{};
+         std::string Locale{};
+         uint16_t Vintage{};
+         uint16_t Quantity{};
+         uint16_t Pending{};
+         std::string Size{};
+         NullableDouble Price{};
+         NullableDouble Valuation{};
+         std::string Country{};
+         std::string Region{};
+         std::string SubRegion{};
+         std::string Appellation{};
+         std::string Producer{};
+         std::string SortProducer{};
+         std::string Color{};
+         std::string Category{};
+         std::string MasterVarietal{};
+         NullableDouble CTScore{};
+         NullableDouble MYScore{};
+         uint16_t BeginConsume{};
+         uint16_t EndConsume{};
+      };
+
+   } // namespace detail 
+
 
    /// @brief class that encapsulates the data from a row in a CellarTracker 'List' CSV file.
    ///
@@ -116,7 +119,7 @@ namespace ctb::data
 
 
       /// @brief variant that can hold any of our supported field types.
-      using ValueWrapper = std::variant<uint16_t, uint64_t, double, std::string_view, std::string>;
+      using ValueWrapper = std::variant<uint16_t, uint64_t, NullableDouble, std::string_view, std::string>;
 
 
       /// @brief used to return a field value or an error
@@ -146,6 +149,7 @@ namespace ctb::data
             return std::unexpected{ Error{constants::ERROR_INVALID_PROP_INDEX} };
       }
 
+
       uint64_t wineID() const                  { return m_rec.iWineID;          }
       std::string_view wineName() const        { return m_rec.WineName;         }
       std::string_view locale() const          { return m_rec.Locale;           }
@@ -153,8 +157,8 @@ namespace ctb::data
       uint16_t qtyAvailable() const            { return m_rec.Quantity;         }
       uint16_t qtyPending() const              { return m_rec.Pending;          }
       std::string_view size() const            { return m_rec.Size;             }
-      double price() const                     { return m_rec.Price;            }
-      double valuation() const                 { return m_rec.Valuation;        }
+      NullableDouble price() const             { return m_rec.Price;            }
+      NullableDouble valuation() const         { return m_rec.Valuation;        }
       std::string_view country() const         { return m_rec.Country;          }
       std::string_view region() const          { return m_rec.Region;           }
       std::string_view subRegion() const       { return m_rec.SubRegion;        }
@@ -164,8 +168,8 @@ namespace ctb::data
       std::string_view color() const           { return m_rec.Color;            }
       std::string_view category() const        { return m_rec.Category;         }
       std::string_view masterVarietal() const  { return m_rec.MasterVarietal;   }
-      double ctScore() const                   { return m_rec.CTScore;          }
-      double myScore() const                   { return m_rec.MYScore;          }
+      NullableDouble ctScore() const           { return m_rec.CTScore;          }
+      NullableDouble myScore() const           { return m_rec.MYScore;          }
       uint16_t beginConsume() const            { return m_rec.BeginConsume;     }
       uint16_t endConsume() const              { return m_rec.EndConsume;       }
       

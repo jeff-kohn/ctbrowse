@@ -40,6 +40,7 @@ namespace ctb
       // some types we borrow from our template parameter
       using Prop         = TE::Prop;
       using ValueWrapper = TE::ValueWrapper;
+      using NullableDouble = ctb::data::NullableDouble;
       
 
       /// @brief enum to specify the alignment for column headers and cell text
@@ -111,15 +112,20 @@ namespace ctb
             [this](std::string_view val)   { return std::format("{}", val); },
             [this](uint64_t val)           { return std::format("{}", val); },
             [this](uint16_t val)           { return std::format("{}", val); },
-            [this](double val)
+            [this](NullableDouble val)
             { 
-               switch(this->format)
+               if (val)
                {
-                  case Format::Currency: return std::format("${:.2f}", val);
-                  case Format::Decimal:  return std::format("{:.1f}", val);
-                  case Format::Number:   return std::format("{:.0f}", val);
-                  default:
-                     return std::format("{}", val);
+                  switch(this->format)
+                  {
+                     case Format::Currency: return std::format("${:.2f}", *val);
+                     case Format::Decimal:  return std::format("{:.1f}", *val);
+                     case Format::Number:   return std::format("{:.0f}", *val);
+                     default:               return std::format("{}", *val);
+                  }
+               }
+               else{
+                  return std::string{};
                }
             }
          };

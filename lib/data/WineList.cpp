@@ -5,6 +5,21 @@
 namespace ctb::data
 {
 
+   /// @brief parses a CSVField into a nullable/optional double
+   ///
+   /// converts the CSV value to decimal and returns it, or returns 
+   /// nullopt if the field was empty or couldn't be parsed
+   NullableDouble parseDouble(csv::CSVField&& fld)
+   {
+      long double val{};
+      if (fld.get_sv().length() && fld.try_parse_decimal(val))
+      {
+         return static_cast<double>(val);
+      }
+      return std::nullopt;
+   }
+
+
    WineListEntry::WineListEntry(const csv::CSVRow& row) 
    {
       parse(row);
@@ -27,8 +42,6 @@ namespace ctb::data
          m_rec.Quantity          = row[to_underlying(Prop::Quantity)].get<decltype(m_rec.Quantity)>();
          m_rec.Pending           = row[to_underlying(Prop::Pending)].get<decltype(m_rec.Pending)>();
          m_rec.Size              = row[to_underlying(Prop::Size)].get<decltype(m_rec.Size)>();
-         m_rec.Price             = row[to_underlying(Prop::Price)].get<decltype(m_rec.Price)>();
-         m_rec.Valuation         = row[to_underlying(Prop::Valuation)].get<decltype(m_rec.Valuation)>();
          m_rec.Country           = row[to_underlying(Prop::Country)].get<decltype(m_rec.Country)>();
          m_rec.Region            = row[to_underlying(Prop::Region)].get<decltype(m_rec.Region)>();
          m_rec.SubRegion         = row[to_underlying(Prop::SubRegion)].get<decltype(m_rec.SubRegion)>();
@@ -41,16 +54,10 @@ namespace ctb::data
          m_rec.BeginConsume      = row[to_underlying(Prop::BeginConsume)].get<decltype(m_rec.BeginConsume)>();
          m_rec.EndConsume        = row[to_underlying(Prop::EndConsume)].get<decltype(m_rec.EndConsume)>();
 
-         long double val{};
-         if (row[to_underlying(Prop::CTScore)].try_parse_decimal(val))
-            m_rec.CTScore = static_cast<double>(val);
-         else
-            m_rec.CTScore = 0;
-
-         if (row[to_underlying(Prop::MYScore)].try_parse_decimal(val))
-            m_rec.MYScore = static_cast<double>(val);
-         else
-            m_rec.MYScore = 0;
+         m_rec.Price             = parseDouble(row[to_underlying(Prop::Price)]);
+         m_rec.Valuation         = parseDouble(row[to_underlying(Prop::Valuation)]);
+         m_rec.CTScore           = parseDouble(row[to_underlying(Prop::CTScore)]);
+         m_rec.MYScore           = parseDouble(row[to_underlying(Prop::MYScore)]);
 
          return true;
       }
