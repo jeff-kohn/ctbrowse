@@ -1,15 +1,12 @@
 
-
 create_windows_target(ctbrowse_win)
 
 target_sources(ctbrowse_win
    PRIVATE
      "App.cpp"
      "App.h"
-     "generated/MainFrameBase.cpp"
-     "generated/MainFrameBase.h"
-     "generated/TableSyncDlgBase.cpp"
-     "generated/TableSyncDlgBase.h"
+     "dialogs/TableSyncDialog.cpp"
+     "dialogs/TableSyncDialog.h"
      "grids/CellarTrackerGrid.cpp"
      "grids/CellarTrackerGrid.h"
      "grids/GridTableBase.h"
@@ -19,8 +16,8 @@ target_sources(ctbrowse_win
      "grids/GridTableWineList.cpp"
      "MainFrame.cpp"
      "MainFrame.h"
-     "TableSyncDialog.cpp"
-     "TableSyncDialog.h"
+     "panels/GridToolsPanel.cpp"
+     "panels/GridToolsPanel.h"
      "wx_helpers.h"
      "utf8.manifest"
 )

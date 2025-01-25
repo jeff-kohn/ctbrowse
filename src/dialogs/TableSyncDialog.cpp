@@ -7,12 +7,16 @@
  *********************************************************************/
 
 #include "App.h"
-#include "TableSyncDialog.h"
+#include "dialogs/TableSyncDialog.h"
 #include "wx_helpers.h"
 
-//#include "ctb/data/table_download.h"
-
 #include <magic_enum/magic_enum.hpp>
+
+#include <wx/button.h>
+#include <wx/sizer.h>
+#include <wx/stattext.h>
+#include <wx/valgen.h>
+
 #include <algorithm>
 #include <sstream>
 
@@ -22,7 +26,8 @@ namespace ctb
 
    inline constexpr auto ENUM_DELIMETER = ';';
 
-   namespace {
+   namespace 
+   {
 
       /// @brief serialize a range of integer values to a delimited string
       template<rng::input_range Rng, typename I = rng::range_value_t<Rng> >
@@ -62,8 +67,10 @@ namespace ctb
    bool TableSyncDialog::Create(wxWindow* parent)
    {
       // give base class a chance set up controls etc
-      if (!TableSyncDlgBase::Create(parent))
+      if (!wxDialog::Create(parent, wxID_ANY, constants::TITLE_DOWNLOAD_DATA))
          return false;
+
+      createImpl();
 
       // message handlers
       Bind(wxEVT_UPDATE_UI, &TableSyncDialog::onOkUpdateUI, this, wxID_OK);
@@ -131,6 +138,7 @@ namespace ctb
       EndDialog(wxID_OK);
    }
 
+
    void TableSyncDialog::onDeselectAll(wxCommandEvent& event)
    {
       for (auto idx = 0u; idx < m_table_selection_ctrl->GetCount(); ++idx)
@@ -168,5 +176,62 @@ namespace ctb
       event.Enable(checkedTableCount());
    }
 
+
+   void TableSyncDialog::createImpl()
+   {
+      auto* dlg_sizer = new wxBoxSizer(wxVERTICAL);
+
+      auto* box_sizer2 = new wxBoxSizer(wxHORIZONTAL);
+
+      auto* box_sizer3 = new wxBoxSizer(wxVERTICAL);
+
+      auto* static_text2 = new wxStaticText(this, wxID_ANY, "&Tables to Download:");
+      box_sizer3->Add(static_text2,
+         wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
+
+      m_table_selection_ctrl = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, nullptr,
+         wxLB_EXTENDED);
+      m_table_selection_ctrl->SetValidator(wxGenericValidator(&m_table_selection_val));
+      m_table_selection_ctrl->SetMinSize(ConvertDialogToPixels(wxSize(112, 112)));
+      box_sizer3->Add(m_table_selection_ctrl,
+         wxSizerFlags().Border(wxLEFT|wxTOP|wxBOTTOM, wxSizerFlags::GetDefaultBorder()));
+
+      m_startup_sync_ctrl = new wxCheckBox(this, wxID_ANY, "Sync on &Program Startup");
+      m_startup_sync_ctrl->SetValidator(wxGenericValidator(&m_startup_sync_val));
+      box_sizer3->Add(m_startup_sync_ctrl, wxSizerFlags().Border(wxALL));
+
+      m_save_default_ctrl = new wxCheckBox(this, wxID_ANY, "Save as &Default");
+      m_save_default_ctrl->SetValidator(wxGenericValidator(&m_save_default_val));
+      box_sizer3->Add(m_save_default_ctrl, wxSizerFlags().Border(wxALL));
+
+      box_sizer2->Add(box_sizer3, wxSizerFlags().Border(wxALL));
+
+      auto* box_sizer = new wxBoxSizer(wxVERTICAL);
+
+      box_sizer->AddSpacer(20);
+
+      auto* m_btn_select_all = new wxButton(this, wxID_ANY, "Select &All");
+      box_sizer->Add(m_btn_select_all, wxSizerFlags().Expand().Border(wxTOP, wxSizerFlags::GetDefaultBorder()));
+
+      auto* btn_deselect_all = new wxButton(this, wxID_ANY, "&Deselect All");
+      box_sizer->Add(btn_deselect_all, wxSizerFlags().Border(wxTOP|wxBOTTOM, FromDIP(wxSize(4, -1)).x));
+
+      box_sizer2->Add(box_sizer, wxSizerFlags().Border(wxALL));
+
+      dlg_sizer->Add(box_sizer2, wxSizerFlags().Expand().Border(wxALL));
+
+      auto* std_buttons = CreateStdDialogButtonSizer(wxOK|wxCANCEL);
+      dlg_sizer->Add(CreateSeparatedSizer(std_buttons), wxSizerFlags().Expand().Border(wxALL));
+
+      SetSizerAndFit(dlg_sizer);
+      Centre(wxBOTH);
+
+      // Event handlers
+      btn_deselect_all->Bind(wxEVT_BUTTON, &TableSyncDialog::onDeselectAll, this);
+      m_btn_select_all->Bind(wxEVT_BUTTON, &TableSyncDialog::onSelectAll, this);
+      btn_deselect_all->Bind(wxEVT_UPDATE_UI, &TableSyncDialog::onDeselectAllUpdateUI, this);
+      m_btn_select_all->Bind(wxEVT_UPDATE_UI, &TableSyncDialog::onSelectAllUpdateUI, this);
+
+   }
 
 }  // namespace ctb

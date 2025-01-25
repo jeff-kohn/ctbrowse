@@ -8,7 +8,7 @@
 
 #include "MainFrame.h"
 #include "App.h"
-#include "TableSyncDialog.h"
+#include "dialogs/TableSyncDialog.h"
 #include "wx_helpers.h"
 #include "grids/GridTableWineList.h"
 
@@ -17,9 +17,15 @@
 #include "ctb/winapi_util.h"
 #include "external/HttpStatusCodes.h"
 
+#include <wx/artprov.h>
+#include <wx/bitmap.h>
+#include <wx/icon.h>
+#include <wx/image.h>
 #include <wx/msgdlg.h>
+#include <wx/panel.h>
 #include <wx/progdlg.h>
-
+#include <wx/sizer.h>
+#include <wx/stockitem.h>
 
 namespace ctb
 {
@@ -39,15 +45,14 @@ namespace ctb
    bool MainFrame::Create(wxWindow* parent)
    {
       // give base class a chance set up controls etc
-      if (!MainFrameBase::Create(parent))
+      if (!wxFrame::Create(parent, wxID_ANY, ""))
          return false;
 
       SetTitle(constants::APP_NAME_LONG);
 
       m_grid = new CellarTrackerGrid{ this };
-      m_grid->Refresh();
-
-      Bind(wxEVT_MENU, &MainFrame::onQuit, this, wxID_EXIT);
+      m_grid_tools_panel = new GridToolsPanel{ this };
+      createImpl();
 
       Centre(wxBOTH);
 
@@ -160,12 +165,58 @@ namespace ctb
       }
    }
 
+
    void MainFrame::onQuit([[maybe_unused]] wxCommandEvent& event)
    {
       Close(true);
    }
 
+   
+   void MainFrame::createImpl()
+   {
+      m_tool_bar = CreateToolBar();
+      m_tool_bar->Realize();
 
+      m_menu_bar = new wxMenuBar();
+
+      auto* menu_file = new wxMenu();
+      auto* menu_sync_data = new wxMenuItem(menu_file, wxID_ANY, "&Sync Data...",
+         "Download data from CellarTracker", wxITEM_NORMAL);
+      menu_file->Append(menu_sync_data);
+      menu_file->AppendSeparator();
+      auto* menu_preferences = new wxMenuItem(menu_file, wxID_ANY, "&Preferences", "Configure App Preferences",
+         wxITEM_NORMAL);
+      menu_file->Append(menu_preferences);
+      menu_file->AppendSeparator();
+      auto* menu_quit = new wxMenuItem(menu_file, wxID_EXIT);
+      menu_quit->SetBitmap(wxArtProvider::GetBitmapBundle(wxART_QUIT, wxART_MENU));
+
+      menu_file->Append(menu_quit);
+      m_menu_bar->Append(menu_file, wxGetStockLabel(wxID_FILE));
+
+      auto* menu_views = new wxMenu();
+      auto* menu_item = new wxMenuItem(menu_views, wxID_ANY, "&Wine List\tCTRL+W");
+      menu_views->Append(menu_item);
+      m_menu_bar->Append(menu_views, "&Data");
+
+      SetMenuBar(m_menu_bar);
+
+      m_status_bar = CreateStatusBar();
+
+      m_main_sizer = new wxBoxSizer(wxHORIZONTAL);
+
+      m_grid_tools_panel->SetMinSize(ConvertDialogToPixels(wxSize(100, -1)));
+      m_main_sizer->Add(m_grid_tools_panel, wxSizerFlags(2).Expand().Border(wxALL));
+      m_main_sizer->Add(m_grid, wxSizerFlags(5).Border(wxALL));
+      SetSizerAndFit(m_main_sizer);
+
+      Centre(wxBOTH);
+
+      Bind(wxEVT_MENU, &MainFrame::onMenuPreferences, this, menu_preferences->GetId());
+      Bind(wxEVT_MENU, &MainFrame::onMenuSyncData, this, menu_sync_data->GetId());
+      Bind(wxEVT_MENU, &MainFrame::onMenuWineList, this, menu_item->GetId());
+      Bind(wxEVT_MENU, &MainFrame::onQuit, this, wxID_EXIT);
+   }
 
 
 } // namespace ctb

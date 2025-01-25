@@ -7,14 +7,13 @@
  *********************************************************************/
 #pragma once
 
-#include "generated/TableSyncDlgBase.h"
 #include "ctb/data/table_data.h"
 
 #include <vector>
 
 namespace ctb
 {
-   class TableSyncDialog : public TableSyncDlgBase
+   class TableSyncDialog final : public wxDialog
    {
    public:
       /// @brief  ctor for two-phase window creation, requires manually calling Create()
@@ -34,9 +33,8 @@ namespace ctb
       template <rng::input_range Rng>
       void selectTables(Rng&& values) requires std::is_same_v<rng::range_value_t<Rng>, data::TableId>
       {
-         m_table_selection_val = 
-            values | vws::transform([] (data::TableId tbl) { return magic_enum::enum_index(tbl); })
-                   | rng::to<wxArrayString>();
+         m_table_selection_val = values | vws::transform([] (data::TableId tbl) { return magic_enum::enum_index(tbl); })
+                                        | rng::to<wxArrayString>();
       }
 
 
@@ -53,12 +51,20 @@ namespace ctb
 
 
    protected:
+      bool           m_save_default_val{ false };
+      bool           m_startup_sync_val{ false };
+      wxCheckBox*    m_save_default_ctrl{};  
+      wxCheckBox*    m_startup_sync_ctrl{};  
+      wxArrayInt     m_table_selection_val{};
+      wxCheckListBox* m_table_selection_ctrl;
+
       void onOkUpdateUI(wxUpdateUIEvent& event);
       void onOkClicked(wxCommandEvent& event);
-      void onDeselectAll(wxCommandEvent& event) override;
-      void onDeselectAllUpdateUI(wxUpdateUIEvent& event) override;
-      void onSelectAll(wxCommandEvent& event) override;
-      void onSelectAllUpdateUI(wxUpdateUIEvent& event) override;
+      void onDeselectAll(wxCommandEvent& event);
+      void onDeselectAllUpdateUI(wxUpdateUIEvent& event);
+      void onSelectAll(wxCommandEvent& event);
+      void onSelectAllUpdateUI(wxUpdateUIEvent& event);
+      void createImpl();
 
       unsigned int checkedTableCount() const
       {

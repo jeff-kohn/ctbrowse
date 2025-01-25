@@ -7,15 +7,24 @@
  *********************************************************************/
 #pragma once
 
-#include "generated/MainFrameBase.h"
 #include "grids/CellarTrackerGrid.h"
+#include "panels/GridToolsPanel.h"
+
+#include <wx/event.h>
+#include <wx/frame.h>
+#include <wx/gdicmn.h>
+#include <wx/grid.h>
+#include <wx/menu.h>
+#include <wx/sizer.h>
+#include <wx/statusbr.h>
+#include <wx/toolbar.h>
 
 #include <format>
 
 
 namespace ctb
 {
-   class MainFrame : public MainFrameBase
+   class MainFrame final : public wxFrame
    {
    public:
       /// @brief default constructor for 2-phase initialization, must call Create(parent)
@@ -39,13 +48,20 @@ namespace ctb
          SetStatusText(std::format(fmt_str, std::forward<Args>(args)...));
       }
 
-   private:
-      void onMenuPreferences(wxCommandEvent&) override;
-      void onMenuSyncData(wxCommandEvent&) override;
-      void onMenuWineList(wxCommandEvent&) override;
-      void onQuit(wxCommandEvent& );
 
-      CellarTrackerGrid* m_grid{ nullptr };
+   private:
+      CellarTrackerGrid*   m_grid{};
+      wxBoxSizer*          m_main_sizer{};
+      wxMenuBar*           m_menu_bar{};
+      GridToolsPanel*      m_grid_tools_panel{};
+      wxStatusBar*         m_status_bar{};
+      wxToolBar*           m_tool_bar{};
+
+      void onMenuPreferences(wxCommandEvent&);
+      void onMenuSyncData(wxCommandEvent&);
+      void onMenuWineList(wxCommandEvent&);
+      void onQuit(wxCommandEvent&);
+      void createImpl();
    };
 
 

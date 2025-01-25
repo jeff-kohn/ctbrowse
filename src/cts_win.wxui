@@ -5,7 +5,7 @@
     class="Project"
     base_directory="generated"
     cmake_varname="wxui_generated"
-    name_space="cts"
+    name_space="ctb"
     wxWidgets_version="3.2">
     <node
       class="wxDialog"
@@ -63,15 +63,16 @@
               class="wxButton"
               class_access="none"
               label="Select &amp;All"
-              var_name="btn"
+              var_name="m_btn_select_all"
               borders="wxTOP"
               flags="wxEXPAND"
               wxEVT_BUTTON="onSelectAll"
               wxEVT_UPDATE_UI="onSelectAllUpdateUI" />
             <node
               class="wxButton"
+              class_access="none"
               label="&amp;Deselect All"
-              var_name="m_btn2"
+              var_name="btn_deselect_all"
               border_size="4"
               borders="wxTOP|wxBOTTOM"
               wxEVT_BUTTON="onDeselectAll"
@@ -80,8 +81,7 @@
         </node>
         <node
           class="wxStdDialogButtonSizer"
-          class_access="protected:"
-          var_name="m_std_buttons"
+          var_name="std_buttons"
           flags="wxEXPAND" />
       </node>
     </node>
@@ -93,9 +93,11 @@
       derived_class_name="MainFrame"
       derived_file="MainFrame">
       <node
-        class="wxToolBar" />
+        class="wxToolBar"
+        var_name="m_tool_bar" />
       <node
-        class="wxMenuBar">
+        class="wxMenuBar"
+        var_name="m_menu_bar">
         <node
           class="wxMenu"
           class_access="none"
@@ -143,7 +145,68 @@
         </node>
       </node>
       <node
-        class="wxStatusBar" />
+        class="wxStatusBar"
+        var_name="m_status_bar" />
+      <node
+        class="wxBoxSizer"
+        class_access="protected:"
+        var_name="m_main_sizer">
+        <node
+          class="wxPanel"
+          class_access="protected:"
+          var_name="m_grid_tools_panel"
+          minimum_size="100,-1d"
+          window_style="wxTAB_TRAVERSAL"
+          flags="wxEXPAND"
+          proportion="2" />
+        <node
+          class="wxGrid"
+          proportion="5" />
+      </node>
+    </node>
+    <node
+      class="PanelForm"
+      class_name="SearchFilterPanelBase"
+      mockup_size="200,200d"
+      base_file="SearchFilterPanelBase"
+      derived_class_name="SearchAndFilterPanel"
+      derived_file="searchandfilterpanel_derived">
+      <node
+        class="wxBoxSizer"
+        orientation="wxVERTICAL"
+        var_name="panel_sizer"
+        flags="wxEXPAND">
+        <node
+          class="wxStaticText"
+          class_access="none"
+          label="&amp;Search:"
+          var_name="static_text"
+          borders="wxTOP|wxRIGHT|wxLEFT" />
+        <node
+          class="wxBoxSizer"
+          var_name="box_sizer2"
+          borders=""
+          flags="wxEXPAND">
+          <node
+            class="wxTextCtrl"
+            var_name="m_search_ctrl"
+            validator_variable="m_search_value"
+            alignment="wxALIGN_BOTTOM"
+            borders="wxBOTTOM|wxLEFT"
+            flags="wxEXPAND"
+            proportion="2"
+            wxEVT_TEXT="onSearchTextChanged" />
+          <node
+            class="wxButton"
+            class_access="none"
+            label="X"
+            var_name="clear_search_btn"
+            maximum_size="10,-1d"
+            alignment="wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL"
+            borders="wxTOP|wxBOTTOM|wxRIGHT"
+            wxEVT_BUTTON="onClearSearchClicked" />
+        </node>
+      </node>
     </node>
   </node>
 </wxUiEditorData>

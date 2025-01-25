@@ -77,6 +77,10 @@ namespace ctb::constants
    inline constexpr const char* LBL_MY_SCORE                      = "My Score";
    inline constexpr const char* LBL_MY_PRICE                      = "My Price";
    inline constexpr const char* LBL_DRINK_BY                      = "Drink By";
+   inline constexpr const char* LBL_SEARCH                        = "&Search";
+
+   inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
+
 
 
 
