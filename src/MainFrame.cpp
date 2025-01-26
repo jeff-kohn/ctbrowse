@@ -50,10 +50,11 @@ namespace ctb
 
       SetTitle(constants::APP_NAME_LONG);
 
-      m_grid = new CellarTrackerGrid{ this };
-      m_grid_tools_panel = new GridToolsPanel{ this };
+      m_splitter = new wxSplitterWindow{ this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D };
+      m_grid = new CellarTrackerGrid{ m_splitter };
+      m_grid_tools_panel = new GridToolsPanel{ m_splitter };
       createImpl();
-
+      m_grid->ForceRefresh();
       Centre(wxBOTH);
 
       return true;
@@ -203,20 +204,20 @@ namespace ctb
 
       m_status_bar = CreateStatusBar();
 
-      m_main_sizer = new wxBoxSizer(wxHORIZONTAL);
-
-      m_grid_tools_panel->SetMinSize(ConvertDialogToPixels(wxSize(100, -1)));
-      m_main_sizer->Add(m_grid_tools_panel, wxSizerFlags(2).Expand().Border(wxALL));
-      m_main_sizer->Add(m_grid, wxSizerFlags(5).Border(wxALL));
-      SetSizerAndFit(m_main_sizer);
+      m_splitter->SetSashGravity(0.0);
+      m_splitter->SetMinimumPaneSize(150);
+      m_splitter->SplitVertically(m_grid_tools_panel, m_grid);
+      m_splitter->SetSashPosition(50);
 
       Centre(wxBOTH);
 
+      Centre(wxBOTH);
+
+
+      // Event handlers
       Bind(wxEVT_MENU, &MainFrame::onMenuPreferences, this, menu_preferences->GetId());
       Bind(wxEVT_MENU, &MainFrame::onMenuSyncData, this, menu_sync_data->GetId());
       Bind(wxEVT_MENU, &MainFrame::onMenuWineList, this, menu_item->GetId());
-      Bind(wxEVT_MENU, &MainFrame::onQuit, this, wxID_EXIT);
    }
-
 
 } // namespace ctb

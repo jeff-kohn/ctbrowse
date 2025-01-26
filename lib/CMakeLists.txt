@@ -15,9 +15,9 @@ target_sources(ctb_lib
       "../include/ctb/winapi_util.h"
 
    PRIVATE
-      "data/table_download.cpp"
-      "data/WineList.cpp"
       "CredentialWrapper.cpp"
+      "data/table_download.cpp"
+      "data/WineListEntry.cpp"
       "winapi_util.cpp"
 )
 

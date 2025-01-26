@@ -41,18 +41,17 @@ namespace ctb
    // we can also change the type for certain members (just have to create them before calling this)
    void GridToolsPanel::createImpl()
    {
+      SetMaxSize(ConvertDialogToPixels(wxSize(-1, 150)));
       auto* panel_sizer = new wxBoxSizer(wxVERTICAL);
 
       auto* static_text = new wxStaticText(this, wxID_ANY, "&Search:");
-      panel_sizer->Add(static_text,
-         wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
+      panel_sizer->Add(static_text, wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP, FromDIP(wxSize(6, -1)).x));
 
       auto* box_sizer2 = new wxBoxSizer(wxHORIZONTAL);
 
       m_search_ctrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString);
       m_search_ctrl->SetValidator(wxTextValidator(wxFILTER_NONE, &m_search_value));
-      box_sizer2->Add(m_search_ctrl,
-         wxSizerFlags(2).Bottom().Expand().Border(wxLEFT|wxBOTTOM, wxSizerFlags::GetDefaultBorder()));
+      box_sizer2->Add(m_search_ctrl, wxSizerFlags(2).Expand().Border(wxALL));
 
       auto* clear_search_btn = new wxButton(this, wxID_ANY, "X");
       clear_search_btn->SetMaxSize(ConvertDialogToPixels(wxSize(10, -1)));
@@ -61,10 +60,14 @@ namespace ctb
 
       panel_sizer->Add(box_sizer2, wxSizerFlags().Expand());
 
-      SetSizerAndFit(panel_sizer);
+      SetSizer(panel_sizer);
+      Fit();
 
+
+      // Event handlers
       clear_search_btn->Bind(wxEVT_BUTTON, &GridToolsPanel::onClearSearchClicked, this);
       m_search_ctrl->Bind(wxEVT_TEXT, &GridToolsPanel::onSearchTextChanged, this);
+
    }
 
 }

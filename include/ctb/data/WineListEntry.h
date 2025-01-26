@@ -8,6 +8,7 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include "ctb/data/table_data.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4365 4464 4702)
@@ -27,8 +28,7 @@
 
 namespace ctb::data
 {
-   /// @brief some fields with numeric values may not actually have a value
-   using NullableDouble = std::optional<double>;
+
 
    namespace detail
    {
@@ -39,8 +39,8 @@ namespace ctb::data
          std::string WineName{};
          std::string Locale{};
          uint16_t Vintage{};
-         uint16_t Quantity{};
-         uint16_t Pending{};
+         NullableShort Quantity{};
+         NullableShort Pending{};
          std::string Size{};
          NullableDouble Price{};
          NullableDouble Valuation{};
@@ -55,8 +55,8 @@ namespace ctb::data
          std::string MasterVarietal{};
          NullableDouble CTScore{};
          NullableDouble MYScore{};
-         uint16_t BeginConsume{};
-         uint16_t EndConsume{};
+         NullableShort BeginConsume{};
+         NullableShort EndConsume{};
       };
 
    } // namespace detail 
@@ -66,6 +66,9 @@ namespace ctb::data
    ///
    /// currently the class only support parsing from CSV. Other formats could be supported
    /// in the future with additional parse() methods.
+   /// 
+   /// all string properties are returned as string_view for performance, which means such
+   /// objects are only valid for the lifetime of this object.
    /// 
    class WineListEntry
    {
@@ -119,7 +122,7 @@ namespace ctb::data
 
 
       /// @brief variant that can hold any of our supported field types.
-      using ValueWrapper = std::variant<uint16_t, uint64_t, NullableDouble, std::string_view, std::string>;
+      using ValueWrapper = std::variant<uint16_t, uint64_t, NullableDouble, std::string_view>;
 
 
       /// @brief used to return a field value or an error
@@ -154,8 +157,8 @@ namespace ctb::data
       std::string_view wineName() const        { return m_rec.WineName;         }
       std::string_view locale() const          { return m_rec.Locale;           }
       uint16_t vintage() const                 { return m_rec.Vintage;          }
-      uint16_t qtyAvailable() const            { return m_rec.Quantity;         }
-      uint16_t qtyPending() const              { return m_rec.Pending;          }
+      NullableShort qtyAvailable() const       { return m_rec.Quantity;         }
+      NullableShort qtyPending() const         { return m_rec.Pending;          }
       std::string_view size() const            { return m_rec.Size;             }
       NullableDouble price() const             { return m_rec.Price;            }
       NullableDouble valuation() const         { return m_rec.Valuation;        }
@@ -170,16 +173,12 @@ namespace ctb::data
       std::string_view masterVarietal() const  { return m_rec.MasterVarietal;   }
       NullableDouble ctScore() const           { return m_rec.CTScore;          }
       NullableDouble myScore() const           { return m_rec.MYScore;          }
-      uint16_t beginConsume() const            { return m_rec.BeginConsume;     }
-      uint16_t endConsume() const              { return m_rec.EndConsume;       }
+      NullableShort beginConsume() const       { return m_rec.BeginConsume;     }
+      NullableShort endConsume() const         { return m_rec.EndConsume;       }
       
 
       /// @brief calculated field to show vintage and wine name as a single value
-      std::string wineAndVintage() const
-      {
-         std::string val = std::format("{} {}", vintage(), wineName());
-         return val;
-      }
+      std::string_view wineAndVintage() const  { return m_wine_and_vintage;     }
 
 
       /// @brief parses data from a row in the CSV file to this object.
@@ -190,6 +189,7 @@ namespace ctb::data
 
    private:
       detail::WineListRec m_rec{};
+      std::string m_wine_and_vintage{}; //
    };
 
    using WineListData = std::deque<WineListEntry>;

@@ -19,6 +19,35 @@ namespace ctb::data
       return std::nullopt;
    }
 
+   /// @brief parse a field that may contain a null value
+   ///
+   /// if value_as_null.has_value(), then a parsed value matching 
+   /// value_as_null.value() will be treated as null and std::nullopt will be returned
+   /// instead of the parsed value. Allows treating special values as null
+   template<typename T>
+   std::optional<T> parseOptional(csv::CSVField&& fld, std::optional<T> value_as_null = std::nullopt)
+   {
+      std::optional<T> retval{};
+
+      if (fld.get_sv().length())
+      {
+         auto parsed_val = fld.get<T>();
+         if (value_as_null)
+         {
+            if (parsed_val != *value_as_null)
+            {
+
+               retval = parsed_val;
+            }
+         }
+         else 
+         {
+            retval = parsed_val;
+         }
+      }
+      return retval;
+   }
+
 
    WineListEntry::WineListEntry(const csv::CSVRow& row) 
    {
@@ -39,8 +68,6 @@ namespace ctb::data
          m_rec.WineName          = row[to_underlying(Prop::WineName)].get<decltype(m_rec.WineName)>();
          m_rec.Locale            = row[to_underlying(Prop::Locale)].get<decltype(m_rec.Locale)>();
          m_rec.Vintage           = row[to_underlying(Prop::Vintage)].get<decltype(m_rec.Vintage)>();
-         m_rec.Quantity          = row[to_underlying(Prop::Quantity)].get<decltype(m_rec.Quantity)>();
-         m_rec.Pending           = row[to_underlying(Prop::Pending)].get<decltype(m_rec.Pending)>();
          m_rec.Size              = row[to_underlying(Prop::Size)].get<decltype(m_rec.Size)>();
          m_rec.Country           = row[to_underlying(Prop::Country)].get<decltype(m_rec.Country)>();
          m_rec.Region            = row[to_underlying(Prop::Region)].get<decltype(m_rec.Region)>();
@@ -51,14 +78,19 @@ namespace ctb::data
          m_rec.Color             = row[to_underlying(Prop::Color)].get<decltype(m_rec.Color)>();
          m_rec.Category          = row[to_underlying(Prop::Category)].get<decltype(m_rec.Category)>();
          m_rec.MasterVarietal    = row[to_underlying(Prop::MasterVarietal)].get<decltype(m_rec.MasterVarietal)>();
-         m_rec.BeginConsume      = row[to_underlying(Prop::BeginConsume)].get<decltype(m_rec.BeginConsume)>();
-         m_rec.EndConsume        = row[to_underlying(Prop::EndConsume)].get<decltype(m_rec.EndConsume)>();
+
+         m_rec.Quantity          = parseOptional<uint16_t>(row[to_underlying(Prop::Quantity)], 0);
+         m_rec.Pending           = parseOptional<uint16_t>(row[to_underlying(Prop::Pending)], 0);
+         m_rec.BeginConsume      = parseOptional<uint16_t>(row[to_underlying(Prop::BeginConsume)], 9999);
+         m_rec.EndConsume        = parseOptional<uint16_t>(row[to_underlying(Prop::EndConsume)], 9999);
 
          m_rec.Price             = parseDouble(row[to_underlying(Prop::Price)]);
          m_rec.Valuation         = parseDouble(row[to_underlying(Prop::Valuation)]);
          m_rec.CTScore           = parseDouble(row[to_underlying(Prop::CTScore)]);
          m_rec.MYScore           = parseDouble(row[to_underlying(Prop::MYScore)]);
 
+         // calculated field but we store it's value for perf reason.
+         m_wine_and_vintage      = std::format("{} {}", vintage(), wineName());
          return true;
       }
       catch ([[maybe_unused]] std::exception& e)

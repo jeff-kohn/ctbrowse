@@ -13,7 +13,8 @@
       title="Download Table Data"
       base_file="TableSyncDlgBase"
       derived_class_name="TableSyncDialog"
-      derived_file="TableSyncDialog">
+      derived_file="TableSyncDialog"
+      use_derived_class="0">
       <node
         class="wxBoxSizer"
         orientation="wxVERTICAL"
@@ -91,7 +92,8 @@
       base_file="MainFrameBase"
       system_src_includes="wx/stockitem.h"
       derived_class_name="MainFrame"
-      derived_file="MainFrame">
+      derived_file="MainFrame"
+      use_derived_class="0">
       <node
         class="wxToolBar"
         var_name="m_tool_bar" />
@@ -148,29 +150,35 @@
         class="wxStatusBar"
         var_name="m_status_bar" />
       <node
-        class="wxBoxSizer"
-        class_access="protected:"
-        var_name="m_main_sizer">
+        class="wxSplitterWindow"
+        sashpos="50"
+        flags="wxEXPAND">
         <node
           class="wxPanel"
           class_access="protected:"
           var_name="m_grid_tools_panel"
-          minimum_size="100,-1d"
+          maximum_size="-1,-1d"
+          minimum_size="-1,-1d"
           window_style="wxTAB_TRAVERSAL"
-          flags="wxEXPAND"
+          borders=""
           proportion="2" />
         <node
           class="wxGrid"
+          minimum_size="-1,250d"
+          borders=""
+          flags="wxEXPAND"
           proportion="5" />
       </node>
     </node>
     <node
       class="PanelForm"
       class_name="SearchFilterPanelBase"
+      maximum_size="-1,150d"
       mockup_size="200,200d"
       base_file="SearchFilterPanelBase"
       derived_class_name="SearchAndFilterPanel"
-      derived_file="searchandfilterpanel_derived">
+      derived_file="searchandfilterpanel_derived"
+      use_derived_class="0">
       <node
         class="wxBoxSizer"
         orientation="wxVERTICAL"
@@ -181,18 +189,19 @@
           class_access="none"
           label="&amp;Search:"
           var_name="static_text"
+          border_size="6"
           borders="wxTOP|wxRIGHT|wxLEFT" />
         <node
           class="wxBoxSizer"
           var_name="box_sizer2"
           borders=""
-          flags="wxEXPAND">
+          flags="wxEXPAND"
+          scale_border_size="0">
           <node
             class="wxTextCtrl"
             var_name="m_search_ctrl"
             validator_variable="m_search_value"
             alignment="wxALIGN_BOTTOM"
-            borders="wxBOTTOM|wxLEFT"
             flags="wxEXPAND"
             proportion="2"
             wxEVT_TEXT="onSearchTextChanged" />
@@ -202,7 +211,7 @@
             label="X"
             var_name="clear_search_btn"
             maximum_size="10,-1d"
-            alignment="wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL"
+            alignment="wxALIGN_CENTER_HORIZONTAL"
             borders="wxTOP|wxBOTTOM|wxRIGHT"
             wxEVT_BUTTON="onClearSearchClicked" />
         </node>

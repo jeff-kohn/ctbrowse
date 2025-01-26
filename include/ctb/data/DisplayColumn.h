@@ -13,25 +13,11 @@
 #include <magic_enum/magic_enum.hpp>
 #include <wx/defs.h>
 
+#include <variant>
 
-namespace ctb
+namespace ctb::data
 {
    using magic_enum::enum_name;
-
-
-   /// @brief concept for a table entry object representing a row in a CT table
-   template <typename T> 
-   concept TableEntry = requires (
-      T t, 
-      typename T::Prop p, 
-      typename T::ValueResult v,
-      typename T::RowType r)
-   {
-      v = t.getProperty(p);
-      v = t[0];
-      t.parse(r);
-   };
-
 
    /// @brief struct containing everything needed to know about how to display a grid column
    template<TableEntry TE>
@@ -41,6 +27,7 @@ namespace ctb
       using Prop         = TE::Prop;
       using ValueWrapper = TE::ValueWrapper;
       using NullableDouble = ctb::data::NullableDouble;
+      using NullableShort  = ctb::data::NullableShort;
       
 
       /// @brief enum to specify the alignment for column headers and cell text
@@ -108,10 +95,11 @@ namespace ctb
          // this functor turns our field values into strings that can be displayed. 
          // Note, we need both the string and string_view overloads 
          auto FieldToStr = Overloaded{
-            [this](const std::string& val) { return std::format("{}", val); },
-            [this](std::string_view val)   { return std::format("{}", val); },
-            [this](uint64_t val)           { return std::format("{}", val); },
-            [this](uint16_t val)           { return std::format("{}", val); },
+            [](const std::string& val) { return std::format("{}", val); },
+            [](std::string_view val)   { return std::format("{}", val); },
+            [](uint64_t val)           { return std::format("{}", val); },
+            [](uint16_t val)           { return std::format("{}", val); },
+            [](NullableShort val)      { return val.has_value() ? std::format("{}", val.value()) : ""; },
             [this](NullableDouble val)
             { 
                if (val)
@@ -142,4 +130,4 @@ namespace ctb
    };
 
 
-} // namespace ctb
+} // namespace ctb::data

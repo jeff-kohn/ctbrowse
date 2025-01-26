@@ -7,10 +7,9 @@
  *******************************************************************/
 #pragma once
 
-#include "ctb/data/table_data.h"
+#include "ctb/data/DisplayColumn.h"
 #include "ctb/data/WineListEntry.h"
 #include "grids/GridTableBase.h"
-#include "grids/DisplayColumn.h"
 
 #include <magic_enum/magic_enum.hpp>
 #include <wx/grid.h>
@@ -25,7 +24,7 @@ namespace ctb
    {
    public:
       /// @brief type used for describing how to display a column in the grid
-      using DisplayColumn = DisplayColumn<data::WineListEntry>;
+      using DisplayColumn = data::DisplayColumn<data::WineListEntry>;
 
       explicit GridTableWineList(data::WineListData&& data) : 
          m_data{std::move(data)},

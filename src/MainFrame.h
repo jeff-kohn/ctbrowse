@@ -16,6 +16,7 @@
 #include <wx/grid.h>
 #include <wx/menu.h>
 #include <wx/sizer.h>
+#include <wx/splitter.h>
 #include <wx/statusbr.h>
 #include <wx/toolbar.h>
 
@@ -54,6 +55,7 @@ namespace ctb
       wxBoxSizer*          m_main_sizer{};
       wxMenuBar*           m_menu_bar{};
       GridToolsPanel*      m_grid_tools_panel{};
+      wxSplitterWindow*    m_splitter{};
       wxStatusBar*         m_status_bar{};
       wxToolBar*           m_tool_bar{};
 

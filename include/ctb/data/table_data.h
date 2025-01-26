@@ -32,6 +32,11 @@ namespace ctb::data
 {
    namespace fs = std::filesystem;
 
+   /// @brief some fields with numeric values may not actually have a value
+   using NullableDouble = std::optional<double>;
+   using NullableShort = std::optional<uint16_t>;
+
+
    /// @brief enum for the data tables available from CT website
    enum class TableId
    {

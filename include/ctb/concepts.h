@@ -21,4 +21,18 @@ namespace ctb
    concept StringViewCompatible = std::convertible_to<T, std::string_view>;
 
 
+   
+
+   /// @brief concept for a table entry object representing a row in a CT table
+   template <typename T> 
+   concept TableEntry = requires (
+      T t, 
+      typename T::Prop p, 
+      typename T::ValueResult v,
+      typename T::RowType r)
+   {
+      v = t.getProperty(p);
+      v = t[0];
+      t.parse(r);
+   };
 } // namespace ctb
