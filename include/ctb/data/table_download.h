@@ -41,9 +41,9 @@ namespace ctb::data
    /// @param cred         the username/password to use for the download
    /// @param tbl          the table to retrieve
    /// @param fmt          the data format to return
-   /// @param callback_ptr optional callback to receive progress updates
+   /// @param callback optional callback to receive progress updates
    /// @return             expected/successful value is the requested table data, unexpected/error value is HTTP status code
    [[nodiscard]] DownloadResult downloadRawTableData(const CredentialWrapper::Credential& cred, TableId table, 
-                                                     DataFormatId format, ProgressCallback* callback_ptr = nullptr);
+                                                     DataFormatId format, ProgressCallback* callback = nullptr);
 
 } // namespace ctb::data

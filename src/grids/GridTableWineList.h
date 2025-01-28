@@ -8,7 +8,7 @@
 #pragma once
 
 #include "ctb/data/DisplayColumn.h"
-#include "ctb/data/SubstringFilter.h"
+#include "ctb/data/SubStringFilter.h"
 #include "ctb/data/WineListEntry.h"
 #include "grids/GridTableBase.h"
 
@@ -32,7 +32,7 @@ namespace ctb
    public:
       /// @brief type used for describing how to display a column in the grid
       using DisplayColumn = data::DisplayColumn<data::WineListEntry>;
-      using SubstringFilter = data::SubstringFilter<data::WineListEntry>;
+      using SubStringFilter = data::SubStringFilter<data::WineListEntry>;
 
       explicit GridTableWineList(data::WineListData&& data) : 
          m_data{std::move(data)},
@@ -55,7 +55,7 @@ namespace ctb
 
 
       /// @brief base class override that returns the number of rows/records in the table/grid
-      int GetNumberRows() override { return std::ssize(m_data); }
+      int GetNumberRows() override { return std::ssize(*m_view); }
 
 
       /// @brief base class override that returns the number of columns displayed in the table/grid
@@ -95,40 +95,42 @@ namespace ctb
 
       /// @brief this method will configure the column alignment settings for the grid based on the
       ///        settings in the DisplayColumn objects.
-      void configureGridColumns(wxGridCellAttrPtr default_attr_ptr) override;
-
-
-      // object is move-only since copying would be expensive 
-      // and we're going to store them in shared_ptr's anyway
-      GridTableWineList(const GridTableWineList&) = delete;
-      GridTableWineList& operator=(const GridTableWineList&) = delete;
+      void configureGridColumns(wxGridCellAttrPtr default_attr) override;
 
 
       /// @brief filter the table by performing a substring search across all columns
       ///
       /// note that class only supports a single substring filter, subsequent calls to
-      /// either overload will overrwite any previous substring filter.
-      void filterBySubstring(std::string_view substr) override;
+      /// either overload will overwrite any previous substring filter.
+      bool filterBySubstring(std::string_view substr) override;
 
 
       /// @brief filter the table by performing a substring search on the specified column
       ///
       /// note that class only supports a single substring filter, subsequent calls to
-      /// either overload will overrwite any previous substring filter.
-      void filterBySubstring(std::string_view substr, size_t col_idx) override;
+      /// either overload will overwrite any previous substring filter.
+      bool filterBySubstring(std::string_view substr, size_t col_idx) override;
 
 
       /// @brief clear/reset the substring filter
-      void clearSubstringFilter() override;
+      void clearSubStringFilter() override;
 
+
+      // this class is meant to be instantiated on the heap.
+      GridTableWineList() = delete;
+      GridTableWineList(const GridTableWineList&) = delete;
+      GridTableWineList(GridTableWineList&&) = delete;
+      GridTableWineList& operator=(const GridTableWineList&) = delete;
+      GridTableWineList& operator=(GridTableWineList&&) = delete;
 
    private:
-      data::WineListData          m_data{};
-      data::WineListData          m_filtered_data{};
-      data::WineListData*         m_view{};           // may point to m_data or m_filtered_data
-      ColumnList                  m_display_columns{};
-      std::optional<SubstringFilter> m_substring_filter{};
+      data::WineListData             m_data{};
+      data::WineListData             m_filtered_data{};  // due to mechanics of wxGrid, we need to copy the dataset when filtering
+      data::WineListData*            m_view{};           // may point to m_data or m_filtered_data depending if filter is active
+      ColumnList                     m_display_columns{};
+      std::optional<SubStringFilter> m_substring_filter{};
 
+      bool filterBySubstringImpl(std::string_view substr, const SubStringFilter& filter);
       void refreshView();
    };
 

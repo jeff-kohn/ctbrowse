@@ -94,9 +94,23 @@ namespace ctb
       return *config;
    }
 
+
    GridTableMgr::GridTablePtr App::getGridTable(GridTableMgr::GridTableId tbl)
    {
       return m_grid_tables.getGridTable(tbl);
+   }
+
+
+   void App::displayErrorMessage(const Error& err)
+   {
+      auto title = std::format(constants::FMT_TITLE_TYPED_ERROR, err.categoryName());
+      displayErrorMessage(err.error_message, title);
+   }
+
+
+   void App::displayErrorMessage(const std::string& msg, const std::string& title)
+   {
+      wxMessageBox(msg, title, wxICON_ERROR | wxOK, m_main_frame);
    }
 
 

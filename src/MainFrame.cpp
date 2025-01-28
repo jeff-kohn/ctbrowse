@@ -9,8 +9,8 @@
 #include "MainFrame.h"
 #include "App.h"
 #include "dialogs/TableSyncDialog.h"
-#include "wx_helpers.h"
 #include "grids/GridTableWineList.h"
+#include "wx_helpers.h"
 
 #include "ctb/CredentialWrapper.h"
 #include "ctb/data/table_download.h"
@@ -52,7 +52,7 @@ namespace ctb
 
       m_splitter = new wxSplitterWindow{ this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D };
       m_grid = new CellarTrackerGrid{ m_splitter };
-      m_grid_tools_panel = new GridToolsPanel{ m_splitter };
+      m_grid_tools_panel = new GridToolsPanel{ m_splitter, m_grid };
       createImpl();
       m_grid->ForceRefresh();
       Centre(wxBOTH);
@@ -63,6 +63,7 @@ namespace ctb
    
    void MainFrame::onMenuPreferences(wxCommandEvent& event) 
    {
+
    }
 
 
@@ -131,7 +132,7 @@ namespace ctb
             }
             else
             {
-               wxMessageBox(result.error().error_message, constants::ERROR_STR, wxICON_ERROR | wxOK);
+               wxGetApp().displayErrorMessage(result.error());
                end_status.message = constants::STATUS_DOWNLOAD_FAILED;
             }
             return;
@@ -153,16 +154,16 @@ namespace ctb
       wxBusyCursor busy{};
       try
       {
-         auto tbl_ptr = std::dynamic_pointer_cast<GridTableWineList>(wxGetApp().getGridTable(GridTableMgr::GridTableId::WineList));
-         assert(tbl_ptr);
+         auto tbl = wxGetApp().getGridTable(GridTableMgr::GridTableId::WineList);
+         assert(tbl);
          assert(m_grid);
 
-         m_grid->setGridTable(tbl_ptr);
+         m_grid->setGridTable(tbl);
          Update();
       }
       catch(Error& e)
       {
-         wxMessageBox(e.error_message, constants::ERROR_STR, wxICON_ERROR | wxOK);
+         wxGetApp().displayErrorMessage(e);
       }
    }
 

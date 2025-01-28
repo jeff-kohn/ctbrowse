@@ -18,7 +18,7 @@ namespace ctb::data
 
    /// @brief implements a substring-matching filter for a table entry/record
    template <TableEntry T>
-   struct SubstringFilter
+   struct SubStringFilter
    {
    public:
       using Prop = T::Prop;
@@ -30,12 +30,11 @@ namespace ctb::data
       std::vector<Prop> search_props{};
 
 
-      /// @brief  function operator used to performan the substring search. 
+      /// @brief  function operator used to perform the substring search. 
       ///
       /// this function will check each specified property to see if it contains
       /// the search substring, returning true if a match was round. case-sensitive
       /// search is used (for now)
-      /// 
       /// 
       bool operator()(const T& rec) const
       {

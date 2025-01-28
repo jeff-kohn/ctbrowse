@@ -32,7 +32,7 @@ namespace ctb
       MainFrame();  
 
 
-      /// @brief constructor for immediate intialization, calls Create(parent for you)
+      /// @brief constructor for immediate initialization, calls Create(parent) for you
       MainFrame(wxWindow* parent);
 
 
@@ -49,6 +49,9 @@ namespace ctb
          SetStatusText(std::format(fmt_str, std::forward<Args>(args)...));
       }
 
+      /// @brief retrieves a pointer to the active grid.
+      /// @return 
+      CellarTrackerGrid* getGrid() { return m_grid; }
 
    private:
       CellarTrackerGrid*   m_grid{};

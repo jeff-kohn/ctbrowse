@@ -121,9 +121,10 @@ namespace ctb
    void TableSyncDialog::onOkClicked(wxCommandEvent& event)
    {
       if (!TransferDataFromWindow())
-         wxMessageBox(constants::ERROR_DIALOG_TRANSFER_FAILED,
-                      constants::ERROR_STR,
-                      wxOK | wxICON_ERROR | wxCENTRE, this);
+      {
+         wxGetApp().displayErrorMessage(constants::ERROR_DIALOG_TRANSFER_FAILED);
+         return;
+      }
 
       // Save relevant settings to config
       auto& cfg = wxGetApp().getConfig();

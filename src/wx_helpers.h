@@ -44,14 +44,14 @@ namespace ctb
    struct ScopedStatusText
    {
       std::string message{};
-      Wnd*        target_ptr{};
+      Wnd*        target{};
 
       ScopedStatusText() = default;
-      ScopedStatusText(std::string_view msg, Wnd* target) : message{ msg }, target_ptr{ target } {}
+      ScopedStatusText(std::string_view msg, Wnd* target) : message{ msg }, target{ target } {}
       ~ScopedStatusText()
       {
-         if (target_ptr)
-            target_ptr->SetStatusText(message);
+         if (target)
+            target->SetStatusText(message);
       }
    };
 

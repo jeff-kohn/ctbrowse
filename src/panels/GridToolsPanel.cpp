@@ -7,31 +7,65 @@ namespace ctb
 {
 
 
-   GridToolsPanel::GridToolsPanel(wxWindow* parent_ptr)
+   GridToolsPanel::GridToolsPanel(wxWindow* parent, CellarTrackerGrid* grid) : m_grid{ grid }
    {
-      Create(parent_ptr);
+      assert(m_grid);
+      if (!m_grid)
+         throw Error{ constants::ERROR_NULL_POINTER, Error::Category::ArgumentError };
+
+      assert(parent);
+      Create(parent);
    }
 
 
-   bool GridToolsPanel::Create(wxWindow* parent_ptr)
+   bool GridToolsPanel::Create(wxWindow* parent)
    {
-      if (!wxPanel::Create(parent_ptr))
+      if (!wxPanel::Create(parent))
          return false;
 
       createImpl();
+      m_timer.SetOwner(this);
+      Bind(wxEVT_TIMER, &GridToolsPanel::onSearchTimer, this);
+
       return true;
    }
 
 
    void GridToolsPanel::onClearSearchClicked(wxCommandEvent& event)
    {
-      m_search_ctrl->SetValue("");
+      m_search_ctrl->ChangeValue("");
+      doFilter();
    }
 
 
    void GridToolsPanel::onSearchTextChanged(wxCommandEvent& event)
    {
-      event.Skip();
+      // we'll trigger the search after they've stopped typing for ~500ms
+      static constexpr int TIMER_INTERVAL{ 500 }; 
+      m_timer.StartOnce(TIMER_INTERVAL);
+   }
+
+
+   void GridToolsPanel::onSearchTimer([[maybe_unused]] wxTimerEvent& event)
+   {
+      doFilter();
+   }
+
+   void GridToolsPanel::doFilter()
+   {
+      try
+      {
+         if (!TransferDataFromWindow())
+         {
+            wxGetApp().displayErrorMessage(constants::ERROR_DIALOG_TRANSFER_FAILED);
+            return;
+         }
+         m_grid->filterBySubstring(m_search_value.wx_str());
+      }
+      catch (Error& e)
+      {
+         wxGetApp().displayErrorMessage(e);
+      }
    }
 
 

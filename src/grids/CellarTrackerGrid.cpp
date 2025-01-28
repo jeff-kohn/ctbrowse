@@ -1,5 +1,6 @@
 #include "grids/CellarTrackerGrid.h"
 
+#include "ctb/ctb.h"
 
 namespace ctb
 {
@@ -10,30 +11,84 @@ namespace ctb
    }
 
 
-   void CellarTrackerGrid::setGridTable(GridTableBase::GridTablePtr tbl_ptr)
+   void CellarTrackerGrid::setGridTable(GridTableBase::GridTablePtr tbl)
    {
+      assert(tbl);
+      if (!tbl)
+         throw Error{ constants::ERROR_NULL_POINTER, Error::Category::ArgumentError };
+
+      // we save our own copy of the ptr, because we need access to 
+      // GridTableBase methods, and GetTable() returns wxGridTableBase*
+      m_table = tbl;
       {
          wxGridUpdateLocker lock(this);
-
+         
          // assign the table and some other initial settings.
-         SetTable(tbl_ptr.get(), false);
+         SetTable(m_table.get(), false);
          SetSelectionMode(wxGrid::wxGridSelectionModes::wxGridSelectRows);
          SetSortingColumn(0, true);
 
          // set the font size for the grid
-         auto attr_ptr = GetOrCreateCellAttrPtr(0, 0);
-         assert(attr_ptr);
-         wxFont font{ attr_ptr->GetFont() };
+         auto attr = GetOrCreateCellAttrPtr(0, 0);
+         assert(attr);
+         wxFont font{ attr->GetFont() };
          font.SetPointSize(10);
-         attr_ptr->SetFont(font);
+         attr->SetFont(font);
 
          // give the grid table a chance to configure column formatting
-         tbl_ptr->configureGridColumns(attr_ptr);
+         m_table->configureGridColumns(attr);
 
          AutoSizeColumns(false);
          AutoSizeRows(true);
       }
-      Refresh();
+      ForceRefresh();
+   }
+
+   void CellarTrackerGrid::filterBySubstring(std::string_view substr)
+   {
+      assert(m_table);
+      if (!m_table)
+         throw Error{ constants::ERROR_INVALID_GRID_STATE, Error::Category::UiError };
+
+      {
+         wxGridUpdateLocker lock(this);
+         if (m_table->filterBySubstring(substr))
+         {
+            // calling SetTable with the same ptr is fine, it forces grid to re-fetch the data.
+            setGridTable(m_table);
+         }
+      }
+   }
+
+   void CellarTrackerGrid::filterBySubstring(std::string_view substr, size_t col_idx)
+   {
+      assert(m_table);
+      if (!m_table)
+         throw Error{ constants::ERROR_INVALID_GRID_STATE, Error::Category::UiError };
+      
+      wxBusyCursor busy{};
+      {
+         wxGridUpdateLocker lock(this);
+         if (m_table->filterBySubstring(substr, col_idx))
+         {
+            // calling setTable with the same ptr is fine, it forces grid to re-fetch the data.
+            setGridTable(m_table);
+         }
+      }
+   }
+
+   void CellarTrackerGrid::clearSubStringFilter()
+   {
+      assert(m_table);
+      if (!m_table)
+         throw Error{ constants::ERROR_INVALID_GRID_STATE, Error::Category::UiError };
+
+      wxBusyCursor busy{};
+      {
+         wxGridUpdateLocker lock(this);
+         m_table->clearSubStringFilter();
+         setGridTable(m_table);
+      }
    }
 
 

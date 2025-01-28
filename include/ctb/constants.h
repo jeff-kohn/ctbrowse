@@ -42,6 +42,8 @@ namespace ctb::constants
    inline constexpr const char* ERROR_INVALID_PROP_INDEX       = "Invalid property index";
    inline constexpr const char* ERROR_INVALID_ROW_INDEX        = "Invalid row index";
    inline constexpr const char* ERROR_EDITING_NOT_SUPPORTED    = "Editing data is not supported.";
+   inline constexpr const char* ERROR_NULL_POINTER             = "Invalid Parameter (nullptr).";
+   inline constexpr const char* ERROR_INVALID_GRID_STATE       = "Corrupted grid state. Please restart app.";
    inline constexpr const char* FMT_ERROR_FILE_NOT_FOUND       = "File '{}' was not found.";
    inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND       = "Folder '{}' does not exist.";
    inline constexpr const char* FMT_ERROR_CURL_ERROR           = "The operation failed with CURL error {}";
@@ -80,7 +82,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_SEARCH                        = "&Search";
 
    inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
-
+   inline constexpr const char* FMT_TITLE_TYPED_ERROR             = "{} Error";
 
 
 

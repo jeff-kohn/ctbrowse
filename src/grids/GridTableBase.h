@@ -20,16 +20,16 @@ namespace ctb
       using GridTablePtr = std::shared_ptr<GridTableBase>;
 
       /// @brief Sets up the formatting options in the calling grid to match our data fields
-      virtual void configureGridColumns(wxGridCellAttrPtr default_attr_ptr) = 0;
+      virtual void configureGridColumns(wxGridCellAttrPtr default_attr) = 0;
 
       /// @brief filter does substring matching on ANY column in the table view
-      virtual void filterBySubstring(std::string_view substr) = 0;
+      virtual bool filterBySubstring(std::string_view substr) = 0;
 
       /// @brief filter that does substring matching on the specified column
-      virtual void filterBySubstring(std::string_view substr, size_t col_idx) = 0;
+      virtual bool filterBySubstring(std::string_view substr, size_t col_idx) = 0;
 
       /// @brief clear the substring filter.
-      virtual void clearSubstringFilter() = 0;
+      virtual void clearSubStringFilter() = 0;
    };
 
 

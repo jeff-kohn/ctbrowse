@@ -7,8 +7,9 @@
  *********************************************************************/
 #pragma once
 
-#include "MainFrame.h"
+#include "ctb/ctb.h"
 
+#include "MainFrame.h"
 #include "grids/GridTableMgr.h"
 
 #include <wx/wx.h>
@@ -55,6 +56,10 @@ namespace ctb
       /// be invalidated by configuration changes or new data files being downloaded
       GridTableMgr::GridTablePtr getGridTable(GridTableMgr::GridTableId tbl);
 
+      /// @brief display a message box with an error description.
+      /// @param error 
+      void displayErrorMessage(const Error& err);
+      void displayErrorMessage(const std::string& msg, const std::string& title = constants::ERROR_STR);
 
    private:
       MainFrame* m_main_frame{};

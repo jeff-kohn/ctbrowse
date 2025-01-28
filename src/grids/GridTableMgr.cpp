@@ -28,8 +28,8 @@ namespace ctb
                {
                   throw table_data.error();
                }
-               auto grid_ptr = std::make_shared<GridTableWineList>(std::move(table_data.value())); 
-               return grid_ptr;
+               auto grid = std::make_shared<GridTableWineList>(std::move(table_data.value())); 
+               return grid;
             }
       };
       auto grid_table = enum_switch(TableFactory, tbl);
