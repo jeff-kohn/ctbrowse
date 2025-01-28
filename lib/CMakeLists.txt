@@ -9,7 +9,10 @@ target_sources(ctb_lib
    PUBLIC
       "../include/ctb/constants.h"
       "../include/ctb/CredentialWrapper.h"
+      "../include/ctb/data/DisplayColumn.h"
+      "../include/ctb/data/SubstringFilter.h"
       "../include/ctb/data/table_data.h"
+      "../include/ctb/data/table_download.h"
       "../include/ctb/data/WineListEntry.h"
       "../include/ctb/Error.h"
       "../include/ctb/winapi_util.h"

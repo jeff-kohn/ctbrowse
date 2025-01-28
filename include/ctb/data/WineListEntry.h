@@ -86,7 +86,7 @@ namespace ctb::data
       /// the values map to column indices in the file, while the enum ordering is based
       /// on the record class layout. The enums with values starting at 100 are calculated
       /// fields, and do not map directly to a column in the file.
-     enum class Prop : uint32_t
+     enum class Prop : size_t
      {
          iWineID = 0,
          WineName = 13,
@@ -122,7 +122,7 @@ namespace ctb::data
 
 
       /// @brief variant that can hold any of our supported field types.
-      using ValueWrapper = std::variant<uint16_t, uint64_t, NullableDouble, std::string_view>;
+      using ValueWrapper = std::variant<uint16_t, uint64_t, NullableDouble, NullableShort, std::string_view>;
 
 
       /// @brief used to return a field value or an error
@@ -130,11 +130,11 @@ namespace ctb::data
 
 
       /// @brief get the property corresponding to the specified enum identifier
-      ValueResult getProperty(Prop prop) const;
+      [[nodiscard]] ValueResult getProperty(Prop prop) const;
 
 
       /// @brief array syntax for getting a property value
-      ValueResult operator[](Prop prop) const 
+      [[nodiscard]] ValueResult operator[](Prop prop) const 
       {
          return getProperty(prop);
       }
@@ -143,9 +143,9 @@ namespace ctb::data
       /// @brief array syntax for getting a property value
       ///
       /// if the specified index doesn't match an enum identifier, an error will be returned.
-      ValueResult operator[](int idx) const 
+      [[nodiscard]] ValueResult operator[](std::integral auto idx) const 
       {
-         auto e = magic_enum::enum_cast<Prop>(static_cast<size_t>(idx));
+         auto e = magic_enum::enum_value<Prop>(static_cast<size_t>(idx));
          if (e)
             return getProperty(e.value());
          else

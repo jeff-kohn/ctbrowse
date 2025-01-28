@@ -8,6 +8,7 @@
 #pragma once
 
 #include "ctb/data/DisplayColumn.h"
+#include "ctb/data/SubstringFilter.h"
 #include "ctb/data/WineListEntry.h"
 #include "grids/GridTableBase.h"
 
@@ -20,14 +21,22 @@
 
 namespace ctb
 {
+
+   /// @brief GridTable-derived class used with CellarTrackerGrid to display table data from CellarTracker.com
+   ///
+   /// This class is NOT THREADSAFE at the instance level. This shouldn't be a problem since this class is meant
+   /// to be used from UI code (specifically CellarTrackerGrid). 
+   /// 
    class GridTableWineList : public GridTableBase
    {
    public:
       /// @brief type used for describing how to display a column in the grid
       using DisplayColumn = data::DisplayColumn<data::WineListEntry>;
+      using SubstringFilter = data::SubstringFilter<data::WineListEntry>;
 
       explicit GridTableWineList(data::WineListData&& data) : 
          m_data{std::move(data)},
+         m_view{&m_data},
          m_display_columns(DefaultDisplayColumns.begin(), DefaultDisplayColumns.end())
       {}
 
@@ -85,7 +94,7 @@ namespace ctb
 
 
       /// @brief this method will configure the column alignment settings for the grid based on the
-      ///        settings in the corresponding DisplayColumn objects.
+      ///        settings in the DisplayColumn objects.
       void configureGridColumns(wxGridCellAttrPtr default_attr_ptr) override;
 
 
@@ -94,9 +103,33 @@ namespace ctb
       GridTableWineList(const GridTableWineList&) = delete;
       GridTableWineList& operator=(const GridTableWineList&) = delete;
 
+
+      /// @brief filter the table by performing a substring search across all columns
+      ///
+      /// note that class only supports a single substring filter, subsequent calls to
+      /// either overload will overrwite any previous substring filter.
+      void filterBySubstring(std::string_view substr) override;
+
+
+      /// @brief filter the table by performing a substring search on the specified column
+      ///
+      /// note that class only supports a single substring filter, subsequent calls to
+      /// either overload will overrwite any previous substring filter.
+      void filterBySubstring(std::string_view substr, size_t col_idx) override;
+
+
+      /// @brief clear/reset the substring filter
+      void clearSubstringFilter() override;
+
+
    private:
-      data::WineListData m_data{};
-      ColumnList m_display_columns{};
+      data::WineListData          m_data{};
+      data::WineListData          m_filtered_data{};
+      data::WineListData*         m_view{};           // may point to m_data or m_filtered_data
+      ColumnList                  m_display_columns{};
+      std::optional<SubstringFilter> m_substring_filter{};
+
+      void refreshView();
    };
 
 
