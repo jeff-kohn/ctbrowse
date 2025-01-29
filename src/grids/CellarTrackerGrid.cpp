@@ -1,5 +1,7 @@
 #include "grids/CellarTrackerGrid.h"
 
+#include "App.h"
+
 #include "ctb/ctb.h"
 
 namespace ctb
@@ -50,12 +52,22 @@ namespace ctb
       if (!m_table)
          throw Error{ constants::ERROR_INVALID_GRID_STATE, Error::Category::UiError };
 
+
+      if (substr.empty())
+      {
+         clearSubStringFilter();
+         return;
+      }
+
       {
          wxGridUpdateLocker lock(this);
          if (m_table->filterBySubstring(substr))
          {
             // calling SetTable with the same ptr is fine, it forces grid to re-fetch the data.
             setGridTable(m_table);
+         }
+         else {
+            wxGetApp().displayInfoMessage(constants::STATUS_NO_MATCHING_ROWS);
          }
       }
    }
@@ -73,6 +85,9 @@ namespace ctb
          {
             // calling setTable with the same ptr is fine, it forces grid to re-fetch the data.
             setGridTable(m_table);
+         }
+         else {
+            wxGetApp().displayInfoMessage(constants::STATUS_NO_MATCHING_ROWS);
          }
       }
    }

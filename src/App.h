@@ -61,6 +61,8 @@ namespace ctb
       void displayErrorMessage(const Error& err);
       void displayErrorMessage(const std::string& msg, const std::string& title = constants::ERROR_STR);
 
+      void displayInfoMessage(const std::string& msg, const std::string& title = constants::APP_NAME_SHORT);
+
    private:
       MainFrame* m_main_frame{};
       ctb::GridTableMgr m_grid_tables{};

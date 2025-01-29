@@ -9,11 +9,16 @@
 #include "App.h"
 #include "ctb/Error.h"
 
-#include <wx/stdpaths.h>
 #include <wx/fileconf.h>
+#include <wx/stdpaths.h>
+#include <wx/xrc/xmlres.h>
 
 #include <chrono>
 #include <filesystem>
+
+/// @brief  this function loads our images from embedded resources
+void initImageResource();
+
 
 namespace ctb
 {
@@ -28,6 +33,9 @@ namespace ctb
    App::App()
    {
       SetUseBestVisual(true);
+      
+      ::wxInitAllImageHandlers();
+      ::initImageResource();
 
       // Set up config object to use file even on windows (registry is yuck)
       wxStandardPaths::Get().SetFileLayout(wxStandardPaths::FileLayout::FileLayout_XDG);
@@ -111,6 +119,12 @@ namespace ctb
    void App::displayErrorMessage(const std::string& msg, const std::string& title)
    {
       wxMessageBox(msg, title, wxICON_ERROR | wxOK, m_main_frame);
+   }
+
+
+   void App::displayInfoMessage(const std::string& msg, const std::string& title /*= constants::APP_NAME_SHORT*/)
+   {
+      wxMessageBox(msg, title, wxICON_INFORMATION | wxOK, m_main_frame);
    }
 
 

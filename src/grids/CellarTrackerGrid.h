@@ -53,6 +53,9 @@ namespace ctb
       CellarTrackerGrid(const CellarTrackerGrid&) = delete;
       CellarTrackerGrid(CellarTrackerGrid&&) = delete;
 
+      size_t getTotalRowCount() const     {  return m_table->getTotalRowCount(); }
+      size_t getFilteredRowCount() const  {  return m_table->getFilteredRowCount(); } 
+
    protected:
       GridTablePtr m_table{};
       void InitializeDefaults();

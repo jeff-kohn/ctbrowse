@@ -20,6 +20,7 @@ target_sources(ctbrowse_win
      "panels/GridToolsPanel.h"
      "wx_helpers.h"
      "utf8.manifest"
+     ${CMAKE_CURRENT_BINARY_DIR}/images_resource.cpp
 )
 
 find_package(wxWidgets CONFIG REQUIRED)
@@ -32,6 +33,12 @@ target_link_libraries(ctbrowse_win
    PRIVATE
       ctbrowse::ctb_lib
       wxWidgets::wxWidgets
+)
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/images_resource.cpp
+    COMMAND ${WXRC_PATH} -c -n initImageResource -o ${CMAKE_CURRENT_BINARY_DIR}/images_resource.cpp ${CMAKE_CURRENT_SOURCE_DIR}/art/images.xrc
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/art/images.xrc
 )
 
 # ---- End-of-file commands ----

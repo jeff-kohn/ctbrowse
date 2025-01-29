@@ -19,6 +19,7 @@ include(cmake/folders.cmake)
 include(cmake/project-is-top-level.cmake)
 include(cmake/use-clang-tidy.cmake)
 include(cmake/variables.cmake)
+include(cmake/find-wxrc.cmake)
 
  #export compile_commands.json for tools like clang-tidy and cppcheck
  set (CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") 

@@ -42,8 +42,8 @@ namespace ctb
 
       static inline const std::array DefaultDisplayColumns { 
          DisplayColumn{ data::WineListEntry::Prop::WineAndVintage,                              constants::LBL_WINE     },
-         DisplayColumn{ data::WineListEntry::Prop::MasterVarietal,                              constants::LBL_VARIETAL },
          DisplayColumn{ data::WineListEntry::Prop::Country                                                              },
+         DisplayColumn{ data::WineListEntry::Prop::Region                                                               },
          DisplayColumn{ data::WineListEntry::Prop::Appellation                                                          },
          DisplayColumn{ data::WineListEntry::Prop::Quantity,   DisplayColumn::Format::Number,   constants::LBL_QTY      },
          DisplayColumn{ data::WineListEntry::Prop::Pending,    DisplayColumn::Format::Number                            },
@@ -114,6 +114,10 @@ namespace ctb
 
       /// @brief clear/reset the substring filter
       void clearSubStringFilter() override;
+
+
+      size_t getTotalRowCount() const override       {  return m_data.size();  }  
+      size_t getFilteredRowCount() const override    {  return m_view->size(); }
 
 
       // this class is meant to be instantiated on the heap.

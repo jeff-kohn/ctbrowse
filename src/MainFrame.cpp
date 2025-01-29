@@ -29,6 +29,7 @@
 
 namespace ctb
 {
+
    using namespace magic_enum;
 
    MainFrame::MainFrame()
@@ -45,29 +46,118 @@ namespace ctb
    bool MainFrame::Create(wxWindow* parent)
    {
       // give base class a chance set up controls etc
-      if (!wxFrame::Create(parent, wxID_ANY, ""))
+      if (!wxFrame::Create(parent, wxID_ANY, "", wxDefaultPosition, wxSize{640, 480}))
          return false;
 
       SetTitle(constants::APP_NAME_LONG);
 
-      m_splitter = new wxSplitterWindow{ this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D };
-      m_grid = new CellarTrackerGrid{ m_splitter };
-      m_grid_tools_panel = new GridToolsPanel{ m_splitter, m_grid };
-      createImpl();
-      m_grid->ForceRefresh();
+      createGrid();
+      createMenuBar();
+      createStatusBar();
+      createToolBar();
+
+      m_search_ctrl->SetFocus();
       Centre(wxBOTH);
 
       return true;
    }
 
-   
-   void MainFrame::onMenuPreferences(wxCommandEvent& event) 
+
+   void MainFrame::createGrid()
+   {
+      m_grid = new CellarTrackerGrid{ this };
+      m_grid->SetMinSize(ConvertDialogToPixels(wxSize(400, 250)));
+      m_grid->SetMargins(0, 0);
+      m_grid->SetColLabelSize(30);
+   }
+
+
+   void MainFrame::createMenuBar()
+   {
+      m_menu_bar = new wxMenuBar();
+
+      auto* menu_file = new wxMenu();
+      auto* menu_sync_data = new wxMenuItem(menu_file, wxID_ANY, "&Sync Data...", "Download data from CellarTracker", wxITEM_NORMAL);
+      menu_file->Append(menu_sync_data);
+
+      menu_file->AppendSeparator();
+
+      auto* menu_preferences = new wxMenuItem(menu_file, wxID_ANY, "&Preferences", "Configure App Preferences", wxITEM_NORMAL);
+      menu_file->Append(menu_preferences);
+
+      menu_file->AppendSeparator();
+
+      auto* menu_quit = new wxMenuItem(menu_file, wxID_EXIT);
+      menu_quit->SetBitmap(wxArtProvider::GetBitmapBundle(wxART_QUIT, wxART_MENU));
+      menu_file->Append(menu_quit);
+
+      m_menu_bar->Append(menu_file, wxGetStockLabel(wxID_FILE));
+
+      auto* menu = new wxMenu();
+      auto* menu_item2 = new wxMenuItem(menu, wxID_FIND);
+      menu_item2->SetBitmap(wxArtProvider::GetBitmapBundle(wxART_FIND, wxART_MENU));
+      menu->Append(menu_item2);
+
+      m_menu_bar->Append(menu, "&Edit");
+
+      auto* menu_views = new wxMenu();
+      auto* menu_item = new wxMenuItem(menu_views, wxID_ANY, "&Wine List\tCtrl+W");
+      menu_views->Append(menu_item);
+
+      m_menu_bar->Append(menu_views, "&View");
+
+      SetMenuBar(m_menu_bar);
+
+      // Event handlers
+      Bind(wxEVT_MENU, &MainFrame::onMenuPreferences, this, menu_preferences->GetId());
+      Bind(wxEVT_MENU, &MainFrame::onMenuSyncData, this, menu_sync_data->GetId());
+      Bind(wxEVT_MENU, &MainFrame::onMenuWineList, this, menu_item->GetId());
+      Bind(wxEVT_MENU, &MainFrame::onQuit, this, wxID_EXIT);
+   }
+
+
+   void MainFrame::createStatusBar()
+   {
+      m_status_bar = CreateStatusBar(3);
+      const int sb_field_widths[3] = {-4, -1, -1};
+      m_status_bar->SetStatusWidths(3, sb_field_widths);
+      const int sb_field_styles[3] = {wxSB_NORMAL, wxSB_NORMAL, wxSB_NORMAL};
+      m_status_bar->SetStatusStyles(3, sb_field_styles);
+   }
+
+
+   void MainFrame::createToolBar()
+   {
+      m_tool_bar = CreateToolBar();
+
+      m_search_ctrl = new wxSearchCtrl(m_tool_bar, wxID_ANY, wxEmptyString);
+      m_search_ctrl->ShowSearchButton(true);
+      m_search_ctrl->ShowCancelButton(true);
+      m_tool_bar->AddControl(m_search_ctrl);
+
+      m_tool_bar->Realize();
+
+      m_search_ctrl->Bind(wxEVT_SEARCHCTRL_CANCEL_BTN, &MainFrame::onSearchCancelBtn, this);
+      m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onSearchBtn, this);
+      m_search_ctrl->Bind(wxEVT_TEXT_ENTER, &MainFrame::onSearchTextEnter, this);
+
+   }
+
+
+   void MainFrame::onMenuEditFind([[maybe_unused]] wxCommandEvent& event)
+   {
+      m_tool_bar->SetFocus();
+      m_search_ctrl->SetFocus();
+   }
+
+
+   void MainFrame::onMenuPreferences([[maybe_unused]] wxCommandEvent& event)
    {
 
    }
 
 
-   void MainFrame::onMenuSyncData(wxCommandEvent& event) 
+   void MainFrame::onMenuSyncData([[maybe_unused]] wxCommandEvent& event) 
    {
       using namespace ctb::data;
 
@@ -149,7 +239,7 @@ namespace ctb
    }
 
 
-   void MainFrame::onMenuWineList(wxCommandEvent&)
+   void MainFrame::onMenuWineList([[maybe_unused]] wxCommandEvent& event)
    {
       wxBusyCursor busy{};
       try
@@ -159,6 +249,7 @@ namespace ctb
          assert(m_grid);
 
          m_grid->setGridTable(tbl);
+         updateStatusBarCounts();
          Update();
       }
       catch(Error& e)
@@ -168,57 +259,64 @@ namespace ctb
    }
 
 
+   void MainFrame::onSearchBtn([[maybe_unused]] wxCommandEvent& event)
+   {
+      doSearchFilter();
+   }
+
+
+   void MainFrame::onSearchCancelBtn([[maybe_unused]] wxCommandEvent& event)
+   {
+      clearSearchFilter();
+   }
+
+
+   void MainFrame::onSearchTextEnter([[maybe_unused]] wxCommandEvent& event)
+   {
+      doSearchFilter();
+   }
+
+
    void MainFrame::onQuit([[maybe_unused]] wxCommandEvent& event)
    {
       Close(true);
    }
 
-   
-   void MainFrame::createImpl()
+
+   void MainFrame::doSearchFilter()
    {
-      m_tool_bar = CreateToolBar();
-      m_tool_bar->Realize();
-
-      m_menu_bar = new wxMenuBar();
-
-      auto* menu_file = new wxMenu();
-      auto* menu_sync_data = new wxMenuItem(menu_file, wxID_ANY, "&Sync Data...",
-         "Download data from CellarTracker", wxITEM_NORMAL);
-      menu_file->Append(menu_sync_data);
-      menu_file->AppendSeparator();
-      auto* menu_preferences = new wxMenuItem(menu_file, wxID_ANY, "&Preferences", "Configure App Preferences",
-         wxITEM_NORMAL);
-      menu_file->Append(menu_preferences);
-      menu_file->AppendSeparator();
-      auto* menu_quit = new wxMenuItem(menu_file, wxID_EXIT);
-      menu_quit->SetBitmap(wxArtProvider::GetBitmapBundle(wxART_QUIT, wxART_MENU));
-
-      menu_file->Append(menu_quit);
-      m_menu_bar->Append(menu_file, wxGetStockLabel(wxID_FILE));
-
-      auto* menu_views = new wxMenu();
-      auto* menu_item = new wxMenuItem(menu_views, wxID_ANY, "&Wine List\tCTRL+W");
-      menu_views->Append(menu_item);
-      m_menu_bar->Append(menu_views, "&Data");
-
-      SetMenuBar(m_menu_bar);
-
-      m_status_bar = CreateStatusBar();
-
-      m_splitter->SetSashGravity(0.0);
-      m_splitter->SetMinimumPaneSize(150);
-      m_splitter->SplitVertically(m_grid_tools_panel, m_grid);
-      m_splitter->SetSashPosition(50);
-
-      Centre(wxBOTH);
-
-      Centre(wxBOTH);
+      try
+      {
+         m_grid->filterBySubstring(m_search_ctrl->GetValue().wx_str());
+         updateStatusBarCounts();
+      }
+      catch(Error& e)
+      {
+         wxGetApp().displayErrorMessage(e);
+      }
+   }
 
 
-      // Event handlers
-      Bind(wxEVT_MENU, &MainFrame::onMenuPreferences, this, menu_preferences->GetId());
-      Bind(wxEVT_MENU, &MainFrame::onMenuSyncData, this, menu_sync_data->GetId());
-      Bind(wxEVT_MENU, &MainFrame::onMenuWineList, this, menu_item->GetId());
+   void MainFrame::clearSearchFilter()
+   {
+      m_search_ctrl->ChangeValue("");
+      m_grid->clearSubStringFilter();
+      updateStatusBarCounts();
+   }
+
+
+   void MainFrame::updateStatusBarCounts()
+   {
+      assert(m_grid);
+      auto total = m_grid->getTotalRowCount();
+      auto filtered = m_grid->getFilteredRowCount();
+
+      SetStatusText(std::format(constants::FMT_LBL_TOTAL_ROWS, total), STATUS_BAR_PANE_TOTAL_ROWS);
+      
+      if (filtered < total)
+         SetStatusText(std::format(constants::FMT_LBL_FILTERED_ROWS, filtered), STATUS_BAR_PANE_FILTERED_ROWS);
+      else
+         SetStatusText("", STATUS_BAR_PANE_FILTERED_ROWS);
    }
 
 } // namespace ctb

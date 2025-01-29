@@ -1,0 +1,6 @@
+find_program(WXRC_PATH NAMES wxrc)
+if (WXRC_PATH)
+   message(STATUS "wxrc found at ${WXRC_PATH}")
+else()
+   message(STATUS "wxrc was not found, resource compilation will fail")
+endif()

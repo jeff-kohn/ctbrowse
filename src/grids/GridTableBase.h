@@ -30,6 +30,9 @@ namespace ctb
 
       /// @brief clear the substring filter.
       virtual void clearSubStringFilter() = 0;
+
+      virtual size_t getTotalRowCount() const = 0;
+      virtual size_t getFilteredRowCount() const  = 0;
    };
 
 

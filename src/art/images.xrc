@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<resource xmlns="http://www.wxwidgets.org/wxxrc" version="2.5.3.0">
+   <object class="tool" name="toolbar_download">
+       <bitmap default_size="24,24">toolbar_download.svg</bitmap>
+   </object>
+   <object class="tool" name="toolbar_refresh">
+       <bitmap default_size="24,24">toolbar_refresh.svg</bitmap>
+   </object>
+      <object class="tool" name="toolbar_settings">
+       <bitmap default_size="24,24">toolbar_settings.svg</bitmap>
+   </object>
+      <object class="tool" name="toolbar_synchronize">
+       <bitmap default_size="24,24">toolbar_synchronize.svg</bitmap>
+   </object>
+</resource>

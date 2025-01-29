@@ -93,10 +93,25 @@
       system_src_includes="wx/stockitem.h"
       derived_class_name="MainFrame"
       derived_file="MainFrame"
-      use_derived_class="0">
+      use_derived_class="0"
+      wxEVT_IDLE="onIdle">
       <node
         class="wxToolBar"
-        var_name="m_tool_bar" />
+        var_name="m_tool_bar">
+        <node
+          class="tool"
+          bitmap="SVG;art/Download from the Cloud.svg;[24,24]"
+          label="" />
+        <node
+          class="wxSearchCtrl"
+          cancel_button="1"
+          focus="1"
+          var_name="m_search_ctrl"
+          wxEVT_SEARCHCTRL_CANCEL_BTN="onSearchCancelBtn"
+          wxEVT_SEARCHCTRL_SEARCH_BTN="onSearchBtn"
+          wxEVT_TEXT="onSearchTextChanged"
+          wxEVT_TEXT_ENTER="onSearchTextEnter" />
+      </node>
       <node
         class="wxMenuBar"
         var_name="m_menu_bar">
@@ -130,24 +145,43 @@
             help="Quit this program"
             id="wxID_EXIT"
             label="&amp;Quit"
+            shortcut="Alt+F4"
             stock_id="wxID_EXIT"
-            var_name="menu_quit" />
+            var_name="menu_quit"
+            wxEVT_MENU="onQuit" />
         </node>
         <node
           class="wxMenu"
           class_access="none"
-          label="&amp;Data"
+          label="&amp;Edit"
+          var_name="menu">
+          <node
+            class="wxMenuItem"
+            bitmap="Art;wxART_FIND|wxART_MENU"
+            help="Find in document"
+            id="wxID_FIND"
+            label="&amp;Find..."
+            shortcut="Ctrl+F"
+            stock_id="wxID_FIND"
+            var_name="menu_item2"
+            wxEVT_MENU="onMenuEditFind" />
+        </node>
+        <node
+          class="wxMenu"
+          class_access="none"
+          label="&amp;View"
           var_name="menu_views">
           <node
             class="wxMenuItem"
             label="&amp;Wine List"
-            shortcut="CTRL+W"
+            shortcut="Ctrl+W"
             var_comment="Open a view on your personal wine inventory"
             wxEVT_MENU="onMenuWineList" />
         </node>
       </node>
       <node
         class="wxStatusBar"
+        fields="wxSB_NORMAL|-1;wxSB_NORMAL|-1;wxSB_NORMAL|-1;wxSB_NORMAL|-1"
         var_name="m_status_bar" />
       <node
         class="wxSplitterWindow"

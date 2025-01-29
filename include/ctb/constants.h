@@ -12,8 +12,8 @@
 
 namespace ctb::constants
 {
-   inline constexpr const char* APP_NAME_LONG  = "CellarTracker Browse for Windows";
-   inline constexpr const char* APP_NAME_SHORT = "cts_win";
+   inline constexpr const char* APP_NAME_LONG  = "ctBrowse for Windows";
+   inline constexpr const char* APP_NAME_SHORT = "ctBrowse";
 
    inline constexpr const char* FMT_HTTP_CELLARTRACKER_QUERY_URL = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
 
@@ -71,6 +71,7 @@ namespace ctb::constants
    inline constexpr const char* STATUS_DOWNLOAD_COMPLETE          = "Download operation completed.";
    inline constexpr const char* STATUS_DOWNLOAD_CANCELED          = "Download operation canceled.";
    inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
+   inline constexpr const char* STATUS_NO_MATCHING_ROWS           = "No rows matched the search text.";
 
    inline constexpr const char* LBL_WINE                          = "Wine";
    inline constexpr const char* LBL_VARIETAL                      = "Varietal";
@@ -80,6 +81,8 @@ namespace ctb::constants
    inline constexpr const char* LBL_MY_PRICE                      = "My Price";
    inline constexpr const char* LBL_DRINK_BY                      = "Drink By";
    inline constexpr const char* LBL_SEARCH                        = "&Search";
+   inline constexpr const char* FMT_LBL_TOTAL_ROWS                = "Total Rows: {}";
+   inline constexpr const char* FMT_LBL_FILTERED_ROWS             = "Filtered Rows: {}";
 
    inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
    inline constexpr const char* FMT_TITLE_TYPED_ERROR             = "{} Error";
