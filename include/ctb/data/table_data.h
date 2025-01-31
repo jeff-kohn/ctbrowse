@@ -13,7 +13,7 @@
 
 #pragma warning(push)
 #pragma warning(disable: 4365 4464 4702)
-#include "external/csv.hpp"
+#include <external/csv.hpp>
 #pragma warning(pop)
 
 #include <frozen/map.h>
@@ -31,6 +31,11 @@
 namespace ctb::data
 {
    namespace fs = std::filesystem;
+
+   /// @brief some fields with numeric values may not actually have a value
+   using NullableDouble = std::optional<double>;
+   using NullableShort = std::optional<uint16_t>;
+
 
    /// @brief enum for the data tables available from CT website
    enum class TableId

@@ -2,7 +2,7 @@
 # depends on being added from it, i.e. the testing is done only from the build
 # tree and is not feasible from an install location
 
-project(ct_searchTests LANGUAGES CXX)
+project(ctBrowseTests LANGUAGES CXX)
 
 # ---- Dependencies ----
 
@@ -20,7 +20,7 @@ target_sources(cts_test
 
 target_link_libraries(cts_test
    PRIVATE
-      ctb_lib
+      ctBrowse_lib
       Catch2::Catch2WithMain
 )
 

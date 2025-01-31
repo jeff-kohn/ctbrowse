@@ -1,7 +1,7 @@
 /*********************************************************************
  * @file       download_csv.h
  *
- * @brief      example showing how to use ctb_lib to download raw
+ * @brief      example showing how to use ctBrowse_lib to download raw
  *             table data from CellarTracker.com
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.

@@ -31,11 +31,13 @@ namespace ctb
       /// @brief enum for categorizing errors. may be useful for determining context for error_code value.
       enum class Category
       {
-         Generic,
+         ArgumentError,
          CurlError,
+         Generic,
          HttpStatus,
          OperationCanceled,
-         DataError
+         DataError,
+         UiError
       };
 
 
