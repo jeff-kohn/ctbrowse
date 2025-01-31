@@ -2,6 +2,7 @@
 
 #include "ctb/ctb.h"
 
+#include <boost/algorithm/string.hpp>
 #include <expected>
 #include <format>
 #include <string_view>
@@ -41,7 +42,7 @@ namespace ctb::data
          auto field_to_str = Overloaded{
             [this](std::string_view val)  -> bool
             { 
-               return val.contains(search_value);                  
+               return boost::icontains(val, search_value);
             },
             [this](NullableDouble val)
             {

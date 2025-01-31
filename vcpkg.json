@@ -3,6 +3,7 @@
   "name": "ct-search",
   "version": "0.1.0",
    "dependencies": [
+      "boost-algorithm",
       "catch2",
       "cpr",
       "frozen",
@@ -16,5 +17,5 @@
          ]
       }
    ],
-  "builtin-baseline": "1420fe276fe8f6450565e6239a675271c0869359"
+  "builtin-baseline": "d504de05dcd7b55df34976be1c824324ec6bca2b"
 }
