@@ -13,6 +13,9 @@ namespace ctb::constants
    inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
    inline constexpr const char* INFO_MSG_NO_MATCHING_ROWS         = "No rows matched the search text.";
 
+
+   inline constexpr const char* RES_NAME_MAINFRAME                = "MAINFRAME";
+   inline constexpr const char* RES_NAME_ICON_PRODUCT             = "IDR_PRODUCT_ICON";
    inline constexpr const char* LBL_WINE                          = "Wine";
    inline constexpr const char* LBL_VARIETAL                      = "Varietal";
    inline constexpr const char* LBL_QTY                           = "Qty";
@@ -27,12 +30,12 @@ namespace ctb::constants
    inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
    inline constexpr const char* FMT_TITLE_TYPED_ERROR             = "Error ({})";
 
-   inline constexpr const char* CMD_FILE_DOWNLOAD_DATA         = "&Download Data...";            
-   inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP     = "Download data from CellarTracker";            
-   inline constexpr const char* CMD_FILE_SETTINGS              = "&Settings...";            
+   inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_LBL     = "&Download Data...";
+   inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP     = "Download data from CellarTracker";
+   inline constexpr const char* CMD_FILE_SETTINGS_LBL          = "&Settings...";
    inline constexpr const char* CMD_FILE_SETTINGS_TIP          = "Configure app settings";
-   inline constexpr const char* MENU_VIEWS                     = "&Views";
-   inline constexpr const char* CMD_VIEWS_WINE_LIST            = "&Wine List\tCtrl+W";
+   inline constexpr const char* MENU_VIEWS_LBL                 = "&Views";
+   inline constexpr const char* CMD_VIEWS_WINE_LIST_LBL        = "&Wine List\tCtrl+W";
    inline constexpr const char* CMD_VIEWS_WINE_LIST_TIP        = "View Personal Wine List";
 
 }  // namespace ctb::app::constants

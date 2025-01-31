@@ -14,8 +14,8 @@
 
 #include "ctb/CredentialWrapper.h"
 #include "ctb/data/table_download.h"
-#include "ctb/winapi_util.h"
 #include "external/HttpStatusCodes.h"
+#include "ctb/winapi_util.h"
 
 #include <wx/artprov.h>
 #include <wx/bitmap.h>
@@ -23,10 +23,13 @@
 #include <wx/image.h>
 #include <wx/msgdlg.h>
 #include <wx/panel.h>
+#include <wx/persist/toplevel.h>
 #include <wx/progdlg.h>
 #include <wx/sizer.h>
 #include <wx/stockitem.h>
 #include <wx/xrc/xmlres.h>
+
+#include <format>
 
 namespace ctb::app
 {
@@ -34,12 +37,13 @@ namespace ctb::app
    using namespace magic_enum;
 
    // we don't use enum class because then every time we need to pass an ID to wxObject,
-   // we'd have to case or use std::to_underlying and that's just an ugly waste of time for this.
+   // we'd have to cast or use std::to_underlying and that's just an ugly waste of time 
+   // with no benefit for this use-case.
    enum CmdId
    {
-      ID_FILE_DOWNLOAD_DATA = wxID_HIGHEST,
-      ID_FILE_SETTINGS,
-      ID_VIEW_WINE_LIST
+      CMD_FILE_DOWNLOAD_DATA = wxID_HIGHEST,
+      CMD_FILE_SETTINGS,
+      CMD_VIEW_WINE_LIST
    };
 
 
@@ -57,17 +61,33 @@ namespace ctb::app
    bool MainFrame::Create(wxWindow* parent)
    {
       // give base class a chance set up controls etc
-      if (!wxFrame::Create(parent, wxID_ANY, "", wxDefaultPosition, wxSize{640, 480}))
+      if (!wxFrame::Create(parent, wxID_ANY, constants::APP_NAME_LONG, wxDefaultPosition, FromDIP(wxSize{640, 480})))
          return false;
 
       SetTitle(constants::APP_NAME_LONG);
+      SetIcon(wxIcon{constants::RES_NAME_ICON_PRODUCT});
+      SetName(constants::RES_NAME_MAINFRAME);               // needed for wxPersistence support
 
-      createGrid();
+      // No createGrid() call here, we'll create it once we have some data 
       createMenuBar();
       createStatusBar();
       createToolBar();
 
-      Centre(wxBOTH);
+      // Event handlers
+      Bind(wxEVT_MENU, &MainFrame::onMenuPreferences, this, CmdId::CMD_FILE_SETTINGS);
+      Bind(wxEVT_MENU, &MainFrame::onMenuSyncData, this, CmdId::CMD_FILE_DOWNLOAD_DATA);
+      Bind(wxEVT_MENU, &MainFrame::onMenuWineList, this, CmdId::CMD_VIEW_WINE_LIST);
+      Bind(wxEVT_MENU, &MainFrame::onQuit, this, wxID_EXIT);
+      m_search_ctrl->Bind(wxEVT_SEARCHCTRL_CANCEL_BTN, &MainFrame::onSearchCancelBtn, this);
+      m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onSearchBtn, this);
+      m_search_ctrl->Bind(wxEVT_TEXT_ENTER, &MainFrame::onSearchTextEnter, this);
+
+      if ( !wxPersistentRegisterAndRestore(this, GetName()))
+      {
+         // Choose some custom default size for the first run
+         SetClientSize(FromDIP(wxSize(800, 600)));
+         Centre(wxBOTH);
+      }
 
       return true;
    }
@@ -76,9 +96,9 @@ namespace ctb::app
    void MainFrame::createGrid()
    {
       m_grid = new CellarTrackerGrid{ this };
-      m_grid->SetMinSize(ConvertDialogToPixels(wxSize(400, 250)));
       m_grid->SetMargins(0, 0);
       m_grid->SetColLabelSize(30);
+      this->SendSizeEvent();
    }
 
 
@@ -94,8 +114,8 @@ namespace ctb::app
 
       auto* menu_sync_data = new wxMenuItem{
          menu_file, 
-         ID_FILE_DOWNLOAD_DATA, 
-         constants::CMD_FILE_DOWNLOAD_DATA, 
+         CmdId::CMD_FILE_DOWNLOAD_DATA, 
+         constants::CMD_FILE_DOWNLOAD_DATA_LBL, 
          constants::CMD_FILE_DOWNLOAD_DATA_TIP, 
          wxITEM_NORMAL
       };
@@ -104,8 +124,8 @@ namespace ctb::app
 
       auto* menu_file_preferences = new wxMenuItem{
          menu_file, 
-         ID_FILE_SETTINGS, 
-         constants::CMD_FILE_SETTINGS,
+         CmdId::CMD_FILE_SETTINGS, 
+         constants::CMD_FILE_SETTINGS_LBL,
          constants::CMD_FILE_SETTINGS_TIP,
          wxITEM_NORMAL
       };
@@ -131,54 +151,54 @@ namespace ctb::app
       auto* menu_views = new wxMenu();
       auto* menu_views_wine_list = new wxMenuItem{
          menu_views, 
-         ID_VIEW_WINE_LIST, 
-         constants::CMD_VIEWS_WINE_LIST, 
+         CmdId::CMD_VIEW_WINE_LIST, 
+         constants::CMD_VIEWS_WINE_LIST_LBL, 
          constants::CMD_VIEWS_WINE_LIST_TIP,
          wxITEM_NORMAL
       };
       menu_views->Append(menu_views_wine_list);
-      m_menu_bar->Append(menu_views, constants::MENU_VIEWS);
+      m_menu_bar->Append(menu_views, constants::MENU_VIEWS_LBL);
 
       SetMenuBar(m_menu_bar);
 
-      // Event handlers
-      Bind(wxEVT_MENU, &MainFrame::onMenuPreferences, this, menu_file_preferences->GetId());
-      Bind(wxEVT_MENU, &MainFrame::onMenuSyncData, this, menu_sync_data->GetId());
-      Bind(wxEVT_MENU, &MainFrame::onMenuWineList, this, menu_views_wine_list->GetId());
-      Bind(wxEVT_MENU, &MainFrame::onQuit, this, wxID_EXIT);
    }
 
 
    void MainFrame::createStatusBar()
    {
-      m_status_bar = CreateStatusBar(3);
-      const int sb_field_widths[3] = {-4, -1, -1};
-      m_status_bar->SetStatusWidths(3, sb_field_widths);
-      const int sb_field_styles[3] = {wxSB_NORMAL, wxSB_NORMAL, wxSB_NORMAL};
-      m_status_bar->SetStatusStyles(3, sb_field_styles);
+      constexpr int pane_count{3};
+
+      m_status_bar = CreateStatusBar(pane_count);
+      const int sb_field_widths[pane_count] = {-4, -1, -1};
+      m_status_bar->SetStatusWidths(pane_count, sb_field_widths);
+      const int sb_field_styles[pane_count] = {wxSB_NORMAL, wxSB_NORMAL, wxSB_NORMAL};
+      m_status_bar->SetStatusStyles(pane_count, sb_field_styles);
    }
 
 
    void MainFrame::createToolBar()
    {
+      const auto toolbar_size = FromDIP(wxSize{24,24});
+
       m_tool_bar = CreateToolBar();
 
-      auto bmp = wxBitmapBundle::FromSVGResource("TOOLBAR_SYNCHRONIZE", FromDIP(wxSize(24, 24)));
+      auto bmp = wxBitmapBundle::FromSVGResource("TOOLBAR_DOWNLOAD", toolbar_size);
+      assert(bmp.IsOk());
+      m_tool_bar->AddTool(CmdId::CMD_FILE_DOWNLOAD_DATA, wxEmptyString, bmp, constants::CMD_FILE_DOWNLOAD_DATA_TIP);
+      m_tool_bar->AddSeparator();
 
-      m_tool_bar->AddTool(wxID_ANY, wxEmptyString, bmp);
+      bmp = wxBitmapBundle::FromSVGResource("TOOLBAR_SETTINGS", toolbar_size);
+      assert(bmp.IsOk());
+      m_tool_bar->AddTool(CmdId::CMD_FILE_SETTINGS, wxEmptyString, bmp, constants::CMD_FILE_SETTINGS_TIP);
+      m_tool_bar->AddSeparator();
 
       m_search_ctrl = new wxSearchCtrl(m_tool_bar, wxID_ANY, wxEmptyString);
       m_search_ctrl->ShowSearchButton(true);
       m_search_ctrl->ShowCancelButton(true);
-
       m_tool_bar->AddControl(m_search_ctrl);
+
       m_tool_bar->Realize();
       m_search_ctrl->SetFocus();
-
-      m_search_ctrl->Bind(wxEVT_SEARCHCTRL_CANCEL_BTN, &MainFrame::onSearchCancelBtn, this);
-      m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onSearchBtn, this);
-      m_search_ctrl->Bind(wxEVT_TEXT_ENTER, &MainFrame::onSearchTextEnter, this);
-
    }
 
 
@@ -282,6 +302,9 @@ namespace ctb::app
       wxBusyCursor busy{};
       try
       {
+         if (!m_grid)
+            createGrid();
+
          auto tbl = wxGetApp().getGridTable(GridTableMgr::GridTableId::WineList);
          assert(tbl);
          assert(m_grid);
@@ -323,6 +346,7 @@ namespace ctb::app
 
    void MainFrame::doSearchFilter()
    {
+      if (!m_grid) return;
       try
       {
          m_grid->filterBySubstring(m_search_ctrl->GetValue().wx_str());
@@ -337,6 +361,7 @@ namespace ctb::app
 
    void MainFrame::clearSearchFilter()
    {
+      if (!m_grid) return;
       try
       {
          m_search_ctrl->ChangeValue("");
@@ -352,12 +377,21 @@ namespace ctb::app
 
    void MainFrame::updateStatusBarCounts()
    {
-      assert(m_grid);
-      auto total = m_grid->getTotalRowCount();
-      auto filtered = m_grid->getFilteredRowCount();
-
-      SetStatusText(std::format(constants::FMT_LBL_TOTAL_ROWS, total), STATUS_BAR_PANE_TOTAL_ROWS);
+            
+      size_t total{0};
+      size_t filtered{0};
       
+      if (m_grid)
+      {
+         total = m_grid->getTotalRowCount();
+         filtered = m_grid->getFilteredRowCount();
+      }
+
+      if (total)
+         SetStatusText(std::format(constants::FMT_LBL_TOTAL_ROWS, total), STATUS_BAR_PANE_TOTAL_ROWS);
+      else 
+         SetStatusText("", STATUS_BAR_PANE_TOTAL_ROWS);
+
       if (filtered < total)
          SetStatusText(std::format(constants::FMT_LBL_FILTERED_ROWS, filtered), STATUS_BAR_PANE_FILTERED_ROWS);
       else
