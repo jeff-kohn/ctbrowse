@@ -19,6 +19,7 @@ namespace ctb::data
       return std::nullopt;
    }
 
+
    /// @brief parse a field that may contain a null value
    ///
    /// if value_as_null.has_value(), then a parsed value matching 
@@ -84,10 +85,10 @@ namespace ctb::data
          m_rec.BeginConsume      = parseOptional<uint16_t>(row[to_underlying(Prop::BeginConsume)], 9999);
          m_rec.EndConsume        = parseOptional<uint16_t>(row[to_underlying(Prop::EndConsume)], 9999);
 
-         m_rec.Price             = parseDouble(row[to_underlying(Prop::Price)]);
-         m_rec.Valuation         = parseDouble(row[to_underlying(Prop::Valuation)]);
-         m_rec.CTScore           = parseDouble(row[to_underlying(Prop::CTScore)]);
-         m_rec.MYScore           = parseDouble(row[to_underlying(Prop::MYScore)]);
+         m_rec.Price             = parseOptional<double>(row[to_underlying(Prop::Price)]);
+         m_rec.Valuation         = parseOptional<double>(row[to_underlying(Prop::Valuation)]);
+         m_rec.CTScore           = parseOptional<double>(row[to_underlying(Prop::CTScore)]);
+         m_rec.MYScore           = parseOptional<double>(row[to_underlying(Prop::MYScore)]);
 
          // calculated field but we store it's value for perf reason.
          m_wine_and_vintage      = std::format("{} {}", vintage(), wineName());

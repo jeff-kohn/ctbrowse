@@ -1,0 +1,22 @@
+
+
+
+#pragma code_page(65001) // UTF-8
+
+
+#ifndef wxUSE_RC_MANIFEST
+#define wxUSE_RC_MANIFEST 1
+#endif
+
+#ifndef wxUSE_DPI_AWARE_MANIFEST
+#define wxUSE_DPI_AWARE_MANIFEST 2
+#endif
+
+// SVG files for toolbar images
+//
+TOOLBAR_DOWNLOAD            RCDATA                  "art\\toolbar_download.svg"
+TOOLBAR_REFRESH             RCDATA                  "art\\toolbar_refresh.svg"
+TOOLBAR_SETTINGS            RCDATA                  "art\\toolbar_settings.svg"
+TOOLBAR_SYNCHRONIZE         RCDATA                  "art\\toolbar_synchronize.svg"
+
+#include "wx/msw/wx.rc"

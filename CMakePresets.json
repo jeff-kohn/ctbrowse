@@ -10,7 +10,7 @@
          "name": "dev-mode",
          "hidden": true,
          "cacheVariables": {
-            "ct_search_DEVELOPER_MODE": "ON",
+            "ctBrowse_DEVELOPER_MODE": "ON",
             "BUILD_TESTING": "OFF"
          }
       },

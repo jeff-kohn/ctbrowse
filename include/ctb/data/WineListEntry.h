@@ -10,11 +10,6 @@
 #include "ctb/ctb.h"
 #include "ctb/data/table_data.h"
 
-#pragma warning(push)
-#pragma warning(disable: 4365 4464 4702)
-#include "external/csv.hpp"
-#pragma warning(pop)
-
 #include <magic_enum/magic_enum.hpp>
 #include <cstdint>
 #include <deque>

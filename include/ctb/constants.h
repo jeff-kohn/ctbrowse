@@ -43,50 +43,10 @@ namespace ctb::constants
    inline constexpr const char* ERROR_INVALID_ROW_INDEX        = "Invalid row index";
    inline constexpr const char* ERROR_EDITING_NOT_SUPPORTED    = "Editing data is not supported.";
    inline constexpr const char* ERROR_NULL_POINTER             = "Invalid Parameter (nullptr).";
-   inline constexpr const char* ERROR_INVALID_GRID_STATE       = "Corrupted grid state. Please restart app.";
+   inline constexpr const char* ERROR_NO_GRID_TABLE            = "No data is currently loaded. Open a data view before searching.";
    inline constexpr const char* FMT_ERROR_FILE_NOT_FOUND       = "File '{}' was not found.";
    inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND       = "Folder '{}' does not exist.";
    inline constexpr const char* FMT_ERROR_CURL_ERROR           = "The operation failed with CURL error {}";
    inline constexpr const char* FMT_ERROR_HTTP_STATUS_CODE     = "The operation failed with HTTP status code {}";
-
-   inline constexpr const char* CONFIG_PATH_SYNC                  = "/Preferences/DataSync";
-   inline constexpr const char* CONFIG_VALUE_SYNC_ON_STARTUP      = "SyncOnStartup";
-   inline constexpr const char* CONFIG_VALUE_DEFAULT_SYNC_TABLES  = "DefaultSyncTables";
-
-   inline constexpr const char* TABLE_DESCRIPTION_LIST            = "Personal Wine List";
-   inline constexpr const char* TABLE_DESCRIPTION_INVENTORY       = "Bottle Inventory";
-   inline constexpr const char* TABLE_DESCRIPTION_NOTES           = "Tasting Notes";
-   inline constexpr const char* TABLE_DESCRIPTION_PRIVATE_NOTES   = "Private Notes";
-   inline constexpr const char* TABLE_DESCRIPTION_PURCHASE        = "Wine Purchases";
-   inline constexpr const char* TABLE_DESCRIPTION_PENDING         = "Pending Wine Deliveries";
-   inline constexpr const char* TABLE_DESCRIPTION_CONSUMED        = "Consumed Bottles";
-   inline constexpr const char* TABLE_DESCRIPTION_AVAILABILITY    = "Ready to Drink List";
-   inline constexpr const char* TABLE_DESCRIPTION_TAG             = "Tags";
-   inline constexpr const char* TABLE_DESCRIPTION_PRO_REVIEW      = "Manually Entered Pro Reviews";
-   inline constexpr const char* TABLE_DESCRIPTION_BOTTLES         = "Raw Bottle List";
-   inline constexpr const char* TABLE_DESCRIPTION_FOOD_TAGS       = "Food Pairing Tags";
-
-   inline constexpr const char* FMT_STATUS_FILE_DOWNLOADING       = "Downloading file '{}'...";
-   inline constexpr const char* FMT_STATUS_FILE_DOWNLOADED        = "Successfully downloaded file '{}'.";
-   inline constexpr const char* STATUS_DOWNLOAD_COMPLETE          = "Download operation completed.";
-   inline constexpr const char* STATUS_DOWNLOAD_CANCELED          = "Download operation canceled.";
-   inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
-   inline constexpr const char* STATUS_NO_MATCHING_ROWS           = "No rows matched the search text.";
-
-   inline constexpr const char* LBL_WINE                          = "Wine";
-   inline constexpr const char* LBL_VARIETAL                      = "Varietal";
-   inline constexpr const char* LBL_QTY                           = "Qty";
-   inline constexpr const char* LBL_CT_SCORE                      = "CT Score";
-   inline constexpr const char* LBL_MY_SCORE                      = "My Score";
-   inline constexpr const char* LBL_MY_PRICE                      = "My Price";
-   inline constexpr const char* LBL_DRINK_BY                      = "Drink By";
-   inline constexpr const char* LBL_SEARCH                        = "&Search";
-   inline constexpr const char* FMT_LBL_TOTAL_ROWS                = "Total Rows: {}";
-   inline constexpr const char* FMT_LBL_FILTERED_ROWS             = "Filtered Rows: {}";
-
-   inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
-   inline constexpr const char* FMT_TITLE_TYPED_ERROR             = "{} Error";
-
-
 
 } // namespace ctb::constants

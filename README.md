@@ -1,6 +1,6 @@
-# ct_search
+# ctBrowse
 
-This is the ct_search project.
+This is the ctBrowse project.
 
 # Building and installing
 
