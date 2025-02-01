@@ -8,28 +8,39 @@
 
 #include "MainFrame.h"
 #include "App.h"
-#include "dialogs/TableSyncDialog.h"
-#include "grids/GridTableWineList.h"
 #include "wx_helpers.h"
+#include "dialogs/TableSyncDialog.h"
+#include "grids/CellarTrackerGrid.h"
+#include "grids/GridTableWineList.h"
+#include "panels/GridOptionsPanel.h"
 
-#include "ctb/CredentialWrapper.h"
-#include "ctb/data/table_download.h"
-#include "external/HttpStatusCodes.h"
-#include "ctb/winapi_util.h"
+#include <ctb/CredentialWrapper.h>
+#include <ctb/data/table_download.h>
+#include <ctb/winapi_util.h>
+#include <external/HttpStatusCodes.h>
 
 #include <wx/artprov.h>
 #include <wx/bitmap.h>
+#include <wx/frame.h>
+#include <wx/gdicmn.h>
+#include <wx/grid.h>
 #include <wx/icon.h>
 #include <wx/image.h>
+#include <wx/menu.h>
 #include <wx/msgdlg.h>
 #include <wx/panel.h>
 #include <wx/persist/toplevel.h>
 #include <wx/progdlg.h>
+#include <wx/splitter.h>
 #include <wx/sizer.h>
+#include <wx/srchctrl.h>
+#include <wx/statusbr.h>
 #include <wx/stockitem.h>
+#include <wx/toolbar.h>
 #include <wx/xrc/xmlres.h>
 
-#include <format>
+#include <memory>
+
 
 namespace ctb::app
 {
@@ -68,7 +79,7 @@ namespace ctb::app
       SetIcon(wxIcon{constants::RES_NAME_ICON_PRODUCT});
       SetName(constants::RES_NAME_MAINFRAME);               // needed for wxPersistence support
 
-      // No createGrid() call here, we'll create it once we have some data 
+      // No createGridWindows() call here, we'll create it once we have some data 
       createMenuBar();
       createStatusBar();
       createToolBar();
@@ -93,11 +104,19 @@ namespace ctb::app
    }
 
 
-   void MainFrame::createGrid()
+   void MainFrame::createGridWindows()
    {
+      auto box_sizer = std::make_unique<wxBoxSizer>(wxHORIZONTAL);
+
+      m_grid_options = new GridOptionsPanel{ this };
+      box_sizer->Add(m_grid_options, wxSizerFlags(20).Expand());
+
       m_grid = new CellarTrackerGrid{ this };
       m_grid->SetMargins(0, 0);
-      m_grid->SetColLabelSize(30);
+      m_grid->SetColLabelSize(FromDIP(30));
+      box_sizer->Add(m_grid, wxSizerFlags(80).Expand());
+
+      SetSizer(box_sizer.release());
       this->SendSizeEvent();
    }
 
@@ -303,7 +322,7 @@ namespace ctb::app
       try
       {
          if (!m_grid)
-            createGrid();
+            createGridWindows();
 
          auto tbl = wxGetApp().getGridTable(GridTableMgr::GridTableId::WineList);
          assert(tbl);

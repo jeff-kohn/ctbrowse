@@ -56,8 +56,8 @@ target_sources(${target_name}
      "grids/GridTableMgr.h"
      "grids/GridTableWineList.h"
      "grids/GridTableWineList.cpp"
-     "panels/GridToolsPanel.cpp"
-     "panels/GridToolsPanel.h"
+     "panels/GridOptionsPanel.cpp"
+     "panels/GridOptionsPanel.h"
      "resources/resource.rc"
      "resources/utf8.manifest"
      ${${PROJECT_NAME}_VERSION_RESOURCE}

@@ -7,7 +7,8 @@
 namespace ctb::app
 {
 
-   CellarTrackerGrid::CellarTrackerGrid(wxWindow* parent) : wxGrid(parent, wxID_ANY)
+   CellarTrackerGrid::CellarTrackerGrid(wxWindow* parent) : 
+      wxGrid(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxBORDER_THEME)
    {
       InitializeDefaults();
    }

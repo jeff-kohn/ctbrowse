@@ -20,7 +20,7 @@ find_package(wxWidgets CONFIG REQUIRED)
 create_windows_target(wxsample)
 target_sources(wxsample
    PRIVATE
-      "notebook.cpp"
+      "wrapsizer.cpp"
 )
 target_link_libraries(wxsample 
    PRIVATE 

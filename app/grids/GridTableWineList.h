@@ -46,12 +46,12 @@ namespace ctb::app
          DisplayColumn{ data::WineListEntry::Prop::Country                                                              },
          DisplayColumn{ data::WineListEntry::Prop::Region                                                               },
          DisplayColumn{ data::WineListEntry::Prop::Appellation                                                          },
-         DisplayColumn{ data::WineListEntry::Prop::Quantity,   DisplayColumn::Format::Number,   constants::LBL_QTY      },
-         DisplayColumn{ data::WineListEntry::Prop::Pending,    DisplayColumn::Format::Number                            },
-         DisplayColumn{ data::WineListEntry::Prop::CTScore,    DisplayColumn::Format::Decimal,  constants::LBL_CT_SCORE },
-         DisplayColumn{ data::WineListEntry::Prop::MYScore,    DisplayColumn::Format::Decimal,  constants::LBL_MY_SCORE },
-         DisplayColumn{ data::WineListEntry::Prop::Price,      DisplayColumn::Format::Currency, constants::LBL_MY_PRICE },
-         DisplayColumn{ data::WineListEntry::Prop::EndConsume, DisplayColumn::Format::Number,   constants::LBL_DRINK_BY }
+         //DisplayColumn{ data::WineListEntry::Prop::Quantity,   DisplayColumn::Format::Number,   constants::LBL_QTY      },
+         //DisplayColumn{ data::WineListEntry::Prop::Pending,    DisplayColumn::Format::Number                            },
+         //DisplayColumn{ data::WineListEntry::Prop::CTScore,    DisplayColumn::Format::Decimal,  constants::LBL_CT_SCORE },
+         //DisplayColumn{ data::WineListEntry::Prop::MYScore,    DisplayColumn::Format::Decimal,  constants::LBL_MY_SCORE },
+         //DisplayColumn{ data::WineListEntry::Prop::Price,      DisplayColumn::Format::Currency, constants::LBL_MY_PRICE },
+         //DisplayColumn{ data::WineListEntry::Prop::EndConsume, DisplayColumn::Format::Number,   constants::LBL_DRINK_BY }
       };
 
 

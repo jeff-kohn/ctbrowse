@@ -7,25 +7,27 @@
  *********************************************************************/
 #pragma once
 
-#include "grids/CellarTrackerGrid.h"
-#include "panels/GridToolsPanel.h"
-
 #include <wx/event.h>
 #include <wx/frame.h>
-#include <wx/gdicmn.h>
-#include <wx/grid.h>
-#include <wx/menu.h>
-#include <wx/srchctrl.h>
-#include <wx/sizer.h>
-#include <wx/splitter.h>
-#include <wx/statusbr.h>
-#include <wx/toolbar.h>
 
 #include <format>
 
 
+/// forward declare wxWidget classes to avoid header pollution.
+class wxBoxSizer;
+class wxMenuBar;
+class wxSearchCtrl;
+class wxSplitterWindow;
+class wxStatusBar;
+class wxToolBar;
+
+
 namespace ctb::app
 {
+   class CellarTrackerGrid;   // the grid window
+   class GridOptionsPanel;    // the options panel
+
+
    class MainFrame final : public wxFrame
    {
    public:
@@ -67,20 +69,24 @@ namespace ctb::app
 
 
       /// @brief retrieves a pointer to the active grid.
-      /// @return 
+      ///
+      /// this should be called as-needed, don't store the returned
+      /// value because the while the returned object may not
+      /// remain the active grid in the window.
+      /// 
       CellarTrackerGrid* getGrid() { return m_grid; }
 
    private:
       CellarTrackerGrid*   m_grid{};
       wxBoxSizer*          m_main_sizer{};
       wxMenuBar*           m_menu_bar{};
-      GridToolsPanel*      m_grid_tools_panel{};
+      GridOptionsPanel*    m_grid_options{};
       wxSearchCtrl*        m_search_ctrl{};
       wxSplitterWindow*    m_splitter{};
       wxStatusBar*         m_status_bar{};
       wxToolBar*           m_tool_bar{};
 
-      void createGrid();
+      void createGridWindows();
       void createMenuBar();
       void createStatusBar();
       void createToolBar();
