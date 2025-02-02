@@ -6,6 +6,7 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 #pragma once
+#include "grids/GridTableBase.h"
 
 #include <wx/choice.h>
 #include <wx/gdicmn.h>
@@ -26,6 +27,8 @@ namespace ctb::app
       GridOptionsPanel(MainFrame* parent);
 
       bool Create(MainFrame* parent);
+
+      void populateSortOptions(GridTableBase::GridTablePtr grid);
 
    private:
       MainFrame* m_parent{};

@@ -1,5 +1,6 @@
 #include "MainFrame.h"
 #include "App.h"
+#include "grids/GridTableBase.h"
 #include "panels/GridOptionsPanel.h"
 
 #include <wx/sizer.h>
@@ -43,6 +44,19 @@ namespace ctb::app
       SetSizerAndFit(top_sizer);
 
       return true;
+   }
+
+   void GridOptionsPanel::populateSortOptions(GridTableBase::GridTablePtr grid)
+   {
+      using SortName = GridTableBase::SortOptionName;
+      auto sort_options = vws::all(grid->availableSortOptions()) 
+         | vws::transform([](const SortName& s) -> wxString 
+            {  
+               return wxString{s.sort_name.data(), s.sort_name.length() };
+            })
+         | rng::to<std::vector>();
+
+      m_sort_combo->Append(sort_options);
    }
 
 

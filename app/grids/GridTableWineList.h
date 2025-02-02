@@ -10,6 +10,7 @@
 #include "app_constants.h"
 #include "ctb/data/DisplayColumn.h"
 #include "ctb/data/SubStringFilter.h"
+#include "ctb/data/TableSort.h"
 #include "ctb/data/WineListEntry.h"
 #include "grids/GridTableBase.h"
 
@@ -32,8 +33,12 @@ namespace ctb::app
    {
    public:
       /// @brief type used for describing how to display a column in the grid
-      using DisplayColumn = data::DisplayColumn<data::WineListEntry>;
-      using SubStringFilter = data::SubStringFilter<data::WineListEntry>;
+      using RecordType = data::WineListEntry;
+      using Prop = RecordType::Prop;
+      using DisplayColumn = data::DisplayColumn<RecordType>;
+      using SubStringFilter = data::SubStringFilter<RecordType>;
+      using TableSort = data::TableSort<RecordType>;
+      using SortSelection = GridTableBase::SortOptionName;
 
       explicit GridTableWineList(data::WineListData&& data) : 
          m_data{std::move(data)},
@@ -42,16 +47,25 @@ namespace ctb::app
       {}
 
       static inline const std::array DefaultDisplayColumns { 
-         DisplayColumn{ data::WineListEntry::Prop::WineAndVintage,                              constants::LBL_WINE     },
-         DisplayColumn{ data::WineListEntry::Prop::Country                                                              },
-         DisplayColumn{ data::WineListEntry::Prop::Region                                                               },
-         DisplayColumn{ data::WineListEntry::Prop::Appellation                                                          },
-         //DisplayColumn{ data::WineListEntry::Prop::Quantity,   DisplayColumn::Format::Number,   constants::LBL_QTY      },
-         //DisplayColumn{ data::WineListEntry::Prop::Pending,    DisplayColumn::Format::Number                            },
-         //DisplayColumn{ data::WineListEntry::Prop::CTScore,    DisplayColumn::Format::Decimal,  constants::LBL_CT_SCORE },
-         //DisplayColumn{ data::WineListEntry::Prop::MYScore,    DisplayColumn::Format::Decimal,  constants::LBL_MY_SCORE },
-         //DisplayColumn{ data::WineListEntry::Prop::Price,      DisplayColumn::Format::Currency, constants::LBL_MY_PRICE },
-         //DisplayColumn{ data::WineListEntry::Prop::EndConsume, DisplayColumn::Format::Number,   constants::LBL_DRINK_BY }
+         DisplayColumn{ Prop::WineAndVintage,                              constants::LBL_WINE     },
+         DisplayColumn{ Prop::Country                                                              },
+         DisplayColumn{ Prop::Region                                                               },
+         DisplayColumn{ Prop::Appellation                                                          },
+         DisplayColumn{ Prop::Quantity,   DisplayColumn::Format::Number,   constants::LBL_QTY      },
+         DisplayColumn{ Prop::Pending,    DisplayColumn::Format::Number                            },
+         DisplayColumn{ Prop::CTScore,    DisplayColumn::Format::Decimal,  constants::LBL_CT_SCORE },
+         DisplayColumn{ Prop::MYScore,    DisplayColumn::Format::Decimal,  constants::LBL_MY_SCORE },
+      };
+
+
+      static inline const std::array SortOptions{ 
+         TableSort{ { Prop::WineName,       Prop::Vintage  },  constants::SORT_OPTION_WINE_VINTAGE },
+         TableSort{ { Prop::Vintage,        Prop::WineName },  constants::SORT_OPTION_VINTAGE_WINE },
+         TableSort{ { Prop::Country,        Prop::WineName,    Prop::Vintage }, constants::SORT_OPTION_COUNTRY_WINE },
+         TableSort{ { Prop::Country,        Prop::Region,      Prop::WineName, Prop::Vintage }, constants::SORT_OPTION_COUNTRY_REGION },
+         TableSort{ { Prop::Country,        Prop::Appellation, Prop::WineName, Prop::Vintage }, constants::SORT_OPTION_COUNTRY_APPELATION },
+         TableSort{ { Prop::MasterVarietal, Prop::WineName,    Prop::Vintage }, constants::SORT_OPTION_VARIETAL_WINE },
+         TableSort{ { Prop::Appellation,    Prop::WineName,    Prop::Vintage }, constants::SORT_OPTION_APPELATION_WINE }
       };
 
 
@@ -117,8 +131,24 @@ namespace ctb::app
       void clearSubStringFilter() override;
 
 
-      size_t getTotalRowCount() const override       {  return m_data.size();  }  
-      size_t getFilteredRowCount() const override    {  return m_view->size(); }
+      /// @brief get the total row count (non-virtual)
+      size_t totalRowCount() const override       {  return m_data.size();  }  
+
+
+      /// @brief get the filtered row count (non-virtual)
+      size_t filteredRowCount() const override    {  return m_view->size(); }
+
+
+      // returns a collection of available sort options. 
+      std::vector<SortSelection> availableSortOptions() const override;
+
+
+      // retrieves the currently-active sort option
+      SortSelection currentSortSelection() const override;
+
+
+      // sets the currently-active sort option
+      void setSortSelection(size_t index) override;
 
 
       // this class is meant to be instantiated on the heap.
@@ -130,14 +160,14 @@ namespace ctb::app
 
    private:
       data::WineListData             m_data{};
-      data::WineListData             m_filtered_data{};  // due to mechanics of wxGrid, we need to copy the dataset when filtering
-      data::WineListData*            m_view{};           // may point to m_data or m_filtered_data depending if filter is active
+      data::WineListData             m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
+      data::WineListData*            m_view{};                 // may point to m_data or m_filtered_data depending if filter is active
       ColumnList                     m_display_columns{};
+      size_t                         m_sort_index{};
       std::optional<SubStringFilter> m_substring_filter{};
 
       bool filterBySubstringImpl(std::string_view substr, const SubStringFilter& filter);
-      void refreshView();
+      void sortData();
    };
-
 
 } // namespace ctb::app

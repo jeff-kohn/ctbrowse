@@ -117,6 +117,8 @@ namespace ctb::app
       box_sizer->Add(m_grid, wxSizerFlags(80).Expand());
 
       SetSizer(box_sizer.release());
+
+      //m_grid_options->populateSortOptions(m_grid);
       this->SendSizeEvent();
    }
 

@@ -39,6 +39,15 @@ namespace ctb::constants
    inline constexpr const char* CMD_VIEWS_WINE_LIST_LBL        = "&Wine List\tCtrl+W";
    inline constexpr const char* CMD_VIEWS_WINE_LIST_TIP        = "View Personal Wine List";
 
+
+   inline constexpr const char* SORT_OPTION_APPELATION_WINE    = "Appellation, Wine Name, Vintage";
+   inline constexpr const char* SORT_OPTION_COUNTRY_WINE       = "Country, Wine Name, Vintage";
+   inline constexpr const char* SORT_OPTION_COUNTRY_REGION     = "Country, Region, Wine Name, Vintage";
+   inline constexpr const char* SORT_OPTION_COUNTRY_APPELATION = "Country, Appellation, Wine Name, Vintage";
+   inline constexpr const char* SORT_OPTION_VARIETAL_WINE      = "Varietal, Wine Name, Vintage";
+   inline constexpr const char* SORT_OPTION_VINTAGE_WINE       = "Vintage, Wine Name";
+   inline constexpr const char* SORT_OPTION_WINE_VINTAGE       = "Wine Name, Vintage";
+
    inline constexpr int UNSPECIFIED = -1;
 
 }  // namespace ctb::app::constants

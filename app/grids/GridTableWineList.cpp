@@ -57,7 +57,7 @@ namespace ctb::app
       auto display_col = m_display_columns[static_cast<size_t>(col)];
       auto prop = display_col.prop_id;
 
-      // if the expected value is returned format it as string and return it to caller
+      // if the expected value is returned, format it as string and return it to caller
       // otherwise we just return an empty string
       return (*m_view)[row_idx][prop]
          .and_then([&display_col](WineListEntry::ValueWrapper val) -> std::expected<wxString, Error>
@@ -126,6 +126,33 @@ namespace ctb::app
    }
 
 
+   std::vector<GridTableBase::SortOptionName> GridTableWineList::availableSortOptions() const
+   {
+      std::vector<GridTableBase::SortOptionName> options{};
+      options.reserve(GridTableWineList::SortOptions.size()); 
+
+      for (const auto& [i, table_sort] : vws::enumerate(GridTableWineList::SortOptions))
+      {
+         options.emplace_back(GridTableBase::SortOptionName{ static_cast<size_t>(i), table_sort.sort_name  });
+      }
+      return options;
+   }
+
+
+   ctb::app::GridTableBase::SortOptionName GridTableWineList::currentSortSelection() const
+   {
+      return SortSelection{ m_sort_index };
+   }
+
+
+   void GridTableWineList::setSortSelection(size_t index) 
+   {
+      m_sort_index = index;
+      sortData();
+   }
+
+
+
    bool GridTableWineList::filterBySubstringImpl(std::string_view substr, const SubStringFilter& filter)
    {
       auto filtered_data = vws::all(m_data) | vws::filter(filter)
@@ -140,6 +167,14 @@ namespace ctb::app
       m_view = &m_filtered_data;
 
       return true;
+   }
+
+   void GridTableWineList::sortData()
+   {
+      // sort the data table, then re-apply any filters to the view. Otherwise we'd have to sort twice
+      rng::sort(m_data, SortOptions[m_sort_index]);
+
+      // todo
    }
 
 } // namespace ctb::app

@@ -31,8 +31,19 @@ namespace ctb::app
       /// @brief clear the substring filter.
       virtual void clearSubStringFilter() = 0;
 
-      virtual size_t getTotalRowCount() const = 0;
-      virtual size_t getFilteredRowCount() const  = 0;
+      virtual size_t totalRowCount() const = 0;
+      virtual size_t filteredRowCount() const  = 0;
+
+      struct SortOptionName
+      {
+         size_t            sort_index{};
+         std::string_view  sort_name{};
+      };
+
+      virtual std::vector<SortOptionName> availableSortOptions() const = 0;
+      virtual SortOptionName currentSortSelection() const = 0;
+      virtual void setSortSelection(size_t index) = 0;
+
    };
 
 

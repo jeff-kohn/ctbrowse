@@ -34,8 +34,8 @@ namespace ctb::data
       /// @brief  function operator used to perform the substring search. 
       ///
       /// this function will check each specified property to see if it contains
-      /// the search substring, returning true if a match was round. case-sensitive
-      /// search is used (for now)
+      /// the search substring, returning true if a match was round. case-neutral
+      /// search is used
       /// 
       bool operator()(const T& rec) const
       {

@@ -53,8 +53,14 @@ namespace ctb::app
       CellarTrackerGrid(const CellarTrackerGrid&) = delete;
       CellarTrackerGrid(CellarTrackerGrid&&) = delete;
 
-      size_t getTotalRowCount() const     {  return m_table->getTotalRowCount(); }
-      size_t getFilteredRowCount() const  {  return m_table->getFilteredRowCount(); } 
+      size_t getTotalRowCount() const     {  return m_table->totalRowCount(); }
+      size_t getFilteredRowCount() const  {  return m_table->filteredRowCount(); } 
+
+ //     using SortOptionName = GridTableBase::SortOptionName;
+//      virtual std::vector<SortOptionName> availableSortOptions() {};
+ //     virtual SortOptionName currentSortSelection() {};
+ //     virtual void setSortSelection(size_t index){};
+
 
    protected:
       GridTablePtr m_table{};
