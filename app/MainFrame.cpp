@@ -64,18 +64,23 @@ namespace ctb::app
    }
 
 
-   MainFrame::MainFrame(wxWindow* parent) : m_event_source{ GridTableSource::create() }
+   [[nodiscard]] MainFrame* MainFrame::create()
    {
-      Create(parent);
+      // give base class a chance set up controls etc
+      std::unique_ptr<MainFrame> wnd{ new MainFrame{} };
+
+      const auto default_size = wnd->FromDIP(wxSize{640, 480});
+      if (!wnd->Create(nullptr, wxID_ANY, constants::APP_NAME_LONG, wxDefaultPosition, default_size))
+      {
+         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      }
+      wnd->initControls();
+      return wnd.release(); // top-level window manages its own lifetime, we return non-owning pointer
    }
 
 
-   bool MainFrame::Create(wxWindow* parent)
+   void MainFrame::initControls()
    {
-      // give base class a chance set up controls etc
-      if (!wxFrame::Create(parent, wxID_ANY, constants::APP_NAME_LONG, wxDefaultPosition, FromDIP(wxSize{640, 480})))
-         return false;
-
       SetTitle(constants::APP_NAME_LONG);
       SetIcon(wxIcon{constants::RES_NAME_ICON_PRODUCT});
       SetName(constants::RES_NAME_MAINFRAME);               // needed for wxPersistence support
@@ -100,10 +105,7 @@ namespace ctb::app
          SetClientSize(FromDIP(wxSize(800, 600)));
          Centre(wxBOTH);
       }
-
-      return true;
    }
-
 
    void MainFrame::createGridWindows()
    {

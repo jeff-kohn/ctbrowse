@@ -57,17 +57,27 @@ namespace ctb::app
 
    bool App::OnInit()
    {
-      if (!wxApp::OnInit())
-         return false;
+      try
+      {
+         if (!wxApp::OnInit())
+            return false;
 
-      ::wxInitAllImageHandlers();
+         m_main_frame = MainFrame::create();
+         m_main_frame->Center();
+         m_main_frame->Show();
+         SetTopWindow(m_main_frame);
 
-      m_main_frame = new MainFrame{nullptr};
-      SetTopWindow(m_main_frame);
-      m_main_frame->Center();
-      m_main_frame->Show();
-
-      return true;
+         return true;
+      }
+      catch(Error& err)
+      {
+         displayErrorMessage(err);
+      }
+      catch(std::exception& e)
+      {
+         displayErrorMessage(e.what());
+      }
+      return false;
    } 
 
 
@@ -85,8 +95,9 @@ namespace ctb::app
    {
       auto *config = wxConfigBase::Get(false);
       if (nullptr == config)
+      {
          throw Error{ "No configuration object available" };
-
+      }
       return *config;
    }
 
@@ -95,8 +106,9 @@ namespace ctb::app
    {
       auto *config = wxConfigBase::Get(false);
       if (nullptr == config)
+      {
          throw Error{ "No configuration object available" };
-
+      }
       return *config;
    }
 

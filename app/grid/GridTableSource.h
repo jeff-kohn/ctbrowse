@@ -77,10 +77,6 @@ namespace ctb::app
       bool signal(GridTableEvent event) override;
  
 
-      /// @brief destructor
-      ///
-      ~GridTableSource() override = default;
-
    private:
       GridTablePtr m_table{};
       std::unordered_set<IGridTableEventSink*> m_observers{};

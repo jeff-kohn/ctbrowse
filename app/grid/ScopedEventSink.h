@@ -48,13 +48,6 @@ namespace ctb::app
       }
 
 
-      /// @brief destructor
-      ~ScopedEventSink()
-      {
-         detach();
-      }
-
-
       /// @brief attach this sink to the specified source
       void reset(GridTableEventSourcePtr source)
       {
@@ -79,11 +72,18 @@ namespace ctb::app
       }
 
 
+      /// @brief destructor
+      ~ScopedEventSink() noexcept
+      {
+         detach();
+      }
+
+
    private:
       IGridTableEventSink*    m_sink{ nullptr };
       GridTableEventSourcePtr m_source{ nullptr };
 
-      void attach()
+      void attach() noexcept
       {
          if (m_source)
          {

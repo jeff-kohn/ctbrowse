@@ -38,18 +38,13 @@ namespace ctb::app
       static inline constexpr int STATUS_BAR_PANE_FILTERED_ROWS = 1;
       static inline constexpr int STATUS_BAR_PANE_TOTAL_ROWS = 2;
 
-      /// @brief default constructor for 2-phase initialization, must call Create(parent)
-      MainFrame();  
 
-
-      /// @brief constructor for immediate initialization, calls Create(parent) for you
-      MainFrame(wxWindow* parent);
-
-
-      /// @brief create the window object
-      ///
-      /// this should only be directly called if this object was default-constructed
-      bool Create(wxWindow* parent);
+      /// @brief static factor method to create an initialize an instance of the MainFrame class
+      /// 
+      /// throws a ctb::Error if the window can't be created; otherwise returns a non-owning pointer 
+      /// to the window (top-level window so it will manage its own lifetime). 
+      /// 
+      static [[nodiscard]] MainFrame* create();
 
 
       /// @brief set status bar text using std::format() syntax
@@ -70,17 +65,22 @@ namespace ctb::app
          SetStatusText(std::format(fmt_str, std::forward<Args>(args)...), pane_index);
       }
 
+
    private:
       CellarTrackerGrid*      m_grid{};
+      GridOptionsPanel*       m_grid_options{};
+      GridTableEventSourcePtr m_event_source{};
       wxBoxSizer*             m_main_sizer{};
       wxMenuBar*              m_menu_bar{};
-      GridOptionsPanel*       m_grid_options{};
       wxSearchCtrl*           m_search_ctrl{};
       wxSplitterWindow*       m_splitter{};
       wxStatusBar*            m_status_bar{};
       wxToolBar*              m_tool_bar{};
-      GridTableEventSourcePtr m_event_source{};
 
+      /// @brief private ctor called by static create()
+      MainFrame();
+
+      void initControls();
       void createGridWindows();
       void createMenuBar();
       void createStatusBar();

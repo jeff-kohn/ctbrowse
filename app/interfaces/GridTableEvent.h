@@ -93,7 +93,7 @@ namespace ctb::app
       
       /// @brief virtual destructor
       ///
-      virtual ~IGridTableEventSource()
+      virtual ~IGridTableEventSource() noexcept
       {}
    };
 
