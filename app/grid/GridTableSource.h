@@ -1,10 +1,18 @@
-
+/*******************************************************************
+ * @file GridTableSource.h
+ *
+ * @brief Header file for GridTableSource class
+ * 
+ * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+ *******************************************************************/
 #pragma once
 
+#include "App.h"
 #include "interfaces/GridTableEvent.h"
 
 #include <memory>
 #include <unordered_set>
+
 
 namespace ctb::app
 {
@@ -70,6 +78,7 @@ namespace ctb::app
  
 
       /// @brief destructor
+      ///
       ~GridTableSource() override = default;
 
    private:

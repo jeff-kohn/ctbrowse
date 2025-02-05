@@ -1,8 +1,13 @@
+/*******************************************************************
+ * @file CellarTrackerGrid.cpp
+ *
+ * @brief Header file for
+ * 
+ * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+ *******************************************************************/
+
 #include "grid/CellarTrackerGrid.h"
 
-#include "App.h"
-
-#include "ctb/ctb.h"
 
 namespace ctb::app
 {

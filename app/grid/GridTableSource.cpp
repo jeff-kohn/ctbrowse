@@ -1,3 +1,11 @@
+/*******************************************************************
+ * @file GridTableSource.cpp
+ *
+ * @brief implementation file for the GridTableSource class
+ * 
+ * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+ *******************************************************************/
+
 #include "grid/GridTableSource.h"
 
 

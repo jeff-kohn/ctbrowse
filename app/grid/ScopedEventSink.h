@@ -1,6 +1,13 @@
+/*******************************************************************
+ * @file ScopedEventSink.h
+ *
+ * @brief Header file for ScopedEventSink class
+ * 
+ * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+ *******************************************************************/
 #pragma once
 
-#include "ctb/ctb.h"
+#include "App.h"
 #include "interfaces/GridTableEvent.h"
 
 

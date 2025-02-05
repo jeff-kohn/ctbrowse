@@ -7,13 +7,13 @@
  *******************************************************************/
 #pragma once
 
-#include "app_constants.h"
+#include "App.h"
 #include "interfaces/GridTableEvent.h"
 
-#include "ctb/data/DisplayColumn.h"
-#include "ctb/data/SubStringFilter.h"
-#include "ctb/data/TableSort.h"
-#include "ctb/data/WineListEntry.h"
+#include <ctb/data/DisplayColumn.h>
+#include <ctb/data/SubStringFilter.h>
+#include <ctb/data/TableSort.h>
+#include <ctb/data/WineListEntry.h>
 
 #include <magic_enum/magic_enum.hpp>
 #include <wx/grid.h>

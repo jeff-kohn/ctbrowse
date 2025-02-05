@@ -1,4 +1,11 @@
-#include "MainFrame.h"
+/*******************************************************************
+ * @file GridOptionsPanel.cpp
+ *
+ * @brief implementation file for the GridOptionsPanel class
+ * 
+ * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+ *******************************************************************/
+
 #include "App.h"
 #include "panels/GridOptionsPanel.h"
 

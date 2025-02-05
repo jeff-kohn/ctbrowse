@@ -6,8 +6,8 @@
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 
-#include "MainFrame.h"
 #include "App.h"
+#include "MainFrame.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
 #include "grid/CellarTrackerGrid.h"

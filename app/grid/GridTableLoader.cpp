@@ -1,10 +1,17 @@
+/*******************************************************************
+ * @file GridTableLoader.cpp
+ *
+ * @brief Header file for the GridTableLoader class
+ * 
+ * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+ *******************************************************************/
 
 #include "grid/GridTableLoader.h"
 #include "grid/GridTableWineList.h"
 
-#include "ctb/functors.h"
-#include "ctb/data/table_data.h"
-#include "ctb/data/WineListEntry.h"
+#include <ctb/functors.h>
+#include <ctb/data/table_data.h>
+#include <ctb/data/WineListEntry.h>
 
 #include <magic_enum/magic_enum.hpp>
 #include <magic_enum/magic_enum_switch.hpp>

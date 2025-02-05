@@ -7,7 +7,7 @@
  *******************************************************************/
 #pragma once
 
-#include "ctb/ctb.h"
+#include "App.h"
 #include "interfaces/GridTableEvent.h"
 
 #include <filesystem>

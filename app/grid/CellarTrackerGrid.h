@@ -1,12 +1,13 @@
 /*******************************************************************
- * @file CTGrid.h
+ * @file CellarTrackerGrid.h
  *
- * @brief Header file for the class CTGrid
+ * @brief Header file for the class CellarTrackerGrid
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 #pragma once
 
+#include "App.h"
 #include "grid/ScopedEventSink.h"
 
 #include <wx/grid.h>

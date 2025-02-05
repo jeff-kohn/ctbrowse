@@ -7,7 +7,7 @@
  *********************************************************************/
 
 #include "App.h"
-#include "ctb/Error.h"
+#include "MainFrame.h"
 
 #include <wx/fileconf.h>
 #include <wx/stdpaths.h>

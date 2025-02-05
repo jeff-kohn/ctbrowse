@@ -1,8 +1,17 @@
-
+/*******************************************************************
+ * @file GridTableEvent.h
+ *
+ * @brief Header file defining GridTable events and related interfaces
+ * 
+ * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+ *******************************************************************/
 #pragma once
+
+#include "App.h"
 #include "interfaces/GridTable.h"
 
 #include <memory>
+
 
 namespace ctb::app
 {

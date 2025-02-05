@@ -7,7 +7,10 @@
  *******************************************************************/
 #pragma once
 
+#include "App.h"
+
 #include <wx/grid.h>
+
 #include <set>
 #include <memory>
 
@@ -18,7 +21,7 @@ namespace ctb::app
    using GridTableEventSourcePtr = std::shared_ptr<IGridTableEventSource>;
 
 
-   /// @brief our data "model" interface, provides an interface for accessing the data for our views
+   /// @brief our "data model", provides an interface for accessing CellarTrcker data
    /// 
    /// users of this interface should gain access through 
    /// IGridTableEventSource::getTable() or using the ptr supplied when
@@ -27,11 +30,9 @@ namespace ctb::app
    class IGridTable : public wxGridStringTable
    {
    public:
-      virtual ~IGridTable()
-      {}
-
 
       /// @brief Sets up the formatting options in the calling grid to match this grid table's fields
+      ///
       virtual void configureGridColumns(wxGridCellAttrPtr default_attr) = 0;
 
 
@@ -39,6 +40,7 @@ namespace ctb::app
       ///
       /// returns true if filter was applied, false if there were no matches in which
       /// case the filter was not applied. triggers GridTableEvent::SubStringFilter
+      ///
       virtual bool filterBySubstring(std::string_view substr) = 0;
 
 
@@ -46,24 +48,29 @@ namespace ctb::app
       ///
       /// returns true if filter was applied, false if there were no matches in which
       /// case the filter was not applied. triggers GridTableEvent::SubStringFilter
+      /// 
       virtual bool filterBySubstring(std::string_view substr, size_t col_idx) = 0;
 
 
       /// @brief clear the substring filter
       ///
       /// triggers GridTableEvent::SubStringFilter
+      /// 
       virtual void clearSubStringFilter() = 0;
 
 
       /// @brief returns the total number of records in the underlying dataset
+      ///
       virtual size_t totalRowCount() const = 0;
 
 
       /// @brief returns the number of records with filters applied.
+      ///
       virtual size_t filteredRowCount() const  = 0;
 
 
       /// @brief contains a name and index of a sort option
+      ///
       struct SortOptionName
       {
          size_t            sort_index{};
@@ -75,20 +82,28 @@ namespace ctb::app
       /// 
       /// the index in this vector corresponds to the index in the sort_index
       /// property.
+      /// 
       virtual std::vector<SortOptionName> availableSortOptions() const = 0;
 
 
       /// @brief returns the currently active sort option
+      ///
       virtual SortOptionName currentSortSelection() const = 0;
 
 
       /// @brief specifies a new sort option, triggers GridTableEvent::Sort
+      ///
       virtual void setSortSelection(size_t sort_index) = 0;
+
+
+      virtual ~IGridTable()
+      {}
    };
 
-   /// @brief the smart-ptr-to-base that this class returns to callers.
-   using GridTablePtr = std::shared_ptr<IGridTable>;
 
+   /// @brief the smart-ptr-to-base that's used to work with the IGridTable interface 
+   ///
+   using GridTablePtr = std::shared_ptr<IGridTable>;
 
 
 }  // namespace ctb::app

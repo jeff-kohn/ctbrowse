@@ -9,7 +9,6 @@
 
 #include "ctb/ctb.h"
 #include "app_constants.h"
-#include "MainFrame.h"
 
 #include <wx/wx.h>
 #include <wx/confbase.h>
@@ -20,6 +19,12 @@
 namespace ctb::app
 {
    namespace fs = std::filesystem;
+
+
+   /// @brief forward declare top-level window class so we don't have to add header dependency
+   ///
+   class MainFrame;
+
 
    /// <summary>
    ///   app object for the OuraCharts applicatin.

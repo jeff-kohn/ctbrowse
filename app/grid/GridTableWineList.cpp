@@ -5,11 +5,10 @@
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
+
 #include "grid/GridTableWineList.h"
-#include "grid/CellarTrackerGrid.h"
 
-#include "ctb/functors.h"
-
+#include <ctb/functors.h>
 #include <magic_enum/magic_enum.hpp>
 #include <wx/font.h>
 

@@ -7,6 +7,7 @@
  *******************************************************************/
 #pragma once
 
+#include "App.h"
 #include "grid/ScopedEventSink.h"
 
 #include <wx/choice.h>
