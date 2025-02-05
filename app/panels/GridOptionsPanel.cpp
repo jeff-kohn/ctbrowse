@@ -66,6 +66,8 @@ namespace ctb::app
       top_sizer->Add(m_sort_combo, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, default_border));
 
       SetSizerAndFit(top_sizer.release());
+
+      m_sort_combo->Bind(wxEVT_CHOICE, &GridOptionsPanel::onSortSelection, this);
    }
 
 
@@ -81,6 +83,44 @@ namespace ctb::app
 
       m_sort_combo->Clear();
       m_sort_combo->Append(sort_options);
+      updateSortSelection(grid_table);
+   }
+
+
+   void GridOptionsPanel::updateSortSelection(IGridTable* grid_table)
+   {
+      m_sort_combo->SetSelection(grid_table->currentSortSelection().sort_index);
+   }
+
+
+   void GridOptionsPanel::onSortSelection([[maybe_unused]] wxCommandEvent& event)
+   {
+      try
+      {
+         TransferDataFromWindow();
+
+         CallAfter([this](){
+               auto table = m_sink.getTable();
+               if (table)
+               {
+                  table->setSortSelection(m_sort_idx);
+                  m_sink.signal_source(GridTableEvent::Sort);
+               }
+         });
+      }
+      catch(Error& err)
+      {
+         wxGetApp().displayErrorMessage(err);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
+   }
+
+
+   void GridOptionsPanel::onSortDirection(wxCommandEvent& event)
+   {
    }
 
 
@@ -93,13 +133,12 @@ namespace ctb::app
             break;
 
          case GridTableEvent::Sort:
+            updateSortSelection(grid_table);
             break;
+
          case GridTableEvent::Filter:
-            break;
          case GridTableEvent::SubStringFilter:
-            break;
          case GridTableEvent::RowSelected:
-            break;
          default:
             break;
       }   

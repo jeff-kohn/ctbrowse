@@ -51,25 +51,19 @@ namespace ctb::app
    }
 
 
-   void CellarTrackerGrid::setGridTable(IGridTable* tbl)
+   void CellarTrackerGrid::setGridTable(GridTablePtr tbl)
    {
-      if (m_table)
-      {
-         // detach the current table so that base class doesn't try to
-         // use it when we call SetTable() with the new table in a few,
-         // because if we're holding the last shared_ptr ref to the old
-         // table it's about to get deleted
-         SetTable(nullptr);
-      }
-
       // we save our own copy of the ptr, because we need access to 
-      // IGridTable methods, and GetTable() returns wxGridTableBase*
-      m_table = tbl;
+      // IGridTable methods, and GetTable() returns wxGridTableBase*.
+      // We store a shared_ptr instead of the RAW ptr to prevent the
+      // table from being deleted out from under us (object lifetimes
+      // can get tricket with wxWindow-derived classes).
+      m_grid_table = m_sink.getTable();
       {
          wxGridUpdateLocker lock(this);
          
          // assign the table and some other initial settings.
-         SetTable(m_table, false);
+         SetTable(m_grid_table.get(), false);
          HideRowLabels();
          SetColLabelAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
          SetSelectionMode(wxGrid::wxGridSelectionModes::wxGridSelectRows);
@@ -83,7 +77,7 @@ namespace ctb::app
          attr->SetFont(font);
 
          // give the grid table a chance to configure column formatting
-         m_table->configureGridColumns(attr);
+         m_grid_table->configureGridColumns(attr);
 
          AutoSizeColumns(false);
          AutoSizeRows(true);
@@ -93,7 +87,7 @@ namespace ctb::app
 
    void CellarTrackerGrid::filterBySubstring(std::string_view substr)
    {
-      if (!m_table)
+      if (!m_grid_table)
          throw Error{ constants::ERROR_NO_GRID_TABLE, Error::Category::UiError };
 
 
@@ -105,10 +99,10 @@ namespace ctb::app
 
       {
          wxGridUpdateLocker lock(this);
-         if (m_table->filterBySubstring(substr))
+         if (m_grid_table->filterBySubstring(substr))
          {
             // calling SetTable with the same ptr is fine, it forces grid to re-fetch the data.
-            setGridTable(m_table);
+            setGridTable(m_grid_table);;
          }
          else {
             wxGetApp().displayInfoMessage(constants::INFO_MSG_NO_MATCHING_ROWS);
@@ -118,16 +112,16 @@ namespace ctb::app
 
    void CellarTrackerGrid::filterBySubstring(std::string_view substr, int col_idx)
    {
-      if (!m_table)
+      if (!m_grid_table)
          throw Error{ constants::ERROR_NO_GRID_TABLE, Error::Category::UiError };
       
       wxBusyCursor busy{};
       {
          wxGridUpdateLocker lock(this);
-         if (m_table->filterBySubstring(substr, col_idx))
+         if (m_grid_table->filterBySubstring(substr, col_idx))
          {
             // calling setTable with the same ptr is fine, it forces grid to re-fetch the data.
-            setGridTable(m_table);
+            setGridTable(m_grid_table);
          }
          else {
             wxGetApp().displayInfoMessage(constants::INFO_MSG_NO_MATCHING_ROWS);
@@ -138,14 +132,14 @@ namespace ctb::app
 
    void CellarTrackerGrid::clearSubStringFilter()
    {
-      if (!m_table)
+      if (!m_grid_table)
          throw Error{ constants::ERROR_NO_GRID_TABLE, Error::Category::UiError };
 
       wxBusyCursor busy{};
       {
          wxGridUpdateLocker lock(this);
-         m_table->clearSubStringFilter();
-         setGridTable(m_table);
+         m_grid_table->clearSubStringFilter();
+         setGridTable(m_grid_table);
       }
    }
 
@@ -153,17 +147,18 @@ namespace ctb::app
    void CellarTrackerGrid::notify(GridTableEvent event, IGridTable* grid_table)
    {
       switch (event)
-      {
-         case GridTableEvent::TableInitialize:
-            setGridTable(grid_table);
+      { 
+         case GridTableEvent::TableRemove:
+            SetTable(nullptr);
             break;
 
+         case GridTableEvent::TableInitialize:
          case GridTableEvent::Sort:
-            break;
          case GridTableEvent::Filter:
-            break;
          case GridTableEvent::SubStringFilter:
+            setGridTable(m_sink.getTable());   // we need the ref-conted smart-ptr
             break;
+
          case GridTableEvent::RowSelected:
             break;
          default:

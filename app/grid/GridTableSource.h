@@ -76,9 +76,10 @@ namespace ctb::app
       ///
       bool signal(GridTableEvent event) override;
  
+      ~GridTableSource() noexcept override;
 
    private:
-      GridTablePtr m_table{};
+      GridTablePtr m_grid_table{};
       std::unordered_set<IGridTableEventSink*> m_observers{};
    
       /// @brief default ctor is private, use static create()

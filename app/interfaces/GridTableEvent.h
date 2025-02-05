@@ -21,6 +21,7 @@ namespace ctb::app
    enum class GridTableEvent
    {
       TableInitialize,  /// fired when a grid table is being loaded
+      TableRemove,      /// fired when a grid table is being removed/detached.
       Sort,             /// fired when a grid table has been sorted
       Filter,           /// fired when a grid table has been filtered
       SubStringFilter,  /// fired when a substring filter has been applied to the grid table

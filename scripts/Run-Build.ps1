@@ -8,7 +8,7 @@
    Command Prompt.
 
   .PARAMETER Preset
-  Specifies the CMake build preset to use. Defaults to "win-msvc".
+  Specifies the CMake build preset to use. Defaults to "dev-vscode".
 
   .PARAMETER Config
   Optionally specify the build configuration for multi-config presets that don't specify

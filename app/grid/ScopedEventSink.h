@@ -49,6 +49,7 @@ namespace ctb::app
 
 
       /// @brief attach this sink to the specified source
+      ///
       void reset(GridTableEventSourcePtr source)
       {
          detach();
@@ -72,7 +73,22 @@ namespace ctb::app
       }
 
 
+      /// @brief returns the table currently associated with this source, if any
+      /// 
+      /// be sure to check the return value as it could be nullptr
+      /// 
+      [[nodiscard]] GridTablePtr getTable()
+      {
+         if (m_source)
+         {
+            return m_source->getTable();
+         }
+         return {};
+      }
+
+
       /// @brief destructor
+      ///
       ~ScopedEventSink() noexcept
       {
          detach();

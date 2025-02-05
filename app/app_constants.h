@@ -17,6 +17,7 @@ namespace ctb::constants
    inline constexpr const char* RES_NAME_MAINFRAME                = "MAINFRAME";
    inline constexpr const char* RES_NAME_ICON_PRODUCT             = "IDR_PRODUCT_ICON";
    inline constexpr const char* LBL_WINE                          = "Wine";
+   inline constexpr const char* LBL_LOCALE                        = "Region and Appellation";
    inline constexpr const char* LBL_VARIETAL                      = "Varietal";
    inline constexpr const char* LBL_QTY                           = "Qty";
    inline constexpr const char* LBL_CT_SCORE                      = "CT Score";
@@ -40,13 +41,14 @@ namespace ctb::constants
    inline constexpr const char* CMD_VIEWS_WINE_LIST_TIP        = "View Personal Wine List";
 
 
-   inline constexpr const char* SORT_OPTION_APPELATION_WINE    = "Appellation, Wine Name, Vintage";
-   inline constexpr const char* SORT_OPTION_COUNTRY_WINE       = "Country, Wine Name, Vintage";
-   inline constexpr const char* SORT_OPTION_COUNTRY_REGION     = "Country, Region, Wine Name, Vintage";
-   inline constexpr const char* SORT_OPTION_COUNTRY_APPELATION = "Country, Appellation, Wine Name, Vintage";
-   inline constexpr const char* SORT_OPTION_VARIETAL_WINE      = "Varietal, Wine Name, Vintage";
-   inline constexpr const char* SORT_OPTION_VINTAGE_WINE       = "Vintage, Wine Name";
-   inline constexpr const char* SORT_OPTION_WINE_VINTAGE       = "Wine Name, Vintage";
+   inline constexpr const char* SORT_OPTION_APPELATION_WINE    = "Appellation, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_LOCALE_WINE        = "Country, Region, and Appellation";
+   inline constexpr const char* SORT_OPTION_COUNTRY_APPELATION = "Country, Appellation and Wine";
+   inline constexpr const char* SORT_OPTION_PRODUCER_WINE_NAME = "Producer, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_REGION_WINE        = "Region, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_VARIETAL_WINE      = "Varietal, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_VINTAGE_WINE       = "Vintage and Wine";
+   inline constexpr const char* SORT_OPTION_WINE_VINTAGE       = "Wine and Vintage";
 
    inline constexpr const char* ERROR_WINDOW_CREATION_FAILED   = "Window creation failed. You may need to restart the app.";
 

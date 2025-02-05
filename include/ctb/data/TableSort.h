@@ -21,8 +21,7 @@ namespace ctb::data
       using Prop = T::Prop;
 
       std::vector<Prop> sort_props{};   // properties to use for soring, in order
-      std::string sort_name{};          // for display purposes in selection lists etc
-
+      std::string       sort_name{};    // for display purposes in selection lists etc
 
       /// @brief function operator that does the comparison.
       bool operator()(const T& t1, const T& t2)

@@ -20,14 +20,18 @@ namespace ctb::app
 
    bool GridTableSource::hasTable() const
    { 
-      return m_table ? true : false; 
+      return m_grid_table ? true : false; 
    }
 
 
    /// @brief assigns a table to this source.
    void GridTableSource::setTable(GridTablePtr table)
    {
-      m_table = table;
+      // We need to signal that the current table is being replaced, because
+      // otherwise views that hold internal table pointers will be left with
+      // dangling/garbage pointer
+      signal(GridTableEvent::TableRemove);
+      m_grid_table = table;
       signal(GridTableEvent::TableInitialize);
    }
 
@@ -35,7 +39,7 @@ namespace ctb::app
    /// @brief retrieves a pointer to the active table for this source, if any.
    GridTablePtr GridTableSource::getTable()
    {
-      return m_table;
+      return m_grid_table;
    }
 
 
@@ -45,6 +49,7 @@ namespace ctb::app
       m_observers.insert(observer);
    }
 
+
    /// @brief detach an event sink from this source to no longer receive event notifications
    void GridTableSource::detach(IGridTableEventSink* observer)
    {
@@ -53,14 +58,22 @@ namespace ctb::app
          m_observers.erase(it);
    }
 
+
    /// @brief this is called to signal that an event needs to be sent to all listeners
    bool GridTableSource::signal(GridTableEvent event)
    {
-      if (m_table)
+      if (m_grid_table)
       {
-         for (auto observer : m_observers) { observer->notify(event, m_table.get()); }
+         for (auto observer : m_observers) { observer->notify(event, m_grid_table.get()); }
          return true;
       }
       return false;
    }
+
+
+   GridTableSource::~GridTableSource() noexcept
+   {
+      signal(GridTableEvent::TableRemove);
+   }
+
 } // namespace ctb::app

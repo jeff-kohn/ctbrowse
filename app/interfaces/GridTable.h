@@ -93,7 +93,7 @@ namespace ctb::app
 
       /// @brief specifies a new sort option, triggers GridTableEvent::Sort
       ///
-      virtual void setSortSelection(int sort_index) = 0;
+      virtual void setSortSelection(int sort_index, bool sort_ascending = true) = 0;
 
 
       virtual ~IGridTable()

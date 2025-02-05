@@ -55,9 +55,8 @@ namespace ctb::app
       /// @brief destructor
       ~CellarTrackerGrid() override;
 
-
    protected:
-      IGridTable*     m_table{};
+      GridTablePtr    m_grid_table{};
       ScopedEventSink m_sink;
       
       /// @brief private ctor used by static create()
@@ -66,7 +65,7 @@ namespace ctb::app
 
       void initGrid();
       void notify(GridTableEvent event, IGridTable* grid_table) override;
-      void setGridTable(IGridTable* tbl);
+      void setGridTable(GridTablePtr tbl);
 
       // no copy/move/assign, this class is created on the heap.
       CellarTrackerGrid(const CellarTrackerGrid&) = delete;

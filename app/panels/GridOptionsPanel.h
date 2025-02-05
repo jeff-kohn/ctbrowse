@@ -38,6 +38,10 @@ namespace ctb::app
       void initControls();
       void notify(GridTableEvent event, IGridTable* grid_table) override;
       void populateSortOptions(IGridTable* grid_table);
+      void updateSortSelection(IGridTable* grid_table);
+
+      void onSortSelection(wxCommandEvent& event);
+      void onSortDirection(wxCommandEvent& event);
 
       // no copy/move/assign, this class is created on the heap.
       GridOptionsPanel(const GridOptionsPanel&) = delete;
