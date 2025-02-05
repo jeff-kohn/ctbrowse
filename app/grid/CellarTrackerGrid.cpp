@@ -1,4 +1,4 @@
-#include "grids/CellarTrackerGrid.h"
+#include "grid/CellarTrackerGrid.h"
 
 #include "App.h"
 
@@ -7,27 +7,66 @@
 namespace ctb::app
 {
 
-   CellarTrackerGrid::CellarTrackerGrid(wxWindow* parent) : 
-      wxGrid(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxBORDER_THEME)
+   void CellarTrackerGrid::initGrid()
    {
-      InitializeDefaults();
+      EnableEditing(false);
+      EnableDragGridSize(false);
+      UseNativeColHeader(true);
    }
 
 
-   void CellarTrackerGrid::setGridTable(GridTableBase::GridTablePtr tbl)
+   [[nodiscard]] CellarTrackerGrid* CellarTrackerGrid::create(wxWindow* parent, GridTableEventSourcePtr source)
    {
-      assert(tbl);
-      if (!tbl)
-         throw Error{ constants::ERROR_NULL_POINTER, Error::Category::ArgumentError };
+      if (!source)
+      {
+         assert("source parameter cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_NULLPTR_ARG };
+      }
+      if (!parent)
+      {
+         assert("parent parameter cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_NULLPTR_ARG };
+      }
+
+      std::unique_ptr<CellarTrackerGrid> wnd{ new CellarTrackerGrid{source} };
+      if (!wnd->Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxBORDER_THEME))
+      {
+         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      }
+      wnd->initGrid();
+      return wnd.release();
+   }
+
+
+   CellarTrackerGrid::~CellarTrackerGrid()
+   {
+      // wxGrid accesses the table pointer from its destructor if not null, 
+      // and our table may already be destroyed by then.
+      SetTable(nullptr);
+   }
+
+
+   void CellarTrackerGrid::setGridTable(IGridTable* tbl)
+   {
+      if (m_table)
+      {
+         // detach the current table so that base class doesn't try to
+         // use it when we call SetTable() with the new table in a few,
+         // because if we're holding the last shared_ptr ref to the old
+         // table it's about to get deleted
+         SetTable(nullptr);
+      }
 
       // we save our own copy of the ptr, because we need access to 
-      // GridTableBase methods, and GetTable() returns wxGridTableBase*
+      // IGridTable methods, and GetTable() returns wxGridTableBase*
       m_table = tbl;
       {
          wxGridUpdateLocker lock(this);
          
          // assign the table and some other initial settings.
-         SetTable(m_table.get(), false);
+         SetTable(m_table, false);
+         HideRowLabels();
+         SetColLabelAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
          SetSelectionMode(wxGrid::wxGridSelectionModes::wxGridSelectRows);
          SetSortingColumn(0, true);
 
@@ -91,6 +130,7 @@ namespace ctb::app
       }
    }
 
+
    void CellarTrackerGrid::clearSubStringFilter()
    {
       if (!m_table)
@@ -105,13 +145,25 @@ namespace ctb::app
    }
 
 
-   void CellarTrackerGrid::InitializeDefaults()
+   void CellarTrackerGrid::notify(GridTableEvent event, IGridTable* grid_table)
    {
-      EnableEditing(false);
-      EnableDragGridSize(false);
-      SetColLabelAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
-      HideRowLabels();
-      UseNativeColHeader(true);
+      switch (event)
+      {
+         case GridTableEvent::TableInitialize:
+            setGridTable(grid_table);
+            break;
+
+         case GridTableEvent::Sort:
+            break;
+         case GridTableEvent::Filter:
+            break;
+         case GridTableEvent::SubStringFilter:
+            break;
+         case GridTableEvent::RowSelected:
+            break;
+         default:
+            break;
+      }
    }
 
 

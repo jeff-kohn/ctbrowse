@@ -1,6 +1,6 @@
 
-#include "grids/GridTableMgr.h"
-#include "grids/GridTableWineList.h"
+#include "grid/GridTableLoader.h"
+#include "grid/GridTableWineList.h"
 
 #include "ctb/functors.h"
 #include "ctb/data/table_data.h"
@@ -15,26 +15,20 @@ namespace ctb::app
    using namespace magic_enum;
    using namespace ctb::data;
 
-   GridTableMgr::GridTablePtr GridTableMgr::getGridTable(GridTableId tbl)
+   GridTablePtr GridTableLoader::getGridTable(GridTableId tbl)
    {
-      if (m_grid_tables.contains(tbl))
-         return m_grid_tables[tbl];
-
       Overloaded TableFactory{
-         [&](enum_constant<GridTableId::WineList>) 
+         [this](enum_constant<GridTableId::WineList>) 
             { 
                auto table_data = loadTableData<WineListData>(m_data_folder, TableId::List);
                if (!table_data)
                {
                   throw table_data.error();
                }
-               auto grid = std::make_shared<GridTableWineList>(std::move(table_data.value())); 
-               return grid;
+               return GridTableWineList::create(std::move(table_data.value())); 
             }
       };
-      auto grid_table = enum_switch(TableFactory, tbl);
-      m_grid_tables[tbl] = grid_table;
-      return grid_table;
+      return enum_switch(TableFactory, tbl);
    }
 
 }  // ctb::app

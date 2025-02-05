@@ -10,8 +10,9 @@
 #include "App.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
-#include "grids/CellarTrackerGrid.h"
-#include "grids/GridTableWineList.h"
+#include "grid/CellarTrackerGrid.h"
+#include "grid/GridTableLoader.h"
+#include "grid/GridTableWineList.h"
 #include "panels/GridOptionsPanel.h"
 
 #include <ctb/CredentialWrapper.h>
@@ -58,12 +59,12 @@ namespace ctb::app
    };
 
 
-   MainFrame::MainFrame()
+   MainFrame::MainFrame() : m_event_source{ GridTableSource::create() }
    {
    }
 
 
-   MainFrame::MainFrame(wxWindow* parent)   
+   MainFrame::MainFrame(wxWindow* parent) : m_event_source{ GridTableSource::create() }
    {
       Create(parent);
    }
@@ -108,17 +109,15 @@ namespace ctb::app
    {
       auto box_sizer = std::make_unique<wxBoxSizer>(wxHORIZONTAL);
 
-      m_grid_options = new GridOptionsPanel{ this };
+      m_grid_options = GridOptionsPanel::create(this, m_event_source);
       box_sizer->Add(m_grid_options, wxSizerFlags(20).Expand());
 
-      m_grid = new CellarTrackerGrid{ this };
+      m_grid = CellarTrackerGrid::create(this, m_event_source);
       m_grid->SetMargins(0, 0);
       m_grid->SetColLabelSize(FromDIP(30));
       box_sizer->Add(m_grid, wxSizerFlags(80).Expand());
 
       SetSizer(box_sizer.release());
-
-      //m_grid_options->populateSortOptions(m_grid);
       this->SendSizeEvent();
    }
 
@@ -324,13 +323,16 @@ namespace ctb::app
       try
       {
          if (!m_grid)
+         {
             createGridWindows();
+            assert(m_grid);
+         }
 
-         auto tbl = wxGetApp().getGridTable(GridTableMgr::GridTableId::WineList);
-         assert(tbl);
-         assert(m_grid);
+         // load table and connect it to the event source
+         GridTableLoader loader{ wxGetApp().userDataFolder() };
+         auto tbl = loader.getGridTable(GridTableLoader::GridTableId::WineList);
+         m_event_source->setTable(tbl);
 
-         m_grid->setGridTable(tbl);
          updateStatusBarCounts();
          Update();
       }
@@ -402,21 +404,28 @@ namespace ctb::app
       size_t total{0};
       size_t filtered{0};
       
-      if (m_grid)
+      if (m_event_source->hasTable())
       {
-         total = m_grid->getTotalRowCount();
-         filtered = m_grid->getFilteredRowCount();
+         auto tbl = m_event_source->getTable();
+         total = tbl->totalRowCount();
+         filtered = tbl->filteredRowCount();
       }
 
       if (total)
+      {
          SetStatusText(std::format(constants::FMT_LBL_TOTAL_ROWS, total), STATUS_BAR_PANE_TOTAL_ROWS);
-      else 
+      }
+      else{
          SetStatusText("", STATUS_BAR_PANE_TOTAL_ROWS);
+      }
 
       if (filtered < total)
+      {
          SetStatusText(std::format(constants::FMT_LBL_FILTERED_ROWS, filtered), STATUS_BAR_PANE_FILTERED_ROWS);
-      else
+      }
+      else{
          SetStatusText("", STATUS_BAR_PANE_FILTERED_ROWS);
+      }
    }
 
 } // namespace ctb::app

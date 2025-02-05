@@ -10,7 +10,6 @@
 #include "ctb/ctb.h"
 #include "app_constants.h"
 #include "MainFrame.h"
-#include "grids/GridTableMgr.h"
 
 #include <wx/wx.h>
 #include <wx/confbase.h>
@@ -50,12 +49,6 @@ namespace ctb::app
       const wxConfigBase& getConfig() const noexcept(false);
 
 
-      /// @brief get the grid table corresponding to the provided id
-      ///
-      /// grid tables are lazy-loaded and cached in memory. The cache may 
-      /// be invalidated by configuration changes or new data files being downloaded
-      GridTableMgr::GridTablePtr getGridTable(GridTableMgr::GridTableId tbl);
-
       /// @brief display a message box with an error description.
       void displayErrorMessage(const Error& err);
       void displayErrorMessage(const std::string& msg, const std::string& title = constants::ERROR_STR);
@@ -65,7 +58,6 @@ namespace ctb::app
 
    private:
       MainFrame* m_main_frame{};
-      GridTableMgr m_grid_tables{};
       fs::path m_user_data_folder{ "." }; // safe default but should never actually be used since we set re-initialize it in OnInit()
    };
 

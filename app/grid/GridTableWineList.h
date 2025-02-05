@@ -8,11 +8,12 @@
 #pragma once
 
 #include "app_constants.h"
+#include "interfaces/GridTableEvent.h"
+
 #include "ctb/data/DisplayColumn.h"
 #include "ctb/data/SubStringFilter.h"
 #include "ctb/data/TableSort.h"
 #include "ctb/data/WineListEntry.h"
-#include "grids/GridTableBase.h"
 
 #include <magic_enum/magic_enum.hpp>
 #include <wx/grid.h>
@@ -29,7 +30,7 @@ namespace ctb::app
    /// This class is NOT THREADSAFE at the instance level. This shouldn't be a problem since this class is meant
    /// to be used from UI code (specifically CellarTrackerGrid). 
    /// 
-   class GridTableWineList : public GridTableBase
+   class GridTableWineList : public IGridTable
    {
    public:
       /// @brief type used for describing how to display a column in the grid
@@ -38,13 +39,12 @@ namespace ctb::app
       using DisplayColumn = data::DisplayColumn<RecordType>;
       using SubStringFilter = data::SubStringFilter<RecordType>;
       using TableSort = data::TableSort<RecordType>;
-      using SortSelection = GridTableBase::SortOptionName;
+      using SortSelection = IGridTable::SortOptionName;
 
-      explicit GridTableWineList(data::WineListData&& data) : 
-         m_data{std::move(data)},
-         m_view{&m_data},
-         m_display_columns(DefaultDisplayColumns.begin(), DefaultDisplayColumns.end())
-      {}
+
+      /// @brief static factory method to create an instance of the GridTableWineList class
+      static [[nodiscard]] GridTablePtr create(data::WineListData&& data);
+
 
       static inline const std::array DefaultDisplayColumns { 
          DisplayColumn{ Prop::WineAndVintage,                              constants::LBL_WINE     },
@@ -132,11 +132,13 @@ namespace ctb::app
 
 
       /// @brief get the total row count (non-virtual)
-      size_t totalRowCount() const override       {  return m_data.size();  }  
+      size_t totalRowCount() const override       
+      {  return m_data.size();  }  
 
 
       /// @brief get the filtered row count (non-virtual)
-      size_t filteredRowCount() const override    {  return m_view->size(); }
+      size_t filteredRowCount() const override    
+      {  return m_view->size(); }
 
 
       // returns a collection of available sort options. 
@@ -150,6 +152,23 @@ namespace ctb::app
       // sets the currently-active sort option
       void setSortSelection(size_t index) override;
 
+   private:
+      data::WineListData             m_data{};                 // the underlying data records for this table.
+      data::WineListData             m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
+      data::WineListData*            m_view{};                 // may point to m_data or m_filtered_data depending if filter is active
+      ColumnList                     m_display_columns{};
+      size_t                         m_sort_index{};
+      std::optional<SubStringFilter> m_substring_filter{};
+
+      /// @brief private constructor used by static create()
+      GridTableWineList(data::WineListData&& data) : 
+         m_data{std::move(data)},
+         m_view{&m_data},
+         m_display_columns(DefaultDisplayColumns.begin(), DefaultDisplayColumns.end())
+      {}
+
+      bool filterBySubstringImpl(std::string_view substr, const SubStringFilter& filter);
+      void sortData();
 
       // this class is meant to be instantiated on the heap.
       GridTableWineList() = delete;
@@ -157,17 +176,6 @@ namespace ctb::app
       GridTableWineList(GridTableWineList&&) = delete;
       GridTableWineList& operator=(const GridTableWineList&) = delete;
       GridTableWineList& operator=(GridTableWineList&&) = delete;
-
-   private:
-      data::WineListData             m_data{};
-      data::WineListData             m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
-      data::WineListData*            m_view{};                 // may point to m_data or m_filtered_data depending if filter is active
-      ColumnList                     m_display_columns{};
-      size_t                         m_sort_index{};
-      std::optional<SubStringFilter> m_substring_filter{};
-
-      bool filterBySubstringImpl(std::string_view substr, const SubStringFilter& filter);
-      void sortData();
    };
 
 } // namespace ctb::app

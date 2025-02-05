@@ -7,6 +7,8 @@
  *********************************************************************/
 #pragma once
 
+#include "grid/GridTableSource.h"
+
 #include <wx/event.h>
 #include <wx/frame.h>
 
@@ -67,24 +69,16 @@ namespace ctb::app
          SetStatusText(std::format(fmt_str, std::forward<Args>(args)...), pane_index);
       }
 
-
-      /// @brief retrieves a pointer to the active grid.
-      ///
-      /// this should be called as-needed, don't store the returned
-      /// value because the while the returned object may not
-      /// remain the active grid in the window.
-      /// 
-      CellarTrackerGrid* getGrid() { return m_grid; }
-
    private:
-      CellarTrackerGrid*   m_grid{};
-      wxBoxSizer*          m_main_sizer{};
-      wxMenuBar*           m_menu_bar{};
-      GridOptionsPanel*    m_grid_options{};
-      wxSearchCtrl*        m_search_ctrl{};
-      wxSplitterWindow*    m_splitter{};
-      wxStatusBar*         m_status_bar{};
-      wxToolBar*           m_tool_bar{};
+      CellarTrackerGrid*      m_grid{};
+      wxBoxSizer*             m_main_sizer{};
+      wxMenuBar*              m_menu_bar{};
+      GridOptionsPanel*       m_grid_options{};
+      wxSearchCtrl*           m_search_ctrl{};
+      wxSplitterWindow*       m_splitter{};
+      wxStatusBar*            m_status_bar{};
+      wxToolBar*              m_tool_bar{};
+      GridTableEventSourcePtr m_event_source{};
 
       void createGridWindows();
       void createMenuBar();

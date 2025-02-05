@@ -5,8 +5,8 @@
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
-#include "grids/GridTableWineList.h"
-#include "grids/CellarTrackerGrid.h"
+#include "grid/GridTableWineList.h"
+#include "grid/CellarTrackerGrid.h"
 
 #include "ctb/functors.h"
 
@@ -22,6 +22,12 @@ namespace ctb::app
 {
    using data::WineListData;
    using data::WineListEntry;
+
+
+   [[nodiscard]] GridTablePtr GridTableWineList::create(data::WineListData&& data)
+   {
+      return std::shared_ptr<GridTableWineList>{ new GridTableWineList{ std::move(data) } };  
+   }
 
 
    wxString GridTableWineList::GetColLabelValue(int col)
@@ -126,20 +132,20 @@ namespace ctb::app
    }
 
 
-   std::vector<GridTableBase::SortOptionName> GridTableWineList::availableSortOptions() const
+   std::vector<IGridTable::SortOptionName> GridTableWineList::availableSortOptions() const
    {
-      std::vector<GridTableBase::SortOptionName> options{};
+      std::vector<IGridTable::SortOptionName> options{};
       options.reserve(GridTableWineList::SortOptions.size()); 
 
       for (const auto& [i, table_sort] : vws::enumerate(GridTableWineList::SortOptions))
       {
-         options.emplace_back(GridTableBase::SortOptionName{ static_cast<size_t>(i), table_sort.sort_name  });
+         options.emplace_back(IGridTable::SortOptionName{ static_cast<size_t>(i), table_sort.sort_name  });
       }
       return options;
    }
 
 
-   ctb::app::GridTableBase::SortOptionName GridTableWineList::currentSortSelection() const
+   ctb::app::IGridTable::SortOptionName GridTableWineList::currentSortSelection() const
    {
       return SortSelection{ m_sort_index };
    }
@@ -169,6 +175,7 @@ namespace ctb::app
       return true;
    }
 
+
    void GridTableWineList::sortData()
    {
       // sort the data table, then re-apply any filters to the view. Otherwise we'd have to sort twice
@@ -176,5 +183,6 @@ namespace ctb::app
 
       // todo
    }
+
 
 } // namespace ctb::app

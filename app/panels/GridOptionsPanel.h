@@ -6,7 +6,8 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 #pragma once
-#include "grids/GridTableBase.h"
+
+#include "grid/ScopedEventSink.h"
 
 #include <wx/choice.h>
 #include <wx/gdicmn.h>
@@ -15,25 +16,33 @@
 
 namespace ctb::app
 {
-   // we need a ptr to parent window
-   class MainFrame;
-
-
    /// @brief panel class that provides UI for sorting and filtering a grid
-   class GridOptionsPanel final : public wxPanel
+   class GridOptionsPanel final : public wxPanel, public IGridTableEventSink
    {
    public:
-      GridOptionsPanel() = default;
-      GridOptionsPanel(MainFrame* parent);
-
-      bool Create(MainFrame* parent);
-
-      void populateSortOptions(GridTableBase::GridTablePtr grid);
-
+      /// @brief creates and initializes a panel for showing grid sort/filter options
+      ///
+      /// throws a ctb::Error parent or source = nullptr, or if the window can't be created;
+      /// otherwise returns a non-owning pointer to the window (parent window will manage 
+      /// its lifetime). 
+      /// 
+      static [[nodiscard]] GridOptionsPanel* create(wxWindow* parent, GridTableEventSourcePtr source);
+   
    private:
-      MainFrame* m_parent{};
-      int        m_sort_idx{};
-      wxChoice*  m_sort_combo{}; 
+      ScopedEventSink         m_sink;
+      wxChoice*               m_sort_combo{};
+      int                     m_sort_idx{};
+
+      GridOptionsPanel(GridTableEventSourcePtr source);
+      void initControls();
+      void notify(GridTableEvent event, IGridTable* grid_table) override;
+      void populateSortOptions(IGridTable* grid_table);
+
+      // no copy/move/assign, this class is created on the heap.
+      GridOptionsPanel(const GridOptionsPanel&) = delete;
+      GridOptionsPanel(GridOptionsPanel&&) = delete;
+      GridOptionsPanel& operator=(const GridOptionsPanel&) = delete;
+      GridOptionsPanel& operator=(GridOptionsPanel&&) = delete;
    };
 
 } // namespace ctb::app

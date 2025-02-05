@@ -16,8 +16,6 @@
 #include <chrono>
 #include <filesystem>
 
-/// @brief  this function loads our images from embedded resources
-void initImageResource();
 
 
 namespace ctb::app
@@ -44,7 +42,6 @@ namespace ctb::app
       // so create it first in case it doesn't exist.
       m_user_data_folder = fs::path{ std_paths.GetUserDataDir().wx_str() };
       fs::create_directories(m_user_data_folder);
-      m_grid_tables.setDataFolder(m_user_data_folder);
 
       // Set up config object to use file even on windows (registry is yuck)
       fs::path config_file_path{ m_user_data_folder / constants::APP_NAME_LONG };
@@ -101,12 +98,6 @@ namespace ctb::app
          throw Error{ "No configuration object available" };
 
       return *config;
-   }
-
-
-   GridTableMgr::GridTablePtr App::getGridTable(GridTableMgr::GridTableId tbl)
-   {
-      return m_grid_tables.getGridTable(tbl);
    }
 
 

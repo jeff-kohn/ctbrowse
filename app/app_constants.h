@@ -48,6 +48,8 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_VINTAGE_WINE       = "Vintage, Wine Name";
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE       = "Wine Name, Vintage";
 
+   inline constexpr const char* ERROR_WINDOW_CREATION_FAILED   = "Window creation failed. You may need to restart the app.";
+
    inline constexpr int UNSPECIFIED = -1;
 
 }  // namespace ctb::app::constants
