@@ -124,21 +124,21 @@ namespace ctb::app
       ///
       /// note that class only supports a single substring filter, subsequent calls to
       /// either overload will overwrite any previous substring filter.
-      bool filterBySubstring(std::string_view substr, size_t col_idx) override;
+      bool filterBySubstring(std::string_view substr, int col_idx) override;
 
 
       /// @brief clear/reset the substring filter
       void clearSubStringFilter() override;
 
 
-      /// @brief get the total row count (non-virtual)
-      size_t totalRowCount() const override       
-      {  return m_data.size();  }  
+      /// @brief get the total row count
+      int totalRowCount() const override       
+      {  return std::ssize(m_data);  }  
 
 
-      /// @brief get the filtered row count (non-virtual)
-      size_t filteredRowCount() const override    
-      {  return m_view->size(); }
+      /// @brief get the filtered row count
+      int filteredRowCount() const override    
+      {  return std::ssize(*m_view); }
 
 
       // returns a collection of available sort options. 
@@ -150,14 +150,14 @@ namespace ctb::app
 
 
       // sets the currently-active sort option
-      void setSortSelection(size_t index) override;
+      void setSortSelection(int index) override;
 
    private:
       data::WineListData             m_data{};                 // the underlying data records for this table.
       data::WineListData             m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
       data::WineListData*            m_view{};                 // may point to m_data or m_filtered_data depending if filter is active
       ColumnList                     m_display_columns{};
-      size_t                         m_sort_index{};
+      int                            m_sort_index{};
       std::optional<SubStringFilter> m_substring_filter{};
 
       /// @brief private constructor used by static create()

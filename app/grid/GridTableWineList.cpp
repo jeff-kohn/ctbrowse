@@ -117,9 +117,9 @@ namespace ctb::app
    }
 
 
-   bool GridTableWineList::filterBySubstring(std::string_view substr, size_t col_idx)
+   bool GridTableWineList::filterBySubstring(std::string_view substr, int col_idx)
    {
-      SubStringFilter::Prop prop = magic_enum::enum_value<SubStringFilter::Prop>(col_idx);
+      SubStringFilter::Prop prop = magic_enum::enum_value<SubStringFilter::Prop>(static_cast<uint32_t>(col_idx));
       return filterBySubstringImpl(substr, SubStringFilter{ std::string{substr},  std::vector<SubStringFilter::Prop>{prop} });
    }
 
@@ -138,7 +138,7 @@ namespace ctb::app
 
       for (const auto& [i, table_sort] : vws::enumerate(GridTableWineList::SortOptions))
       {
-         options.emplace_back(IGridTable::SortOptionName{ static_cast<size_t>(i), table_sort.sort_name  });
+         options.emplace_back(IGridTable::SortOptionName{ static_cast<int>(i), table_sort.sort_name  });
       }
       return options;
    }
@@ -150,7 +150,7 @@ namespace ctb::app
    }
 
 
-   void GridTableWineList::setSortSelection(size_t index) 
+   void GridTableWineList::setSortSelection(int index) 
    {
       m_sort_index = index;
       sortData();
@@ -178,7 +178,7 @@ namespace ctb::app
    void GridTableWineList::sortData()
    {
       // sort the data table, then re-apply any filters to the view. Otherwise we'd have to sort twice
-      rng::sort(m_data, SortOptions[m_sort_index]);
+      rng::sort(m_data, SortOptions[static_cast<size_t>(m_sort_index)]);
 
       // todo
    }

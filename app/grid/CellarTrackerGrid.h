@@ -44,7 +44,7 @@ namespace ctb::app
       /// note that class only supports a single substring filter, subsequent calls to
       /// either overload will overwrite any previous substring filter.
       /// 
-      void filterBySubstring(std::string_view substr, size_t col_idx);
+      void filterBySubstring(std::string_view substr, int col_idx);
 
 
       /// @brief clear/reset the substring filter

@@ -403,8 +403,8 @@ namespace ctb::app
    void MainFrame::updateStatusBarCounts()
    {
             
-      size_t total{0};
-      size_t filtered{0};
+      int total{0};
+      int filtered{0};
       
       if (m_event_source->hasTable())
       {

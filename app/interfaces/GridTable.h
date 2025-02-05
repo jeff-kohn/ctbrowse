@@ -49,7 +49,7 @@ namespace ctb::app
       /// returns true if filter was applied, false if there were no matches in which
       /// case the filter was not applied. triggers GridTableEvent::SubStringFilter
       /// 
-      virtual bool filterBySubstring(std::string_view substr, size_t col_idx) = 0;
+      virtual bool filterBySubstring(std::string_view substr, int col_idx) = 0;
 
 
       /// @brief clear the substring filter
@@ -61,19 +61,19 @@ namespace ctb::app
 
       /// @brief returns the total number of records in the underlying dataset
       ///
-      virtual size_t totalRowCount() const = 0;
+      virtual int totalRowCount() const = 0;
 
 
       /// @brief returns the number of records with filters applied.
       ///
-      virtual size_t filteredRowCount() const  = 0;
+      virtual int filteredRowCount() const  = 0;
 
 
       /// @brief contains a name and index of a sort option
       ///
       struct SortOptionName
       {
-         size_t            sort_index{};
+         int               sort_index{};
          std::string_view  sort_name{};
       };
 
@@ -93,7 +93,7 @@ namespace ctb::app
 
       /// @brief specifies a new sort option, triggers GridTableEvent::Sort
       ///
-      virtual void setSortSelection(size_t sort_index) = 0;
+      virtual void setSortSelection(int sort_index) = 0;
 
 
       virtual ~IGridTable()

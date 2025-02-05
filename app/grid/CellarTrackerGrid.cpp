@@ -116,7 +116,7 @@ namespace ctb::app
       }
    }
 
-   void CellarTrackerGrid::filterBySubstring(std::string_view substr, size_t col_idx)
+   void CellarTrackerGrid::filterBySubstring(std::string_view substr, int col_idx)
    {
       if (!m_table)
          throw Error{ constants::ERROR_NO_GRID_TABLE, Error::Category::UiError };

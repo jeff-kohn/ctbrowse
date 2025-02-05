@@ -81,7 +81,7 @@ namespace ctb::data
       /// the values map to column indices in the file, while the enum ordering is based
       /// on the record class layout. The enums with values starting at 100 are calculated
       /// fields, and do not map directly to a column in the file.
-     enum class Prop : size_t
+     enum class Prop : uint32_t
      {
          iWineID = 0,
          WineName = 13,
@@ -106,14 +106,20 @@ namespace ctb::data
          BeginConsume = 63,
          EndConsume = 64,
          WineAndVintage = 100
-      };
+     };
+
+      
+      static constexpr int to_int(Prop prop)
+      {
+         return static_cast<int>(std::to_underlying(prop));
+      }
 
       // type alias used by template code
       using RowType = csv::CSVRow;
 
 
       /// @brief static function to get the 0-based index of the last column.
-      static constexpr int maxPropIndex() { return static_cast<int>(Prop::EndConsume); }
+      static constexpr int maxPropIndex() { return static_cast<int>(Prop::WineAndVintage); }
 
 
       /// @brief variant that can hold any of our supported field types.
@@ -140,7 +146,7 @@ namespace ctb::data
       /// if the specified index doesn't match an enum identifier, an error will be returned.
       [[nodiscard]] ValueResult operator[](std::integral auto idx) const 
       {
-         auto e = magic_enum::enum_value<Prop>(static_cast<size_t>(idx));
+         auto e = magic_enum::enum_value<Prop>(static_cast<int>(idx));
          if (e)
             return getProperty(e.value());
          else
