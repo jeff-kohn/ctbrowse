@@ -12,7 +12,7 @@
 
 #include <ctb/data/DisplayColumn.h>
 #include <ctb/data/SubStringFilter.h>
-#include <ctb/data/TableSort.h>
+#include <ctb/data/TableSorter.h>
 #include <ctb/data/WineListEntry.h>
 
 #include <magic_enum/magic_enum.hpp>
@@ -38,8 +38,8 @@ namespace ctb::app
       using Prop = RecordType::Prop;
       using DisplayColumn = data::DisplayColumn<RecordType>;
       using SubStringFilter = data::SubStringFilter<RecordType>;
-      using TableSort = data::TableSort<RecordType>;
-      using SortSelection = IGridTable::SortOptionName;
+      using TableSort = data::TableSorter<RecordType>;
+      using SortConfig = IGridTable::SortConfig;
 
 
       /// @brief static factory method to create an instance of the GridTableWineList class
@@ -59,14 +59,13 @@ namespace ctb::app
       };
 
 
-      /// @brief the available sort options for this table.
+      /// @brief the available sortings for this table.
       ///
-      static inline const std::array SortOptions{ 
+      static inline const std::array Sorters{ 
          TableSort{ { Prop::WineName, Prop::Vintage                    }, constants::SORT_OPTION_WINE_VINTAGE },
          TableSort{ { Prop::Vintage,  Prop::WineName                   }, constants::SORT_OPTION_VINTAGE_WINE },
          TableSort{ { Prop::Locale,   Prop::WineName,    Prop::Vintage }, constants::SORT_OPTION_LOCALE_WINE  },
          TableSort{ { Prop::Region,   Prop::WineName,    Prop::Vintage }, constants::SORT_OPTION_REGION_WINE  },
-         //TableSort{ { Prop::MasterVarietal, Prop::WineName,    Prop::Vintage }, constants::SORT_OPTION_VARIETAL_WINE },
       };
 
 
@@ -158,12 +157,12 @@ namespace ctb::app
 
       // returns a collection of available sort options. 
       ///
-      std::vector<SortSelection> availableSortOptions() const override;
+      std::vector<SortConfig> availableSortOptions() const override;
 
 
       // retrieves the currently-active sort option
       ///
-      SortSelection currentSortSelection() const override;
+      SortConfig currentSortSelection() const override;
 
 
       // sets the currently-active sort option

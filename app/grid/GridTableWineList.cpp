@@ -133,22 +133,22 @@ namespace ctb::app
    }
 
 
-   std::vector<IGridTable::SortOptionName> GridTableWineList::availableSortOptions() const
+   std::vector<IGridTable::SortConfig> GridTableWineList::availableSortOptions() const
    {
-      std::vector<IGridTable::SortOptionName> options{};
-      options.reserve(GridTableWineList::SortOptions.size()); 
+      std::vector<IGridTable::SortConfig> configs{};
+      configs.reserve(GridTableWineList::Sorters.size()); 
 
-      for (const auto& [i, table_sort] : vws::enumerate(GridTableWineList::SortOptions))
+      for (const auto& [i, table_sort] : vws::enumerate(GridTableWineList::Sorters))
       {
-         options.emplace_back(IGridTable::SortOptionName{ static_cast<int>(i), table_sort.sort_name  });
+         configs.emplace_back(IGridTable::SortConfig{ static_cast<int>(i), table_sort.sort_name  });
       }
-      return options;
+      return configs;
    }
 
 
-   ctb::app::IGridTable::SortOptionName GridTableWineList::currentSortSelection() const
+   ctb::app::IGridTable::SortConfig GridTableWineList::currentSortSelection() const
    {
-      return SortSelection{ m_sort_index };
+      return SortConfig{ m_sort_index };
    }
 
 
@@ -184,11 +184,11 @@ namespace ctb::app
       // sort the data table, then re-apply any filters to the view. Otherwise we'd have to sort twice
       if (m_sort_ascending)
       {
-         rng::sort(m_grid_data, SortOptions[static_cast<size_t>(m_sort_index)]);
+         rng::sort(m_grid_data, Sorters[static_cast<size_t>(m_sort_index)]);
       }
       else
       {
-         rng::sort(vws::reverse(m_grid_data), SortOptions[static_cast<size_t>(m_sort_index)]);
+         rng::sort(vws::reverse(m_grid_data), Sorters[static_cast<size_t>(m_sort_index)]);
       }
 
       // apply substring filter if any

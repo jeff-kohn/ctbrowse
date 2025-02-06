@@ -150,6 +150,7 @@ namespace ctb::app
       { 
          case GridTableEvent::TableRemove:
             SetTable(nullptr);
+            m_grid_table.reset();
             break;
 
          case GridTableEvent::TableInitialize:

@@ -73,7 +73,7 @@ namespace ctb::app
 
    void GridOptionsPanel::populateSortOptions(IGridTable* grid_table)
    {
-      using SortName = IGridTable::SortOptionName;
+      using SortName = IGridTable::SortConfig;
       auto sort_options = vws::all(grid_table->availableSortOptions()) 
          | vws::transform([](const SortName& s) -> wxString 
             {  

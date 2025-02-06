@@ -71,10 +71,11 @@ namespace ctb::app
 
       /// @brief contains a name and index of a sort option
       ///
-      struct SortOptionName
+      struct SortConfig
       {
          int               sort_index{};
          std::string_view  sort_name{};
+         bool              ascending{ true };
       };
 
 
@@ -83,12 +84,12 @@ namespace ctb::app
       /// the index in this vector corresponds to the index in the sort_index
       /// property.
       /// 
-      virtual std::vector<SortOptionName> availableSortOptions() const = 0;
+      virtual std::vector<SortConfig> availableSortOptions() const = 0;
 
 
       /// @brief returns the currently active sort option
       ///
-      virtual SortOptionName currentSortSelection() const = 0;
+      virtual SortConfig currentSortSelection() const = 0;
 
 
       /// @brief specifies a new sort option, triggers GridTableEvent::Sort
