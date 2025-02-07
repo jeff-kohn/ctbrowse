@@ -1,7 +1,7 @@
 #/*******************************************************************
  * @file GridTable.h
  *
- * @brief Header file for the IGridTable interface
+ * @brief Header file for the GridTable interface
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
@@ -27,7 +27,7 @@ namespace ctb::app
    /// IGridTableEventSource::getTable() or using the ptr supplied when
    /// handling IGridTableEventSource::notify()
    /// 
-   class IGridTable : public wxGridStringTable
+   class GridTable : public wxGridStringTable
    {
    public:
 
@@ -76,6 +76,8 @@ namespace ctb::app
          int               sort_index{};
          std::string_view  sort_name{};
          bool              ascending{ true };
+
+         [[nodiscard]] std::strong_ordering operator<=>(const SortConfig&) const = default;
       };
 
 
@@ -84,27 +86,32 @@ namespace ctb::app
       /// the index in this vector corresponds to the index in the sort_index
       /// property.
       /// 
-      virtual std::vector<SortConfig> availableSortOptions() const = 0;
+      virtual std::vector<SortConfig> availableSortConfigs() const = 0;
 
 
       /// @brief returns the currently active sort option
       ///
-      virtual SortConfig currentSortSelection() const = 0;
+      virtual SortConfig activeSortConfig() const = 0;
 
 
       /// @brief specifies a new sort option, triggers GridTableEvent::Sort
       ///
-      virtual void setSortSelection(int sort_index, bool sort_ascending = true) = 0;
+      virtual void setActiveSortConfig(const SortConfig& config) = 0;
 
 
-      virtual ~IGridTable()
+      /// @brief specifies a new sort option, triggers GridTableEvent::Sort
+      ///
+      //virtual void setActiveSortConfig(int config_index, bool ascending = true) = 0;
+
+
+      virtual ~GridTable()
       {}
    };
 
 
-   /// @brief the smart-ptr-to-base that's used to work with the IGridTable interface 
+   /// @brief the smart-ptr-to-base that's used to work with the GridTable interface 
    ///
-   using GridTablePtr = std::shared_ptr<IGridTable>;
+   using GridTablePtr = std::shared_ptr<GridTable>;
 
 
 }  // namespace ctb::app

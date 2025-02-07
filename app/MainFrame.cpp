@@ -288,7 +288,7 @@ namespace ctb::app
             }
             else
             {
-               end_status.message = constants::ERROR_DOWNLOAD_AUTH_FAILURE;
+               end_status.message = constants::ERROR_STR_DOWNLOAD_AUTH_FAILURE;
                return;
             }
          }
@@ -334,6 +334,8 @@ namespace ctb::app
          GridTableLoader loader{ wxGetApp().userDataFolder() };
          auto tbl = loader.getGridTable(GridTableLoader::GridTableId::WineList);
          m_event_source->setTable(tbl);
+         tbl->setActiveSortConfig(GridTableWineList::getSortConfig(0));
+         m_event_source->signal(GridTableEvent::Sort);
 
          updateStatusBarCounts();
          Update();

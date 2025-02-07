@@ -76,7 +76,7 @@ namespace ctb::app
 
    void GridTableWineList::SetValue(int row, int col, const wxString& value) 
    {
-      throw Error{constants::ERROR_EDITING_NOT_SUPPORTED };
+      throw Error{constants::ERROR_STR_EDITING_NOT_SUPPORTED };
    }
 
 
@@ -133,41 +133,50 @@ namespace ctb::app
    }
 
 
-   std::vector<IGridTable::SortConfig> GridTableWineList::availableSortOptions() const
+   std::vector<GridTableWineList::SortConfig>  GridTableWineList::availableSortConfigs() const
    {
-      std::vector<IGridTable::SortConfig> configs{};
+      std::vector<GridTable::SortConfig> configs{};
       configs.reserve(GridTableWineList::Sorters.size()); 
 
       for (const auto& [i, table_sort] : vws::enumerate(GridTableWineList::Sorters))
       {
-         configs.emplace_back(IGridTable::SortConfig{ static_cast<int>(i), table_sort.sort_name  });
+         configs.emplace_back(GridTable::SortConfig{ static_cast<int>(i), table_sort.sort_name  });
       }
       return configs;
    }
 
 
-   ctb::app::IGridTable::SortConfig GridTableWineList::currentSortSelection() const
+   GridTableWineList::SortConfig  GridTableWineList::activeSortConfig() const 
    {
-      return SortConfig{ m_sort_index };
+      return m_sort_config;
    }
 
 
-   void GridTableWineList::setSortSelection(int index, bool sort_ascending) 
+   void GridTableWineList::setActiveSortConfig(const SortConfig& config)
    {
-      m_sort_index = index;
-      m_sort_ascending = sort_ascending;
-      sortData();
+      if (config != m_sort_config)
+      {
+         m_sort_config = config;
+         sortData();
+      }
    }
+
+
+   //void GridTableWineList::setActiveSortConfig(int config_index, bool ascending)
+   //{
+   //   SortConfig cfg = getSortConfig()
+   //}
+
 
    bool GridTableWineList::applySubStringFilter(const SubStringFilter& filter)
    {
       // TODO:  once column filtering is added, we'll need to check whether 
       //        this step should start with m_grid_data or m_current_view
       auto filtered_data = vws::all(m_grid_data) | vws::filter(filter)
-                                            | rng::to<std::deque>();
+                                                 | rng::to<std::deque>();
 
       // we only update the grid if there is some matching data
-      if (not filtered_data.empty())
+      if (!filtered_data.empty())
       {
          m_substring_filter = filter;
          m_filtered_data.swap(filtered_data);
@@ -182,17 +191,20 @@ namespace ctb::app
    void GridTableWineList::sortData()
    {
       // sort the data table, then re-apply any filters to the view. Otherwise we'd have to sort twice
-      if (m_sort_ascending)
+      if (m_sort_config.ascending)
       {
-         rng::sort(m_grid_data, Sorters[static_cast<size_t>(m_sort_index)]);
+         rng::sort(m_grid_data, Sorters[static_cast<size_t>(m_sort_config.sort_index)]);
       }
       else
       {
-         rng::sort(vws::reverse(m_grid_data), Sorters[static_cast<size_t>(m_sort_index)]);
+         rng::sort(vws::reverse(m_grid_data), Sorters[static_cast<size_t>(m_sort_config.sort_index)]);
       }
 
       // apply substring filter if any
-
+      if (m_substring_filter)
+      {
+         applySubStringFilter(*m_substring_filter);
+      }
    }
 
 

@@ -130,7 +130,7 @@ namespace ctb::data
          case EndConsume:     return endConsume();
          case WineAndVintage: return wineAndVintage();
          default:
-            return std::unexpected{ Error{constants::ERROR_INVALID_PROP_INDEX} };
+            return std::unexpected{ Error{constants::ERROR_STR_INVALID_INDEX} };
       };
    }
 

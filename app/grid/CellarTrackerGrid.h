@@ -64,7 +64,7 @@ namespace ctb::app
       {}
 
       void initGrid();
-      void notify(GridTableEvent event, IGridTable* grid_table) override;
+      void notify(GridTableEvent event, GridTable* grid_table) override;
       void setGridTable(GridTablePtr tbl);
 
       // no copy/move/assign, this class is created on the heap.

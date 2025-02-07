@@ -81,8 +81,8 @@ namespace ctb::data
       /// the values map to column indices in the file, while the enum ordering is based
       /// on the record class layout. The enums with values starting at 100 are calculated
       /// fields, and do not map directly to a column in the file.
-     enum class Prop : uint32_t
-     {
+      enum class Prop : uint32_t
+      {
          iWineID = 0,
          WineName = 13,
          Locale = 14,
@@ -106,7 +106,7 @@ namespace ctb::data
          BeginConsume = 63,
          EndConsume = 64,
          WineAndVintage = 100
-     };
+      };
 
       
       static constexpr int to_int(Prop prop)
@@ -150,7 +150,7 @@ namespace ctb::data
          if (e)
             return getProperty(e.value());
          else
-            return std::unexpected{ Error{constants::ERROR_INVALID_PROP_INDEX} };
+            return std::unexpected{ Error{constants::ERROR_STR_INVALID_INDEX} };
       }
 
 

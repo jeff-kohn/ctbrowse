@@ -25,12 +25,12 @@ namespace ctb::app
       if (!source)
       {
          assert("source parameter cannot == nullptr");
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_NULLPTR_ARG };
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
       if (!parent)
       {
          assert("parent parameter cannot == nullptr");
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_NULLPTR_ARG };
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
 
       std::unique_ptr<CellarTrackerGrid> wnd{ new CellarTrackerGrid{source} };
@@ -54,10 +54,10 @@ namespace ctb::app
    void CellarTrackerGrid::setGridTable(GridTablePtr tbl)
    {
       // we save our own copy of the ptr, because we need access to 
-      // IGridTable methods, and GetTable() returns wxGridTableBase*.
-      // We store a shared_ptr instead of the RAW ptr to prevent the
+      // GridTable methods, and GetTable() returns wxGridTableBase*.
+      // We store a shared_ptr instead of the raw ptr to prevent the
       // table from being deleted out from under us (object lifetimes
-      // can get tricket with wxWindow-derived classes).
+      // can get tricky with wxWindow-derived classes).
       m_grid_table = m_sink.getTable();
       {
          wxGridUpdateLocker lock(this);
@@ -67,7 +67,7 @@ namespace ctb::app
          HideRowLabels();
          SetColLabelAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
          SetSelectionMode(wxGrid::wxGridSelectionModes::wxGridSelectRows);
-         SetSortingColumn(0, true);
+         //SetSortingColumn(0, true);
 
          // set the font size for the grid
          auto attr = GetOrCreateCellAttrPtr(0, 0);
@@ -88,7 +88,7 @@ namespace ctb::app
    void CellarTrackerGrid::filterBySubstring(std::string_view substr)
    {
       if (!m_grid_table)
-         throw Error{ constants::ERROR_NO_GRID_TABLE, Error::Category::UiError };
+         throw Error{ constants::ERROR_STR_NO_GRID_TABLE, Error::Category::UiError };
 
 
       if (substr.empty())
@@ -113,7 +113,7 @@ namespace ctb::app
    void CellarTrackerGrid::filterBySubstring(std::string_view substr, int col_idx)
    {
       if (!m_grid_table)
-         throw Error{ constants::ERROR_NO_GRID_TABLE, Error::Category::UiError };
+         throw Error{ constants::ERROR_STR_NO_GRID_TABLE, Error::Category::UiError };
       
       wxBusyCursor busy{};
       {
@@ -133,7 +133,7 @@ namespace ctb::app
    void CellarTrackerGrid::clearSubStringFilter()
    {
       if (!m_grid_table)
-         throw Error{ constants::ERROR_NO_GRID_TABLE, Error::Category::UiError };
+         throw Error{ constants::ERROR_STR_NO_GRID_TABLE, Error::Category::UiError };
 
       wxBusyCursor busy{};
       {
@@ -144,7 +144,7 @@ namespace ctb::app
    }
 
 
-   void CellarTrackerGrid::notify(GridTableEvent event, IGridTable* grid_table)
+   void CellarTrackerGrid::notify(GridTableEvent event, GridTable* grid_table)
    {
       switch (event)
       { 
@@ -157,7 +157,7 @@ namespace ctb::app
          case GridTableEvent::Sort:
          case GridTableEvent::Filter:
          case GridTableEvent::SubStringFilter:
-            setGridTable(m_sink.getTable());   // we need the ref-conted smart-ptr
+             setGridTable(m_sink.getTable());   // we need the ref-counted smart-ptr
             break;
 
          case GridTableEvent::RowSelected:

@@ -30,7 +30,7 @@ namespace ctb::app
    /// This class is NOT THREADSAFE at the instance level. This shouldn't be a problem since this class is meant
    /// to be used from UI code (specifically CellarTrackerGrid). 
    /// 
-   class GridTableWineList : public IGridTable
+   class GridTableWineList : public GridTable
    {
    public:
       /// @brief type used for describing how to display a column in the grid
@@ -39,7 +39,7 @@ namespace ctb::app
       using DisplayColumn = data::DisplayColumn<RecordType>;
       using SubStringFilter = data::SubStringFilter<RecordType>;
       using TableSort = data::TableSorter<RecordType>;
-      using SortConfig = IGridTable::SortConfig;
+      using SortConfig = GridTable::SortConfig;
 
 
       /// @brief static factory method to create an instance of the GridTableWineList class
@@ -59,7 +59,7 @@ namespace ctb::app
       };
 
 
-      /// @brief the available sortings for this table.
+      /// @brief the available sort orders for this table.
       ///
       static inline const std::array Sorters{ 
          TableSort{ { Prop::WineName, Prop::Vintage                    }, constants::SORT_OPTION_WINE_VINTAGE },
@@ -67,6 +67,20 @@ namespace ctb::app
          TableSort{ { Prop::Locale,   Prop::WineName,    Prop::Vintage }, constants::SORT_OPTION_LOCALE_WINE  },
          TableSort{ { Prop::Region,   Prop::WineName,    Prop::Vintage }, constants::SORT_OPTION_REGION_WINE  },
       };
+
+
+      /// @brief returns the sort config for a Sorter based on its zero-based index. You can get the
+      ///        sort configs by calling availableSortConfigs()
+      /// 
+      /// this function will throw an exception if you pass an invalid index.
+      static SortConfig getSortConfig(int index) 
+      {
+         if (index >= std::ssize(Sorters))
+            throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_INVALID_INDEX };
+         
+         auto& ts = Sorters[static_cast<size_t>(index)];
+         return SortConfig{ index, ts.sort_name, true };
+      }
 
 
       /// @brief base class override that returns the number of rows/records in the table/grid
@@ -157,32 +171,32 @@ namespace ctb::app
 
       // returns a collection of available sort options. 
       ///
-      std::vector<SortConfig> availableSortOptions() const override;
+      std::vector<SortConfig>  availableSortConfigs() const override;
 
 
       // retrieves the currently-active sort option
       ///
-      SortConfig currentSortSelection() const override;
+      SortConfig activeSortConfig() const override;
 
 
       // sets the currently-active sort option
       ///
-      void setSortSelection(int index, bool ascending = true) override;
+      void setActiveSortConfig(const SortConfig& config) override;
+      //void setActiveSortConfig(int config_index, bool ascending = true) override;
 
    private:
-      data::WineListData             m_grid_data{};                 // the underlying data records for this table.
-      data::WineListData             m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
-      data::WineListData*            m_current_view{};                 // may point to m_grid_data or m_filtered_data depending if filter is active
       ColumnList                     m_display_columns{};
-      int                            m_sort_index{0};
-      bool                           m_sort_ascending{true};
+      data::WineListData*            m_current_view{};         // may point to m_grid_data or m_filtered_data depending if filter is active
+      data::WineListData             m_grid_data{};            // the underlying data records for this table.
+      data::WineListData             m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
+      SortConfig                     m_sort_config{};
       std::optional<SubStringFilter> m_substring_filter{};
 
       /// @brief private constructor used by static create()
       GridTableWineList(data::WineListData&& data) : 
-         m_grid_data{std::move(data)},
+         m_display_columns(DefaultDisplayColumns.begin(), DefaultDisplayColumns.end()),
          m_current_view{&m_grid_data},
-         m_display_columns(DefaultDisplayColumns.begin(), DefaultDisplayColumns.end())
+         m_grid_data{std::move(data)}
       {}
 
       //void filterData();

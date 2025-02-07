@@ -32,16 +32,22 @@ namespace ctb::app
    private:
       ScopedEventSink         m_sink;
       wxChoice*               m_sort_combo{};
-      int                     m_sort_idx{};
+      GridTable::SortConfig   m_sort_config{};
 
-      GridOptionsPanel(GridTableEventSourcePtr source);
+      /// @brief called when there are updates to the table 
+      void notify(GridTableEvent event, GridTable* grid_table) override;
+
       void initControls();
-      void notify(GridTableEvent event, IGridTable* grid_table) override;
-      void populateSortOptions(IGridTable* grid_table);
-      void updateSortSelection(IGridTable* grid_table);
+      wxArrayString getSortOptionList(GridTable* grid_table);
 
+      // event handlers
       void onSortSelection(wxCommandEvent& event);
-      void onSortDirection(wxCommandEvent& event);
+      void onSortOrderClicked(wxCommandEvent& event);
+      void onTableInitialize(GridTable* grid_table);
+      void onTableSorted(GridTable* grid_table);
+
+      /// @brief private ctor used by static create()
+      GridOptionsPanel(GridTableEventSourcePtr source);
 
       // no copy/move/assign, this class is created on the heap.
       GridOptionsPanel(const GridOptionsPanel&) = delete;

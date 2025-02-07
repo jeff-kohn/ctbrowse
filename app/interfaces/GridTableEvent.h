@@ -38,7 +38,7 @@ namespace ctb::app
       /// the supplied pointer will remain valid until a subsequent event
       /// notification of type TableInitialized is received
       /// 
-      virtual void notify(GridTableEvent event, IGridTable* grid_table) = 0;
+      virtual void notify(GridTableEvent event, GridTable* grid_table) = 0;
 
   
       /// @brief virtual destructor

@@ -26,6 +26,9 @@ namespace ctb::constants
    inline constexpr const char* LBL_DRINK_BY                      = "Drink By";
    inline constexpr const char* LBL_SEARCH                        = "&Search";
    inline constexpr const char* LBL_SORT_BY                       = "Sort By:";
+   inline constexpr const char* LBL_SORT_ORDER                    = "Sort Order";
+   inline constexpr const char* LBL_SORT_ASCENDING                = "Ascending";
+   inline constexpr const char* LBL_SORT_DESCENDING               = "Descending";
    inline constexpr const char* FMT_LBL_TOTAL_ROWS                = "Total Rows: {}";
    inline constexpr const char* FMT_LBL_FILTERED_ROWS             = "Filtered Rows: {}";
 
