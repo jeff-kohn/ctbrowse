@@ -33,20 +33,20 @@ namespace ctb::constants
    inline constexpr const char* CURRENT_DIRECTORY           = ".";
 
    // CT doesn't return an HTTP response code for invalid logon, it just returns this text instead of the requested file.
-   inline constexpr const char* ERR_INVALID_CELLARTRACKER_LOGON = "<html><body>You are currently not logged into CellarTracker.</body></html>";
+   inline constexpr const char* ERR_STR_INVALID_CELLARTRACKER_LOGON = "<html><body>You are currently not logged into CellarTracker.</body></html>";
 
-   inline constexpr const char* ERROR_STR                      = "Error";
-   inline constexpr const char* ERROR_AUTHENTICATION_FAILED    = "Invalid username/password.";
-   inline constexpr const char* ERROR_DIALOG_TRANSFER_FAILED   = "Unexpected error transferring data to/from dialog.";
-   inline constexpr const char* ERROR_DOWNLOAD_AUTH_FAILURE    = "File download canceled, no valid login was provided.";
-   inline constexpr const char* ERROR_INVALID_PROP_INDEX       = "Invalid property index";
-   inline constexpr const char* ERROR_INVALID_ROW_INDEX        = "Invalid row index";
-   inline constexpr const char* ERROR_EDITING_NOT_SUPPORTED    = "Editing data is not supported.";
-   inline constexpr const char* ERROR_NULL_POINTER             = "Invalid Parameter (nullptr).";
-   inline constexpr const char* ERROR_NO_GRID_TABLE            = "No data is currently loaded. Open a data view before searching.";
-   inline constexpr const char* FMT_ERROR_FILE_NOT_FOUND       = "File '{}' was not found.";
-   inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND       = "Folder '{}' does not exist.";
-   inline constexpr const char* FMT_ERROR_CURL_ERROR           = "The operation failed with CURL error {}";
-   inline constexpr const char* FMT_ERROR_HTTP_STATUS_CODE     = "The operation failed with HTTP status code {}";
+   inline constexpr const char* ERROR_STR                         = "Error";
+   inline constexpr const char* ERROR_STR_AUTHENTICATION_FAILED   = "Invalid username/password.";
+   inline constexpr const char* ERROR_STR_DIALOG_TRANSFER_FAILED  = "Unexpected error transferring data to/from dialog.";
+   inline constexpr const char* ERROR_STR_DOWNLOAD_AUTH_FAILURE   = "File download canceled, no valid login was provided.";
+   inline constexpr const char* ERROR_STR_INVALID_INDEX           = "Invalid index";
+   inline constexpr const char* ERROR_STR_INVALID_ROW_INDEX       = "Invalid row index";
+   inline constexpr const char* ERROR_STR_EDITING_NOT_SUPPORTED   = "Editing data is not supported.";
+   inline constexpr const char* ERROR_STR_NO_GRID_TABLE           = "No data is currently loaded. Open a data view before searching.";
+   inline constexpr const char* ERROR_STR_NULLPTR_ARG             = "Invalid Parameter (nullptr).";
+   inline constexpr const char* FMT_ERROR_CURL_ERROR              = "The operation failed with CURL error {}";
+   inline constexpr const char* FMT_ERROR_FILE_NOT_FOUND          = "File '{}' was not found.";
+   inline constexpr const char* FMT_ERROR_HTTP_STATUS_CODE        = "The operation failed with HTTP status code {}";
+   inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND          = "Folder '{}' does not exist.";
 
 } // namespace ctb::constants

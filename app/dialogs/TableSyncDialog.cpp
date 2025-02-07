@@ -122,7 +122,7 @@ namespace ctb::app
    {
       if (!TransferDataFromWindow())
       {
-         wxGetApp().displayErrorMessage(constants::ERROR_DIALOG_TRANSFER_FAILED);
+         wxGetApp().displayErrorMessage(constants::ERROR_STR_DIALOG_TRANSFER_FAILED);
          return;
       }
 

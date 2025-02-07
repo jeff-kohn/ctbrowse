@@ -7,7 +7,7 @@
  *********************************************************************/
 
 #include "App.h"
-#include "ctb/Error.h"
+#include "MainFrame.h"
 
 #include <wx/fileconf.h>
 #include <wx/stdpaths.h>
@@ -16,8 +16,6 @@
 #include <chrono>
 #include <filesystem>
 
-/// @brief  this function loads our images from embedded resources
-void initImageResource();
 
 
 namespace ctb::app
@@ -44,7 +42,6 @@ namespace ctb::app
       // so create it first in case it doesn't exist.
       m_user_data_folder = fs::path{ std_paths.GetUserDataDir().wx_str() };
       fs::create_directories(m_user_data_folder);
-      m_grid_tables.setDataFolder(m_user_data_folder);
 
       // Set up config object to use file even on windows (registry is yuck)
       fs::path config_file_path{ m_user_data_folder / constants::APP_NAME_LONG };
@@ -60,17 +57,27 @@ namespace ctb::app
 
    bool App::OnInit()
    {
-      if (!wxApp::OnInit())
-         return false;
+      try
+      {
+         if (!wxApp::OnInit())
+            return false;
 
-      ::wxInitAllImageHandlers();
+         m_main_frame = MainFrame::create();
+         m_main_frame->Center();
+         m_main_frame->Show();
+         SetTopWindow(m_main_frame);
 
-      m_main_frame = new MainFrame{nullptr};
-      SetTopWindow(m_main_frame);
-      m_main_frame->Center();
-      m_main_frame->Show();
-
-      return true;
+         return true;
+      }
+      catch(Error& err)
+      {
+         displayErrorMessage(err);
+      }
+      catch(std::exception& e)
+      {
+         displayErrorMessage(e.what());
+      }
+      return false;
    } 
 
 
@@ -88,8 +95,9 @@ namespace ctb::app
    {
       auto *config = wxConfigBase::Get(false);
       if (nullptr == config)
+      {
          throw Error{ "No configuration object available" };
-
+      }
       return *config;
    }
 
@@ -98,15 +106,10 @@ namespace ctb::app
    {
       auto *config = wxConfigBase::Get(false);
       if (nullptr == config)
+      {
          throw Error{ "No configuration object available" };
-
+      }
       return *config;
-   }
-
-
-   GridTableMgr::GridTablePtr App::getGridTable(GridTableMgr::GridTableId tbl)
-   {
-      return m_grid_tables.getGridTable(tbl);
    }
 
 

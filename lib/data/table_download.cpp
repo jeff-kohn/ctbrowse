@@ -28,10 +28,10 @@ namespace
       {
          // our request was successful, but we need to check if the response contains
          // a file or an error message since CT returns an HTML <body> for some errors
-         if (response.text == constants::ERR_INVALID_CELLARTRACKER_LOGON)
+         if (response.text == constants::ERR_STR_INVALID_CELLARTRACKER_LOGON)
          {
             error.error_code = static_cast<int64_t>(HttpStatus::Code::Unauthorized);
-            error.error_message = constants::ERROR_AUTHENTICATION_FAILED;
+            error.error_message = constants::ERROR_STR_AUTHENTICATION_FAILED;
             error.category = Error::Category::HttpStatus;
          }
          else

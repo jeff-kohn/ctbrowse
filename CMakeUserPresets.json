@@ -1,0 +1,60 @@
+{
+   "version": 5,
+   "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 25,
+      "patch": 0
+   },
+   "configurePresets": [
+      {
+         "name": "dev-vstudio",
+         "hidden": false,
+         "inherits": [ "ci-win-vstudio", "dev-mode" ]
+      },
+      {
+         "name": "dev-vscode",
+         "hidden": false,
+         "inherits": [ "ci-win-ninja", "dev-mode" ],
+         "cacheVariables": {
+            "CTS_ENABLE_CLANG_TIDY": "ON"
+         }
+      }
+   ],
+   "buildPresets": [
+      {
+         "name": "dev-vstudio",
+         "configurePreset": "dev-vstudio",
+         "jobs": 16
+      },
+      {
+         "name": "dev-vscode",
+         "configurePreset": "dev-vscode",
+         "jobs": 16
+      }
+
+   ],
+   "testPresets": [
+      {
+         "name": "dev-vstudio",
+         "configurePreset": "dev-vstudio",
+         "output": {
+            "outputOnFailure": true
+         },
+         "execution": {
+            "jobs": 16,
+            "noTestsAction": "error"
+         }
+      },
+      {
+         "name": "dev-vscode",
+         "configurePreset": "dev-vscode",
+         "output": {
+            "outputOnFailure": true
+         },
+         "execution": {
+            "jobs": 16,
+            "noTestsAction": "error"
+         }
+      }
+   ]
+}

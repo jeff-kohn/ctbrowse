@@ -1,14 +1,14 @@
 /*******************************************************************
- * @file GridTableMgr.h
+ * @file GridTableLoader.h
  *
- * @brief Header file for the class GridTableMgr
+ * @brief Header file for the class GridTableLoader
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 #pragma once
 
-#include "ctb/ctb.h"
-#include "grids/GridTableBase.h"
+#include "App.h"
+#include "interfaces/GridTableEvent.h"
 
 #include <filesystem>
 #include <memory>
@@ -21,10 +21,22 @@ namespace ctb::app
 
 
    /// @brief class to manage a cached collection of grid tables, which are use for grid view in the application
-   class GridTableMgr
+   class GridTableLoader
    {
    public:
+      /// @brief default ctor, initializes data folder to "." unless overriden by a call to setDataFolder()
+      GridTableLoader() = default;
+
+      /// @brief construct a GridTableLoader specifying the data folder. May throw if folder is invalid.
+      ///
+      explicit GridTableLoader(const fs::path& folder)
+      {
+         setDataFolder(folder);
+      }
+
+
       /// @brief enum for the support grid tables
+      ///
       enum class GridTableId
       {
          WineList,
@@ -46,6 +58,7 @@ namespace ctb::app
 
 
       /// @brief returns the location used for loading data files from disk
+      ///
       fs::path getDataFolder() const
       {
          return m_data_folder;
@@ -53,21 +66,19 @@ namespace ctb::app
 
 
       /// @brief the smart-ptr-to-base that this class returns to callers.
-      using GridTablePtr = GridTableBase::GridTablePtr;
+      ///
+      using GridTablePtr = GridTablePtr;
 
 
       /// @brief get the requested grid table
       ///
-      /// this will always return a valid object, but it may be empty (e.g.
-      /// contain zero rows of data) if the table file couldn't be loaded
+      /// this will throw an exception if the table couldn't be loaded.
+      ///
       GridTablePtr getGridTable(GridTableId tbl);
 
 
    private:
-      using GridTables = std::unordered_map<GridTableId, GridTablePtr>;
-      GridTables m_grid_tables{};
       fs::path m_data_folder{constants::CURRENT_DIRECTORY};
-
    };
 
 

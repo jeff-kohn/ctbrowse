@@ -6,30 +6,42 @@
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 
-#include "MainFrame.h"
 #include "App.h"
-#include "dialogs/TableSyncDialog.h"
-#include "grids/GridTableWineList.h"
+#include "MainFrame.h"
 #include "wx_helpers.h"
+#include "dialogs/TableSyncDialog.h"
+#include "grid/CellarTrackerGrid.h"
+#include "grid/GridTableLoader.h"
+#include "grid/GridTableWineList.h"
+#include "panels/GridOptionsPanel.h"
 
-#include "ctb/CredentialWrapper.h"
-#include "ctb/data/table_download.h"
-#include "external/HttpStatusCodes.h"
-#include "ctb/winapi_util.h"
+#include <ctb/CredentialWrapper.h>
+#include <ctb/data/table_download.h>
+#include <ctb/winapi_util.h>
+#include <external/HttpStatusCodes.h>
 
 #include <wx/artprov.h>
 #include <wx/bitmap.h>
+#include <wx/frame.h>
+#include <wx/gdicmn.h>
+#include <wx/grid.h>
 #include <wx/icon.h>
 #include <wx/image.h>
+#include <wx/menu.h>
 #include <wx/msgdlg.h>
 #include <wx/panel.h>
 #include <wx/persist/toplevel.h>
 #include <wx/progdlg.h>
+#include <wx/splitter.h>
 #include <wx/sizer.h>
+#include <wx/srchctrl.h>
+#include <wx/statusbr.h>
 #include <wx/stockitem.h>
+#include <wx/toolbar.h>
 #include <wx/xrc/xmlres.h>
 
-#include <format>
+#include <memory>
+
 
 namespace ctb::app
 {
@@ -47,28 +59,33 @@ namespace ctb::app
    };
 
 
-   MainFrame::MainFrame()
+   MainFrame::MainFrame() : m_event_source{ GridTableSource::create() }
    {
    }
 
 
-   MainFrame::MainFrame(wxWindow* parent)   
-   {
-      Create(parent);
-   }
-
-
-   bool MainFrame::Create(wxWindow* parent)
+   [[nodiscard]] MainFrame* MainFrame::create()
    {
       // give base class a chance set up controls etc
-      if (!wxFrame::Create(parent, wxID_ANY, constants::APP_NAME_LONG, wxDefaultPosition, FromDIP(wxSize{640, 480})))
-         return false;
+      std::unique_ptr<MainFrame> wnd{ new MainFrame{} };
 
+      const auto default_size = wnd->FromDIP(wxSize{640, 480});
+      if (!wnd->Create(nullptr, wxID_ANY, constants::APP_NAME_LONG, wxDefaultPosition, default_size))
+      {
+         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      }
+      wnd->initControls();
+      return wnd.release(); // top-level window manages its own lifetime, we return non-owning pointer
+   }
+
+
+   void MainFrame::initControls()
+   {
       SetTitle(constants::APP_NAME_LONG);
       SetIcon(wxIcon{constants::RES_NAME_ICON_PRODUCT});
       SetName(constants::RES_NAME_MAINFRAME);               // needed for wxPersistence support
 
-      // No createGrid() call here, we'll create it once we have some data 
+      // No createGridWindows() call here, we'll create it once we have some data 
       createMenuBar();
       createStatusBar();
       createToolBar();
@@ -88,16 +105,21 @@ namespace ctb::app
          SetClientSize(FromDIP(wxSize(800, 600)));
          Centre(wxBOTH);
       }
-
-      return true;
    }
 
-
-   void MainFrame::createGrid()
+   void MainFrame::createGridWindows()
    {
-      m_grid = new CellarTrackerGrid{ this };
+      auto box_sizer = std::make_unique<wxBoxSizer>(wxHORIZONTAL);
+
+      m_grid_options = GridOptionsPanel::create(this, m_event_source);
+      box_sizer->Add(m_grid_options, wxSizerFlags(20).Expand());
+
+      m_grid = CellarTrackerGrid::create(this, m_event_source);
       m_grid->SetMargins(0, 0);
-      m_grid->SetColLabelSize(30);
+      m_grid->SetColLabelSize(FromDIP(30));
+      box_sizer->Add(m_grid, wxSizerFlags(80).Expand());
+
+      SetSizer(box_sizer.release());
       this->SendSizeEvent();
    }
 
@@ -266,7 +288,7 @@ namespace ctb::app
             }
             else
             {
-               end_status.message = constants::ERROR_DOWNLOAD_AUTH_FAILURE;
+               end_status.message = constants::ERROR_STR_DOWNLOAD_AUTH_FAILURE;
                return;
             }
          }
@@ -303,13 +325,18 @@ namespace ctb::app
       try
       {
          if (!m_grid)
-            createGrid();
+         {
+            createGridWindows();
+            assert(m_grid);
+         }
 
-         auto tbl = wxGetApp().getGridTable(GridTableMgr::GridTableId::WineList);
-         assert(tbl);
-         assert(m_grid);
+         // load table and connect it to the event source
+         GridTableLoader loader{ wxGetApp().userDataFolder() };
+         auto tbl = loader.getGridTable(GridTableLoader::GridTableId::WineList);
+         m_event_source->setTable(tbl);
+         tbl->setActiveSortConfig(GridTableWineList::getSortConfig(0));
+         m_event_source->signal(GridTableEvent::Sort);
 
-         m_grid->setGridTable(tbl);
          updateStatusBarCounts();
          Update();
       }
@@ -378,24 +405,31 @@ namespace ctb::app
    void MainFrame::updateStatusBarCounts()
    {
             
-      size_t total{0};
-      size_t filtered{0};
+      int total{0};
+      int filtered{0};
       
-      if (m_grid)
+      if (m_event_source->hasTable())
       {
-         total = m_grid->getTotalRowCount();
-         filtered = m_grid->getFilteredRowCount();
+         auto tbl = m_event_source->getTable();
+         total = tbl->totalRowCount();
+         filtered = tbl->filteredRowCount();
       }
 
       if (total)
+      {
          SetStatusText(std::format(constants::FMT_LBL_TOTAL_ROWS, total), STATUS_BAR_PANE_TOTAL_ROWS);
-      else 
+      }
+      else{
          SetStatusText("", STATUS_BAR_PANE_TOTAL_ROWS);
+      }
 
       if (filtered < total)
+      {
          SetStatusText(std::format(constants::FMT_LBL_FILTERED_ROWS, filtered), STATUS_BAR_PANE_FILTERED_ROWS);
-      else
+      }
+      else{
          SetStatusText("", STATUS_BAR_PANE_FILTERED_ROWS);
+      }
    }
 
 } // namespace ctb::app
