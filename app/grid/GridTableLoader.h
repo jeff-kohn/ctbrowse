@@ -28,12 +28,15 @@ namespace ctb::app
       GridTableLoader() = default;
 
       /// @brief construct a GridTableLoader specifying the data folder. May throw if folder is invalid.
+      ///
       explicit GridTableLoader(const fs::path& folder)
       {
          setDataFolder(folder);
       }
 
+
       /// @brief enum for the support grid tables
+      ///
       enum class GridTableId
       {
          WineList,
@@ -55,6 +58,7 @@ namespace ctb::app
 
 
       /// @brief returns the location used for loading data files from disk
+      ///
       fs::path getDataFolder() const
       {
          return m_data_folder;
@@ -62,18 +66,19 @@ namespace ctb::app
 
 
       /// @brief the smart-ptr-to-base that this class returns to callers.
+      ///
       using GridTablePtr = GridTablePtr;
 
 
       /// @brief get the requested grid table
       ///
       /// this will throw an exception if the table couldn't be loaded.
+      ///
       GridTablePtr getGridTable(GridTableId tbl);
 
 
    private:
       fs::path m_data_folder{constants::CURRENT_DIRECTORY};
-
    };
 
 

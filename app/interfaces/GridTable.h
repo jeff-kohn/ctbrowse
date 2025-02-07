@@ -1,7 +1,7 @@
 #/*******************************************************************
  * @file GridTable.h
  *
- * @brief Header file for the GridTable interface
+ * @brief Header file for the GridTable base class
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
@@ -21,7 +21,7 @@ namespace ctb::app
    using GridTableEventSourcePtr = std::shared_ptr<IGridTableEventSource>;
 
 
-   /// @brief our "data model", provides an interface for accessing CellarTrcker data
+   /// @brief our "data model", provides an base class interface for accessing CellarTracker data
    /// 
    /// users of this interface should gain access through 
    /// IGridTableEventSource::getTable() or using the ptr supplied when
@@ -69,7 +69,7 @@ namespace ctb::app
       virtual int filteredRowCount() const  = 0;
 
 
-      /// @brief contains a name and index of a sort option
+      /// @brief contains name, index and direction of a sort option
       ///
       struct SortConfig
       {
@@ -104,6 +104,8 @@ namespace ctb::app
       //virtual void setActiveSortConfig(int config_index, bool ascending = true) = 0;
 
 
+      /// @brief destructor
+      ///
       virtual ~GridTable()
       {}
    };

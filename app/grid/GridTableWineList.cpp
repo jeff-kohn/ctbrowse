@@ -162,12 +162,6 @@ namespace ctb::app
    }
 
 
-   //void GridTableWineList::setActiveSortConfig(int config_index, bool ascending)
-   //{
-   //   SortConfig cfg = getSortConfig()
-   //}
-
-
    bool GridTableWineList::applySubStringFilter(const SubStringFilter& filter)
    {
       // TODO:  once column filtering is added, we'll need to check whether 
@@ -187,6 +181,7 @@ namespace ctb::app
          return false;
       }
    }
+
 
    void GridTableWineList::sortData()
    {

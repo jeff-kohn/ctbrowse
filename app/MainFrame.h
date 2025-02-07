@@ -48,6 +48,7 @@ namespace ctb::app
 
 
       /// @brief set status bar text using std::format() syntax
+      ///
       template <typename... Args>
       constexpr void setStatusText(std::format_string<Args...> fmt_str, Args&&... args)
       {
@@ -58,6 +59,7 @@ namespace ctb::app
       /// @brief set status bar text for a specified pane using std::format() syntax
       ///
       /// pane-index is zero-based
+      ///
       template <typename... Args>
       constexpr void setStatusText(int pane_index, std::format_string<Args...> fmt_str, Args&&... args)
       {

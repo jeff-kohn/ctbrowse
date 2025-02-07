@@ -85,6 +85,7 @@ namespace ctb::app
       ForceRefresh();
    }
 
+
    void CellarTrackerGrid::filterBySubstring(std::string_view substr)
    {
       if (!m_grid_table)
@@ -109,6 +110,7 @@ namespace ctb::app
          }
       }
    }
+
 
    void CellarTrackerGrid::filterBySubstring(std::string_view substr, int col_idx)
    {
@@ -157,7 +159,7 @@ namespace ctb::app
          case GridTableEvent::Sort:
          case GridTableEvent::Filter:
          case GridTableEvent::SubStringFilter:
-             setGridTable(m_sink.getTable());   // we need the ref-counted smart-ptr
+            setGridTable(m_sink.getTable());   // we need the ref-counted smart-ptr
             break;
 
          case GridTableEvent::RowSelected:
