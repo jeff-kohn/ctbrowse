@@ -1,4 +1,4 @@
-find_package(wxWidgets CONFIG REQUIRED)
+﻿find_package(wxWidgets CONFIG REQUIRED)
 
 set(TARGET_NAME ctBrowse_app)
 
@@ -53,7 +53,8 @@ target_sources(${TARGET_NAME}
      "dialogs/TableSyncDialog.h"
      "interfaces/GridTable.h"
      "interfaces/GridTableEvent.h"
-     "interfaces/GridTableFilter.h"
+     "grid/GridTableFilter.cpp"
+     "grid/GridTableFilter.h"
      "grid/CellarTrackerGrid.cpp"
      "grid/CellarTrackerGrid.h"
      "grid/GridTableLoader.cpp"
