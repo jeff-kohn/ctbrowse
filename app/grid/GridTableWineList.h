@@ -10,6 +10,7 @@
 #include "App.h"
 #include "interfaces/GridTableEvent.h"
 
+#include <ctb/data/ColumnFilter.h>
 #include <ctb/data/DisplayColumn.h>
 #include <ctb/data/SubStringFilter.h>
 #include <ctb/data/TableSorter.h>
@@ -181,8 +182,10 @@ namespace ctb::app
 
       // sets the currently-active sort option
       ///
-      void setActiveSortConfig(const SortConfig& config) override;
-      //void setActiveSortConfig(int config_index, bool ascending = true) override;
+      void applySortConfig(const SortConfig& config) override;
+
+
+      //void getFilterValues(GridTable* grid_table) override;
 
    private:
       ColumnList                     m_display_columns{};

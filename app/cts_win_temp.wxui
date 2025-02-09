@@ -119,21 +119,52 @@
       <node
         class="wxBoxSizer"
         orientation="wxVERTICAL"
-        var_name="top_sizer">
+        var_name="top_sizer"
+        flags="wxEXPAND">
         <node
-          class="wxStaticText"
-          class_access="none"
-          label="Sort By:"
-          var_name="static_text"
-          borders="wxTOP|wxRIGHT|wxLEFT" />
+          class="wxStaticBoxSizer"
+          label="Sort Options"
+          var_name="sort_options_box"
+          flags="wxEXPAND">
+          <node
+            class="wxChoice"
+            focus="1"
+            var_name="m_sort_combo"
+            validator_data_type="int"
+            validator_variable="m_sort_choice_val"
+            flags="wxEXPAND" />
+          <node
+            class="wxRadioButton"
+            checked="1"
+            class_access="none"
+            label="Ascending"
+            style="wxRB_GROUP"
+            var_name="sort_ascending_opt" />
+          <node
+            class="wxRadioButton"
+            class_access="none"
+            label="Descending"
+            var_name="sort_descending_opt" />
+        </node>
         <node
-          class="wxChoice"
-          focus="1"
-          var_name="m_sort_choice_ctrl"
-          validator_data_type="int"
-          validator_variable="m_sort_choice_val"
-          borders="wxBOTTOM|wxRIGHT|wxLEFT"
-          flags="wxEXPAND" />
+          class="wxStaticBoxSizer"
+          label="Filter Options"
+          var_name="filter_options_box"
+          flags="wxEXPAND"
+          proportion="2">
+          <node
+            class="wxTreeListCtrl"
+            style="wxTL_SINGLE|wxTL_CHECKBOX|wxTR_TWIST_BUTTONS"
+            var_name="m_filter_tree"
+            maximum_size="-1,400d"
+            flags="wxEXPAND"
+            proportion="2"
+            wxEVT_TREELIST_ITEM_EXPANDING="OnTreelistItemExpanding"
+            wxEVT_TREELIST_ITEM_CHECKED="OnTreelistItemChecked" />
+        </node>
+        <node
+          class="spacer"
+          proportion="1" />
       </node>
     </node>
   </node>

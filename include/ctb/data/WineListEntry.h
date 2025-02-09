@@ -68,19 +68,18 @@ namespace ctb::data
    class WineListEntry
    {
    public:
-      WineListEntry() = default;
-      WineListEntry(const csv::CSVRow& row);
-      WineListEntry(const WineListEntry&) = default;
-      WineListEntry(WineListEntry&&) = default;
+      
+      /// @brief construct a WineListEntry from a row in a CSV data file
+      /// 
+      explicit WineListEntry(const csv::CSVRow& row);
 
-      WineListEntry& operator=(const WineListEntry&) = default;
-      WineListEntry& operator=(WineListEntry&&) = default;
 
       /// @brief these are the fields from the denormalized CSV that we parse and use
       ///
       /// the values map to column indices in the file, while the enum ordering is based
       /// on the record class layout. The enums with values starting at 100 are calculated
       /// fields, and do not map directly to a column in the file.
+      ///
       enum class Prop : uint32_t
       {
          iWineID = 0,
@@ -109,32 +108,41 @@ namespace ctb::data
       };
 
       
+      /// @brief small helper to convert a Prop enum into an integer value
+      /// 
       static constexpr int to_int(Prop prop)
       {
          return static_cast<int>(std::to_underlying(prop));
       }
 
+
       // type alias used by template code
+      ///
       using RowType = csv::CSVRow;
 
 
       /// @brief static function to get the 0-based index of the last column.
+      ///
       static constexpr int maxPropIndex() { return static_cast<int>(Prop::WineAndVintage); }
 
 
       /// @brief variant that can hold any of our supported field types.
+      ///
       using ValueWrapper = std::variant<uint16_t, uint64_t, NullableDouble, NullableShort, std::string_view>;
 
 
       /// @brief used to return a field value or an error
+      ///
       using ValueResult = std::expected<ValueWrapper, Error>;
 
 
       /// @brief get the property corresponding to the specified enum identifier
+      ///
       [[nodiscard]] ValueResult getProperty(Prop prop) const;
 
 
       /// @brief array syntax for getting a property value
+      ///
       [[nodiscard]] ValueResult operator[](Prop prop) const 
       {
          return getProperty(prop);
@@ -144,6 +152,7 @@ namespace ctb::data
       /// @brief array syntax for getting a property value
       ///
       /// if the specified index doesn't match an enum identifier, an error will be returned.
+      ///
       [[nodiscard]] ValueResult operator[](std::integral auto idx) const 
       {
          auto e = magic_enum::enum_value<Prop>(static_cast<int>(idx));
@@ -176,9 +185,6 @@ namespace ctb::data
       NullableDouble myScore() const           { return m_rec.MYScore;          }
       NullableShort beginConsume() const       { return m_rec.BeginConsume;     }
       NullableShort endConsume() const         { return m_rec.EndConsume;       }
-      
-
-      /// @brief calculated field to show vintage and wine name as a single value
       std::string_view wineAndVintage() const  { return m_wine_and_vintage;     }
 
 
@@ -186,7 +192,15 @@ namespace ctb::data
       /// 
       /// returns false if the row could not be parse, in which case this 
       /// object may be in an invalid/indeterminate state (but not UB)
+      ///
       bool parse(const csv::CSVRow& row);
+
+
+      WineListEntry() = default;
+      WineListEntry(const WineListEntry&) = default;
+      WineListEntry(WineListEntry&&) = default;
+      WineListEntry& operator=(const WineListEntry&) = default;
+      WineListEntry& operator=(WineListEntry&&) = default;
 
    private:
       detail::WineListRec m_rec{};

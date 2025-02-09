@@ -63,7 +63,6 @@ namespace ctb::app
             return false;
 
          m_main_frame = MainFrame::create();
-         m_main_frame->Center();
          m_main_frame->Show();
          SetTopWindow(m_main_frame);
 

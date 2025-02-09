@@ -1,7 +1,7 @@
 /*******************************************************************
- * @file GridTableSource.h
+ * @file GridTableEventSource.h
  *
- * @brief Header file for GridTableSource class
+ * @brief Header file for GridTableEventSource class
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
@@ -23,7 +23,7 @@ namespace ctb::app
    /// only be accessed from the main thread. If communication with background threads is
    /// needed, a different implementation will be necessary.
    /// 
-   class GridTableSource final : public IGridTableEventSource
+   class GridTableEventSource final : public IGridTableEventSource
    {
    public:
       
@@ -78,20 +78,20 @@ namespace ctb::app
  
 
       /// @brief destructor
-      ~GridTableSource() noexcept override;
+      ~GridTableEventSource() noexcept override;
 
    private:
       GridTablePtr m_grid_table{};
       std::unordered_set<IGridTableEventSink*> m_observers{};
    
       /// @brief default ctor is private, use static create()
-      GridTableSource() = default;
+      GridTableEventSource() = default;
 
       // no copy/move/assign, this class is created on the heap.
-      GridTableSource(const GridTableSource&) = delete;
-      GridTableSource(GridTableSource&&) = delete;
-      GridTableSource& operator=(const GridTableSource&) = delete;
-      GridTableSource& operator=(GridTableSource&&) = delete;   
+      GridTableEventSource(const GridTableEventSource&) = delete;
+      GridTableEventSource(GridTableEventSource&&) = delete;
+      GridTableEventSource& operator=(const GridTableEventSource&) = delete;
+      GridTableEventSource& operator=(GridTableEventSource&&) = delete;   
    };
 
 

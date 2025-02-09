@@ -1,31 +1,31 @@
 /*******************************************************************
- * @file GridTableSource.cpp
+ * @file GridTableEventSource.cpp
  *
- * @brief implementation file for the GridTableSource class
+ * @brief implementation file for the GridTableEventSource class
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
-#include "grid/GridTableSource.h"
+#include "grid/GridTableEventSource.h"
 
 
 namespace ctb::app
 {
 
    /// @brief static method to create a class instance.
-   [[nodiscard]] GridTableEventSourcePtr GridTableSource::create()
+   [[nodiscard]] GridTableEventSourcePtr GridTableEventSource::create()
    { 
-      return GridTableEventSourcePtr{ new GridTableSource{} }; 
+      return GridTableEventSourcePtr{ new GridTableEventSource{} }; 
    }
 
-   bool GridTableSource::hasTable() const
+   bool GridTableEventSource::hasTable() const
    { 
       return m_grid_table ? true : false; 
    }
 
 
    /// @brief assigns a table to this source.
-   void GridTableSource::setTable(GridTablePtr table)
+   void GridTableEventSource::setTable(GridTablePtr table)
    {
       // We need to signal that the current table is being replaced, because
       // otherwise views that hold internal table pointers will be left with
@@ -37,21 +37,21 @@ namespace ctb::app
 
 
    /// @brief retrieves a pointer to the active table for this source, if any.
-   GridTablePtr GridTableSource::getTable()
+   GridTablePtr GridTableEventSource::getTable()
    {
       return m_grid_table;
    }
 
 
    /// @brief  attaches an event sink to this source to receive event notifications
-   void GridTableSource::attach(IGridTableEventSink* observer) 
+   void GridTableEventSource::attach(IGridTableEventSink* observer) 
    {
       m_observers.insert(observer);
    }
 
 
    /// @brief detach an event sink from this source to no longer receive event notifications
-   void GridTableSource::detach(IGridTableEventSink* observer)
+   void GridTableEventSource::detach(IGridTableEventSink* observer)
    {
       auto it = m_observers.find(observer);
       if (it != m_observers.end()) 
@@ -60,7 +60,7 @@ namespace ctb::app
 
 
    /// @brief this is called to signal that an event needs to be sent to all listeners
-   bool GridTableSource::signal(GridTableEvent event)
+   bool GridTableEventSource::signal(GridTableEvent event)
    {
       if (m_grid_table)
       {
@@ -71,7 +71,7 @@ namespace ctb::app
    }
 
 
-   GridTableSource::~GridTableSource() noexcept
+   GridTableEventSource::~GridTableEventSource() noexcept
    {
       signal(GridTableEvent::TableRemove);
    }

@@ -8,7 +8,7 @@
 #pragma once
 
 #include "App.h"
-#include "grid/GridTableSource.h"
+#include "grid/GridTableEventSource.h"
 
 #include <wx/event.h>
 #include <wx/frame.h>

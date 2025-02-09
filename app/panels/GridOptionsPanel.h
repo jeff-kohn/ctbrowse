@@ -8,11 +8,14 @@
 #pragma once
 
 #include "App.h"
+#include "grid/GridTableFilterMgr.h"
 #include "grid/ScopedEventSink.h"
 
 #include <wx/choice.h>
 #include <wx/gdicmn.h>
 #include <wx/panel.h>
+#include <wx/dataview.h>
+#include <wx/treelist.h>
 
 
 namespace ctb::app
@@ -33,18 +36,22 @@ namespace ctb::app
       ScopedEventSink         m_sink;
       wxChoice*               m_sort_combo{};
       GridTable::SortConfig   m_sort_config{};
+      wxTreeListCtrl*         m_filter_tree{};
 
       /// @brief called when there are updates to the table 
       void notify(GridTableEvent event, GridTable* grid_table) override;
 
       void initControls();
       wxArrayString getSortOptionList(GridTable* grid_table);
+      void populateFilterTypes(GridTable* grid_table);
+      void populateChoicesForFilter(GridTable* grid_table);
 
       // event handlers
       void onSortSelection(wxCommandEvent& event);
       void onSortOrderClicked(wxCommandEvent& event);
       void onTableInitialize(GridTable* grid_table);
       void onTableSorted(GridTable* grid_table);
+      void OnFilterTreeItemExpand(wxDataViewEvent& event);
 
       /// @brief private ctor used by static create()
       GridOptionsPanel(GridTableEventSourcePtr source);

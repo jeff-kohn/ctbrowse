@@ -1,4 +1,4 @@
-#/*******************************************************************
+/*******************************************************************
  * @file GridTable.h
  *
  * @brief Header file for the GridTable base class
@@ -8,6 +8,7 @@
 #pragma once
 
 #include "App.h"
+#include "interfaces/GridTableFilter.h"
 
 #include <wx/grid.h>
 
@@ -17,9 +18,6 @@
 
 namespace ctb::app
 {
-   struct IGridTableEventSource;
-   using GridTableEventSourcePtr = std::shared_ptr<IGridTableEventSource>;
-
 
    /// @brief our "data model", provides an base class interface for accessing CellarTracker data
    /// 
@@ -96,12 +94,12 @@ namespace ctb::app
 
       /// @brief specifies a new sort option, triggers GridTableEvent::Sort
       ///
-      virtual void setActiveSortConfig(const SortConfig& config) = 0;
+      virtual void applySortConfig(const SortConfig& config) = 0;
 
 
-      /// @brief specifies a new sort option, triggers GridTableEvent::Sort
+      /// @brief retrieves a list of available fitlers for this table.
       ///
-      //virtual void setActiveSortConfig(int config_index, bool ascending = true) = 0;
+      //virtual std::vector<GridTableFilterInfo> availableFilters() = 0;
 
 
       /// @brief destructor

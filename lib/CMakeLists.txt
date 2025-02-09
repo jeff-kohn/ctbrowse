@@ -9,6 +9,7 @@ target_sources(ctBrowse_lib
    PUBLIC
       "../include/ctb/constants.h"
       "../include/ctb/CredentialWrapper.h"
+      "../include/ctb/data/ColumnFilter.h"
       "../include/ctb/data/DisplayColumn.h"
       "../include/ctb/data/SubstringFilter.h"
       "../include/ctb/data/table_data.h"

@@ -59,7 +59,7 @@ namespace ctb::app
    };
 
 
-   MainFrame::MainFrame() : m_event_source{ GridTableSource::create() }
+   MainFrame::MainFrame() : m_event_source{ GridTableEventSource::create() }
    {
    }
 
@@ -103,7 +103,7 @@ namespace ctb::app
       {
          // Choose some custom default size for the first run
          SetClientSize(FromDIP(wxSize(800, 600)));
-         Centre(wxBOTH);
+         Center(wxBOTH);
       }
    }
 
@@ -120,6 +120,7 @@ namespace ctb::app
       box_sizer->Add(m_grid, wxSizerFlags(80).Expand());
 
       SetSizer(box_sizer.release());
+      //box_sizer->SetSizeHints(this);
       this->SendSizeEvent();
    }
 
@@ -334,7 +335,7 @@ namespace ctb::app
          GridTableLoader loader{ wxGetApp().userDataFolder() };
          auto tbl = loader.getGridTable(GridTableLoader::GridTableId::WineList);
          m_event_source->setTable(tbl);
-         tbl->setActiveSortConfig(GridTableWineList::getSortConfig(0));
+         tbl->applySortConfig(GridTableWineList::getSortConfig(0));
          m_event_source->signal(GridTableEvent::Sort);
 
          updateStatusBarCounts();

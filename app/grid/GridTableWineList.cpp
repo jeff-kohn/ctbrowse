@@ -152,7 +152,7 @@ namespace ctb::app
    }
 
 
-   void GridTableWineList::setActiveSortConfig(const SortConfig& config)
+   void GridTableWineList::applySortConfig(const SortConfig& config)
    {
       if (config != m_sort_config)
       {

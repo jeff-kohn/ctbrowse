@@ -1,3 +1,10 @@
+/*******************************************************************
+ * @file SubStringFilter.h
+ *
+ * @brief defines the template class SubStringFilter
+ * 
+ * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+ *******************************************************************/
 #pragma once
 
 #include "ctb/ctb.h"
@@ -11,13 +18,9 @@
 
 namespace ctb::data
 {
-   namespace detail
-   {
-
-   }
-   
 
    /// @brief implements a substring-matching filter for a table entry/record
+   ///
    template <TableEntry T>
    struct SubStringFilter
    {
@@ -25,9 +28,11 @@ namespace ctb::data
       using Prop = T::Prop;
 
       /// @brief the substring to search for.
+      ///
       std::string search_value{};
 
       /// @brief the properties to search for.
+      ///
       std::vector<Prop> search_props{};
 
 

@@ -1,19 +1,21 @@
 find_package(wxWidgets CONFIG REQUIRED)
 
-set(target_name ctBrowse_app)
+set(TARGET_NAME ctBrowse_app)
 
-# vars used for version resource
+# vars used for later statements
 set (${PROJECT_NAME}_AUTHOR "Jeff Kohn")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set (${PROJECT_NAME}_COPYRIGHT "Copyright © ${CURRENT_YEAR} ${${PROJECT_NAME}_AUTHOR}")
 set(${PROJECT_NAME}_VERSION_RESOURCE "")
+set(MANIFEST_FILE "${CMAKE_CURRENT_SOURCE_DIR}/resources/utf-8.manifest" )
+
 
 generate_product_version(
    ${PROJECT_NAME}_VERSION_RESOURCE
-   NAME ${target_name}
+   NAME ${TARGET_NAME}
    FILE_DESCRIPTION "${PROJECT_NAME} for Windows"
    ICON ${CMAKE_CURRENT_LIST_DIR}/resources/art/product.ico
-   ORIGINAL_FILENAME ${target_name}${CMAKE_EXECUTABLE_SUFFIX}
+   ORIGINAL_FILENAME ${TARGET_NAME}${CMAKE_EXECUTABLE_SUFFIX}
    VERSION_MAJOR ${PROJECT_VERSION_MAJOR}
    VERSION_MINOR ${PROJECT_VERSION_MINOR}
    VERSION_PATCH ${PROJECT_VERSION_PATCH}
@@ -22,24 +24,24 @@ generate_product_version(
    COMPANY_COPYRIGHT  ${${PROJECT_NAME}_COPYRIGHT}
 )
 
-create_windows_target(${target_name} ALIAS ${target_name})
+create_windows_target(${TARGET_NAME} ALIAS ${TARGET_NAME})
 
 # disable cmake's generated manifest because we're using one from wxWidgets
-set_target_properties(${target_name} PROPERTIES LINK_FLAGS "/MANIFEST:NO")
+set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "/MANIFEST:NO")
 
-target_include_directories(${target_name} 
+target_include_directories(${TARGET_NAME} 
    ${warning_guard}
    PRIVATE
       ${CMAKE_CURRENT_LIST_DIR}
 )
 
-target_link_libraries(${target_name}
+target_link_libraries(${TARGET_NAME}
    PRIVATE
       ctBrowse::ctBrowse_lib
       wxWidgets::wxWidgets
 )
 
-target_sources(${target_name}
+target_sources(${TARGET_NAME}
    PRIVATE
      "App.cpp"
      "App.h"
@@ -51,22 +53,24 @@ target_sources(${target_name}
      "dialogs/TableSyncDialog.h"
      "interfaces/GridTable.h"
      "interfaces/GridTableEvent.h"
+     "interfaces/GridTableFilter.h"
      "grid/CellarTrackerGrid.cpp"
      "grid/CellarTrackerGrid.h"
      "grid/GridTableLoader.cpp"
      "grid/GridTableLoader.h"
-     "grid/GridTableSource.cpp"
-     "grid/GridTableSource.h"
+     "grid/GridTableEventSource.cpp"
+     "grid/GridTableEventSource.h"
      "grid/GridTableWineList.cpp"
      "grid/GridTableWineList.h"
      "grid/ScopedEventSink.h"
      "panels/GridOptionsPanel.cpp"
      "panels/GridOptionsPanel.h"
+     "resources/utf-8.manifest"
      "resources/resource.rc"
-     "resources/utf8.manifest"
      ${${PROJECT_NAME}_VERSION_RESOURCE}
 )
 
+add_manifest(${TARGET_NAME} ${MANIFEST_FILE} )
 
 # ---- End-of-file commands ----
 add_folders(app)

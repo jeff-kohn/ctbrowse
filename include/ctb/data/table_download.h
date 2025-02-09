@@ -1,7 +1,7 @@
 /*******************************************************************
  * @file table_download.h
  *
- * @brief Header file fucnctionality in the ctb::data namespace for
+ * @brief Header file functionality in the ctb::data namespace for
  *        downloading table data from CellarTracker.com
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 

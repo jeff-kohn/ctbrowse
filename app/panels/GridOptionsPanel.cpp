@@ -47,30 +47,28 @@ namespace ctb::app
 
    void GridOptionsPanel::initControls()
    {
+      auto default_border = wxSizerFlags::GetDefaultBorder();
+
       // panel shouldn't grow infinitely
-      SetMaxSize(ConvertDialogToPixels(wxSize{ 140, constants::UNSPECIFIED }));
-      SetMinSize(ConvertDialogToPixels(wxSize{ 70, constants::UNSPECIFIED }));
+      SetMaxSize(ConvertDialogToPixels(wxSize{ 140, constants::WX_UNSPECIFIED_VALUE }));
+      SetMinSize(ConvertDialogToPixels(wxSize{ 70, constants::WX_UNSPECIFIED_VALUE }));
 
       // defines the rows of controls in our panel
       auto top_sizer = new wxBoxSizer{ wxVERTICAL };
+      top_sizer->AddSpacer(default_border);
 
-      // sort field label
-      auto* static_text = new wxStaticText(this, wxID_ANY, constants::LBL_SORT_BY);
-      top_sizer->Add(static_text, wxSizerFlags{}.Border(wxTOP | wxLEFT, wxSizerFlags::GetDefaultBorder() * 1.5));
+      // sort options box
+      auto* sort_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_SORT_OPTIONS);
 
       // sort fields combo
-      m_sort_combo = new wxChoice(this, wxID_ANY);
+      m_sort_combo = new wxChoice(sort_options_box->GetStaticBox(), wxID_ANY);
       m_sort_combo->SetFocus();
       m_sort_combo->SetValidator(wxGenericValidator(&m_sort_config.sort_index));
-      top_sizer->Add(m_sort_combo, wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT ));
-      top_sizer->AddSpacer(5);
-
-      // sort order radio group
-      auto sort_order_group = new wxStaticBoxSizer{ wxHORIZONTAL, this, constants::LBL_SORT_ORDER };
+      sort_options_box->Add(m_sort_combo, wxSizerFlags{}.Expand().Border(wxALL));
 
       // ascending sort order radio. validator tied to SortConfig.ascending
       auto opt_ascending = new wxRadioButton{
-         sort_order_group->GetStaticBox(),
+         sort_options_box->GetStaticBox(),
          wxID_ANY, 
          constants::LBL_SORT_ASCENDING,
          wxDefaultPosition, 
@@ -79,14 +77,32 @@ namespace ctb::app
       };
       opt_ascending->SetValue(true);
       opt_ascending->SetValidator(wxGenericValidator{ &m_sort_config.ascending });
-      sort_order_group->Add(opt_ascending, wxSizerFlags{1}.Expand().Border(wxALL));
+      sort_options_box->Add(opt_ascending, wxSizerFlags{}.Expand().Border(wxALL));
 
       // descending sort order radio. no validator needed 
-      auto opt_descending = new wxRadioButton{ sort_order_group->GetStaticBox(), wxID_ANY, constants::LBL_SORT_DESCENDING };
-      sort_order_group->Add(opt_descending, wxSizerFlags{1}.Expand().Border(wxALL));
+      auto opt_descending = new wxRadioButton{ sort_options_box->GetStaticBox(), wxID_ANY, constants::LBL_SORT_DESCENDING };
+      sort_options_box->Add(opt_descending, wxSizerFlags{1}.Expand().Border(wxALL));
+      top_sizer->Add(sort_options_box, wxSizerFlags().Expand().Border(wxALL));
+      top_sizer->AddSpacer(default_border);
+
+      // filter options box
+      auto* filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_FILTER_OPTIONS);
+
+      // filter tree control
+      m_filter_tree = new wxTreeListCtrl{
+         filter_options_box->GetStaticBox(), 
+         wxID_ANY,
+         wxDefaultPosition, 
+         wxDefaultSize, 
+         wxTL_SINGLE | wxTL_CHECKBOX
+      };
+      m_filter_tree->SetMinSize(ConvertDialogToPixels(wxSize(-1, 100)));
+      filter_options_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
+      filter_options_box->AddSpacer(default_border);
+      top_sizer->Add(filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
+      top_sizer->AddStretchSpacer(2);
 
       // finalize layout
-      top_sizer->Add(sort_order_group, wxSizerFlags().Expand().Border(wxALL));
       SetSizer(top_sizer);
 
       // event bindings.
@@ -101,8 +117,14 @@ namespace ctb::app
       using SortConfig = GridTable::SortConfig;
 
       return vws::all(grid_table->availableSortConfigs()) 
-         | vws::transform([](const SortConfig& s) {  return wxString{s.sort_name.data(), s.sort_name.length() };  })
-         | rng::to<wxArrayString>();
+               | vws::transform([](const SortConfig& s) {  return wxString{s.sort_name.data(), s.sort_name.length() };  })
+               | rng::to<wxArrayString>();
+   }
+
+
+   void GridOptionsPanel::populateFilterTypes(GridTable* grid_table)
+   {
+
    }
 
 
@@ -112,7 +134,9 @@ namespace ctb::app
       m_sort_combo->Clear();
       m_sort_combo->Append(getSortOptionList(grid_table));
       onTableSorted(grid_table);
+      populateFilterTypes(grid_table);
    }
+
 
    void GridOptionsPanel::onTableSorted(GridTable* grid_table)
    {
@@ -132,7 +156,7 @@ namespace ctb::app
                auto table = m_sink.getTable();
                if (table)
                {
-                  table->setActiveSortConfig(m_sort_config);
+                  table->applySortConfig(m_sort_config);
                   m_sink.signal_source(GridTableEvent::Sort);
                }
          });
@@ -156,7 +180,7 @@ namespace ctb::app
          auto table = m_sink.getTable();
          if (table)
          {
-            table->setActiveSortConfig(m_sort_config);
+            table->applySortConfig(m_sort_config);
             m_sink.signal_source(GridTableEvent::Sort);
          }
       }
