@@ -120,7 +120,6 @@ namespace ctb::app
       box_sizer->Add(m_grid, wxSizerFlags(80).Expand());
 
       SetSizer(box_sizer.release());
-      //box_sizer->SetSizeHints(this);
       this->SendSizeEvent();
    }
 

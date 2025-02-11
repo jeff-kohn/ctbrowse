@@ -14,7 +14,7 @@
 #include <wx/gdicmn.h>
 #include <wx/panel.h>
 #include <wx/dataview.h>
-#include <wx/treelist.h>
+#include <wx/treectrl.h>
 
 #include <map>
 
@@ -40,7 +40,7 @@ namespace ctb::app
       ScopedEventSink         m_sink;           // no default init
       wxChoice*               m_sort_combo{};
       GridTableSortConfig     m_sort_config{};
-      wxDataViewTreeCtrl*     m_filter_tree{};
+      wxTreeCtrl*             m_filter_tree{};
 
       /// @brief called when there are updates to the table 
       void notify(GridTableEvent event, GridTable* grid_table) override;
@@ -51,11 +51,11 @@ namespace ctb::app
       void populateChoicesForFilter(GridTable* grid_table);
 
       // event handlers
-      void onSortSelection(wxCommandEvent& event);
       void onSortOrderClicked(wxCommandEvent& event);
+      void onSortSelection(wxCommandEvent& event);
       void onTableInitialize(GridTable* grid_table);
       void onTableSorted(GridTable* grid_table);
-      void OnFilterItemExpanding(wxDataViewEvent& event);
+      void onTreeFilterExpanding(wxTreeEvent& event);
 
       /// @brief private ctor used by static create()
       GridOptionsPanel(GridTableEventSourcePtr source);

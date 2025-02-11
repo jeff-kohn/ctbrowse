@@ -52,8 +52,8 @@ namespace ctb::app
       auto default_border = wxSizerFlags::GetDefaultBorder();
 
       // panel shouldn't grow infinitely
-      SetMaxSize(ConvertDialogToPixels(wxSize{ 140, constants::WX_UNSPECIFIED_VALUE }));
-      SetMinSize(ConvertDialogToPixels(wxSize{ 70, constants::WX_UNSPECIFIED_VALUE }));
+      //SetMaxSize(ConvertDialogToPixels(wxSize{ 140, constants::WX_UNSPECIFIED_VALUE }));
+      SetMinSize(ConvertDialogToPixels(wxSize{ 100, constants::WX_UNSPECIFIED_VALUE }));
 
       // defines the rows of controls in our panel
       auto top_sizer = new wxBoxSizer{ wxVERTICAL };
@@ -91,26 +91,22 @@ namespace ctb::app
       auto* filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_FILTER_OPTIONS);
 
       // filter tree control
-      m_filter_tree = new wxDataViewTreeCtrl{
-         filter_options_box->GetStaticBox(), 
-         wxID_ANY,
-         wxDefaultPosition, 
-         wxDefaultSize, 
-         wxTL_SINGLE | wxTL_CHECKBOX
-      };
-      m_filter_tree->SetMinSize(ConvertDialogToPixels(wxSize(-1, 100)));
+      auto style = wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_TWIST_BUTTONS | wxTR_NO_LINES | wxTR_HIDE_ROOT;
+      m_filter_tree = new wxTreeCtrl{ filter_options_box->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, style };
 
+      m_filter_tree->SetMaxSize(ConvertDialogToPixels(wxSize(-1, 500)));
+      m_filter_tree->SetMinSize(ConvertDialogToPixels(wxSize(-1, 100)));
       filter_options_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
       filter_options_box->AddSpacer(default_border);
-      top_sizer->Add(filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
-      top_sizer->AddStretchSpacer(2);
 
       // finalize layout
+      top_sizer->Add(filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
+      top_sizer->AddStretchSpacer(2);
       SetSizer(top_sizer);
 
       // event bindings.
       m_sort_combo->Bind(wxEVT_CHOICE, &GridOptionsPanel::onSortSelection, this);
-      m_filter_tree->Bind(wxEVT_DATAVIEW_ITEM_EXPANDING, &GridOptionsPanel::OnFilterItemExpanding, this);
+      m_filter_tree->Bind(wxEVT_TREE_ITEM_EXPANDING, &GridOptionsPanel::onTreeFilterExpanding, this);
       opt_ascending->Bind(wxEVT_RADIOBUTTON, &GridOptionsPanel::onSortOrderClicked, this);
       opt_descending->Bind(wxEVT_RADIOBUTTON, &GridOptionsPanel::onSortOrderClicked, this);
 
@@ -128,17 +124,19 @@ namespace ctb::app
    {
       assert(m_filter_tree);
 
+      // disable window updates till we're done and reset the tree
       wxWindowUpdateLocker freeze_updates{m_filter_tree};
-
       m_filter_tree->DeleteAllItems();
-      auto root = wxDataViewItem(0);
+
+      // get the available filters for this grid table, and add them to the tree.
       auto filters = grid_table->availableFilters();
+      auto root = m_filter_tree->AddRoot(wxEmptyString);
       for (auto& filter : filters)
       {
-         
          wxString filter_name{ wxFromSV(filter.filterName() ) };
-         auto item_id = m_filter_tree->AppendContainer(root, filter_name);
-         m_filters[item_id.m_pItem] = std::make_unique<GridTableFilter>(filter);
+         auto item = m_filter_tree->AppendItem(m_filter_tree->GetRootItem(), filter_name);
+         m_filter_tree->SetItemHasChildren(item, true);
+         m_filters[item.m_pItem] = std::make_unique<GridTableFilter>(filter);
       }
    }
 
@@ -165,10 +163,16 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::OnFilterItemExpanding(wxDataViewEvent& event)
+   void GridOptionsPanel::onTreeFilterExpanding(wxTreeEvent& event)
    {
+      // if the node has a filter in our map and it doens't already have a list of 
+      // available filter values as children, we need to populate the child nodes.
+      // if not just return.
       auto parent = event.GetItem();
-      assert(m_filters.contains(parent.m_pItem));
+      if(!m_filters.contains(parent.m_pItem) || m_filter_tree->GetChildrenCount(parent) )
+      {
+         return;
+      }
 
       auto grid_table = m_sink.getTable();
       assert(grid_table);
