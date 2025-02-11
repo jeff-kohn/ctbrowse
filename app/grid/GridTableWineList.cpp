@@ -119,7 +119,7 @@ namespace ctb::app
 
    bool GridTableWineList::filterBySubstring(std::string_view substr, int col_idx)
    {
-      SubStringFilter::Prop prop = magic_enum::enum_value<SubStringFilter::Prop>(static_cast<uint32_t>(col_idx));
+      SubStringFilter::Prop prop = data::indexToProp<SubStringFilter::Prop>(col_idx);
       auto cols = std::vector<SubStringFilter::Prop>{ prop };
 
       return applySubStringFilter(SubStringFilter{ std::string{substr}, cols });
@@ -133,32 +133,52 @@ namespace ctb::app
    }
 
 
-   std::vector<GridTableWineList::SortConfig>  GridTableWineList::availableSortConfigs() const
+   std::vector<GridTableWineList::GridTableSortConfig>  GridTableWineList::availableSortConfigs() const
    {
-      std::vector<GridTable::SortConfig> configs{};
+      std::vector<GridTableSortConfig> configs{};
       configs.reserve(GridTableWineList::Sorters.size()); 
 
       for (const auto& [i, table_sort] : vws::enumerate(GridTableWineList::Sorters))
       {
-         configs.emplace_back(GridTable::SortConfig{ static_cast<int>(i), table_sort.sort_name  });
+         configs.emplace_back(GridTableSortConfig{ static_cast<int>(i), table_sort.sort_name  });
       }
       return configs;
    }
 
 
-   GridTableWineList::SortConfig  GridTableWineList::activeSortConfig() const 
+   GridTableWineList::GridTableSortConfig  GridTableWineList::activeSortConfig() const 
    {
       return m_sort_config;
    }
 
 
-   void GridTableWineList::applySortConfig(const SortConfig& config)
+   void GridTableWineList::applySortConfig(const GridTableSortConfig& config)
    {
       if (config != m_sort_config)
       {
          m_sort_config = config;
          sortData();
       }
+   }
+
+
+   std::vector<GridTableFilter> GridTableWineList::availableFilters() const
+   {
+      return std::vector<GridTableFilter>(std::begin(StringFilters), std::end(StringFilters));
+   }
+
+
+   std::set<std::string> GridTableWineList::getFilterMatchValues(int prop_id) const
+   {
+      auto prop = data::indexToProp<Prop>(prop_id);
+      return data::getFilterMatchValues<WineListData>(m_grid_data, prop);
+   }
+
+
+   void GridTableWineList::addFilter(int prop_id, std::string_view value)
+   {
+      assert("Not implemented, dummy");
+      throw Error{ "Not Implemented"};
    }
 
 

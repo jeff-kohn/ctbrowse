@@ -31,6 +31,8 @@ namespace ctb::app
    class GridOptionsPanel;    // the options panel
 
 
+   /// @brief class for the main window of the application
+   ///
    class MainFrame final : public wxFrame
    {
    public:
@@ -69,25 +71,26 @@ namespace ctb::app
 
 
    private:
-      CellarTrackerGrid*      m_grid{};
-      GridOptionsPanel*       m_grid_options{};
-      GridTableEventSourcePtr m_event_source{};
+      CellarTrackerGrid*      m_grid{};         // grid window view
+      GridOptionsPanel*       m_grid_options{}; // gird options view
+      GridTableEventSourcePtr m_event_source{}; // for synchronizing events between views and the underlying table
       wxBoxSizer*             m_main_sizer{};
       wxMenuBar*              m_menu_bar{};
-      wxSearchCtrl*           m_search_ctrl{};
-      wxSplitterWindow*       m_splitter{};
+      wxSearchCtrl*           m_search_ctrl{};  // substring search box on the toolbar
       wxStatusBar*            m_status_bar{};
       wxToolBar*              m_tool_bar{};
 
       /// @brief private ctor called by static create()
       MainFrame();
 
+      // child window creation
       void initControls();
       void createGridWindows();
       void createMenuBar();
       void createStatusBar();
       void createToolBar();
 
+      // message handlers
       void onMenuEditFind(wxCommandEvent& event);
       void onMenuPreferences(wxCommandEvent&);
       void onMenuSyncData(wxCommandEvent&);
@@ -97,6 +100,7 @@ namespace ctb::app
       void onSearchTextEnter(wxCommandEvent& event);
       void onQuit(wxCommandEvent&);
 
+      // implementation details
       void doSearchFilter();
       void clearSearchFilter();
       void updateStatusBarCounts();

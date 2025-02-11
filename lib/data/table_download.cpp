@@ -16,6 +16,7 @@
 namespace
 {
    /// @brief  returns true if the request returned a valid response, or an Error if it didn't
+   ///
    std::expected<bool, ctb::Error> validateResult(cpr::Response& response)
    {
       using namespace ctb;
@@ -65,12 +66,11 @@ namespace ctb::data
       const CredentialWrapper::Credential& cred,
       TableId table,
       DataFormatId format,
-      ProgressCallback* callback)
+      ProgressCallback* callback )
    {
       auto table_name = magic_enum::enum_name(table);
       auto data_format = magic_enum::enum_name(format);
       cpr::Header header{ {constants::HTTP_HEADER_XCLIENT, constants::HTTP_HEADER_XCLIENT_VALUE} };
-
 
       cpr::Url url{ std::format(constants::FMT_HTTP_CELLARTRACKER_QUERY_URL,
                                 util::percentEncode(std::string(cred.username)),

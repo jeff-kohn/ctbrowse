@@ -37,6 +37,7 @@ namespace ctb::data
          Center = wxAlignment::wxALIGN_CENTER
       };
 
+
       /// @brief enum to specify the format the value will be displayed in
       ///
       enum Format

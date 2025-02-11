@@ -8,7 +8,6 @@
 #pragma once
 
 #include "App.h"
-#include "grid/GridTableFilterMgr.h"
 #include "grid/ScopedEventSink.h"
 
 #include <wx/choice.h>
@@ -17,6 +16,7 @@
 #include <wx/dataview.h>
 #include <wx/treelist.h>
 
+#include <map>
 
 namespace ctb::app
 {
@@ -24,19 +24,23 @@ namespace ctb::app
    class GridOptionsPanel final : public wxPanel, public IGridTableEventSink
    {
    public:
+
       /// @brief creates and initializes a panel for showing grid sort/filter options
       ///
-      /// throws a ctb::Error parent or source = nullptr, or if the window can't be created;
+      /// throws a ctb::Error if parent or source = nullptr, or if the window can't be created;
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its lifetime). 
       /// 
       static [[nodiscard]] GridOptionsPanel* create(wxWindow* parent, GridTableEventSourcePtr source);
    
    private:
-      ScopedEventSink         m_sink;
+      using PropFilterMap = std::map<void*, std::unique_ptr<GridTableFilter> >;
+
+      PropFilterMap           m_filters{};
+      ScopedEventSink         m_sink;           // no default init
       wxChoice*               m_sort_combo{};
-      GridTable::SortConfig   m_sort_config{};
-      wxTreeListCtrl*         m_filter_tree{};
+      GridTableSortConfig     m_sort_config{};
+      wxDataViewTreeCtrl*     m_filter_tree{};
 
       /// @brief called when there are updates to the table 
       void notify(GridTableEvent event, GridTable* grid_table) override;
@@ -51,7 +55,7 @@ namespace ctb::app
       void onSortOrderClicked(wxCommandEvent& event);
       void onTableInitialize(GridTable* grid_table);
       void onTableSorted(GridTable* grid_table);
-      void OnFilterTreeItemExpand(wxDataViewEvent& event);
+      void OnFilterItemExpanding(wxDataViewEvent& event);
 
       /// @brief private ctor used by static create()
       GridOptionsPanel(GridTableEventSourcePtr source);

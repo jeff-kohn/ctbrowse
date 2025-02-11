@@ -32,6 +32,19 @@ namespace ctb::constants
    inline constexpr const char* CT_PASSWORD                 = "CT_PASSWORD";
    inline constexpr const char* CURRENT_DIRECTORY           = ".";
 
+   inline constexpr const char* TABLE_NAME_LIST             = "Personal Wine List";
+   inline constexpr const char* TABLE_NAME_INVENTORY        = "Bottle Inventory";
+   inline constexpr const char* TABLE_NAME_NOTES            = "Tasting Notes";
+   inline constexpr const char* TABLE_NAME_PRIVATENOTES     = "Private Notes";
+   inline constexpr const char* TABLE_NAME_PURCHASE         = "Wine Purchases";
+   inline constexpr const char* TABLE_NAME_PENDING          = "Pending Wine Deliveries";
+   inline constexpr const char* TABLE_NAME_CONSUMED         = "Consumed Bottles";
+   inline constexpr const char* TABLE_NAME_AVAILABILITY     = "Ready to Drink List";
+   inline constexpr const char* TABLE_NAME_TAG              = "Wish List Tags";
+   inline constexpr const char* TABLE_NAME_PROREVIEW        = "Manually Entered Pro Reviews";
+   inline constexpr const char* TABLE_NAME_BOTTLES          = "Raw Bottle List";
+   inline constexpr const char* TABLE_NAME_FOODTAGS         = "Food Pairing Tag";
+
    // CT doesn't return an HTTP response code for invalid logon, it just returns this text instead of the requested file.
    inline constexpr const char* ERR_STR_INVALID_CELLARTRACKER_LOGON = "<html><body>You are currently not logged into CellarTracker.</body></html>";
 

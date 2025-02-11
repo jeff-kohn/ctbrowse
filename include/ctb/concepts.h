@@ -30,7 +30,7 @@ namespace ctb
       typename T::RowType r)
    {
       v = t.getProperty(p);
-      v = t[0];
+      //v = t[0];
       v = t[p];
       t.parse(r);
    };

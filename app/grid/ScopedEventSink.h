@@ -13,14 +13,18 @@
 
 namespace ctb::app
 {
-   /// @brief scoped RAII wrapper for subscribing/unsubscribing from an event source
+   /// @brief scoped RAII wrapper for subscribing/unsubscribing from a grid table event source
    ///
+   /// to handle grid-table events, all a class needs to do is instantiate a member of this
+   /// class, passing a pointer to the IGridTableEventSink interface to its ctor (usually 'this'
+   /// when the containing class itself inherits from IGridTableEventSink to ensure that the sink
+   /// interface is available for the lifetime of the event source).
    class ScopedEventSink final
    {
    public:
       /// @brief construct a scoped event sink without attaching it to a source
-      ScopedEventSink(IGridTableEventSink* sink) : 
-         m_sink{ sink }
+      ///
+      explicit ScopedEventSink(IGridTableEventSink* sink) : m_sink{ sink }
       {
          if (!m_sink)
          {

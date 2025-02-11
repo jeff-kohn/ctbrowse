@@ -49,29 +49,41 @@ namespace ctb::data
       }
    };
 
-   template<rng::input_range Rows, TableEntry TblEntry> requires std::is_same_v<rng::range_value_t<Rows>, TblEntry>
-   auto getFilterValues(Rows&& rows, typename TblEntry::Prop prop_id)
+
+   /// @brief retrieve a list of possible filter values for the given property in the table
+   ///
+   template<rng::input_range Rows, typename PropEnum> 
+   std::set<std::string> getFilterMatchValues(const Rows& rows, PropEnum prop_id)
    {
+      using TblEntry = rng::range_value_t<Rows>;
+      using Prop = TblEntry::Prop;
+
       // this functor turns our field values into strings
       // Note, we need both the string and string_view overloads 
-      auto FieldToStr = Overloaded{
-         [](const std::string& val) { return std::format("{}", val); },
-         [](std::string_view val)   { return std::format("{}", val); },
-         [](auto&& val)             { return std::format("{}", val); },
-         [](NullableShort val)      { return val.has_value() ? std::format("{}", val.value()) : ""; },
-         [this](NullableDouble val) { return val.has_value() ? std::format("{}", val.value()) : ""; }
+      auto FieldToStr = Overloaded {
+         [](const std::string& val)      { return std::format("{}", val); },
+         [](const std::string_view val)  { return std::format("{}", val); },
+         [](const auto& val)             { return std::format("{}", val); },
+         [](const NullableShort val)     { return val.has_value() ? std::format("{}", val.value()) : std::string{}; },
+         [](const NullableDouble val)    { return val.has_value() ? std::format("{}", val.value()) : std::string{}; }
       };
 
-      auto result = rows | vws::transform([prop_id](TblEntry& row)
-                              {
-                                 auto maybe_prop = row[prop_id].or_else([](auto) -> TblEntry::ValueResult 
-                                    { 
-                                       return { typename TblEntry::ValueWrapper{} }; 
-                                    });
-                                 return std::visit(FieldToStr, maybe_prop);
-                              })
-                         | rng::to<std::set>(); // automatic de-dup
-
+      /// vws::transform() is considered mutating and cannot be called on a const range, because the 
+      /// whole ranges/views library is fucked when it comes to const-correctness and is a real step back for the 
+      /// language, so now I have to write a motherfucking for loop. I supposed I could use ranges::for_each
+      /// but it has no advantages and is uglier.
+      /// 
+      std::set<std::string> result{};
+      for (auto& row : rows)
+      {
+         auto val_result = row[prop_id];
+         if (val_result)
+         {
+            auto val = std::visit(FieldToStr, *val_result);
+            result.insert(val);
+         }
+      }
+      return result;
    }
 
 } // namespace ctb::data

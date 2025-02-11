@@ -8,7 +8,7 @@
 #pragma once
 
 #include "App.h"
-#include "interfaces/GridTableFilter.h"
+#include "grid/GridTableFilter.h"
 
 #include <wx/grid.h>
 
@@ -18,6 +18,20 @@
 
 namespace ctb::app
 {
+
+
+   /// @brief struct that contains name, index and direction of a sort option
+   ///
+   struct GridTableSortConfig
+   {
+      int               sort_index{};
+      std::string_view  sort_name{};
+      bool              ascending{ true };
+
+      [[nodiscard]] std::strong_ordering operator<=>(const GridTableSortConfig&) const = default;
+   };
+
+
 
    /// @brief our "data model", provides an base class interface for accessing CellarTracker data
    /// 
@@ -67,40 +81,40 @@ namespace ctb::app
       virtual int filteredRowCount() const  = 0;
 
 
-      /// @brief contains name, index and direction of a sort option
-      ///
-      struct SortConfig
-      {
-         int               sort_index{};
-         std::string_view  sort_name{};
-         bool              ascending{ true };
-
-         [[nodiscard]] std::strong_ordering operator<=>(const SortConfig&) const = default;
-      };
-
-
       /// @brief retrieves list of available sortOptions, in order of display
       /// 
       /// the index in this vector corresponds to the index in the sort_index
       /// property.
       /// 
-      virtual std::vector<SortConfig> availableSortConfigs() const = 0;
+      virtual std::vector<GridTableSortConfig> availableSortConfigs() const = 0;
 
 
       /// @brief returns the currently active sort option
       ///
-      virtual SortConfig activeSortConfig() const = 0;
+      virtual GridTableSortConfig activeSortConfig() const = 0;
 
 
       /// @brief specifies a new sort option, triggers GridTableEvent::Sort
       ///
-      virtual void applySortConfig(const SortConfig& config) = 0;
+      virtual void applySortConfig(const GridTableSortConfig& config) = 0;
 
 
-      /// @brief retrieves a list of available fitlers for this table.
+      /// @brief retrieves a list of available filters for this table.
       ///
-      //virtual std::vector<GridTableFilterInfo> availableFilters() = 0;
+      virtual std::vector<GridTableFilter> availableFilters() const = 0;
 
+
+      /// @brief get a list of values that can be used to filter on a column in the table
+      ///
+      virtual std::set<std::string> getFilterMatchValues(int prop_id) const = 0;
+
+
+      /// @brief adds a match value filter for the specified column.
+      ///
+      /// a record must match at least one value for each property that 
+      /// has a filter to be considered a match.
+      /// 
+      virtual void addFilter(int prop_id, std::string_view match_value) = 0;
 
       /// @brief destructor
       ///

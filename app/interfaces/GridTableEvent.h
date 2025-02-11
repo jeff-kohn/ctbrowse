@@ -49,6 +49,7 @@ namespace ctb::app
 
 
    /// @brief Interface for an event source that generates events for grid tables
+   /// 
    struct IGridTableEventSource
    {
       /// @brief returns true if this source has a table attached, false otherwise
@@ -99,7 +100,8 @@ namespace ctb::app
    };
 
 
-   /// @brief smart ptr alias for shared IGridTableEventSource
+   /// @brief smart ptr alias for shared ptr to IGridTableEventSource-derived
+   /// 
    using GridTableEventSourcePtr = std::shared_ptr<IGridTableEventSource>;
 
 

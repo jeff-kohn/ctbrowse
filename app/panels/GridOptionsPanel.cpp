@@ -7,10 +7,12 @@
  *******************************************************************/
 
 #include "App.h"
+#include "wx_helpers.h"
 #include "panels/GridOptionsPanel.h"
 
 #include <wx/sizer.h>
 #include <wx/stattext.h>
+#include <wx/wupdlock.h>
 #include <wx/valgen.h>
 
 #include <memory>
@@ -66,7 +68,7 @@ namespace ctb::app
       m_sort_combo->SetValidator(wxGenericValidator(&m_sort_config.sort_index));
       sort_options_box->Add(m_sort_combo, wxSizerFlags{}.Expand().Border(wxALL));
 
-      // ascending sort order radio. validator tied to SortConfig.ascending
+      // ascending sort order radio. validator tied to GridTableSortConfig.ascending
       auto opt_ascending = new wxRadioButton{
          sort_options_box->GetStaticBox(),
          wxID_ANY, 
@@ -89,7 +91,7 @@ namespace ctb::app
       auto* filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_FILTER_OPTIONS);
 
       // filter tree control
-      m_filter_tree = new wxTreeListCtrl{
+      m_filter_tree = new wxDataViewTreeCtrl{
          filter_options_box->GetStaticBox(), 
          wxID_ANY,
          wxDefaultPosition, 
@@ -97,6 +99,7 @@ namespace ctb::app
          wxTL_SINGLE | wxTL_CHECKBOX
       };
       m_filter_tree->SetMinSize(ConvertDialogToPixels(wxSize(-1, 100)));
+
       filter_options_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
       filter_options_box->AddSpacer(default_border);
       top_sizer->Add(filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
@@ -107,6 +110,7 @@ namespace ctb::app
 
       // event bindings.
       m_sort_combo->Bind(wxEVT_CHOICE, &GridOptionsPanel::onSortSelection, this);
+      m_filter_tree->Bind(wxEVT_DATAVIEW_ITEM_EXPANDING, &GridOptionsPanel::OnFilterItemExpanding, this);
       opt_ascending->Bind(wxEVT_RADIOBUTTON, &GridOptionsPanel::onSortOrderClicked, this);
       opt_descending->Bind(wxEVT_RADIOBUTTON, &GridOptionsPanel::onSortOrderClicked, this);
 
@@ -114,15 +118,31 @@ namespace ctb::app
 
    wxArrayString GridOptionsPanel::getSortOptionList(GridTable* grid_table)
    {
-      using SortConfig = GridTable::SortConfig;
-
       return vws::all(grid_table->availableSortConfigs()) 
-               | vws::transform([](const SortConfig& s) {  return wxString{s.sort_name.data(), s.sort_name.length() };  })
+               | vws::transform([](const GridTableSortConfig& s) {  return wxString{s.sort_name.data(), s.sort_name.length() };  })
                | rng::to<wxArrayString>();
    }
 
 
    void GridOptionsPanel::populateFilterTypes(GridTable* grid_table)
+   {
+      assert(m_filter_tree);
+
+      wxWindowUpdateLocker freeze_updates{m_filter_tree};
+
+      m_filter_tree->DeleteAllItems();
+      auto root = wxDataViewItem(0);
+      auto filters = grid_table->availableFilters();
+      for (auto& filter : filters)
+      {
+         
+         wxString filter_name{ wxFromSV(filter.filterName() ) };
+         auto item_id = m_filter_tree->AppendContainer(root, filter_name);
+         m_filters[item_id.m_pItem] = std::make_unique<GridTableFilter>(filter);
+      }
+   }
+
+   void GridOptionsPanel::populateChoicesForFilter(GridTable* grid_table)
    {
 
    }
@@ -142,6 +162,23 @@ namespace ctb::app
    {
       m_sort_config = grid_table->activeSortConfig();
       TransferDataToWindow();
+   }
+
+
+   void GridOptionsPanel::OnFilterItemExpanding(wxDataViewEvent& event)
+   {
+      auto parent = event.GetItem();
+      assert(m_filters.contains(parent.m_pItem));
+
+      auto grid_table = m_sink.getTable();
+      assert(grid_table);
+
+      auto& filter = m_filters[parent.m_pItem]; 
+      for (auto& match_val : filter->getMatchValues(grid_table.get()) )
+      {
+         m_filter_tree->AppendItem(parent, match_val.c_str());
+      }
+
    }
 
 

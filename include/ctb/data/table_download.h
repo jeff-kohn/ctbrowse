@@ -18,6 +18,7 @@ namespace ctb::data
 {
 
    /// @brief struct that contains data (and metadata) for a downloaded CellarTracker table
+   ///
    struct RawTableData
    {
       std::string  data{};
@@ -30,10 +31,12 @@ namespace ctb::data
 
 
    /// @brief the result of a download will contain the requested data if successful, or an Error object if unsuccessful.
+   ///
    using DownloadResult = std::expected<RawTableData, Error>;
 
 
    /// @brief callback functor. Receives updates of the request process, and allows cancellation (return false)
+   ///
    using ProgressCallback = std::function<bool(__int64 downloadTotal, __int64 downloadNow, __int64 uploadTotal, __int64 uploadNow, intptr_t userdata)>;
 
 
@@ -41,8 +44,9 @@ namespace ctb::data
    /// @param cred         the username/password to use for the download
    /// @param tbl          the table to retrieve
    /// @param fmt          the data format to return
-   /// @param callback optional callback to receive progress updates
+   /// @param callback     optional callback to receive progress updates
    /// @return             expected/successful value is the requested table data, unexpected/error value is HTTP status code
+   ///
    [[nodiscard]] DownloadResult downloadRawTableData(const CredentialWrapper::Credential& cred, TableId table, 
                                                      DataFormatId format, ProgressCallback* callback = nullptr);
 

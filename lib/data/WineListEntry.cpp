@@ -1,3 +1,10 @@
+/*********************************************************************
+* @file       WineListEntry.cpp
+*
+* @brief      implementation for the class WineListEntry
+*
+* @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+*********************************************************************/
 #include "ctb/data/WineListEntry.h"
 #include <magic_enum/magic_enum.hpp>
 
@@ -9,6 +16,7 @@ namespace ctb::data
    ///
    /// converts the CSV value to decimal and returns it, or returns 
    /// nullopt if the field was empty or couldn't be parsed
+   /// 
    NullableDouble parseDouble(csv::CSVField&& fld)
    {
       long double val{};
@@ -25,6 +33,7 @@ namespace ctb::data
    /// if value_as_null.has_value(), then a parsed value matching 
    /// value_as_null.value() will be treated as null and std::nullopt will be returned
    /// instead of the parsed value. Allows treating special values as null
+   /// 
    template<typename T>
    std::optional<T> parseOptional(csv::CSVField&& fld, std::optional<T> value_as_null = std::nullopt)
    {

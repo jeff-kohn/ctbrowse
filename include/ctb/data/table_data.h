@@ -35,6 +35,7 @@ namespace ctb::data
 
 
    /// @brief enum for the data tables available from CT website
+   ///
    enum class TableId
    {
       List,			   /// Wine Summary (does not include location or bin unless optional parameter Location=1)
@@ -52,7 +53,9 @@ namespace ctb::data
    };
 
 
+
    /// @brief enum for available data formats
+   ///
    enum class DataFormatId
    {
       html,	// default if not specified
@@ -62,32 +65,37 @@ namespace ctb::data
    };
 
    /// @brief default table format (and currently the only format we support parsing)
+   ///
    inline constexpr auto DEFAULT_TABLE_FORMAT =  DataFormatId::csv;
 
 
+
    /// @brief type alias for a static map of TableId's to display name
+   ///
    using TableDescriptionMap = frozen::map<TableId, std::string_view, magic_enum::enum_count<TableId>()>;
 
    /// @brief maps TableId to descriptive name.
+   ///
    inline constexpr TableDescriptionMap TableDescriptions
    {
-      { TableId::List, "Personal Wine List" },
-      { TableId::Inventory, "Bottle Inventory" },
-      { TableId::Notes, "Tasting Notes" },
-      { TableId::PrivateNotes, "Private Notes" },
-      { TableId::Purchase, "Wine Purchases" },
-      { TableId::Pending, "Pending Wine Deliveries" },
-      { TableId::Consumed, "Consumed Bottles" },
-      { TableId::Availability, "Ready to Drink List" },
-      { TableId::Tag, "Wish List Tags" },
-      { TableId::ProReview, "Manually Entered Pro Reviews" },
-      { TableId::Bottles, "Raw Bottle List" },
-      { TableId::FoodTags, "Food Pairing Tags" }
+      { TableId::List,           constants::TABLE_NAME_LIST          },
+      { TableId::Inventory,      constants::TABLE_NAME_INVENTORY     },
+      { TableId::Notes,          constants::TABLE_NAME_NOTES         },
+      { TableId::PrivateNotes,   constants::TABLE_NAME_PRIVATENOTES  },
+      { TableId::Purchase,       constants::TABLE_NAME_PURCHASE      },
+      { TableId::Pending,        constants::TABLE_NAME_PENDING       },
+      { TableId::Consumed,       constants::TABLE_NAME_CONSUMED      },
+      { TableId::Availability,   constants::TABLE_NAME_AVAILABILITY  },
+      { TableId::Tag,            constants::TABLE_NAME_TAG           },
+      { TableId::ProReview,      constants::TABLE_NAME_PROREVIEW     },
+      { TableId::Bottles,        constants::TABLE_NAME_BOTTLES       },
+      { TableId::FoodTags,       constants::TABLE_NAME_FOODTAGS      }
    };
 
 
 
    /// @brief  returns the descriptive name that corresponds tbl, or empty string if not found
+   ///
    inline std::string_view getTableDescription(TableId tbl)
    {
       auto it = TableDescriptions.find(tbl);
@@ -99,6 +107,7 @@ namespace ctb::data
 
 
    /// @brief  combine enum values to generate a filename.
+   ///
    inline std::string getTableFileName(TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT)
    {
       using magic_enum::enum_name;
@@ -107,6 +116,7 @@ namespace ctb::data
 
 
    /// @brief  get the fully qualified path for a table 
+   ///
    inline fs::path getTablePath(fs::path data_folder, TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT)
    {
       return data_folder / getTableFileName(tbl, fmt);
@@ -114,6 +124,7 @@ namespace ctb::data
 
 
    /// @brief checks whether the requested table is available at the specified location
+   ///
    inline bool isTableFileAvailable(fs::path file_path)
    {
       return fs::exists(file_path);
@@ -121,6 +132,7 @@ namespace ctb::data
 
 
    /// @brief checks whether the requested table is available at the specified location
+   ///
    inline bool isTableAvailable(fs::path data_folder, TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT)
    {
       return isTableFileAvailable(getTablePath(data_folder, tbl, fmt));
@@ -128,6 +140,7 @@ namespace ctb::data
 
 
    /// @brief get a list of available tables in the specified folder
+   ///
    inline std::vector<TableId> getAvailableTables(fs::path data_folder, DataFormatId fmt = DataFormatId::csv)
    {
       std::vector<TableId> ids{};
@@ -144,6 +157,7 @@ namespace ctb::data
    /// @returns expected value is the requested table object, unexpected value is Error information if operation failed.
    /// 
    /// Note the lack of a "format" parameter, we currently only support parsing CSV files.
+   ///
    template <typename TableData>
    std::expected<TableData, Error> loadTableData(fs::path data_folder, TableId tbl)
    {
@@ -161,6 +175,31 @@ namespace ctb::data
             data.emplace_back(std::move(record));
       }
       return data;
+   }
+
+
+   /// @brief helper function to convert an int to a enum value, since the syntax is so fugly
+   ///
+   template<typename Prop>
+   constexpr Prop indexToProp(int idx)
+   {
+      using namespace magic_enum;
+
+      if (idx >= enum_count<Prop>())
+         assert("Invalid enum index, this is a bug.");
+
+      return enum_value<Prop>(static_cast<size_t>(idx));
+   }
+
+   
+   /// @brief convert a property enum into its zero-based index
+   /// 
+   template<typename Prop>
+   constexpr int propToIndex(Prop prop)
+   {
+      using namespace magic_enum;
+      auto index = enum_index(prop);
+      return static_cast<int>(*index);
    }
 
 } // namespace ctb::data

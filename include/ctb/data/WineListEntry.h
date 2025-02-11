@@ -149,20 +149,8 @@ namespace ctb::data
       }
 
 
-      /// @brief array syntax for getting a property value
-      ///
-      /// if the specified index doesn't match an enum identifier, an error will be returned.
-      ///
-      [[nodiscard]] ValueResult operator[](std::integral auto idx) const 
-      {
-         auto e = magic_enum::enum_value<Prop>(static_cast<int>(idx));
-         if (e)
-            return getProperty(e.value());
-         else
-            return std::unexpected{ Error{constants::ERROR_STR_INVALID_INDEX} };
-      }
-
-
+      /// string-based properties return a string_view, which will only be valid for the lifetime of this object.
+      /// 
       uint64_t wineID() const                  { return m_rec.iWineID;          }
       std::string_view wineName() const        { return m_rec.WineName;         }
       std::string_view locale() const          { return m_rec.Locale;           }
@@ -204,7 +192,7 @@ namespace ctb::data
 
    private:
       detail::WineListRec m_rec{};
-      std::string m_wine_and_vintage{}; //
+      std::string m_wine_and_vintage{}; // calclulated value that we cache.
    };
 
    using WineListData = std::deque<WineListEntry>;

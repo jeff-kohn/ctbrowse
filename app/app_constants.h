@@ -2,7 +2,6 @@
 
 namespace ctb::constants
 {
-
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_LBL        = "&Download Data...";
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP        = "Download data from CellarTracker";
    inline constexpr const char* CMD_FILE_SETTINGS_LBL             = "&Settings...";
@@ -15,6 +14,11 @@ namespace ctb::constants
    inline constexpr const char* CONFIG_VALUE_SYNC_ON_STARTUP      = "SyncOnStartup";
 
    inline constexpr const char* ERROR_WINDOW_CREATION_FAILED      = "Window creation failed. You may need to restart the app.";
+
+   inline constexpr const char* FILTER_APPELATION                 = "Appellation";
+   inline constexpr const char* FILTER_COUNTRY                    = "Country";
+   inline constexpr const char* FILTER_REGION                     = "Region";
+   inline constexpr const char* FILTER_VARIETAL                   = "Varietal";
 
    inline constexpr const char* FMT_LBL_FILTERED_ROWS             = "Filtered Rows: {}";
    inline constexpr const char* FMT_LBL_TOTAL_ROWS                = "Total Rows: {}";

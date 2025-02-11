@@ -15,17 +15,17 @@ target_sources(parse_csv
 target_link_libraries(parse_csv PRIVATE ctBrowse::ctBrowse_lib)
 
 
-find_package(wxWidgets CONFIG REQUIRED)
-
-create_windows_target(wxsample)
-target_sources(wxsample
-   PRIVATE
-      "wrapsizer.cpp"
-)
-target_link_libraries(wxsample 
-   PRIVATE 
-     wxWidgets::wxWidgets
-)
+# find_package(wxWidgets CONFIG REQUIRED)
+# 
+# create_windows_target(wxsample)
+# target_sources(wxsample
+#    PRIVATE
+#       "wrapsizer.cpp"
+# )
+# target_link_libraries(wxsample 
+#    PRIVATE 
+#      wxWidgets::wxWidgets
+# )
 
 add_folders(examples)
 

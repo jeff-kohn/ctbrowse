@@ -40,7 +40,7 @@ namespace ctb::app
       using DisplayColumn = data::DisplayColumn<RecordType>;
       using SubStringFilter = data::SubStringFilter<RecordType>;
       using TableSort = data::TableSorter<RecordType>;
-      using SortConfig = GridTable::SortConfig;
+      using GridTableSortConfig = GridTableSortConfig;
 
 
       /// @brief static factory method to create an instance of the GridTableWineList class
@@ -70,17 +70,27 @@ namespace ctb::app
       };
 
 
+      /// @brief  string filters that can be used on this table.
+      ///
+      static inline const std::array StringFilters{
+         GridTableFilter{ constants::FILTER_COUNTRY,    propToIndex(Prop::Country)        },
+         GridTableFilter{ constants::FILTER_REGION,     propToIndex(Prop::Region)         },
+         GridTableFilter{ constants::FILTER_VARIETAL,   propToIndex(Prop::MasterVarietal) },
+         GridTableFilter{ constants::FILTER_APPELATION, propToIndex(Prop::Appellation)    }
+      };
+
+
       /// @brief returns the sort config for a Sorter based on its zero-based index. You can get the
       ///        sort configs by calling availableSortConfigs()
       /// 
       /// this function will throw an exception if you pass an invalid index.
-      static SortConfig getSortConfig(int index) 
+      static GridTableSortConfig getSortConfig(int index) 
       {
          if (index >= std::ssize(Sorters))
             throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_INVALID_INDEX };
          
          auto& ts = Sorters[static_cast<size_t>(index)];
-         return SortConfig{ index, ts.sort_name, true };
+         return GridTableSortConfig{ index, ts.sort_name, true };
       }
 
 
@@ -172,27 +182,40 @@ namespace ctb::app
 
       // returns a collection of available sort options. 
       ///
-      std::vector<SortConfig>  availableSortConfigs() const override;
+      std::vector<GridTableSortConfig>  availableSortConfigs() const override;
 
 
       // retrieves the currently-active sort option
       ///
-      SortConfig activeSortConfig() const override;
+      GridTableSortConfig activeSortConfig() const override;
 
 
       // sets the currently-active sort option
       ///
-      void applySortConfig(const SortConfig& config) override;
+      void applySortConfig(const GridTableSortConfig& config) override;
 
 
-      //void getFilterValues(GridTable* grid_table) override;
+      /// @brief get a list of available filter option for this table.
+      /// 
+      std::vector<GridTableFilter> availableFilters() const override;
+
+
+      /// @brief get a list of values that can be used to filter on a column in the table
+      ///
+      std::set<std::string> getFilterMatchValues(int prop_id) const override;
+
+
+      /// @brief adds a match value filter for the specified column.
+      ///
+      void addFilter(int prop_id, std::string_view match_value) override;
+
 
    private:
       ColumnList                     m_display_columns{};
       data::WineListData*            m_current_view{};         // may point to m_grid_data or m_filtered_data depending if filter is active
       data::WineListData             m_grid_data{};            // the underlying data records for this table.
       data::WineListData             m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
-      SortConfig                     m_sort_config{};
+      GridTableSortConfig                     m_sort_config{};
       std::optional<SubStringFilter> m_substring_filter{};
 
       /// @brief private constructor used by static create()

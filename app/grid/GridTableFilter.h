@@ -1,10 +1,9 @@
 ﻿#pragma once
 
 #include "App.h"
-#include "interfaces/GridTable.h"
 
 #include <ctb/nullable_types.h>
-#include <string>
+#include <string_view>
 #include <set>
 
 
@@ -12,19 +11,65 @@ namespace ctb::app
 {
    class GridTable;
 
-   struct GridTableFilter
+   /// @brief  class that contains a filter specification
+   ///
+   /// this class only has consteval initialization since it takes a string literal as a param
+   /// and this way we don't have to worry about it being invalidated since it's by definition
+   /// in static storage.
+   /// 
+   /// if you need delayed initialization you'll have to use a heap-allocated instance that is
+   /// copy-initialized.
+   /// 
+   class GridTableFilter
    {
-      /// @brief this is the display name for the filter type
+   public:
+      /// @brief compile-time ctor, the only way to create an instance besides copy/assignment
       ///
-      std::string filter_type{};
+      consteval GridTableFilter(const char* filter_name, int prop_index) : 
+         m_filter_name(filter_name),
+         m_prop_index(prop_index)
+      {}
+      constexpr GridTableFilter(const GridTableFilter&) = default;
+      constexpr GridTableFilter& operator=(const GridTableFilter&) = default;
+      ~GridTableFilter() = default;
 
-      /// @brief this is the property index the filter will be applied to in the dataset
+
+      /// @brief returns the name/description of this filter
+      /// 
+      std::string_view filterName() const
+      {
+         return m_filter_name;
+      }
+
+
+      /// @brief returns the index (into the table entry's Prop enum) of the property this filter is for
       ///
-      int prop_index{};
+      int propIndex() const 
+      {
+         return m_prop_index;
+      }
+
+
+      /// @brief typedef for unique set of filter values for a column.
+      using MatchValueList = std::set<std::string>;
+
 
       /// @brief retrieve a list of available values in the table for this filter
+      /// 
+      MatchValueList getMatchValues(GridTable* grid_table) const;
+
+
+      /// @brief no default ctor or move semantics
       ///
-      std::set<std::string> getMatchValues(GridTable* grid_table);
+      GridTableFilter() = delete;
+      GridTableFilter(GridTableFilter&&) = delete;
+      GridTableFilter& operator=(GridTableFilter&&) = delete;
+
+   private:
+      const char* m_filter_name{};
+      int         m_prop_index{};
+
+
    };
 
 } // namespace ctb::app
