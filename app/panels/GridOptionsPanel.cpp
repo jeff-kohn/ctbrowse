@@ -19,6 +19,12 @@
 
 namespace ctb::app
 {
+   namespace 
+   {
+      constexpr int IMG_CONTAINER = 0;
+      constexpr int IMG_UNCHECKED = 1;
+      constexpr int IMG_CHECKED = 2;
+   }
    
    GridOptionsPanel::GridOptionsPanel(GridTableEventSourcePtr source) : m_sink{ this, source }
    {}
@@ -91,7 +97,7 @@ namespace ctb::app
       auto* filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_FILTER_OPTIONS);
 
       // load images for the checkboxes in our filter tree.
-      const auto tr_img_size = FromDIP(wxSize{ 16,16 });
+      const auto tr_img_size = FromDIP(wxSize{ 16, 16 });
       m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_FILTER_IMG, tr_img_size));
       m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_UNCHECKED_IMG, tr_img_size));
       m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_CHECKED_IMG, tr_img_size));
@@ -113,16 +119,10 @@ namespace ctb::app
       // event bindings.
       m_sort_combo->Bind(wxEVT_CHOICE, &GridOptionsPanel::onSortSelection, this);
       m_filter_tree->Bind(wxEVT_TREE_ITEM_EXPANDING, &GridOptionsPanel::onTreeFilterExpanding, this);
+      m_filter_tree->Bind(wxEVT_LEFT_DOWN, &GridOptionsPanel::onTreeFilterLeftClick, this);
       opt_ascending->Bind(wxEVT_RADIOBUTTON, &GridOptionsPanel::onSortOrderClicked, this);
       opt_descending->Bind(wxEVT_RADIOBUTTON, &GridOptionsPanel::onSortOrderClicked, this);
 
-   }
-
-   wxArrayString GridOptionsPanel::getSortOptionList(GridTable* grid_table)
-   {
-      return vws::all(grid_table->availableSortConfigs()) 
-               | vws::transform([](const GridTableSortConfig& s) {  return wxString{s.sort_name.data(), s.sort_name.length() };  })
-               | rng::to<wxArrayString>();
    }
 
 
@@ -139,11 +139,84 @@ namespace ctb::app
       auto root = m_filter_tree->AddRoot(wxEmptyString);
       for (auto& filter : filters)
       {
-         wxString filter_name{ wxFromSV(filter.filterName() ) };
+         wxString filter_name{ wxFromSV(filter.filterName()) };
          auto item = m_filter_tree->AppendItem(root, filter_name);
          m_filter_tree->SetItemHasChildren(item, true);
-         m_filter_tree->SetItemImage(item, 0);
-         m_filters[item.m_pItem] = std::make_unique<GridTableFilter>(filter);
+         m_filter_tree->SetItemImage(item, IMG_CONTAINER);
+         m_filters[item.GetID()] = std::make_unique<GridTableFilter>(filter);
+      }
+   }
+
+
+   wxArrayString GridOptionsPanel::getSortOptionList(GridTable* grid_table)
+   {
+      return vws::all(grid_table->availableSortConfigs()) 
+               | vws::transform([](const GridTableSortConfig& s) {  return wxString{s.sort_name.data(), s.sort_name.length() };  })
+               | rng::to<wxArrayString>();
+   }
+
+
+   bool GridOptionsPanel::isContainerNode(wxTreeItemId item)
+   {
+      return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CONTAINER;
+   }
+
+
+   bool GridOptionsPanel::isMatchValueNode(wxTreeItemId item)
+   {
+      return item.IsOk() and m_filter_tree->GetItemImage(item) != IMG_CONTAINER;
+   }
+
+
+   bool GridOptionsPanel::isChecked(wxTreeItemId item)
+   {
+      return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CHECKED;
+   }
+
+
+   void GridOptionsPanel::setChecked(wxTreeItemId item, bool checked)
+   {
+      if ( item.IsOk() and isMatchValueNode(item) )
+      {
+         m_filter_tree->SetItemImage(item, checked ? IMG_CHECKED : IMG_UNCHECKED);
+      }
+   }
+
+
+   void GridOptionsPanel::toggleFilterSelection(wxTreeItemId item)
+   {
+      setChecked(item, !isChecked(item));
+   }
+
+
+   void GridOptionsPanel::notify(GridTableEvent event, GridTable* grid_table)
+   {
+      try
+      {
+         switch (event)
+         {
+         case GridTableEvent::TableInitialize:
+            onTableInitialize(grid_table);
+            break;
+
+         case GridTableEvent::Sort:
+            onTableSorted(grid_table);
+            break;
+
+         case GridTableEvent::Filter:
+         case GridTableEvent::SubStringFilter:
+         case GridTableEvent::RowSelected:
+         default:
+            break;
+         }
+      }
+      catch(Error& err)
+      {
+         wxGetApp().displayErrorMessage(err);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
       }
    }
 
@@ -165,30 +238,6 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::onTreeFilterExpanding(wxTreeEvent& event)
-   {
-      // if the node has a filter in our map and it doesn't already have a list of 
-      // available filter values as children, we need to populate the child nodes.
-      // if not just return.
-      auto parent = event.GetItem();
-      if(!m_filters.contains(parent.m_pItem) || m_filter_tree->GetChildrenCount(parent) )
-      {
-         return;
-      }
-
-      auto grid_table = m_sink.getTable();
-      assert(grid_table);
-
-      auto& filter = m_filters[parent.m_pItem]; 
-      for (auto& match_val : filter->getMatchValues(grid_table.get()) )
-      {
-         auto item = m_filter_tree->AppendItem(parent, match_val.c_str());
-         m_filter_tree->SetItemImage(item, 1);
-      }
-
-   }
-
-
    void GridOptionsPanel::onSortSelection([[maybe_unused]] wxCommandEvent& event)
    {
       try
@@ -197,13 +246,13 @@ namespace ctb::app
 
          // let the combo close its list before we reload the grid
          CallAfter([this](){
-               auto table = m_sink.getTable();
-               if (table)
-               {
-                  table->applySortConfig(m_sort_config);
-                  m_sink.signal_source(GridTableEvent::Sort);
-               }
-         });
+            auto table = m_sink.getTable();
+            if (table)
+            {
+               table->applySortConfig(m_sort_config);
+               m_sink.signal_source(GridTableEvent::Sort);
+            }
+            });
       }
       catch(Error& err)
       {
@@ -215,7 +264,7 @@ namespace ctb::app
       }
    }
 
-   
+
    void GridOptionsPanel::onSortOrderClicked([[maybe_unused]] wxCommandEvent& event)
    {
       try
@@ -240,24 +289,56 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::notify(GridTableEvent event, GridTable* grid_table)
+   void GridOptionsPanel::onTreeFilterExpanding(wxTreeEvent& event)
    {
-      switch (event)
+      try
       {
-         case GridTableEvent::TableInitialize:
-            onTableInitialize(grid_table);
-            break;
 
-         case GridTableEvent::Sort:
-            onTableSorted(grid_table);
-            break;
+         auto filter_node = event.GetItem();
+         if (!filter_node.IsOk())
+            return;
 
-         case GridTableEvent::Filter:
-         case GridTableEvent::SubStringFilter:
-         case GridTableEvent::RowSelected:
-         default:
-            break;
-      }   
+         // if the node has a filter in our map and it doesn't already have a list of 
+         // available filter values as children, we need to populate the child nodes.
+         // if not just return.
+         if( !m_filters.contains(filter_node.GetID()) || m_filter_tree->GetChildrenCount(filter_node) > 0 )
+         {
+            return;
+         }
+
+         auto grid_table = m_sink.getTable();
+         assert(grid_table);
+
+         auto& filter = m_filters[filter_node.m_pItem]; 
+         for (auto& match_val : filter->getMatchValues(grid_table.get()) )
+         {
+            auto item = m_filter_tree->AppendItem(filter_node, match_val.c_str());
+            m_filter_tree->SetItemImage(item, 1);
+         }
+      }
+      catch(Error& err)
+      {
+         wxGetApp().displayErrorMessage(err);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
+   }
+
+
+   void GridOptionsPanel::onTreeFilterLeftClick(wxMouseEvent& event)
+   {
+      int flags{};
+      auto item = m_filter_tree->HitTest(event.GetPosition(), flags);
+
+      if ( item.IsOk() and (flags & wxTREE_HITTEST_ONITEMICON) )
+      {
+         toggleFilterSelection(item);
+      }
+      else{
+         event.Skip();
+      }
    }
 
 

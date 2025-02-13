@@ -99,7 +99,7 @@ namespace ctb::app
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onSearchBtn, this);
       m_search_ctrl->Bind(wxEVT_TEXT_ENTER, &MainFrame::onSearchTextEnter, this);
 
-      if ( !wxPersistentRegisterAndRestore(this, GetName()))
+      if ( !wxPersistentRegisterAndRestore(this, GetName()) )
       {
          // Choose some custom default size for the first run
          SetClientSize(FromDIP(wxSize(800, 600)));

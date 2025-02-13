@@ -38,6 +38,7 @@ namespace ctb::app
       GridOptionsPanel(GridOptionsPanel&&) = delete;
       GridOptionsPanel& operator=(const GridOptionsPanel&) = delete;
       GridOptionsPanel& operator=(GridOptionsPanel&&) = delete;
+      ~GridOptionsPanel() override = default;
       
    private:
       using PropFilterMap = std::map<void*, std::unique_ptr<GridTableFilter> >;
@@ -47,27 +48,33 @@ namespace ctb::app
       wxChoice*               m_sort_combo{};
       GridTableSortConfig     m_sort_config{};
       wxTreeCtrl*             m_filter_tree{};
-
       wxWithImages::Images    m_filter_tree_images{};
 
-      /// @brief called when there are updates to the table 
-      void notify(GridTableEvent event, GridTable* grid_table) override;
-
+      // window creation
       void initControls();
-      wxArrayString getSortOptionList(GridTable* grid_table);
-      void populateFilterTypes(GridTable* grid_table);
-      void populateChoicesForFilter(GridTable* grid_table);
 
-      // event handlers
-      void onSortOrderClicked(wxCommandEvent& event);
-      void onSortSelection(wxCommandEvent& event);
+      // implementation/helper functions
+      wxArrayString getSortOptionList(GridTable* grid_table);
+      bool isContainerNode(wxTreeItemId item);
+      bool isMatchValueNode(wxTreeItemId item);
+      bool isChecked(wxTreeItemId item);
+      void setChecked(wxTreeItemId item, bool checked = true);
+      void toggleFilterSelection(wxTreeItemId item);
+
+      /// event source related handlers
+      void notify(GridTableEvent event, GridTable* grid_table) override;
       void onTableInitialize(GridTable* grid_table);
       void onTableSorted(GridTable* grid_table);
+      void populateFilterTypes(GridTable* grid_table);
+
+      /// event handlers
+      void onSortOrderClicked(wxCommandEvent& event);
+      void onSortSelection(wxCommandEvent& event);
       void onTreeFilterExpanding(wxTreeEvent& event);
+      void onTreeFilterLeftClick(wxMouseEvent& event);
 
       /// @brief private ctor used by static create()
       explicit GridOptionsPanel(GridTableEventSourcePtr source);
-
    };
 
 } // namespace ctb::app
