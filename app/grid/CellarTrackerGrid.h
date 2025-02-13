@@ -28,7 +28,7 @@ namespace ctb::app
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its lifetime). 
       /// 
-      static [[nodiscard]] CellarTrackerGrid* create(wxWindow* parent, GridTableEventSourcePtr source);
+      [[nodiscard]] static CellarTrackerGrid* create(wxWindow* parent, GridTableEventSourcePtr source);
 
 
       /// @brief filter the table by performing a substring search across all columns

@@ -19,9 +19,9 @@
 #include <string>
 #include <vector>
 
-#include <windows.h>
-#include <shlwapi.h>
-#include <WinInet.h>
+#include <Windows.h>
+#include <Shlwapi.h>
+#include <wininet.h>
 
 
 namespace ctb::util

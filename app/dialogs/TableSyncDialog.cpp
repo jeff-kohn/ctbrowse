@@ -118,7 +118,7 @@ namespace ctb::app
    }
 
 
-   void TableSyncDialog::onOkClicked(wxCommandEvent& event)
+   void TableSyncDialog::onOkClicked([[maybe_unused]] wxCommandEvent& event)
    {
       if (!TransferDataFromWindow())
       {
@@ -140,7 +140,7 @@ namespace ctb::app
    }
 
 
-   void TableSyncDialog::onDeselectAll(wxCommandEvent& event)
+   void TableSyncDialog::onDeselectAll([[maybe_unused]] wxCommandEvent& event)
    {
       for (auto idx = 0u; idx < m_table_selection_ctrl->GetCount(); ++idx)
       {
@@ -149,14 +149,14 @@ namespace ctb::app
    }
 
 
-   void TableSyncDialog::onDeselectAllUpdateUI(wxUpdateUIEvent & event)
+   void TableSyncDialog::onDeselectAllUpdateUI([[maybe_unused]] wxUpdateUIEvent & event)
    {
       // we already check for at least one selection for OK button, so just piggy back.
       onOkUpdateUI(event);
    }
 
 
-   void TableSyncDialog::onSelectAll(wxCommandEvent & event)
+   void TableSyncDialog::onSelectAll([[maybe_unused]] wxCommandEvent & event)
    {
       for (auto idx = 0u; idx < m_table_selection_ctrl->GetCount(); ++idx)
       {

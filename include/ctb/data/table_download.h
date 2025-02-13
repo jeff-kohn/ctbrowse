@@ -37,13 +37,13 @@ namespace ctb::data
 
    /// @brief callback functor. Receives updates of the request process, and allows cancellation (return false)
    ///
-   using ProgressCallback = std::function<bool(__int64 downloadTotal, __int64 downloadNow, __int64 uploadTotal, __int64 uploadNow, intptr_t userdata)>;
+   using ProgressCallback = std::function<bool(int64_t downloadTotal, int64_t downloadNow, int64_t uploadTotal, int64_t uploadNow, intptr_t userdata)>;
 
 
    /// @brief              retrieve a data table from CT website
    /// @param cred         the username/password to use for the download
-   /// @param tbl          the table to retrieve
-   /// @param fmt          the data format to return
+   /// @param table        the table to retrieve
+   /// @param format       the data format to return
    /// @param callback     optional callback to receive progress updates
    /// @return             expected/successful value is the requested table data, unexpected/error value is HTTP status code
    ///

@@ -30,7 +30,7 @@ namespace ctb::data
 
       /// @brief enum to specify the alignment for column headers and cell text
       ///
-      enum Align
+      enum Align : uint16_t
       {
          Left = wxAlignment::wxALIGN_LEFT,
          Right = wxAlignment::wxALIGN_RIGHT,
@@ -95,7 +95,7 @@ namespace ctb::data
       /// currency values will use a dollar sign and 2 decimal places, decimal values  will be 
       /// displayed with 1 decimal place.
       ///
-      std::string getDisplayValue(const ValueWrapper& val) const
+      std::string getDisplayValue(const ValueWrapper& value) const
       {
          // this functor turns our field values into strings that can be displayed. 
          // Note, we need both the string and string_view overloads 
@@ -123,7 +123,7 @@ namespace ctb::data
             }
          };
          // todo: check perf, may want to use manual visit
-         return std::visit(FieldToStr, val);
+         return std::visit(FieldToStr, value);
       }
 
 

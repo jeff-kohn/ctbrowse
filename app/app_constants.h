@@ -32,6 +32,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_DRINK_BY                      = "Drink By";
    inline constexpr const char* LBL_FILTER_OPTIONS                = "Filters Options";
    inline constexpr const char* LBL_LOCALE                        = "Region and Appellation";
+   inline constexpr const char* LBL_MENU_VIEWS                    = "&Views";
    inline constexpr const char* LBL_MY_PRICE                      = "My Price";
    inline constexpr const char* LBL_MY_SCORE                      = "My Score";
    inline constexpr const char* LBL_QTY                           = "Qty";
@@ -42,9 +43,11 @@ namespace ctb::constants
    inline constexpr const char* LBL_VARIETAL                      = "Varietal";
    inline constexpr const char* LBL_WINE                          = "Wine";
 
-   inline constexpr const char* MENU_VIEWS_LBL                    = "&Views";
    inline constexpr const char* RES_NAME_ICON_PRODUCT             = "IDR_PRODUCT_ICON";
    inline constexpr const char* RES_NAME_MAINFRAME                = "MAINFRAME";
+   inline constexpr const char* RES_NAME_TREE_CHECKED_IMG         = "TREE_CHECKED_IMG";
+   inline constexpr const char* RES_NAME_TREE_FILTER_IMG          = "TREE_FILTER_IMG";
+   inline constexpr const char* RES_NAME_TREE_UNCHECKED_IMG       = "TREE_UNCHECKED_IMG";
 
    inline constexpr const char* SORT_OPTION_APPELATION_WINE       = "Appellation, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_COUNTRY_APPELATION    = "Country, Appellation and Wine";

@@ -90,12 +90,18 @@ namespace ctb::app
       // filter options box
       auto* filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_FILTER_OPTIONS);
 
+      // load images for the checkboxes in our filter tree.
+      const auto tr_img_size = FromDIP(wxSize{ 16,16 });
+      m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_FILTER_IMG, tr_img_size));
+      m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_UNCHECKED_IMG, tr_img_size));
+      m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_CHECKED_IMG, tr_img_size));
+
       // filter tree control
       auto style = wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_TWIST_BUTTONS | wxTR_NO_LINES | wxTR_HIDE_ROOT;
       m_filter_tree = new wxTreeCtrl{ filter_options_box->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, style };
-
       m_filter_tree->SetMaxSize(ConvertDialogToPixels(wxSize(-1, 500)));
       m_filter_tree->SetMinSize(ConvertDialogToPixels(wxSize(-1, 100)));
+      m_filter_tree->SetImages(m_filter_tree_images);
       filter_options_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
       filter_options_box->AddSpacer(default_border);
 
@@ -134,21 +140,17 @@ namespace ctb::app
       for (auto& filter : filters)
       {
          wxString filter_name{ wxFromSV(filter.filterName() ) };
-         auto item = m_filter_tree->AppendItem(m_filter_tree->GetRootItem(), filter_name);
+         auto item = m_filter_tree->AppendItem(root, filter_name);
          m_filter_tree->SetItemHasChildren(item, true);
+         m_filter_tree->SetItemImage(item, 0);
          m_filters[item.m_pItem] = std::make_unique<GridTableFilter>(filter);
       }
-   }
-
-   void GridOptionsPanel::populateChoicesForFilter(GridTable* grid_table)
-   {
-
    }
 
 
    void GridOptionsPanel::onTableInitialize(GridTable* grid_table)
    {
-      // load the correct sort options into the combo, and select the active one.
+      // reload sort/filter options
       m_sort_combo->Clear();
       m_sort_combo->Append(getSortOptionList(grid_table));
       onTableSorted(grid_table);
@@ -165,7 +167,7 @@ namespace ctb::app
 
    void GridOptionsPanel::onTreeFilterExpanding(wxTreeEvent& event)
    {
-      // if the node has a filter in our map and it doens't already have a list of 
+      // if the node has a filter in our map and it doesn't already have a list of 
       // available filter values as children, we need to populate the child nodes.
       // if not just return.
       auto parent = event.GetItem();
@@ -180,7 +182,8 @@ namespace ctb::app
       auto& filter = m_filters[parent.m_pItem]; 
       for (auto& match_val : filter->getMatchValues(grid_table.get()) )
       {
-         m_filter_tree->AppendItem(parent, match_val.c_str());
+         auto item = m_filter_tree->AppendItem(parent, match_val.c_str());
+         m_filter_tree->SetItemImage(item, 1);
       }
 
    }

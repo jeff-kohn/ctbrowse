@@ -118,7 +118,7 @@ namespace ctb::app
 
       /// @brief destructor
       ///
-      virtual ~GridTable()
+      ~GridTable() override
       {}
    };
 

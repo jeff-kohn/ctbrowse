@@ -58,7 +58,7 @@ namespace ctb::app
       // We store a shared_ptr instead of the raw ptr to prevent the
       // table from being deleted out from under us (object lifetimes
       // can get tricky with wxWindow-derived classes).
-      m_grid_table = m_sink.getTable();
+      m_grid_table = tbl;
       {
          wxGridUpdateLocker lock(this);
          
@@ -103,7 +103,7 @@ namespace ctb::app
          if (m_grid_table->filterBySubstring(substr))
          {
             // calling SetTable with the same ptr is fine, it forces grid to re-fetch the data.
-            setGridTable(m_grid_table);;
+            setGridTable(m_grid_table);
          }
          else {
             wxGetApp().displayInfoMessage(constants::INFO_MSG_NO_MATCHING_ROWS);
@@ -146,7 +146,7 @@ namespace ctb::app
    }
 
 
-   void CellarTrackerGrid::notify(GridTableEvent event, GridTable* grid_table)
+   void CellarTrackerGrid::notify(GridTableEvent event, [[maybe_unused]] GridTable* grid_table)
    {
       switch (event)
       { 

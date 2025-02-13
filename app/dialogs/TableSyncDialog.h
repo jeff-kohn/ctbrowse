@@ -78,7 +78,7 @@ namespace ctb::app
       void onSelectAllUpdateUI(wxUpdateUIEvent& event);
       void createImpl();
 
-      unsigned int checkedTableCount() const
+      size_t checkedTableCount() const
       {
          wxArrayInt dummy{};
          m_table_selection_ctrl->GetCheckedItems(dummy);

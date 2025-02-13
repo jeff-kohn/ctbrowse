@@ -74,7 +74,7 @@ namespace ctb::app
    }
 
 
-   void GridTableWineList::SetValue(int row, int col, const wxString& value) 
+   void GridTableWineList::SetValue(int, int, const wxString&) 
    {
       throw Error{constants::ERROR_STR_EDITING_NOT_SUPPORTED };
    }
@@ -85,7 +85,7 @@ namespace ctb::app
       auto attr_prov = GetAttrProvider();
       assert(attr_prov);
 
-      for (const auto& [idx, disp_col] : vws::enumerate(m_display_columns))
+      for (const auto&& [idx, disp_col] : vws::enumerate(m_display_columns))
       {
          // update existing attr if it exists, otherwise use a copy of the default attr
          auto attr = attr_prov->GetAttrPtr(0, idx, wxGridCellAttr::wxAttrKind::Col);
@@ -119,7 +119,7 @@ namespace ctb::app
 
    bool GridTableWineList::filterBySubstring(std::string_view substr, int col_idx)
    {
-      SubStringFilter::Prop prop = data::indexToProp<SubStringFilter::Prop>(col_idx);
+      auto prop = data::indexToProp<SubStringFilter::Prop>(col_idx);
       auto cols = std::vector<SubStringFilter::Prop>{ prop };
 
       return applySubStringFilter(SubStringFilter{ std::string{substr}, cols });
@@ -138,7 +138,7 @@ namespace ctb::app
       std::vector<GridTableSortConfig> configs{};
       configs.reserve(GridTableWineList::Sorters.size()); 
 
-      for (const auto& [i, table_sort] : vws::enumerate(GridTableWineList::Sorters))
+      for (const auto&& [i, table_sort] : vws::enumerate(GridTableWineList::Sorters))
       {
          configs.emplace_back(GridTableSortConfig{ static_cast<int>(i), table_sort.sort_name  });
       }
@@ -175,7 +175,7 @@ namespace ctb::app
    }
 
 
-   void GridTableWineList::addFilter(int prop_id, std::string_view value)
+   void GridTableWineList::addFilter([[maybe_unused]] int prop_id, [[maybe_unused]] std::string_view value)
    {
       assert("Not implemented, dummy");
       throw Error{ "Not Implemented"};

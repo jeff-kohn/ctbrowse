@@ -51,7 +51,7 @@ namespace ctb::app
    // we don't use enum class because then every time we need to pass an ID to wxObject,
    // we'd have to cast or use std::to_underlying and that's just an ugly waste of time 
    // with no benefit for this use-case.
-   enum CmdId
+   enum CmdId : uint16_t
    {
       CMD_FILE_DOWNLOAD_DATA = wxID_HIGHEST,
       CMD_FILE_SETTINGS,
@@ -179,7 +179,7 @@ namespace ctb::app
          wxITEM_NORMAL
       };
       menu_views->Append(menu_views_wine_list);
-      m_menu_bar->Append(menu_views, constants::MENU_VIEWS_LBL);
+      m_menu_bar->Append(menu_views, constants::LBL_MENU_VIEWS);
 
       SetMenuBar(m_menu_bar);
 
@@ -263,9 +263,9 @@ namespace ctb::app
 
       wxProgressDialog progress_dlg{"Download Progress", "Downloading Data Files", 100, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL };
 
-      data::ProgressCallback progress_callback = [&progress_dlg] (int64_t downloadTotal, int64_t downloadNow,
-                                                                  int64_t uploadTotal, int64_t uploadNow,
-                                                                  intptr_t userdata)
+      data::ProgressCallback progress_callback = [&progress_dlg] ([[maybe_unused]] int64_t downloadTotal, [[maybe_unused]] int64_t downloadNow,
+                                                                  [[maybe_unused]] int64_t uploadTotal, [[maybe_unused]] int64_t uploadNow,
+                                                                  [[maybe_unused]] intptr_t userdata)
                                                                   {
                                                                      return progress_dlg.Pulse();
                                                                   };

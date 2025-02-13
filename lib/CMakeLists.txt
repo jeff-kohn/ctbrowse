@@ -32,6 +32,12 @@ target_include_directories(ctBrowse_lib
 		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
+target_include_directories(ctBrowse_lib
+   SYSTEM
+	PUBLIC
+		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/3rdParty>
+)
+
 # Note that since this target is a 
 target_link_libraries(ctBrowse_lib
    PUBLIC

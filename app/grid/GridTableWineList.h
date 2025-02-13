@@ -45,7 +45,7 @@ namespace ctb::app
 
       /// @brief static factory method to create an instance of the GridTableWineList class
       /// 
-      static [[nodiscard]] GridTablePtr create(data::WineListData&& data);
+      [[nodiscard]] static GridTablePtr create(data::WineListData&& data);
 
 
       /// @brief list of display columns that can be used for a grid.
@@ -96,12 +96,12 @@ namespace ctb::app
 
       /// @brief base class override that returns the number of rows/records in the table/grid
       ///
-      int GetNumberRows() override { return std::ssize(*m_current_view); }
+      int GetNumberRows() override { return static_cast<int>(m_current_view->size()); }
 
 
       /// @brief base class override that returns the number of columns displayed in the table/grid
       ///
-      int GetNumberCols() override { return std::ssize(m_display_columns); }
+      int GetNumberCols() override { return static_cast<int>(m_display_columns.size()); }
 
 
       /// @brief base class override to get the display name for column headers
@@ -210,6 +210,14 @@ namespace ctb::app
       void addFilter(int prop_id, std::string_view match_value) override;
 
 
+      // default ctor, others are deleted since this object is meant to live on the heap
+      ~GridTableWineList() override = default;
+      GridTableWineList() = delete;
+      GridTableWineList(const GridTableWineList&) = delete;
+      GridTableWineList(GridTableWineList&&) = delete;
+      GridTableWineList& operator=(const GridTableWineList&) = delete;
+      GridTableWineList& operator=(GridTableWineList&&) = delete;
+
    private:
       ColumnList                     m_display_columns{};
       data::WineListData*            m_current_view{};         // may point to m_grid_data or m_filtered_data depending if filter is active
@@ -231,12 +239,6 @@ namespace ctb::app
       bool isFilterActive()   {  return m_current_view = &m_filtered_data; }
 
 
-      // this class is meant to be instantiated on the heap.
-      GridTableWineList() = delete;
-      GridTableWineList(const GridTableWineList&) = delete;
-      GridTableWineList(GridTableWineList&&) = delete;
-      GridTableWineList& operator=(const GridTableWineList&) = delete;
-      GridTableWineList& operator=(GridTableWineList&&) = delete;
    };
 
 } // namespace ctb::app

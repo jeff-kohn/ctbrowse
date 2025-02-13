@@ -185,7 +185,7 @@ namespace ctb::data
    {
       using namespace magic_enum;
 
-      if (idx >= enum_count<Prop>())
+      if (static_cast<size_t>(idx) >= enum_count<Prop>())
          assert("Invalid enum index, this is a bug.");
 
       return enum_value<Prop>(static_cast<size_t>(idx));

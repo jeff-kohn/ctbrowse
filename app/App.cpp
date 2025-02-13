@@ -25,7 +25,8 @@ namespace ctb::app
    namespace
    {
       const wxSize g_default_frame_size{ 400, 600 }; // NOLINT(cert-err58-cpp) this ctor doesn't throw it's just not marked noexcept
-   }
+
+   } //namespace
 
 
    App::App()
@@ -44,7 +45,6 @@ namespace ctb::app
       fs::create_directories(m_user_data_folder);
 
       // Set up config object to use file even on windows (registry is yuck)
-      fs::path config_file_path{ m_user_data_folder / constants::APP_NAME_LONG };
       auto cfg = std::make_unique<wxFileConfig>(constants::APP_NAME_LONG, 
                                                 wxEmptyString, 
                                                 wxEmptyString,  

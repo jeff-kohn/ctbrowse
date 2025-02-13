@@ -140,7 +140,7 @@ namespace ctb::data
          case WineAndVintage: return wineAndVintage();
          default:
             return std::unexpected{ Error{constants::ERROR_STR_INVALID_INDEX} };
-      };
+      }
    }
 
 } // namespace ctb::data

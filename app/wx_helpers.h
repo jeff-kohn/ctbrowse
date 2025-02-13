@@ -11,7 +11,7 @@
 #include "ctb/functors.h"
 
 #include <wx/activityindicator.h>
-#include <chrono>
+
 
 namespace ctb::app
 {
@@ -24,7 +24,7 @@ namespace ctb::app
       Overloaded overloaded{
          [](std::string&& str)
          {
-            return wxString{ std::move(str) };
+            return wxString{ str };
          },
          [] (std::string_view sv)
          {
@@ -57,14 +57,21 @@ namespace ctb::app
       std::string message{};
       Wnd*        target{};
 
-      ScopedStatusText() = default;
       ScopedStatusText(std::string_view msg, Wnd* target) : message{ msg }, target{ target } {}
       ~ScopedStatusText()
       {
          if (target)
             target->SetStatusText(message);
       }
+
+      ScopedStatusText() = default;
+      ScopedStatusText(const ScopedStatusText&) = default;
+      ScopedStatusText(ScopedStatusText&&) = default;
+      ScopedStatusText& operator=(const ScopedStatusText&) = default;
+      ScopedStatusText& operator=(ScopedStatusText&&) = default;
    };
+
+   template<class Wnd> ScopedStatusText(std::string_view, Wnd*) -> ScopedStatusText<Wnd>;
 
 
 } // namespace ctb::app

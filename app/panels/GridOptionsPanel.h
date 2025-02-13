@@ -31,8 +31,14 @@ namespace ctb::app
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its lifetime). 
       /// 
-      static [[nodiscard]] GridOptionsPanel* create(wxWindow* parent, GridTableEventSourcePtr source);
+      [[nodiscard]] static GridOptionsPanel* create(wxWindow* parent, GridTableEventSourcePtr source);
    
+      // no copy/move/assign, this class is created on the heap.
+      GridOptionsPanel(const GridOptionsPanel&) = delete;
+      GridOptionsPanel(GridOptionsPanel&&) = delete;
+      GridOptionsPanel& operator=(const GridOptionsPanel&) = delete;
+      GridOptionsPanel& operator=(GridOptionsPanel&&) = delete;
+      
    private:
       using PropFilterMap = std::map<void*, std::unique_ptr<GridTableFilter> >;
 
@@ -41,6 +47,8 @@ namespace ctb::app
       wxChoice*               m_sort_combo{};
       GridTableSortConfig     m_sort_config{};
       wxTreeCtrl*             m_filter_tree{};
+
+      wxWithImages::Images    m_filter_tree_images{};
 
       /// @brief called when there are updates to the table 
       void notify(GridTableEvent event, GridTable* grid_table) override;
@@ -58,13 +66,8 @@ namespace ctb::app
       void onTreeFilterExpanding(wxTreeEvent& event);
 
       /// @brief private ctor used by static create()
-      GridOptionsPanel(GridTableEventSourcePtr source);
+      explicit GridOptionsPanel(GridTableEventSourcePtr source);
 
-      // no copy/move/assign, this class is created on the heap.
-      GridOptionsPanel(const GridOptionsPanel&) = delete;
-      GridOptionsPanel(GridOptionsPanel&&) = delete;
-      GridOptionsPanel& operator=(const GridOptionsPanel&) = delete;
-      GridOptionsPanel& operator=(GridOptionsPanel&&) = delete;
    };
 
 } // namespace ctb::app

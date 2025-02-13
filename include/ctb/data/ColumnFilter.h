@@ -55,9 +55,6 @@ namespace ctb::data
    template<rng::input_range Rows, typename PropEnum> 
    std::set<std::string> getFilterMatchValues(const Rows& rows, PropEnum prop_id)
    {
-      using TblEntry = rng::range_value_t<Rows>;
-      using Prop = TblEntry::Prop;
-
       // this functor turns our field values into strings
       // Note, we need both the string and string_view overloads 
       auto FieldToStr = Overloaded {

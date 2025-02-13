@@ -33,7 +33,7 @@ namespace ctb::app
       /// getTable() will return nullptr and the object won't fire any events 
       /// until a valid table ptr is passed to setTable().
       /// 
-      static [[nodiscard]] GridTableEventSourcePtr create();
+      [[nodiscard]] static GridTableEventSourcePtr create();
 
 
       /// @brief returns true if this source has a table attached, false otherwise
