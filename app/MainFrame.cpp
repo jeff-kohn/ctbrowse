@@ -14,6 +14,7 @@
 #include "grid/GridTableLoader.h"
 #include "grid/GridTableWineList.h"
 #include "panels/GridOptionsPanel.h"
+#include "panels/WineDetailsPanel.h"
 
 #include <ctb/CredentialWrapper.h>
 #include <ctb/data/table_download.h>
@@ -120,6 +121,7 @@ namespace ctb::app
       }
    }
 
+
    void MainFrame::createGridWindows()
    {
       auto box_sizer = std::make_unique<wxBoxSizer>(wxHORIZONTAL);
@@ -132,7 +134,11 @@ namespace ctb::app
       m_grid->SetColLabelSize(FromDIP(30));
       box_sizer->Add(m_grid, wxSizerFlags(80).Expand());
 
+      m_wine_details = WineDetailsPanel::create(this, m_event_source);
+      box_sizer->Add(m_wine_details, wxSizerFlags(30).Expand());
+
       SetSizer(box_sizer.release());
+      Layout();
       this->SendSizeEvent();
    }
 

@@ -29,6 +29,7 @@ namespace ctb::app
 {
    class CellarTrackerGrid;   // the grid window
    class GridOptionsPanel;    // the options panel
+   class WineDetailsPanel;    // details panel
 
 
    /// @brief class for the main window of the application
@@ -79,6 +80,7 @@ namespace ctb::app
       wxSearchCtrl*           m_search_ctrl{};  // substring search box on the toolbar
       wxStatusBar*            m_status_bar{};
       wxToolBar*              m_tool_bar{};
+      WineDetailsPanel*       m_wine_details{};
 
       /// @brief private ctor called by static create()
       MainFrame();

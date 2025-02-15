@@ -66,6 +66,8 @@ target_sources(${TARGET_NAME}
      "grid/ScopedEventSink.h"
      "panels/GridOptionsPanel.cpp"
      "panels/GridOptionsPanel.h"
+     "panels/WineDetailsPanel.cpp"
+     "panels/WineDetailsPanel.h"
      "resources/utf-8.manifest"
      "resources/resource.rc"
      ${${PROJECT_NAME}_VERSION_RESOURCE}
