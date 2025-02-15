@@ -21,6 +21,7 @@ namespace ctb::constants
    inline constexpr const char* FILTER_VARIETAL                   = "Varietal";
 
    inline constexpr const char* FMT_LBL_FILTERED_ROWS             = "Filtered Rows: {}";
+   inline constexpr const char* FMT_LBL_FILTERS_SELECTED          = "{}  ({} selected)";
    inline constexpr const char* FMT_LBL_TOTAL_ROWS                = "Total Rows: {}";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADED        = "Successfully downloaded file '{}'.";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADING       = "Downloading file '{}'...";

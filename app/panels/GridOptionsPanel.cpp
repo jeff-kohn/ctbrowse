@@ -161,6 +161,8 @@ namespace ctb::app
       // disable window updates till we're done and reset the tree
       wxWindowUpdateLocker freeze_updates{m_filter_tree};
       m_filter_tree->DeleteAllItems();
+      m_filters.clear();
+      m_check_map.clear();
 
       // get the available filters for this grid table, and add them to the tree.
       auto filters = grid_table->availableFilters();
@@ -227,10 +229,39 @@ namespace ctb::app
    {
       if ( isMatchValueNode(item) )
       {
-         m_filter_tree->SetItemImage(item, checked ? IMG_CHECKED : IMG_UNCHECKED);
+         if (checked)
+         {
+            m_check_map[m_filter_tree->GetItemParent(item)]++;
+            m_filter_tree->SetItemImage(item, IMG_CHECKED);
+         }
+         else{
+            m_check_map[m_filter_tree->GetItemParent(item)]--;
+            m_filter_tree->SetItemImage(item, IMG_UNCHECKED);
+         }
          return true;
       }
+
       return false;
+   }
+
+
+   void GridOptionsPanel::updateFilterLabel(wxTreeItemId item)
+   {
+      auto maybe_filter = m_filters[item];
+      if ( !maybe_filter or !item.IsOk() )
+         return;
+
+      // if the filter node has selected childen, update the lable with the count
+      wxString filter_name{ wxFromSV(maybe_filter->filterName()) };
+      auto count = m_check_map[item];
+      if (count)
+      {
+         auto lbl = std::format(constants::FMT_LBL_FILTERS_SELECTED, filter_name.wx_str(), count);
+         m_filter_tree->SetItemText(item, lbl.c_str());
+      }
+      else{
+         m_filter_tree->SetItemText(item, filter_name);
+      }
    }
 
 
@@ -245,10 +276,13 @@ namespace ctb::app
       if (checked)
       {
          addFilter(item);
+         m_check_map[item]++;
       }
       else{
          removeFilter(item);
+         m_check_map[item]--;
       }
+      updateFilterLabel(m_filter_tree->GetItemParent(item));
    }
 
 

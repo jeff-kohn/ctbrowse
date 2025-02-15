@@ -74,9 +74,9 @@ namespace ctb::app
       /// @brief  string filters that can be used on this table.
       ///
       static inline const std::array StringFilters{
+         GridTableFilter{ constants::FILTER_VARIETAL,   RecordType::propToIndex(Prop::MasterVarietal) },
          GridTableFilter{ constants::FILTER_COUNTRY,    RecordType::propToIndex(Prop::Country)        },
          GridTableFilter{ constants::FILTER_REGION,     RecordType::propToIndex(Prop::Region)         },
-         GridTableFilter{ constants::FILTER_VARIETAL,   RecordType::propToIndex(Prop::MasterVarietal) },
          GridTableFilter{ constants::FILTER_APPELATION, RecordType::propToIndex(Prop::Appellation)    }
       };
 

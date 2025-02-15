@@ -44,8 +44,10 @@ namespace ctb::app
    private:
       using MaybeFilter = std::optional<GridTableFilter>;
       using FilterMap = std::map<wxTreeItemId, MaybeFilter>;
+      using CheckCountMap = std::map<wxTreeItemId, int>;
 
       FilterMap             m_filters{};
+      CheckCountMap         m_check_map{};
       ScopedEventSink       m_sink;           // no default init
       wxChoice*             m_sort_combo{};
       GridTableSortConfig   m_sort_config{};
@@ -64,6 +66,7 @@ namespace ctb::app
       bool isMatchValueNode(wxTreeItemId item);
       bool isChecked(wxTreeItemId item);
       bool setChecked(wxTreeItemId item, bool checked = true);
+      void updateFilterLabel(wxTreeItemId item);
       void toggleFilterSelection(wxTreeItemId item);
 
       /// event source related handlers
