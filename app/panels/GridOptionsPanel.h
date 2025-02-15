@@ -17,6 +17,7 @@
 #include <wx/treectrl.h>
 
 #include <map>
+#include <optional>
 
 namespace ctb::app
 {
@@ -41,24 +42,28 @@ namespace ctb::app
       ~GridOptionsPanel() override = default;
       
    private:
-      using PropFilterMap = std::map<void*, std::unique_ptr<GridTableFilter> >;
+      using MaybeFilter = std::optional<GridTableFilter>;
+      using FilterMap = std::map<wxTreeItemId, MaybeFilter>;
 
-      PropFilterMap           m_filters{};
-      ScopedEventSink         m_sink;           // no default init
-      wxChoice*               m_sort_combo{};
-      GridTableSortConfig     m_sort_config{};
-      wxTreeCtrl*             m_filter_tree{};
-      wxWithImages::Images    m_filter_tree_images{};
+      FilterMap             m_filters{};
+      ScopedEventSink       m_sink;           // no default init
+      wxChoice*             m_sort_combo{};
+      GridTableSortConfig   m_sort_config{};
+      wxTreeCtrl*           m_filter_tree{};
+      wxWithImages::Images  m_filter_tree_images{};
 
       // window creation
       void initControls();
 
       // implementation/helper functions
+      void addFilter(wxTreeItemId item);
+      void removeFilter(wxTreeItemId item);
+      MaybeFilter getFilterForItem(wxTreeItemId item);
       wxArrayString getSortOptionList(GridTable* grid_table);
       bool isContainerNode(wxTreeItemId item);
       bool isMatchValueNode(wxTreeItemId item);
       bool isChecked(wxTreeItemId item);
-      void setChecked(wxTreeItemId item, bool checked = true);
+      bool setChecked(wxTreeItemId item, bool checked = true);
       void toggleFilterSelection(wxTreeItemId item);
 
       /// event source related handlers

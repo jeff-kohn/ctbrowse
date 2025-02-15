@@ -66,16 +66,29 @@ namespace ctb::app
 
    [[nodiscard]] MainFrame* MainFrame::create()
    {
-      // give base class a chance set up controls etc
-      std::unique_ptr<MainFrame> wnd{ new MainFrame{} };
-
-      const auto default_size = wnd->FromDIP(wxSize{640, 480});
-      if (!wnd->Create(nullptr, wxID_ANY, constants::APP_NAME_LONG, wxDefaultPosition, default_size))
+      try
       {
-         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+         // give base class a chance set up controls etc
+         std::unique_ptr<MainFrame> wnd{ new MainFrame{} };
+
+         const auto default_size = wnd->FromDIP(wxSize{640, 480});
+         if (!wnd->Create(nullptr, wxID_ANY, constants::APP_NAME_LONG, wxDefaultPosition, default_size))
+         {
+            throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+         }
+         wnd->initControls();
+         return wnd.release(); // top-level window manages its own lifetime, we return non-owning pointer
       }
-      wnd->initControls();
-      return wnd.release(); // top-level window manages its own lifetime, we return non-owning pointer
+      catch(Error& err)
+      {
+         wxGetApp().displayErrorMessage(err);
+         throw;
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+         throw;
+      }
    }
 
 

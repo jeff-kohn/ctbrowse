@@ -126,6 +126,34 @@ namespace ctb::app
    }
 
 
+   void GridOptionsPanel::addFilter(wxTreeItemId item)
+   {
+      if (m_sink.hasTable())
+      {
+         auto filter = getFilterForItem(item);
+         if (filter)
+         {
+            m_sink.getTable()->addFilter(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
+            m_sink.signal_source(GridTableEvent::Filter);
+         }
+      }
+   }
+
+
+   void GridOptionsPanel::removeFilter(wxTreeItemId item)
+   {
+      if (m_sink.hasTable())
+      {
+         auto filter = getFilterForItem(item);
+         if (filter)
+         {
+            m_sink.getTable()->removeFilter(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
+            m_sink.signal_source(GridTableEvent::Filter);
+         }
+      }
+   }
+
+
    void GridOptionsPanel::populateFilterTypes(GridTable* grid_table)
    {
       assert(m_filter_tree);
@@ -143,7 +171,7 @@ namespace ctb::app
          auto item = m_filter_tree->AppendItem(root, filter_name);
          m_filter_tree->SetItemHasChildren(item, true);
          m_filter_tree->SetItemImage(item, IMG_CONTAINER);
-         m_filters[item.GetID()] = std::make_unique<GridTableFilter>(filter);
+         m_filters[item] = filter;
       }
    }
 
@@ -153,6 +181,24 @@ namespace ctb::app
       return vws::all(grid_table->availableSortConfigs()) 
                | vws::transform([](const GridTableSortConfig& s) {  return wxString{s.sort_name.data(), s.sort_name.length() };  })
                | rng::to<wxArrayString>();
+   }
+
+
+   GridOptionsPanel::MaybeFilter GridOptionsPanel::getFilterForItem(wxTreeItemId item)
+   {
+      auto table = m_sink.getTable();
+      if (table)
+      {
+         // we need to get the parent node's item, since that's what's in the map.
+         auto parent = m_filter_tree->GetItemParent(item);
+         if (parent.IsOk())
+         {
+            auto it = m_filters.find(parent);
+            if (it != m_filters.end())
+               return it->second;
+         }
+      }
+      return {};
    }
 
 
@@ -174,18 +220,35 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::setChecked(wxTreeItemId item, bool checked)
+   /// @brief updates the checked/unchecked status of a node.
+   /// @return true if successful, false otherwise (ie invalid item)
+   /// 
+   bool GridOptionsPanel::setChecked(wxTreeItemId item, bool checked)
    {
-      if ( item.IsOk() and isMatchValueNode(item) )
+      if ( isMatchValueNode(item) )
       {
          m_filter_tree->SetItemImage(item, checked ? IMG_CHECKED : IMG_UNCHECKED);
+         return true;
       }
+      return false;
    }
 
 
+   /// @brief toggles a filter value by updating its checked/unchecked image and applying/deleting the corresponding filter.
+   /// 
    void GridOptionsPanel::toggleFilterSelection(wxTreeItemId item)
    {
-      setChecked(item, !isChecked(item));
+      bool checked = !isChecked(item);
+      if (!setChecked(item, checked))
+         return;
+
+      if (checked)
+      {
+         addFilter(item);
+      }
+      else{
+         removeFilter(item);
+      }
    }
 
 
@@ -329,15 +392,26 @@ namespace ctb::app
 
    void GridOptionsPanel::onTreeFilterLeftClick(wxMouseEvent& event)
    {
-      int flags{};
-      auto item = m_filter_tree->HitTest(event.GetPosition(), flags);
-
-      if ( item.IsOk() and (flags & wxTREE_HITTEST_ONITEMICON) )
+      try
       {
-         toggleFilterSelection(item);
+         int flags{};
+         auto item = m_filter_tree->HitTest(event.GetPosition(), flags);
+
+         if ( item.IsOk() and (flags & wxTREE_HITTEST_ONITEMICON) )
+         {
+            toggleFilterSelection(item); // safe to call even if it's a filter/container node
+         }
+         else{
+            event.Skip(); // need default processing for parent node's +/- button
+         }
       }
-      else{
-         event.Skip();
+      catch(Error& err)
+      {
+         wxGetApp().displayErrorMessage(err);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
       }
    }
 

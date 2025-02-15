@@ -9,6 +9,7 @@
 
 #include "ctb/ctb.h"
 #include "ctb/functors.h"
+#include "ctb/data/TableProperty.h"
 
 #include <compare>
 #include <vector>
@@ -26,8 +27,7 @@ namespace ctb::data
    struct TableSorter
    {
       using Prop = T::Prop;
-      using ValueWrapper = T::ValueWrapper;
-      using ValueResult = T::ValueResult;
+      using PropertyResult = T::PropertyResult;
 
       std::vector<Prop> sort_props{};      // properties to use for sorting, in order
       std::string       sort_name{};       // for display purposes in selection lists etc
@@ -38,9 +38,9 @@ namespace ctb::data
       {
          for (auto prop : sort_props)
          {
-            // If returned property doesn't contain the expected ValueResult, just use a default-constructed one.
-            const auto& val1 = t1[prop].or_else([](auto) { return ValueResult{ ValueWrapper{} }; });
-            const auto& val2 = t2[prop].or_else([](auto) { return ValueResult{ ValueWrapper{} }; });
+            // If returned property doesn't contain the expected PropertyResult, just use a default-constructed one.
+            const auto& val1 = t1[prop].or_else([](auto) { return PropertyResult{ TableProperty{} }; });
+            const auto& val2 = t2[prop].or_else([](auto) { return PropertyResult{ TableProperty{} }; });
 
             auto cmp = *val1 <=> *val2;
             if (cmp < 0)

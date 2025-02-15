@@ -91,6 +91,14 @@ namespace ctb::app
       }
 
 
+      /// @brief returns whether the event source has a table attached or not.
+      /// 
+      bool hasTable() const
+      {
+         return m_source->getTable() != nullptr;
+      }
+
+
       /// @brief destructor
       ///
       ~ScopedEventSink() noexcept

@@ -4,7 +4,7 @@
 
 namespace ctb::app
 {
-   std::set<std::string> GridTableFilter::getMatchValues(GridTable* grid_table) const
+   StringSet GridTableFilter::getMatchValues(GridTable* grid_table) const
    {
       return grid_table->getFilterMatchValues(m_prop_index);
    }

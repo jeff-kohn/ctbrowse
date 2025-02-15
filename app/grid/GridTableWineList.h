@@ -10,8 +10,8 @@
 #include "App.h"
 #include "interfaces/GridTableEvent.h"
 
-#include <ctb/data/ColumnFilter.h>
 #include <ctb/data/DisplayColumn.h>
+#include <ctb/data/PropertyFilterMgr.h>
 #include <ctb/data/SubStringFilter.h>
 #include <ctb/data/TableSorter.h>
 #include <ctb/data/WineListEntry.h>
@@ -38,6 +38,7 @@ namespace ctb::app
       using RecordType = data::WineListEntry;
       using Prop = RecordType::Prop;
       using DisplayColumn = data::DisplayColumn<RecordType>;
+      using PropertyFilterMgr = data::PropertyFilterMgr<RecordType>;
       using SubStringFilter = data::SubStringFilter<RecordType>;
       using TableSort = data::TableSorter<RecordType>;
       using GridTableSortConfig = GridTableSortConfig;
@@ -73,10 +74,10 @@ namespace ctb::app
       /// @brief  string filters that can be used on this table.
       ///
       static inline const std::array StringFilters{
-         GridTableFilter{ constants::FILTER_COUNTRY,    propToIndex(Prop::Country)        },
-         GridTableFilter{ constants::FILTER_REGION,     propToIndex(Prop::Region)         },
-         GridTableFilter{ constants::FILTER_VARIETAL,   propToIndex(Prop::MasterVarietal) },
-         GridTableFilter{ constants::FILTER_APPELATION, propToIndex(Prop::Appellation)    }
+         GridTableFilter{ constants::FILTER_COUNTRY,    RecordType::propToIndex(Prop::Country)        },
+         GridTableFilter{ constants::FILTER_REGION,     RecordType::propToIndex(Prop::Region)         },
+         GridTableFilter{ constants::FILTER_VARIETAL,   RecordType::propToIndex(Prop::MasterVarietal) },
+         GridTableFilter{ constants::FILTER_APPELATION, RecordType::propToIndex(Prop::Appellation)    }
       };
 
 
@@ -202,12 +203,17 @@ namespace ctb::app
 
       /// @brief get a list of values that can be used to filter on a column in the table
       ///
-      std::set<std::string> getFilterMatchValues(int prop_id) const override;
+      StringSet getFilterMatchValues(int prop_idx) const override;
 
 
       /// @brief adds a match value filter for the specified column.
       ///
-      void addFilter(int prop_id, std::string_view match_value) override;
+      bool addFilter(int prop_idx, std::string_view match_value) override;
+
+
+      /// @brief adds a match value filter for the specified column.
+      ///
+      bool removeFilter(int prop_idx, std::string_view match_value) override;
 
 
       // default ctor, others are deleted since this object is meant to live on the heap
@@ -220,10 +226,11 @@ namespace ctb::app
 
    private:
       ColumnList                     m_display_columns{};
+      PropertyFilterMgr              m_prop_filters{};
       data::WineListData*            m_current_view{};         // may point to m_grid_data or m_filtered_data depending if filter is active
       data::WineListData             m_grid_data{};            // the underlying data records for this table.
       data::WineListData             m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
-      GridTableSortConfig                     m_sort_config{};
+      GridTableSortConfig            m_sort_config{};
       std::optional<SubStringFilter> m_substring_filter{};
 
       /// @brief private constructor used by static create()
@@ -233,7 +240,7 @@ namespace ctb::app
          m_grid_data{std::move(data)}
       {}
 
-      //void filterData();
+      void applyFilters();
       bool applySubStringFilter(const SubStringFilter& filter);
       void sortData();
       bool isFilterActive()   {  return m_current_view = &m_filtered_data; }

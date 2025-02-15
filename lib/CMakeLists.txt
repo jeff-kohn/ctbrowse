@@ -7,16 +7,22 @@ add_library(${PROJECT_NAME}::ctBrowse_lib ALIAS ctBrowse_lib)
 
 target_sources(ctBrowse_lib
    PUBLIC
+      "../include/ctb/common_types.h"
+      "../include/ctb/concepts.h"
       "../include/ctb/constants.h"
       "../include/ctb/CredentialWrapper.h"
-      "../include/ctb/data/ColumnFilter.h"
+      "../include/ctb/Error.h"
+      "../include/ctb/winapi_util.h"
+
       "../include/ctb/data/DisplayColumn.h"
+      "../include/ctb/data/PropertyFilterMgr.h"
+      "../include/ctb/data/PropertyFilterString.h"
       "../include/ctb/data/SubstringFilter.h"
+      "../include/ctb/data/TableProperty.h"
+      "../include/ctb/data/TableSorter.h"
       "../include/ctb/data/table_data.h"
       "../include/ctb/data/table_download.h"
       "../include/ctb/data/WineListEntry.h"
-      "../include/ctb/Error.h"
-      "../include/ctb/winapi_util.h"
 
    PRIVATE
       "CredentialWrapper.cpp"

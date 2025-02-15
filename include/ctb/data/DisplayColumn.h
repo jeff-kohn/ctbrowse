@@ -1,13 +1,14 @@
 /*******************************************************************
  * @file DisplayColumn.h
  *
- * @brief defintes the template class DisplayColumn
+ * @brief defines the template class DisplayColumn
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 #pragma once
 
 #include "ctb/functors.h"
+#include "ctb/data/TableProperty.h"
 #include "ctb/data/table_data.h"
 
 #include <magic_enum/magic_enum.hpp>
@@ -18,15 +19,13 @@
 namespace ctb::data
 {
 
-   /// @brief struct containing everything needed to know about how to display a grid column
+   /// @brief struct containing everything needed to know about how to display a table column
    ///
-   template<TableEntry TE>
+   template<TableEntry RecordType>
    struct DisplayColumn
    {
       // some types we borrow from our template parameter
-      using Prop         = TE::Prop;
-      using ValueWrapper = TE::ValueWrapper;
-     
+      using Prop         = RecordType::Prop;    
 
       /// @brief enum to specify the alignment for column headers and cell text
       ///
@@ -95,35 +94,20 @@ namespace ctb::data
       /// currency values will use a dollar sign and 2 decimal places, decimal values  will be 
       /// displayed with 1 decimal place.
       ///
-      std::string getDisplayValue(const ValueWrapper& value) const
-      {
-         // this functor turns our field values into strings that can be displayed. 
-         // Note, we need both the string and string_view overloads 
-         auto FieldToStr = Overloaded{
-            [](const std::string& val) { return std::format("{}", val); },
-            [](std::string_view val)   { return std::format("{}", val); },
-            [](uint64_t val)           { return std::format("{}", val); },
-            [](uint16_t val)           { return std::format("{}", val); },
-            [](NullableShort val)      { return val.has_value() ? std::format("{}", val.value()) : ""; },
-            [this](NullableDouble val)
-            { 
-               if (val)
-               {
-                  switch(this->format)
-                  {
-                     case Format::Currency: return std::format("${:.2f}", *val);
-                     case Format::Decimal:  return std::format("{:.1f}", *val);
-                     case Format::Number:   return std::format("{:.0f}", *val);
-                     default:               return std::format("{}", *val);
-                  }
-               }
-               else{
-                  return std::string{};
-               }
-            }
-         };
-         // todo: check perf, may want to use manual visit
-         return std::visit(FieldToStr, value);
+      std::string getDisplayValue(const TableProperty& value) const
+      {       
+         switch (format)
+         {
+            case Format::Decimal:   
+               return value.asString(constants::FMT_NUMBER_DECIMAL);
+
+            case Format::Currency:  
+               return value.asString(constants::FMT_NUMBER_CURRENCY);
+
+            case Format::Number: // regular numbers don't have special formatting excpept for being right-aligned.   
+            default:                
+               return value.asString();
+         }
       }
 
 

@@ -109,35 +109,35 @@ namespace ctb::data
       }
    }
 
-   WineListEntry::ValueResult WineListEntry::getProperty(Prop prop) const
+   WineListEntry::PropertyResult WineListEntry::getProperty(Prop prop) const
    {
       using enum Prop;
 
       switch (prop)
       {
-         case iWineID:        return wineID();
-         case WineName:       return wineName();
-         case Locale:         return locale();
-         case Vintage:        return vintage();
-         case Quantity:       return qtyAvailable();
-         case Pending:        return qtyPending();
-         case Size:           return size();
-         case Price:          return price();
-         case Valuation:      return valuation();
-         case Country:        return country();
-         case Region:         return region();
-         case SubRegion:      return subRegion();
-         case Appellation:    return appellation();
-         case Producer:       return producer();
-         case SortProducer:   return sortProducer();
-         case Color:          return color();
-         case Category:       return category();
-         case MasterVarietal: return masterVarietal();
-         case CTScore:        return ctScore();
-         case MYScore:        return myScore();
-         case BeginConsume:   return beginConsume();
-         case EndConsume:     return endConsume();
-         case WineAndVintage: return wineAndVintage();
+         case iWineID:        return TableProperty{ wineID() };
+         case WineName:       return TableProperty{ wineName() };
+         case Locale:         return TableProperty{ locale() };
+         case Vintage:        return TableProperty{ vintage() };
+         case Quantity:       return TableProperty{ qtyAvailable() };
+         case Pending:        return TableProperty{ qtyPending() };
+         case Size:           return TableProperty{ size() };
+         case Price:          return TableProperty{ price() };
+         case Valuation:      return TableProperty{ valuation() };
+         case Country:        return TableProperty{ country() };
+         case Region:         return TableProperty{ region() };
+         case SubRegion:      return TableProperty{ subRegion() };
+         case Appellation:    return TableProperty{ appellation() };
+         case Producer:       return TableProperty{ producer() };
+         case SortProducer:   return TableProperty{ sortProducer() };
+         case Color:          return TableProperty{ color() };
+         case Category:       return TableProperty{ category() };
+         case MasterVarietal: return TableProperty{ masterVarietal() };
+         case CTScore:        return TableProperty{ ctScore() };
+         case MYScore:        return TableProperty{ myScore() };
+         case BeginConsume:   return TableProperty{ beginConsume() };
+         case EndConsume:     return TableProperty{ endConsume() };
+         case WineAndVintage: return TableProperty{ wineAndVintage() };
          default:
             return std::unexpected{ Error{constants::ERROR_STR_INVALID_INDEX} };
       }

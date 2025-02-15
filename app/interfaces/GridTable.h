@@ -106,15 +106,24 @@ namespace ctb::app
 
       /// @brief get a list of values that can be used to filter on a column in the table
       ///
-      virtual std::set<std::string> getFilterMatchValues(int prop_id) const = 0;
+      virtual StringSet getFilterMatchValues(int prop_idx) const = 0;
 
 
       /// @brief adds a match value filter for the specified column.
       ///
-      /// a record must match at least one value for each property that 
+      /// @return true if the filter was applied, false it it wasn't because there were no matches
+      /// 
+      /// a record must match at least one match_value for each property that 
       /// has a filter to be considered a match.
       /// 
-      virtual void addFilter(int prop_id, std::string_view match_value) = 0;
+      virtual bool addFilter(int prop_idx, std::string_view match_value) = 0;
+
+
+      /// @brief removes a match value filter for the specified column.
+      ///
+      /// @return true if the filter was removed, false if it wasn't found
+      /// 
+      virtual bool removeFilter(int prop_idx, std::string_view match_value) = 0;
 
       /// @brief destructor
       ///

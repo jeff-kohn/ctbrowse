@@ -26,21 +26,31 @@ namespace ctb
    concept TableEntry = requires (
       T t, 
       typename T::Prop p, 
-      typename T::ValueResult v,
+      typename T::PropertyResult v,
       typename T::RowType r)
    {
       v = t.getProperty(p);
-      //v = t[0];
       v = t[p];
       t.parse(r);
+
+      T::propFromIndex(0);
+      T::propToIndex(p);
    };
 
+
+   /// @brief concept for a type that implmeents the interface of std::optional
+   ///
    template<typename T> 
    concept Nullable = requires (T t, T::value_type v1, T::value_type v2)
    {
       v1 = t ? *t : v2;
       v1 = t.has_value() ? t.value() : v2;
    };
+
+   /// @brief concept for a type that is either integral or floating point.
+   ///
+   template <typename T>
+   concept Arithmetic = std::integral<T> or std::floating_point<T>; 
 
 
 } // namespace ctb

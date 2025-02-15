@@ -44,34 +44,12 @@ namespace ctb::data
       /// 
       bool operator()(const T& rec) const
       {
-         auto field_to_str = Overloaded{
-            [this](std::string_view val)  -> bool
-            { 
-               return boost::icontains(val, search_value);
-            },
-            [this](NullableDouble val)
-            {
-               return val ? std::format("{}", *val).contains(search_value)
-                          : false;
-            },
-            [this](NullableShort val)
-            {
-               return val ? std::format("{}", *val).contains(search_value)
-                          : false;
-            },            
-            [this](auto val)               
-            { 
-               return std::format("{}", val).contains(search_value); 
-            }
-         };
-
          for (auto prop : search_props)
          {
-            auto maybe_val = rec.getProperty(prop);
-            if (maybe_val.has_value())
+            auto val_result = rec.getProperty(prop);
+            if (val_result.has_value())
             {
-               if (std::visit(field_to_str, maybe_val.value()))
-                  return true; 
+               return val_result->asString().contains(search_value);
             }              
          }
          return false;

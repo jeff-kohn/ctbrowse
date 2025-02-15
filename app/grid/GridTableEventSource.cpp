@@ -25,14 +25,16 @@ namespace ctb::app
 
 
    /// @brief assigns a table to this source.
-   void GridTableEventSource::setTable(GridTablePtr table)
+   bool GridTableEventSource::setTable(GridTablePtr table)
    {
       // We need to signal that the current table is being replaced, because
       // otherwise views that hold internal table pointers will be left with
       // dangling/garbage pointer
-      signal(GridTableEvent::TableRemove);
+      if (! signal(GridTableEvent::TableRemove) )
+         return false;
+
       m_grid_table = table;
-      signal(GridTableEvent::TableInitialize);
+      return signal(GridTableEvent::TableInitialize);
    }
 
 
@@ -60,20 +62,43 @@ namespace ctb::app
 
 
    /// @brief this is called to signal that an event needs to be sent to all listeners
-   bool GridTableEventSource::signal(GridTableEvent event)
+   bool GridTableEventSource::signal(GridTableEvent event) noexcept
    {
+      bool retval{ true };
+
       if (m_grid_table)
       {
-         for (auto observer : m_observers) { observer->notify(event, m_grid_table.get()); }
-         return true;
+         for (auto observer : m_observers) 
+         { 
+            try
+            {
+               observer->notify(event, m_grid_table.get()); 
+            }
+            catch(Error& err)
+            {
+               retval = false;
+               wxGetApp().displayErrorMessage(err);
+            }
+            catch(std::exception& e)
+            {
+               retval = false;
+               wxGetApp().displayErrorMessage(e.what());
+            }
+         }
       }
-      return false;
+
+      return retval;
    }
 
 
    GridTableEventSource::~GridTableEventSource() noexcept
    {
-      signal(GridTableEvent::TableRemove);
+      // We can't guarantee that some event sink won't throw, so best to be safe.
+      try
+      {
+         signal(GridTableEvent::TableRemove);
+      }
+      catch(...){} // TODO: logging to OutputDebugString maybe? not much we can safely do from here.
    }
 
 } // namespace ctb::app

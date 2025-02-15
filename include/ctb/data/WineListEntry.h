@@ -8,7 +8,9 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include "ctb/functors.h"
 #include "ctb/data/table_data.h"
+#include "ctb/data/TableProperty.h"
 
 #include <magic_enum/magic_enum.hpp>
 #include <cstdint>
@@ -108,13 +110,20 @@ namespace ctb::data
       };
 
       
-      /// @brief small helper to convert a Prop enum into an integer value
+      /// @brief small helper to convert a Prop enum into its integer index
       /// 
-      static constexpr int to_int(Prop prop)
+      static constexpr int propToIndex(Prop prop)
       {
-         return static_cast<int>(std::to_underlying(prop));
+         return enumToIndex(prop);
       }
 
+
+      /// @brief small helper to convert a zero-based index to a Prop enum
+      /// 
+      static constexpr Prop propFromIndex(int idx)
+      {
+         return enumFromIndex<Prop>(idx);
+      }
 
       // type alias used by template code
       ///
@@ -126,30 +135,26 @@ namespace ctb::data
       static constexpr int maxPropIndex() { return static_cast<int>(Prop::WineAndVintage); }
 
 
-      /// @brief variant that can hold any of our supported field types.
-      ///
-      using ValueWrapper = std::variant<uint16_t, uint64_t, NullableDouble, NullableShort, std::string_view>;
-
-
       /// @brief used to return a field value or an error
       ///
-      using ValueResult = std::expected<ValueWrapper, Error>;
+      using PropertyResult = std::expected<TableProperty, Error>;
 
 
       /// @brief get the property corresponding to the specified enum identifier
       ///
-      [[nodiscard]] ValueResult getProperty(Prop prop) const;
+      [[nodiscard]] PropertyResult getProperty(Prop prop) const;
 
 
       /// @brief array syntax for getting a property value
       ///
-      [[nodiscard]] ValueResult operator[](Prop prop) const 
+      [[nodiscard]] PropertyResult operator[](Prop prop) const 
       {
          return getProperty(prop);
       }
 
 
       /// string-based properties return a string_view, which will only be valid for the lifetime of this object.
+      /// 
       /// 
       uint64_t wineID() const                  { return m_rec.iWineID;          }
       std::string_view wineName() const        { return m_rec.WineName;         }

@@ -2,7 +2,6 @@
 
 #include "App.h"
 
-#include <ctb/nullable_types.h>
 #include <string_view>
 #include <set>
 
@@ -10,6 +9,10 @@
 namespace ctb::app
 {
    class GridTable;
+
+   /// type alias
+   using StringSet = std::set<std::string, std::less<> >;
+
 
    /// @brief  class that contains a filter specification
    ///
@@ -50,13 +53,9 @@ namespace ctb::app
       }
 
 
-      /// @brief typedef for unique set of filter values for a column.
-      using MatchValueList = std::set<std::string>;
-
-
       /// @brief retrieve a list of available values in the table for this filter
       /// 
-      MatchValueList getMatchValues(GridTable* grid_table) const;
+      StringSet getMatchValues(GridTable* grid_table) const;
 
 
       /// @brief no default ctor or move semantics

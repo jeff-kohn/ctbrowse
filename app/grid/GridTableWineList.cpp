@@ -35,11 +35,12 @@ namespace ctb::app
 
       if (col_idx >= m_display_columns.size())
       {
-         /// If we get here we got a request for invalid column, should be impossible...
+         /// If we get here we got a request for invalid column, i.e. a bug
          assert(false);
          return std::format("Col {}", col);
       }
       return wxString{ m_display_columns[col_idx].display_name };
+
    }
 
 
@@ -47,30 +48,40 @@ namespace ctb::app
    {
       using namespace ctb::data;
 
-      if (row >= std::ssize(*m_current_view)) // don't use GetNumerRows because it's virtual
+      try
       {
-         assert(false); 
-         return wxString{};
+         if (row >= std::ssize(*m_current_view)) // don't use GetNumerRows because it's virtual
+         {
+            assert(false); 
+            return wxString{};
+         }
+         if (col >= std::ssize(m_display_columns))
+         {
+            assert(false);
+            return wxString{};
+         }
+
+         auto row_idx  = static_cast<size_t>(row);
+         auto display_col = m_display_columns[static_cast<size_t>(col)];
+         auto prop = display_col.prop_id;
+
+         // if the expected value is returned, format it as string and return it to caller
+         auto result = (*m_current_view)[row_idx][prop];
+         if (result.has_value())
+         {
+            auto val_str = display_col.getDisplayValue(result.value());
+            return wxString{ val_str.data(), val_str.size() };
+         }
       }
-      if (col >= std::ssize(m_display_columns))
+      catch(std::exception&)
       {
-         assert(false);
-         return wxString{};
+         // don't display an error message here because if there's a problem with the data in a row or column,
+         // user might get dozens (or hundreds) of messages.
+         // TODO: LOGGING
       }
 
-      auto row_idx  = static_cast<size_t>(row);
-      auto display_col = m_display_columns[static_cast<size_t>(col)];
-      auto prop = display_col.prop_id;
-
-      // if the expected value is returned, format it as string and return it to caller
-      // otherwise we just return an empty string
-      return (*m_current_view)[row_idx][prop]
-         .and_then([&display_col](WineListEntry::ValueWrapper val) -> std::expected<wxString, Error>
-            {
-               auto val_str = display_col.getDisplayValue(val);
-               return wxString{ val_str.data(), val_str.size() };
-            })
-         .value_or(wxString{});
+      // if we get here it's likely a bug, shouldn't happen.
+      return constants::ERROR_VAL;
    }
 
 
@@ -110,6 +121,7 @@ namespace ctb::app
 
    bool GridTableWineList::filterBySubstring(std::string_view substr)
    {
+      // this overload searches all columns in the current grid, so get the prop_id's 
       auto cols = getDisplayColumns() | vws::transform([](const DisplayColumn& disp_col) -> auto { return disp_col.prop_id; })
                                       | rng::to<std::vector>();
 
@@ -119,7 +131,7 @@ namespace ctb::app
 
    bool GridTableWineList::filterBySubstring(std::string_view substr, int col_idx)
    {
-      auto prop = data::indexToProp<SubStringFilter::Prop>(col_idx);
+      auto prop = RecordType::propFromIndex(col_idx);
       auto cols = std::vector<SubStringFilter::Prop>{ prop };
 
       return applySubStringFilter(SubStringFilter{ std::string{substr}, cols });
@@ -129,7 +141,7 @@ namespace ctb::app
    void GridTableWineList::clearSubStringFilter()
    {
       m_substring_filter = std::nullopt;
-      m_current_view = &m_grid_data;  // TODO: this is wrong if we have column filters
+      applyFilters();
    }
 
 
@@ -168,26 +180,63 @@ namespace ctb::app
    }
 
 
-   std::set<std::string> GridTableWineList::getFilterMatchValues(int prop_id) const
+   StringSet GridTableWineList::getFilterMatchValues(int prop_idx) const
    {
-      auto prop = data::indexToProp<Prop>(prop_id);
-      return data::getFilterMatchValues<WineListData>(m_grid_data, prop);
+      return PropertyFilterMgr::getFilterMatchValues(m_grid_data, RecordType::propFromIndex(prop_idx));
    }
 
 
-   void GridTableWineList::addFilter([[maybe_unused]] int prop_id, [[maybe_unused]] std::string_view value)
+   bool GridTableWineList::addFilter(int prop_idx, std::string_view value)
    {
-      assert("Not implemented, dummy");
-      throw Error{ "Not Implemented"};
+      // if we somehow get passed a filter we already have, don't waste our time.
+      if ( m_prop_filters.addFilter(RecordType::propFromIndex(prop_idx), value) )
+      {
+         applyFilters();
+         return true;
+      }
+      return false;
    }
 
+
+   bool GridTableWineList::removeFilter(int prop_idx, std::string_view match_value)
+   {
+      // if we somehow get passed filter that we aren't using, don't waste our time.
+      if ( m_prop_filters.removeFilter(RecordType::propFromIndex(prop_idx), match_value) )
+      {
+         applyFilters();
+         return true;
+      }
+      return false;
+   }
+
+
+   void GridTableWineList::applyFilters()
+   {
+      if (m_prop_filters.activeFilters() )
+      {
+         m_filtered_data = vws::all(m_grid_data) 
+            | vws::filter([this](const RecordType& rec) {  return m_prop_filters.isMatch(rec); })
+            | rng::to<std::deque>();
+
+         m_current_view = &m_filtered_data;
+      }
+      else{
+         m_current_view = &m_grid_data;
+         m_filtered_data.clear();
+      }
+
+      if (m_substring_filter)
+      {
+         applySubStringFilter(*m_substring_filter);
+      }
+   }
 
    bool GridTableWineList::applySubStringFilter(const SubStringFilter& filter)
    {
-      // TODO:  once column filtering is added, we'll need to check whether 
-      //        this step should start with m_grid_data or m_current_view
-      auto filtered_data = vws::all(m_grid_data) | vws::filter(filter)
-                                                 | rng::to<std::deque>();
+      /// We use the view not the source table because there may be other filters applied
+      /// that need to be preserved.
+      auto filtered_data = vws::all(*m_current_view) | vws::filter(filter)
+                                                     | rng::to<std::deque>();
 
       // we only update the grid if there is some matching data
       if (!filtered_data.empty())
@@ -215,11 +264,7 @@ namespace ctb::app
          rng::sort(vws::reverse(m_grid_data), Sorters[static_cast<size_t>(m_sort_config.sort_index)]);
       }
 
-      // apply substring filter if any
-      if (m_substring_filter)
-      {
-         applySubStringFilter(*m_substring_filter);
-      }
+      applyFilters();
    }
 
 

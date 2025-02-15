@@ -10,7 +10,6 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/nullable_types.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4365 4464 4702)
@@ -177,29 +176,5 @@ namespace ctb::data
       return data;
    }
 
-
-   /// @brief helper function to convert an int to a enum value, since the syntax is so fugly
-   ///
-   template<typename Prop>
-   constexpr Prop indexToProp(int idx)
-   {
-      using namespace magic_enum;
-
-      if (static_cast<size_t>(idx) >= enum_count<Prop>())
-         assert("Invalid enum index, this is a bug.");
-
-      return enum_value<Prop>(static_cast<size_t>(idx));
-   }
-
-   
-   /// @brief convert a property enum into its zero-based index
-   /// 
-   template<typename Prop>
-   constexpr int propToIndex(Prop prop)
-   {
-      using namespace magic_enum;
-      auto index = enum_index(prop);
-      return static_cast<int>(*index);
-   }
 
 } // namespace ctb::data

@@ -71,7 +71,7 @@ namespace ctb::app
       /// If a null table ptr is passed, this grid will no longer fire events 
       /// until a subsequent call to setTable() passes a valid pointer.
       /// 
-      virtual void setTable(GridTablePtr table) = 0;
+      virtual bool setTable(GridTablePtr table) = 0;
 
 
       /// @brief attaches an event sink to this source to receive event notifications
