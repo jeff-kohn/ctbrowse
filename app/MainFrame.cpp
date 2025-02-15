@@ -239,8 +239,19 @@ namespace ctb::app
 
    void MainFrame::onMenuEditFind([[maybe_unused]] wxCommandEvent& event)
    {
-      m_tool_bar->SetFocus();
-      m_search_ctrl->SetFocus();
+      try
+      {
+         m_tool_bar->SetFocus();
+         m_search_ctrl->SetFocus();
+      }
+      catch(Error& e)
+      {
+         wxGetApp().displayErrorMessage(e);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
    }
 
 
@@ -252,83 +263,96 @@ namespace ctb::app
 
    void MainFrame::onMenuSyncData([[maybe_unused]] wxCommandEvent& event) 
    {
-      using namespace ctb::data;
-
-      TableSyncDialog dlg(this);
-      if (dlg.ShowModal() != wxID_OK)
-         return;
-
-      wxBusyCursor busy{};
-      ScopedStatusText end_status{ constants::STATUS_DOWNLOAD_COMPLETE, this };
-
-      CredentialWrapper cred_wrapper{
-         constants::CELLARTRACKER_DOT_COM, true,
-         constants::CELLARTRACKER_LOGON_CAPTION,
-         constants::CELLARTRACKER_LOGON_TITLE
-      };
-
-      auto cred_result = cred_wrapper.promptForCredential();
-      if (!cred_result.has_value())
+      // TODO: refactor this
+      try
       {
-         end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
-      }
-      auto& cred = cred_result.value();
+         using namespace ctb::data;
 
-      wxProgressDialog progress_dlg{"Download Progress", "Downloading Data Files", 100, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL };
+         TableSyncDialog dlg(this);
+         if (dlg.ShowModal() != wxID_OK)
+            return;
 
-      data::ProgressCallback progress_callback = [&progress_dlg] ([[maybe_unused]] int64_t downloadTotal, [[maybe_unused]] int64_t downloadNow,
-                                                                  [[maybe_unused]] int64_t uploadTotal, [[maybe_unused]] int64_t uploadNow,
-                                                                  [[maybe_unused]] intptr_t userdata)
-                                                                  {
-                                                                     return progress_dlg.Pulse();
-                                                                  };
+         wxBusyCursor busy{};
+         ScopedStatusText end_status{ constants::STATUS_DOWNLOAD_COMPLETE, this };
 
-      // For each selected table, download it.
-      for (auto tbl : dlg.selectedTables())
-      {
-         setStatusText(constants::FMT_STATUS_FILE_DOWNLOADING, data::getTableDescription(tbl));
+         CredentialWrapper cred_wrapper{
+            constants::CELLARTRACKER_DOT_COM, true,
+            constants::CELLARTRACKER_LOGON_CAPTION,
+            constants::CELLARTRACKER_LOGON_TITLE
+         };
 
-         data::DownloadResult result{};
-         result = downloadRawTableData(cred, tbl, DataFormatId::csv, &progress_callback);
-
-         // we may need to re-prompt 
-         while (!result.has_value() && result.error().error_code == enum_index(HttpStatus::Code::Unauthorized))
+         auto cred_result = cred_wrapper.promptForCredential();
+         if (!cred_result.has_value())
          {
-            cred_result = cred_wrapper.promptForCredential();
-            if (cred_result)
+            end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
+         }
+         auto& cred = cred_result.value();
+
+         wxProgressDialog progress_dlg{"Download Progress", "Downloading Data Files", 100, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL };
+
+         data::ProgressCallback progress_callback = [&progress_dlg] ([[maybe_unused]] int64_t downloadTotal, [[maybe_unused]] int64_t downloadNow,
+                                                                     [[maybe_unused]] int64_t uploadTotal, [[maybe_unused]] int64_t uploadNow,
+                                                                     [[maybe_unused]] intptr_t userdata)
+                                                                     {
+                                                                        return progress_dlg.Pulse();
+                                                                     };
+
+         // For each selected table, download it.
+         for (auto tbl : dlg.selectedTables())
+         {
+            setStatusText(constants::FMT_STATUS_FILE_DOWNLOADING, data::getTableDescription(tbl));
+
+            data::DownloadResult result{};
+            result = downloadRawTableData(cred, tbl, DataFormatId::csv, &progress_callback);
+
+            // we may need to re-prompt 
+            while (!result.has_value() && result.error().error_code == enum_index(HttpStatus::Code::Unauthorized))
             {
-               cred = cred_result.value();
+               cred_result = cred_wrapper.promptForCredential();
+               if (cred_result)
+               {
+                  cred = cred_result.value();
+               }
+               else
+               {
+                  end_status.message = constants::ERROR_STR_DOWNLOAD_AUTH_FAILURE;
+                  return;
+               }
             }
-            else
+
+            if (!result)
             {
-               end_status.message = constants::ERROR_STR_DOWNLOAD_AUTH_FAILURE;
+               // we didn't get a result, so indicate error to user.
+               if (result.error().category == Error::Category::OperationCanceled)
+               {
+                  end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
+               }
+               else
+               {
+                  wxGetApp().displayErrorMessage(result.error());
+                  end_status.message = constants::STATUS_DOWNLOAD_FAILED;
+               }
                return;
             }
+
+            // if we get here we have the data, so save it to file.
+            auto folder = wxGetApp().userDataFolder();
+            auto file_path{ folder / result->tableName() };
+            file_path.replace_extension(constants::DATA_FILE_EXTENSION);
+            util::saveTextToFile(result->data, file_path);
+
+            setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, data::getTableDescription(tbl));
          }
-
-         if (!result)
-         {
-            // we didn't get a result, so indicate error to user.
-            if (result.error().category == Error::Category::OperationCanceled)
-            {
-               end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
-            }
-            else
-            {
-               wxGetApp().displayErrorMessage(result.error());
-               end_status.message = constants::STATUS_DOWNLOAD_FAILED;
-            }
-            return;
-         }
-
-         // if we get here we have the data, so save it to file.
-         auto folder = wxGetApp().userDataFolder();
-         auto file_path{ folder / result->tableName() };
-         file_path.replace_extension(constants::DATA_FILE_EXTENSION);
-         util::saveTextToFile(result->data, file_path);
-
-         setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, data::getTableDescription(tbl));
       }
+      catch(Error& e)
+      {
+         wxGetApp().displayErrorMessage(e);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
+
    }
 
 
@@ -357,24 +381,61 @@ namespace ctb::app
       {
          wxGetApp().displayErrorMessage(e);
       }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
    }
 
 
    void MainFrame::onSearchBtn([[maybe_unused]] wxCommandEvent& event)
    {
-      doSearchFilter();
+      try
+      {
+         doSearchFilter();
+      }
+      catch(Error& e)
+      {
+         wxGetApp().displayErrorMessage(e);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
    }
 
 
    void MainFrame::onSearchCancelBtn([[maybe_unused]] wxCommandEvent& event)
    {
-      clearSearchFilter();
+      try
+      {
+         clearSearchFilter();
+      }
+      catch(Error& e)
+      {
+         wxGetApp().displayErrorMessage(e);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
    }
 
 
    void MainFrame::onSearchTextEnter([[maybe_unused]] wxCommandEvent& event)
    {
-      doSearchFilter();
+      try
+      {
+         doSearchFilter();
+      }
+      catch(Error& e)
+      {
+         wxGetApp().displayErrorMessage(e);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
    }
 
 
@@ -389,13 +450,21 @@ namespace ctb::app
       if (!m_grid) return;
       try
       {
-         m_grid->filterBySubstring(m_search_ctrl->GetValue().wx_str());
-         updateStatusBarCounts();
+         if ( !m_grid->filterBySubstring(m_search_ctrl->GetValue().wx_str()) )
+         {
+            // clear any previous search filter, because that search text is no longer displayed.
+            m_grid->clearSubStringFilter();
+         }
       }
       catch(Error& e)
       {
          wxGetApp().displayErrorMessage(e);
       }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
+      updateStatusBarCounts();
    }
 
 
@@ -406,18 +475,18 @@ namespace ctb::app
       {
          m_search_ctrl->ChangeValue("");
          m_grid->clearSubStringFilter();
-         updateStatusBarCounts();
+
       }
       catch(Error& e)
       {
          wxGetApp().displayErrorMessage(e);
       }
+      updateStatusBarCounts();
    }
 
 
    void MainFrame::updateStatusBarCounts()
-   {
-            
+   {     
       int total{0};
       int filtered{0};
       

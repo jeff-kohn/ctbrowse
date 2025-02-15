@@ -33,18 +33,18 @@ namespace ctb::app
 
       /// @brief filter the table by performing a substring search across all columns
       ///
-      /// note that class only supports a single substring filter, subsequent calls to
+      /// note this class only supports a single substring filter, subsequent calls to
       /// either overload will overwrite any previous substring filter.
       /// 
-      void filterBySubstring(std::string_view substr);
+      bool filterBySubstring(std::string_view substr);
 
 
       /// @brief filter the table by performing a substring search on the specified column
       ///
-      /// note that class only supports a single substring filter, subsequent calls to
+      /// note this class only supports a single substring filter, subsequent calls to
       /// either overload will overwrite any previous substring filter.
       /// 
-      void filterBySubstring(std::string_view substr, int col_idx);
+      bool filterBySubstring(std::string_view substr, int col_idx);
 
 
       /// @brief clear/reset the substring filter

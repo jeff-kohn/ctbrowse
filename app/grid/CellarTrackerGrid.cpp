@@ -86,7 +86,7 @@ namespace ctb::app
    }
 
 
-   void CellarTrackerGrid::filterBySubstring(std::string_view substr)
+   bool CellarTrackerGrid::filterBySubstring(std::string_view substr)
    {
       if (!m_grid_table)
          throw Error{ constants::ERROR_STR_NO_GRID_TABLE, Error::Category::UiError };
@@ -95,7 +95,7 @@ namespace ctb::app
       if (substr.empty())
       {
          clearSubStringFilter();
-         return;
+         return false;
       }
 
       {
@@ -104,15 +104,17 @@ namespace ctb::app
          {
             // calling SetTable with the same ptr is fine, it forces grid to re-fetch the data.
             setGridTable(m_grid_table);
+            return true;
          }
          else {
             wxGetApp().displayInfoMessage(constants::INFO_MSG_NO_MATCHING_ROWS);
+            return false;
          }
       }
    }
 
 
-   void CellarTrackerGrid::filterBySubstring(std::string_view substr, int col_idx)
+   bool CellarTrackerGrid::filterBySubstring(std::string_view substr, int col_idx)
    {
       if (!m_grid_table)
          throw Error{ constants::ERROR_STR_NO_GRID_TABLE, Error::Category::UiError };
@@ -124,9 +126,11 @@ namespace ctb::app
          {
             // calling setTable with the same ptr is fine, it forces grid to re-fetch the data.
             setGridTable(m_grid_table);
+            return true;
          }
          else {
             wxGetApp().displayInfoMessage(constants::INFO_MSG_NO_MATCHING_ROWS);
+            return false;
          }
       }
    }
