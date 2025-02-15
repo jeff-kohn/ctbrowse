@@ -43,12 +43,14 @@ namespace ctb::data
       ///
       bool operator()(const RecordType& rec) const
       {
+         if (match_values.empty())
+            return true;
+
          auto prop_result = rec[prop_id];
-         if (prop_result)
-         {
-            return match_values.find(prop_result->asString() ) != match_values.end();
-         }
-         return false;
+         if (!prop_result)
+            return false;
+         
+        return match_values.find(prop_result->asString() ) != match_values.end();
       }
    };
 

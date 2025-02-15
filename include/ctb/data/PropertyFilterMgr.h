@@ -75,17 +75,18 @@ namespace ctb::data
       }
 
 
-      /// @brief check if a record matches any of our filters
-      /// @return true if at least one PropertyFilterString matched the record
+      /// @brief check if a record matches all of our filters
+      /// @return true if each PropertyFilterString matched the record, false  
+      ///         if the record failed to match one or more filters.
       /// 
       bool isMatch(const RecordType& rec) const
       {
          for (auto&& filter : vws::values(m_filters))
          {
-            if ( filter.match_values.empty() or filter(rec) )
-               return true;
+            if ( !filter(rec) )
+               return false;
          }
-         return false;
+         return true;
       }
 
 

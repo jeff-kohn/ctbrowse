@@ -30,7 +30,7 @@ namespace ctb::constants
 
    inline constexpr const char* LBL_CT_SCORE                      = "CT Score";
    inline constexpr const char* LBL_DRINK_BY                      = "Drink By";
-   inline constexpr const char* LBL_FILTER_OPTIONS                = "Filters Options";
+   inline constexpr const char* LBL_FILTER_OPTIONS                = "Filter Options";
    inline constexpr const char* LBL_LOCALE                        = "Region and Appellation";
    inline constexpr const char* LBL_MENU_VIEWS                    = "&Views";
    inline constexpr const char* LBL_MY_PRICE                      = "My Price";
