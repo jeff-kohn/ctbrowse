@@ -10,8 +10,8 @@
 #include "grid/GridTableWineList.h"
 
 #include <ctb/functors.h>
-#include <ctb/data/table_data.h>
-#include <ctb/data/WineListEntry.h>
+#include <ctb/table_data.h>
+#include <ctb/WineListTraits.h>
 
 #include <magic_enum/magic_enum.hpp>
 #include <magic_enum/magic_enum_switch.hpp>
@@ -20,7 +20,6 @@
 namespace ctb::app
 {
    using namespace magic_enum;
-   using namespace ctb::data;
 
    GridTablePtr GridTableLoader::getGridTable(GridTableId tbl)
    {

@@ -1,7 +1,7 @@
 /*******************************************************************
  * @file table_data.h
  *
- * @brief Header file for functionality in the ctb::data namespace to
+ * @brief Header file for functionality in the ctb namespace to
  *        work with CT data tables
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
@@ -28,7 +28,7 @@
 #include <vector>
 
 
-namespace ctb::data
+namespace ctb
 {
    namespace fs = std::filesystem;
 
@@ -170,11 +170,11 @@ namespace ctb::data
       for (csv::CSVRow& row : reader)
       {
          typename TableData::value_type record{};
-         if (record.parse(row))
-            data.emplace_back(std::move(record));
+         record.parse(row);
+         data.emplace_back(std::move(record));
       }
       return data;
    }
 
 
-} // namespace ctb::data
+} // namespace ctb

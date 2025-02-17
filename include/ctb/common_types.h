@@ -1,5 +1,5 @@
 ﻿/*******************************************************************
- * @file nullable_types.h
+ * @file common_types.h
  *
  * @brief Header file for
  * 

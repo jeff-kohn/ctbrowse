@@ -16,16 +16,16 @@
 #include <vector>
 
 
-namespace ctb::data
+namespace ctb
 {
 
    /// @brief implements a substring-matching filter for a table entry/record
    ///
-   template <TableEntry T>
+   template <CtRecord T>
    struct SubStringFilter
    {
    public:
-      using Prop = T::Prop;
+      using PropId = T::PropId;
 
       /// @brief the substring to search for.
       ///
@@ -33,7 +33,7 @@ namespace ctb::data
 
       /// @brief the properties to search for.
       ///
-      std::vector<Prop> search_props{};
+      std::vector<PropId> search_props{};
 
 
       /// @brief  function operator used to perform the substring search. 
@@ -46,10 +46,10 @@ namespace ctb::data
       {
          for (auto prop : search_props)
          {
-            auto val_result = rec.getProperty(prop);
-            if (val_result.has_value())
+            auto val = rec.getProperty(prop);
+            if (val)
             {
-               return val_result->asString().contains(search_value);
+               return val.asString().contains(search_value);
             }              
          }
          return false;
@@ -58,4 +58,4 @@ namespace ctb::data
    };
 
 
-} // namespace ctb::data
+} // namespace ctb

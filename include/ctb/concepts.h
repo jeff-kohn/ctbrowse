@@ -19,26 +19,28 @@ namespace ctb
    /// @brief concept for a type that is convertible to std::string_view
    template <typename T>
    concept StringViewCompatible = std::convertible_to<T, std::string_view>;
-      
 
-   /// @brief concept for a table entry object representing a row in a CT table
+
+   /// @brief concept for a traits object definining the schema for a CtRecord instantiation
+   ///
    template <typename T> 
-   concept TableEntry = requires (
-      T t, 
-      typename T::Prop p, 
-      typename T::PropertyResult v,
-      typename T::RowType r)
+   concept CtRecordTraits = requires (T t, typename T::PropId p)
    {
-      v = t.getProperty(p);
-      v = t[p];
-      t.parse(r);
-
-      T::propFromIndex(0);
-      T::propToIndex(p);
+      t.getCsvSchema();
    };
 
 
-   /// @brief concept for a type that implmeents the interface of std::optional
+   /// @brief concept for a record object representing a row in a CT table (CSV file)
+   ///
+   template <typename T> 
+   concept CtRecord = requires (T t, typename T::PropId p, typename T::RowType r)
+   {
+     t.parse(r);
+     t.getProperty(p);
+   };
+
+
+   /// @brief concept for a type that implements the interface of std::optional
    ///
    template<typename T> 
    concept Nullable = requires (T t, T::value_type v1, T::value_type v2)

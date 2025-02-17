@@ -78,7 +78,7 @@ namespace ctb::app
          Bind(wxEVT_BUTTON, &TableSyncDialog::onOkClicked, this, wxID_OK);
 
          // populate table name selection list
-         constexpr auto table_descriptions = data::TableDescriptions | vws::values;
+         constexpr auto table_descriptions = TableDescriptions | vws::values;
          m_table_selection_ctrl->InsertItems(wxToArrayString(table_descriptions), 0);
 
          // need to read some defaults from config settings.
@@ -113,10 +113,10 @@ namespace ctb::app
    }
 
 
-   std::vector<data::TableId> TableSyncDialog::selectedTables() const
+   std::vector<TableId> TableSyncDialog::selectedTables() const
    {
       using namespace vws;
-      using EnumT = data::TableId;
+      using EnumT = TableId;
 
       // convert our internal list of ints to the actual enum, need to filter out
       // values that don't map to an enum (should never happen, but best to be

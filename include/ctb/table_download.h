@@ -1,7 +1,7 @@
 /*******************************************************************
  * @file table_download.h
  *
- * @brief Header file functionality in the ctb::data namespace for
+ * @brief Header file functionality in the ctb namespace for
  *        downloading table data from CellarTracker.com
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
@@ -12,9 +12,9 @@
 #include "ctb/ctb.h"
 
 #include "ctb/CredentialWrapper.h"
-#include "ctb/data/table_data.h"
+#include "ctb/table_data.h"
 
-namespace ctb::data
+namespace ctb
 {
 
    /// @brief struct that contains data (and metadata) for a downloaded CellarTracker table
@@ -50,4 +50,4 @@ namespace ctb::data
    [[nodiscard]] DownloadResult downloadRawTableData(const CredentialWrapper::Credential& cred, TableId table, 
                                                      DataFormatId format, ProgressCallback* callback = nullptr);
 
-} // namespace ctb::data
+} // namespace ctb

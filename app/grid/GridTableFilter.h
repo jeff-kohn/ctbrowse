@@ -45,7 +45,7 @@ namespace ctb::app
       }
 
 
-      /// @brief returns the index (into the table entry's Prop enum) of the property this filter is for
+      /// @brief returns the index (into the table entry's PropId enum) of the property this filter is for
       ///
       int propIndex() const 
       {

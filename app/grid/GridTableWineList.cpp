@@ -19,11 +19,8 @@
 
 namespace ctb::app
 {
-   using data::WineListData;
-   using data::WineListEntry;
 
-
-   [[nodiscard]] GridTablePtr GridTableWineList::create(data::WineListData&& data)
+   [[nodiscard]] GridTablePtr GridTableWineList::create(WineListData&& data)
    {
       return std::shared_ptr<GridTableWineList>{ new GridTableWineList{ std::move(data) } };  
    }
@@ -46,8 +43,6 @@ namespace ctb::app
 
    wxString GridTableWineList::GetValue(int row, int col)
    {
-      using namespace ctb::data;
-
       try
       {
          if (row >= std::ssize(*m_current_view)) // don't use GetNumerRows because it's virtual
@@ -65,13 +60,10 @@ namespace ctb::app
          auto display_col = m_display_columns[static_cast<size_t>(col)];
          auto prop = display_col.prop_id;
 
-         // if the expected value is returned, format it as string and return it to caller
-         auto result = (*m_current_view)[row_idx][prop];
-         if (result.has_value())
-         {
-            auto val_str = display_col.getDisplayValue(result.value());
-            return wxString{ val_str.data(), val_str.size() };
-         }
+         // format as string and return it to caller
+         auto val = (*m_current_view)[row_idx][prop];
+         auto val_str = display_col.getDisplayValue(val);
+         return wxString{ val_str.data(), val_str.size() };
       }
       catch(std::exception&)
       {
@@ -131,8 +123,8 @@ namespace ctb::app
 
    bool GridTableWineList::filterBySubstring(std::string_view substr, int col_idx)
    {
-      auto prop = RecordType::propFromIndex(col_idx);
-      auto cols = std::vector<SubStringFilter::Prop>{ prop };
+      auto prop = RecordType::Traits::propFromIndex(col_idx);
+      auto cols = std::vector<SubStringFilter::PropId>{ prop };
 
       return applySubStringFilter(SubStringFilter{ std::string{substr}, cols });
    }
@@ -182,14 +174,14 @@ namespace ctb::app
 
    StringSet GridTableWineList::getFilterMatchValues(int prop_idx) const
    {
-      return PropertyFilterMgr::getFilterMatchValues(m_grid_data, RecordType::propFromIndex(prop_idx));
+      return PropertyFilterMgr::getFilterMatchValues(m_grid_data, RecordType::Traits::propFromIndex(prop_idx));
    }
 
 
    bool GridTableWineList::addFilter(int prop_idx, std::string_view value)
    {
       // if we somehow get passed a filter we already have, don't waste our time.
-      if ( m_prop_filters.addFilter(RecordType::propFromIndex(prop_idx), value) )
+      if ( m_prop_filters.addFilter(RecordType::Traits::propFromIndex(prop_idx), value) )
       {
          applyFilters();
          return true;
@@ -201,7 +193,7 @@ namespace ctb::app
    bool GridTableWineList::removeFilter(int prop_idx, std::string_view match_value)
    {
       // if we somehow get passed filter that we aren't using, don't waste our time.
-      if ( m_prop_filters.removeFilter(RecordType::propFromIndex(prop_idx), match_value) )
+      if ( m_prop_filters.removeFilter(RecordType::Traits::propFromIndex(prop_idx), match_value) )
       {
          applyFilters();
          return true;

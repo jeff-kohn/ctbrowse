@@ -10,11 +10,11 @@
 #include "App.h"
 #include "interfaces/GridTableEvent.h"
 
-#include <ctb/data/DisplayColumn.h>
-#include <ctb/data/PropertyFilterMgr.h>
-#include <ctb/data/SubStringFilter.h>
-#include <ctb/data/TableSorter.h>
-#include <ctb/data/WineListEntry.h>
+#include <ctb/DisplayColumn.h>
+#include <ctb/PropertyFilterMgr.h>
+#include <ctb/SubStringFilter.h>
+#include <ctb/TableSorter.h>
+#include <ctb/WineListTraits.h>
 
 #include <magic_enum/magic_enum.hpp>
 #include <wx/grid.h>
@@ -35,49 +35,49 @@ namespace ctb::app
    {
    public:
       /// @brief type used for describing how to display a column in the grid
-      using RecordType = data::WineListEntry;
-      using Prop = RecordType::Prop;
-      using DisplayColumn = data::DisplayColumn<RecordType>;
-      using PropertyFilterMgr = data::PropertyFilterMgr<RecordType>;
-      using SubStringFilter = data::SubStringFilter<RecordType>;
-      using TableSort = data::TableSorter<RecordType>;
+      using RecordType          = WineListRecord;
+      using PropId              = RecordType::PropId;
+      using DisplayColumn       = DisplayColumn<RecordType>;
+      using PropertyFilterMgr   = PropertyFilterMgr<RecordType>;
+      using SubStringFilter     = SubStringFilter<RecordType>;
+      using TableSort           = TableSorter<RecordType>;
       using GridTableSortConfig = GridTableSortConfig;
 
 
       /// @brief static factory method to create an instance of the GridTableWineList class
       /// 
-      [[nodiscard]] static GridTablePtr create(data::WineListData&& data);
+      [[nodiscard]] static GridTablePtr create(WineListData&& data);
 
 
       /// @brief list of display columns that can be used for a grid.
       ///
       static inline const std::array DefaultDisplayColumns { 
-         DisplayColumn{ Prop::WineAndVintage,                              constants::LBL_WINE     },
-         DisplayColumn{ Prop::Locale,                                      constants::LBL_LOCALE   },
-         DisplayColumn{ Prop::Quantity,   DisplayColumn::Format::Number,   constants::LBL_QTY      },
-         DisplayColumn{ Prop::Pending,    DisplayColumn::Format::Number                            },
-         DisplayColumn{ Prop::CTScore,    DisplayColumn::Format::Decimal,  constants::LBL_CT_SCORE },
-         DisplayColumn{ Prop::MYScore,    DisplayColumn::Format::Decimal,  constants::LBL_MY_SCORE },
+         DisplayColumn{ PropId::WineAndVintage,                              constants::LBL_WINE     },
+         DisplayColumn{ PropId::Locale,                                      constants::LBL_LOCALE   },
+         DisplayColumn{ PropId::Quantity,   DisplayColumn::Format::Number,   constants::LBL_QTY      },
+         DisplayColumn{ PropId::Pending,    DisplayColumn::Format::Number                            },
+         DisplayColumn{ PropId::CTScore,    DisplayColumn::Format::Decimal,  constants::LBL_CT_SCORE },
+         DisplayColumn{ PropId::MYScore,    DisplayColumn::Format::Decimal,  constants::LBL_MY_SCORE },
       };
 
 
       /// @brief the available sort orders for this table.
       ///
       static inline const std::array Sorters{ 
-         TableSort{ { Prop::WineName, Prop::Vintage                    }, constants::SORT_OPTION_WINE_VINTAGE },
-         TableSort{ { Prop::Vintage,  Prop::WineName                   }, constants::SORT_OPTION_VINTAGE_WINE },
-         TableSort{ { Prop::Locale,   Prop::WineName,    Prop::Vintage }, constants::SORT_OPTION_LOCALE_WINE  },
-         TableSort{ { Prop::Region,   Prop::WineName,    Prop::Vintage }, constants::SORT_OPTION_REGION_WINE  },
+         TableSort{ { PropId::WineName, PropId::Vintage                    }, constants::SORT_OPTION_WINE_VINTAGE },
+         TableSort{ { PropId::Vintage,  PropId::WineName                   }, constants::SORT_OPTION_VINTAGE_WINE },
+         TableSort{ { PropId::Locale,   PropId::WineName,    PropId::Vintage }, constants::SORT_OPTION_LOCALE_WINE  },
+         TableSort{ { PropId::Region,   PropId::WineName,    PropId::Vintage }, constants::SORT_OPTION_REGION_WINE  },
       };
 
 
       /// @brief  string filters that can be used on this table.
       ///
       static inline const std::array StringFilters{
-         GridTableFilter{ constants::FILTER_VARIETAL,   RecordType::propToIndex(Prop::MasterVarietal) },
-         GridTableFilter{ constants::FILTER_COUNTRY,    RecordType::propToIndex(Prop::Country)        },
-         GridTableFilter{ constants::FILTER_REGION,     RecordType::propToIndex(Prop::Region)         },
-         GridTableFilter{ constants::FILTER_APPELATION, RecordType::propToIndex(Prop::Appellation)    }
+         GridTableFilter{ constants::FILTER_VARIETAL,   static_cast<int>(PropId::MasterVarietal) },
+         GridTableFilter{ constants::FILTER_COUNTRY,    static_cast<int>(PropId::Country)        },
+         GridTableFilter{ constants::FILTER_REGION,     static_cast<int>(PropId::Region)         },
+         GridTableFilter{ constants::FILTER_APPELATION, static_cast<int>(PropId::Appellation)    }
       };
 
 
@@ -227,14 +227,14 @@ namespace ctb::app
    private:
       ColumnList                     m_display_columns{};
       PropertyFilterMgr              m_prop_filters{};
-      data::WineListData*            m_current_view{};         // may point to m_grid_data or m_filtered_data depending if filter is active
-      data::WineListData             m_grid_data{};            // the underlying data records for this table.
-      data::WineListData             m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
+      WineListData*                  m_current_view{};         // may point to m_grid_data or m_filtered_data depending if filter is active
+      WineListData                   m_grid_data{};            // the underlying data records for this table.
+      WineListData                   m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
       GridTableSortConfig            m_sort_config{};
       std::optional<SubStringFilter> m_substring_filter{};
 
       /// @brief private constructor used by static create()
-      GridTableWineList(data::WineListData&& data) : 
+      GridTableWineList(WineListData&& data) : 
          m_display_columns(DefaultDisplayColumns.begin(), DefaultDisplayColumns.end()),
          m_current_view{&m_grid_data},
          m_grid_data{std::move(data)}

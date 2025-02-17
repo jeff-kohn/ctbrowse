@@ -17,7 +17,7 @@
 #include "panels/WineDetailsPanel.h"
 
 #include <ctb/CredentialWrapper.h>
-#include <ctb/data/table_download.h>
+#include <ctb/table_download.h>
 #include <ctb/winapi_util.h>
 #include <external/HttpStatusCodes.h>
 
@@ -272,8 +272,6 @@ namespace ctb::app
       // TODO: refactor this
       try
       {
-         using namespace ctb::data;
-
          TableSyncDialog dlg(this);
          if (dlg.ShowModal() != wxID_OK)
             return;
@@ -296,7 +294,7 @@ namespace ctb::app
 
          wxProgressDialog progress_dlg{"Download Progress", "Downloading Data Files", 100, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL };
 
-         data::ProgressCallback progress_callback = [&progress_dlg] ([[maybe_unused]] int64_t downloadTotal, [[maybe_unused]] int64_t downloadNow,
+         ProgressCallback progress_callback = [&progress_dlg] ([[maybe_unused]] int64_t downloadTotal, [[maybe_unused]] int64_t downloadNow,
                                                                      [[maybe_unused]] int64_t uploadTotal, [[maybe_unused]] int64_t uploadNow,
                                                                      [[maybe_unused]] intptr_t userdata)
                                                                      {
@@ -306,9 +304,9 @@ namespace ctb::app
          // For each selected table, download it.
          for (auto tbl : dlg.selectedTables())
          {
-            setStatusText(constants::FMT_STATUS_FILE_DOWNLOADING, data::getTableDescription(tbl));
+            setStatusText(constants::FMT_STATUS_FILE_DOWNLOADING, getTableDescription(tbl));
 
-            data::DownloadResult result{};
+            DownloadResult result{};
             result = downloadRawTableData(cred, tbl, DataFormatId::csv, &progress_callback);
 
             // we may need to re-prompt 
@@ -347,7 +345,7 @@ namespace ctb::app
             file_path.replace_extension(constants::DATA_FILE_EXTENSION);
             util::saveTextToFile(result->data, file_path);
 
-            setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, data::getTableDescription(tbl));
+            setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, getTableDescription(tbl));
          }
       }
       catch(Error& e)

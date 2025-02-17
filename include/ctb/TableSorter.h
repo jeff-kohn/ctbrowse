@@ -9,13 +9,13 @@
 
 #include "ctb/ctb.h"
 #include "ctb/functors.h"
-#include "ctb/data/TableProperty.h"
+#include "ctb/TableProperty.h"
 
 #include <compare>
 #include <vector>
 
 
-namespace ctb::data
+namespace ctb
 {
 
    /// @brief defines a functor that can be used to sort a container/range of table entries
@@ -23,26 +23,21 @@ namespace ctb::data
    /// note there's no ascending/descending option, because that decision should be made
    /// by the range passed to the sort algorithm, not here.
    /// 
-   template<TableEntry T>
+   template<CtRecord Record>
    struct TableSorter
    {
-      using Prop = T::Prop;
-      using PropertyResult = T::PropertyResult;
+      using PropId = Record::PropId;
 
-      std::vector<Prop> sort_props{};      // properties to use for sorting, in order
-      std::string       sort_name{};       // for display purposes in selection lists etc
+      std::vector<PropId> sort_props{};      // properties to use for sorting, in order
+      std::string         sort_name{};       // for display purposes in selection lists etc
 
       /// @brief function operator that does the comparison.
       ///
-      bool operator()(const T& t1, const T& t2)
+      bool operator()(const Record& r1, const Record& r2)
       {
          for (auto prop : sort_props)
          {
-            // If returned property doesn't contain the expected PropertyResult, just use a default-constructed one.
-            const auto& val1 = t1[prop].or_else([](auto) { return PropertyResult{ TableProperty{} }; });
-            const auto& val2 = t2[prop].or_else([](auto) { return PropertyResult{ TableProperty{} }; });
-
-            auto cmp = *val1 <=> *val2;
+            auto cmp = r1[prop] <=> r2[prop];
             if (cmp < 0)
                return true;
             else if (cmp > 0)
@@ -52,4 +47,4 @@ namespace ctb::data
       }
    };
 
-}  // ctb::data
+}  // ctb

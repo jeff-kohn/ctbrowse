@@ -8,7 +8,7 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/data/PropertyFilterString.h"
+#include "ctb/PropertyFilterString.h"
 
 #include <map>
 #include <set>
@@ -16,7 +16,7 @@
 #include <string_view>
 
 
-namespace ctb::data
+namespace ctb
 {
    /// @brief class to manage property filters for a data table.
    /// 
@@ -24,18 +24,18 @@ namespace ctb::data
    /// will be converted to string for filtering purposes. Not ideal for 
    /// performance, but most of our filters are text base. Will revisit this later.
    /// 
-   template <TableEntry RecordType>
+   template <CtRecord RecordType>
    class PropertyFilterMgr
    {
    public:
       using PropertyFilter = PropertyFilterString<RecordType>;
-      using Prop           = RecordType::Prop;
+      using PropId         = RecordType::PropId;
 
 
       /// @brief add a match value for the specified column filter.
       /// @return true if successful, false if filter value already existed or could not be added.
       /// 
-      bool addFilter(Prop prop_id, std::string_view match_value)
+      bool addFilter(PropId prop_id, std::string_view match_value)
       {
          auto& filter = m_filters[prop_id];
 
@@ -55,7 +55,7 @@ namespace ctb::data
       /// @brief remove a match value for the specified column filter
       /// @return true if removed, false if not found.1
       /// 
-      bool removeFilter(Prop prop_id, std::string_view match_value)
+      bool removeFilter(PropId prop_id, std::string_view match_value)
       {
          bool ret_val{ false };
 
@@ -93,7 +93,7 @@ namespace ctb::data
       /// @brief returns the number of active property filters we have.
       /// 
       /// the count is based on the number of match values across all property filters, not a count
-      /// of the ProperyFilter objects themselves.
+      /// of the PropertyFilter objects themselves.
       /// 
       int activeFilters() const
       {
@@ -109,10 +109,10 @@ namespace ctb::data
          StringSet result{};
          for (auto& row : rows)
          {
-            auto val_result = row[prop_id];
-            if (val_result)
+            auto val = row[prop_id];
+            if (val)
             {
-               result.insert(val_result->asString());
+               result.insert(val.asString());
             }
          }
          return result;
@@ -120,7 +120,7 @@ namespace ctb::data
 
 
    private:
-      std::map<Prop, PropertyFilter> m_filters{};
+      std::map<PropId, PropertyFilter> m_filters{};
    };
 
-} // namespace ctb::data
+} // namespace ctb

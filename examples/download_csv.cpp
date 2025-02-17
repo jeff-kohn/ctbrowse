@@ -7,7 +7,7 @@
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 #include "ctb/constants.h"
-#include "ctb/data/table_download.h"
+#include "ctb/table_download.h"
 #include "ctb/winapi_util.h"
 #include "external/HttpStatusCodes.h"
 
@@ -24,7 +24,6 @@ int main()
 
    try {
       using namespace ctb;
-      using namespace ctb::data;
 
       CredentialWrapper cred_wrapper{
          constants::CELLARTRACKER_DOT_COM, true,
@@ -43,7 +42,7 @@ int main()
          if (!cred)
             throw Error{ "Authentication failed." };
 
-         result = downloadRawTableData(cred.value(), data::TableId::Notes, data::DataFormatId::csv);
+         result = downloadRawTableData(cred.value(), TableId::Notes, DataFormatId::csv);
          if (!result.has_value() && result.error().error_code == static_cast<int>(HttpStatus::Code::Unauthorized))
             prompt_again = true; // wrong user/pass, try again
          else 
