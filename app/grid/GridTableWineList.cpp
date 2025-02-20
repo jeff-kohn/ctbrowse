@@ -8,7 +8,7 @@
 
 #include "grid/GridTableWineList.h"
 
-#include <ctb/functors.h>
+#include <ctb/utility.h>
 #include <magic_enum/magic_enum.hpp>
 #include <wx/font.h>
 
@@ -45,7 +45,7 @@ namespace ctb::app
    {
       try
       {
-         if (row >= std::ssize(*m_current_view)) // don't use GetNumerRows because it's virtual
+         if (row >= std::ssize(*m_current_view)) // don't use GetNumberRows because it's virtual
          {
             assert(false); 
             return wxString{};
@@ -257,6 +257,16 @@ namespace ctb::app
       }
 
       applyFilters();
+   }
+
+
+   const CtProperty& GridTableWineList::getDetailProp(int row_idx, std::string_view prop_name)
+   {
+      auto maybe_prop = magic_enum::enum_cast<PropId>(prop_name);
+      if (!maybe_prop)
+         return null_prop; // can't return default-constructed becuase it would be ref to temp
+
+      return (*m_current_view)[static_cast<size_t>(row_idx)][*maybe_prop];
    }
 
 

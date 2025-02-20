@@ -376,7 +376,7 @@ namespace ctb::app
          auto tbl = loader.getGridTable(GridTableLoader::GridTableId::WineList);
          m_event_source->setTable(tbl);
          tbl->applySortConfig(GridTableWineList::getSortConfig(0));
-         m_event_source->signal(GridTableEvent::Sort);
+         m_event_source->signal(GridTableEvent::Id::Sort);
 
          updateStatusBarCounts();
          Update();

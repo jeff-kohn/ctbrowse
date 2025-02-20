@@ -8,7 +8,7 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/functors.h"
+#include "ctb/utility.h"
 #include "ctb/TableProperty.h"
 #include "ctb/table_data.h"
 
@@ -106,7 +106,7 @@ namespace ctb
             case Format::Currency:  
                return value.asString(constants::FMT_NUMBER_CURRENCY);
 
-            case Format::Number: // regular numbers don't have special formatting excpept for being right-aligned.   
+            case Format::Number: // regular numbers don't have special formatting except for being right-aligned.   
             default:                
                return value.asString();
          }

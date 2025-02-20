@@ -9,7 +9,7 @@
 #include "grid/GridTableLoader.h"
 #include "grid/GridTableWineList.h"
 
-#include <ctb/functors.h>
+#include <ctb/utility.h>
 #include <ctb/table_data.h>
 #include <ctb/WineListTraits.h>
 

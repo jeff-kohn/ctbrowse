@@ -12,6 +12,9 @@
 
 namespace ctb::app
 {
+
+
+
    class WineDetailsPanel final : public wxPanel, public IGridTableEventSink
    {
    public:
@@ -24,6 +27,7 @@ namespace ctb::app
       /// 
       [[nodiscard]] static WineDetailsPanel* create(wxWindow* parent, GridTableEventSourcePtr source);
 
+
       // no copy/move/assign, this class is created on the heap.
       WineDetailsPanel(const WineDetailsPanel&) = delete;
       WineDetailsPanel(WineDetailsPanel&&) = delete;
@@ -31,34 +35,39 @@ namespace ctb::app
       WineDetailsPanel& operator=(WineDetailsPanel&&) = delete;
       ~WineDetailsPanel() override = default;
 
-   protected:
+   private:
+      /// @brief struct that control validators will be bound to for displaying in the window
+      ///
+      struct WineDetails
+      {
+         wxString wine_name{};
+         wxString vintage{};
+         wxString country{};
+         wxString region{};
+         wxString sub_region{};
+         wxString appellation{};
+         wxString drink_window{};
+         wxString my_score{};
+         wxString ct_score{};
+         wxString my_price{};
+         wxString community_price{};
+         wxString auction_value{};
+      };
 
-      // member variables
-      wxStaticText*           m_appellation_txt{};
-      wxStaticText*           m_auction_price_txt{};
-      wxStaticText*           m_country_region_txt{};
-      wxStaticText*           m_ct_price_txt{};
-      wxStaticText*           m_ct_score_txt{};
-      wxFlexGridSizer*        m_details_sizer{};
-      wxGenericHyperlinkCtrl* m_drink_window_link{};
-      ScopedEventSink         m_event_sink;           // no default init
-      wxStaticText*           m_my_price_txt{};
-      wxStaticText*           m_my_score_txt{};
-      wxCollapsiblePane*      m_score_pane{};
-      wxCollapsiblePane*      m_value_pane{};
-      wxGenericHyperlinkCtrl* m_wine_name_link{};
+      WineDetails       m_details{};
+      ScopedEventSink   m_event_sink;   // no default init
 
-      // window creation
+      // window creation``
       void initControls();
 
       /// event source related handlers
-      void notify(GridTableEvent event, GridTable* grid_table) override;
+      void notify(GridTableEvent event) override;
 
       // windows event handlers
-      void onPaneOpenClose(wxCollapsiblePaneEvent& event);
+      void UpdateDetails(GridTableEvent event);
 
       // private ctor used by create()
-      WineDetailsPanel(GridTableEventSourcePtr source);
+      explicit WineDetailsPanel(GridTableEventSourcePtr source);
    };
 
 } // namespace ctb::app

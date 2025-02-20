@@ -8,7 +8,9 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include "ctb/utility.h"
 
+#include <format>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -49,31 +51,6 @@ namespace ctb
       {}
 
 
-      /// @brief get a numeric value out of the property
-      /// 
-      /// returns an optional in case this property doesn't contain a value or it can't be converted to T.
-      /// Note that this method does NOT attempt to parse string values into arithmetic types. If this
-      /// property is a string, you'll get std::nullopt.
-      /// 
-      //template<Arithmetic T> 
-      //std::optional<T> as() const
-      //{
-      //   // do we have an exact match?
-      //   if (std::holds_alternative<T>(m_val))
-      //   {
-      //      return std::get<T>(m_val);
-      //   }        
-      //
-      //   // if not, try to convert
-      //   auto asT = Overloaded{
-      //      [](const Nullable auto& val)              { return val ? static_cast<T>(*val) : std::nullopt; },
-      //      [](const StringViewCompatible auto&)      { return std::nullopt; },
-      //      [](auto val)                              { return static_cast<T>(val); }
-      //   };
-      //   return std::visit(asT, m_val);
-      //}
-
-
       /// @brief returns whether or not this object contains a 'null' value.
       ///
       bool isNull() const
@@ -90,6 +67,23 @@ namespace ctb
       }
 
 
+      /// @brief get a numeric value out of the property
+      /// 
+      /// returns an optional in case this property doesn't contain a value or it can't be converted to T.
+      /// 
+      template<Arithmetic T> 
+      constexpr std::optional<T> as() const
+      {    
+         // try to convert
+         auto asT = Overloaded{
+            [](const std::monostate) -> std::optional<T>    { return std::nullopt; },
+            [](const std::string& str) -> std::optional<T>  { return from_str<T>(str); },
+            [](auto val) -> std::optional<T>                { return std::optional<T>(static_cast<T>(val)); }
+         };
+         return std::visit(asT, m_val);
+      }
+
+
       /// @brief get a string value out of the property
       /// 
       /// @return the requested value, or an empty string if no value is available (e.g. null) 
@@ -101,28 +95,26 @@ namespace ctb
             return std::get<std::string>(m_val);
          }
 
-         auto asStr = Overloaded{
-            [](Nullable auto val)   {  return val ? std::format("{}", *val) : std::string{};  },
-            [](std::monostate)      {  return std::string{};                                  },
-            [](auto val)            {  return std::format("{}", val);                         }
-         };
-         return std::visit(asStr, m_val);
+         return asString("{}");
       }
 
 
       /// @brief get a formatted string value out of the property.
       /// @param fmt_str format string to use for formatting the value. must contain exactly 1 {} placeholder
-      /// @return the requested value, or an empty string if no value is available 
+      /// @return the requested value, or an empty string if isNull(). 
+      /// 
+      /// Note that if the property isNull(), the fmt_str will not be used - you will always get an empty string
       /// 
       std::string asString(std::string_view fmt_str) const
       {
          auto asStr = Overloaded{
-            [](std::string val)              {  return val;                                                 },
+            [](const std::string& val)       {  return val;                                                 },
             [](std::monostate)               {  return std::string{};                                       },
             [&fmt_str](auto val)             {  return std::vformat(fmt_str,  std::make_format_args(val));  }
          };
          return std::visit(asStr, m_val);
       }
+
 
       /// @brief allows for comparison of TableProperty objects, as well as putting them in ordered containers
       /// 
@@ -139,8 +131,8 @@ namespace ctb
          return !isNull();
       }
 
-      TableProperty() = default;
-      ~TableProperty() = default;
+      constexpr TableProperty() noexcept = default;
+      ~TableProperty() noexcept = default;
       TableProperty(const TableProperty&) = default;
       TableProperty(TableProperty&&) = default;
       TableProperty& operator=(const TableProperty&) = default;

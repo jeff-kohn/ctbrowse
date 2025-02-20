@@ -31,7 +31,7 @@ namespace ctb
 
       /// @brief these are the fields that this object contains properties for.
       /// 
-      enum class PropId
+      enum class PropId : uint16_t
       {
          iWineID,
          WineName,
@@ -66,7 +66,7 @@ namespace ctb
       /// calculated properties are not included here which explains why this array doesn't contain 
       /// every PropId enum value.
       /// 
-      static inline constexpr frozen::map<PropId, FieldSchema, static_cast<size_t>(PropId::EndConsume)> CsvSchema
+      static inline constexpr frozen::map<PropId, FieldSchema, static_cast<size_t>(PropId::WineAndVintage)> CsvSchema
       {
          { PropId::iWineID,         FieldSchema { static_cast<uint32_t>(PropId::iWineID),        PropType::String,      0 }},
          { PropId::WineName,        FieldSchema { static_cast<uint32_t>(PropId::WineName),       PropType::String,     13 }},
@@ -111,25 +111,42 @@ namespace ctb
          return enumFromIndex<PropId>(idx);
       }
 
-      /// @brief this gets called by CtRecordImpl to get the value for calculated properties not in the CSV
-      ///
+
+      /// @brief this gets called by CtRecordImpl to set any missing property values
+      /// @param rec span containing a TableProperty for each PropID enum value.
+      /// 
+      /// properties from the CSV file are already set, this impl just provides
+      /// any calculated property values or does fixup for any parsed values that need it.
+      /// 
       template<std::size_t N, typename... Args>
-      static void getCalculatedValue(std::span<TableProperty<Args...>, N> rec, PropId prop_id)
+      static void onRecordParse(std::span<TableProperty<Args...>, N> rec)
       {
          using enum PropId;
 
-         switch (prop_id)
-         {
-            case PropId::WineAndVintage:
-            {
-               auto vintage   = rec[static_cast<size_t>(Vintage) ].asString();
-               auto wine_name = rec[static_cast<size_t>(WineName)].asString();
-               rec[static_cast<size_t>(prop_id)] = std::format("{} {}", vintage, wine_name);
-               break;
-            }
-            default:
-               assert("Unexpected PropId passed to WineListTraits::getCalculatedValue()");
-         }
+         // set value for the WineAndVintage property
+         auto vintage   = rec[static_cast<size_t>(PropId::Vintage) ].asString();
+         auto wine_name = rec[static_cast<size_t>(PropId::WineName)].asString();
+         rec[static_cast<size_t>(PropId::WineAndVintage)] = std::format("{} {}", vintage, wine_name);
+
+         // set 0 quantities to null
+         auto& qty_prop = rec[static_cast<size_t>(PropId::Quantity)];
+         auto val = qty_prop.template as<int>();
+         if (val and *val == 0) 
+            qty_prop.setNull();
+
+         auto& pending_prop = rec[static_cast<size_t>(PropId::Pending)];
+         val = pending_prop.template as<int>();
+         if (val and *val == 0) 
+            pending_prop.setNull();
+
+         // for drinking window, 9999 = null
+         auto& drink_start = rec[static_cast<size_t>(PropId::BeginConsume)];
+         if (drink_start.template as<int>() == constants::CT_NULL_YEAR)
+            drink_start.setNull();
+
+         auto& drink_end = rec[static_cast<size_t>(PropId::EndConsume)];
+         if (drink_end.template as<int>() == constants::CT_NULL_YEAR)
+            drink_end.setNull();
       }
    };
 

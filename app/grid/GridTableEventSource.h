@@ -81,8 +81,19 @@ namespace ctb::app
       /// sinks should try to handle their own exceptions if it's possible to do so gracefully. Any 
       /// exceptions propagated back to this function will be displayed to the user.
       /// 
-      bool signal(GridTableEvent event) noexcept override;
+      bool signal(GridTableEvent::Id event_id, std::optional<int> row_idx) noexcept override;
  
+
+      /// @brief this is called to signal that an event needs to be sent to all listeners
+      ///
+      /// @return true if every subscriber was notified without error, false if at least one
+      ///         subscriber threw an error.
+      /// 
+      /// sinks should try to handle their own exceptions if it's possible to do so gracefully. Any 
+      /// exceptions propagated back to this function will be displayed to the user.
+      /// 
+      bool signal(GridTableEvent::Id event_id) noexcept override;
+
 
       /// @brief destructor
       ~GridTableEventSource() noexcept override;

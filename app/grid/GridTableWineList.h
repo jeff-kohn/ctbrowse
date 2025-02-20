@@ -64,8 +64,8 @@ namespace ctb::app
       /// @brief the available sort orders for this table.
       ///
       static inline const std::array Sorters{ 
-         TableSort{ { PropId::WineName, PropId::Vintage                    }, constants::SORT_OPTION_WINE_VINTAGE },
-         TableSort{ { PropId::Vintage,  PropId::WineName                   }, constants::SORT_OPTION_VINTAGE_WINE },
+         TableSort{ { PropId::WineName, PropId::Vintage                      }, constants::SORT_OPTION_WINE_VINTAGE },
+         TableSort{ { PropId::Vintage,  PropId::WineName                     }, constants::SORT_OPTION_VINTAGE_WINE },
          TableSort{ { PropId::Locale,   PropId::WineName,    PropId::Vintage }, constants::SORT_OPTION_LOCALE_WINE  },
          TableSort{ { PropId::Region,   PropId::WineName,    PropId::Vintage }, constants::SORT_OPTION_REGION_WINE  },
       };
@@ -216,6 +216,10 @@ namespace ctb::app
       bool removeFilter(int prop_idx, std::string_view match_value) override;
 
 
+      // Inherited via GridTable
+      const CtProperty& getDetailProp(int row_idx, std::string_view prop_name) override;
+
+
       // default ctor, others are deleted since this object is meant to live on the heap
       ~GridTableWineList() override = default;
       GridTableWineList() = delete;
@@ -246,6 +250,7 @@ namespace ctb::app
       bool isFilterActive()   {  return m_current_view = &m_filtered_data; }
 
 
-   };
+
+};
 
 } // namespace ctb::app

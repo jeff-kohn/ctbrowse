@@ -44,6 +44,22 @@ namespace ctb::constants
    inline constexpr const char* LBL_VARIETAL                      = "Varietal";
    inline constexpr const char* LBL_WINE                          = "Wine";
 
+   inline constexpr const char* DETAIL_PROP_APPELLATION           = "Appellation";
+   inline constexpr const char* DETAIL_PROP_AUCTION_VALUE         = "AuctionPrice";
+   inline constexpr const char* DETAIL_PROP_COMMUNITY_PRICE       = "CtPrice";
+   inline constexpr const char* DETAIL_PROP_COUNTRY               = "Country";
+   inline constexpr const char* DETAIL_PROP_CT_SCORE              = "CTScore";
+   inline constexpr const char* DETAIL_PROP_DRINK_START           = "BeginConsume";
+   inline constexpr const char* DETAIL_PROP_DRINK_END             = "EndConsume";
+   inline constexpr const char* DETAIL_PROP_LOCALE                = "Locale";
+   inline constexpr const char* DETAIL_PROP_MY_PRICE              = "Price";
+   inline constexpr const char* DETAIL_PROP_MY_SCORE              = "MYScore";
+   inline constexpr const char* DETAIL_PROP_REGION                = "Region";
+   inline constexpr const char* DETAIL_PROP_SUB_REGION            = "SubRegion";
+   inline constexpr const char* DETAIL_PROP_VINTAGE               = "Vintage";
+   inline constexpr const char* DETAIL_PROP_WINE_NAME             = "WineName";
+
+
    inline constexpr const char* RES_NAME_ICON_PRODUCT             = "IDR_PRODUCT_ICON";
    inline constexpr const char* RES_NAME_MAINFRAME                = "MAINFRAME";
    inline constexpr const char* RES_NAME_TREE_CHECKED_IMG         = "TREE_CHECKED_IMG";

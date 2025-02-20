@@ -43,19 +43,6 @@ namespace ctb::app
       }
    }
 
-   /// @brief  user-friendly version of from_chars that works with string_view and string
-   /// @return an optional containing the requested value if successful, or an empty optional otherwise.
-   template<typename T, StringViewCompatible S>
-   std::optional<T> from_str(S str)
-   {
-      T val{};
-      auto result = std::from_chars(str.data(), str.data() + str.size(), val);
-
-      if (result.ec != std::errc())
-         return {};  // there was an error, return uninitialized optional
-
-      return val;
-   }
 
 
    TableSyncDialog::TableSyncDialog(wxWindow* parent)

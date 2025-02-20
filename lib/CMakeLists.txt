@@ -11,9 +11,10 @@ target_sources(ctBrowse_lib
       "../include/ctb/concepts.h"
       "../include/ctb/constants.h"
       "../include/ctb/CredentialWrapper.h"
-      "../include/ctb/Error.h"
-      "../include/ctb/winapi_util.h"
+      "../include/ctb/ctb.h"
+      "../include/ctb/CtRecordImpl.h"
       "../include/ctb/DisplayColumn.h"
+      "../include/ctb/Error.h"
       "../include/ctb/PropertyFilterMgr.h"
       "../include/ctb/PropertyFilterString.h"
       "../include/ctb/SubstringFilter.h"
@@ -21,8 +22,9 @@ target_sources(ctBrowse_lib
       "../include/ctb/TableSorter.h"
       "../include/ctb/table_data.h"
       "../include/ctb/table_download.h"
-      "../include/ctb/CtRecordImpl.h"
+      "../include/ctb/utility.h"
       "../include/ctb/WineListTraits.h"
+      "../include/ctb/winapi_util.h"
 
    PRIVATE
       "CredentialWrapper.cpp"

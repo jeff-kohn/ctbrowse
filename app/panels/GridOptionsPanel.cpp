@@ -134,7 +134,7 @@ namespace ctb::app
          if (filter)
          {
             m_sink.getTable()->addFilter(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
-            m_sink.signal_source(GridTableEvent::Filter);
+            m_sink.signal_source(GridTableEvent::Id::Filter);
          }
       }
    }
@@ -148,7 +148,7 @@ namespace ctb::app
          if (filter)
          {
             m_sink.getTable()->removeFilter(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
-            m_sink.signal_source(GridTableEvent::Filter);
+            m_sink.signal_source(GridTableEvent::Id::Filter);
          }
       }
    }
@@ -286,23 +286,23 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::notify(GridTableEvent event, GridTable* grid_table)
+   void GridOptionsPanel::notify(GridTableEvent event)
    {
       try
       {
-         switch (event)
+         switch (event.m_event_id)
          {
-         case GridTableEvent::TableInitialize:
-            onTableInitialize(grid_table);
+         case GridTableEvent::Id::TableInitialize:
+            onTableInitialize(event.m_grid_table);
             break;
 
-         case GridTableEvent::Sort:
-            onTableSorted(grid_table);
+         case GridTableEvent::Id::Sort:
+            onTableSorted(event.m_grid_table);
             break;
 
-         case GridTableEvent::Filter:
-         case GridTableEvent::SubStringFilter:
-         case GridTableEvent::RowSelected:
+         case GridTableEvent::Id::Filter:
+         case GridTableEvent::Id::SubStringFilter:
+         case GridTableEvent::Id::RowSelected:
          default:
             break;
          }
@@ -347,7 +347,7 @@ namespace ctb::app
             if (table)
             {
                table->applySortConfig(m_sort_config);
-               m_sink.signal_source(GridTableEvent::Sort);
+               m_sink.signal_source(GridTableEvent::Id::Sort);
             }
             });
       }
@@ -371,7 +371,7 @@ namespace ctb::app
          if (table)
          {
             table->applySortConfig(m_sort_config);
-            m_sink.signal_source(GridTableEvent::Sort);
+            m_sink.signal_source(GridTableEvent::Id::Sort);
          }
       }
       catch(Error& err)

@@ -17,6 +17,8 @@ namespace ctb::app
       EnableEditing(false);
       EnableDragGridSize(false);
       UseNativeColHeader(true);
+
+      Bind(wxEVT_GRID_SELECT_CELL, &CellarTrackerGrid::onGridCellChanging, this);
    }
 
 
@@ -150,26 +152,36 @@ namespace ctb::app
    }
 
 
-   void CellarTrackerGrid::notify(GridTableEvent event, [[maybe_unused]] GridTable* grid_table)
+   void CellarTrackerGrid::notify(GridTableEvent event)
    {
-      switch (event)
+      switch (event.m_event_id)
       { 
-         case GridTableEvent::TableRemove:
+         case GridTableEvent::Id::TableRemove:
             SetTable(nullptr);
             m_grid_table.reset();
             break;
 
-         case GridTableEvent::TableInitialize:
-         case GridTableEvent::Sort:
-         case GridTableEvent::Filter:
-         case GridTableEvent::SubStringFilter:
+         case GridTableEvent::Id::TableInitialize:
+         case GridTableEvent::Id::Sort:
+         case GridTableEvent::Id::Filter:
+         case GridTableEvent::Id::SubStringFilter:
             setGridTable(m_sink.getTable());   // we need the ref-counted smart-ptr
             break;
 
-         case GridTableEvent::RowSelected:
-            break;
+         case GridTableEvent::Id::RowSelected:
          default:
             break;
+      }
+   }
+
+   void CellarTrackerGrid::onGridCellChanging(wxGridEvent& event)
+   {
+      // When row selection changes, we need to let the details panel know about it.
+      // we don't care about column position, only row.
+      auto new_row = event.GetRow();
+      if (new_row != GetGridCursorCoords().GetRow())
+      {
+         m_sink.signal_source(GridTableEvent::Id::RowSelected, new_row);
       }
    }
 

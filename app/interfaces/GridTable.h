@@ -33,7 +33,7 @@ namespace ctb::app
 
 
 
-   /// @brief our "data model", provides an base class interface for accessing CellarTracker data
+   /// @brief our "data model", provides a base class interface for accessing CellarTracker data
    /// 
    /// users of this interface should gain access through 
    /// IGridTableEventSource::getTable() or using the ptr supplied when
@@ -124,6 +124,17 @@ namespace ctb::app
       /// @return true if the filter was removed, false if it wasn't found
       /// 
       virtual bool removeFilter(int prop_idx, std::string_view match_value) = 0;
+
+
+      /// @brief retrieve a property from the underlying table record (as opposed to a grid column)
+      /// 
+      /// @return the property value formatted as a string if found, std::nullopt if not found 
+      ///
+      /// Since we don't have table-neutral indices to use, this lookup has to be done by
+      /// property name as a string that corresponds to correct enum. 
+      /// 
+      virtual const CtProperty& getDetailProp(int row_idx, std::string_view prop_name) = 0;
+
 
       /// @brief destructor
       ///
