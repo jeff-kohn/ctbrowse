@@ -33,7 +33,7 @@ namespace ctb::app
    {}
 
 
-   WineDetailsPanel* ctb::app::WineDetailsPanel::create(wxWindow* parent, GridTableEventSourcePtr source)
+   WineDetailsPanel* WineDetailsPanel::create(wxWindow* parent, GridTableEventSourcePtr source)
    {
       if (!source)
       {
@@ -58,6 +58,8 @@ namespace ctb::app
 
    void WineDetailsPanel::initControls()
    {
+      wxWindowUpdateLocker freeze_win(this);
+
       SetMaxSize(ConvertDialogToPixels( wxSize{220, -1} ));
       SetMinSize(ConvertDialogToPixels( wxSize{100, -1} ));
 
@@ -84,7 +86,7 @@ namespace ctb::app
       auto* details_sizer = new wxFlexGridSizer(2, 0, 0);
 
       // vintage
-      auto* lbl_vintage = new wxStaticText(this, wxID_ANY, "Vintage:");
+      auto* lbl_vintage = new wxStaticText(this, wxID_ANY, constants::LBL_VINTAGE);
       lbl_vintage->SetFont(default_font);
       details_sizer->Add(lbl_vintage, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
       auto* vintage_val = new wxStaticText(this, wxID_ANY, "");
@@ -92,17 +94,27 @@ namespace ctb::app
       vintage_val->SetFont(default_font);
       details_sizer->Add(vintage_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
 
+      // varietal
+      auto* lbl_varietal = new wxStaticText(this, wxID_ANY, constants::LBL_VARIETAL);
+      lbl_varietal->SetFont(default_font);
+      details_sizer->Add(lbl_varietal, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      auto* varietal_val = new wxStaticText(this, wxID_ANY, "");
+      varietal_val->SetFont(default_font);
+      varietal_val->SetValidator(wxGenericValidator{ &m_details.varietal });
+      details_sizer->Add(varietal_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
+
+
       // country
-      auto* lbl_country_region = new wxStaticText(this, wxID_ANY, "Country:");
-      lbl_country_region->SetFont(default_font);
-      details_sizer->Add(lbl_country_region, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      auto* lbl_country = new wxStaticText(this, wxID_ANY, constants::LBL_COUNTRY);
+      lbl_country->SetFont(default_font);
+      details_sizer->Add(lbl_country, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
       auto* country_region_val = new wxStaticText(this, wxID_ANY, "");
       country_region_val->SetValidator(wxGenericValidator{ &m_details.country });
       country_region_val->SetFont(default_font);
       details_sizer->Add(country_region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
 
       // region
-      auto* lbl_region = new wxStaticText(this, wxID_ANY, "Region:");
+      auto* lbl_region = new wxStaticText(this, wxID_ANY, constants::LBL_REGION);
       lbl_region->SetFont(default_font);
       details_sizer->Add(lbl_region, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
       auto* region_val = new wxStaticText(this, wxID_ANY, "");
@@ -111,7 +123,7 @@ namespace ctb::app
       details_sizer->Add(region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
 
       // subregion
-      auto* lbl_sub_region = new wxStaticText(this, wxID_ANY, "Subregion:");
+      auto* lbl_sub_region = new wxStaticText(this, wxID_ANY, constants::LBL_SUB_REGION);
       lbl_sub_region->SetFont(default_font);
       details_sizer->Add(lbl_sub_region, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
       auto* sub_region_val = new wxStaticText(this, wxID_ANY, "");
@@ -120,16 +132,16 @@ namespace ctb::app
       details_sizer->Add(sub_region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
 
       // appellation
-      auto* lbl_appellation = new wxStaticText(this, wxID_ANY, "Appellation:");
+      auto* lbl_appellation = new wxStaticText(this, wxID_ANY, constants::LBL_APPELLATION);
       lbl_appellation->SetFont(default_font);
       details_sizer->Add(lbl_appellation, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
       auto* appellation_val = new wxStaticText(this, wxID_ANY, "");
-      appellation_val->SetFont(default_font);
       appellation_val->SetValidator(wxGenericValidator{ &m_details.appellation });
+      appellation_val->SetFont(default_font);
       details_sizer->Add(appellation_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
 
       // drink window
-      auto* lbl_drink_window = new wxStaticText(this, wxID_ANY, "Drink Window:");
+      auto* lbl_drink_window = new wxStaticText(this, wxID_ANY, constants::LBL_DRINK_WINDOW);
       lbl_drink_window->SetFont(default_font);
       details_sizer->Add(lbl_drink_window, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
       auto* drink_window_val = new wxStaticText(this, wxID_ANY, "");
@@ -138,13 +150,13 @@ namespace ctb::app
       details_sizer->Add(drink_window_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
 
       // Scores heading
-      auto* lbl_scores_header = new wxStaticText(this, wxID_ANY, "Scores");
+      auto* lbl_scores_header = new wxStaticText(this, wxID_ANY, constants::LBL_SCORES);
       lbl_scores_header->SetFont(title_font);
       details_sizer->Add(lbl_scores_header, wxSizerFlags{}.Border(wxALL));
       details_sizer->AddSpacer(0);
 
       // My Score
-      auto* lbl_my_score = new wxStaticText(this, wxID_ANY, "My Score:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      auto* lbl_my_score = new wxStaticText(this, wxID_ANY, constants::LBL_MY_SCORE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       lbl_my_score->SetFont(default_font);
       details_sizer->Add(lbl_my_score, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
       auto* my_score_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -153,7 +165,7 @@ namespace ctb::app
       details_sizer->Add(my_score_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
 
       // CT Score
-      auto* lbl_ct_score = new wxStaticText(this, wxID_ANY, "CT Score:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      auto* lbl_ct_score = new wxStaticText(this, wxID_ANY, constants::LBL_CT_SCORE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       lbl_ct_score->SetFont(default_font);
       details_sizer->Add(lbl_ct_score, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
       auto* ct_score_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -162,13 +174,13 @@ namespace ctb::app
       details_sizer->Add(ct_score_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
 
       // Valuation heading
-      auto* lbl_value_header = new wxStaticText(this, wxID_ANY, "Valuation");
+      auto* lbl_value_header = new wxStaticText(this, wxID_ANY, constants::LBL_VALUATION);
       lbl_value_header->SetFont(title_font);
       details_sizer->Add(lbl_value_header, wxSizerFlags{}.Border(wxALL));
       details_sizer->AddSpacer(0);
 
       // My Price
-      auto* lbl_my_price = new wxStaticText(this, wxID_ANY, "My Price:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      auto* lbl_my_price = new wxStaticText(this, wxID_ANY, constants::LBL_MY_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       lbl_my_price->SetFont(default_font);
       details_sizer->Add(lbl_my_price, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
       auto* my_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -179,7 +191,7 @@ namespace ctb::app
       details_sizer->Add(my_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
 
       // Community Avg
-      auto* lbl_ct_price = new wxStaticText(this, wxID_ANY, "Community Avg:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      auto* lbl_ct_price = new wxStaticText(this, wxID_ANY, constants::LBL_CT_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       lbl_ct_price->SetFont(default_font);
       details_sizer->Add(lbl_ct_price, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
       auto* ct_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -190,7 +202,7 @@ namespace ctb::app
       details_sizer->Add(ct_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
 
       // Auction value
-      auto* lbl_auction_value = new wxStaticText(this, wxID_ANY, "Auction Value:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      auto* lbl_auction_value = new wxStaticText(this, wxID_ANY, constants::LBL_AUCTION_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       lbl_auction_value->SetFont(default_font);
       details_sizer->Add(lbl_auction_value, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
       auto* auction_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -201,6 +213,7 @@ namespace ctb::app
       details_sizer->Add(auction_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
 
       top_sizer->Add(details_sizer, wxSizerFlags{1}.Expand().FixedMinSize().Border(wxALL));
+      top_sizer->ShowItems(false);
       SetSizerAndFit(top_sizer);
    }
 
@@ -236,7 +249,7 @@ namespace ctb::app
    {
       using namespace magic_enum;
       
-      wxWindowUpdateLocker noUpdates(this);
+      wxWindowUpdateLocker freeze_win(this);
 
       if (event.m_affected_row and event.m_affected_row.value() >= 0)
       {
@@ -244,6 +257,7 @@ namespace ctb::app
          auto row_idx = event.m_affected_row.value();
          m_details.wine_name   = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_WINE_NAME  ).asString();
          m_details.vintage     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_VINTAGE    ).asString();
+         m_details.varietal    = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_VARIETAL   ).asString();
          m_details.country     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_COUNTRY    ).asString();
          m_details.region      = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_REGION     ).asString();
          m_details.sub_region  = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_SUB_REGION ).asString();
@@ -258,8 +272,10 @@ namespace ctb::app
 
          m_details.ct_score         = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_CT_SCORE).asString(constants::FMT_NUMBER_DECIMAL).c_str();
          m_details.my_score         = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_MY_SCORE).asString(constants::FMT_NUMBER_DECIMAL).c_str();
+         GetSizer()->ShowItems(true);
       }
       else{
+         GetSizer()->ShowItems(false);
          m_details = WineDetails{};
       }
 

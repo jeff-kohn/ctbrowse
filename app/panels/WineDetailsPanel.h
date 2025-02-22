@@ -42,6 +42,7 @@ namespace ctb::app
       {
          wxString wine_name{};
          wxString vintage{};
+         wxString varietal{};
          wxString country{};
          wxString region{};
          wxString sub_region{};

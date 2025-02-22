@@ -52,12 +52,12 @@ namespace ctb::app
       /// @brief list of display columns that can be used for a grid.
       ///
       static inline const std::array DefaultDisplayColumns { 
-         DisplayColumn{ PropId::WineAndVintage,                              constants::LBL_WINE     },
-         DisplayColumn{ PropId::Locale,                                      constants::LBL_LOCALE   },
-         DisplayColumn{ PropId::Quantity,   DisplayColumn::Format::Number,   constants::LBL_QTY      },
+         DisplayColumn{ PropId::WineAndVintage,                              constants::COL_WINE     },
+         DisplayColumn{ PropId::Locale,                                      constants::COL_LOCALE   },
+         DisplayColumn{ PropId::Quantity,   DisplayColumn::Format::Number,   constants::COL_QTY      },
          DisplayColumn{ PropId::Pending,    DisplayColumn::Format::Number                            },
-         DisplayColumn{ PropId::CTScore,    DisplayColumn::Format::Decimal,  constants::LBL_CT_SCORE },
-         DisplayColumn{ PropId::MYScore,    DisplayColumn::Format::Decimal,  constants::LBL_MY_SCORE },
+         DisplayColumn{ PropId::CTScore,    DisplayColumn::Format::Decimal,  constants::COL_CT_SCORE },
+         DisplayColumn{ PropId::MYScore,    DisplayColumn::Format::Decimal,  constants::COL_MY_SCORE },
       };
 
 
