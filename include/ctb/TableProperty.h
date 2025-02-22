@@ -98,6 +98,30 @@ namespace ctb
          return asString("{}");
       }
 
+      /// @brief return stringview to the internal string property
+      /// @return the requested string_view, or an empty one if this property doens't contain a string.
+      /// 
+      /// this method does not convert other types to string_view, because that would require a view on a temporary. 
+      /// if the contained property is not a valid string, you'll get an empty string_view back.
+      std::string_view asStringView() const
+      {
+         if (std::holds_alternative<std::string>(m_val))
+         {
+            return std::get<std::string>(m_val);
+         }
+         return {};
+      }
+
+
+      /// @brief convenience function getting value as int
+      /// 
+      /// just calls as<int>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
+      /// 
+      std::optional<int> asInt() const
+      {
+         return as<int>();
+      }
+
 
       /// @brief get a formatted string value out of the property.
       /// @param fmt_str format string to use for formatting the value. must contain exactly 1 {} placeholder

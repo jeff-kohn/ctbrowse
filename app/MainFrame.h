@@ -76,7 +76,7 @@ namespace ctb::app
       CellarTrackerGrid*      m_grid{};         // grid window view
       GridOptionsPanel*       m_grid_options{}; // gird options view
       GridTableEventSourcePtr m_event_source{}; // for synchronizing events between views and the underlying table
-      ScopedEventSink         m_sink;         // so we can also handle events from our source
+      ScopedEventSink         m_sink;           // so we can also handle events from our source
       wxBoxSizer*             m_main_sizer{};
       wxMenuBar*              m_menu_bar{};
       wxSearchCtrl*           m_search_ctrl{};  // substring search box on the toolbar

@@ -54,8 +54,7 @@ namespace ctb::app
       static inline const std::array DefaultDisplayColumns { 
          DisplayColumn{ PropId::WineAndVintage,                              constants::COL_WINE     },
          DisplayColumn{ PropId::Locale,                                      constants::COL_LOCALE   },
-         DisplayColumn{ PropId::Quantity,   DisplayColumn::Format::Number,   constants::COL_QTY      },
-         DisplayColumn{ PropId::Pending,    DisplayColumn::Format::Number                            },
+         DisplayColumn{ PropId::TotalQty,   DisplayColumn::Format::Number,   constants::COL_QTY      },
          DisplayColumn{ PropId::CTScore,    DisplayColumn::Format::Decimal,  constants::COL_CT_SCORE },
          DisplayColumn{ PropId::MYScore,    DisplayColumn::Format::Decimal,  constants::COL_MY_SCORE },
       };

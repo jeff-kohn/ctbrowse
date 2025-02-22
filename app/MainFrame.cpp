@@ -519,7 +519,8 @@ namespace ctb::app
       }
    }
 
-   void MainFrame::notify(GridTableEvent event)
+
+   void MainFrame::notify([[maybe_unused]] GridTableEvent event)
    {
       updateStatusBarCounts();
    }

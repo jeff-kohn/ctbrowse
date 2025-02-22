@@ -74,7 +74,6 @@ namespace ctb::constants
    inline constexpr const char* DETAIL_PROP_REGION                = "Region";
    inline constexpr const char* DETAIL_PROP_SUB_REGION            = "SubRegion";
    inline constexpr const char* DETAIL_PROP_VARIETAL              = "MasterVarietal";
-   
    inline constexpr const char* DETAIL_PROP_VINTAGE               = "Vintage";
    inline constexpr const char* DETAIL_PROP_WINE_NAME             = "WineName";
 

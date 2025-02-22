@@ -56,7 +56,8 @@ namespace ctb
          MYScore,
          BeginConsume,
          EndConsume,
-         WineAndVintage
+         WineAndVintage,
+         TotalQty
       };
 
 
@@ -125,19 +126,19 @@ namespace ctb
 
          // set value for the WineAndVintage property
          auto vintage   = rec[static_cast<size_t>(PropId::Vintage) ].asString();
-         auto wine_name = rec[static_cast<size_t>(PropId::WineName)].asString();
+         auto wine_name = rec[static_cast<size_t>(PropId::WineName)].asStringView();
          rec[static_cast<size_t>(PropId::WineAndVintage)] = std::format("{} {}", vintage, wine_name);
 
-         // set 0 quantities to null
-         auto& qty_prop = rec[static_cast<size_t>(PropId::Quantity)];
-         auto val = qty_prop.template as<int>();
-         if (val and *val == 0) 
-            qty_prop.setNull();
-
-         auto& pending_prop = rec[static_cast<size_t>(PropId::Pending)];
-         val = pending_prop.template as<int>();
-         if (val and *val == 0) 
-            pending_prop.setNull();
+         // total qty is in-stock + pending
+         auto& qty = rec[static_cast<size_t>(PropId::Quantity)];
+         auto& pending = rec[static_cast<size_t>(PropId::Pending)];
+         if (pending and pending.asInt().value() > 0)
+         {
+            rec[static_cast<size_t>(PropId::TotalQty)] = std::format("{}+{}", qty.asInt().value(), pending.asInt().value());
+         }
+         else{
+            rec[static_cast<size_t>(PropId::TotalQty)] = qty;
+         }
 
          // for drinking window, 9999 = null
          auto& drink_start = rec[static_cast<size_t>(PropId::BeginConsume)];
