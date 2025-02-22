@@ -37,8 +37,6 @@ namespace ctb
    template<typename... Args>
    struct TableProperty
    {
-      //using MaybeShort  = std::optional<uint16_t>;
-      //using MaybeDouble = std::optional<double>;
       using ValueType   = std::variant<std::monostate, Args...>;
 
 
@@ -99,7 +97,7 @@ namespace ctb
       }
 
       /// @brief return stringview to the internal string property
-      /// @return the requested string_view, or an empty one if this property doens't contain a string.
+      /// @return the requested string_view, or an empty one if this property doesn't contain a string.
       /// 
       /// this method does not convert other types to string_view, because that would require a view on a temporary. 
       /// if the contained property is not a valid string, you'll get an empty string_view back.
@@ -124,13 +122,43 @@ namespace ctb
          return std::holds_alternative<std::string>(m_val);
       }
 
-      /// @brief convenience function getting value as int
+      /// @brief convenience function getting value as int32_t
       /// 
-      /// just calls as<int>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
+      /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
       /// 
-      std::optional<int> asInt() const
+      std::optional<int32_t> asInt32() const
       {
-         return as<int>();
+         return as<int32_t>();
+      }
+
+
+      /// @brief convenience function getting value as uint16_t
+      /// 
+      /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
+      /// 
+      std::optional<uint16_t> asUInt16() const
+      {
+         return as<uint16_t>();
+      }
+
+
+      /// @brief convenience function getting value as uint64_t
+      /// 
+      /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
+      /// 
+      std::optional<uint64_t> asUInt64() const
+      {
+         return as<uint64_t>();
+      }
+
+
+      /// @brief convenience function getting value as double
+      /// 
+      /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
+      /// 
+      std::optional<double> asDouble() const
+      {
+         return as<double>();
       }
 
 
@@ -158,6 +186,16 @@ namespace ctb
          return m_val <=> prop.m_val;
       }
 
+      
+      /// @brief allow assigning values, not just TableProperties
+      ///
+      template<typename Self, std::convertible_to<ValueType> T>
+      TableProperty operator=(this Self&& self, T&& t) 
+      {
+         self.m_val = std::forward<T>(t);         
+         return std::forward<Self>(self);
+      }
+
 
       /// @brief allow checking for null in a conditional statement
       /// @return true if this object contains a non-null value, false if its value is null
@@ -168,10 +206,10 @@ namespace ctb
 
       constexpr TableProperty() noexcept = default;
       ~TableProperty() noexcept = default;
-      TableProperty(const TableProperty&) = default;
-      TableProperty(TableProperty&&) = default;
-      TableProperty& operator=(const TableProperty&) = default;
-      TableProperty& operator=(TableProperty&&) = default;
+      constexpr TableProperty(const TableProperty&) = default;
+      constexpr TableProperty(TableProperty&&) = default;
+      constexpr TableProperty& operator=(const TableProperty&) = default;
+      constexpr TableProperty& operator=(TableProperty&&) = default;
    
    private:
       ValueType m_val{};

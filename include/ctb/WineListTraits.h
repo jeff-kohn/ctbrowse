@@ -129,24 +129,24 @@ namespace ctb
          auto wine_name = rec[static_cast<size_t>(PropId::WineName)].asStringView();
          rec[static_cast<size_t>(PropId::WineAndVintage)] = std::format("{} {}", vintage, wine_name);
 
-         // total qty is in-stock + pending
-         auto& qty = rec[static_cast<size_t>(PropId::Quantity)];
-         auto& pending = rec[static_cast<size_t>(PropId::Pending)];
-         if (pending and pending.asInt().value() > 0)
+         // total qty is in-stock + pending, this combined field displays similar to CT.com
+         auto qty     = rec[static_cast<size_t>(PropId::Quantity)].asUInt16().value_or(0u);
+         auto pending = rec[static_cast<size_t>(PropId::Pending) ].asUInt16().value_or(0u);
+         if (pending == 0)
          {
-            rec[static_cast<size_t>(PropId::TotalQty)] = std::format("{}+{}", qty.asInt().value(), pending.asInt().value());
+            rec[static_cast<size_t>(PropId::TotalQty)] = qty;
          }
          else{
-            rec[static_cast<size_t>(PropId::TotalQty)] = qty;
+            rec[static_cast<size_t>(PropId::TotalQty)] = std::format("{}+{}", qty, pending);
          }
 
          // for drinking window, 9999 = null
          auto& drink_start = rec[static_cast<size_t>(PropId::BeginConsume)];
-         if (drink_start.template as<int>() == constants::CT_NULL_YEAR)
+         if (drink_start.asUInt16() == constants::CT_NULL_YEAR)
             drink_start.setNull();
 
          auto& drink_end = rec[static_cast<size_t>(PropId::EndConsume)];
-         if (drink_end.template as<int>() == constants::CT_NULL_YEAR)
+         if (drink_end.asUInt16() == constants::CT_NULL_YEAR)
             drink_end.setNull();
       }
    };

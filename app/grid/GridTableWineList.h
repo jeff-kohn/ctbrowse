@@ -80,6 +80,8 @@ namespace ctb::app
       };
 
 
+
+
       /// @brief returns the sort config for a Sorter based on its zero-based index. You can get the
       ///        sort configs by calling availableSortConfigs()
       /// 
