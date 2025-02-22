@@ -113,6 +113,17 @@ namespace ctb
       }
 
 
+      /// @brief indicates whether this property contains a std::string
+      /// @return true if the property type is std::string, false if it's anything else
+      /// 
+      /// this can be useful in determining whether you want to call asString() or asStringView()
+      /// since the former will convert numbers to string and the latter will not.
+      /// 
+      constexpr bool hasString() const
+      {
+         return std::holds_alternative<std::string>(m_val);
+      }
+
       /// @brief convenience function getting value as int
       /// 
       /// just calls as<int>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.

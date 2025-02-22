@@ -202,14 +202,16 @@ namespace ctb::app
    }
 
 
+   auto getFilteredData(const WineListData& grid_data, GridTableWineList::PropertyFilterMgr& filters)
+   {
+      return vws::all(grid_data) | vws::filter([&filters](const GridTableWineList::RecordType& rec) {  return filters.isMatch(rec); });
+   }
+
    void GridTableWineList::applyFilters()
    {
       if (m_prop_filters.activeFilters() )
       {
-         m_filtered_data = vws::all(m_grid_data) 
-            | vws::filter([this](const RecordType& rec) {  return m_prop_filters.isMatch(rec); })
-            | rng::to<std::deque>();
-
+         m_filtered_data = getFilteredData(m_grid_data, m_prop_filters) | rng::to<std::deque>();
          m_current_view = &m_filtered_data;
       }
       else{
@@ -225,10 +227,12 @@ namespace ctb::app
 
    bool GridTableWineList::applySubStringFilter(const SubStringFilter& filter)
    {
-      /// We use the view not the source table because there may be other filters applied
-      /// that need to be preserved.
-      auto filtered_data = vws::all(*m_current_view) | vws::filter(filter)
-                                                     | rng::to<std::deque>();
+      /// We don't use the view there may already be a substring filter and we don't want to 
+      /// stack them. Therefore we need to start with the unfiltered data, apply any 
+      /// property filters, and then apply the new substring filter.
+      auto filtered_data = getFilteredData(m_grid_data, m_prop_filters)
+                              | vws::filter(filter)
+                              | rng::to<std::deque>();
 
       // we only update the grid if there is some matching data
       if (!filtered_data.empty())

@@ -47,10 +47,11 @@ namespace ctb
          for (auto prop : search_props)
          {
             auto val = rec.getProperty(prop);
-            if (val)
+            if (val.hasString())
             {
-               return val.asString().contains(search_value);
+               return boost::icontains(val.asStringView(), search_value);
             }              
+            return boost::icontains(val.asString(), search_value);
          }
          return false;
       }

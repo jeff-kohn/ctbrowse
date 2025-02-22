@@ -178,11 +178,7 @@ namespace ctb::app
    {
       // When row selection changes, we need to let the details panel know about it.
       // we don't care about column position, only row.
-      auto new_row = event.GetRow();
-      if (new_row != GetGridCursorCoords().GetRow())
-      {
-         m_sink.signal_source(GridTableEvent::Id::RowSelected, new_row);
-      }
+      m_sink.signal_source(GridTableEvent::Id::RowSelected,  event.GetRow());
    }
 
 
