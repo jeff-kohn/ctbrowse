@@ -87,7 +87,6 @@
       {
          "name": "ci-win-msvc",
          "description": "Defines default compiler/linker flags for MSVC/Win",
-         "hidden": true,
          "inherits": [ "build-dir", "vcpkg-win64-static", "win-msvc-flags" ],
          "generator": "Visual Studio 17 2022",
          "architecture": "x64",
@@ -105,7 +104,6 @@
       },
       {
          "name": "ci-win-clang",
-         "hidden": true,
          "description": "Defines default compiler/linker flags for clang-cl/Win",
          "inherits": [ "build-dir", "vcpkg-win64-static", "clang-cl-flags" ],
          "generator": "Visual Studio 17 2022",
@@ -122,6 +120,13 @@
                "enableClangTidyCodeAnalysis": true
             }
          }
+      }
+   ],
+   "buildPresets": [
+      {
+         "name": "ci-win-msvc",
+         "configurePreset": "ci-win-msvc",
+         "jobs": 16
       }
    ]
 }
