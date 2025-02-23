@@ -56,4 +56,4 @@ jobs:
 
     - name: build
       run: |
-        cmake --build --preset=$env:BUILD_PRESET --config=$env:BUILD_CONFIG --target=BUILD_ALL
+        cmake --build --preset=$env:BUILD_PRESET --config=$env:BUILD_CONFIG --target=ALL_BUILD
