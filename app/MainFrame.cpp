@@ -60,7 +60,9 @@ namespace ctb::app
    };
 
 
-   MainFrame::MainFrame() : m_event_source{ GridTableEventSource::create() }
+   MainFrame::MainFrame() : 
+      m_event_source{ GridTableEventSource::create() },
+      m_sink{ this, m_event_source }
    {
    }
 
@@ -376,9 +378,8 @@ namespace ctb::app
          auto tbl = loader.getGridTable(GridTableLoader::GridTableId::WineList);
          m_event_source->setTable(tbl);
          tbl->applySortConfig(GridTableWineList::getSortConfig(0));
-         m_event_source->signal(GridTableEvent::Sort);
+         m_event_source->signal(GridTableEvent::Id::Sort);
 
-         updateStatusBarCounts();
          Update();
       }
       catch(Error& e)
@@ -516,6 +517,12 @@ namespace ctb::app
       else{
          SetStatusText("", STATUS_BAR_PANE_FILTERED_ROWS);
       }
+   }
+
+
+   void MainFrame::notify([[maybe_unused]] GridTableEvent event)
+   {
+      updateStatusBarCounts();
    }
 
 } // namespace ctb::app

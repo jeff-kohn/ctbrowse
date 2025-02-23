@@ -8,7 +8,7 @@
 #pragma once
 
 #include "ctb/concepts.h"
-#include "ctb/functors.h"
+#include "ctb/utility.h"
 
 #include <wx/activityindicator.h>
 

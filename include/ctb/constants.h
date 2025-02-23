@@ -7,8 +7,7 @@
  *********************************************************************/
 #pragma once
 
-#include <string_view>
-#include <format>
+#include <cstdint>
 
 namespace ctb::constants
 {
@@ -58,6 +57,7 @@ namespace ctb::constants
    inline constexpr const char* ERROR_STR_NO_GRID_TABLE           = "No data is currently loaded. Open a data view before searching.";
    inline constexpr const char* ERROR_STR_NULLPTR_ARG             = "Invalid Parameter (nullptr).";
    inline constexpr const char* ERROR_VAL                         = "#Err#";
+   inline constexpr const char* FMT_ERROR_PROP_NOT_FOUND          = "Property '{}' was not found.";
    inline constexpr const char* FMT_ERROR_CURL_ERROR              = "The operation failed with CURL error {}";
    inline constexpr const char* FMT_ERROR_FILE_NOT_FOUND          = "File '{}' was not found.";
    inline constexpr const char* FMT_ERROR_HTTP_STATUS_CODE        = "The operation failed with HTTP status code {}";
@@ -67,5 +67,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_NUMBER_CURRENCY               = "${:.2f}";
    inline constexpr const char* FMT_NUMBER_DECIMAL                = "{:.1f}";
    inline constexpr const char* FMT_NUMBER_INTEGRAL               = "{:.0f}";
+
+   inline constexpr uint16_t CT_NULL_YEAR                         = 9999;
 
 } // namespace ctb::constants

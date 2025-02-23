@@ -10,7 +10,7 @@
 #include "ctb/ctb.h"
 #include "ctb/table_data.h"
 #include "ctb/TableProperty.h"
-#include "ctb/functors.h"
+#include "ctb/utility.h"
 
 #include <string>
 #include <set>

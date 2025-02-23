@@ -30,11 +30,11 @@ namespace ctb::app
       // We need to signal that the current table is being replaced, because
       // otherwise views that hold internal table pointers will be left with
       // dangling/garbage pointer
-      if (! signal(GridTableEvent::TableRemove) )
+      if (!signal(GridTableEvent::Id::TableRemove))
          return false;
 
       m_grid_table = table;
-      return signal(GridTableEvent::TableInitialize);
+      return signal(GridTableEvent::Id::TableInitialize);
    }
 
 
@@ -62,7 +62,7 @@ namespace ctb::app
 
 
    /// @brief this is called to signal that an event needs to be sent to all listeners
-   bool GridTableEventSource::signal(GridTableEvent event) noexcept
+   bool GridTableEventSource::signal(GridTableEvent::Id event_id, std::optional<int> row_idx) noexcept
    {
       bool retval{ true };
 
@@ -72,7 +72,7 @@ namespace ctb::app
          { 
             try
             {
-               observer->notify(event, m_grid_table.get()); 
+               observer->notify({ event_id, m_grid_table.get(), row_idx }); 
             }
             catch(Error& err)
             {
@@ -91,12 +91,18 @@ namespace ctb::app
    }
 
 
+   bool GridTableEventSource::signal(GridTableEvent::Id event_id) noexcept
+   {
+      return signal(event_id, std::nullopt);
+   }
+
+
    GridTableEventSource::~GridTableEventSource() noexcept
    {
       // We can't guarantee that some event sink won't throw, so best to be safe.
       try
       {
-         signal(GridTableEvent::TableRemove);
+         signal(GridTableEvent::Id::TableRemove);
       }
       catch(...){} // TODO: logging to OutputDebugString maybe? not much we can safely do from here.
    }

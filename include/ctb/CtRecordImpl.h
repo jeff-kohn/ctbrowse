@@ -9,15 +9,17 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/functors.h"
+#include "ctb/utility.h"
 #include "ctb/TableProperty.h"
 
+#include <boost/container/small_vector.hpp>
 #include <external/csv.hpp>
 #include <magic_enum/magic_enum.hpp>
 #include <magic_enum/magic_enum_utility.hpp>
 
 #include <array>
 #include <cassert>
+#include <expected>
 #include <optional>
 #include <vector>
 
@@ -62,7 +64,7 @@ namespace ctb
    public:
       using Traits        = RecordTraits;
       using PropId        = RecordTraits::PropId;
-      using TableProperty = TableProperty<uint16_t, uint64_t, double, std::string>;
+      using TableProperty = CtProperty;
       using Properties    = std::array<TableProperty, magic_enum::enum_count<PropId>()>;
       using RowType       = csv::CSVRow;
 
@@ -100,11 +102,10 @@ namespace ctb
                   m_props[fld.prop_idx].setNull();
                }
             }
-            else{
-               // give the traits class a chance to provide the value.
-               Traits::getCalculatedValue(std::span(m_props), prop_id);
-            }
          }
+
+         // give the traits class a chance to provide any missing values
+         Traits::onRecordParse(std::span(m_props));
       }
 
 
@@ -145,6 +146,31 @@ namespace ctb
          return getProperty(col_idx);
       }
 
+
+      /// @brief  retrieve TableProperty by property name
+      /// @return the requested property if found, an error otherwise.
+      /// 
+      /// the property name must be an exact match for the PropID's enum name, and 
+      /// is case-sensitive. This is obviously going to be slower than retrieving
+      /// the property via index/enum value, so the other overloads should be preferred. 
+      /// 
+      /// We use an expected here because the caller might 
+      /// need to differentiate between a null TableProperty and a non-existent one
+      /// (i.e. incorrect name specified), since the caller may not be sure this
+      /// table contains the requested property if they're using this table through
+      /// an abstract interface.
+      /// 
+      [[nodiscard]] std::expected<TableProperty, Error> getProperty(std::string_view prop_name) const
+      {
+         auto maybe_prop_id = magic_enum::enum_cast<PropId>(prop_name);
+         if (maybe_prop_id)
+         {
+            return getProperty(*maybe_prop_id);
+         }
+         else{
+            return std::unexpected{ Error{ Error::Category::DataError, constants::FMT_ERROR_PROP_NOT_FOUND, prop_name } };
+         }
+      }
 
    private:
       // array to hold a property value for every entry in the PropId enum. 

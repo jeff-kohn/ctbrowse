@@ -70,7 +70,7 @@ namespace ctb::app
       void toggleFilterSelection(wxTreeItemId item);
 
       /// event source related handlers
-      void notify(GridTableEvent event, GridTable* grid_table) override;
+      void notify(GridTableEvent event) override;
       void onTableInitialize(GridTable* grid_table);
       void onTableSorted(GridTable* grid_table);
       void populateFilterTypes(GridTable* grid_table);

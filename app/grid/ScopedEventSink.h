@@ -67,11 +67,11 @@ namespace ctb::app
       /// returns true if successful, false if we don't have a source or the source 
       /// couldn't send notifications (because of no current table, for instance)
       /// 
-      bool signal_source(GridTableEvent event)
+      bool signal_source(GridTableEvent::Id event_id, std::optional<int> row_idx = std::nullopt)
       {
          if (m_source)
          {
-            return m_source->signal(event);
+            return m_source->signal(event_id, row_idx);
          }
          return false;
       }

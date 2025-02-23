@@ -29,20 +29,54 @@ namespace ctb::constants
 
    inline constexpr const char* INFO_MSG_NO_MATCHING_ROWS         = "No rows matched the search text.";
 
-   inline constexpr const char* LBL_CT_SCORE                      = "CT Score";
-   inline constexpr const char* LBL_DRINK_BY                      = "Drink By";
+
+   // grid column labels
+   inline constexpr const char* COL_CT_SCORE                      = "CT Score";
+   inline constexpr const char* COL_LOCALE                        = "Region and Appellation";
+   inline constexpr const char* COL_MY_SCORE                      = "My Score";
+   inline constexpr const char* COL_QTY                           = "Qty";
+   inline constexpr const char* COL_WINE                          = "Wine";
+
+
+   // WineDetailsPanel labels
    inline constexpr const char* LBL_FILTER_OPTIONS                = "Filter Options";
-   inline constexpr const char* LBL_LOCALE                        = "Region and Appellation";
    inline constexpr const char* LBL_MENU_VIEWS                    = "&Views";
-   inline constexpr const char* LBL_MY_PRICE                      = "My Price";
-   inline constexpr const char* LBL_MY_SCORE                      = "My Score";
-   inline constexpr const char* LBL_QTY                           = "Qty";
    inline constexpr const char* LBL_SEARCH                        = "&Search";
    inline constexpr const char* LBL_SORT_ASCENDING                = "Ascending";
    inline constexpr const char* LBL_SORT_DESCENDING               = "Descending";
    inline constexpr const char* LBL_SORT_OPTIONS                  = "Sort Options";
-   inline constexpr const char* LBL_VARIETAL                      = "Varietal";
-   inline constexpr const char* LBL_WINE                          = "Wine";
+   inline constexpr const char* LBL_VARIETAL                      = "Varietal:";
+   inline constexpr const char* LBL_VINTAGE                       = "Vintage:";
+   inline constexpr const char* LBL_COUNTRY                       = "Country:";
+   inline constexpr const char* LBL_REGION                        = "Region:";
+   inline constexpr const char* LBL_SUB_REGION                    = "Subregion:";
+   inline constexpr const char* LBL_APPELLATION                   = "Appellation:";
+   inline constexpr const char* LBL_DRINK_WINDOW                  = "Drink Window:";
+   inline constexpr const char* LBL_SCORES                        = "Scores";
+   inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
+   inline constexpr const char* LBL_CT_SCORE                      = "CT Score:";
+   inline constexpr const char* LBL_VALUATION                     = "Valuation";
+   inline constexpr const char* LBL_MY_PRICE                      = "My Price:";
+   inline constexpr const char* LBL_CT_PRICE                      = "Community Avg:";
+   inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";
+
+   // Detail property names
+   inline constexpr const char* DETAIL_PROP_APPELLATION           = "Appellation";
+   inline constexpr const char* DETAIL_PROP_AUCTION_VALUE         = "AuctionPrice";
+   inline constexpr const char* DETAIL_PROP_COMMUNITY_PRICE       = "CtPrice";
+   inline constexpr const char* DETAIL_PROP_COUNTRY               = "Country";
+   inline constexpr const char* DETAIL_PROP_CT_SCORE              = "CTScore";
+   inline constexpr const char* DETAIL_PROP_DRINK_START           = "BeginConsume";
+   inline constexpr const char* DETAIL_PROP_DRINK_END             = "EndConsume";
+   inline constexpr const char* DETAIL_PROP_LOCALE                = "Locale";
+   inline constexpr const char* DETAIL_PROP_MY_PRICE              = "Price";
+   inline constexpr const char* DETAIL_PROP_MY_SCORE              = "MYScore";
+   inline constexpr const char* DETAIL_PROP_REGION                = "Region";
+   inline constexpr const char* DETAIL_PROP_SUB_REGION            = "SubRegion";
+   inline constexpr const char* DETAIL_PROP_VARIETAL              = "MasterVarietal";
+   inline constexpr const char* DETAIL_PROP_VINTAGE               = "Vintage";
+   inline constexpr const char* DETAIL_PROP_WINE_NAME             = "WineName";
+
 
    inline constexpr const char* RES_NAME_ICON_PRODUCT             = "IDR_PRODUCT_ICON";
    inline constexpr const char* RES_NAME_MAINFRAME                = "MAINFRAME";

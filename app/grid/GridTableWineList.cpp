@@ -8,7 +8,7 @@
 
 #include "grid/GridTableWineList.h"
 
-#include <ctb/functors.h>
+#include <ctb/utility.h>
 #include <magic_enum/magic_enum.hpp>
 #include <wx/font.h>
 
@@ -45,7 +45,7 @@ namespace ctb::app
    {
       try
       {
-         if (row >= std::ssize(*m_current_view)) // don't use GetNumerRows because it's virtual
+         if (row >= std::ssize(*m_current_view)) // don't use GetNumberRows because it's virtual
          {
             assert(false); 
             return wxString{};
@@ -202,14 +202,16 @@ namespace ctb::app
    }
 
 
+   auto getFilteredData(const WineListData& grid_data, GridTableWineList::PropertyFilterMgr& filters)
+   {
+      return vws::all(grid_data) | vws::filter([&filters](const GridTableWineList::RecordType& rec) {  return filters.isMatch(rec); });
+   }
+
    void GridTableWineList::applyFilters()
    {
       if (m_prop_filters.activeFilters() )
       {
-         m_filtered_data = vws::all(m_grid_data) 
-            | vws::filter([this](const RecordType& rec) {  return m_prop_filters.isMatch(rec); })
-            | rng::to<std::deque>();
-
+         m_filtered_data = getFilteredData(m_grid_data, m_prop_filters) | rng::to<std::deque>();
          m_current_view = &m_filtered_data;
       }
       else{
@@ -225,10 +227,12 @@ namespace ctb::app
 
    bool GridTableWineList::applySubStringFilter(const SubStringFilter& filter)
    {
-      /// We use the view not the source table because there may be other filters applied
-      /// that need to be preserved.
-      auto filtered_data = vws::all(*m_current_view) | vws::filter(filter)
-                                                     | rng::to<std::deque>();
+      /// We don't use the view there may already be a substring filter and we don't want to 
+      /// stack them. Therefore we need to start with the unfiltered data, apply any 
+      /// property filters, and then apply the new substring filter.
+      auto filtered_data = getFilteredData(m_grid_data, m_prop_filters)
+                              | vws::filter(filter)
+                              | rng::to<std::deque>();
 
       // we only update the grid if there is some matching data
       if (!filtered_data.empty())
@@ -257,6 +261,16 @@ namespace ctb::app
       }
 
       applyFilters();
+   }
+
+
+   const CtProperty& GridTableWineList::getDetailProp(int row_idx, std::string_view prop_name)
+   {
+      auto maybe_prop = magic_enum::enum_cast<PropId>(prop_name);
+      if (!maybe_prop)
+         return null_prop; // can't return default-constructed becuase it would be ref to temp
+
+      return (*m_current_view)[static_cast<size_t>(row_idx)][*maybe_prop];
    }
 
 

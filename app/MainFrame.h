@@ -9,6 +9,7 @@
 
 #include "App.h"
 #include "grid/GridTableEventSource.h"
+#include "grid/ScopedEventSink.h"
 
 #include <wx/event.h>
 #include <wx/frame.h>
@@ -34,7 +35,7 @@ namespace ctb::app
 
    /// @brief class for the main window of the application
    ///
-   class MainFrame final : public wxFrame
+   class MainFrame final : public wxFrame, public IGridTableEventSink
    {
    public:
       static inline constexpr int STATUS_BAR_PANE_STATUS = 0;
@@ -75,6 +76,7 @@ namespace ctb::app
       CellarTrackerGrid*      m_grid{};         // grid window view
       GridOptionsPanel*       m_grid_options{}; // gird options view
       GridTableEventSourcePtr m_event_source{}; // for synchronizing events between views and the underlying table
+      ScopedEventSink         m_sink;           // so we can also handle events from our source
       wxBoxSizer*             m_main_sizer{};
       wxMenuBar*              m_menu_bar{};
       wxSearchCtrl*           m_search_ctrl{};  // substring search box on the toolbar
@@ -106,6 +108,9 @@ namespace ctb::app
       void doSearchFilter();
       void clearSearchFilter();
       void updateStatusBarCounts();
+
+      // Inherited via IGridTableEventSink
+      void notify(GridTableEvent event) override;
    };
 
 

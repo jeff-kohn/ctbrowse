@@ -18,6 +18,9 @@
 
 namespace ctb
 {
+   
+
+
    /// @brief class to manage property filters for a data table.
    /// 
    /// this class currently only works with strings. Numeric table properties
@@ -28,8 +31,8 @@ namespace ctb
    class PropertyFilterMgr
    {
    public:
-      using PropertyFilter = PropertyFilterString<RecordType>;
-      using PropId         = RecordType::PropId;
+      using StringFilter = PropertyFilterString<RecordType>;
+      using PropId       = RecordType::PropId;
 
 
       /// @brief add a match value for the specified column filter.
@@ -92,9 +95,6 @@ namespace ctb
 
       /// @brief returns the number of active property filters we have.
       /// 
-      /// the count is based on the number of match values across all property filters, not a count
-      /// of the PropertyFilter objects themselves.
-      /// 
       int activeFilters() const
       {
          return static_cast<int>(rng::count_if( m_filters | vws::values, [](auto&& filter) { return filter.match_values.size(); } ));
@@ -112,7 +112,7 @@ namespace ctb
             auto val = row[prop_id];
             if (val)
             {
-               result.insert(val.asString());
+               result.emplace(val.asString());
             }
          }
          return result;
@@ -120,7 +120,7 @@ namespace ctb
 
 
    private:
-      std::map<PropId, PropertyFilter> m_filters{};
+      std::map<PropId, StringFilter> m_filters{};
    };
 
 } // namespace ctb

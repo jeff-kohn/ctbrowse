@@ -8,7 +8,7 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/functors.h"
+#include "ctb/utility.h"
 #include "ctb/TableProperty.h"
 
 #include <compare>
