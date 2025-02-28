@@ -166,7 +166,7 @@ namespace ctb::app
    }
 
 
-   std::vector<GridTableFilter> GridTableWineList::availableFilters() const
+   std::vector<GridTableFilter> GridTableWineList::availableStringFilters() const
    {
       return std::vector<GridTableFilter>(std::begin(StringFilters), std::end(StringFilters));
    }
@@ -178,7 +178,7 @@ namespace ctb::app
    }
 
 
-   bool GridTableWineList::addFilter(int prop_idx, std::string_view value)
+   bool GridTableWineList::addPropFilterString(int prop_idx, std::string_view value)
    {
       // if we somehow get passed a filter we already have, don't waste our time.
       if ( m_prop_filters.addFilter(RecordType::Traits::propFromIndex(prop_idx), value) )
@@ -190,7 +190,7 @@ namespace ctb::app
    }
 
 
-   bool GridTableWineList::removeFilter(int prop_idx, std::string_view match_value)
+   bool GridTableWineList::removePropFilterString(int prop_idx, std::string_view match_value)
    {
       // if we somehow get passed filter that we aren't using, don't waste our time.
       if ( m_prop_filters.removeFilter(RecordType::Traits::propFromIndex(prop_idx), match_value) )
@@ -225,7 +225,6 @@ namespace ctb::app
          return vws::all(std::forward<RngT>(rng)) | vws::filter([&filter](const GridTableWineList::RecordType& rec) {  return filter(rec); });
       }
    } // namespace 
-
 
 
    void GridTableWineList::applyPropFilters()
@@ -285,6 +284,7 @@ namespace ctb::app
       }
    }
 
+
    bool GridTableWineList::enableInStockFilter(bool enable)
    {
       if (enable)
@@ -294,6 +294,18 @@ namespace ctb::app
       
       applyPropFilters();
       return true;
+   }
+
+
+   NullableDouble GridTableWineList::getMinScoreFilter() const
+   {
+      return NullableDouble();
+   }
+
+
+   bool GridTableWineList::setMinScoreFilter(NullableDouble min_score)
+   {
+      return false;
    }
 
 

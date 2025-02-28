@@ -46,7 +46,7 @@ namespace ctb::app
       using SubStringFilter     = SubStringFilter<RecordType>;
       using TableSort           = TableSorter<RecordType>;
       using GridTableSortConfig = GridTableSortConfig;
-      using GreaterThanFilter   = PropertyFilterNumeric<RecordType, std::greater<> >;
+      using GreaterThanFilter   = PropertyFilterNumeric<RecordType, TableProperty>;
 
 
       /// @brief static factory method to create an instance of the GridTableWineList class
@@ -202,7 +202,7 @@ namespace ctb::app
 
       /// @brief get a list of available filter option for this table.
       /// 
-      std::vector<GridTableFilter> availableFilters() const override;
+      std::vector<GridTableFilter> availableStringFilters() const override;
 
 
       /// @brief get a list of string values that can be used to filter on a column in the table
@@ -212,12 +212,12 @@ namespace ctb::app
 
       /// @brief adds a match value string filter for the specified column.
       ///
-      bool addFilter(int prop_idx, std::string_view match_value) override;
+      bool addPropFilterString(int prop_idx, std::string_view match_value) override;
 
 
       /// @brief adds a match value filter for the specified column.
       ///
-      bool removeFilter(int prop_idx, std::string_view match_value) override;
+      bool removePropFilterString(int prop_idx, std::string_view match_value) override;
 
 
       const TableProperty& getDetailProp(int row_idx, std::string_view prop_name) override;
@@ -230,6 +230,13 @@ namespace ctb::app
       {  
          return true;   
       }
+
+
+      NullableDouble getMinScoreFilter() const override;
+
+
+      bool setMinScoreFilter(NullableDouble min_score) override;
+
 
       // default dtor, others are deleted since this object is meant to live on the heap
       ~GridTableWineList() override = default;

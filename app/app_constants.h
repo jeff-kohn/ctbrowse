@@ -43,7 +43,7 @@ namespace ctb::constants
    // WineDetailsPanel labels
    inline constexpr const char* LBL_APPELLATION                   = "Appellation:";
    inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";
-   inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only show in-stock inventory";
+   inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only Show In-Stock Inventory";
    inline constexpr const char* LBL_COUNTRY                       = "Country:";
    inline constexpr const char* LBL_CT_PRICE                      = "Community Avg:";
    inline constexpr const char* LBL_CT_SCORE                      = "CT Score:";
@@ -53,7 +53,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
    inline constexpr const char* LBL_MY_PRICE                      = "My Price:";
    inline constexpr const char* LBL_REGION                        = "Region:";
-   inline constexpr const char* LBL_REQUIRE_MIN_SCORE             = "Require Minimum Score:";
+   inline constexpr const char* LBL_REQUIRE_MIN_SCORE             = "Score Must Be At Least:";
    inline constexpr const char* LBL_SCORES                        = "Scores";
    inline constexpr const char* LBL_SEARCH                        = "&Search";
    inline constexpr const char* LBL_SORT_ASCENDING                = "Ascending";

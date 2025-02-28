@@ -101,7 +101,7 @@ namespace ctb::app
 
       /// @brief retrieves a list of available filters for this table.
       ///
-      virtual std::vector<GridTableFilter> availableFilters() const = 0;
+      virtual std::vector<GridTableFilter> availableStringFilters() const = 0;
 
 
       /// @brief get a list of values that can be used to filter on a column in the table
@@ -116,14 +116,14 @@ namespace ctb::app
       /// a record must match at least one match_value for each property that 
       /// has a filter to be considered a match.
       /// 
-      virtual bool addFilter(int prop_idx, std::string_view match_value) = 0;
+      virtual bool addPropFilterString(int prop_idx, std::string_view match_value) = 0;
 
 
       /// @brief removes a match value filter for the specified column.
       ///
       /// @return true if the filter was removed, false if it wasn't found
       /// 
-      virtual bool removeFilter(int prop_idx, std::string_view match_value) = 0;
+      virtual bool removePropFilterString(int prop_idx, std::string_view match_value) = 0;
 
 
       /// @brief retrieve a property from the underlying table record (as opposed to a grid column)
@@ -149,6 +149,12 @@ namespace ctb::app
       /// 
       virtual bool hasInStockFilter() const
       {  return false; }
+
+
+      virtual NullableDouble getMinScoreFilter() const = 0;
+
+
+      virtual bool setMinScoreFilter(NullableDouble min_score = std::nullopt) = 0;
 
 
       /// @brief destructor

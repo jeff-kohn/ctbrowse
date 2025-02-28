@@ -100,10 +100,6 @@ namespace ctb::app
       // filter options box
       m_filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_FILTER_OPTIONS);
 
-      auto instock_filter_ctrl = new wxCheckBox(m_filter_options_box->GetStaticBox(), wxID_ANY, constants::LBL_CHECK_IN_STOCK_ONLY);
-      instock_filter_ctrl->SetValidator(wxGenericValidator{ &m_instock_only });
-      m_filter_options_box->Add(instock_filter_ctrl, wxSizerFlags().Border(wxALL));
-
       // load images for the checkboxes in our filter tree.
       const auto tr_img_size = FromDIP(wxSize{ 16, 16 });
       m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_FILTER_IMG, tr_img_size));
@@ -119,13 +115,18 @@ namespace ctb::app
       m_filter_options_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
       m_filter_options_box->AddSpacer(default_border);
 
-      // min score filter sizer
+      // in-stock filter
+      auto instock_filter_ctrl = new wxCheckBox(m_filter_options_box->GetStaticBox(), wxID_ANY, constants::LBL_CHECK_IN_STOCK_ONLY);
+      instock_filter_ctrl->SetValidator(wxGenericValidator{ &m_instock_only });
+      m_filter_options_box->Add(instock_filter_ctrl, wxSizerFlags().Border(wxALL));
+
+      // min-score filter sizer
       auto* min_score_sizer = new wxBoxSizer(wxHORIZONTAL);
 
       // enable score filter checkbox
       auto* score_filter_chk = new wxCheckBox{ m_filter_options_box->GetStaticBox(), wxID_ANY, constants::LBL_REQUIRE_MIN_SCORE };
       score_filter_chk->SetValidator(wxGenericValidator{ &m_enable_score_filter });
-      min_score_sizer->Add(score_filter_chk, wxSizerFlags{}.Center().Border(wxALL));
+      min_score_sizer->Add(score_filter_chk, wxSizerFlags{}.Center().Border(wxLEFT|wxTOP|wxBOTTOM));
 
       // score filter value spinbox
       m_score_spin_ctrl = new wxSpinCtrlDouble
@@ -139,7 +140,7 @@ namespace ctb::app
          };
       m_score_spin_ctrl->SetDigits(constants::FILTER_SCORE_DIGITS);
       m_score_spin_ctrl->Enable(false);
-      min_score_sizer->Add(m_score_spin_ctrl, wxSizerFlags().Border(wxALL));
+      min_score_sizer->Add(m_score_spin_ctrl, wxSizerFlags{}.Border(wxRIGHT|wxTOP|wxBOTTOM));
       m_filter_options_box->Add(min_score_sizer, wxSizerFlags());
 
       // finalize layout
@@ -166,7 +167,7 @@ namespace ctb::app
          auto filter = getPropFilterForItem(item);
          if (filter)
          {
-            m_sink.getTable()->addFilter(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
+            m_sink.getTable()->addPropFilterString(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
             m_sink.signal_source(GridTableEvent::Id::Filter);
          }
       }
@@ -180,7 +181,7 @@ namespace ctb::app
          auto filter = getPropFilterForItem(item);
          if (filter)
          {
-            m_sink.getTable()->removeFilter(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
+            m_sink.getTable()->removePropFilterString(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
             m_sink.signal_source(GridTableEvent::Id::Filter);
          }
       }
@@ -198,7 +199,7 @@ namespace ctb::app
       m_check_map.clear();
 
       // get the available filters for this grid table, and add them to the tree.
-      auto filters = grid_table->availableFilters();
+      auto filters = grid_table->availableStringFilters();
       auto root = m_filter_tree->AddRoot(wxEmptyString);
       for (auto& filter : filters)
       {
@@ -407,22 +408,37 @@ namespace ctb::app
       TransferDataFromWindow();
       if (m_enable_score_filter and m_sink.hasTable())
       {
-         //TODO:
-         m_sink.signal_source(GridTableEvent::Id::Filter);
+         if (m_sink.getTable()->setMinScoreFilter(m_score_filter_val))
+         {
+            m_sink.signal_source(GridTableEvent::Id::Filter);
+         }
       }
    }
 
 
    void GridOptionsPanel::onMinScoreFilterChecked([[maybe_unused]] wxCommandEvent& event)
    {
+      if (!m_sink.hasTable())
+      {
+         assert(false);
+         return;
+      }
+
       TransferDataFromWindow();
       m_score_spin_ctrl->Enable(m_enable_score_filter);
-      if (m_enable_score_filter)
+      if (m_enable_score_filter) 
       {
-         // TODO
+         if (m_sink.getTable()->setMinScoreFilter(m_score_filter_val))
+         {
+            m_sink.signal_source(GridTableEvent::Id::Filter);
+         }
       }
-      else{
-         // TODO
+      else 
+      {
+         if (m_sink.getTable()->setMinScoreFilter(std::nullopt))
+         {
+            m_sink.signal_source(GridTableEvent::Id::Filter);
+         }
       }
    }
 
