@@ -11,9 +11,10 @@
 #include "grid/ScopedEventSink.h"
 
 #include <wx/choice.h>
+#include <wx/dataview.h>
 #include <wx/gdicmn.h>
 #include <wx/panel.h>
-#include <wx/dataview.h>
+#include <wx/spinctrl.h>
 #include <wx/treectrl.h>
 
 #include <map>
@@ -46,13 +47,15 @@ namespace ctb::app
       using FilterMap = std::map<wxTreeItemId, MaybeFilter>; // map tree node to corresponding filter config
       using CheckCountMap = std::map<wxTreeItemId, int>;     // for keeping track of number of filter items selected 
 
-      wxCheckBox*           m_check_in_stock_only{};
       CheckCountMap         m_check_map{};
+      bool                  m_enable_score_filter{ false };
       wxStaticBoxSizer*     m_filter_options_box{};
-      bool                  m_in_stock_only{ constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT };
+      bool                  m_instock_only{ constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT };
       wxTreeCtrl*           m_filter_tree{};
       wxWithImages::Images  m_filter_tree_images{};
       FilterMap             m_filters{};
+      wxSpinCtrlDouble*     m_score_spin_ctrl{};
+      double                m_score_filter_val{};
       ScopedEventSink       m_sink;           // no default init
       wxChoice*             m_sort_combo{};
       GridTableSortConfig   m_sort_config{};
@@ -60,19 +63,21 @@ namespace ctb::app
       // window creation
       void initControls();
 
-      // implementation/helper functions
+      // implementation functions for the property filter treeview
       void addPropFilter(wxTreeItemId item);
       void removePropFilter(wxTreeItemId item);
-      void enableInStockFilter(bool enable = true);
       MaybeFilter getPropFilterForItem(wxTreeItemId item);
       wxArrayString getSortOptionList(GridTable* grid_table);
+      bool isChecked(wxTreeItemId item);
       bool isContainerNode(wxTreeItemId item);
       bool isMatchValueNode(wxTreeItemId item);
-      bool isChecked(wxTreeItemId item);
-      void resetInStockCheckbox();
       bool setMatchValueChecked(wxTreeItemId item, bool checked = true);
-      void updateFilterLabel(wxTreeItemId item);
       void toggleFilterSelection(wxTreeItemId item);
+      void updateFilterLabel(wxTreeItemId item);
+
+      // in-stock and score filters.
+      void enableInStockFilter(bool enable = true);
+      void resetInStockCheckbox();
 
       /// event source related handlers
       void notify(GridTableEvent event) override;
@@ -82,6 +87,8 @@ namespace ctb::app
 
       /// event handlers
       void OnInStockChecked(wxCommandEvent& event);
+      void onMinScoreChanged(wxSpinDoubleEvent& event);
+      void onMinScoreFilterChecked(wxCommandEvent& event);
       void onSortOrderClicked(wxCommandEvent& event);
       void onSortSelection(wxCommandEvent& event);
       void onTreeFilterExpanding(wxTreeEvent& event);

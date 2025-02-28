@@ -241,7 +241,7 @@ namespace ctb::app
 
    private:
       ColumnList                       m_display_columns{};
-      std::optional<GreaterThanFilter> m_in_stock_filter{};
+      std::optional<GreaterThanFilter> m_instock_filter{};
       PropFilterMgrString              m_prop_filters{};
       WineListData*                    m_current_view{};         // may point to m_grid_data or m_filtered_data depending if filter is active
       WineListData                     m_grid_data{};            // the underlying data records for this table.

@@ -230,9 +230,9 @@ namespace ctb::app
 
    void GridTableWineList::applyPropFilters()
    {
-      if (m_prop_filters.activeFilters() and m_in_stock_filter)
+      if (m_prop_filters.activeFilters() and m_instock_filter)
       {
-         m_filtered_data =  applyInStockFilter(applyPropStringFilters(m_grid_data, m_prop_filters), *m_in_stock_filter) | rng::to<TableType>();
+         m_filtered_data =  applyInStockFilter(applyPropStringFilters(m_grid_data, m_prop_filters), *m_instock_filter) | rng::to<TableType>();
          m_current_view = &m_filtered_data;
       }
       else if (m_prop_filters.activeFilters())
@@ -240,9 +240,9 @@ namespace ctb::app
          m_filtered_data = applyPropStringFilters(m_grid_data, m_prop_filters) | rng::to<TableType>();
          m_current_view = &m_filtered_data;
       }
-      else if (m_in_stock_filter)
+      else if (m_instock_filter)
       {
-         m_filtered_data = applyInStockFilter(m_grid_data, *m_in_stock_filter)| rng::to<TableType>();
+         m_filtered_data = applyInStockFilter(m_grid_data, *m_instock_filter)| rng::to<TableType>();
          m_current_view = &m_filtered_data;
       }
       else{
@@ -288,9 +288,9 @@ namespace ctb::app
    bool GridTableWineList::enableInStockFilter(bool enable)
    {
       if (enable)
-         m_in_stock_filter = GreaterThanFilter{ PropId::Quantity, uint16_t{0} }; // data type has to be exact match.
+         m_instock_filter = GreaterThanFilter{ PropId::Quantity, uint16_t{0} }; // data type has to be exact match.
       else
-         m_in_stock_filter = std::nullopt;
+         m_instock_filter = std::nullopt;
       
       applyPropFilters();
       return true;

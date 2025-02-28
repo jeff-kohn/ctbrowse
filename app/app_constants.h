@@ -41,27 +41,28 @@ namespace ctb::constants
 
 
    // WineDetailsPanel labels
+   inline constexpr const char* LBL_APPELLATION                   = "Appellation:";
+   inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";
+   inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only show in-stock inventory";
+   inline constexpr const char* LBL_COUNTRY                       = "Country:";
+   inline constexpr const char* LBL_CT_PRICE                      = "Community Avg:";
+   inline constexpr const char* LBL_CT_SCORE                      = "CT Score:";
+   inline constexpr const char* LBL_DRINK_WINDOW                  = "Drink Window:";
    inline constexpr const char* LBL_FILTER_OPTIONS                = "Filter Options";
    inline constexpr const char* LBL_MENU_VIEWS                    = "&Views";
+   inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
+   inline constexpr const char* LBL_MY_PRICE                      = "My Price:";
+   inline constexpr const char* LBL_REGION                        = "Region:";
+   inline constexpr const char* LBL_REQUIRE_MIN_SCORE             = "Require Minimum Score:";
+   inline constexpr const char* LBL_SCORES                        = "Scores";
    inline constexpr const char* LBL_SEARCH                        = "&Search";
    inline constexpr const char* LBL_SORT_ASCENDING                = "Ascending";
    inline constexpr const char* LBL_SORT_DESCENDING               = "Descending";
    inline constexpr const char* LBL_SORT_OPTIONS                  = "Sort Options";
+   inline constexpr const char* LBL_SUB_REGION                    = "Subregion:";
+   inline constexpr const char* LBL_VALUATION                     = "Valuation";
    inline constexpr const char* LBL_VARIETAL                      = "Varietal:";
    inline constexpr const char* LBL_VINTAGE                       = "Vintage:";
-   inline constexpr const char* LBL_COUNTRY                       = "Country:";
-   inline constexpr const char* LBL_REGION                        = "Region:";
-   inline constexpr const char* LBL_SUB_REGION                    = "Subregion:";
-   inline constexpr const char* LBL_APPELLATION                   = "Appellation:";
-   inline constexpr const char* LBL_DRINK_WINDOW                  = "Drink Window:";
-   inline constexpr const char* LBL_SCORES                        = "Scores";
-   inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
-   inline constexpr const char* LBL_CT_SCORE                      = "CT Score:";
-   inline constexpr const char* LBL_VALUATION                     = "Valuation";
-   inline constexpr const char* LBL_MY_PRICE                      = "My Price:";
-   inline constexpr const char* LBL_CT_PRICE                      = "Community Avg:";
-   inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";
-   inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only show in-stock inventory";
 
 
    // Detail property names
@@ -102,7 +103,13 @@ namespace ctb::constants
    inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
    inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
 
-   inline constexpr int WX_UNSPECIFIED_VALUE = -1;
+   inline constexpr int FILTER_SCORE_DEFAULT =  90;
+   inline constexpr int FILTER_SCORE_DIGITS  =   1;
+   inline constexpr int FILTER_SCORE_MIN     =  50;
+   inline constexpr int FILTER_SCORE_MAX     = 100;
+   inline constexpr int WX_UNSPECIFIED_VALUE =  -1;
+   inline constexpr double FILTER_SCORE_INCR = 0.1;
+
    inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = false;
 
 }  // namespace ctb::app::constants

@@ -135,17 +135,21 @@ namespace ctb::app
       /// 
       virtual const CtProperty& getDetailProp(int row_idx, std::string_view prop_name) = 0;
 
+
       /// @brief apples "in-stock only" filter to the data set, if supported.
       /// @return true if the filter was applied, false if it was not 
       /// 
       /// not all grid table support this filter, you can check by calling hasInStockmFilter()
+      /// 
       virtual bool enableInStockFilter(bool enable) = 0;
 
 
       /// @brief indicates whether the grid table supports filtering to in-stock only 
       /// @return true if supported, false otherwise.
+      /// 
       virtual bool hasInStockFilter() const
       {  return false; }
+
 
       /// @brief destructor
       ///
