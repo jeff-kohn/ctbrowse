@@ -2,104 +2,58 @@ name: Continuous Integration
 
 on:
   push:
-    branches:
-    - master
+    paths-ignore:
+      - 'README.md'
+      - '**/.gitignore'
 
   pull_request:
     branches:
     - master
 
 env:
-  VCPKG_COMMIT: "eba7c6a894fce24146af4fdf161fef8e90dd6be3"
+  VCPKG_INSTALLATION_ROOT: "${{ github.workspace }}\\vcpkg"
+
+permissions:
+  contents: write
+  checks: write
 
 jobs:
-  test:
-    strategy:
-      matrix:
-        os: [windows-2022]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Install static analyzers
-      if: matrix.os == 'ubuntu-22.04'
-      run: >-
-        sudo apt-get install clang-tidy-14 cppcheck -y -q
-
-        sudo update-alternatives --install
-        /usr/bin/clang-tidy clang-tidy
-        /usr/bin/clang-tidy-14 140
-
-    - name: Install vcpkg
-      uses: friendlyanon/setup-vcpkg@v1
-      with: { committish: "${{ env.VCPKG_COMMIT }}" }
-
-    - name: Setup MultiToolTask
-      if: matrix.os == 'windows-2022'
-      run: |
-        Add-Content "$env:GITHUB_ENV" 'UseMultiToolTask=true'
-        Add-Content "$env:GITHUB_ENV" 'EnforceProcessCountAcrossBuilds=true'
-
-    - name: Configure
-      shell: pwsh
-      run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
-
-    - name: Build
-      run: cmake --build build --config Release -j 2
-
-    - name: Install
-      run: cmake --install build --config Release --prefix prefix
-
-    - name: Test
-      working-directory: build
-      run: ctest --output-on-failure --no-tests=error -C Release -j 2
-
-  docs:
-    # Deploy docs only when builds succeed
-    needs: [sanitize, test]
-
-    runs-on: ubuntu-22.04
-
-    # To enable, first you have to create an orphaned gh-pages branch:
-    #
-    #    git switch --orphan gh-pages
-    #    git commit --allow-empty -m "Initial commit"
-    #    git push -u origin gh-pages
-    #
-    # Edit the <name> placeholder below to your GitHub name, so this action
-    # runs only in your repository and no one else's fork. After these, delete
-    # this comment and the last line in the conditional below.
-    # If you do not wish to use GitHub Pages for deploying documentation, then
-    # simply delete this job similarly to the coverage one.
-    if: github.ref == 'refs/heads/master'
-      && github.event_name == 'push'
-      && github.repository_owner == '<name>'
-      && false
-
-    permissions:
-      contents: write
+  windows_build:
+    name: "Window MSVC Build"
+    runs-on: windows-latest
+    env:
+      CONFIGURE_PRESET: "ci-win-msvc"
+      BUILD_PRESET: "ci-win-msvc"
+      BUILD_CONFIG: "RelWithDebInfo"
 
     steps:
     - uses: actions/checkout@v4
-
-    - uses: actions/setup-python@v5
-      with: { python-version: "3.12" }
-
-    - name: Install m.css dependencies
-      run: pip3 install jinja2 Pygments
-
-    - name: Install Doxygen
-      run: sudo apt-get update -q
-        && sudo apt-get install doxygen -q -y
-
-    - name: Build docs
-      run: cmake "-DPROJECT_SOURCE_DIR=$PWD" "-DPROJECT_BINARY_DIR=$PWD/build"
-        -P cmake/docs-ci.cmake
-
-    - name: Deploy docs
-      uses: peaceiris/actions-gh-pages@v4
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: build/docs/html
+        submodules: true
+
+    - name: 'Set vcvars'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: "Setup CMake/ninja"
+      uses: lukka/get-cmake@latest
+
+    - name: "Run Vcpkg"
+      uses: lukka/run-vcpkg@v11.5
+      with:
+        vcpkgJsonGlob: 'vcpkg.json'
+
+    # - name: Install winget
+    #   uses: Cyberboss/install-winget@v1
+
+    # - name: Install pre-reqs
+    #   run: |
+    #     winget install CppCheck --verbose --disable-interactivity  --accept-source-agreements --accept-package-agreements
+    #     choco install OpenCppCoverage -y
+
+    - name: configure
+      run: |
+        cmake --preset=$env:CONFIGURE_PRESET
+
+    - name: build
+      run: |
+        cmake --build --preset=$env:BUILD_PRESET --config=$env:BUILD_CONFIG --target=ALL_BUILD
