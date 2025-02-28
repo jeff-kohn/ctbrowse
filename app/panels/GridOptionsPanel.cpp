@@ -27,7 +27,11 @@ namespace ctb::app
    }
    
    GridOptionsPanel::GridOptionsPanel(GridTableEventSourcePtr source) : m_sink{ this, source }
-   {}
+   {
+      auto& cfg = wxGetApp().getConfig();
+      cfg.SetPath(constants::CONFIG_PATH_SYNC);
+      cfg.Read(constants::CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY, &m_in_stock_only, constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT);
+   }
 
 
    [[nodiscard]] GridOptionsPanel* GridOptionsPanel::create(wxWindow* parent, GridTableEventSourcePtr source)
@@ -58,7 +62,7 @@ namespace ctb::app
       auto default_border = wxSizerFlags::GetDefaultBorder();
 
       // panel shouldn't grow infinitely
-      //SetMaxSize(ConvertDialogToPixels(wxSize{ 140, constants::WX_UNSPECIFIED_VALUE }));
+      SetMaxSize(ConvertDialogToPixels(wxSize{ 150, constants::WX_UNSPECIFIED_VALUE }));
       SetMinSize(ConvertDialogToPixels(wxSize{ 100, constants::WX_UNSPECIFIED_VALUE }));
 
       // defines the rows of controls in our panel
@@ -94,7 +98,11 @@ namespace ctb::app
       top_sizer->AddSpacer(default_border);
 
       // filter options box
-      auto* filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_FILTER_OPTIONS);
+      m_filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_FILTER_OPTIONS);
+
+      auto in_stock_filter_ctrl = new wxCheckBox(m_filter_options_box->GetStaticBox(), wxID_ANY, constants::LBL_CHECK_IN_STOCK_ONLY);
+      in_stock_filter_ctrl->SetValidator(wxGenericValidator{ &m_in_stock_only });
+      m_filter_options_box->Add(in_stock_filter_ctrl, wxSizerFlags().Border(wxALL));
 
       // load images for the checkboxes in our filter tree.
       const auto tr_img_size = FromDIP(wxSize{ 16, 16 });
@@ -104,15 +112,15 @@ namespace ctb::app
 
       // filter tree control
       auto style = wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_TWIST_BUTTONS | wxTR_NO_LINES | wxTR_HIDE_ROOT;
-      m_filter_tree = new wxTreeCtrl{ filter_options_box->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, style };
+      m_filter_tree = new wxTreeCtrl{ m_filter_options_box->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, style };
       m_filter_tree->SetMaxSize(ConvertDialogToPixels(wxSize(-1, 500)));
       m_filter_tree->SetMinSize(ConvertDialogToPixels(wxSize(-1, 100)));
       m_filter_tree->SetImages(m_filter_tree_images);
-      filter_options_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
-      filter_options_box->AddSpacer(default_border);
+      m_filter_options_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
+      m_filter_options_box->AddSpacer(default_border);
 
       // finalize layout
-      top_sizer->Add(filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
+      top_sizer->Add(m_filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
       top_sizer->AddStretchSpacer(2);
       SetSizer(top_sizer);
 
@@ -122,15 +130,16 @@ namespace ctb::app
       m_filter_tree->Bind(wxEVT_LEFT_DOWN, &GridOptionsPanel::onTreeFilterLeftClick, this);
       opt_ascending->Bind(wxEVT_RADIOBUTTON, &GridOptionsPanel::onSortOrderClicked, this);
       opt_descending->Bind(wxEVT_RADIOBUTTON, &GridOptionsPanel::onSortOrderClicked, this);
-
+      in_stock_filter_ctrl->Bind(wxEVT_CHECKBOX, &GridOptionsPanel::OnInStockChecked, this);
+      
    }
 
 
-   void GridOptionsPanel::addFilter(wxTreeItemId item)
+   void GridOptionsPanel::addPropFilter(wxTreeItemId item)
    {
       if (m_sink.hasTable())
       {
-         auto filter = getFilterForItem(item);
+         auto filter = getPropFilterForItem(item);
          if (filter)
          {
             m_sink.getTable()->addFilter(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
@@ -140,11 +149,11 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::removeFilter(wxTreeItemId item)
+   void GridOptionsPanel::removePropFilter(wxTreeItemId item)
    {
       if (m_sink.hasTable())
       {
-         auto filter = getFilterForItem(item);
+         auto filter = getPropFilterForItem(item);
          if (filter)
          {
             m_sink.getTable()->removeFilter(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
@@ -186,7 +195,7 @@ namespace ctb::app
    }
 
 
-   GridOptionsPanel::MaybeFilter GridOptionsPanel::getFilterForItem(wxTreeItemId item)
+   GridOptionsPanel::MaybeFilter GridOptionsPanel::getPropFilterForItem(wxTreeItemId item)
    {
       auto table = m_sink.getTable();
       if (table)
@@ -222,10 +231,17 @@ namespace ctb::app
    }
 
 
+   void GridOptionsPanel::resetInStockCheckbox()
+   {
+      m_in_stock_only = false;
+      TransferDataToWindow();
+   }
+
+
    /// @brief updates the checked/unchecked status of a node.
    /// @return true if successful, false otherwise (ie invalid item)
    /// 
-   bool GridOptionsPanel::setChecked(wxTreeItemId item, bool checked)
+   bool GridOptionsPanel::setMatchValueChecked(wxTreeItemId item, bool checked)
    {
       if ( isMatchValueNode(item) )
       {
@@ -242,6 +258,13 @@ namespace ctb::app
       }
 
       return false;
+   }
+
+
+   void GridOptionsPanel::enableInStockFilter(bool enable)
+   {
+      constexpr size_t index = 0;
+      m_filter_options_box->Show(index, enable);
    }
 
 
@@ -270,16 +293,16 @@ namespace ctb::app
    void GridOptionsPanel::toggleFilterSelection(wxTreeItemId item)
    {
       bool checked = !isChecked(item);
-      if (!setChecked(item, checked))
+      if (!setMatchValueChecked(item, checked))
          return;
 
       if (checked)
       {
-         addFilter(item);
+         addPropFilter(item);
          m_check_map[item]++;
       }
       else{
-         removeFilter(item);
+         removePropFilter(item);
          m_check_map[item]--;
       }
       updateFilterLabel(m_filter_tree->GetItemParent(item));
@@ -288,12 +311,16 @@ namespace ctb::app
 
    void GridOptionsPanel::notify(GridTableEvent event)
    {
+      assert(event.m_grid_table);
+
       try
       {
          switch (event.m_event_id)
          {
          case GridTableEvent::Id::TableInitialize:
             onTableInitialize(event.m_grid_table);
+            enableInStockFilter(event.m_grid_table->hasInStockFilter());
+            resetInStockCheckbox();
             break;
 
          case GridTableEvent::Id::Sort:
@@ -358,6 +385,23 @@ namespace ctb::app
       catch(std::exception& e)
       {
          wxGetApp().displayErrorMessage(e.what());
+      }
+   }
+
+
+   void GridOptionsPanel::OnInStockChecked([[maybe_unused]] wxCommandEvent& event)
+   {
+      assert(m_sink.hasTable());
+
+      TransferDataFromWindow();
+      if (m_sink.hasTable() and m_sink.getTable()->enableInStockFilter(m_in_stock_only))
+      {
+         m_sink.signal_source(GridTableEvent::Id::Filter);
+      }
+      else{
+         // something went wrong, so clear checkbox.
+         m_in_stock_only = false;
+         TransferDataToWindow();
       }
    }
 

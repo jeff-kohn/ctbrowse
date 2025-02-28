@@ -157,8 +157,8 @@ namespace ctb
    /// 
    /// Note the lack of a "format" parameter, we currently only support parsing CSV files.
    ///
-   template <typename TableData>
-   std::expected<TableData, Error> loadTableData(fs::path data_folder, TableId tbl)
+   template <typename TableDataT>
+   std::expected<TableDataT, Error> loadTableData(fs::path data_folder, TableId tbl)
    {
       auto table_path = getTablePath(data_folder, tbl, DataFormatId::csv);
       if (not isTableFileAvailable(table_path))
@@ -166,10 +166,10 @@ namespace ctb
 
       csv::CSVReader reader{ table_path.generic_string() };
 
-      TableData data{};
+      TableDataT data{};
       for (csv::CSVRow& row : reader)
       {
-         typename TableData::value_type record{};
+         typename TableDataT::value_type record{};
          record.parse(row);
          data.emplace_back(std::move(record));
       }

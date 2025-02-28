@@ -22,10 +22,11 @@ namespace ctb
    /// @brief class that can be used to filter table entry records based
    ///        on one or more values for a given property.
    /// 
-   template <CtRecord RecordType>
+   template <CtRecord RecordTypeT>
    struct PropertyFilterString
    {
-      // some types we borrow from our template parameter
+      // some types we borrow from our template parameters
+      using RecordType = RecordTypeT;
       using PropId  = RecordType::PropId;
 
 
@@ -50,7 +51,7 @@ namespace ctb
          if (prop_val.isNull())
             return false;
          
-        return match_values.find(prop_val.asString()) != match_values.end();
+        return match_values.find(prop_val.asStringView()) != match_values.end();
       }
    };
 

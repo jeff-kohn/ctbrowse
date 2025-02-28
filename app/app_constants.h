@@ -12,6 +12,8 @@ namespace ctb::constants
    inline constexpr const char* CONFIG_PATH_SYNC                  = "/Preferences/DataSync";
    inline constexpr const char* CONFIG_VALUE_DEFAULT_SYNC_TABLES  = "DefaultSyncTables";
    inline constexpr const char* CONFIG_VALUE_SYNC_ON_STARTUP      = "SyncOnStartup";
+   inline constexpr const char* CONFIG_PATH_GRID_OPTIONS          = "/Preferences/GridOptions";
+   inline constexpr const char* CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY= "DefaultInStockOnly";
 
    inline constexpr const char* ERROR_WINDOW_CREATION_FAILED      = "Window creation failed. You may need to restart the app.";
 
@@ -59,6 +61,8 @@ namespace ctb::constants
    inline constexpr const char* LBL_MY_PRICE                      = "My Price:";
    inline constexpr const char* LBL_CT_PRICE                      = "Community Avg:";
    inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";
+   inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only show in-stock inventory";
+
 
    // Detail property names
    inline constexpr const char* DETAIL_PROP_APPELLATION           = "Appellation";
@@ -99,5 +103,6 @@ namespace ctb::constants
    inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
 
    inline constexpr int WX_UNSPECIFIED_VALUE = -1;
+   inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = false;
 
 }  // namespace ctb::app::constants

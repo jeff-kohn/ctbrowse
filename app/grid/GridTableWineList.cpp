@@ -124,7 +124,7 @@ namespace ctb::app
    bool GridTableWineList::filterBySubstring(std::string_view substr, int col_idx)
    {
       auto prop = RecordType::Traits::propFromIndex(col_idx);
-      auto cols = std::vector<SubStringFilter::PropId>{ prop };
+      auto cols = std::vector{ prop };
 
       return applySubStringFilter(SubStringFilter{ std::string{substr}, cols });
    }
@@ -133,7 +133,7 @@ namespace ctb::app
    void GridTableWineList::clearSubStringFilter()
    {
       m_substring_filter = std::nullopt;
-      applyFilters();
+      applyPropFilters();
    }
 
 
@@ -174,7 +174,7 @@ namespace ctb::app
 
    StringSet GridTableWineList::getFilterMatchValues(int prop_idx) const
    {
-      return PropertyFilterMgr::getFilterMatchValues(m_grid_data, RecordType::Traits::propFromIndex(prop_idx));
+      return PropFilterMgrString::getFilterMatchValues(m_grid_data, RecordType::Traits::propFromIndex(prop_idx));
    }
 
 
@@ -183,7 +183,7 @@ namespace ctb::app
       // if we somehow get passed a filter we already have, don't waste our time.
       if ( m_prop_filters.addFilter(RecordType::Traits::propFromIndex(prop_idx), value) )
       {
-         applyFilters();
+         applyPropFilters();
          return true;
       }
       return false;
@@ -195,56 +195,74 @@ namespace ctb::app
       // if we somehow get passed filter that we aren't using, don't waste our time.
       if ( m_prop_filters.removeFilter(RecordType::Traits::propFromIndex(prop_idx), match_value) )
       {
-         applyFilters();
+         applyPropFilters();
          return true;
       }
       return false;
    }
 
 
-   auto getFilteredData(const WineListData& grid_data, GridTableWineList::PropertyFilterMgr& filters)
+   // some helper functions for composing filters to apply to the grid_data.
+   namespace 
    {
-      return vws::all(grid_data) | vws::filter([&filters](const GridTableWineList::RecordType& rec) {  return filters.isMatch(rec); });
-   }
-
-   void GridTableWineList::applyFilters()
-   {
-      if (m_prop_filters.activeFilters() )
+      template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
+      auto applyPropStringFilters(RngT&& rng, GridTableWineList::PropFilterMgrString& filters)
       {
-         m_filtered_data = getFilteredData(m_grid_data, m_prop_filters) | rng::to<std::deque>();
+         return vws::all(std::forward<RngT>(rng)) | vws::filter([&filters](const GridTableWineList::RecordType& rec) {  return filters.isMatch(rec); });
+      }
+
+
+      template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
+      auto applyInStockFilter(RngT&& rng, const GridTableWineList::GreaterThanFilter& filter)
+      {
+         return vws::all(std::forward<RngT>(rng)) | vws::filter([&filter](const GridTableWineList::RecordType& rec) {  return filter(rec); });
+      }
+   
+
+      template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
+      auto applyStringSearchFilter(RngT&& rng, const GridTableWineList::SubStringFilter& filter)
+      {
+         return vws::all(std::forward<RngT>(rng)) | vws::filter([&filter](const GridTableWineList::RecordType& rec) {  return filter(rec); });
+      }
+   } // namespace 
+
+
+
+   void GridTableWineList::applyPropFilters()
+   {
+      if (m_prop_filters.activeFilters() and m_in_stock_filter)
+      {
+         m_filtered_data =  applyInStockFilter(applyPropStringFilters(m_grid_data, m_prop_filters), *m_in_stock_filter) | rng::to<TableType>();
+         m_current_view = &m_filtered_data;
+      }
+      else if (m_prop_filters.activeFilters())
+      {
+         m_filtered_data = applyPropStringFilters(m_grid_data, m_prop_filters) | rng::to<TableType>();
+         m_current_view = &m_filtered_data;
+      }
+      else if (m_in_stock_filter)
+      {
+         m_filtered_data = applyInStockFilter(m_grid_data, *m_in_stock_filter)| rng::to<TableType>();
          m_current_view = &m_filtered_data;
       }
       else{
          m_current_view = &m_grid_data;
-         m_filtered_data.clear();
-      }
-
-      if (m_substring_filter)
-      {
-         applySubStringFilter(*m_substring_filter);
+         m_filtered_data = WineListData{};
       }
    }
 
+
    bool GridTableWineList::applySubStringFilter(const SubStringFilter& filter)
    {
-      /// We don't use the view there may already be a substring filter and we don't want to 
-      /// stack them. Therefore we need to start with the unfiltered data, apply any 
-      /// property filters, and then apply the new substring filter.
-      auto filtered_data = getFilteredData(m_grid_data, m_prop_filters)
-                              | vws::filter(filter)
-                              | rng::to<std::deque>();
+      auto filtered = applyStringSearchFilter(*m_current_view, filter) | rng::to<TableType>();
 
-      // we only update the grid if there is some matching data
-      if (!filtered_data.empty())
-      {
-         m_substring_filter = filter;
-         m_filtered_data.swap(filtered_data);
-         m_current_view = &m_filtered_data;
-         return true;
-      }
-      else{
+      if (filtered.empty())
          return false;
-      }
+    
+      m_substring_filter = filter;
+      m_filtered_data.swap(filtered);
+      m_current_view = &m_filtered_data;
+      return true;
    }
 
 
@@ -260,7 +278,22 @@ namespace ctb::app
          rng::sort(vws::reverse(m_grid_data), Sorters[static_cast<size_t>(m_sort_config.sort_index)]);
       }
 
-      applyFilters();
+      applyPropFilters();
+      if (m_substring_filter)
+      {
+         applySubStringFilter(*m_substring_filter);
+      }
+   }
+
+   bool GridTableWineList::enableInStockFilter(bool enable)
+   {
+      if (enable)
+         m_in_stock_filter = GreaterThanFilter{ PropId::Quantity, uint16_t{0} }; // data type has to be exact match.
+      else
+         m_in_stock_filter = std::nullopt;
+      
+      applyPropFilters();
+      return true;
    }
 
 

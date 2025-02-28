@@ -39,8 +39,8 @@ namespace ctb::app
 
       /// @brief set the list of tables that should be selected for download.
       ///
-      template <rng::input_range Rng>
-      void selectTables(Rng&& values) requires std::is_same_v<rng::range_value_t<Rng>, TableId>
+      template <rng::input_range RngT>
+      void selectTables(RngT&& values) requires std::is_same_v<rng::range_value_t<RngT>, TableId>
       {
          m_table_selection_val = values | vws::transform([] (TableId tbl) { return magic_enum::enum_index(tbl); })
                                         | rng::to<wxArrayString>();

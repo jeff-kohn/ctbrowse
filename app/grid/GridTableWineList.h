@@ -11,7 +11,8 @@
 #include "interfaces/GridTableEvent.h"
 
 #include <ctb/DisplayColumn.h>
-#include <ctb/PropertyFilterMgr.h>
+#include <ctb/PropFilterMgrString.h>
+#include <ctb/PropertyFilterNumeric.h>
 #include <ctb/SubStringFilter.h>
 #include <ctb/TableSorter.h>
 #include <ctb/WineListTraits.h>
@@ -20,6 +21,7 @@
 #include <wx/grid.h>
 
 #include <array>
+#include <optional>
 #include <vector>
 
 
@@ -36,12 +38,15 @@ namespace ctb::app
    public:
       /// @brief type used for describing how to display a column in the grid
       using RecordType          = WineListRecord;
+      using TableType           = WineListData;
+      using TableProperty       = RecordType::TableProperty;
       using PropId              = RecordType::PropId;
       using DisplayColumn       = DisplayColumn<RecordType>;
-      using PropertyFilterMgr   = PropertyFilterMgr<RecordType>;
+      using PropFilterMgrString = PropFilterMgrString<RecordType>;
       using SubStringFilter     = SubStringFilter<RecordType>;
       using TableSort           = TableSorter<RecordType>;
       using GridTableSortConfig = GridTableSortConfig;
+      using GreaterThanFilter   = PropertyFilterNumeric<RecordType, std::greater<> >;
 
 
       /// @brief static factory method to create an instance of the GridTableWineList class
@@ -78,8 +83,6 @@ namespace ctb::app
          GridTableFilter{ constants::FILTER_REGION,     static_cast<int>(PropId::Region)         },
          GridTableFilter{ constants::FILTER_APPELATION, static_cast<int>(PropId::Appellation)    }
       };
-
-
 
 
       /// @brief returns the sort config for a Sorter based on its zero-based index. You can get the
@@ -202,12 +205,12 @@ namespace ctb::app
       std::vector<GridTableFilter> availableFilters() const override;
 
 
-      /// @brief get a list of values that can be used to filter on a column in the table
+      /// @brief get a list of string values that can be used to filter on a column in the table
       ///
       StringSet getFilterMatchValues(int prop_idx) const override;
 
 
-      /// @brief adds a match value filter for the specified column.
+      /// @brief adds a match value string filter for the specified column.
       ///
       bool addFilter(int prop_idx, std::string_view match_value) override;
 
@@ -217,11 +220,18 @@ namespace ctb::app
       bool removeFilter(int prop_idx, std::string_view match_value) override;
 
 
-      // Inherited via GridTable
-      const CtProperty& getDetailProp(int row_idx, std::string_view prop_name) override;
+      const TableProperty& getDetailProp(int row_idx, std::string_view prop_name) override;
 
 
-      // default ctor, others are deleted since this object is meant to live on the heap
+      bool enableInStockFilter(bool enable) override;
+
+
+      bool hasInStockFilter() const override 
+      {  
+         return true;   
+      }
+
+      // default dtor, others are deleted since this object is meant to live on the heap
       ~GridTableWineList() override = default;
       GridTableWineList() = delete;
       GridTableWineList(const GridTableWineList&) = delete;
@@ -230,13 +240,14 @@ namespace ctb::app
       GridTableWineList& operator=(GridTableWineList&&) = delete;
 
    private:
-      ColumnList                     m_display_columns{};
-      PropertyFilterMgr              m_prop_filters{};
-      WineListData*                  m_current_view{};         // may point to m_grid_data or m_filtered_data depending if filter is active
-      WineListData                   m_grid_data{};            // the underlying data records for this table.
-      WineListData                   m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
-      GridTableSortConfig            m_sort_config{};
-      std::optional<SubStringFilter> m_substring_filter{};
+      ColumnList                       m_display_columns{};
+      std::optional<GreaterThanFilter> m_in_stock_filter{};
+      PropFilterMgrString              m_prop_filters{};
+      WineListData*                    m_current_view{};         // may point to m_grid_data or m_filtered_data depending if filter is active
+      WineListData                     m_grid_data{};            // the underlying data records for this table.
+      WineListData                     m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
+      GridTableSortConfig              m_sort_config{};
+      std::optional<SubStringFilter>   m_substring_filter{};
 
       /// @brief private constructor used by static create()
       GridTableWineList(WineListData&& data) : 
@@ -245,12 +256,12 @@ namespace ctb::app
          m_grid_data{std::move(data)}
       {}
 
-      void applyFilters();
+      void applyPropFilters();
       bool applySubStringFilter(const SubStringFilter& filter);
       void sortData();
       bool isFilterActive()   {  return m_current_view = &m_filtered_data; }
 
-
+      // Inherited via GridTable
 
 };
 

@@ -1,7 +1,7 @@
 /*******************************************************************7
-* @file PropertyFilterMgr.h
+* @file PropFilterMgrString.h
 *
-* @brief defines the template class PropertyFilterMgr
+* @brief defines the template class PropFilterMgrString
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
 *******************************************************************/
@@ -27,10 +27,11 @@ namespace ctb
    /// will be converted to string for filtering purposes. Not ideal for 
    /// performance, but most of our filters are text base. Will revisit this later.
    /// 
-   template <CtRecord RecordType>
-   class PropertyFilterMgr
+   template <CtRecord RecordTypeT>
+   class PropFilterMgrString
    {
    public:
+      using RecordType   = RecordTypeT;
       using StringFilter = PropertyFilterString<RecordType>;
       using PropId       = RecordType::PropId;
 
@@ -103,8 +104,8 @@ namespace ctb
       
       /// @brief retrieve a list of possible filter values for the given property in the table
       ///
-      template<rng::input_range Rows, typename PropEnum> 
-      static StringSet getFilterMatchValues(const Rows& rows, PropEnum prop_id) 
+      template<rng::input_range RowsT, typename PropEnumT> 
+      static StringSet getFilterMatchValues(const RowsT& rows, PropEnumT prop_id) 
       {
          StringSet result{};
          for (auto& row : rows)

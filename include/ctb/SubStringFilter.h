@@ -21,11 +21,12 @@ namespace ctb
 
    /// @brief implements a substring-matching filter for a table entry/record
    ///
-   template <CtRecord T>
+   template <CtRecord RecordTypeT>
    struct SubStringFilter
    {
    public:
-      using PropId = T::PropId;
+      using RecordType = RecordTypeT;
+      using PropId = RecordType::PropId;
 
       /// @brief the substring to search for.
       ///
@@ -42,7 +43,7 @@ namespace ctb
       /// the search substring, returning true if a match was round. case-neutral
       /// search is used
       /// 
-      bool operator()(const T& rec) const
+      bool operator()(const RecordType& rec) const
       {
          for (auto prop : search_props)
          {

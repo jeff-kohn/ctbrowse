@@ -43,29 +43,34 @@ namespace ctb::app
       
    private:
       using MaybeFilter = std::optional<GridTableFilter>;
-      using FilterMap = std::map<wxTreeItemId, MaybeFilter>;
-      using CheckCountMap = std::map<wxTreeItemId, int>;
+      using FilterMap = std::map<wxTreeItemId, MaybeFilter>; // map tree node to corresponding filter config
+      using CheckCountMap = std::map<wxTreeItemId, int>;     // for keeping track of number of filter items selected 
 
-      FilterMap             m_filters{};
+      wxCheckBox*           m_check_in_stock_only{};
       CheckCountMap         m_check_map{};
+      wxStaticBoxSizer*     m_filter_options_box{};
+      bool                  m_in_stock_only{ constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT };
+      wxTreeCtrl*           m_filter_tree{};
+      wxWithImages::Images  m_filter_tree_images{};
+      FilterMap             m_filters{};
       ScopedEventSink       m_sink;           // no default init
       wxChoice*             m_sort_combo{};
       GridTableSortConfig   m_sort_config{};
-      wxTreeCtrl*           m_filter_tree{};
-      wxWithImages::Images  m_filter_tree_images{};
 
       // window creation
       void initControls();
 
       // implementation/helper functions
-      void addFilter(wxTreeItemId item);
-      void removeFilter(wxTreeItemId item);
-      MaybeFilter getFilterForItem(wxTreeItemId item);
+      void addPropFilter(wxTreeItemId item);
+      void removePropFilter(wxTreeItemId item);
+      void enableInStockFilter(bool enable = true);
+      MaybeFilter getPropFilterForItem(wxTreeItemId item);
       wxArrayString getSortOptionList(GridTable* grid_table);
       bool isContainerNode(wxTreeItemId item);
       bool isMatchValueNode(wxTreeItemId item);
       bool isChecked(wxTreeItemId item);
-      bool setChecked(wxTreeItemId item, bool checked = true);
+      void resetInStockCheckbox();
+      bool setMatchValueChecked(wxTreeItemId item, bool checked = true);
       void updateFilterLabel(wxTreeItemId item);
       void toggleFilterSelection(wxTreeItemId item);
 
@@ -76,6 +81,7 @@ namespace ctb::app
       void populateFilterTypes(GridTable* grid_table);
 
       /// event handlers
+      void OnInStockChecked(wxCommandEvent& event);
       void onSortOrderClicked(wxCommandEvent& event);
       void onSortSelection(wxCommandEvent& event);
       void onTreeFilterExpanding(wxTreeEvent& event);
