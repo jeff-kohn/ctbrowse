@@ -133,7 +133,7 @@ namespace ctb::app
    void GridTableWineList::clearSubStringFilter()
    {
       m_substring_filter = std::nullopt;
-      applyPropFilters();
+      applyFilters();
    }
 
 
@@ -174,16 +174,16 @@ namespace ctb::app
 
    StringSet GridTableWineList::getFilterMatchValues(int prop_idx) const
    {
-      return PropFilterMgrString::getFilterMatchValues(m_grid_data, RecordType::Traits::propFromIndex(prop_idx));
+      return PropStringFilterMgr::getFilterMatchValues(m_grid_data, RecordType::Traits::propFromIndex(prop_idx));
    }
 
 
    bool GridTableWineList::addPropFilterString(int prop_idx, std::string_view value)
    {
       // if we somehow get passed a filter we already have, don't waste our time.
-      if ( m_prop_filters.addFilter(RecordType::Traits::propFromIndex(prop_idx), value) )
+      if ( m_prop_string_filters.addFilter(RecordType::Traits::propFromIndex(prop_idx), value) )
       {
-         applyPropFilters();
+         applyFilters();
          return true;
       }
       return false;
@@ -193,67 +193,76 @@ namespace ctb::app
    bool GridTableWineList::removePropFilterString(int prop_idx, std::string_view match_value)
    {
       // if we somehow get passed filter that we aren't using, don't waste our time.
-      if ( m_prop_filters.removeFilter(RecordType::Traits::propFromIndex(prop_idx), match_value) )
+      if ( m_prop_string_filters.removeFilter(RecordType::Traits::propFromIndex(prop_idx), match_value) )
       {
-         applyPropFilters();
+         applyFilters();
          return true;
       }
       return false;
    }
 
 
-   // some helper functions for composing filters to apply to the grid_data.
-   namespace 
+   //namespace 
+   //{
+   //   // some helper functions for composing filters to apply to the grid_data.
+   //   //
+   //   template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
+   //   auto applyPropStringFilters(RngT&& rng, GridTableWineList::PropStringFilterMgr& filters)
+   //   {
+   //      return vws::all(std::forward<RngT>(rng)) | vws::filter(filters);
+   //   }
+
+   //   // some helper functions for composing filters to apply to the grid_data.
+   //   //
+   //   template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
+   //   auto applyPropFilters(RngT&& rng, GridTableWineList::PropStringFilterMgr& filters)
+   //   {
+   //      return vws::all(std::forward<RngT>(rng)) | vws::filter(filters);
+   //   }
+
+
+
+   //   template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
+   //   auto applyInStockFilter(RngT&& rng, const GridTableWineList::PropFilter& filter)
+   //   {
+   //      return vws::all(std::forward<RngT>(rng)) | vws::filter(filter);
+   //   }
+
+   //   template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
+   //   auto applyStringSearchFilter(RngT&& rng, const GridTableWineList::SubStringFilter& filter)
+   //   {
+   //      return vws::all(std::forward<RngT>(rng)) | vws::filter(filter);
+   //   }
+
+   //} // namespace 
+
+
+   void GridTableWineList::applyFilters()
    {
-      template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
-      auto applyPropStringFilters(RngT&& rng, GridTableWineList::PropFilterMgrString& filters)
+      if (m_prop_string_filters.activeFilters() or m_instock_filter.enabled or m_score_filter.enabled)
       {
-         return vws::all(std::forward<RngT>(rng)) | vws::filter([&filters](const GridTableWineList::RecordType& rec) {  return filters.isMatch(rec); });
-      }
-
-
-      template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
-      auto applyInStockFilter(RngT&& rng, const GridTableWineList::GreaterThanFilter& filter)
-      {
-         return vws::all(std::forward<RngT>(rng)) | vws::filter([&filter](const GridTableWineList::RecordType& rec) {  return filter(rec); });
-      }
-   
-
-      template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
-      auto applyStringSearchFilter(RngT&& rng, const GridTableWineList::SubStringFilter& filter)
-      {
-         return vws::all(std::forward<RngT>(rng)) | vws::filter([&filter](const GridTableWineList::RecordType& rec) {  return filter(rec); });
-      }
-   } // namespace 
-
-
-   void GridTableWineList::applyPropFilters()
-   {
-      if (m_prop_filters.activeFilters() and m_instock_filter)
-      {
-         m_filtered_data =  applyInStockFilter(applyPropStringFilters(m_grid_data, m_prop_filters), *m_instock_filter) | rng::to<TableType>();
+         m_filtered_data = vws::all(m_grid_data) | vws::filter(m_prop_string_filters) 
+                                                 | vws::filter(m_instock_filter)
+                                                 | vws::filter(m_score_filter)
+                                                 | rng::to<TableType>();
          m_current_view = &m_filtered_data;
       }
-      else if (m_prop_filters.activeFilters())
+      else
       {
-         m_filtered_data = applyPropStringFilters(m_grid_data, m_prop_filters) | rng::to<TableType>();
-         m_current_view = &m_filtered_data;
-      }
-      else if (m_instock_filter)
-      {
-         m_filtered_data = applyInStockFilter(m_grid_data, *m_instock_filter)| rng::to<TableType>();
-         m_current_view = &m_filtered_data;
-      }
-      else{
          m_current_view = &m_grid_data;
-         m_filtered_data = WineListData{};
+      }
+
+      if (m_substring_filter)
+      {
+         applySubStringFilter(*m_substring_filter);
       }
    }
 
 
    bool GridTableWineList::applySubStringFilter(const SubStringFilter& filter)
    {
-      auto filtered = applyStringSearchFilter(*m_current_view, filter) | rng::to<TableType>();
+      auto filtered = vws::all(*m_current_view) | vws::filter(filter)
+                                                | rng::to<TableType>();
 
       if (filtered.empty())
          return false;
@@ -277,7 +286,7 @@ namespace ctb::app
          rng::sort(vws::reverse(m_grid_data), Sorters[static_cast<size_t>(m_sort_config.sort_index)]);
       }
 
-      applyPropFilters();
+      applyFilters();
       if (m_substring_filter)
       {
          applySubStringFilter(*m_substring_filter);
@@ -287,25 +296,37 @@ namespace ctb::app
 
    bool GridTableWineList::enableInStockFilter(bool enable)
    {
-      if (enable)
-         m_instock_filter = GreaterThanFilter{ PropId::Quantity, uint16_t{0} }; // data type has to be exact match.
-      else
-         m_instock_filter = std::nullopt;
-      
-      applyPropFilters();
+      if (enable == m_instock_filter.enabled)
+         return true;
+
+      m_instock_filter.enabled = enable;
+      applyFilters();
       return true;
    }
 
 
    NullableDouble GridTableWineList::getMinScoreFilter() const
    {
-      return NullableDouble();
+      if (m_score_filter.enabled)
+      {
+         return m_score_filter.compare_val.asDouble();
+      }
+      return std::nullopt;
    }
 
 
    bool GridTableWineList::setMinScoreFilter(NullableDouble min_score)
    {
-      return false;
+      if (min_score)
+      {
+         m_score_filter.enabled = true;
+         m_score_filter.compare_val = *min_score;
+      }
+      else {
+         m_score_filter.enabled = false;
+      }
+      applyFilters();
+      return true;
    }
 
 

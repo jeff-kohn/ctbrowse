@@ -53,7 +53,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
    inline constexpr const char* LBL_MY_PRICE                      = "My Price:";
    inline constexpr const char* LBL_REGION                        = "Region:";
-   inline constexpr const char* LBL_REQUIRE_MIN_SCORE             = "Score Must Be At Least:";
+   inline constexpr const char* LBL_REQUIRE_MIN_SCORE             = "Only Show Scores Above:";
    inline constexpr const char* LBL_SCORES                        = "Scores";
    inline constexpr const char* LBL_SEARCH                        = "&Search";
    inline constexpr const char* LBL_SORT_ASCENDING                = "Ascending";
@@ -103,12 +103,12 @@ namespace ctb::constants
    inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
    inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
 
-   inline constexpr int FILTER_SCORE_DEFAULT =  90;
-   inline constexpr int FILTER_SCORE_DIGITS  =   1;
-   inline constexpr int FILTER_SCORE_MIN     =  50;
-   inline constexpr int FILTER_SCORE_MAX     = 100;
-   inline constexpr int WX_UNSPECIFIED_VALUE =  -1;
-   inline constexpr double FILTER_SCORE_INCR = 0.1;
+   inline constexpr double FILTER_SCORE_DEFAULT =  90.0;
+   inline constexpr double FILTER_SCORE_INCR    =   0.1;
+   inline constexpr double FILTER_SCORE_MIN     =    50;
+   inline constexpr double FILTER_SCORE_MAX     = 100.0;
+   inline constexpr int FILTER_SCORE_DIGITS     =     1;
+   inline constexpr int WX_UNSPECIFIED_VALUE    =    -1;
 
    inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = false;
 

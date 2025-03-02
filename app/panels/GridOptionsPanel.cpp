@@ -24,7 +24,8 @@ namespace ctb::app
       constexpr int IMG_CONTAINER = 0;
       constexpr int IMG_UNCHECKED = 1;
       constexpr int IMG_CHECKED = 2;
-   }
+
+   } // namespace
    
    GridOptionsPanel::GridOptionsPanel(GridTableEventSourcePtr source) : m_sink{ this, source }
    {
@@ -405,10 +406,9 @@ namespace ctb::app
 
    void GridOptionsPanel::onMinScoreChanged([[maybe_unused]] wxSpinDoubleEvent& event)
    {
-      TransferDataFromWindow();
       if (m_enable_score_filter and m_sink.hasTable())
       {
-         if (m_sink.getTable()->setMinScoreFilter(m_score_filter_val))
+         if ( m_sink.getTable()->setMinScoreFilter(event.GetValue()) )
          {
             m_sink.signal_source(GridTableEvent::Id::Filter);
          }

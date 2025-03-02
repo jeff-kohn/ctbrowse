@@ -1,14 +1,14 @@
 /*******************************************************************7
-* @file PropFilterMgrString.h
+* @file PropStringFilterMgr.h
 *
-* @brief defines the template class PropFilterMgrString
+* @brief defines the template class PropStringFilterMgr
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
 *******************************************************************/
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/PropertyFilterString.h"
+#include "ctb/PropStringFilter.h"
 
 #include <map>
 #include <set>
@@ -28,11 +28,11 @@ namespace ctb
    /// performance, but most of our filters are text base. Will revisit this later.
    /// 
    template <CtRecord RecordTypeT>
-   class PropFilterMgrString
+   class PropStringFilterMgr
    {
    public:
       using RecordType   = RecordTypeT;
-      using StringFilter = PropertyFilterString<RecordType>;
+      using StringFilter = PropStringFilter<RecordType>;
       using PropId       = RecordType::PropId;
 
 
@@ -43,14 +43,10 @@ namespace ctb
       {
          auto& filter = m_filters[prop_id];
 
-         // match values contains ValueWrapper, which will gladly accept string_view and cause issues
-         // so we need to explicitly insert a std::string
-         std::string match_str{ match_value };
-         filter.match_values.insert(match_str);
-
          // note we always assign the filter object's prop-id because if the filter
          // is being default-constructed on-demand it won't have the correct prop_id.
          filter.prop_id = prop_id;
+         filter.match_values.insert(std::string{ match_value });
 
          return true;
       }
@@ -68,6 +64,7 @@ namespace ctb
          {
             auto& filter = filt_it->second;
 
+            // if we're removing the last match value, remove the filter altogether because it won't match anything
             ret_val = filter.match_values.erase(match_value);
             if (filter.match_values.empty())
             {
@@ -80,15 +77,19 @@ namespace ctb
 
 
       /// @brief check if a record matches all of our filters
-      /// @return true if each PropertyFilterString matched the record, false  
-      ///         if the record failed to match one or more filters.
+      /// @return true if each PropFilterString matched the record, false  
+      ///         if the record failed to match one or more filters. Will
+      ///         also return true if there are no active filters.
       /// 
-      bool isMatch(const RecordType& rec) const
+      bool operator()(const RecordType& rec) const
       {
-         for (auto&& filter : vws::values(m_filters))
+         if (activeFilters())
          {
-            if ( !filter(rec) )
-               return false;
+            for (auto&& filter : vws::values(m_filters))
+            {
+               if ( !filter(rec) )
+                  return false;
+            }
          }
          return true;
       }
@@ -98,7 +99,7 @@ namespace ctb
       /// 
       int activeFilters() const
       {
-         return static_cast<int>(rng::count_if( m_filters | vws::values, [](auto&& filter) { return filter.match_values.size(); } ));
+         return m_filters.size();
       }
 
       

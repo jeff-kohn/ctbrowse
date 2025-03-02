@@ -11,8 +11,8 @@
 #include "interfaces/GridTableEvent.h"
 
 #include <ctb/DisplayColumn.h>
-#include <ctb/PropFilterMgrString.h>
-#include <ctb/PropertyFilterNumeric.h>
+#include <ctb/PropFilter.h>
+#include <ctb/PropStringFilterMgr.h>
 #include <ctb/SubStringFilter.h>
 #include <ctb/TableSorter.h>
 #include <ctb/WineListTraits.h>
@@ -42,12 +42,11 @@ namespace ctb::app
       using TableProperty       = RecordType::TableProperty;
       using PropId              = RecordType::PropId;
       using DisplayColumn       = DisplayColumn<RecordType>;
-      using PropFilterMgrString = PropFilterMgrString<RecordType>;
+      using PropStringFilterMgr = PropStringFilterMgr<RecordType>;
       using SubStringFilter     = SubStringFilter<RecordType>;
       using TableSort           = TableSorter<RecordType>;
       using GridTableSortConfig = GridTableSortConfig;
-      using GreaterThanFilter   = PropertyFilterNumeric<RecordType, TableProperty>;
-
+      using PropFilter          = PropFilter<RecordType, TableProperty>;
 
       /// @brief static factory method to create an instance of the GridTableWineList class
       /// 
@@ -248,8 +247,9 @@ namespace ctb::app
 
    private:
       ColumnList                       m_display_columns{};
-      std::optional<GreaterThanFilter> m_instock_filter{};
-      PropFilterMgrString              m_prop_filters{};
+      PropFilter                       m_instock_filter{};
+      PropFilter                       m_score_filter{};
+      PropStringFilterMgr              m_prop_string_filters{};
       WineListData*                    m_current_view{};         // may point to m_grid_data or m_filtered_data depending if filter is active
       WineListData                     m_grid_data{};            // the underlying data records for this table.
       WineListData                     m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
@@ -259,11 +259,14 @@ namespace ctb::app
       /// @brief private constructor used by static create()
       GridTableWineList(WineListData&& data) : 
          m_display_columns(DefaultDisplayColumns.begin(), DefaultDisplayColumns.end()),
+         m_instock_filter{ PropId::Quantity, std::greater<TableProperty>(), uint16_t{0} },
+         m_score_filter{ {PropId::CTScore, PropId::MYScore}, std::greater_equal<TableProperty>(), constants::FILTER_SCORE_DEFAULT },
          m_current_view{&m_grid_data},
          m_grid_data{std::move(data)}
-      {}
+      {
+      }
 
-      void applyPropFilters();
+      void applyFilters();
       bool applySubStringFilter(const SubStringFilter& filter);
       void sortData();
       bool isFilterActive()   {  return m_current_view = &m_filtered_data; }

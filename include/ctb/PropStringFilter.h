@@ -1,7 +1,7 @@
 /*******************************************************************
- * @file PropertyFilterString.h
+ * @file PropStringFilter.h
  *
- * @brief defines the template class PropertyFilterString
+ * @brief defines the template class PropStringFilter
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
@@ -20,10 +20,10 @@ namespace ctb
 {
 
    /// @brief class that can be used to filter table entry records based
-   ///        on one or more values for a given property.
+   ///        on one or more match values for a given property.
    /// 
    template <CtRecord RecordTypeT>
-   struct PropertyFilterString
+   struct PropStringFilter
    {
       // some types we borrow from our template parameters
       using RecordType = RecordTypeT;
@@ -54,7 +54,6 @@ namespace ctb
         return match_values.find(prop_val.asStringView()) != match_values.end();
       }
    };
-
 
 
 } // namespace ctb
