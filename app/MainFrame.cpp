@@ -14,9 +14,10 @@
 #include "grid/GridTableLoader.h"
 #include "grid/GridTableWineList.h"
 #include "panels/GridOptionsPanel.h"
+#include "panels/WineDetailsPanel.h"
 
 #include <ctb/CredentialWrapper.h>
-#include <ctb/data/table_download.h>
+#include <ctb/table_download.h>
 #include <ctb/winapi_util.h>
 #include <external/HttpStatusCodes.h>
 
@@ -51,7 +52,7 @@ namespace ctb::app
    // we don't use enum class because then every time we need to pass an ID to wxObject,
    // we'd have to cast or use std::to_underlying and that's just an ugly waste of time 
    // with no benefit for this use-case.
-   enum CmdId
+   enum CmdId : uint16_t
    {
       CMD_FILE_DOWNLOAD_DATA = wxID_HIGHEST,
       CMD_FILE_SETTINGS,
@@ -59,23 +60,38 @@ namespace ctb::app
    };
 
 
-   MainFrame::MainFrame() : m_event_source{ GridTableSource::create() }
+   MainFrame::MainFrame() : 
+      m_event_source{ GridTableEventSource::create() },
+      m_sink{ this, m_event_source }
    {
    }
 
 
    [[nodiscard]] MainFrame* MainFrame::create()
    {
-      // give base class a chance set up controls etc
-      std::unique_ptr<MainFrame> wnd{ new MainFrame{} };
-
-      const auto default_size = wnd->FromDIP(wxSize{640, 480});
-      if (!wnd->Create(nullptr, wxID_ANY, constants::APP_NAME_LONG, wxDefaultPosition, default_size))
+      try
       {
-         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+         // give base class a chance set up controls etc
+         std::unique_ptr<MainFrame> wnd{ new MainFrame{} };
+
+         const auto default_size = wnd->FromDIP(wxSize{640, 480});
+         if (!wnd->Create(nullptr, wxID_ANY, constants::APP_NAME_LONG, wxDefaultPosition, default_size))
+         {
+            throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+         }
+         wnd->initControls();
+         return wnd.release(); // top-level window manages its own lifetime, we return non-owning pointer
       }
-      wnd->initControls();
-      return wnd.release(); // top-level window manages its own lifetime, we return non-owning pointer
+      catch(Error& err)
+      {
+         wxGetApp().displayErrorMessage(err);
+         throw;
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+         throw;
+      }
    }
 
 
@@ -99,13 +115,14 @@ namespace ctb::app
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onSearchBtn, this);
       m_search_ctrl->Bind(wxEVT_TEXT_ENTER, &MainFrame::onSearchTextEnter, this);
 
-      if ( !wxPersistentRegisterAndRestore(this, GetName()))
+      if ( !wxPersistentRegisterAndRestore(this, GetName()) )
       {
          // Choose some custom default size for the first run
          SetClientSize(FromDIP(wxSize(800, 600)));
-         Centre(wxBOTH);
+         Center(wxBOTH);
       }
    }
+
 
    void MainFrame::createGridWindows()
    {
@@ -119,7 +136,11 @@ namespace ctb::app
       m_grid->SetColLabelSize(FromDIP(30));
       box_sizer->Add(m_grid, wxSizerFlags(80).Expand());
 
+      m_wine_details = WineDetailsPanel::create(this, m_event_source);
+      box_sizer->Add(m_wine_details, wxSizerFlags(30).Expand());
+
       SetSizer(box_sizer.release());
+      Layout();
       this->SendSizeEvent();
    }
 
@@ -179,7 +200,7 @@ namespace ctb::app
          wxITEM_NORMAL
       };
       menu_views->Append(menu_views_wine_list);
-      m_menu_bar->Append(menu_views, constants::MENU_VIEWS_LBL);
+      m_menu_bar->Append(menu_views, constants::LBL_MENU_VIEWS);
 
       SetMenuBar(m_menu_bar);
 
@@ -226,8 +247,19 @@ namespace ctb::app
 
    void MainFrame::onMenuEditFind([[maybe_unused]] wxCommandEvent& event)
    {
-      m_tool_bar->SetFocus();
-      m_search_ctrl->SetFocus();
+      try
+      {
+         m_tool_bar->SetFocus();
+         m_search_ctrl->SetFocus();
+      }
+      catch(Error& e)
+      {
+         wxGetApp().displayErrorMessage(e);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
    }
 
 
@@ -239,83 +271,94 @@ namespace ctb::app
 
    void MainFrame::onMenuSyncData([[maybe_unused]] wxCommandEvent& event) 
    {
-      using namespace ctb::data;
-
-      TableSyncDialog dlg(this);
-      if (dlg.ShowModal() != wxID_OK)
-         return;
-
-      wxBusyCursor busy{};
-      ScopedStatusText end_status{ constants::STATUS_DOWNLOAD_COMPLETE, this };
-
-      CredentialWrapper cred_wrapper{
-         constants::CELLARTRACKER_DOT_COM, true,
-         constants::CELLARTRACKER_LOGON_CAPTION,
-         constants::CELLARTRACKER_LOGON_TITLE
-      };
-
-      auto cred_result = cred_wrapper.promptForCredential();
-      if (!cred_result.has_value())
+      // TODO: refactor this
+      try
       {
-         end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
-      }
-      auto& cred = cred_result.value();
+         TableSyncDialog dlg(this);
+         if (dlg.ShowModal() != wxID_OK)
+            return;
 
-      wxProgressDialog progress_dlg{"Download Progress", "Downloading Data Files", 100, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL };
+         wxBusyCursor busy{};
+         ScopedStatusText end_status{ constants::STATUS_DOWNLOAD_COMPLETE, this };
 
-      data::ProgressCallback progress_callback = [&progress_dlg] (int64_t downloadTotal, int64_t downloadNow,
-                                                                  int64_t uploadTotal, int64_t uploadNow,
-                                                                  intptr_t userdata)
-                                                                  {
-                                                                     return progress_dlg.Pulse();
-                                                                  };
+         CredentialWrapper cred_wrapper{
+            constants::CELLARTRACKER_DOT_COM, true,
+            constants::CELLARTRACKER_LOGON_CAPTION,
+            constants::CELLARTRACKER_LOGON_TITLE
+         };
 
-      // For each selected table, download it.
-      for (auto tbl : dlg.selectedTables())
-      {
-         setStatusText(constants::FMT_STATUS_FILE_DOWNLOADING, data::getTableDescription(tbl));
-
-         data::DownloadResult result{};
-         result = downloadRawTableData(cred, tbl, DataFormatId::csv, &progress_callback);
-
-         // we may need to re-prompt 
-         while (!result.has_value() && result.error().error_code == enum_index(HttpStatus::Code::Unauthorized))
+         auto cred_result = cred_wrapper.promptForCredential();
+         if (!cred_result.has_value())
          {
-            cred_result = cred_wrapper.promptForCredential();
-            if (cred_result)
+            end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
+         }
+         auto& cred = cred_result.value();
+
+         wxProgressDialog progress_dlg{"Download Progress", "Downloading Data Files", 100, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL };
+
+         ProgressCallback progress_callback = [&progress_dlg] ([[maybe_unused]] int64_t downloadTotal, [[maybe_unused]] int64_t downloadNow,
+                                                                     [[maybe_unused]] int64_t uploadTotal, [[maybe_unused]] int64_t uploadNow,
+                                                                     [[maybe_unused]] intptr_t userdata)
+                                                                     {
+                                                                        return progress_dlg.Pulse();
+                                                                     };
+
+         // For each selected table, download it.
+         for (auto tbl : dlg.selectedTables())
+         {
+            setStatusText(constants::FMT_STATUS_FILE_DOWNLOADING, getTableDescription(tbl));
+
+            DownloadResult result{};
+            result = downloadRawTableData(cred, tbl, DataFormatId::csv, &progress_callback);
+
+            // we may need to re-prompt 
+            while (!result.has_value() && result.error().error_code == enum_index(HttpStatus::Code::Unauthorized))
             {
-               cred = cred_result.value();
+               cred_result = cred_wrapper.promptForCredential();
+               if (cred_result)
+               {
+                  cred = cred_result.value();
+               }
+               else
+               {
+                  end_status.message = constants::ERROR_STR_DOWNLOAD_AUTH_FAILURE;
+                  return;
+               }
             }
-            else
+
+            if (!result)
             {
-               end_status.message = constants::ERROR_STR_DOWNLOAD_AUTH_FAILURE;
+               // we didn't get a result, so indicate error to user.
+               if (result.error().category == Error::Category::OperationCanceled)
+               {
+                  end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
+               }
+               else
+               {
+                  wxGetApp().displayErrorMessage(result.error());
+                  end_status.message = constants::STATUS_DOWNLOAD_FAILED;
+               }
                return;
             }
+
+            // if we get here we have the data, so save it to file.
+            auto folder = wxGetApp().userDataFolder();
+            auto file_path{ folder / result->tableName() };
+            file_path.replace_extension(constants::DATA_FILE_EXTENSION);
+            util::saveTextToFile(result->data, file_path);
+
+            setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, getTableDescription(tbl));
          }
-
-         if (!result)
-         {
-            // we didn't get a result, so indicate error to user.
-            if (result.error().category == Error::Category::OperationCanceled)
-            {
-               end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
-            }
-            else
-            {
-               wxGetApp().displayErrorMessage(result.error());
-               end_status.message = constants::STATUS_DOWNLOAD_FAILED;
-            }
-            return;
-         }
-
-         // if we get here we have the data, so save it to file.
-         auto folder = wxGetApp().userDataFolder();
-         auto file_path{ folder / result->tableName() };
-         file_path.replace_extension(constants::DATA_FILE_EXTENSION);
-         util::saveTextToFile(result->data, file_path);
-
-         setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, data::getTableDescription(tbl));
       }
+      catch(Error& e)
+      {
+         wxGetApp().displayErrorMessage(e);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
+
    }
 
 
@@ -334,34 +377,70 @@ namespace ctb::app
          GridTableLoader loader{ wxGetApp().userDataFolder() };
          auto tbl = loader.getGridTable(GridTableLoader::GridTableId::WineList);
          m_event_source->setTable(tbl);
-         tbl->setActiveSortConfig(GridTableWineList::getSortConfig(0));
-         m_event_source->signal(GridTableEvent::Sort);
+         tbl->applySortConfig(GridTableWineList::getSortConfig(0));
+         m_event_source->signal(GridTableEvent::Id::Sort);
 
-         updateStatusBarCounts();
          Update();
       }
       catch(Error& e)
       {
          wxGetApp().displayErrorMessage(e);
       }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
    }
 
 
    void MainFrame::onSearchBtn([[maybe_unused]] wxCommandEvent& event)
    {
-      doSearchFilter();
+      try
+      {
+         doSearchFilter();
+      }
+      catch(Error& e)
+      {
+         wxGetApp().displayErrorMessage(e);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
    }
 
 
    void MainFrame::onSearchCancelBtn([[maybe_unused]] wxCommandEvent& event)
    {
-      clearSearchFilter();
+      try
+      {
+         clearSearchFilter();
+      }
+      catch(Error& e)
+      {
+         wxGetApp().displayErrorMessage(e);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
    }
 
 
    void MainFrame::onSearchTextEnter([[maybe_unused]] wxCommandEvent& event)
    {
-      doSearchFilter();
+      try
+      {
+         doSearchFilter();
+      }
+      catch(Error& e)
+      {
+         wxGetApp().displayErrorMessage(e);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
    }
 
 
@@ -376,13 +455,21 @@ namespace ctb::app
       if (!m_grid) return;
       try
       {
-         m_grid->filterBySubstring(m_search_ctrl->GetValue().wx_str());
-         updateStatusBarCounts();
+         if ( !m_grid->filterBySubstring(m_search_ctrl->GetValue().wx_str()) )
+         {
+            // clear any previous search filter, because that search text is no longer displayed.
+            m_grid->clearSubStringFilter();
+         }
       }
       catch(Error& e)
       {
          wxGetApp().displayErrorMessage(e);
       }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
+      updateStatusBarCounts();
    }
 
 
@@ -393,18 +480,18 @@ namespace ctb::app
       {
          m_search_ctrl->ChangeValue("");
          m_grid->clearSubStringFilter();
-         updateStatusBarCounts();
+
       }
       catch(Error& e)
       {
          wxGetApp().displayErrorMessage(e);
       }
+      updateStatusBarCounts();
    }
 
 
    void MainFrame::updateStatusBarCounts()
-   {
-            
+   {     
       int total{0};
       int filtered{0};
       
@@ -430,6 +517,12 @@ namespace ctb::app
       else{
          SetStatusText("", STATUS_BAR_PANE_FILTERED_ROWS);
       }
+   }
+
+
+   void MainFrame::notify([[maybe_unused]] GridTableEvent event)
+   {
+      updateStatusBarCounts();
    }
 
 } // namespace ctb::app

@@ -7,14 +7,14 @@
    },
    "configurePresets": [
       {
-         "name": "dev-vstudio",
+         "name": "dev-win-msvc",
          "hidden": false,
-         "inherits": [ "ci-win-vstudio", "dev-mode" ]
+         "inherits": [ "ci-win-msvc", "dev-mode" ]
       },
       {
-         "name": "dev-vscode",
+         "name": "dev-win-clang",
          "hidden": false,
-         "inherits": [ "ci-win-ninja", "dev-mode" ],
+         "inherits": [ "ci-win-clang", "dev-mode" ],
          "cacheVariables": {
             "CTS_ENABLE_CLANG_TIDY": "ON"
          }
@@ -22,21 +22,21 @@
    ],
    "buildPresets": [
       {
-         "name": "dev-vstudio",
-         "configurePreset": "dev-vstudio",
+         "name": "dev-win-msvc",
+         "configurePreset": "dev-win-msvc",
          "jobs": 16
       },
       {
-         "name": "dev-vscode",
-         "configurePreset": "dev-vscode",
+         "name": "dev-win-clang",
+         "configurePreset": "dev-win-clang",
          "jobs": 16
       }
 
    ],
    "testPresets": [
       {
-         "name": "dev-vstudio",
-         "configurePreset": "dev-vstudio",
+         "name": "dev-win-msvc",
+         "configurePreset": "dev-win-msvc",
          "output": {
             "outputOnFailure": true
          },
@@ -46,8 +46,8 @@
          }
       },
       {
-         "name": "dev-vscode",
-         "configurePreset": "dev-vscode",
+         "name": "dev-win-clang",
+         "configurePreset": "dev-win-clang",
          "output": {
             "outputOnFailure": true
          },

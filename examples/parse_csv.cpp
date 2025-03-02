@@ -8,7 +8,7 @@
  *
  *******************************************************************/
 #include "ctb/constants.h"
-#include "ctb/data/WineListEntry.h"
+#include "ctb/WineListTraits.h"
 #include "ctb/Error.h"
 
 #include <cassert>
@@ -26,19 +26,17 @@
 int main()
 {
    using namespace std::literals;
-   using namespace ctb::data;
+   using namespace ctb;
 
    try
    {
       csv::CSVReader reader{ R"(C:\Users\jkohn\AppData\Roaming\cts_win\List.csv)" };
-      std::deque<WineListEntry> wines{};
-      WineListEntry entry{};
+      std::deque<WineListRecord> wines{};
+      WineListRecord rec{};
       for (csv::CSVRow& row : reader)
       {
-         if (entry.parse(row))
-            wines.emplace_back(std::move(entry));
-         else
-            std::println("Skipping invalid row:\r\n\t{}\r\n", row.to_json());
+         rec.parse(row);
+         wines.emplace_back(std::move(rec));
       }
    }
    catch (std::exception& ex)

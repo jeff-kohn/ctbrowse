@@ -43,19 +43,6 @@ namespace ctb::app
       }
    }
 
-   /// @brief  user-friendly version of from_chars that works with string_view and string
-   /// @return an optional containing the requested value if successful, or an empty optional otherwise.
-   template<typename T, StringViewCompatible S>
-   std::optional<T> from_str(S str)
-   {
-      T val{};
-      auto result = std::from_chars(str.data(), str.data() + str.size(), val);
-
-      if (result.ec != std::errc())
-         return {};  // there was an error, return uninitialized optional
-
-      return val;
-   }
 
 
    TableSyncDialog::TableSyncDialog(wxWindow* parent)
@@ -66,46 +53,57 @@ namespace ctb::app
 
    bool TableSyncDialog::Create(wxWindow* parent)
    {
-      // give base class a chance set up controls etc
-      if (!wxDialog::Create(parent, wxID_ANY, constants::TITLE_DOWNLOAD_DATA))
-         return false;
+      try{
+         // give base class a chance set up controls etc
+         if (!wxDialog::Create(parent, wxID_ANY, constants::TITLE_DOWNLOAD_DATA))
+            return false;
 
-      createImpl();
+         createImpl();
 
-      // message handlers
-      Bind(wxEVT_UPDATE_UI, &TableSyncDialog::onOkUpdateUI, this, wxID_OK);
-      Bind(wxEVT_BUTTON, &TableSyncDialog::onOkClicked, this, wxID_OK);
+         // message handlers
+         Bind(wxEVT_UPDATE_UI, &TableSyncDialog::onOkUpdateUI, this, wxID_OK);
+         Bind(wxEVT_BUTTON, &TableSyncDialog::onOkClicked, this, wxID_OK);
 
-      // populate table name selection list
-      constexpr auto table_descriptions = data::TableDescriptions | vws::values;
-      m_table_selection_ctrl->InsertItems(wxToArrayString(table_descriptions), 0);
+         // populate table name selection list
+         constexpr auto table_descriptions = TableDescriptions | vws::values;
+         m_table_selection_ctrl->InsertItems(wxToArrayString(table_descriptions), 0);
 
-      // need to read some defaults from config settings.
-      auto& cfg = wxGetApp().getConfig();
-      cfg.SetPath(constants::CONFIG_PATH_SYNC);
+         // need to read some defaults from config settings.
+         auto& cfg = wxGetApp().getConfig();
+         cfg.SetPath(constants::CONFIG_PATH_SYNC);
 
-      // default-selected tables are stored as a string of enum values (e.g int values not names)
-      // delimited by ENUM_DELIMTER. The default value is the table enum value 0 (List)
-      m_table_selection_val = std::string_view{ cfg.Read(constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES, "0").wx_str() } // read the config value
-         | vws::split(ENUM_DELIMETER)                                                                                 // split by token ';'
-         | vws::transform([] (auto subrange) { return std::string_view(subrange.begin(), subrange.end()); })          // convert subranges to string_view's
-         | vws::transform([] (std::string_view sv) { return from_str<int>(sv); })                                     // convert string view to from_chars() result
-         | vws::filter([] (auto opt) { return opt.has_value(); })                                                     // filter out results that have no value
-         | vws::transform([](auto opt) { return opt.value(); })                                                       // retrieve actual value from remaining results
-         | rng::to<wxArrayInt>();                                                                                     // convert to array
+         // default-selected tables are stored as a string of enum values (e.g int values not names)
+         // delimited by ENUM_DELIMTER. The default value is the table enum value 0 (List)
+         m_table_selection_val = std::string_view{ cfg.Read(constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES, "0").wx_str() } // read the config value
+            | vws::split(ENUM_DELIMETER)                                                                                 // split by token ';'
+            | vws::transform([] (auto subrange) { return std::string_view(subrange.begin(), subrange.end()); })          // convert subranges to string_view's
+            | vws::transform([] (std::string_view sv) { return from_str<int>(sv); })                                     // convert string view to from_chars() result
+            | vws::filter([] (auto opt) { return opt.has_value(); })                                                     // filter out results that have no value
+            | vws::transform([](auto opt) { return opt.value(); })                                                       // retrieve actual value from remaining results
+            | rng::to<wxArrayInt>();                                                                                     // convert to array
 
-      // whether the "Sync on Startup" box should be checked.
-      m_startup_sync_val = cfg.ReadBool(constants::CONFIG_VALUE_SYNC_ON_STARTUP, false);
+         // whether the "Sync on Startup" box should be checked.
+         m_startup_sync_val = cfg.ReadBool(constants::CONFIG_VALUE_SYNC_ON_STARTUP, false);
 
-      TransferDataToWindow();
-      return true;
+         TransferDataToWindow();
+         return true;
+      }
+      catch(Error& err)
+      {
+         wxGetApp().displayErrorMessage(err);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
+      return false;
    }
 
 
-   std::vector<data::TableId> TableSyncDialog::selectedTables() const
+   std::vector<TableId> TableSyncDialog::selectedTables() const
    {
       using namespace vws;
-      using EnumT = data::TableId;
+      using EnumT = TableId;
 
       // convert our internal list of ints to the actual enum, need to filter out
       // values that don't map to an enum (should never happen, but best to be
@@ -118,29 +116,40 @@ namespace ctb::app
    }
 
 
-   void TableSyncDialog::onOkClicked(wxCommandEvent& event)
+   void TableSyncDialog::onOkClicked([[maybe_unused]] wxCommandEvent& event)
    {
-      if (!TransferDataFromWindow())
+      try
       {
-         wxGetApp().displayErrorMessage(constants::ERROR_STR_DIALOG_TRANSFER_FAILED);
-         return;
-      }
+         if (!TransferDataFromWindow())
+         {
+            wxGetApp().displayErrorMessage(constants::ERROR_STR_DIALOG_TRANSFER_FAILED);
+            return;
+         }
 
-      // Save relevant settings to config
-      auto& cfg = wxGetApp().getConfig();
-      cfg.SetPath(constants::CONFIG_PATH_SYNC);
-      cfg.Write(wxString(constants::CONFIG_VALUE_SYNC_ON_STARTUP), m_startup_sync_val);
-      if (m_save_default_val)
+         // Save relevant settings to config
+         auto& cfg = wxGetApp().getConfig();
+         cfg.SetPath(constants::CONFIG_PATH_SYNC);
+         cfg.Write(wxString(constants::CONFIG_VALUE_SYNC_ON_STARTUP), m_startup_sync_val);
+         if (m_save_default_val)
+         {
+            cfg.Write(wxString(constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES), wxString(serializeIntegers(vws::all(m_table_selection_val))));
+         }
+         cfg.Flush();
+
+         EndDialog(wxID_OK);
+      }
+      catch(Error& err)
       {
-         cfg.Write(wxString(constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES), wxString(serializeIntegers(vws::all(m_table_selection_val))));
+         wxGetApp().displayErrorMessage(err);
       }
-      cfg.Flush();
-
-      EndDialog(wxID_OK);
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }
    }
 
 
-   void TableSyncDialog::onDeselectAll(wxCommandEvent& event)
+   void TableSyncDialog::onDeselectAll([[maybe_unused]] wxCommandEvent& event)
    {
       for (auto idx = 0u; idx < m_table_selection_ctrl->GetCount(); ++idx)
       {
@@ -149,14 +158,14 @@ namespace ctb::app
    }
 
 
-   void TableSyncDialog::onDeselectAllUpdateUI(wxUpdateUIEvent & event)
+   void TableSyncDialog::onDeselectAllUpdateUI([[maybe_unused]] wxUpdateUIEvent & event)
    {
       // we already check for at least one selection for OK button, so just piggy back.
       onOkUpdateUI(event);
    }
 
 
-   void TableSyncDialog::onSelectAll(wxCommandEvent & event)
+   void TableSyncDialog::onSelectAll([[maybe_unused]] wxCommandEvent & event)
    {
       for (auto idx = 0u; idx < m_table_selection_ctrl->GetCount(); ++idx)
       {

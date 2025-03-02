@@ -28,23 +28,23 @@ namespace ctb::app
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its lifetime). 
       /// 
-      static [[nodiscard]] CellarTrackerGrid* create(wxWindow* parent, GridTableEventSourcePtr source);
+      [[nodiscard]] static CellarTrackerGrid* create(wxWindow* parent, GridTableEventSourcePtr source);
 
 
       /// @brief filter the table by performing a substring search across all columns
       ///
-      /// note that class only supports a single substring filter, subsequent calls to
+      /// note this class only supports a single substring filter, subsequent calls to
       /// either overload will overwrite any previous substring filter.
       /// 
-      void filterBySubstring(std::string_view substr);
+      bool filterBySubstring(std::string_view substr);
 
 
       /// @brief filter the table by performing a substring search on the specified column
       ///
-      /// note that class only supports a single substring filter, subsequent calls to
+      /// note this class only supports a single substring filter, subsequent calls to
       /// either overload will overwrite any previous substring filter.
       /// 
-      void filterBySubstring(std::string_view substr, int col_idx);
+      bool filterBySubstring(std::string_view substr, int col_idx);
 
 
       /// @brief clear/reset the substring filter
@@ -56,24 +56,25 @@ namespace ctb::app
       ///
       ~CellarTrackerGrid() override;
 
-   protected:
-      GridTablePtr    m_grid_table{};
-      ScopedEventSink m_sink;
-      
-      void notify(GridTableEvent event, GridTable* grid_table) override;
-
-      void initGrid();
-      void setGridTable(GridTablePtr tbl);
-
-      /// @brief private ctor used by static create()
-      CellarTrackerGrid(GridTableEventSourcePtr source) : m_sink{ this, source }
-      {}
-
       // no copy/move/assign, this class is created on the heap.
       CellarTrackerGrid(const CellarTrackerGrid&) = delete;
       CellarTrackerGrid(CellarTrackerGrid&&) = delete;
       CellarTrackerGrid& operator=(const CellarTrackerGrid&) = delete;
       CellarTrackerGrid& operator=(CellarTrackerGrid&&) = delete;
+
+   protected:
+      GridTablePtr    m_grid_table{};
+      ScopedEventSink m_sink;
+      
+      void notify(GridTableEvent event) override;
+      void onGridCellChanging(wxGridEvent& event);
+
+      void initGrid();
+      void setGridTable(GridTablePtr tbl);
+
+      /// @brief private ctor used by static create()
+      explicit CellarTrackerGrid(GridTableEventSourcePtr source) : m_sink{ this, source }
+      {}
    };
 
 }  // namespace ctb::app

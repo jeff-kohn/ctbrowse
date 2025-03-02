@@ -65,3 +65,23 @@ function (create_windows_target TARGET_NAME)
 endfunction()
 
 
+# add_manifest(<target> <manifest file>)
+#
+# Adds a manifest file (https://learn.microsoft.com/en-us/windows/win32/sbscs/application-manifests)
+# to an EXE
+function(add_manifest TARGET_NAME MANIFEST_FILE )
+
+  if(NOT TARGET_NAME)
+      message(FATAL_ERROR "You must provide a target")
+    endif()
+    if(NOT MANIFEST_FILE)
+      message(FATAL_ERROR "You must provide a manifest file")
+    endif()
+    add_custom_command(
+       TARGET ${TARGET_NAME}
+       POST_BUILD
+       COMMAND "mt.exe" -manifest \"${MANIFEST_FILE}\" \"-updateresource:$<TARGET_FILE:${TARGET_NAME}>\"
+    )
+
+endfunction()
+

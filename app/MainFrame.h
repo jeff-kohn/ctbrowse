@@ -8,7 +8,8 @@
 #pragma once
 
 #include "App.h"
-#include "grid/GridTableSource.h"
+#include "grid/GridTableEventSource.h"
+#include "grid/ScopedEventSink.h"
 
 #include <wx/event.h>
 #include <wx/frame.h>
@@ -29,9 +30,12 @@ namespace ctb::app
 {
    class CellarTrackerGrid;   // the grid window
    class GridOptionsPanel;    // the options panel
+   class WineDetailsPanel;    // details panel
 
 
-   class MainFrame final : public wxFrame
+   /// @brief class for the main window of the application
+   ///
+   class MainFrame final : public wxFrame, public IGridTableEventSink
    {
    public:
       static inline constexpr int STATUS_BAR_PANE_STATUS = 0;
@@ -44,7 +48,7 @@ namespace ctb::app
       /// throws a ctb::Error if the window can't be created; otherwise returns a non-owning pointer 
       /// to the window (top-level window so it will manage its own lifetime). 
       /// 
-      static [[nodiscard]] MainFrame* create();
+      [[nodiscard]] static MainFrame* create();
 
 
       /// @brief set status bar text using std::format() syntax
@@ -69,25 +73,28 @@ namespace ctb::app
 
 
    private:
-      CellarTrackerGrid*      m_grid{};
-      GridOptionsPanel*       m_grid_options{};
-      GridTableEventSourcePtr m_event_source{};
+      CellarTrackerGrid*      m_grid{};         // grid window view
+      GridOptionsPanel*       m_grid_options{}; // gird options view
+      GridTableEventSourcePtr m_event_source{}; // for synchronizing events between views and the underlying table
+      ScopedEventSink         m_sink;           // so we can also handle events from our source
       wxBoxSizer*             m_main_sizer{};
       wxMenuBar*              m_menu_bar{};
-      wxSearchCtrl*           m_search_ctrl{};
-      wxSplitterWindow*       m_splitter{};
+      wxSearchCtrl*           m_search_ctrl{};  // substring search box on the toolbar
       wxStatusBar*            m_status_bar{};
       wxToolBar*              m_tool_bar{};
+      WineDetailsPanel*       m_wine_details{};
 
       /// @brief private ctor called by static create()
       MainFrame();
 
+      // child window creation
       void initControls();
       void createGridWindows();
       void createMenuBar();
       void createStatusBar();
       void createToolBar();
 
+      // message handlers
       void onMenuEditFind(wxCommandEvent& event);
       void onMenuPreferences(wxCommandEvent&);
       void onMenuSyncData(wxCommandEvent&);
@@ -97,9 +104,13 @@ namespace ctb::app
       void onSearchTextEnter(wxCommandEvent& event);
       void onQuit(wxCommandEvent&);
 
+      // implementation details
       void doSearchFilter();
       void clearSearchFilter();
       void updateStatusBarCounts();
+
+      // Inherited via IGridTableEventSink
+      void notify(GridTableEvent event) override;
    };
 
 

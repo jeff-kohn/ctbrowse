@@ -7,7 +7,7 @@
  *********************************************************************/
 #include "ctb/CredentialWrapper.h"
 
-#include "windows.h"
+#include "Windows.h"
 #include "wincred.h"
 
 #include <array>
@@ -40,7 +40,7 @@ namespace ctb
 
             default:
                return ErrorUnknown;
-         };
+         }
       }
    } // namespace
 
@@ -106,7 +106,7 @@ namespace ctb
 
       CREDUI_INFOA cui{};
       cui.cbSize = sizeof(CREDUI_INFO);
-      cui.hwndParent = NULL;
+      cui.hwndParent = nullptr;
       cui.pszMessageText = m_message_text.c_str();
       cui.pszCaptionText = m_caption_text.c_str();
       cui.hbmBanner = nullptr;

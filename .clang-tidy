@@ -3,16 +3,28 @@
 # misc-non-private-member-variables-in-classes: the options don't do anything
 # modernize-use-nodiscard: too aggressive, attribute is situationally useful
 Checks: "*,\
+  -bugprone-easily-swappable-parameters, \
   -google-readability-todo,\
+  -google-readability-braces-around-statements, \
   -altera-*,\
+  -objc-*, \
+  -osx-*, \
   -fuchsia-*,\
-  fuchsia-multiple-inheritance,\
-  -llvm-header-guard,\
-  -llvm-include-order,\
+  -hicpp-*, \
+  -readability-*, \
+  -google-build-using-namespace, \
+  -llvm-else-after-return, \
+  -llvm-include-order, \
   -llvmlibc-*,\
+  -modernize-use-trailing-return-type, \
   -modernize-use-nodiscard,\
-  -misc-non-private-member-variables-in-classes"
+  -misc-const-correctness, \
+  -misc-include-cleaner, \
+  -misc-non-private-member-variables-in-classes, \
+  -concurrency-mt-unsafe, \
+  -performance-avoid-endl"
 WarningsAsErrors: ''
+
 CheckOptions:
   - key: 'bugprone-argument-comment.StrictMode'
     value: 'true'

@@ -1,7 +1,5 @@
 cmake_minimum_required (VERSION 3.30)
 
-include(cmake/prelude.cmake)
-
 project(
     ctBrowse
     VERSION 0.1.0.0
@@ -13,6 +11,7 @@ set (CMAKE_CXX_STANDARD 23)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS OFF)
 
+include(cmake/prelude.cmake)
 include(FetchContent)
 
 # So that cmake can find any additional modules we've written (stuff like Find modules, export targets, etc)
@@ -23,11 +22,10 @@ include(product-version/generate-product-version)
 include(use-clang-tidy)
 include(variables)
 
+#export compile_commands.json for tools like clang-tidy and cppcheck
+set (CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") 
 
- #export compile_commands.json for tools like clang-tidy and cppcheck
- set (CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") 
-
-   # Only do these if this is the main project, and not if it is included through add_subdirectory
+# Only do these if this is the main project, and not if it is included through add_subdirectory
 if (PROJECT_IS_TOP_LEVEL)
    include(folders)
 endif()

@@ -8,22 +8,23 @@
 #pragma once
 
 #include "ctb/concepts.h"
-#include "ctb/functors.h"
+#include "ctb/utility.h"
 
 #include <wx/activityindicator.h>
-#include <chrono>
+
 
 namespace ctb::app
 {
 
    /// @brief convert a range of strings/string_views to a wxArrayString
+   ///
    template <rng::input_range Rng> requires StringViewCompatible<rng::range_value_t<Rng> >
    wxArrayString wxToArrayString(Rng&& strings)
    {
       Overloaded overloaded{
          [](std::string&& str)
          {
-            return wxString{ std::move(str) };
+            return wxString{ str };
          },
          [] (std::string_view sv)
          {
@@ -39,21 +40,40 @@ namespace ctb::app
                                                       | rng::to<wxArrayString>();
    }
 
+
+   /// @brief just a convenience wrapper for converting a string_view to a wxString
+   ///
+   inline wxString wxFromSV(std::string_view sv)
+   {
+      return wxString{sv.data(), sv.size() };
+   }
+
+
    /// @brief  small object that sets a frame window's status text on destruction
-   template <typename Wnd>
+   ///
+   template <typename WndT>
    struct ScopedStatusText
    {
       std::string message{};
-      Wnd*        target{};
+      WndT*        target{};
 
-      ScopedStatusText() = default;
-      ScopedStatusText(std::string_view msg, Wnd* target) : message{ msg }, target{ target } {}
+
+      ScopedStatusText(std::string_view msg, WndT* target) : message{ msg }, target{ target } {}
       ~ScopedStatusText()
       {
          if (target)
             target->SetStatusText(message);
       }
+
+
+      ScopedStatusText() noexcept = default;
+      ScopedStatusText(const ScopedStatusText&) = default;
+      ScopedStatusText(ScopedStatusText&&) = default;
+      ScopedStatusText& operator=(const ScopedStatusText&) = default;
+      ScopedStatusText& operator=(ScopedStatusText&&) = default;
    };
+
+   template<typename WndT> ScopedStatusText(std::string_view, WndT*) -> ScopedStatusText<WndT>;
 
 
 } // namespace ctb::app

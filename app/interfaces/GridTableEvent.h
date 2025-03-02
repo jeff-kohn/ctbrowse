@@ -11,6 +11,7 @@
 #include "interfaces/GridTable.h"
 
 #include <memory>
+#include <optional>
 
 
 namespace ctb::app
@@ -18,16 +19,22 @@ namespace ctb::app
 
    /// @brief categorizes the different notification events supported by this interface
    ///
-   enum class GridTableEvent
+   struct GridTableEvent
    {
-      TableInitialize,  /// fired when a grid table is being loaded
-      TableRemove,      /// fired when a grid table is being removed/detached.
-      Sort,             /// fired when a grid table has been sorted
-      Filter,           /// fired when a grid table has been filtered
-      SubStringFilter,  /// fired when a substring filter has been applied to the grid table
-      RowSelected       /// fired when the user selects a row
-   };
+      enum class Id
+      {
+         TableInitialize,  /// fired when a grid table is being loaded
+         TableRemove,      /// fired when a grid table is being removed/detached.
+         Sort,             /// fired when a grid table has been sorted
+         Filter,           /// fired when a grid table has been filtered
+         SubStringFilter,  /// fired when a substring filter has been applied to the grid table
+         RowSelected       /// fired when the user selects a row
+      };
 
+      Id                 m_event_id{};
+      GridTable*         m_grid_table{};
+      std::optional<int> m_affected_row{};
+   };
 
    /// @brief listener interface for classes that want to receive notification events about a grid table.
    struct IGridTableEventSink
@@ -38,7 +45,7 @@ namespace ctb::app
       /// the supplied pointer will remain valid until a subsequent event
       /// notification of type TableInitialized is received
       /// 
-      virtual void notify(GridTableEvent event, GridTable* grid_table) = 0;
+      virtual void notify(GridTableEvent event) = 0;
 
   
       /// @brief virtual destructor
@@ -49,6 +56,7 @@ namespace ctb::app
 
 
    /// @brief Interface for an event source that generates events for grid tables
+   /// 
    struct IGridTableEventSource
    {
       /// @brief returns true if this source has a table attached, false otherwise
@@ -70,7 +78,7 @@ namespace ctb::app
       /// If a null table ptr is passed, this grid will no longer fire events 
       /// until a subsequent call to setTable() passes a valid pointer.
       /// 
-      virtual void setTable(GridTablePtr table) = 0;
+      virtual bool setTable(GridTablePtr table) = 0;
 
 
       /// @brief attaches an event sink to this source to receive event notifications
@@ -89,9 +97,14 @@ namespace ctb::app
 
       /// @brief this is called to signal that an event needs to be sent to all listeners
       ///
-      virtual bool signal(GridTableEvent event) = 0;
+      virtual bool signal(GridTableEvent::Id event, std::optional<int> row_idx) = 0;
 
-      
+
+      /// @brief this is called to signal that an event needs to be sent to all listeners
+      ///
+      virtual bool signal(GridTableEvent::Id event) = 0;
+
+
       /// @brief virtual destructor
       ///
       virtual ~IGridTableEventSource() noexcept
@@ -99,7 +112,8 @@ namespace ctb::app
    };
 
 
-   /// @brief smart ptr alias for shared IGridTableEventSource
+   /// @brief smart ptr alias for shared ptr to IGridTableEventSource-derived
+   /// 
    using GridTableEventSourcePtr = std::shared_ptr<IGridTableEventSource>;
 
 

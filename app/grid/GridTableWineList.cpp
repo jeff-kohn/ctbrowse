@@ -8,7 +8,7 @@
 
 #include "grid/GridTableWineList.h"
 
-#include <ctb/functors.h>
+#include <ctb/utility.h>
 #include <magic_enum/magic_enum.hpp>
 #include <wx/font.h>
 
@@ -19,11 +19,8 @@
 
 namespace ctb::app
 {
-   using data::WineListData;
-   using data::WineListEntry;
 
-
-   [[nodiscard]] GridTablePtr GridTableWineList::create(data::WineListData&& data)
+   [[nodiscard]] GridTablePtr GridTableWineList::create(WineListData&& data)
    {
       return std::shared_ptr<GridTableWineList>{ new GridTableWineList{ std::move(data) } };  
    }
@@ -35,46 +32,52 @@ namespace ctb::app
 
       if (col_idx >= m_display_columns.size())
       {
-         /// If we get here we got a request for invalid column, should be impossible...
+         /// If we get here we got a request for invalid column, i.e. a bug
          assert(false);
          return std::format("Col {}", col);
       }
       return wxString{ m_display_columns[col_idx].display_name };
+
    }
 
 
    wxString GridTableWineList::GetValue(int row, int col)
    {
-      using namespace ctb::data;
-
-      if (row >= std::ssize(*m_current_view)) // don't use GetNumerRows because it's virtual
+      try
       {
-         assert(false); 
-         return wxString{};
+         if (row >= std::ssize(*m_current_view)) // don't use GetNumberRows because it's virtual
+         {
+            assert(false); 
+            return wxString{};
+         }
+         if (col >= std::ssize(m_display_columns))
+         {
+            assert(false);
+            return wxString{};
+         }
+
+         auto row_idx  = static_cast<size_t>(row);
+         auto display_col = m_display_columns[static_cast<size_t>(col)];
+         auto prop = display_col.prop_id;
+
+         // format as string and return it to caller
+         auto val = (*m_current_view)[row_idx][prop];
+         auto val_str = display_col.getDisplayValue(val);
+         return wxString{ val_str.data(), val_str.size() };
       }
-      if (col >= std::ssize(m_display_columns))
+      catch(std::exception&)
       {
-         assert(false);
-         return wxString{};
+         // don't display an error message here because if there's a problem with the data in a row or column,
+         // user might get dozens (or hundreds) of messages.
+         // TODO: LOGGING
       }
 
-      auto row_idx  = static_cast<size_t>(row);
-      auto display_col = m_display_columns[static_cast<size_t>(col)];
-      auto prop = display_col.prop_id;
-
-      // if the expected value is returned, format it as string and return it to caller
-      // otherwise we just return an empty string
-      return (*m_current_view)[row_idx][prop]
-         .and_then([&display_col](WineListEntry::ValueWrapper val) -> std::expected<wxString, Error>
-            {
-               auto val_str = display_col.getDisplayValue(val);
-               return wxString{ val_str.data(), val_str.size() };
-            })
-         .value_or(wxString{});
+      // if we get here it's likely a bug, shouldn't happen.
+      return constants::ERROR_VAL;
    }
 
 
-   void GridTableWineList::SetValue(int row, int col, const wxString& value) 
+   void GridTableWineList::SetValue(int, int, const wxString&) 
    {
       throw Error{constants::ERROR_STR_EDITING_NOT_SUPPORTED };
    }
@@ -85,7 +88,7 @@ namespace ctb::app
       auto attr_prov = GetAttrProvider();
       assert(attr_prov);
 
-      for (const auto& [idx, disp_col] : vws::enumerate(m_display_columns))
+      for (const auto&& [idx, disp_col] : vws::enumerate(m_display_columns))
       {
          // update existing attr if it exists, otherwise use a copy of the default attr
          auto attr = attr_prov->GetAttrPtr(0, idx, wxGridCellAttr::wxAttrKind::Col);
@@ -110,6 +113,7 @@ namespace ctb::app
 
    bool GridTableWineList::filterBySubstring(std::string_view substr)
    {
+      // this overload searches all columns in the current grid, so get the prop_id's 
       auto cols = getDisplayColumns() | vws::transform([](const DisplayColumn& disp_col) -> auto { return disp_col.prop_id; })
                                       | rng::to<std::vector>();
 
@@ -119,8 +123,8 @@ namespace ctb::app
 
    bool GridTableWineList::filterBySubstring(std::string_view substr, int col_idx)
    {
-      SubStringFilter::Prop prop = magic_enum::enum_value<SubStringFilter::Prop>(static_cast<uint32_t>(col_idx));
-      auto cols = std::vector<SubStringFilter::Prop>{ prop };
+      auto prop = RecordType::Traits::propFromIndex(col_idx);
+      auto cols = std::vector{ prop };
 
       return applySubStringFilter(SubStringFilter{ std::string{substr}, cols });
    }
@@ -129,30 +133,30 @@ namespace ctb::app
    void GridTableWineList::clearSubStringFilter()
    {
       m_substring_filter = std::nullopt;
-      m_current_view = &m_grid_data;  // TODO: this is wrong if we have column filters
+      applyFilters();
    }
 
 
-   std::vector<GridTableWineList::SortConfig>  GridTableWineList::availableSortConfigs() const
+   std::vector<GridTableWineList::GridTableSortConfig>  GridTableWineList::availableSortConfigs() const
    {
-      std::vector<GridTable::SortConfig> configs{};
+      std::vector<GridTableSortConfig> configs{};
       configs.reserve(GridTableWineList::Sorters.size()); 
 
-      for (const auto& [i, table_sort] : vws::enumerate(GridTableWineList::Sorters))
+      for (const auto&& [i, table_sort] : vws::enumerate(GridTableWineList::Sorters))
       {
-         configs.emplace_back(GridTable::SortConfig{ static_cast<int>(i), table_sort.sort_name  });
+         configs.emplace_back(GridTableSortConfig{ static_cast<int>(i), table_sort.sort_name  });
       }
       return configs;
    }
 
 
-   GridTableWineList::SortConfig  GridTableWineList::activeSortConfig() const 
+   GridTableWineList::GridTableSortConfig  GridTableWineList::activeSortConfig() const 
    {
       return m_sort_config;
    }
 
 
-   void GridTableWineList::setActiveSortConfig(const SortConfig& config)
+   void GridTableWineList::applySortConfig(const GridTableSortConfig& config)
    {
       if (config != m_sort_config)
       {
@@ -162,24 +166,111 @@ namespace ctb::app
    }
 
 
-   bool GridTableWineList::applySubStringFilter(const SubStringFilter& filter)
+   std::vector<GridTableFilter> GridTableWineList::availableStringFilters() const
    {
-      // TODO:  once column filtering is added, we'll need to check whether 
-      //        this step should start with m_grid_data or m_current_view
-      auto filtered_data = vws::all(m_grid_data) | vws::filter(filter)
-                                                 | rng::to<std::deque>();
+      return std::vector<GridTableFilter>(std::begin(StringFilters), std::end(StringFilters));
+   }
 
-      // we only update the grid if there is some matching data
-      if (!filtered_data.empty())
+
+   StringSet GridTableWineList::getFilterMatchValues(int prop_idx) const
+   {
+      return PropStringFilterMgr::getFilterMatchValues(m_grid_data, RecordType::Traits::propFromIndex(prop_idx));
+   }
+
+
+   bool GridTableWineList::addPropFilterString(int prop_idx, std::string_view value)
+   {
+      // if we somehow get passed a filter we already have, don't waste our time.
+      if ( m_prop_string_filters.addFilter(RecordType::Traits::propFromIndex(prop_idx), value) )
       {
-         m_substring_filter = filter;
-         m_filtered_data.swap(filtered_data);
-         m_current_view = &m_filtered_data;
+         applyFilters();
          return true;
       }
-      else{
-         return false;
+      return false;
+   }
+
+
+   bool GridTableWineList::removePropFilterString(int prop_idx, std::string_view match_value)
+   {
+      // if we somehow get passed filter that we aren't using, don't waste our time.
+      if ( m_prop_string_filters.removeFilter(RecordType::Traits::propFromIndex(prop_idx), match_value) )
+      {
+         applyFilters();
+         return true;
       }
+      return false;
+   }
+
+
+   //namespace 
+   //{
+   //   // some helper functions for composing filters to apply to the grid_data.
+   //   //
+   //   template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
+   //   auto applyPropStringFilters(RngT&& rng, GridTableWineList::PropStringFilterMgr& filters)
+   //   {
+   //      return vws::all(std::forward<RngT>(rng)) | vws::filter(filters);
+   //   }
+
+   //   // some helper functions for composing filters to apply to the grid_data.
+   //   //
+   //   template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
+   //   auto applyPropFilters(RngT&& rng, GridTableWineList::PropStringFilterMgr& filters)
+   //   {
+   //      return vws::all(std::forward<RngT>(rng)) | vws::filter(filters);
+   //   }
+
+
+
+   //   template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
+   //   auto applyInStockFilter(RngT&& rng, const GridTableWineList::PropFilter& filter)
+   //   {
+   //      return vws::all(std::forward<RngT>(rng)) | vws::filter(filter);
+   //   }
+
+   //   template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
+   //   auto applyStringSearchFilter(RngT&& rng, const GridTableWineList::SubStringFilter& filter)
+   //   {
+   //      return vws::all(std::forward<RngT>(rng)) | vws::filter(filter);
+   //   }
+
+   //} // namespace 
+
+
+   void GridTableWineList::applyFilters()
+   {
+      if (m_prop_string_filters.activeFilters() or m_instock_filter.enabled or m_score_filter.enabled)
+      {
+         m_filtered_data = vws::all(m_grid_data) | vws::filter(m_prop_string_filters) 
+                                                 | vws::filter(m_instock_filter)
+                                                 | vws::filter(m_score_filter)
+                                                 | rng::to<TableType>();
+         m_current_view = &m_filtered_data;
+      }
+      else
+      {
+         m_current_view = &m_grid_data;
+      }
+
+      if (m_substring_filter)
+      {
+         applySubStringFilter(*m_substring_filter);
+      }
+   }
+
+
+   bool GridTableWineList::applySubStringFilter(const SubStringFilter& filter)
+   {
+      auto filtered = vws::all(*m_current_view) | vws::filter(filter)
+                                                | rng::to<TableType>();
+
+      if (filtered.empty())
+         return false;
+    
+      m_substring_filter = filter;
+      m_filtered_data.swap(filtered);
+      m_current_view = &m_filtered_data;
+      return true;
    }
 
 
@@ -195,11 +286,57 @@ namespace ctb::app
          rng::sort(vws::reverse(m_grid_data), Sorters[static_cast<size_t>(m_sort_config.sort_index)]);
       }
 
-      // apply substring filter if any
+      applyFilters();
       if (m_substring_filter)
       {
          applySubStringFilter(*m_substring_filter);
       }
+   }
+
+
+   bool GridTableWineList::enableInStockFilter(bool enable)
+   {
+      if (enable == m_instock_filter.enabled)
+         return true;
+
+      m_instock_filter.enabled = enable;
+      applyFilters();
+      return true;
+   }
+
+
+   NullableDouble GridTableWineList::getMinScoreFilter() const
+   {
+      if (m_score_filter.enabled)
+      {
+         return m_score_filter.compare_val.asDouble();
+      }
+      return std::nullopt;
+   }
+
+
+   bool GridTableWineList::setMinScoreFilter(NullableDouble min_score)
+   {
+      if (min_score)
+      {
+         m_score_filter.enabled = true;
+         m_score_filter.compare_val = *min_score;
+      }
+      else {
+         m_score_filter.enabled = false;
+      }
+      applyFilters();
+      return true;
+   }
+
+
+   const CtProperty& GridTableWineList::getDetailProp(int row_idx, std::string_view prop_name)
+   {
+      auto maybe_prop = magic_enum::enum_cast<PropId>(prop_name);
+      if (!maybe_prop)
+         return null_prop; // can't return default-constructed becuase it would be ref to temp
+
+      return (*m_current_view)[static_cast<size_t>(row_idx)][*maybe_prop];
    }
 
 

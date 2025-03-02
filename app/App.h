@@ -26,9 +26,8 @@ namespace ctb::app
    class MainFrame;
 
 
-   /// <summary>
-   ///   app object for the OuraCharts applicatin.
-   /// </summary>
+   /// @brief app object for the OuraCharts application.
+   ///
    class App : public wxApp
    {
    public:
@@ -69,7 +68,7 @@ namespace ctb::app
 
    private:
       MainFrame* m_main_frame{};
-      fs::path m_user_data_folder{ "." }; // safe default but should never actually be used since we set re-initialize it in OnInit()
+      fs::path m_user_data_folder{ constants::CURRENT_DIRECTORY }; // safe default but should never actually be used since we set re-initialize it in OnInit()
    };
 
 }  // namespace ctb::app

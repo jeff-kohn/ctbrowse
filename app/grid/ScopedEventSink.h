@@ -13,14 +13,18 @@
 
 namespace ctb::app
 {
-   /// @brief scoped RAII wrapper for subscribing/unsubscribing from an event source
+   /// @brief scoped RAII wrapper for subscribing/unsubscribing from a grid table event source
    ///
+   /// to handle grid-table events, all a class needs to do is instantiate a member of this
+   /// class, passing a pointer to the IGridTableEventSink interface to its ctor (usually 'this'
+   /// when the containing class itself inherits from IGridTableEventSink to ensure that the sink
+   /// interface is available for the lifetime of the event source).
    class ScopedEventSink final
    {
    public:
       /// @brief construct a scoped event sink without attaching it to a source
-      ScopedEventSink(IGridTableEventSink* sink) : 
-         m_sink{ sink }
+      ///
+      explicit ScopedEventSink(IGridTableEventSink* sink) : m_sink{ sink }
       {
          if (!m_sink)
          {
@@ -63,11 +67,11 @@ namespace ctb::app
       /// returns true if successful, false if we don't have a source or the source 
       /// couldn't send notifications (because of no current table, for instance)
       /// 
-      bool signal_source(GridTableEvent event)
+      bool signal_source(GridTableEvent::Id event_id, std::optional<int> row_idx = std::nullopt)
       {
          if (m_source)
          {
-            return m_source->signal(event);
+            return m_source->signal(event_id, row_idx);
          }
          return false;
       }
@@ -84,6 +88,14 @@ namespace ctb::app
             return m_source->getTable();
          }
          return {};
+      }
+
+
+      /// @brief returns whether the event source has a table attached or not.
+      /// 
+      bool hasTable() const
+      {
+         return m_source->getTable() != nullptr;
       }
 
 

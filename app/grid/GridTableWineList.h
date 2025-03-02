@@ -10,15 +10,18 @@
 #include "App.h"
 #include "interfaces/GridTableEvent.h"
 
-#include <ctb/data/DisplayColumn.h>
-#include <ctb/data/SubStringFilter.h>
-#include <ctb/data/TableSorter.h>
-#include <ctb/data/WineListEntry.h>
+#include <ctb/DisplayColumn.h>
+#include <ctb/PropFilter.h>
+#include <ctb/PropStringFilterMgr.h>
+#include <ctb/SubStringFilter.h>
+#include <ctb/TableSorter.h>
+#include <ctb/WineListTraits.h>
 
 #include <magic_enum/magic_enum.hpp>
 #include <wx/grid.h>
 
 #include <array>
+#include <optional>
 #include <vector>
 
 
@@ -34,38 +37,50 @@ namespace ctb::app
    {
    public:
       /// @brief type used for describing how to display a column in the grid
-      using RecordType = data::WineListEntry;
-      using Prop = RecordType::Prop;
-      using DisplayColumn = data::DisplayColumn<RecordType>;
-      using SubStringFilter = data::SubStringFilter<RecordType>;
-      using TableSort = data::TableSorter<RecordType>;
-      using SortConfig = GridTable::SortConfig;
-
+      using RecordType          = WineListRecord;
+      using TableType           = WineListData;
+      using TableProperty       = RecordType::TableProperty;
+      using PropId              = RecordType::PropId;
+      using DisplayColumn       = DisplayColumn<RecordType>;
+      using PropStringFilterMgr = PropStringFilterMgr<RecordType>;
+      using SubStringFilter     = SubStringFilter<RecordType>;
+      using TableSort           = TableSorter<RecordType>;
+      using GridTableSortConfig = GridTableSortConfig;
+      using PropFilter          = PropFilter<RecordType, TableProperty>;
 
       /// @brief static factory method to create an instance of the GridTableWineList class
       /// 
-      static [[nodiscard]] GridTablePtr create(data::WineListData&& data);
+      [[nodiscard]] static GridTablePtr create(WineListData&& data);
 
 
       /// @brief list of display columns that can be used for a grid.
       ///
       static inline const std::array DefaultDisplayColumns { 
-         DisplayColumn{ Prop::WineAndVintage,                              constants::LBL_WINE     },
-         DisplayColumn{ Prop::Locale,                                      constants::LBL_LOCALE   },
-         DisplayColumn{ Prop::Quantity,   DisplayColumn::Format::Number,   constants::LBL_QTY      },
-         DisplayColumn{ Prop::Pending,    DisplayColumn::Format::Number                            },
-         DisplayColumn{ Prop::CTScore,    DisplayColumn::Format::Decimal,  constants::LBL_CT_SCORE },
-         DisplayColumn{ Prop::MYScore,    DisplayColumn::Format::Decimal,  constants::LBL_MY_SCORE },
+         DisplayColumn{ PropId::WineAndVintage,                              constants::COL_WINE     },
+         DisplayColumn{ PropId::Locale,                                      constants::COL_LOCALE   },
+         DisplayColumn{ PropId::TotalQty,   DisplayColumn::Format::Number,   constants::COL_QTY      },
+         DisplayColumn{ PropId::CTScore,    DisplayColumn::Format::Decimal,  constants::COL_CT_SCORE },
+         DisplayColumn{ PropId::MYScore,    DisplayColumn::Format::Decimal,  constants::COL_MY_SCORE },
       };
 
 
       /// @brief the available sort orders for this table.
       ///
       static inline const std::array Sorters{ 
-         TableSort{ { Prop::WineName, Prop::Vintage                    }, constants::SORT_OPTION_WINE_VINTAGE },
-         TableSort{ { Prop::Vintage,  Prop::WineName                   }, constants::SORT_OPTION_VINTAGE_WINE },
-         TableSort{ { Prop::Locale,   Prop::WineName,    Prop::Vintage }, constants::SORT_OPTION_LOCALE_WINE  },
-         TableSort{ { Prop::Region,   Prop::WineName,    Prop::Vintage }, constants::SORT_OPTION_REGION_WINE  },
+         TableSort{ { PropId::WineName, PropId::Vintage                      }, constants::SORT_OPTION_WINE_VINTAGE },
+         TableSort{ { PropId::Vintage,  PropId::WineName                     }, constants::SORT_OPTION_VINTAGE_WINE },
+         TableSort{ { PropId::Locale,   PropId::WineName,    PropId::Vintage }, constants::SORT_OPTION_LOCALE_WINE  },
+         TableSort{ { PropId::Region,   PropId::WineName,    PropId::Vintage }, constants::SORT_OPTION_REGION_WINE  },
+      };
+
+
+      /// @brief  string filters that can be used on this table.
+      ///
+      static inline const std::array StringFilters{
+         GridTableFilter{ constants::FILTER_VARIETAL,   static_cast<int>(PropId::MasterVarietal) },
+         GridTableFilter{ constants::FILTER_COUNTRY,    static_cast<int>(PropId::Country)        },
+         GridTableFilter{ constants::FILTER_REGION,     static_cast<int>(PropId::Region)         },
+         GridTableFilter{ constants::FILTER_APPELATION, static_cast<int>(PropId::Appellation)    }
       };
 
 
@@ -73,24 +88,24 @@ namespace ctb::app
       ///        sort configs by calling availableSortConfigs()
       /// 
       /// this function will throw an exception if you pass an invalid index.
-      static SortConfig getSortConfig(int index) 
+      static GridTableSortConfig getSortConfig(int index) 
       {
          if (index >= std::ssize(Sorters))
             throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_INVALID_INDEX };
          
          auto& ts = Sorters[static_cast<size_t>(index)];
-         return SortConfig{ index, ts.sort_name, true };
+         return GridTableSortConfig{ index, ts.sort_name, true };
       }
 
 
       /// @brief base class override that returns the number of rows/records in the table/grid
       ///
-      int GetNumberRows() override { return std::ssize(*m_current_view); }
+      int GetNumberRows() override { return static_cast<int>(m_current_view->size()); }
 
 
       /// @brief base class override that returns the number of columns displayed in the table/grid
       ///
-      int GetNumberCols() override { return std::ssize(m_display_columns); }
+      int GetNumberCols() override { return static_cast<int>(m_display_columns.size()); }
 
 
       /// @brief base class override to get the display name for column headers
@@ -171,46 +186,93 @@ namespace ctb::app
 
       // returns a collection of available sort options. 
       ///
-      std::vector<SortConfig>  availableSortConfigs() const override;
+      std::vector<GridTableSortConfig>  availableSortConfigs() const override;
 
 
       // retrieves the currently-active sort option
       ///
-      SortConfig activeSortConfig() const override;
+      GridTableSortConfig activeSortConfig() const override;
 
 
       // sets the currently-active sort option
       ///
-      void setActiveSortConfig(const SortConfig& config) override;
-      //void setActiveSortConfig(int config_index, bool ascending = true) override;
-
-   private:
-      ColumnList                     m_display_columns{};
-      data::WineListData*            m_current_view{};         // may point to m_grid_data or m_filtered_data depending if filter is active
-      data::WineListData             m_grid_data{};            // the underlying data records for this table.
-      data::WineListData             m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
-      SortConfig                     m_sort_config{};
-      std::optional<SubStringFilter> m_substring_filter{};
-
-      /// @brief private constructor used by static create()
-      GridTableWineList(data::WineListData&& data) : 
-         m_display_columns(DefaultDisplayColumns.begin(), DefaultDisplayColumns.end()),
-         m_current_view{&m_grid_data},
-         m_grid_data{std::move(data)}
-      {}
-
-      //void filterData();
-      bool applySubStringFilter(const SubStringFilter& filter);
-      void sortData();
-      bool isFilterActive()   {  return m_current_view = &m_filtered_data; }
+      void applySortConfig(const GridTableSortConfig& config) override;
 
 
-      // this class is meant to be instantiated on the heap.
+      /// @brief get a list of available filter option for this table.
+      /// 
+      std::vector<GridTableFilter> availableStringFilters() const override;
+
+
+      /// @brief get a list of string values that can be used to filter on a column in the table
+      ///
+      StringSet getFilterMatchValues(int prop_idx) const override;
+
+
+      /// @brief adds a match value string filter for the specified column.
+      ///
+      bool addPropFilterString(int prop_idx, std::string_view match_value) override;
+
+
+      /// @brief adds a match value filter for the specified column.
+      ///
+      bool removePropFilterString(int prop_idx, std::string_view match_value) override;
+
+
+      const TableProperty& getDetailProp(int row_idx, std::string_view prop_name) override;
+
+
+      bool enableInStockFilter(bool enable) override;
+
+
+      bool hasInStockFilter() const override 
+      {  
+         return true;   
+      }
+
+
+      NullableDouble getMinScoreFilter() const override;
+
+
+      bool setMinScoreFilter(NullableDouble min_score) override;
+
+
+      // default dtor, others are deleted since this object is meant to live on the heap
+      ~GridTableWineList() override = default;
       GridTableWineList() = delete;
       GridTableWineList(const GridTableWineList&) = delete;
       GridTableWineList(GridTableWineList&&) = delete;
       GridTableWineList& operator=(const GridTableWineList&) = delete;
       GridTableWineList& operator=(GridTableWineList&&) = delete;
-   };
+
+   private:
+      ColumnList                       m_display_columns{};
+      PropFilter                       m_instock_filter{};
+      PropFilter                       m_score_filter{};
+      PropStringFilterMgr              m_prop_string_filters{};
+      WineListData*                    m_current_view{};         // may point to m_grid_data or m_filtered_data depending if filter is active
+      WineListData                     m_grid_data{};            // the underlying data records for this table.
+      WineListData                     m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
+      GridTableSortConfig              m_sort_config{};
+      std::optional<SubStringFilter>   m_substring_filter{};
+
+      /// @brief private constructor used by static create()
+      GridTableWineList(WineListData&& data) : 
+         m_display_columns(DefaultDisplayColumns.begin(), DefaultDisplayColumns.end()),
+         m_instock_filter{ PropId::Quantity, std::greater<TableProperty>(), uint16_t{0} },
+         m_score_filter{ {PropId::CTScore, PropId::MYScore}, std::greater_equal<TableProperty>(), constants::FILTER_SCORE_DEFAULT },
+         m_current_view{&m_grid_data},
+         m_grid_data{std::move(data)}
+      {
+      }
+
+      void applyFilters();
+      bool applySubStringFilter(const SubStringFilter& filter);
+      void sortData();
+      bool isFilterActive()   {  return m_current_view = &m_filtered_data; }
+
+      // Inherited via GridTable
+
+};
 
 } // namespace ctb::app

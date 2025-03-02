@@ -8,7 +8,7 @@
 #pragma once
 
 #include "App.h"
-#include <ctb/data/table_data.h>
+#include <ctb/table_data.h>
 
 #include <vector>
 
@@ -39,17 +39,17 @@ namespace ctb::app
 
       /// @brief set the list of tables that should be selected for download.
       ///
-      template <rng::input_range Rng>
-      void selectTables(Rng&& values) requires std::is_same_v<rng::range_value_t<Rng>, data::TableId>
+      template <rng::input_range RngT>
+      void selectTables(RngT&& values) requires std::is_same_v<rng::range_value_t<RngT>, TableId>
       {
-         m_table_selection_val = values | vws::transform([] (data::TableId tbl) { return magic_enum::enum_index(tbl); })
+         m_table_selection_val = values | vws::transform([] (TableId tbl) { return magic_enum::enum_index(tbl); })
                                         | rng::to<wxArrayString>();
       }
 
 
       /// @brief retrieve the list of tables the user selected for download
       ///
-      [[nodiscard]] std::vector<data::TableId> selectedTables() const;
+      [[nodiscard]] std::vector<TableId> selectedTables() const;
 
 
       /// @brief  indicates whether the user checked "Save as Default" in the dialog
@@ -78,7 +78,7 @@ namespace ctb::app
       void onSelectAllUpdateUI(wxUpdateUIEvent& event);
       void createImpl();
 
-      unsigned int checkedTableCount() const
+      size_t checkedTableCount() const
       {
          wxArrayInt dummy{};
          m_table_selection_ctrl->GetCheckedItems(dummy);

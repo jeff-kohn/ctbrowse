@@ -17,6 +17,8 @@ namespace ctb::app
       EnableEditing(false);
       EnableDragGridSize(false);
       UseNativeColHeader(true);
+
+      Bind(wxEVT_GRID_SELECT_CELL, &CellarTrackerGrid::onGridCellChanging, this);
    }
 
 
@@ -58,7 +60,7 @@ namespace ctb::app
       // We store a shared_ptr instead of the raw ptr to prevent the
       // table from being deleted out from under us (object lifetimes
       // can get tricky with wxWindow-derived classes).
-      m_grid_table = m_sink.getTable();
+      m_grid_table = tbl;
       {
          wxGridUpdateLocker lock(this);
          
@@ -86,7 +88,7 @@ namespace ctb::app
    }
 
 
-   void CellarTrackerGrid::filterBySubstring(std::string_view substr)
+   bool CellarTrackerGrid::filterBySubstring(std::string_view substr)
    {
       if (!m_grid_table)
          throw Error{ constants::ERROR_STR_NO_GRID_TABLE, Error::Category::UiError };
@@ -95,7 +97,7 @@ namespace ctb::app
       if (substr.empty())
       {
          clearSubStringFilter();
-         return;
+         return false;
       }
 
       {
@@ -103,16 +105,18 @@ namespace ctb::app
          if (m_grid_table->filterBySubstring(substr))
          {
             // calling SetTable with the same ptr is fine, it forces grid to re-fetch the data.
-            setGridTable(m_grid_table);;
+            setGridTable(m_grid_table);
+            return true;
          }
          else {
             wxGetApp().displayInfoMessage(constants::INFO_MSG_NO_MATCHING_ROWS);
+            return false;
          }
       }
    }
 
 
-   void CellarTrackerGrid::filterBySubstring(std::string_view substr, int col_idx)
+   bool CellarTrackerGrid::filterBySubstring(std::string_view substr, int col_idx)
    {
       if (!m_grid_table)
          throw Error{ constants::ERROR_STR_NO_GRID_TABLE, Error::Category::UiError };
@@ -124,9 +128,11 @@ namespace ctb::app
          {
             // calling setTable with the same ptr is fine, it forces grid to re-fetch the data.
             setGridTable(m_grid_table);
+            return true;
          }
          else {
             wxGetApp().displayInfoMessage(constants::INFO_MSG_NO_MATCHING_ROWS);
+            return false;
          }
       }
    }
@@ -146,27 +152,33 @@ namespace ctb::app
    }
 
 
-   void CellarTrackerGrid::notify(GridTableEvent event, GridTable* grid_table)
+   void CellarTrackerGrid::notify(GridTableEvent event)
    {
-      switch (event)
+      switch (event.m_event_id)
       { 
-         case GridTableEvent::TableRemove:
+         case GridTableEvent::Id::TableRemove:
             SetTable(nullptr);
             m_grid_table.reset();
             break;
 
-         case GridTableEvent::TableInitialize:
-         case GridTableEvent::Sort:
-         case GridTableEvent::Filter:
-         case GridTableEvent::SubStringFilter:
+         case GridTableEvent::Id::TableInitialize:
+         case GridTableEvent::Id::Sort:
+         case GridTableEvent::Id::Filter:
+         case GridTableEvent::Id::SubStringFilter:
             setGridTable(m_sink.getTable());   // we need the ref-counted smart-ptr
             break;
 
-         case GridTableEvent::RowSelected:
-            break;
+         case GridTableEvent::Id::RowSelected:
          default:
             break;
       }
+   }
+
+   void CellarTrackerGrid::onGridCellChanging(wxGridEvent& event)
+   {
+      // When row selection changes, we need to let the details panel know about it.
+      // we don't care about column position, only row.
+      m_sink.signal_source(GridTableEvent::Id::RowSelected,  event.GetRow());
    }
 
 

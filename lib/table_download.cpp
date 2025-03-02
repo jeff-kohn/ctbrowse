@@ -5,7 +5,7 @@
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
-#include "ctb/data/table_download.h"
+#include "ctb/table_download.h"
 #include "ctb/winapi_util.h"
 #include "external/HttpStatusCodes.h"
 
@@ -13,12 +13,12 @@
 #include <cpr/response.h>
 #include <cpr/status_codes.h>
 
-namespace
+namespace ctb
 {
    /// @brief  returns true if the request returned a valid response, or an Error if it didn't
+   ///
    std::expected<bool, ctb::Error> validateResult(cpr::Response& response)
    {
-      using namespace ctb;
       using namespace magic_enum;
 
       // unexpected return value, will be populated below if request failed.
@@ -58,19 +58,18 @@ namespace
 } // anon namespace
 
 
-namespace ctb::data
+namespace ctb
 {
 
    [[nodiscard]] DownloadResult downloadRawTableData(
       const CredentialWrapper::Credential& cred,
       TableId table,
       DataFormatId format,
-      ProgressCallback* callback)
+      ProgressCallback* callback )
    {
       auto table_name = magic_enum::enum_name(table);
       auto data_format = magic_enum::enum_name(format);
       cpr::Header header{ {constants::HTTP_HEADER_XCLIENT, constants::HTTP_HEADER_XCLIENT_VALUE} };
-
 
       cpr::Url url{ std::format(constants::FMT_HTTP_CELLARTRACKER_QUERY_URL,
                                 util::percentEncode(std::string(cred.username)),
@@ -102,4 +101,4 @@ namespace ctb::data
    }
 
 
-} // namespace ctb::data
+} // namespace ctb

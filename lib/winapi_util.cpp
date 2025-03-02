@@ -19,9 +19,9 @@
 #include <string>
 #include <vector>
 
-#include <windows.h>
-#include <shlwapi.h>
-#include <WinInet.h>
+#include <Windows.h>
+#include <Shlwapi.h>
+#include <wininet.h>
 
 
 namespace ctb::util
@@ -81,68 +81,28 @@ namespace ctb::util
    }
 
 
-   std::string getEnvironmentVar(const char* var_name, std::string_view default_val)
-   {
-      if (nullptr == var_name || *var_name == '\0')
-         return std::string(default_val);
-
-      // std::getenv() isn't thread safe so use the WinAPI.
-      // try with a modestly sized static array first, if it's not big enough
-      // we can re-try with a dynamically-sized array
-      char buf[constants::MAX_ENV_VAR_LENGTH] = { '\0' };
-      auto max_var_length = sizeof(buf) - 1;
-      auto actual_var_length = ::GetEnvironmentVariable(var_name, buf, sizeof(buf));
-      if (actual_var_length <= max_var_length)
-      {
-         return std::string{ buf };
-      }
-      else if (actual_var_length > max_var_length)
-      {
-         std::vector<char> dyn_buf(actual_var_length);
-         if (::GetEnvironmentVariable(var_name, dyn_buf.data(), static_cast<DWORD>(dyn_buf.size())))
-            return std::string{dyn_buf.data()};
-      }
-
-      return std::string{ default_val };
-   }
-
-
-   bool expandEnvironmentVars(std::string& text)
-   {
-      // Find out how big of a string we need to accommodate
-      auto bufsize = ExpandEnvironmentStrings(text.c_str(), nullptr, 0);
-      if (0 == bufsize)
-         return false;
-
-      // When using ANSI strings, the buffer size should be the string length,
-      // plus terminating null character, plus one.
-      std::string dest(bufsize + 2, '\0');
-
-      if (ExpandEnvironmentStrings(text.c_str(), dest.data(), bufsize))
-      {
-         text.swap(dest);
-         return true;
-      }
-      else
-         return false;
-   }
-
-
    bool saveTextToFile(std::string_view text, fs::path file_path, bool overwrite) noexcept
    {
-      if (fs::exists(file_path) && !overwrite)
+      try
+      {
+         if (fs::exists(file_path) && !overwrite)
+            return false;
+
+         if (file_path.has_parent_path())
+            fs::create_directories(file_path.parent_path());
+
+         // use binary mode to keep ofstream from inserting extra carriage returns, since
+         // we want to preserve whatever line feeds are already in the file (it may already
+         // have CR/LF, in which case we'd end up with extra CR on Windows in text mode because
+         // ofstream isn't smart enough to recognize it).
+         std::ofstream file_out{ file_path, std::ios_base::out | std::ios_base::binary };
+         file_out << text;
+         return true;
+      }
+      catch(fs::filesystem_error&)
+      {
          return false;
-
-      if (file_path.has_parent_path())
-         fs::create_directories(file_path.parent_path());
-
-      // use binary mode to keep ofstream from inserting extra carriage returns, since
-      // we want to preserve whatever line feeds are already in the file (it may already
-      // have CR/LF, in which case we'd end up with extra CR in text mode because
-      // ofstream isn't smart enough to recognize it).
-      std::ofstream file_out{ file_path, std::ios_base::out | std::ios_base::binary };
-      file_out << text;
-      return true;
+      }
    }
 
 

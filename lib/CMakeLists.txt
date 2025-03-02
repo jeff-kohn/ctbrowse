@@ -7,20 +7,29 @@ add_library(${PROJECT_NAME}::ctBrowse_lib ALIAS ctBrowse_lib)
 
 target_sources(ctBrowse_lib
    PUBLIC
+      "../include/ctb/common_types.h"
+      "../include/ctb/concepts.h"
       "../include/ctb/constants.h"
       "../include/ctb/CredentialWrapper.h"
-      "../include/ctb/data/DisplayColumn.h"
-      "../include/ctb/data/SubstringFilter.h"
-      "../include/ctb/data/table_data.h"
-      "../include/ctb/data/table_download.h"
-      "../include/ctb/data/WineListEntry.h"
+      "../include/ctb/ctb.h"
+      "../include/ctb/CtRecordImpl.h"
+      "../include/ctb/DisplayColumn.h"
       "../include/ctb/Error.h"
+      "../include/ctb/PropFilter.h"
+      "../include/ctb/PropStringFilter.h"
+      "../include/ctb/PropStringFilterMgr.h"
+      "../include/ctb/SubstringFilter.h"
+      "../include/ctb/TableProperty.h"
+      "../include/ctb/TableSorter.h"
+      "../include/ctb/table_data.h"
+      "../include/ctb/table_download.h"
+      "../include/ctb/utility.h"
+      "../include/ctb/WineListTraits.h"
       "../include/ctb/winapi_util.h"
 
    PRIVATE
       "CredentialWrapper.cpp"
-      "data/table_download.cpp"
-      "data/WineListEntry.cpp"
+      "table_download.cpp"
       "winapi_util.cpp"
 )
 
@@ -29,6 +38,12 @@ target_include_directories(ctBrowse_lib
 	PUBLIC
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
 		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+target_include_directories(ctBrowse_lib
+   SYSTEM
+	PUBLIC
+		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/3rdParty>
 )
 
 # Note that since this target is a 
