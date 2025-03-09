@@ -30,6 +30,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_TITLE_TYPED_ERROR             = "Error ({})";
 
    inline constexpr const char* INFO_MSG_NO_MATCHING_ROWS         = "No rows matched the search text.";
+   inline constexpr const char* NO_SCORE                          = " --";
 
 
    // grid column labels
@@ -81,7 +82,7 @@ namespace ctb::constants
    inline constexpr const char* DETAIL_PROP_VARIETAL              = "MasterVarietal";
    inline constexpr const char* DETAIL_PROP_VINTAGE               = "Vintage";
    inline constexpr const char* DETAIL_PROP_WINE_NAME             = "WineName";
-
+   inline constexpr const char* DETAIL_PROP_WINE_ID               = "iWineID";
 
    inline constexpr const char* RES_NAME_ICON_PRODUCT             = "IDR_PRODUCT_ICON";
    inline constexpr const char* RES_NAME_MAINFRAME                = "MAINFRAME";
@@ -103,13 +104,14 @@ namespace ctb::constants
    inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
    inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
 
+   inline constexpr const char* FMT_URL_WINE_DETAILS              = "https://www.cellartracker.com/wine.asp?iWine={}";
+
    inline constexpr double FILTER_SCORE_DEFAULT =  90.0;
    inline constexpr double FILTER_SCORE_INCR    =   0.1;
    inline constexpr double FILTER_SCORE_MIN     =    50;
    inline constexpr double FILTER_SCORE_MAX     = 100.0;
    inline constexpr int FILTER_SCORE_DIGITS     =     1;
    inline constexpr int WX_UNSPECIFIED_VALUE    =    -1;
-
    inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = false;
 
 }  // namespace ctb::app::constants

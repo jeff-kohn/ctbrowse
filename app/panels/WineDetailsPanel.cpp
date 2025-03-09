@@ -1,5 +1,6 @@
 #include "panels/WineDetailsPanel.h"
 
+#include <wx/commandlinkbutton.h>
 #include <wx/stattext.h>
 #include <wx/valgen.h>
 #include <wx/wupdlock.h>
@@ -83,6 +84,7 @@ namespace ctb::app
       wine_name_val->SetFont(wine_font);
       top_sizer->Add(wine_name_val, wxSizerFlags{1}.Expand().Border(wxLEFT|wxRIGHT|wxTOP));
 
+      // grid sizer gives us a property grid (eg a column of labels and values)
       auto* details_sizer = new wxFlexGridSizer(2, 0, 0);
 
       // vintage
@@ -212,9 +214,18 @@ namespace ctb::app
       auction_price_val->SetValidator(wxGenericValidator{ &m_details.auction_value });
       details_sizer->Add(auction_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
 
-      top_sizer->Add(details_sizer, wxSizerFlags{1}.Expand().FixedMinSize().Border(wxALL));
+      top_sizer->Add(details_sizer, wxSizerFlags{}.Expand().FixedMinSize().Border(wxALL));
+
+      // View Online button (also outside grid sizer, same as wine name)
+      auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, "View Online at CellarTracker.com");
+      top_sizer->Add(view_online_btn, wxSizerFlags().Border(wxALL).Expand());
+
       top_sizer->ShowItems(false);
       SetSizerAndFit(top_sizer);
+
+      // hook up event handlers
+      view_online_btn->Bind(wxEVT_BUTTON, &WineDetailsPanel::onViewWebPage, this);
+
    }
 
 
@@ -255,6 +266,8 @@ namespace ctb::app
       {
          auto* tbl = event.m_grid_table;
          auto row_idx = event.m_affected_row.value();
+
+         m_details.wine_id     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_WINE_ID    ).asString();
          m_details.wine_name   = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_WINE_NAME  ).asString();
          m_details.vintage     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_VINTAGE    ).asString();
          m_details.varietal    = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_VARIETAL   ).asString();
@@ -270,8 +283,11 @@ namespace ctb::app
          m_details.community_price  = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_COMMUNITY_PRICE).asString(constants::FMT_NUMBER_CURRENCY).c_str();
          m_details.my_price         = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_MY_PRICE       ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
 
-         m_details.ct_score         = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_CT_SCORE).asString(constants::FMT_NUMBER_DECIMAL).c_str();
-         m_details.my_score         = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_MY_SCORE).asString(constants::FMT_NUMBER_DECIMAL).c_str();
+         auto prop_val = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_CT_SCORE);
+         m_details.ct_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
+
+         prop_val = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_MY_SCORE);
+         m_details.my_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
          GetSizer()->ShowItems(true);
       }
       else{
@@ -282,6 +298,17 @@ namespace ctb::app
       TransferDataToWindow();
       Layout();
       // TODO hide/unhide fields as necessary.
+   }
+
+   void WineDetailsPanel::onViewWebPage(wxCommandEvent& event)
+   {
+      if (m_details.wine_id.empty())
+      {
+         wxGetApp().displayInfoMessage("no wine id available.");
+      }
+      else{
+         wxLaunchDefaultBrowser(std::format(constants::FMT_URL_WINE_DETAILS, m_details.wine_id).c_str());
+      }
    }
 
 

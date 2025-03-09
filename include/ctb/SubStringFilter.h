@@ -32,7 +32,7 @@ namespace ctb
       ///
       std::string search_value{};
 
-      /// @brief the properties to search for.
+      /// @brief the properties to search in.
       ///
       std::vector<PropId> search_props{};
 
@@ -48,11 +48,12 @@ namespace ctb
          for (auto prop : search_props)
          {
             auto val = rec.getProperty(prop);
-            if (val.hasString())
-            {
-               return boost::icontains(val.asStringView(), search_value);
-            }              
-            return boost::icontains(val.asString(), search_value);
+
+            if ( val.hasString() and boost::icontains(val.asStringView(), search_value) )
+               return true;
+            
+            if (boost::icontains(val.asString(), search_value))
+               return true;
          }
          return false;
       }

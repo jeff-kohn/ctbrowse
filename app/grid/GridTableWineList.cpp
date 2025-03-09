@@ -261,9 +261,13 @@ namespace ctb::app
 
    bool GridTableWineList::applySubStringFilter(const SubStringFilter& filter)
    {
+      // clear any existing substring filter first, only one at a time. The new filter will be 
+      // applied if there are any matches. If no matches, substring filter will be cleared
+      // since we dont' restore it (by design).
+      m_substring_filter = {};
+      applyFilters();
       auto filtered = vws::all(*m_current_view) | vws::filter(filter)
                                                 | rng::to<TableType>();
-
       if (filtered.empty())
          return false;
     

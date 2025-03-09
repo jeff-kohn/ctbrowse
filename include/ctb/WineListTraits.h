@@ -17,6 +17,7 @@
 #include <format>
 #include <utility>
 #include <span>
+#include <vector>
 
 namespace ctb
 {
@@ -152,6 +153,6 @@ namespace ctb
    };
 
    using WineListRecord = CtRecordImpl<WineListTraits>;
-   using WineListData   = std::deque<WineListRecord>;
+   using WineListData   = std::vector<WineListRecord>;
 
 } // namespace ctb

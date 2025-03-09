@@ -40,6 +40,7 @@ namespace ctb::app
       ///
       struct WineDetails
       {
+         std::string wine_id{};
          wxString wine_name{};
          wxString vintage{};
          wxString varietal{};
@@ -58,7 +59,7 @@ namespace ctb::app
       WineDetails       m_details{};
       ScopedEventSink   m_event_sink;   // no default init
 
-      // window creation``
+      // window creation
       void initControls();
 
       /// event source related handlers
@@ -66,6 +67,7 @@ namespace ctb::app
 
       // windows event handlers
       void UpdateDetails(GridTableEvent event);
+      void onViewWebPage(wxCommandEvent& event);
 
       // private ctor used by create()
       explicit WineDetailsPanel(GridTableEventSourcePtr source);
