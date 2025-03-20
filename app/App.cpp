@@ -121,7 +121,7 @@ namespace ctb::app
 
    void App::displayErrorMessage(const Error& err)
    {
-      auto title = std::format(constants::FMT_TITLE_TYPED_ERROR, err.categoryName());
+      auto title = ctb::format(constants::FMT_TITLE_TYPED_ERROR, err.categoryName());
       displayErrorMessage(err.error_message, title);
    }
 

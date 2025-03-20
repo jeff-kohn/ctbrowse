@@ -311,7 +311,7 @@ namespace ctb::app
       auto count = m_check_map[item];
       if (count)
       {
-         auto lbl = std::format(constants::FMT_LBL_FILTERS_SELECTED, filter_name.wx_str(), count);
+         auto lbl = ctb::format(constants::FMT_LBL_FILTERS_SELECTED, filter_name.wx_str(), count);
          m_filter_tree->SetItemText(item, lbl.c_str());
       }
       else{

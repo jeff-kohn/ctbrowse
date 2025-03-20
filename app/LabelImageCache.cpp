@@ -1,7 +1,7 @@
 #include "LabelImageCache.h"
 #include <stdexec/execution.hpp>
 
-namespace ctb
+namespace ctb::app
 {
 
 

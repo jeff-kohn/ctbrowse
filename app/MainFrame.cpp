@@ -504,7 +504,7 @@ namespace ctb::app
 
       if (total)
       {
-         SetStatusText(std::format(constants::FMT_LBL_TOTAL_ROWS, total), STATUS_BAR_PANE_TOTAL_ROWS);
+         SetStatusText(ctb::format(constants::FMT_LBL_TOTAL_ROWS, total), STATUS_BAR_PANE_TOTAL_ROWS);
       }
       else{
          SetStatusText("", STATUS_BAR_PANE_TOTAL_ROWS);
@@ -512,7 +512,7 @@ namespace ctb::app
 
       if (filtered < total)
       {
-         SetStatusText(std::format(constants::FMT_LBL_FILTERED_ROWS, filtered), STATUS_BAR_PANE_FILTERED_ROWS);
+         SetStatusText(ctb::format(constants::FMT_LBL_FILTERED_ROWS, filtered), STATUS_BAR_PANE_FILTERED_ROWS);
       }
       else{
          SetStatusText("", STATUS_BAR_PANE_FILTERED_ROWS);

@@ -42,6 +42,7 @@ target_link_libraries(${TARGET_NAME}
       HtmlParser
       STDEXEC::stdexec
       spdlog::spdlog
+      fmt::fmt
 )
 
 target_sources(${TARGET_NAME}

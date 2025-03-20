@@ -10,9 +10,8 @@
 #include <vector>
 
 
-namespace ctb
+namespace ctb::app
 {
-   namespace fs = std::filesystem;
 
    /// @brief manages a disk-based cache of wine label images.
    ///
@@ -60,7 +59,7 @@ namespace ctb
 
       static std::string buildFileName(uint64_t wine_id, int image_num = 1)
       {
-         return std::format(constants::FMT_LABEL_IMAGE_FILENAME, wine_id, image_num);
+         return ctb::format(constants::FMT_LABEL_IMAGE_FILENAME, wine_id, image_num);
       }
 
       static fs::path buildFilePath(fs::path folder, uint64_t wine_id, int image_num = 1)

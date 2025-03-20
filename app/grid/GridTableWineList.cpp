@@ -34,7 +34,7 @@ namespace ctb::app
       {
          /// If we get here we got a request for invalid column, i.e. a bug
          assert(false);
-         return std::format("Col {}", col);
+         return ctb::format("Col {}", col);
       }
       return wxString{ m_display_columns[col_idx].display_name };
 

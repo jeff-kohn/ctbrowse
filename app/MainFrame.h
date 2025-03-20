@@ -51,24 +51,24 @@ namespace ctb::app
       [[nodiscard]] static MainFrame* create();
 
 
-      /// @brief set status bar text using std::format() syntax
+      /// @brief set status bar text using format() syntax
       ///
       template <typename... Args>
-      constexpr void setStatusText(std::format_string<Args...> fmt_str, Args&&... args)
+      constexpr void setStatusText(ctb::format_string<Args...> fmt_str, Args&&... args)
       {
-         SetStatusText(std::format(fmt_str, std::forward<Args>(args)...));
+         SetStatusText(ctb::format(fmt_str, std::forward<Args>(args)...));
       }
 
 
-      /// @brief set status bar text for a specified pane using std::format() syntax
+      /// @brief set status bar text for a specified pane using format() syntax
       ///
       /// pane-index is zero-based
       ///
       template <typename... Args>
-      constexpr void setStatusText(int pane_index, std::format_string<Args...> fmt_str, Args&&... args)
+      constexpr void setStatusText(int pane_index, ctb::format_string<Args...> fmt_str, Args&&... args)
       {
          assert(pane_index <= STATUS_BAR_PANE_FILTERED_ROWS);
-         SetStatusText(std::format(fmt_str, std::forward<Args>(args)...), pane_index);
+         SetStatusText(ctb::format(fmt_str, std::forward<Args>(args)...), pane_index);
       }
 
 

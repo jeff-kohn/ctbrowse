@@ -17,9 +17,19 @@
 #include <filesystem>
 
 
+namespace ctb
+{
+   // we can replace these with std:: if we want, rest of app uses them from ctb::
+   using fmt::format;
+   using fmt::format_string;
+   using fmt::format;
+}
+
+
 namespace ctb::app
 {
    namespace fs = std::filesystem;
+
 
 
    /// @brief forward declare top-level window class so we don't have to add header dependency
@@ -63,7 +73,7 @@ namespace ctb::app
       void displayErrorMessage(const Error& err);
       void displayErrorMessage(const std::string& msg, const std::string& title = constants::ERROR_STR);
 
-      /// @brief display a message box with informational text
+      /// @brief display a message box with inctb::formational text
       ///
       void displayInfoMessage(const std::string& msg, const std::string& title = constants::APP_NAME_SHORT);
 

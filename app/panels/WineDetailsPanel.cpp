@@ -30,7 +30,7 @@ namespace ctb::app
          if (drink_end.isNull() )
             return drink_start.asString("{} +").c_str();
 
-         return std::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str(); 
+         return ctb::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str(); 
       }
 
 
@@ -42,7 +42,7 @@ namespace ctb::app
             cpr::Header headers = { {"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"} };
 
             // make an HTTP GET request to retrieve the target page
-            cpr::Response response = cpr::Get(cpr::Url{ std::format(constants::FMT_URL_WINE_DETAILS, wine_id) }, headers);
+            cpr::Response response = cpr::Get(cpr::Url{ ctb::format(constants::FMT_URL_WINE_DETAILS, wine_id) }, headers);
 
             HtmlParser::Parser parser;
             HtmlParser::DOM dom = parser.Parse(response.text);
@@ -349,7 +349,7 @@ namespace ctb::app
          wxGetApp().displayInfoMessage("no wine id available.");
       }
       else{
-         wxLaunchDefaultBrowser(std::format(constants::FMT_URL_WINE_DETAILS, m_details.wine_id).c_str());
+         wxLaunchDefaultBrowser(ctb::format(constants::FMT_URL_WINE_DETAILS, m_details.wine_id).c_str());
       }
    }
 
