@@ -1,3 +1,11 @@
+/*********************************************************************
+ * @file       CtProperty.h
+ *
+ * @brief      declaration for the CtProperty type, which is used by
+ *             all of our data tables/grids
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #pragma once
 #include "ctb/TableProperty.h"
 

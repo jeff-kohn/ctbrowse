@@ -1,3 +1,10 @@
+/*********************************************************************
+ * @file       log.cpp
+ *
+ * @brief      logging-related function implementations for the app. 
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #include "log.h"
 #include <spdlog/sinks/null_sink.h>
 

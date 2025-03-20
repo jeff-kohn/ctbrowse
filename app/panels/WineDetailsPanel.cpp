@@ -1,3 +1,10 @@
+/*********************************************************************
+ * @file       WineDetailsPanel.cpp
+ *
+ * @brief      implementation for the WineDetailsPanel class
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #include "panels/WineDetailsPanel.h"
 
 #include <cpr/cpr.h>

@@ -1,3 +1,10 @@
+/*********************************************************************
+ * @file       PropFilter.h
+ *
+ * @brief      declaration for the PropFilter class
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #pragma once
 
 #include "ctb/ctb.h"

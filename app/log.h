@@ -1,11 +1,11 @@
 /*********************************************************************
- * @file       logging.h
+ * @file       log.h
  *
  * @brief      logging interface for the app. wxWidgets logging sucks so 
- *             we use spdlog instead, exposed throug this logging 
+ *             we use spdlog instead, exposed through this ctb::log
  *             namespace
  *
- * @copyright  Copyright © 2024 Jeff Kohn. All rights reserved.
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 #pragma once
 
@@ -28,7 +28,7 @@
 
 namespace ctb::log
 {
-   //
+
    // import these symbols into our namespace, so logging interface looks like logging::warn(...) and there's
    // possibility to replace logging backend with minimal impact if needed.
    //
@@ -92,6 +92,9 @@ namespace ctb::log
       error("In {}:{} - {}", file_name, source_loc.line(), source_loc.function_name(), e.what());
    }
 
+
+   /// @brief flush the active default logger's queue to disk
+   ///
    inline void flush()
    {
       spdlog::default_logger()->flush();
@@ -104,15 +107,26 @@ namespace ctb::log
    [[nodiscard]] sink_ptr_t makeConsoleSink(level_enum level, std::string_view pattern = constants::LOG_PATTERN_CONSOLE);
 
 
+   /// @brief create a logging sink that outputs to OutputDebugString()
+   /// @return the requested sink if enabled (debug windows), or null_sink if not
+   /// 
    [[nodiscard]] sinks_init_list::value_type makeDebuggerSink();
 
 
+   /// @brief create a sink that logs to file
+   /// 
    [[nodiscard]] sinks_init_list::value_type makeFileSink(level_enum level = constants::LOGLEVEL_FILE,
                                                           fs::path log_folder = constants::LOG_FOLDER, 
                                                           std::string_view log_filename_base = constants::APP_NAME_SHORT, 
                                                           std::string_view pattern = constants::LOG_PATTERN_FILE);
 
 
+   /// @brief create and set the default logger so that free-standing log functions will use it.
+   /// @param sinks the logging sinks to use with the logger (defaults to debugger and file sinks)
+   /// 
+   /// while a pointer to the created logger is returned, you don't need to use or hold it since
+   /// spdlog has its own internal shared_ptr to the default logger.
+   /// 
    log_ptr_t setupDefaultLogger(sinks_init_list sinks = { makeDebuggerSink(), makeFileSink() });
 
 

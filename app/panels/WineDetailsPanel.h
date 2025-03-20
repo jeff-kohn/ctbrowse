@@ -1,3 +1,10 @@
+/*********************************************************************
+ * @file       WineDetailsPanel.h
+ *
+ * @brief      declaration for the WineDetailsPanel class
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #pragma once
 #include "App.h"
 #include "grid/ScopedEventSink.h"

@@ -14,8 +14,6 @@
 #include <wx/wx.h>
 #include <wx/confbase.h>
 
-#include <filesystem>
-
 
 namespace ctb
 {

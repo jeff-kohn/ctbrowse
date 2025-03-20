@@ -1,3 +1,11 @@
+/*********************************************************************
+ * @file       LabelImageCache.cpp
+ *
+ * @brief      implementation for the LabelImageCache class
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
+
 #include "LabelImageCache.h"
 #include <stdexec/execution.hpp>
 

@@ -1,3 +1,10 @@
+/*********************************************************************
+ * @file       LabelImageCache.h
+ *
+ * @brief      declaration for the LabelImageCache class 
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #pragma once
 
 #include "App.h"
