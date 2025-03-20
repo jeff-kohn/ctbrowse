@@ -25,6 +25,12 @@ namespace ctb::util
    std::string percentDecode(std::string_view text);
 
 
+   /// @brief  Expand environment varariables in a string (in-place).
+   /// @return true if successful, false if unsuccessful in which case text will be unmodified
+   /// 
+   bool expandEnvironmentVars(std::string& text);
+
+
    /// @brief convert text to UTF8 from other narrow/multi-byte encoding.
    ///
    /// see https://learn.microsoft.com/en-us/windows/win32/Intl/code-page-identifiers

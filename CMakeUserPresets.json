@@ -16,7 +16,7 @@
          "hidden": false,
          "inherits": [ "ci-win-clang", "dev-mode" ],
          "cacheVariables": {
-            "CTS_ENABLE_CLANG_TIDY": "ON"
+            "CTB_ENABLE_CLANG_TIDY": "ON"
          }
       }
    ],

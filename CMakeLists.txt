@@ -22,7 +22,7 @@ include(product-version/generate-product-version)
 include(use-clang-tidy)
 include(variables)
 
-#export compile_commands.json for tools like clang-tidy and cppcheck
+# export compile_commands.json for tools like clang-tidy and cppcheck
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") 
 
 # Only do these if this is the main project, and not if it is included through add_subdirectory
@@ -30,14 +30,33 @@ if (PROJECT_IS_TOP_LEVEL)
    include(folders)
 endif()
 
+
+
+# HTML parser library
+set(CMAKE_MSVC_RUNTIME_LIBRARY ${CTB_MSVC_RUNTIME_LIBRARY})
+include(FetchContent)
+FetchContent_Declare(
+        HtmlParser
+        GIT_REPOSITORY https://github.com/JustCabbage/HtmlParser.git
+        GIT_TAG master
+)
+
+option(HTMLPARSER_BUILD_TESTS "Build tests" OFF)
+option(HTMLPARSER_BUILD_BENCHMARKS "Build benchmarks" OFF)
+option(HTMLPARSER_BUILD_EXAMPLES "Build examples" OFF)
+FetchContent_MakeAvailable(HtmlParser)
+
 find_package(cpr CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+find_package(stdexec CONFIG REQUIRED)
 
 add_subdirectory(lib)
 add_subdirectory(app)
 add_subdirectory(examples)
 
-# ---- Developer mode, anything after endif() will only be included if developer mode is enabled ----
+# ---- Developer mode, anything after endif() will only be included if developer mode is enabled ----5
 if(NOT ctBrowse_DEVELOPER_MODE)
   return()
 elseif(NOT PROJECT_IS_TOP_LEVEL)

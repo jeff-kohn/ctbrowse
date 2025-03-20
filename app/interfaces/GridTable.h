@@ -10,6 +10,7 @@
 #include "App.h"
 #include "grid/GridTableFilter.h"
 
+#include <ctb/CtProperty.h>
 #include <wx/grid.h>
 
 #include <set>

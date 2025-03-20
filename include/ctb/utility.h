@@ -1,5 +1,5 @@
 /*******************************************************************
- * @file utility_templates.h
+ * @file utility.h
  *
  * @brief Header file for some helper templates/functions
  * 
@@ -18,11 +18,12 @@ namespace ctb
 {
 
    /// @brief a functor object that is overloaded for multiple types 
-   template < typename... Ts >
+   template <typename... Ts>
    struct Overloaded : Ts...
    {
-      using Ts:: operator()...;
+      using Ts::operator()...;
    };
+   template<class... Ts> Overloaded(Ts...) -> Overloaded<Ts...>;
 
 
    /// @brief  user-friendly version of from_chars that works with string_view and string
@@ -62,6 +63,19 @@ namespace ctb
          assert(false);
 
       return static_cast<int>(*maybe_idx);
+   }
+
+
+   inline std::string_view fileNamePart(std::string_view fq_path) noexcept
+   {
+      auto sep = fq_path.find_last_of('\\');
+      if (std::string_view::npos == sep)
+         sep = fq_path.find_last_of('/');
+
+      if (std::string_view::npos == sep)
+         return fq_path;
+      else
+         return fq_path.substr(sep + 1);
    }
 
 } // namespace ctb

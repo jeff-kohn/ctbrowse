@@ -39,6 +39,9 @@ target_link_libraries(${TARGET_NAME}
    PRIVATE
       ctBrowse::ctBrowse_lib
       wxWidgets::wxWidgets
+      HtmlParser
+      STDEXEC::stdexec
+      spdlog::spdlog
 )
 
 target_sources(${TARGET_NAME}
@@ -46,6 +49,10 @@ target_sources(${TARGET_NAME}
      "App.cpp"
      "App.h"
      "app_constants.h"
+     "LabelImageCache.h"
+     "LabelImageCache.cpp"
+     "log.h"
+     "log.cpp"
      "MainFrame.cpp"
      "MainFrame.h"
      "wx_helpers.h"

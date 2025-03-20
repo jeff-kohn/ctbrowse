@@ -65,11 +65,11 @@ namespace ctb::app
          auto val_str = display_col.getDisplayValue(val);
          return wxString{ val_str.data(), val_str.size() };
       }
-      catch(std::exception&)
+      catch(std::exception& e)
       {
          // don't display an error message here because if there's a problem with the data in a row or column,
          // user might get dozens (or hundreds) of messages.
-         // TODO: LOGGING
+         log::exception(e);
       }
 
       // if we get here it's likely a bug, shouldn't happen.

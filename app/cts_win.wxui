@@ -155,6 +155,10 @@
           note="At CellarTracker.com"
           var_name="view_online_btn"
           wxEVT_BUTTON="onViewWebPage" />
+        <node
+          class="wxStaticBitmap"
+          scale_mode="AspectFit"
+          flags="wxEXPAND" />
       </node>
     </node>
   </node>

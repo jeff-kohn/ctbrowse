@@ -17,7 +17,7 @@ namespace ctb
    /// while this class could technically be used for string filtering, it's not really designed for that
    /// and performance would be poor. There is a different class optimized for that use case (PropStringFilter)
    /// 
-   template <CtRecord RecordTypeT, typename ValueT = CtProperty>
+   template <CtRecord RecordTypeT, typename ValueT = typename RecordTypeT::TableProperty>
    struct PropFilter
    {
       using RecordType  = RecordTypeT;

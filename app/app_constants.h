@@ -28,11 +28,11 @@ namespace ctb::constants
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADED        = "Successfully downloaded file '{}'.";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADING       = "Downloading file '{}'...";
    inline constexpr const char* FMT_TITLE_TYPED_ERROR             = "Error ({})";
+   inline constexpr const char* FMT_LABEL_IMAGE_FILENAME          = "{}-{}.jpg";
 
    inline constexpr const char* INFO_MSG_NO_MATCHING_ROWS         = "No rows matched the search text.";
    inline constexpr const char* NO_SCORE                          = " --";
-
-
+   
    // grid column labels
    inline constexpr const char* COL_CT_SCORE                      = "CT Score";
    inline constexpr const char* COL_LOCALE                        = "Region and Appellation";
@@ -114,4 +114,4 @@ namespace ctb::constants
    inline constexpr int WX_UNSPECIFIED_VALUE    =    -1;
    inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = false;
 
-}  // namespace ctb::app::constants
+}  // namespace ctb::constants

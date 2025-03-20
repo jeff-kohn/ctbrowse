@@ -31,6 +31,9 @@ namespace ctb::app
 
    App::App()
    {
+      log::setupDefaultLogger();
+      log::info("App startup.");
+
       SetAppName(constants::APP_NAME_LONG);
       SetAppDisplayName(constants::APP_NAME_LONG);
       SetUseBestVisual(true);
@@ -52,6 +55,7 @@ namespace ctb::app
                                                 wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_SUBDIR);
 
       wxConfigBase::Set(cfg.release());
+
    } // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks) unfortunately no way around it with wxWindows
 
 
@@ -83,9 +87,12 @@ namespace ctb::app
    int App::OnExit()
    {
 #ifdef _DEBUG
-         // to prevent the tzdb allocations from being reported as memory leaks
-         std::chrono::get_tzdb_list().~tzdb_list();
+      // to prevent the tzdb allocations from being reported as memory leaks
+      std::chrono::get_tzdb_list().~tzdb_list();
 #endif
+      log::warn("App shutting down.");
+      log::flush();
+      log::shutdown();
       return wxApp::OnExit();
    }
 

@@ -13,6 +13,8 @@ namespace ctb::constants
 {
    inline constexpr const char* APP_NAME_LONG  = "ctBrowse for Windows";
    inline constexpr const char* APP_NAME_SHORT = "ctBrowse";
+   inline constexpr const char* LOG_FOLDER     = "%LOCALAPPDATA%/ctBrowse for Windows/logs";
+
 
    inline constexpr const char* FMT_HTTP_CELLARTRACKER_QUERY_URL = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
 
@@ -56,11 +58,13 @@ namespace ctb::constants
    inline constexpr const char* ERROR_STR_EDITING_NOT_SUPPORTED   = "Editing data is not supported.";
    inline constexpr const char* ERROR_STR_NO_GRID_TABLE           = "No data is currently loaded. Open a data view before searching.";
    inline constexpr const char* ERROR_STR_NULLPTR_ARG             = "Invalid Parameter (nullptr).";
+   inline constexpr const char* ERROR_STR_RELATIVE_LABEL_CACHE    = "The label image cache folder must be an absolute path, not relative.";
    inline constexpr const char* ERROR_VAL                         = "#Err#";
    inline constexpr const char* FMT_ERROR_PROP_NOT_FOUND          = "Property '{}' was not found.";
    inline constexpr const char* FMT_ERROR_CURL_ERROR              = "The operation failed with CURL error {}";
    inline constexpr const char* FMT_ERROR_FILE_NOT_FOUND          = "File '{}' was not found.";
    inline constexpr const char* FMT_ERROR_HTTP_STATUS_CODE        = "The operation failed with HTTP status code {}";
+   inline constexpr const char* FMT_ERROR_NO_LABEL_CACHE_FOLDER   = "The image cache folder {} does not exist and could not be created.";
    inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND          = "Folder '{}' does not exist.";
 
 
@@ -69,5 +73,6 @@ namespace ctb::constants
    inline constexpr const char* FMT_NUMBER_INTEGRAL               = "{:.0f}";
 
    inline constexpr uint16_t CT_NULL_YEAR                         = 9999;
+   inline constexpr auto     ONE_MB                               = 1024 * 1024;
 
 } // namespace ctb::constants

@@ -1,0 +1,121 @@
+/*********************************************************************
+ * @file       logging.h
+ *
+ * @brief      logging interface for the app. wxWidgets logging sucks so 
+ *             we use spdlog instead, exposed throug this logging 
+ *             namespace
+ *
+ * @copyright  Copyright © 2024 Jeff Kohn. All rights reserved.
+ *********************************************************************/
+#pragma once
+
+#include <ctb/utility.h>
+#include <ctb/winapi_util.h>
+
+#if !defined(NDEBUG)
+   #define SPDLOG_ACTIVE_LEVEL 1
+#endif
+
+#include <spdlog/spdlog.h>
+#include <spdlog/async.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/sinks/msvc_sink.h>
+#include <memory>
+#include <filesystem>
+#include <string_view>
+#include <source_location>
+
+namespace ctb::log
+{
+   //
+   // import these symbols into our namespace, so logging interface looks like logging::warn(...) and there's
+   // possibility to replace logging backend with minimal impact if needed.
+   //
+   namespace fs = std::filesystem;
+   namespace sinks = spdlog::sinks;
+   namespace log_level = spdlog::level;
+   using spdlog::logger;
+   using spdlog::source_loc;
+   using spdlog::level::level_enum;
+   using spdlog::sinks::rotating_file_sink_mt;
+   using spdlog::sinks_init_list;
+   using spdlog::set_default_logger;
+   using spdlog::shutdown;
+   using spdlog::log;
+   using spdlog::error;
+   using spdlog::warn;
+   using spdlog::info;
+   using spdlog::trace;
+   using spdlog::critical;
+   using log_ptr_t = std::shared_ptr<logger>;
+   using sink_ptr_t = sinks_init_list::value_type;
+
+#if defined(_WIN32)
+   using spdlog::sinks::msvc_sink_mt;
+#endif
+
+} // namespace ctb::log
+
+
+namespace ctb::constants
+{
+   inline constexpr const char* LOG_NAME = "ctb";
+   inline constexpr const char* LOG_PATTERN_CONSOLE  = "[%^%l%$] %v";
+   inline constexpr const char* LOG_PATTERN_DEBUGGER = "[%n Thread %t][%^%l%$] %v";
+   inline constexpr const char* LOG_PATTERN_FILE     = "[%Y-%m-%d %H:%M:%S.%e][TID %t][%^%l%$] %v";
+
+
+#if !defined(NDEBUG)
+   inline constexpr auto LOGLEVEL_GLOBAL   = log::level_enum::debug;
+   inline constexpr auto LOGLEVEL_FILE     = log::level_enum::debug;
+   inline constexpr auto LOGLEVEL_CONSOLE  = log::level_enum::info;
+   inline constexpr auto LOGLEVEL_DEBUGGER = log::level_enum::info;
+#else
+   inline constexpr auto LOGLEVEL_GLOBAL   = log::level_enum::info;
+   inline constexpr auto LOGLEVEL_FILE     = log::level_enum::warn;
+   inline constexpr auto LOGLEVEL_CONSOLE  = log::level_enum::warn;
+   inline constexpr auto LOGLEVEL_DEBUGGER = log::level_enum::off;
+#endif
+
+} // namespace ctb::constants
+
+
+namespace ctb::log
+{
+
+   /// @brief Log an exception with source information. 
+   /// 
+   inline void exception(const std::exception& e, std::source_location source_loc = std::source_location::current())
+   {
+      auto file_name = fileNamePart(source_loc.file_name());
+      error("In {}:{} - {}", file_name, source_loc.line(), source_loc.function_name(), e.what());
+   }
+
+   inline void flush()
+   {
+      spdlog::default_logger()->flush();
+   }
+
+
+   /// @brief create a color stdout logging sink
+   /// @return the requested sink. may throw on error
+   /// 
+   [[nodiscard]] sink_ptr_t makeConsoleSink(level_enum level, std::string_view pattern = constants::LOG_PATTERN_CONSOLE);
+
+
+   [[nodiscard]] sinks_init_list::value_type makeDebuggerSink();
+
+
+   [[nodiscard]] sinks_init_list::value_type makeFileSink(level_enum level = constants::LOGLEVEL_FILE,
+                                                          fs::path log_folder = constants::LOG_FOLDER, 
+                                                          std::string_view log_filename_base = constants::APP_NAME_SHORT, 
+                                                          std::string_view pattern = constants::LOG_PATTERN_FILE);
+
+
+   log_ptr_t setupDefaultLogger(sinks_init_list sinks = { makeDebuggerSink(), makeFileSink() });
+
+
+} // namespace ctb::log
+
+

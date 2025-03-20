@@ -41,6 +41,7 @@ namespace ctb::util
       return "";
    }
 
+
    std::string percentDecode(std::string_view text)
    {
       // this just makes sure that curl's global init has been called, we don't actually need a handle
@@ -54,6 +55,27 @@ namespace ctb::util
          return result;
       }
       return "";
+   }
+
+
+   bool expandEnvironmentVars(std::string& text)
+   {
+      // Find out how big of a string we need to accommodate
+      auto bufsize = ExpandEnvironmentStrings(text.c_str(), nullptr, 0);
+      if (0 == bufsize)
+         return false;
+
+      // When using ANSI strings, the buffer size should be the string length,
+      // plus terminating null character, plus one.
+      std::string dest(bufsize + 2, '\0');
+
+      if (ExpandEnvironmentStrings(text.c_str(), dest.data(), bufsize))
+      {
+         text.swap(dest);
+         return true;
+      }
+      else
+         return false;
    }
 
 

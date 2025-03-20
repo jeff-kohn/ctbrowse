@@ -1,12 +1,17 @@
 #include "panels/WineDetailsPanel.h"
 
+#include <cpr/cpr.h>
+#include <HtmlParser/Parser.hpp>
+#include <HtmlParser/Query.hpp>
+
 #include <wx/commandlinkbutton.h>
 #include <wx/stattext.h>
 #include <wx/valgen.h>
 #include <wx/wupdlock.h>
 
 #include <format>
-
+#include <chrono>
+#include <thread>
 
 namespace ctb::app
 {
@@ -25,7 +30,39 @@ namespace ctb::app
          if (drink_end.isNull() )
             return drink_start.asString("{} +").c_str();
 
-         return std::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str();
+         return std::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str(); 
+      }
+
+
+      void getLabelImage(uint64_t wine_id)
+      {
+         try 
+         {
+            // define the user agent for the GET request
+            cpr::Header headers = { {"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"} };
+
+            // make an HTTP GET request to retrieve the target page
+            cpr::Response response = cpr::Get(cpr::Url{ std::format(constants::FMT_URL_WINE_DETAILS, wine_id) }, headers);
+
+            HtmlParser::Parser parser;
+            HtmlParser::DOM dom = parser.Parse(response.text);
+            HtmlParser::Query query(dom.Root());
+            auto images = dom.GetElementById("label_photo");
+            if (images and !images->Children.empty())
+            {
+               auto image_url = images->Children[0]->GetAttribute("src");
+               response = cpr::Get(cpr::Url{ image_url }, headers);
+            }
+
+         }
+         catch (Error& err)
+         {
+            wxGetApp().displayErrorMessage(err);
+         }
+         catch (std::exception& e)
+         {
+            wxGetApp().displayErrorMessage(e.what());
+         }
       }
    }
 
@@ -239,6 +276,9 @@ namespace ctb::app
             UpdateDetails(event);
             break;
 
+         case GridTableEvent::Id::TableInitialize:
+            break;
+
          default:
             event.m_affected_row = std::nullopt;
             UpdateDetails(event);
@@ -267,7 +307,7 @@ namespace ctb::app
          auto* tbl = event.m_grid_table;
          auto row_idx = event.m_affected_row.value();
 
-         m_details.wine_id     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_WINE_ID    ).asString();
+         m_details.wine_id     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_WINE_ID    ).asUInt64().value_or(0);
          m_details.wine_name   = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_WINE_NAME  ).asString();
          m_details.vintage     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_VINTAGE    ).asString();
          m_details.varietal    = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_VARIETAL   ).asString();
@@ -289,6 +329,8 @@ namespace ctb::app
          prop_val = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_MY_SCORE);
          m_details.my_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
          GetSizer()->ShowItems(true);
+
+         // detail::getLabelImage(m_details.wine_id);
       }
       else{
          GetSizer()->ShowItems(false);
@@ -300,9 +342,9 @@ namespace ctb::app
       // TODO hide/unhide fields as necessary.
    }
 
-   void WineDetailsPanel::onViewWebPage(wxCommandEvent& event)
+   void WineDetailsPanel::onViewWebPage([[maybe_unused]] wxCommandEvent& event)
    {
-      if (m_details.wine_id.empty())
+      if (!m_details.wine_id)
       {
          wxGetApp().displayInfoMessage("no wine id available.");
       }

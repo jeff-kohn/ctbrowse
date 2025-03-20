@@ -7,9 +7,10 @@
  *********************************************************************/
 #pragma once
 
-#include "ctb/ctb.h"
 #include "app_constants.h"
+#include "log.h"
 
+#include <ctb/TableProperty.h>
 #include <wx/wx.h>
 #include <wx/confbase.h>
 

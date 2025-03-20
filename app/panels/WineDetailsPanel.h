@@ -40,7 +40,7 @@ namespace ctb::app
       ///
       struct WineDetails
       {
-         std::string wine_id{};
+         uint64_t wine_id{};
          wxString wine_name{};
          wxString vintage{};
          wxString varietal{};
