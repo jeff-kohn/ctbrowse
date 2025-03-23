@@ -62,20 +62,16 @@ namespace ctb::util
    {
       // Find out how big of a string we need to accommodate
       auto bufsize = ExpandEnvironmentStrings(text.c_str(), nullptr, 0);
-      if (0 == bufsize)
+      if ( 0 == bufsize or bufsize == text.length() )
          return false;
 
-      // When using ANSI strings, the buffer size should be the string length,
-      // plus terminating null character, plus one.
-      std::string dest(bufsize + 2, '\0');
-
+      std::string dest(bufsize, '\0');
       if (ExpandEnvironmentStrings(text.c_str(), dest.data(), bufsize))
       {
          text.swap(dest);
          return true;
       }
-      else
-         return false;
+      return false;
    }
 
 

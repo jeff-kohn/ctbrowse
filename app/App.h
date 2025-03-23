@@ -35,7 +35,7 @@ namespace ctb::app
    class MainFrame;
 
 
-   /// @brief app object for the OuraCharts application.
+   /// @brief app object for the application.
    ///
    class App : public wxApp
    {
@@ -59,8 +59,7 @@ namespace ctb::app
 
       /// @brief Get the current config object.
       ///
-      /// Calling this will throw an exception  instead of returning nullptr
-      /// if there's no default config.
+      /// Calling this will throw an exception  if there's no default config.
       ///
       wxConfigBase& getConfig() noexcept(false);
       const wxConfigBase& getConfig() const noexcept(false);
@@ -70,6 +69,7 @@ namespace ctb::app
       ///
       void displayErrorMessage(const Error& err);
       void displayErrorMessage(const std::string& msg, const std::string& title = constants::ERROR_STR);
+
 
       /// @brief display a message box with inctb::formational text
       ///

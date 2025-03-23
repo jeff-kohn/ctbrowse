@@ -25,8 +25,8 @@ namespace ctb::util
    std::string percentDecode(std::string_view text);
 
 
-   /// @brief  Expand environment varariables in a string (in-place).
-   /// @return true if successful, false if unsuccessful in which case text will be unmodified
+   /// @brief  Expand environment variables in place
+   /// @return true if successful, false if unsuccessful in which case the parameter 'text' will be unmodified
    /// 
    bool expandEnvironmentVars(std::string& text);
 
@@ -48,5 +48,6 @@ namespace ctb::util
    /// doesn't exist and can't be created.
    /// 
    bool saveTextToFile(std::string_view text, fs::path file_path, bool overwrite = true) noexcept;
+
 
 }  // namespace ctb::util
