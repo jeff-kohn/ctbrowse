@@ -152,10 +152,17 @@ namespace ctb::app
       {  return false; }
 
 
+      /// @brief retrieves the minimum score filter value if active.
+      /// 
       virtual NullableDouble getMinScoreFilter() const = 0;
 
-
+      /// @brief set the minimum score filter
+      ///
       virtual bool setMinScoreFilter(NullableDouble min_score = std::nullopt) = 0;
+
+      /// @brief retrieve the iWineId value for every record in the dataset.
+      /// 
+      virtual std::vector<uint64_t> getWineIds() = 0;
 
 
       /// @brief destructor

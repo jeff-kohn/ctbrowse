@@ -28,8 +28,23 @@ namespace ctb::util
    /// @brief  Expand environment variables in place
    /// @return true if successful, false if unsuccessful in which case the parameter 'text' will be unmodified
    /// 
-   bool expandEnvironmentVars(std::string& text);
+   /// in the case when the passed string does not contain any environment vars, this function
+   /// returns without any allocation or copying, which gives it a slight performance edge over
+   /// expandEnvironmentVars() if you're working with strings that may or may not contain any vars.
+   /// 
+   bool tryExpandEnvironmentVars(std::string& text);
 
+
+   /// @brief expand environment variables and return result
+   ///
+   /// while this overload is convenient, it has the overhead of an unnecessary copy
+   /// when the passed string has no vars to expand.
+   inline std::string expandEnvironmentVars(std::string_view text)
+   {
+      std::string result{};
+      tryExpandEnvironmentVars(result);
+      return result;
+   }
 
    /// @brief convert text to UTF8 from other narrow/multi-byte encoding.
    ///

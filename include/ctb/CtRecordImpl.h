@@ -211,5 +211,8 @@ namespace ctb
       }
    };
 
+   template <CtRecordTraits RecordTraits>
+   using CtDataset = std::vector<CtRecordImpl<RecordTraits>>;
+
 
 } // namespace ctb

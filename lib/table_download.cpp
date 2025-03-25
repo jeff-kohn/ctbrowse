@@ -69,7 +69,6 @@ namespace ctb
    {
       auto table_name = magic_enum::enum_name(table);
       auto data_format = magic_enum::enum_name(format);
-      cpr::Header header{ {constants::HTTP_HEADER_XCLIENT, constants::HTTP_HEADER_XCLIENT_VALUE} };
 
       cpr::Url url{ std::format(constants::FMT_HTTP_CELLARTRACKER_QUERY_URL,
                                 util::percentEncode(std::string(cred.username)),
@@ -77,8 +76,8 @@ namespace ctb
                                 data_format, table_name)
       };
 
-      auto response = callback ? cpr::Get(url, header, *callback)
-                               : cpr::Get(url, header);
+      auto response = callback ? cpr::Get(url, *callback)
+                               : cpr::Get(url);
 
       // check the response for success, bail out if we got an error 
       auto request_result = validateResult(response);

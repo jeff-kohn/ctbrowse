@@ -34,7 +34,7 @@ namespace ctb
       /// 
       enum class PropId : uint16_t
       {
-         iWineID,
+         iWineId,
          WineName,
          Locale,
          Vintage,
@@ -70,7 +70,7 @@ namespace ctb
       /// 
       static inline constexpr frozen::map<PropId, FieldSchema, static_cast<size_t>(PropId::WineAndVintage)> CsvSchema
       {
-         { PropId::iWineID,         FieldSchema { static_cast<uint32_t>(PropId::iWineID),        PropType::String,      0 }},
+         { PropId::iWineId,         FieldSchema { static_cast<uint32_t>(PropId::iWineId),        PropType::String,      0 }},
          { PropId::WineName,        FieldSchema { static_cast<uint32_t>(PropId::WineName),       PropType::String,     13 }},
          { PropId::Locale,          FieldSchema { static_cast<uint32_t>(PropId::Locale),         PropType::String,     14 }},
          { PropId::Vintage,         FieldSchema { static_cast<uint32_t>(PropId::Vintage),        PropType::UInt16,     12 }},
@@ -153,6 +153,6 @@ namespace ctb
    };
 
    using WineListRecord = CtRecordImpl<WineListTraits>;
-   using WineListData   = std::vector<WineListRecord>;
+   using WineListData   = CtDataset<WineListTraits>;
 
 } // namespace ctb

@@ -11,19 +11,12 @@
 
 namespace ctb::constants
 {
-   inline constexpr const char* APP_NAME_LONG  = "ctBrowse for Windows";
-   inline constexpr const char* APP_NAME_SHORT = "ctBrowse";
-   inline constexpr const char* LOG_FOLDER     = "%LOCALAPPDATA%/ctBrowse for Windows/logs";
-
-
    inline constexpr const char* FMT_HTTP_CELLARTRACKER_QUERY_URL = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
 
    inline constexpr const char* CELLARTRACKER_DOT_COM       = "CellarTracker.com";
    inline constexpr const char* CELLARTRACKER_LOGON_CAPTION = "Enter login information for CellarTracker.com:";
    inline constexpr const char* CELLARTRACKER_LOGON_TITLE   = "CellarTracker Login";
 
-   inline constexpr const char* HTTP_HEADER_XCLIENT         = "X-Client";
-   inline constexpr const char* HTTP_HEADER_XCLIENT_VALUE   = APP_NAME_SHORT;
    inline constexpr const char* HTTP_PARAM_TABLE            = "Table";
    inline constexpr const char* HTTP_PARAM_FORMAT           = "Format";
    inline constexpr int         HTTP_TIMEOUT_SEC            = 30;

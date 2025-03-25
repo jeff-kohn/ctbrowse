@@ -8,15 +8,25 @@
 
 #include "LabelImageCache.h"
 
+#include <coro/coro.hpp>
 #include <ctb/winapi_util.h>
 #include <algorithm>
 
 namespace ctb::app
 {
+   using PoolOptions = coro::thread_pool::options;
+   
+   PoolOptions pool_opts
+      {
+         .thread_count = std::thread::hardware_concurrency(),
+         .on_thread_start_functor = [](auto id) { SPDLOG_DEBUG("thread pool worker {} is starting up.", id); },
+         .on_thread_stop_functor = [](auto id) { SPDLOG_DEBUG("thread pool worker {} is shutting down.", id); }
+      };
+
 
    LabelImageCache::LabelImageCache(std::string cache_folder)
    {
-      util::expandEnvironmentVars(cache_folder);
+      util::tryExpandEnvironmentVars(cache_folder);
 
       m_cache_folder = cache_folder;
       if (m_cache_folder.is_relative())
@@ -80,9 +90,9 @@ namespace ctb::app
             m_thread->request_stop();
             if (wait and m_thread->joinable())
             {
-               log::info("Waiting for thread to terminate...");
+               log::info("Waiting for label image cache thread to terminate...");
                m_thread->join();
-               log::info("Thread terminated");
+               log::info("Label image cache thread terminated");
             }
          }
          else
@@ -94,14 +104,43 @@ namespace ctb::app
    }
 
 
+   auto LabelImageCache::startDownloadTask(coro::thread_pool& tp, uint64_t wine_id) -> TaskResult
+   {
+      // move execution from main worker thread to thread pool.
+      co_await tp.schedule();
+
+      SPDLOG_DEBUG("Returning success from label download task for id {}", wine_id);
+      co_return TaskResultCode::Success;
+   }
+
+
    void LabelImageCache::workerThreadProc(std::stop_token cancel, fs::path cache_folder, std::vector<uint64_t> ids)
    {
       if (cancel.stop_requested())
          return;
 
-      log::info("Cache queue contains {} id's, scanning for missing files...", ids.size());
-      std::erase_if(ids, [&cache_folder, &cancel](auto id) {  return fs::exists(buildFilePath(cache_folder, id)); });
-      log::info("{} id's missing from cache.", ids.size());
+      // first determine the files we need to request.
+      log::info("Label cache queue contains {} id's, scanning for missing files...", ids.size());
+      std::erase_if(ids, [cache_folder, &cancel](auto id) 
+         {  
+            auto fp = buildFilePath(cache_folder, id);
+            return fs::exists(fp); 
+         });
+      log::info("{} id's missing from label cache.", ids.size());
+
+      // now run the request task for each needed file, using a thread pool.
+      coro::thread_pool pool{ pool_opts };
+
+      auto download_tasks = vws::all(ids) | vws::transform([&pool](auto id) -> TaskResult { return startDownloadTask(pool, id); })
+                                          | rng::to<std::vector>();
+
+      auto results = coro::sync_wait(coro::when_all(std::move(download_tasks)));
+      auto success_count = std::count_if(results.begin(), results.end(), [](auto& result) -> bool 
+         {  
+            return result.return_value() == TaskResultCode::Success; 
+         });
+
+      log::info("Label image cache update processed {} tasks successfully and failed {} tasks.", success_count, results.size() - success_count);
 
    }
 

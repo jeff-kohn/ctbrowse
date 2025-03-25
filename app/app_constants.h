@@ -2,6 +2,12 @@
 
 namespace ctb::constants
 {
+   inline constexpr const char* APP_NAME_LONG = "ctBrowse for Windows";
+   inline constexpr const char* APP_NAME_SHORT = "ctBrowse";
+   inline constexpr const char* APP_LOG_FOLDER = "%LOCALAPPDATA%\\ctBrowse for Windows\\logs";
+   inline constexpr const char* APP_LABEL_FOLDER = "%LOCALAPPDATA%\\ctBrowse for Windows\\labels\\";
+
+
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_LBL        = "&Download Data...";
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP        = "Download data from CellarTracker";
    inline constexpr const char* CMD_FILE_SETTINGS_LBL             = "&Settings...";
@@ -82,7 +88,7 @@ namespace ctb::constants
    inline constexpr const char* DETAIL_PROP_VARIETAL              = "MasterVarietal";
    inline constexpr const char* DETAIL_PROP_VINTAGE               = "Vintage";
    inline constexpr const char* DETAIL_PROP_WINE_NAME             = "WineName";
-   inline constexpr const char* DETAIL_PROP_WINE_ID               = "iWineID";
+   inline constexpr const char* DETAIL_PROP_WINE_ID               = "iWineId";
 
    inline constexpr const char* RES_NAME_ICON_PRODUCT             = "IDR_PRODUCT_ICON";
    inline constexpr const char* RES_NAME_MAINFRAME                = "MAINFRAME";

@@ -17,7 +17,7 @@
 #include <format>
 
 
-/// forward declare wxWidget classes to avoid header pollution.
+/// forward declare wx classes to avoid header pollution.
 class wxBoxSizer;
 class wxMenuBar;
 class wxSearchCtrl;
@@ -31,6 +31,7 @@ namespace ctb::app
    class CellarTrackerGrid;   // the grid window
    class GridOptionsPanel;    // the options panel
    class WineDetailsPanel;    // details panel
+   class LabelImageCache;     // used for retrieving label images
 
 
    /// @brief class for the main window of the application
@@ -76,13 +77,16 @@ namespace ctb::app
       CellarTrackerGrid*      m_grid{};         // grid window view
       GridOptionsPanel*       m_grid_options{}; // gird options view
       GridTableEventSourcePtr m_event_source{}; // for synchronizing events between views and the underlying table
-      ScopedEventSink         m_sink;           // so we can also handle events from our source
       wxBoxSizer*             m_main_sizer{};
       wxMenuBar*              m_menu_bar{};
       wxSearchCtrl*           m_search_ctrl{};  // substring search box on the toolbar
+      ScopedEventSink         m_sink;           // so we can also handle events from our source
       wxStatusBar*            m_status_bar{};
       wxToolBar*              m_tool_bar{};
       WineDetailsPanel*       m_wine_details{};
+
+      // we use a shared_ptr because we want to share the object with child window(s)0
+      std::shared_ptr<LabelImageCache> m_label_cache{};
 
       /// @brief private ctor called by static create()
       MainFrame();

@@ -9,6 +9,8 @@
 
 #include "App.h"
 
+#include <coro/task.hpp>
+#include <coro/thread_pool.hpp>
 #include <wx/bitmap.h>
 
 #include <atomic>
@@ -41,18 +43,31 @@ namespace ctb::app
       /// @brief get a label image from the cache, if available
       /// @return the image if available, or std::nullopt if not
       /// 
+      /// you can request that the image be fetched online if not available locally;
+      /// but the online fetch happens in the background and this function will NOT
+      /// block until it's available. If you get back an empty optional and 
       std::optional<wxBitmap> getLabelImage(uint64_t wine_id);
 
 
-      /// @brief fetches label images missing from the cache for the specified iWineId's
-      /// @return true if a cache update was started, false if not.
+      /// @brief  fetches label images missing from the cache for the specified iWineId's
+      /// @return true if a cache update was started, false if pendingCacheUpdate() == true
+      ///         or an error occurred starting the background task.
       /// 
-      /// this function returns immediately, cache update is done in background thread.
+      /// queuing up requests is not supported (for now). this function returns 
+      /// immediately, cache update is done in background thread.
       /// 
       bool requestCacheUpdate(const std::vector<uint64_t>& wine_ids);
       bool requestCacheUpdate(uint64_t wine_id)
       {
          return requestCacheUpdate(std::vector{ wine_id });
+      }
+
+      /// @brief convenience function that will take a CtDatset and transform it into a view of iWineId's and requesting an update on those id's
+      ///
+      template <rng::input_range Rng, CtRecordTraits traits> requires std::same_as<rng::range_value_t<Rng>, CtRecordImpl<traits> >
+      bool requestCacheUpdate(Rng recs)
+      {
+         return requestCacheUpdate(recs | vws::transform([](auto rec) -> uint64_t { return rec[traits::iWineId]; }));
       }
 
 
@@ -86,6 +101,16 @@ namespace ctb::app
 
       static void workerThreadProc(std::stop_token cancel, fs::path cache_folder, std::vector<uint64_t> ids);
 
+      enum class TaskResultCode
+      {
+         Success,
+         Error,
+         Aborted
+      };
+      using TaskResult = coro::task<TaskResultCode>;
+
+      static TaskResult startDownloadTask(coro::thread_pool& tp, uint64_t wine_id);
+
       static std::string buildFileName(uint64_t wine_id, int image_num = 1)
       {
          return ctb::format(constants::FMT_LABEL_IMAGE_FILENAME, wine_id, image_num);
@@ -93,6 +118,7 @@ namespace ctb::app
 
       static fs::path buildFilePath(fs::path folder, uint64_t wine_id, int image_num = 1)
       {
+         
          return folder / buildFileName(wine_id, image_num);
       }
    };

@@ -56,7 +56,7 @@ namespace ctb::app
 
       wxConfigBase::Set(cfg.release());
 
-   } // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks) unfortunately no way around it with wxWindows
+   } // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks) unfortunately no way around it with wxWidgets
 
 
    bool App::OnInit()

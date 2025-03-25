@@ -58,17 +58,19 @@ namespace ctb::util
    }
 
 
-   bool expandEnvironmentVars(std::string& text)
+   bool tryExpandEnvironmentVars(std::string& text)
    {
-      // Find out how big of a string we need to accommodate
+      constexpr int padding = 2; //The API requires a buffer equal to string length + '\0' + 1
+
+      // Find out how big of a string we need to accommodate. 
       auto bufsize = ExpandEnvironmentStrings(text.c_str(), nullptr, 0);
-      if ( 0 == bufsize or bufsize == text.length() )
+      if ( 0 == bufsize or bufsize <= text.length() + padding ) 
          return false;
 
-      std::string dest(bufsize, '\0');
+      std::vector<char> dest(bufsize, 0);
       if (ExpandEnvironmentStrings(text.c_str(), dest.data(), bufsize))
       {
-         text.swap(dest);
+         text = dest.data();
          return true;
       }
       return false;

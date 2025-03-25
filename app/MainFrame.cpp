@@ -7,6 +7,7 @@
  *********************************************************************/
 
 #include "App.h"
+#include "LabelImageCache.h"
 #include "MainFrame.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
@@ -62,7 +63,8 @@ namespace ctb::app
 
    MainFrame::MainFrame() : 
       m_event_source{ GridTableEventSource::create() },
-      m_sink{ this, m_event_source }
+      m_sink{ this, m_event_source },
+      m_label_cache{ std::make_shared<LabelImageCache>(constants::APP_LABEL_FOLDER)}
    {
    }
 
@@ -380,6 +382,8 @@ namespace ctb::app
          tbl->applySortConfig(GridTableWineList::getSortConfig(0));
          m_event_source->signal(GridTableEvent::Id::Sort);
 
+         // submit background request to get label images not found in cache.
+         m_label_cache->requestCacheUpdate(tbl->getWineIds());
          Update();
       }
       catch(Error& e)

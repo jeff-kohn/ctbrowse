@@ -202,41 +202,6 @@ namespace ctb::app
    }
 
 
-   //namespace 
-   //{
-   //   // some helper functions for composing filters to apply to the grid_data.
-   //   //
-   //   template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
-   //   auto applyPropStringFilters(RngT&& rng, GridTableWineList::PropStringFilterMgr& filters)
-   //   {
-   //      return vws::all(std::forward<RngT>(rng)) | vws::filter(filters);
-   //   }
-
-   //   // some helper functions for composing filters to apply to the grid_data.
-   //   //
-   //   template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
-   //   auto applyPropFilters(RngT&& rng, GridTableWineList::PropStringFilterMgr& filters)
-   //   {
-   //      return vws::all(std::forward<RngT>(rng)) | vws::filter(filters);
-   //   }
-
-
-
-   //   template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
-   //   auto applyInStockFilter(RngT&& rng, const GridTableWineList::PropFilter& filter)
-   //   {
-   //      return vws::all(std::forward<RngT>(rng)) | vws::filter(filter);
-   //   }
-
-   //   template<rng::input_range RngT> requires std::same_as<std::decay_t<rng::range_value_t<RngT> >, GridTableWineList::RecordType>
-   //   auto applyStringSearchFilter(RngT&& rng, const GridTableWineList::SubStringFilter& filter)
-   //   {
-   //      return vws::all(std::forward<RngT>(rng)) | vws::filter(filter);
-   //   }
-
-   //} // namespace 
-
-
    void GridTableWineList::applyFilters()
    {
       if (m_prop_string_filters.activeFilters() or m_instock_filter.enabled or m_score_filter.enabled)
@@ -295,6 +260,15 @@ namespace ctb::app
       {
          applySubStringFilter(*m_substring_filter);
       }
+   }
+
+   std::vector<uint64_t> GridTableWineList::getWineIds()
+   {
+       return vws::all(m_grid_data) | vws::transform([](auto rec) -> uint64_t 
+                                             { 
+                                                return rec[PropId::iWineId].asUInt64().value_or(0); // should always be a valid value, but why risk UB
+                                             })
+                                    | rng::to<std::vector>();
    }
 
 

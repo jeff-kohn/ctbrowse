@@ -275,6 +275,10 @@ namespace ctb::app
 
       // Inherited via GridTable
 
+
+      // Inherited via GridTable
+      std::vector<uint64_t> getWineIds() override;
+
 };
 
 } // namespace ctb::app

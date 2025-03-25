@@ -40,7 +40,7 @@ target_link_libraries(${TARGET_NAME}
       ctBrowse::ctBrowse_lib
       wxWidgets::wxWidgets
       HtmlParser
-      STDEXEC::stdexec
+      libcoro
       spdlog::spdlog
       fmt::fmt
 )

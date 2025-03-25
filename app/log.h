@@ -116,7 +116,7 @@ namespace ctb::log
    /// @brief create a sink that logs to file
    /// 
    [[nodiscard]] sinks_init_list::value_type makeFileSink(level_enum level = constants::LOGLEVEL_FILE,
-                                                          fs::path log_folder = constants::LOG_FOLDER, 
+                                                          fs::path log_folder = constants::APP_LOG_FOLDER, 
                                                           std::string_view log_filename_base = constants::APP_NAME_SHORT, 
                                                           std::string_view pattern = constants::LOG_PATTERN_FILE);
 
