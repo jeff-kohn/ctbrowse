@@ -264,11 +264,12 @@ namespace ctb::app
 
    std::vector<uint64_t> GridTableWineList::getWineIds()
    {
-       return vws::all(m_grid_data) | vws::transform([](auto rec) -> uint64_t 
-                                             { 
-                                                return rec[PropId::iWineId].asUInt64().value_or(0); // should always be a valid value, but why risk UB
-                                             })
-                                    | rng::to<std::vector>();
+       return vws::all(m_grid_data) 
+          | vws::transform([](auto rec) -> uint64_t 
+               { 
+                  return rec[PropId::iWineId].asUInt64().value_or(0); // should always be a valid value, but why risk UB
+               })
+          | rng::to<std::vector>();
    }
 
 

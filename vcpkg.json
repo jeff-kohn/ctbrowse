@@ -4,10 +4,12 @@
   "version": "0.1.0",
   "dependencies": [
     "boost-algorithm",
+    "boost-scope",
     "catch2",
     "cpr",
     "fmt",
     "frozen",
+    "llfio",
     "magic-enum",
     {
       "name": "wxwidgets",

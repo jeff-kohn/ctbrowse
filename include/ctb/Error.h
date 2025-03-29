@@ -13,7 +13,6 @@
 #include <format>
 #include <string>
 #include <string_view>
-// #include <winerror.h>
 
 
 namespace ctb
@@ -33,6 +32,7 @@ namespace ctb
       {
          ArgumentError,
          CurlError,
+         FileError,
          Generic,
          HttpStatus,
          OperationCanceled,

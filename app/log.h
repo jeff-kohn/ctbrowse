@@ -10,7 +10,6 @@
 #pragma once
 
 #include <ctb/utility.h>
-#include <ctb/winapi_util.h>
 
 #if !defined(NDEBUG)
    #define SPDLOG_ACTIVE_LEVEL 1
@@ -23,6 +22,7 @@
 #include <spdlog/sinks/msvc_sink.h>
 #include <memory>
 #include <filesystem>
+#include <string>
 #include <string_view>
 #include <source_location>
 

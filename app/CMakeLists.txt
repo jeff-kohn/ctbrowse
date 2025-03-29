@@ -56,6 +56,8 @@ target_sources(${TARGET_NAME}
      "log.cpp"
      "MainFrame.cpp"
      "MainFrame.h"
+     "tasks.h"
+     "tasks.cpp"
      "wx_helpers.h"
      "dialogs/TableSyncDialog.cpp"
      "dialogs/TableSyncDialog.h"

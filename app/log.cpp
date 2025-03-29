@@ -45,7 +45,7 @@ namespace ctb::log
          log_path.replace_extension(".log");
 
       std::string logfile{ log_path.generic_string() };
-      util::tryExpandEnvironmentVars(logfile);
+      tryExpandEnvironmentVars(logfile);
 
       auto file_sink = make_shared<rotating_file_sink_mt>(logfile, MAX_FILE_SIZE, MAX_FILE_COUNT);
       file_sink->set_level(level);

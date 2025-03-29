@@ -19,7 +19,7 @@
 
 #include <ctb/CredentialWrapper.h>
 #include <ctb/table_download.h>
-#include <ctb/winapi_util.h>
+#include <ctb/utility.h>
 #include <external/HttpStatusCodes.h>
 
 #include <wx/artprov.h>
@@ -347,7 +347,7 @@ namespace ctb::app
             auto folder = wxGetApp().userDataFolder();
             auto file_path{ folder / result->tableName() };
             file_path.replace_extension(constants::DATA_FILE_EXTENSION);
-            util::saveTextToFile(result->data, file_path);
+            saveTextToFile(result->data, file_path, true);
 
             setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, getTableDescription(tbl));
          }
@@ -383,7 +383,7 @@ namespace ctb::app
          m_event_source->signal(GridTableEvent::Id::Sort);
 
          // submit background request to get label images not found in cache.
-         m_label_cache->requestCacheUpdate(tbl->getWineIds());
+         //m_label_cache->requestCacheUpdate(tbl->getWineIds());
          Update();
       }
       catch(Error& e)

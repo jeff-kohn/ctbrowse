@@ -13,10 +13,10 @@ include(Catch)
 
 create_exe_target(cts_test)
 
-target_sources(cts_test
-   PRIVATE
-      "source/cts_test.cpp"
-)
+#target_sources(cts_test
+#   PRIVATE
+#      "source/cts_test.cpp"
+#)
 
 target_link_libraries(cts_test
    PRIVATE

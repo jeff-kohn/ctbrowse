@@ -8,7 +8,7 @@
  *********************************************************************/
 #include "ctb/constants.h"
 #include "ctb/table_download.h"
-#include "ctb/winapi_util.h"
+#include "ctb/utility.h"
 #include "external/HttpStatusCodes.h"
 
 #include <cpr/cpr.h>
@@ -52,7 +52,7 @@ int main()
       if (result.has_value())
       {
          auto& data = result.value();
-         util::saveTextToFile(data.data, data.tableName());
+         saveTextToFile(data.data, data.tableName());
       }
 
       return 0;

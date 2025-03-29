@@ -6,7 +6,7 @@
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 #include "ctb/table_download.h"
-#include "ctb/winapi_util.h"
+#include "ctb/utility.h"
 #include "external/HttpStatusCodes.h"
 
 #include <cpr/cpr.h>
@@ -71,8 +71,8 @@ namespace ctb
       auto data_format = magic_enum::enum_name(format);
 
       cpr::Url url{ std::format(constants::FMT_HTTP_CELLARTRACKER_QUERY_URL,
-                                util::percentEncode(std::string(cred.username)),
-                                util::percentEncode(std::string(cred.password)),
+                                percentEncode(std::string(cred.username)),
+                                percentEncode(std::string(cred.password)),
                                 data_format, table_name)
       };
 
@@ -90,7 +90,7 @@ namespace ctb
       // The returned data is encoded as ISO 8859-1 Latin 1, we need to convert
       // it to UTF-8 before returning it. If the conversion fails, just return the
       // original encoding as fallback.
-      auto utf_text = util::toUTF8(table_data.data);
+      auto utf_text = toUTF8(table_data.data);
       if (!utf_text.empty())
       {
          table_data.data.swap(utf_text);
