@@ -7,6 +7,7 @@
  *********************************************************************/
 #include "ctb/table_download.h"
 #include "ctb/utility.h"
+#include "ctb/utility_http.h"
 #include "external/HttpStatusCodes.h"
 
 #include <cpr/cpr.h>
@@ -17,7 +18,7 @@ namespace ctb
 {
    /// @brief  returns true if the request returned a valid response, or an Error if it didn't
    ///
-   std::expected<bool, ctb::Error> validateResult(cpr::Response& response)
+   std::expected<bool, ctb::Error> validateCtRequest(cpr::Response& response)
    {
       using namespace magic_enum;
 

@@ -39,7 +39,7 @@ namespace ctb::tasks
    /// task will be scheduled for eager execution on the specified thread_pool, function will 
    /// return immediately.
    /// 
-   auto makeFileLoadTask(coro::thread_pool& tp, std::stop_token token, fs::path file) -> FetchImageTask;
+   auto makeFileLoadTask(fs::path file, coro::thread_pool& tp, std::stop_token token = {}) -> FetchImageTask;
 
 
    // result type and task type for UpdateCache task
@@ -63,7 +63,7 @@ namespace ctb::tasks
    /// task will be scheduled for eager execution on the specified thread_pool, function will 
    /// return immediately.
    /// 
-   auto makeHttpRequestTask() -> HttpRequestTask;
+   auto makeHttpGetTask(std::string_view url, coro::thread_pool& tp, std::stop_token token = {}) -> HttpRequestTask;
 
 
 } // namespace ctb::tasks

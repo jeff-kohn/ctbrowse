@@ -8,7 +8,7 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/utility.h"
+#include "ctb/utility_templates.h"
 
 #include <format>
 #include <optional>

@@ -1,9 +1,5 @@
 #include "ctb/utility.h"
 
-#include <cpr/curlholder.h>
-#include <curl/curl.h>
-#include <curl/easy.h>
-
 #include <fstream>
 #include <limits>
 
@@ -74,38 +70,6 @@ namespace ctb
       // we want to preserve whatever line feeds are already in the file
       auto file_out = openFile<std::ofstream>(file_path, std::ios_base::out | std::ios_base::binary, _SH_DENYRW); 
       file_out << text;
-   }
-
-
-   std::string percentEncode(std::string_view text)
-   {
-      // this just makes sure that curl's global init has been called, we don't actually need a handle
-      cpr::CurlHolder holder;
-
-      char* output = curl_easy_escape(nullptr, text.data(), static_cast<int>(text.length()));
-      if (output)
-      {
-         std::string result{ output };
-         curl_free(output);
-         return result;
-      }
-      return std::string{ text };
-   }
-
-
-   std::string percentDecode(std::string_view text)
-   {
-      // this just makes sure that curl's global init has been called, we don't actually need a handle
-      cpr::CurlHolder holder;
-
-      char* output = curl_easy_escape(nullptr, text.data(), static_cast<int>(text.length()));
-      if (output)
-      {
-         std::string result = output;
-         curl_free(output);
-         return result;
-      }
-      return std::string{ text };
    }
 
 

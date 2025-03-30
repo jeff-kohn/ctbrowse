@@ -24,12 +24,15 @@ target_sources(ctBrowse_lib
       "../include/ctb/table_data.h"
       "../include/ctb/table_download.h"
       "../include/ctb/utility.h"
+      "../include/ctb/utility_http.h"
+      "../include/ctb/utility_templates.h"
       "../include/ctb/WineListTraits.h"
 
    PRIVATE
       "CredentialWrapper.cpp"
       "table_download.cpp"
       "utility.cpp"
+      "utility_http.cpp"
 )
 
 target_include_directories(ctBrowse_lib

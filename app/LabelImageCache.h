@@ -87,16 +87,13 @@ namespace ctb::app
       coro::thread_pool m_pool;
       std::stop_source  m_cancel_source{};
 
-      static auto makeFileDownloadTask(coro::thread_pool& tp, std::stop_token token, uint64_t wine_id, int image_num) -> tasks::FetchImageTask;
-        
-      static std::string buildFileName(uint64_t wine_id, int image_num = 1)
+      static auto buildFileName(uint64_t wine_id, int image_num = 1) -> std::string
       {
          return ctb::format(constants::FMT_LABEL_IMAGE_FILENAME, wine_id, image_num);
       }
 
-      static fs::path buildFilePath(fs::path folder, uint64_t wine_id, int image_num = 1)
+      static auto buildFilePath(fs::path folder, uint64_t wine_id, int image_num = 1) -> fs::path
       {
-         
          return folder / buildFileName(wine_id, image_num);
       }
    };

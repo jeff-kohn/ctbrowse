@@ -9,7 +9,6 @@
     "cpr",
     "fmt",
     "frozen",
-    "llfio",
     "magic-enum",
     {
       "name": "wxwidgets",

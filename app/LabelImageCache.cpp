@@ -19,13 +19,6 @@
 
 namespace ctb::app
 {
-   using coro::sync_wait;
-   using coro::thread_pool;
-   using coro::when_all;
-   using std::stop_token;
-   using std::unexpected;
-
-
 
    LabelImageCache::LabelImageCache(std::string cache_folder) :
       m_cache_folder{ expandEnvironmentVars(cache_folder) },
@@ -52,16 +45,35 @@ namespace ctb::app
    }
 
 
+   auto makeLabelDownloadTask(uint64_t wine_id, int image_num, coro::thread_pool& tp, std::stop_token token) -> tasks::FetchImageTask
+   {
+      // First, execute task to get the initial HTTP request for the wine page.
+      //co_await 
+
+      // check if we got the response or need to retry
+
+      // parse the HTML to get the URL for the label image.
+
+      // now execute task to download the label image 
+
+      // save it to disk.
+
+      // return task that can be used to load the bytes into a wxImage
+
+      return tasks::FetchImageTask{};
+   }
+
+
    auto LabelImageCache::loadImage(tasks::FetchImageTask& task) -> LoadImageResult
    {
       try 
       {
          // retrieve the image data from the task, this may block if it's still executing
-         auto bytes = sync_wait(task);
+         auto bytes = coro::sync_wait(task);
          if (!bytes)
-            return unexpected{ bytes.error() };
+            return std::unexpected{ bytes.error() };
 
-         // initialize a stream with the bytes returned from the task so we can load it into a wxBitmap
+         // initialize a stream with the bytes returned from the task so we can load it into a wxImage
          wxMemoryInputStream byte_stream(bytes->data(), bytes->size());
          wxImage label_img{};
          label_img.LoadFile(byte_stream, wxBITMAP_TYPE_JPEG);
@@ -70,9 +82,8 @@ namespace ctb::app
       catch (std::exception& e)
       {
          log::exception(e);
-         return unexpected{ tasks::ResultCode::Error };
+         return std::unexpected{ tasks::ResultCode::Error };
       }
-
    }
 
 
@@ -82,9 +93,9 @@ namespace ctb::app
       
       auto file_path = buildFilePath(m_cache_folder, wine_id, image_num);
       if (fs::exists(file_path))
-         return tasks::makeFileLoadTask(m_pool, m_cancel_source.get_token(), file_path);
+         return tasks::makeFileLoadTask(file_path, m_pool, m_cancel_source.get_token());
 
-      return makeFileDownloadTask(m_pool, m_cancel_source.get_token(), wine_id, image_num);
+      return makeLabelDownloadTask(wine_id, image_num, m_pool, m_cancel_source.get_token());
    }
 
 
@@ -102,37 +113,6 @@ namespace ctb::app
       m_cancel_source.request_stop();
       m_pool.shutdown();
    }
-
-
-   auto LabelImageCache::makeFileDownloadTask(coro::thread_pool& tp, std::stop_token token, uint64_t wine_id, int image_num) -> tasks::FetchImageTask
-   {
-      return tasks::FetchImageTask{};
-   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -153,52 +133,6 @@ namespace ctb::app
          return img;
 
       return {};
-   }
-
-
-   bool LabelImageCache::requestCacheUpdate(const std::vector<uint64_t>& wine_ids)
-   {
-      if (m_thread_active)
-         return false;
-
-      // launch background thread to do the work and return immediately.
-      m_thread_active.store(true);
-      m_thread = std::jthread{ &LabelImageCache::workerThreadProc, m_cache_folder, wine_ids };
-      return true;
-   }
-
-
-   void LabelImageCache::cancelCacheUpdate(bool wait)
-   {
-      if (m_thread)
-      {
-         if (m_thread_active)
-         {
-            log::info("Requesting cancelation of label image cache thread.");
-            m_thread->request_stop();
-            if (wait and m_thread->joinable())
-            {
-               log::info("Waiting for label image cache thread to terminate...");
-               m_thread->join();
-               log::info("Label image cache thread terminated");
-            }
-         }
-         else
-         {
-            // thread has already completed so discard it.
-            m_thread = std::nullopt;
-         }
-      }
-   }
-
-
-   auto LabelImageCache::startDownloadTask(coro::thread_pool& tp, uint64_t wine_id) -> TaskResult
-   {
-      // move execution from main worker thread to thread pool.
-      co_await tp.schedule();
-
-      SPDLOG_DEBUG("Returning success from label download task for id {}", wine_id);
-      co_return TaskResultCode::Success;
    }
 
 
@@ -233,4 +167,4 @@ namespace ctb::app
    }
    */
 
-} // namespace ctb
+} // namespace ctb::app
