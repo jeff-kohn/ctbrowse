@@ -11,7 +11,10 @@
 
 namespace ctb::constants
 {
-   inline constexpr const char* FMT_HTTP_CELLARTRACKER_QUERY_URL = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
+   inline constexpr const char* FMT_HTTP_CT_TABLE_URL       = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
+   inline constexpr const char* FMT_HTTP_CT_WINE_URL        = "https://www.cellartracker.com/wine.asp?iWine={}";
+   inline constexpr const char* HTTP_USER_AGENT_NAME        = "User-Agent";
+   inline constexpr const char* HTTP_USER_AGENT_VALUE       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36";
 
    inline constexpr const char* CELLARTRACKER_DOT_COM       = "CellarTracker.com";
    inline constexpr const char* CELLARTRACKER_LOGON_CAPTION = "Enter login information for CellarTracker.com:";

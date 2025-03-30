@@ -41,7 +41,7 @@ namespace ctb
       else if (response.error.code != cpr::ErrorCode::OK)
       {
          error.error_code = static_cast<int64_t>(response.error.code);
-         error.error_message = std::format(constants::FMT_ERROR_CURL_ERROR, error.error_code);
+         error.error_message = ctb::format(constants::FMT_ERROR_CURL_ERROR, error.error_code);
 
          // use a separate category for cancellation, so the caller can distinguish and avoid showing unnecessary error messages
          error.category = error.error_code == enum_index(cpr::ErrorCode::ABORTED_BY_CALLBACK) ? Error::Category::OperationCanceled
@@ -49,7 +49,7 @@ namespace ctb
       }
       else {
          error.error_code = static_cast<int64_t>(response.status_code);
-         error.error_message = std::format(constants::FMT_ERROR_HTTP_STATUS_CODE, error.error_code);
+         error.error_message = ctb::format(constants::FMT_ERROR_HTTP_STATUS_CODE, error.error_code);
          error.category = Error::Category::HttpStatus;
       }
 
@@ -71,7 +71,7 @@ namespace ctb
       auto table_name = magic_enum::enum_name(table);
       auto data_format = magic_enum::enum_name(format);
 
-      cpr::Url url{ std::format(constants::FMT_HTTP_CELLARTRACKER_QUERY_URL,
+      cpr::Url url{ ctb::format(constants::FMT_HTTP_CT_TABLE_URL,
                                 percentEncode(std::string(cred.username)),
                                 percentEncode(std::string(cred.password)),
                                 data_format, table_name)
@@ -81,7 +81,7 @@ namespace ctb
                                : cpr::Get(url);
 
       // check the response for success, bail out if we got an error 
-      auto request_result = validateResult(response);
+      auto request_result = validateResponse(response);
       if (!request_result.has_value())
       {
          return std::unexpected{ request_result.error() };

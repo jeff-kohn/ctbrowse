@@ -1,6 +1,7 @@
 #include "App.h"
 #include "tasks.h"
 
+#include <ctb/utility_http.h>
 #include <cpr/cpr.h>
 
 
@@ -36,9 +37,21 @@ namespace ctb::tasks
    }
 
 
-   auto makeUpdateCacheTask() -> UpdateCacheTask
+   auto makeUpdateCacheTask(thread_pool& tp, stop_token token) -> UpdateCacheTask
    {
-      co_return UpdateCacheResult{};
+      //co_await tp.schedule();
+      //try
+      //{
+      //   //if (token.stop_requested()) co_return unexpected{ ResultCode::Aborted };
+
+      //   co_return UpdateCacheResult{};
+      //}
+      //catch (exception& e)
+      //{
+      //   log::exception(e);
+      //   co_return unexpected{ ResultCode::Error };
+      //}
+      co_return {};
    }
 
 
@@ -47,7 +60,14 @@ namespace ctb::tasks
       co_await tp.schedule();
       try
       {
-         co_return cpr::Get(Url{ url });
+         if (token.stop_requested()) co_return std::unexpected{ ResultCode::Aborted };
+
+         auto response = cpr::Get(Url{ url }, getDefaultHeaders() );
+         auto result = validateResponse(response);
+         if (!result)
+            throw result.error();
+
+         co_return response;
       }
       catch (exception& e)
       {

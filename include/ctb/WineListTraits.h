@@ -14,7 +14,6 @@
 
 #include <frozen/map.h>
 
-#include <format>
 #include <utility>
 #include <span>
 #include <vector>
@@ -128,7 +127,7 @@ namespace ctb
          // set value for the WineAndVintage property
          auto vintage   = rec[static_cast<size_t>(PropId::Vintage) ].asString();
          auto wine_name = rec[static_cast<size_t>(PropId::WineName)].asStringView();
-         rec[static_cast<size_t>(PropId::WineAndVintage)] = std::format("{} {}", vintage, wine_name);
+         rec[static_cast<size_t>(PropId::WineAndVintage)] = ctb::format("{} {}", vintage, wine_name);
 
          // total qty is in-stock + pending, this combined field displays similar to CT.com
          auto qty     = rec[static_cast<size_t>(PropId::Quantity)].asUInt16().value_or(0u);
@@ -138,7 +137,7 @@ namespace ctb
             rec[static_cast<size_t>(PropId::TotalQty)] = qty;
          }
          else{
-            rec[static_cast<size_t>(PropId::TotalQty)] = std::format("{}+{}", qty, pending);
+            rec[static_cast<size_t>(PropId::TotalQty)] = ctb::format("{}+{}", qty, pending);
          }
 
          // for drinking window, 9999 = null

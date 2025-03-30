@@ -10,7 +10,6 @@
 #include "ctb/ctb.h"
 #include "ctb/utility_templates.h"
 
-#include <format>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -179,7 +178,7 @@ namespace ctb
          {
             [](const std::string& val) {  return val;                                                 },
             [](std::monostate) {  return std::string{};                                       },
-            [&fmt_str](auto val) {  return std::vformat(fmt_str,  std::make_format_args(val));  }
+            [&fmt_str](auto val) {  return ctb::vformat(fmt_str,  ctb::make_format_args(val));  }
          };
          return std::visit(asStr, m_val);
       }

@@ -7,6 +7,7 @@
  *********************************************************************/
 #include "panels/WineDetailsPanel.h"
 
+#include <ctb/utility_http.h>
 #include <cpr/cpr.h>
 #include <HtmlParser/Parser.hpp>
 #include <HtmlParser/Query.hpp>
@@ -16,7 +17,6 @@
 #include <wx/valgen.h>
 #include <wx/wupdlock.h>
 
-#include <format>
 #include <chrono>
 #include <thread>
 
@@ -49,7 +49,7 @@ namespace ctb::app
             cpr::Header headers = { {"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"} };
 
             // make an HTTP GET request to retrieve the target page
-            cpr::Response response = cpr::Get(cpr::Url{ ctb::format(constants::FMT_URL_WINE_DETAILS, wine_id) }, headers);
+            cpr::Response response = cpr::Get(cpr::Url{ ctb::format(constants::FMT_HTTP_CT_WINE_URL, wine_id) }, headers);
 
             HtmlParser::Parser parser;
             HtmlParser::DOM dom = parser.Parse(response.text);
@@ -356,7 +356,7 @@ namespace ctb::app
          wxGetApp().displayInfoMessage("no wine id available.");
       }
       else{
-         wxLaunchDefaultBrowser(ctb::format(constants::FMT_URL_WINE_DETAILS, m_details.wine_id).c_str());
+         wxLaunchDefaultBrowser(getWineDetailsUrl(m_details.wine_id).c_str());
       }
    }
 

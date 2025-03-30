@@ -7,10 +7,10 @@
  *********************************************************************/
 #pragma once
 
+#include "ctb/ctb_format.h"
 #include <magic_enum/magic_enum.hpp>
 
 #include <exception>
-#include <format>
 #include <string>
 #include <string_view>
 
@@ -88,7 +88,7 @@ namespace ctb
       template <typename... T>
       Error(Category category, std::string_view fmt, T&&... args) : 
          error_code{ ERROR_CODE_GENERAL_FAILURE },
-         error_message{ std::vformat(fmt, std::make_format_args(args...)) },
+         error_message{ ctb::vformat(fmt, ctb::make_format_args(args...)) },
          category{ category }
       {}
 
@@ -97,7 +97,7 @@ namespace ctb
       template <typename... T>
       Error(int64_t code, Category category, std::string_view fmt, T&&... args) :
          error_code{ code },
-         error_message{ std::vformat(fmt, std::make_format_args(args...)) },
+         error_message{ ctb::vformat(fmt, ctb::make_format_args(args...)) },
          category{ category }
       {}
 

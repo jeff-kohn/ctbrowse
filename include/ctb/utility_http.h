@@ -3,6 +3,7 @@
 #include "ctb/ctb.h"
 
 #include <cpr/response.h>
+#include <cpr/cprtypes.h>
 #include <expected>
 
 namespace ctb
@@ -23,8 +24,21 @@ namespace ctb
    /// @brief  returns true if the request returned a valid response, or an Error if it didn't
    ///
    /// the bool will always be true, ctb::Error will be returned otherwise. So you can use
-   /// calls to this function in a conditional to evaluate to success/failure if you don't
+   /// operator bool() in a conditional to evaluate to success/failure if you don't
    /// care about retrieving the exact exception details.
    /// 
-   auto validateResult(cpr::Response& response) noexcept -> std::expected<bool, ctb::Error>;
+   auto validateResponse(cpr::Response& response) noexcept -> std::expected<bool, ctb::Error>;
+
+
+   /// @brief get default headers to use for HTTP requests to CellarTracker.com
+   /// 
+   inline auto getDefaultHeaders() noexcept -> cpr::Header
+   {
+      return cpr::Header{ { constants::HTTP_USER_AGENT_NAME, constants::HTTP_USER_AGENT_VALUE } };
+   }
+
+   inline auto getWineDetailsUrl(uint64_t wine_id) noexcept -> std::string
+   {
+      return ctb::format(constants::FMT_HTTP_CT_WINE_URL, wine_id);
+   }
 }

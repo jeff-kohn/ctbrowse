@@ -15,13 +15,6 @@
 #include <wx/confbase.h>
 
 
-namespace ctb
-{
-   // we can replace these with std:: if we want, rest of app uses them from ctb::
-   using fmt::format;
-   using fmt::format_string;
-   using fmt::format;
-}
 
 
 namespace ctb::app

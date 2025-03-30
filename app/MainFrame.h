@@ -14,8 +14,6 @@
 #include <wx/event.h>
 #include <wx/frame.h>
 
-#include <format>
-
 
 /// forward declare wx classes to avoid header pollution.
 class wxBoxSizer;

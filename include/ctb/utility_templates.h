@@ -2,7 +2,10 @@
 
 #include "ctb/ctb.h"
 #include <magic_enum/magic_enum.hpp>
+
+#include <charconv>
 #include <optional>
+
 namespace ctb
 {
 

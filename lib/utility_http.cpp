@@ -41,7 +41,8 @@ namespace ctb
       return std::string{ text };
    }
 
-   auto validateResult(cpr::Response& response) noexcept -> std::expected<bool, ctb::Error>
+
+   auto validateResponse(cpr::Response& response) noexcept -> std::expected<bool, ctb::Error>
    {
       using namespace magic_enum;
 
@@ -64,7 +65,7 @@ namespace ctb
       else if (response.error.code != cpr::ErrorCode::OK)
       {
          error.error_code = static_cast<int64_t>(response.error.code);
-         error.error_message = std::format(constants::FMT_ERROR_CURL_ERROR, error.error_code);
+         error.error_message = ctb::format(constants::FMT_ERROR_CURL_ERROR, error.error_code);
 
          // use a separate category for cancellation, so the caller can distinguish and avoid showing unnecessary error messages
          error.category = error.error_code == enum_index(cpr::ErrorCode::ABORTED_BY_CALLBACK) ? Error::Category::OperationCanceled
@@ -72,7 +73,7 @@ namespace ctb
       }
       else {
          error.error_code = static_cast<int64_t>(response.status_code);
-         error.error_message = std::format(constants::FMT_ERROR_HTTP_STATUS_CODE, error.error_code);
+         error.error_message = ctb::format(constants::FMT_ERROR_HTTP_STATUS_CODE, error.error_code);
          error.category = Error::Category::HttpStatus;
       }
 

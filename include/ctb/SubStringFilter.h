@@ -11,7 +11,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <expected>
-#include <format>
 #include <string_view>
 #include <vector>
 

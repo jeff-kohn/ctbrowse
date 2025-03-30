@@ -19,6 +19,7 @@
 
 namespace ctb::app
 {
+   using namespace tasks;
 
    LabelImageCache::LabelImageCache(std::string cache_folder) :
       m_cache_folder{ expandEnvironmentVars(cache_folder) },
@@ -47,8 +48,12 @@ namespace ctb::app
 
    auto makeLabelDownloadTask(uint64_t wine_id, int image_num, coro::thread_pool& tp, std::stop_token token) -> tasks::FetchImageTask
    {
+      // switch execution to thread pool 
+      co_await tp.schedule();
+
+
       // First, execute task to get the initial HTTP request for the wine page.
-      //co_await 
+      auto response = co_await makeHttpGetTask(getWineDetailsUrl(wine_id), tp, token);
 
       // check if we got the response or need to retry
 
@@ -60,7 +65,7 @@ namespace ctb::app
 
       // return task that can be used to load the bytes into a wxImage
 
-      return tasks::FetchImageTask{};
+      co_return tasks::FetchImageResult{};
    }
 
 

@@ -110,8 +110,6 @@ namespace ctb::constants
    inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
    inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
 
-   inline constexpr const char* FMT_URL_WINE_DETAILS              = "https://www.cellartracker.com/wine.asp?iWine={}";
-
    inline constexpr double FILTER_SCORE_DEFAULT =  90.0;
    inline constexpr double FILTER_SCORE_INCR    =   0.1;
    inline constexpr double FILTER_SCORE_MIN     =    50;

@@ -52,6 +52,7 @@ target_include_directories(ctBrowse_lib
 target_link_libraries(ctBrowse_lib
    PUBLIC
       cpr::cpr
+      fmt::fmt
       magic_enum::magic_enum
       "$<$<PLATFORM_ID:Windows>:Credui>"
       "$<$<PLATFORM_ID:Windows>:shlwapi>"

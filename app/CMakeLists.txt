@@ -42,7 +42,6 @@ target_link_libraries(${TARGET_NAME}
       HtmlParser
       libcoro
       spdlog::spdlog
-      fmt::fmt
 )
 
 target_sources(${TARGET_NAME}
