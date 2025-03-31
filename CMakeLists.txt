@@ -42,8 +42,10 @@ FetchContent_Declare(
         HtmlParser
         GIT_REPOSITORY https://github.com/JustCabbage/HtmlParser.git
         GIT_TAG master
+        SYSTEM
 )
 FetchContent_MakeAvailable(HtmlParser)
+target_compile_options(HtmlParser PRIVATE "-w")
 
 # libcoro
 set(LIBCORO_EXTERNAL_DEPENDENCIES ON)
@@ -54,8 +56,10 @@ FetchContent_Declare(
     libcoro
     GIT_REPOSITORY https://github.com/jbaldwin/libcoro.git
     GIT_TAG        main
+    SYSTEM
 )
 FetchContent_MakeAvailable(libcoro)
+target_compile_options(libcoro PRIVATE "-w")
 
 
 find_package(cpr CONFIG REQUIRED)

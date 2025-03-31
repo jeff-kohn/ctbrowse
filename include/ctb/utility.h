@@ -18,30 +18,29 @@ namespace ctb
 
 
    /// @brief read a binary file (up to max_size bytes in size) into a char buffer
-   /// @return true if the file was read, false if not.
    /// 
-   /// @throws ctb::Error, possibly other std::exception-derived if file can't be read or larger than max_size
+   /// @throws ctb::Error, possibly other std::exception-derived if file can't be read or is larger than max_size
    /// 
    void readBinaryFile(const fs::path& file_path, std::vector<char>& buf, uint32_t max_size = constants::ONE_MB) noexcept(false);
 
 
    /// @brief just dump some text to a file (no encoding or formatting applied).
-   /// @throws ctb::Error, possibly other std::exception-derived if file can't be written or already exists
-   ///         and overwrite = false;
    ///
    /// if the file_path has a parent directory and it doesn't exist, an attempt will be made to 
    /// create it. 
    /// 
+   /// @throws ctb::Error, possibly other std::exception-derived if file can't be written or already exists
+   ///         and overwrite = false;
    /// 
    void saveTextToFile(std::string_view text, fs::path file_path, bool overwrite = false) noexcept(false);
 
 
    /// @brief  Expand environment variables in place
-   /// @return true if successful, false if unsuccessful in which case the parameter 'text' will be unmodified
-   /// 
    /// in the case when the passed string does not contain any environment vars, this function
    /// returns without any allocation or copying, which gives it a slight performance edge over
    /// expandEnvironmentVars() if you're working with strings that may or may not contain any vars.
+   /// 
+   /// @return true if successful, false if unsuccessful in which case the parameter 'text' will be unmodified
    /// 
    bool tryExpandEnvironmentVars(std::string& text);
 
@@ -58,9 +57,10 @@ namespace ctb
    ///
    /// while this overload is convenient, it has the overhead of an unnecessary copy
    /// when the passed string has no vars to expand.
-   inline std::string expandEnvironmentVars(std::string_view text)
+   template<StringViewCompatible Str>
+   inline std::string expandEnvironmentVars(Str&& text)
    {
-      std::string result{};
+      std::string result{std::forward<Str>(text)};
       tryExpandEnvironmentVars(result);
       return result;
    }

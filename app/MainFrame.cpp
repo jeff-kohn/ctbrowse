@@ -7,8 +7,8 @@
  *********************************************************************/
 
 #include "App.h"
-#include "LabelImageCache.h"
 #include "MainFrame.h"
+#include "LabelImageCache.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
 #include "grid/CellarTrackerGrid.h"
@@ -138,7 +138,7 @@ namespace ctb::app
       m_grid->SetColLabelSize(FromDIP(30));
       box_sizer->Add(m_grid, wxSizerFlags(80).Expand());
 
-      m_wine_details = WineDetailsPanel::create(this, m_event_source);
+      m_wine_details = WineDetailsPanel::create(this, m_event_source, m_label_cache);
       box_sizer->Add(m_wine_details, wxSizerFlags(30).Expand());
 
       SetSizer(box_sizer.release());

@@ -1,11 +1,12 @@
 #include "ctb/utility_http.h"
-
 #include "external/HttpStatusCodes.h"
 
 #include <cpr/curlholder.h>
 #include <cpr/status_codes.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <HtmlParser/Parser.hpp>
+#include <HtmlParser/Query.hpp>
 
 namespace ctb
 {
@@ -42,7 +43,7 @@ namespace ctb
    }
 
 
-   auto validateResponse(cpr::Response& response) noexcept -> std::expected<bool, ctb::Error>
+   auto validateResponse(const cpr::Response& response) noexcept -> std::expected<bool, ctb::Error>
    {
       using namespace magic_enum;
 
@@ -79,6 +80,30 @@ namespace ctb
 
       return std::unexpected{ error };
    }
+
+
+   auto parseLabelUrlFromHtml(const std::string& html) -> std::string
+   {
+      try 
+      {
+         // parse the HTML to get the URL for the label image.
+         HtmlParser::Parser parser;
+         HtmlParser::DOM dom = parser.Parse(html);
+         HtmlParser::Query query(dom.Root());
+         auto images = dom.GetElementById(constants::HTML_ELEM_LABEL_PHOTO);
+         if (images and !images->Children.empty())
+         {
+            return images->Children[0]->GetAttribute(constants::HTML_ATTR_SRC);
+         }
+      }
+      catch (std::exception&)
+      {
+         // TODO: LOG?
+      }
+      return {};
+   }
+
+
 
 
 } // namespace ctb

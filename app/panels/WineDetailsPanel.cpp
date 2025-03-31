@@ -8,10 +8,8 @@
 #include "panels/WineDetailsPanel.h"
 
 #include <ctb/utility_http.h>
+#include <coro/sync_wait.hpp>
 #include <cpr/cpr.h>
-#include <HtmlParser/Parser.hpp>
-#include <HtmlParser/Query.hpp>
-
 #include <wx/commandlinkbutton.h>
 #include <wx/stattext.h>
 #include <wx/valgen.h>
@@ -45,21 +43,22 @@ namespace ctb::app
       {
          try 
          {
-            // define the user agent for the GET request
-            cpr::Header headers = { {"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"} };
 
-            // make an HTTP GET request to retrieve the target page
-            cpr::Response response = cpr::Get(cpr::Url{ ctb::format(constants::FMT_HTTP_CT_WINE_URL, wine_id) }, headers);
+            //// define the user agent for the GET request
+            //cpr::Header headers = { {"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"} };
 
-            HtmlParser::Parser parser;
-            HtmlParser::DOM dom = parser.Parse(response.text);
-            HtmlParser::Query query(dom.Root());
-            auto images = dom.GetElementById("label_photo");
-            if (images and !images->Children.empty())
-            {
-               auto image_url = images->Children[0]->GetAttribute("src");
-               response = cpr::Get(cpr::Url{ image_url }, headers);
-            }
+            //// make an HTTP GET request to retrieve the target page
+            //cpr::Response response = cpr::Get(cpr::Url{ ctb::format(constants::FMT_HTTP_CT_WINE_URL, wine_id) }, headers);
+
+            //HtmlParser::Parser parser;
+            //HtmlParser::DOM dom = parser.Parse(response.text);
+            //HtmlParser::Query query(dom.Root());
+            //auto images = dom.GetElementById("label_photo");
+            //if (images and !images->Children.empty())
+            //{
+            //   auto image_url = images->Children[0]->GetAttribute("src");
+            //   response = cpr::Get(cpr::Url{ image_url }, headers);
+            //}
 
          }
          catch (Error& err)
@@ -74,11 +73,13 @@ namespace ctb::app
    }
 
 
-   WineDetailsPanel::WineDetailsPanel(GridTableEventSourcePtr source) : m_event_sink{ this, source }
+   WineDetailsPanel::WineDetailsPanel(GridTableEventSourcePtr source, LabelCachePtr cache) : 
+      m_label_cache{ cache },
+      m_event_sink{ this, source }
    {}
 
 
-   WineDetailsPanel* WineDetailsPanel::create(wxWindow* parent, GridTableEventSourcePtr source)
+   WineDetailsPanel* WineDetailsPanel::create(wxWindow* parent, GridTableEventSourcePtr source, LabelCachePtr cache)
    {
       if (!source)
       {
@@ -91,7 +92,7 @@ namespace ctb::app
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
 
-      std::unique_ptr<WineDetailsPanel> wnd{ new WineDetailsPanel{source} };
+      std::unique_ptr<WineDetailsPanel> wnd{ new WineDetailsPanel{ source, cache } };
       if (!wnd->Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
@@ -337,7 +338,9 @@ namespace ctb::app
          m_details.my_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
          GetSizer()->ShowItems(true);
 
-         // detail::getLabelImage(m_details.wine_id);
+         //m_details.image_result = m_label_cache->fetchLabelImage(m_details.wine_id);
+         m_label_cache->fetchLabelImage(m_details.wine_id);
+         //coro::sync_wait(std::move(m_details.image_result.value()));
       }
       else{
          GetSizer()->ShowItems(false);
@@ -348,6 +351,7 @@ namespace ctb::app
       Layout();
       // TODO hide/unhide fields as necessary.
    }
+
 
    void WineDetailsPanel::onViewWebPage([[maybe_unused]] wxCommandEvent& event)
    {

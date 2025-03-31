@@ -7,8 +7,6 @@
 
 namespace ctb::tasks
 {
-   using coro::sync_wait;
-   using coro::thread_pool;
    using cpr::Url;
    using std::exception;
    using std::expected;
@@ -18,12 +16,11 @@ namespace ctb::tasks
    using std::unexpected;
 
 
-   auto makeFileLoadTask(fs::path file, thread_pool& tp, stop_token token) -> FetchImageTask
+   auto makeLoadFileTask(fs::path file, stop_token token) -> FetchImageTask
    {
-      co_await tp.schedule();
       try
       {
-         if (token.stop_requested()) co_return std::unexpected{ ResultCode::Aborted };
+         checkStopToken(token);
 
          vector<char> buf{};
          readBinaryFile(file, buf);
@@ -37,9 +34,8 @@ namespace ctb::tasks
    }
 
 
-   auto makeUpdateCacheTask(thread_pool& tp, stop_token token) -> UpdateCacheTask
+   auto makeUpdateCacheTask(stop_token token) -> UpdateCacheTask
    {
-      //co_await tp.schedule();
       //try
       //{
       //   //if (token.stop_requested()) co_return unexpected{ ResultCode::Aborted };
@@ -55,24 +51,25 @@ namespace ctb::tasks
    }
 
 
-   auto makeHttpGetTask(string_view url, thread_pool& tp, stop_token token) -> HttpRequestTask
+
+
+   auto makeHttpGetTask(string_view url, stop_token token) -> HttpRequestTask
    {
-      co_await tp.schedule();
       try
       {
-         if (token.stop_requested()) co_return std::unexpected{ ResultCode::Aborted };
+         checkStopToken(token);
 
          auto response = cpr::Get(Url{ url }, getDefaultHeaders() );
          auto result = validateResponse(response);
          if (!result)
-            throw result.error();
+            co_return unexpected{ Error(result.error()) };
 
          co_return response;
       }
       catch (exception& e)
       {
          log::exception(e);
-         co_return unexpected{ ResultCode::Error };
+         co_return unexpected{ Error{ e.what() } };
       }
    }
 

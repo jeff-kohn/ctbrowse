@@ -83,7 +83,7 @@ namespace ctb::app
       wxToolBar*              m_tool_bar{};
       WineDetailsPanel*       m_wine_details{};
 
-      // we use a shared_ptr because we want to share the object with child window(s)0
+      // we use a shared_ptr because we want to share the object with child window(s)
       std::shared_ptr<LabelImageCache> m_label_cache{};
 
       /// @brief private ctor called by static create()

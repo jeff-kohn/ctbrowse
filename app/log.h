@@ -89,7 +89,7 @@ namespace ctb::log
    inline void exception(const std::exception& e, std::source_location source_loc = std::source_location::current())
    {
       auto file_name = fileNamePart(source_loc.file_name());
-      error("In {}:{} - {}", file_name, source_loc.line(), source_loc.function_name(), e.what());
+      error("{} (in {}:{}) - {}", file_name, source_loc.line(), source_loc.function_name(), e.what());
    }
 
 

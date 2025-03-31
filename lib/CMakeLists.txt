@@ -53,6 +53,7 @@ target_link_libraries(ctBrowse_lib
    PUBLIC
       cpr::cpr
       fmt::fmt
+      HtmlParser
       magic_enum::magic_enum
       "$<$<PLATFORM_ID:Windows>:Credui>"
       "$<$<PLATFORM_ID:Windows>:shlwapi>"

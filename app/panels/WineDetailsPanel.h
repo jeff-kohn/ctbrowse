@@ -7,6 +7,8 @@
  *********************************************************************/
 #pragma once
 #include "App.h"
+#include "tasks.h"
+#include "LabelImageCache.h"
 #include "grid/ScopedEventSink.h"
 
 #include <wx/collpane.h>
@@ -32,7 +34,7 @@ namespace ctb::app
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its own lifetime). 
       /// 
-      [[nodiscard]] static WineDetailsPanel* create(wxWindow* parent, GridTableEventSourcePtr source);
+      [[nodiscard]] static WineDetailsPanel* create(wxWindow* parent, GridTableEventSourcePtr source, LabelCachePtr cache);
 
 
       // no copy/move/assign, this class is created on the heap.
@@ -43,6 +45,8 @@ namespace ctb::app
       ~WineDetailsPanel() override = default;
 
    private:
+      using MaybeFetchImageTask = std::optional<tasks::FetchImageTask>;
+
       /// @brief struct that control validators will be bound to for displaying in the window
       ///
       struct WineDetails
@@ -61,10 +65,12 @@ namespace ctb::app
          wxString my_price{};
          wxString community_price{};
          wxString auction_value{};
+         MaybeFetchImageTask image_result{};
       };
 
-      WineDetails       m_details{};
-      ScopedEventSink   m_event_sink;   // no default init
+      LabelCachePtr   m_label_cache{};
+      ScopedEventSink m_event_sink;   // no default init
+      WineDetails     m_details{};
 
       // window creation
       void initControls();
@@ -77,7 +83,7 @@ namespace ctb::app
       void onViewWebPage(wxCommandEvent& event);
 
       // private ctor used by create()
-      explicit WineDetailsPanel(GridTableEventSourcePtr source);
+      explicit WineDetailsPanel(GridTableEventSourcePtr source, LabelCachePtr cache);
    };
 
 } // namespace ctb::app

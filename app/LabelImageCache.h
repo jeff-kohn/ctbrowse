@@ -10,9 +10,11 @@
 #include "App.h"
 #include "tasks.h"
 
+#include <coro/thread_pool.hpp>
 #include <wx/image.h>
 
 #include <expected>
+#include <memory>
 #include <string>
 #include <stop_token>
 #include <vector>
@@ -62,7 +64,7 @@ namespace ctb::app
       /// one of the coro sync/when functions to synchronously wait for the image bytes and 
       /// load them directly into an object of your choosing.
       /// 
-      auto fetchLabelImage(uint64_t wine_id) -> tasks::FetchImageTask;
+      void fetchLabelImage(uint64_t wine_id);
 
 
       /// @brief launch a background task that will retrieve label images for the requested wines
@@ -97,4 +99,6 @@ namespace ctb::app
          return folder / buildFileName(wine_id, image_num);
       }
    };
+
+   using LabelCachePtr = std::shared_ptr<LabelImageCache>;
 }

@@ -19,7 +19,9 @@
 
 namespace ctb::app
 {
+   
    using namespace tasks;
+   using std::unexpected;
 
    LabelImageCache::LabelImageCache(std::string cache_folder) :
       m_cache_folder{ expandEnvironmentVars(cache_folder) },
@@ -29,10 +31,10 @@ namespace ctb::app
          .on_thread_stop_functor = [](auto id) { SPDLOG_DEBUG("thread pool worker {} is shutting down.", id); }
       }}
    {
-      if (m_cache_folder.is_relative())
+      if (m_cache_folder.is_relative() or !fs::is_directory(m_cache_folder))
          throw Error{ constants::ERROR_STR_RELATIVE_LABEL_CACHE };
 
-      if (!fs::exists(m_cache_folder) or !fs::is_directory(cache_folder))
+      if (!fs::exists(m_cache_folder) )
       {
          if (!fs::create_directories(m_cache_folder))
             throw Error{ constants::FMT_ERROR_NO_LABEL_CACHE_FOLDER };
@@ -46,26 +48,44 @@ namespace ctb::app
    }
 
 
-   auto makeLabelDownloadTask(uint64_t wine_id, int image_num, coro::thread_pool& tp, std::stop_token token) -> tasks::FetchImageTask
+   auto makeLabelDownloadTask(uint64_t wine_id, int image_num, std::stop_token token) -> tasks::FetchImageTask
    {
-      // switch execution to thread pool 
-      co_await tp.schedule();
+      SPDLOG_DEBUG("makeLabelDownloadTask({}, {}) now running.", wine_id, image_num);
+      try 
+      {
+         // First, execute task to get the initial HTTP request for the wine page.
+         checkStopToken(token);
+         auto response = co_await makeHttpGetTask(getWineDetailsUrl(wine_id), token);
+         validateOrThrow(response);
+
+         SPDLOG_DEBUG("makeLabelDownloadTask({}, {}) successfully got wine details html.", wine_id, image_num);
+
+         // parse the HTML to get the URL for the label image.
+         checkStopToken(token);
+         auto img_url = parseLabelUrlFromHtml(response->text);
+         if (img_url.empty())
+            throw Error{ constants::ERROR_STR_LABEL_URL_NOT_FOUND };
+
+         SPDLOG_DEBUG("makeLabelDownloadTask({}, {}) parsed image url of {}.", wine_id, image_num, img_url);
+
+         // now execute task to download the label image 
+         checkStopToken(token);
+         response = co_await makeHttpGetTask(img_url, token);
+         validateOrThrow(response);
 
 
-      // First, execute task to get the initial HTTP request for the wine page.
-      auto response = co_await makeHttpGetTask(getWineDetailsUrl(wine_id), tp, token);
+         // check if we got the response or need to retry
 
-      // check if we got the response or need to retry
+         // save it to disk.
 
-      // parse the HTML to get the URL for the label image.
+         // return task that can be used to load the bytes into a wxImage
 
-      // now execute task to download the label image 
-
-      // save it to disk.
-
-      // return task that can be used to load the bytes into a wxImage
-
-      co_return tasks::FetchImageResult{};
+      }
+      catch (std::exception& e)
+      {
+         log::exception(e);
+         co_return unexpected{ ResultCode::Error };
+      }
    }
 
 
@@ -76,7 +96,7 @@ namespace ctb::app
          // retrieve the image data from the task, this may block if it's still executing
          auto bytes = coro::sync_wait(task);
          if (!bytes)
-            return std::unexpected{ bytes.error() };
+            return unexpected{ bytes.error() };
 
          // initialize a stream with the bytes returned from the task so we can load it into a wxImage
          wxMemoryInputStream byte_stream(bytes->data(), bytes->size());
@@ -87,21 +107,52 @@ namespace ctb::app
       catch (std::exception& e)
       {
          log::exception(e);
-         return std::unexpected{ tasks::ResultCode::Error };
+         return unexpected{ tasks::ResultCode::Error };
       }
    }
 
 
-   auto LabelImageCache::fetchLabelImage(uint64_t wine_id) -> tasks::FetchImageTask
+   void LabelImageCache::fetchLabelImage(uint64_t wine_id) 
    {
       constexpr auto image_num = 1; // might support more in the future.
-      
-      auto file_path = buildFilePath(m_cache_folder, wine_id, image_num);
-      if (fs::exists(file_path))
-         return tasks::makeFileLoadTask(file_path, m_pool, m_cancel_source.get_token());
 
-      return makeLabelDownloadTask(wine_id, image_num, m_pool, m_cancel_source.get_token());
+      FetchImageTask task{};
+      auto file_path = buildFilePath(m_cache_folder, wine_id, image_num);
+
+      // Choose the appropriate task depending on if the file is found locally or needs to be downloaded.
+      if (fs::exists(file_path))
+      {
+         m_pool.spawn(makeLoadFileTask(file_path, m_cancel_source.get_token()));
+      }
+      else
+      {
+         m_pool.spawn(makeLabelDownloadTask(wine_id, image_num, m_cancel_source.get_token()));
+      }
+
+      
    }
+
+   //auto LabelImageCache::fetchLabelImage(uint64_t wine_id) -> tasks::FetchImageTask
+   //{
+   //   constexpr auto image_num = 1; // might support more in the future.
+
+   //   FetchImageTask task{};
+   //   auto file_path = buildFilePath(m_cache_folder, wine_id, image_num);
+
+   //   // Choose the appropriate task depending on if the file is found locally or needs to be downloaded.
+   //   if (fs::exists(file_path))
+   //   {
+   //      task = m_pool.schedule(makeLoadFileTask(file_path, m_cancel_source.get_token()));
+   //   }
+   //   else
+   //   {
+   //      task = m_pool.schedule(makeLabelDownloadTask(wine_id, image_num, m_cancel_source.get_token()));
+   //   }
+
+   //   // start the task, we don't want lazy eval
+   //   m_pool.resume(task.handle()); 
+   //   return task;
+   //}
 
 
    auto LabelImageCache::updateCacheAsync(std::vector<uint64_t> wine_ids, std::stop_token cancel) -> tasks::UpdateCacheTask

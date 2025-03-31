@@ -16,6 +16,9 @@ namespace ctb::constants
    inline constexpr const char* HTTP_USER_AGENT_NAME        = "User-Agent";
    inline constexpr const char* HTTP_USER_AGENT_VALUE       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36";
 
+   inline constexpr const char* HTML_ELEM_LABEL_PHOTO       = "label_photo";
+   inline constexpr const char* HTML_ATTR_SRC               = "src";
+
    inline constexpr const char* CELLARTRACKER_DOT_COM       = "CellarTracker.com";
    inline constexpr const char* CELLARTRACKER_LOGON_CAPTION = "Enter login information for CellarTracker.com:";
    inline constexpr const char* CELLARTRACKER_LOGON_TITLE   = "CellarTracker Login";
@@ -47,6 +50,8 @@ namespace ctb::constants
 
    inline constexpr const char* ERROR_STR                         = "Error";
    inline constexpr const char* ERROR_STR_AUTHENTICATION_FAILED   = "Invalid username/password.";
+   inline constexpr const char* ERROR_STR_LABEL_URL_NOT_FOUND     = "Label Image URL not found in HTML.";
+   inline constexpr const char* ERROR_STR_OPERATION_CANCELED      = "Operation Canceled.";
    inline constexpr const char* ERROR_STR_DIALOG_TRANSFER_FAILED  = "Unexpected error transferring data to/from dialog.";
    inline constexpr const char* ERROR_STR_DOWNLOAD_AUTH_FAILURE   = "File download canceled, no valid login was provided.";
    inline constexpr const char* ERROR_STR_INVALID_INDEX           = "Invalid index";

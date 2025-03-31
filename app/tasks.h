@@ -2,9 +2,7 @@
 
 #include <ctb/utility_http.h>
 #include <cpr/response.h>
-#include <coro/sync_wait.hpp>
 #include <coro/task.hpp>
-#include <coro/thread_pool.hpp>
 
 #include <expected>
 #include <stop_token>
@@ -34,12 +32,12 @@ namespace ctb::tasks
    using FetchImageResult  = std::expected<ImageBytes, ResultCode>;
    using FetchImageTask    = coro::task<FetchImageResult>;
 
-   /// @brief creates a task to load a binary file from disk into a vector.
+
+   /// @brief creates a task to load a binary file from disk into a buffer.
    ///
-   /// task will be scheduled for eager execution on the specified thread_pool, function will 
-   /// return immediately.
+   /// task will be suspended until waited on or resumed() with a thread_pool
    /// 
-   auto makeFileLoadTask(fs::path file, coro::thread_pool& tp, std::stop_token token = {}) -> FetchImageTask;
+   auto makeLoadFileTask(fs::path file, std::stop_token token = {}) -> FetchImageTask;
 
 
    // result type and task type for UpdateCache task
@@ -48,22 +46,49 @@ namespace ctb::tasks
 
    /// @brief creates a task to update the label image cache, downloading any missing images
    /// 
-   /// task will be scheduled for eager execution on the specified thread_pool, function will 
-   /// return immediately.
+   /// task will be suspended until waited on or resumed() with a thread_pool
    /// 
    auto makeUpdateCacheTask() -> UpdateCacheTask;
 
 
    // result type and task type for HTTP Request task
-   using HttpRequestResult = std::expected<cpr::Response, ResultCode>;
+   using HttpRequestResult = std::expected<cpr::Response, ctb::Error>;
    using HttpRequestTask   = coro::task<HttpRequestResult>;
 
    /// @brief creates a task to execute an HTTP request using CPR
    ///
-   /// task will be scheduled for eager execution on the specified thread_pool, function will 
-   /// return immediately.
+   /// task will be suspended until waited on or resumed() with a thread_pool
    /// 
-   auto makeHttpGetTask(std::string_view url, coro::thread_pool& tp, std::stop_token token = {}) -> HttpRequestTask;
+   auto makeHttpGetTask(std::string_view url, std::stop_token token = {}) -> HttpRequestTask;
+
+
+   /// @brief validates the supplied task result, and throws if validation fails
+   /// @return always returns true unless it throws (useful in conditionals)
+   /// @throws ctb::Error
+   /// 
+   inline auto validateOrThrow(const HttpRequestResult& task_result) -> bool
+   {
+      // could be the HTTP request itself failed...
+      if (!task_result)
+         throw task_result.error();
+
+      // or it could be that the response indicates an error...
+      auto result = validateResponse(*task_result);
+      if (!result)
+         throw result.error();
+
+      return true;
+   }
+
+
+   /// @brief helper function, throws exception if stop_token.stop_requested() == true
+   /// @throws ctb::Error
+   /// 
+   inline void checkStopToken(const std::stop_token& token)
+   {
+      if (token.stop_requested())
+         throw Error{ constants::ERROR_STR_OPERATION_CANCELED, Error::Category::OperationCanceled };
+   }
 
 
 } // namespace ctb::tasks
