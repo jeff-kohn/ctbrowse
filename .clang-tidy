@@ -21,6 +21,7 @@ Checks: "*,\
   -misc-const-correctness, \
   -misc-include-cleaner, \
   -misc-non-private-member-variables-in-classes, \
+  -misc-use-internal-linkage, \
   -concurrency-mt-unsafe, \
   -performance-avoid-endl"
 WarningsAsErrors: ''

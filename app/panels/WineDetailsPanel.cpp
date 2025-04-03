@@ -8,7 +8,6 @@
 #include "panels/WineDetailsPanel.h"
 
 #include <ctb/utility_http.h>
-#include <coro/sync_wait.hpp>
 #include <cpr/cpr.h>
 #include <wx/commandlinkbutton.h>
 #include <wx/stattext.h>
@@ -23,9 +22,8 @@ namespace ctb::app
 
    namespace detail
    {
-      wxString getDrinkWindow(const CtProperty& drink_start, const CtProperty& drink_end)
+      auto getDrinkWindow(const CtProperty& drink_start, const CtProperty& drink_end) -> wxString
       {
-
          if (drink_start.isNull() && drink_end.isNull() )
             return wxEmptyString;
 
@@ -36,39 +34,6 @@ namespace ctb::app
             return drink_start.asString("{} +").c_str();
 
          return ctb::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str(); 
-      }
-
-
-      void getLabelImage(uint64_t wine_id)
-      {
-         try 
-         {
-
-            //// define the user agent for the GET request
-            //cpr::Header headers = { {"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"} };
-
-            //// make an HTTP GET request to retrieve the target page
-            //cpr::Response response = cpr::Get(cpr::Url{ ctb::format(constants::FMT_HTTP_CT_WINE_URL, wine_id) }, headers);
-
-            //HtmlParser::Parser parser;
-            //HtmlParser::DOM dom = parser.Parse(response.text);
-            //HtmlParser::Query query(dom.Root());
-            //auto images = dom.GetElementById("label_photo");
-            //if (images and !images->Children.empty())
-            //{
-            //   auto image_url = images->Children[0]->GetAttribute("src");
-            //   response = cpr::Get(cpr::Url{ image_url }, headers);
-            //}
-
-         }
-         catch (Error& err)
-         {
-            wxGetApp().displayErrorMessage(err);
-         }
-         catch (std::exception& e)
-         {
-            wxGetApp().displayErrorMessage(e.what());
-         }
       }
    }
 
@@ -338,9 +303,7 @@ namespace ctb::app
          m_details.my_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
          GetSizer()->ShowItems(true);
 
-         //m_details.image_result = m_label_cache->fetchLabelImage(m_details.wine_id);
-         m_label_cache->fetchLabelImage(m_details.wine_id);
-         //coro::sync_wait(std::move(m_details.image_result.value()));
+         m_details.image_result = m_label_cache->fetchLabelImage(m_details.wine_id);
       }
       else{
          GetSizer()->ShowItems(false);

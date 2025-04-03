@@ -92,9 +92,9 @@ namespace ctb
       // it to UTF-8 before returning it. If the conversion fails, just return the
       // original encoding as fallback.
       auto utf_text = toUTF8(table_data.data);
-      if (!utf_text.empty())
+      if (utf_text)
       {
-         table_data.data.swap(utf_text);
+         table_data.data.swap(*utf_text);
       }
 
       return table_data;

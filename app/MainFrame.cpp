@@ -347,7 +347,7 @@ namespace ctb::app
             auto folder = wxGetApp().userDataFolder();
             auto file_path{ folder / result->tableName() };
             file_path.replace_extension(constants::DATA_FILE_EXTENSION);
-            saveTextToFile(result->data, file_path, true);
+            saveTextToFile(file_path, result->data, true);
 
             setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, getTableDescription(tbl));
          }

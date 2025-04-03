@@ -32,6 +32,40 @@ namespace ctb
    auto validateResponse(const cpr::Response& response) noexcept -> std::expected<bool, ctb::Error>;
 
 
+   /// @brief Validates the supplied task result, and throws if validation fails
+   /// 
+   /// You can pass this function an l-value or r-value and it will do the right
+   /// thing to "pass through" the response to the return value without modifying
+   /// or copying it.
+   /// 
+   /// @return either a reference to or moved-to copy of response, depending 
+   ///         on whether response is an l-value or r-value.
+   /// @throws ctb::Error if validation fails
+   /// 
+   template<typename Resp> requires std::same_as<std::decay_t<Resp>, cpr::Response> 
+   auto validateOrThrow(Resp&& response) noexcept(false) -> Resp
+   {
+      auto result = validateResponse(response);
+      if (!result)
+         throw result.error();
+
+      return std::forward<Resp>(response);
+   }
+
+
+   /// @brief Retrieves buffer view and its content-type from a HTTP response
+   /// 
+   /// Note that both values are views into the  Response they  were generated 
+   /// from. This function only accepts l-value reference to avoid returning 
+   /// dangling views to temporaries
+   /// 
+   /// @return a pair containing a span<byte> for the data with a string_view 
+   ///         for the content type. Both will be empty if the response doesn't
+   ///         contain any data
+   /// 
+   auto getBytes(cpr::Response& response) -> std::pair<BufferSpan, std::string_view>;
+
+
    /// @brief parses an HTML fragment looking for the element containing the label_photo URL
    ///
    /// @return the requested URL if found, empty string otherwise.

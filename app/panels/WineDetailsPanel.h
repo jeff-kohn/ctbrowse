@@ -6,6 +6,7 @@
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 #pragma once
+
 #include "App.h"
 #include "tasks.h"
 #include "LabelImageCache.h"
@@ -21,8 +22,6 @@
 
 namespace ctb::app
 {
-
-
 
    class WineDetailsPanel final : public wxPanel, public IGridTableEventSink
    {
@@ -45,7 +44,7 @@ namespace ctb::app
       ~WineDetailsPanel() override = default;
 
    private:
-      using MaybeFetchImageTask = std::optional<tasks::FetchImageTask>;
+      using MaybeImageTask = std::optional<LabelImageCache::wxImageTask>;
 
       /// @brief struct that control validators will be bound to for displaying in the window
       ///
@@ -65,7 +64,7 @@ namespace ctb::app
          wxString my_price{};
          wxString community_price{};
          wxString auction_value{};
-         MaybeFetchImageTask image_result{};
+         MaybeImageTask image_result{};
       };
 
       LabelCachePtr   m_label_cache{};

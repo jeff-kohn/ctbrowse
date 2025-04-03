@@ -118,4 +118,8 @@ namespace ctb::constants
    inline constexpr int WX_UNSPECIFIED_VALUE    =    -1;
    inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = false;
 
+   // app-specific error messages.
+   inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN  = "Label cache object is shutting down.";
+
+
 }  // namespace ctb::constants

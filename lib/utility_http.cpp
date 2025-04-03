@@ -82,6 +82,18 @@ namespace ctb
    }
 
 
+   auto getBytes(cpr::Response& response) -> std::pair<BufferSpan, std::string_view>
+   {
+      assert(response.downloaded_bytes == std::ssize(response.text));
+
+      auto result = std::make_pair(BufferSpan{}, std::string_view{});
+      if (response.downloaded_bytes > 0)
+      {
+         result.first = BufferSpan{ reinterpret_cast<std::byte*>(response.text.data()), response.text.size() };
+      }
+      return result;
+   }
+
    auto parseLabelUrlFromHtml(const std::string& html) -> std::string
    {
       try 

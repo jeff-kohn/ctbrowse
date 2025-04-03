@@ -21,7 +21,13 @@ namespace ctb
    /// 
    /// @throws ctb::Error, possibly other std::exception-derived if file can't be read or is larger than max_size
    /// 
-   void readBinaryFile(const fs::path& file_path, std::vector<char>& buf, uint32_t max_size = constants::ONE_MB) noexcept(false);
+   auto readBinaryFile(const fs::path& file_path, uint32_t max_size = constants::ONE_MB) noexcept(false) -> Buffer;
+
+
+   /// @brief Save binary data to a file.
+   /// @throws ctb::Error, possibly other std::exception-derived
+   /// 
+   auto saveBinaryFile(const fs::path& file_path, BufferSpan buf, bool overwrite = false) noexcept(false) -> void;
 
 
    /// @brief just dump some text to a file (no encoding or formatting applied).
@@ -32,53 +38,54 @@ namespace ctb
    /// @throws ctb::Error, possibly other std::exception-derived if file can't be written or already exists
    ///         and overwrite = false;
    /// 
-   void saveTextToFile(std::string_view text, fs::path file_path, bool overwrite = false) noexcept(false);
+   auto saveTextToFile(fs::path file_path, std::string_view text, bool overwrite = false) noexcept(false) -> void;
+
+
+   /// @brief Get a view/substring of just the filename from a string containing a path
+   /// 
+   /// The returned string_view is only valid for the lifetime of fq_path. This 
+   /// function does not modify fq_path; it only takes a non-const ref to prevent 
+   /// passing an rvalue (since that would be unsafe)
+   ///
+   auto viewFilename(std::string& fq_path) noexcept -> std::string_view;
+
+
+   /// @brief ISO 8859-1 Latin 1; Western European (ISO)
+   constexpr unsigned int ISO_LATIN_1 = 28591;
+
+   /// @brief convert text to UTF8 from other narrow/multi-byte encoding.
+   ///
+   /// see https://learn.microsoft.com/en-us/windows/win32/Intl/code-page-identifiers
+   /// for a list of code page id's.
+   /// 
+   /// @return the converting string if successful, std::nullopt if not.
+   /// 
+   [[nodiscard]] auto toUTF8(const std::string& text, unsigned int code_page = ISO_LATIN_1) -> MaybeString;
 
 
    /// @brief  Expand environment variables in place
-   /// in the case when the passed string does not contain any environment vars, this function
+   /// 
+   /// In the case when the passed string does not contain any environment vars, this function
    /// returns without any allocation or copying, which gives it a slight performance edge over
    /// expandEnvironmentVars() if you're working with strings that may or may not contain any vars.
    /// 
    /// @return true if successful, false if unsuccessful in which case the parameter 'text' will be unmodified
    /// 
-   bool tryExpandEnvironmentVars(std::string& text);
+   auto tryExpandEnvironmentVars(std::string& text) -> bool;
 
 
-   /// @brief convert text to UTF8 from other narrow/multi-byte encoding.
-   ///
-   /// see https://learn.microsoft.com/en-us/windows/win32/Intl/code-page-identifiers
-   /// for a list of code page id's, 
-   /// 
-   std::string toUTF8(const std::string& text, unsigned int code_page = 28591 /* ISO 8859-1 Latin 1; Western European (ISO) */);
-
-
-   /// @brief expand environment variables and return result
+   /// @brief Expand environment variables and return result
    ///
    /// while this overload is convenient, it has the overhead of an unnecessary copy
    /// when the passed string has no vars to expand.
    template<StringViewCompatible Str>
-   inline std::string expandEnvironmentVars(Str&& text)
+   inline auto expandEnvironmentVars(Str&& text) -> std::string
    {
       std::string result{std::forward<Str>(text)};
       tryExpandEnvironmentVars(result);
       return result;
    }
 
-
-   /// @brief get view/substring of just the filename from a string_view containing a path
-   ///
-   inline std::string_view fileNamePart(std::string_view fq_path) noexcept
-   {
-      auto sep = fq_path.find_last_of('\\');
-      if (std::string_view::npos == sep)
-         sep = fq_path.find_last_of('/');
-
-      if (std::string_view::npos == sep)
-         return fq_path;
-      else
-         return fq_path.substr(sep + 1);
-   }
 
 
 

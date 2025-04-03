@@ -10,7 +10,6 @@
 #include "App.h"
 #include "tasks.h"
 
-#include <coro/thread_pool.hpp>
 #include <wx/image.h>
 
 #include <expected>
@@ -32,50 +31,66 @@ namespace ctb::app
    class LabelImageCache final
    {
    public:
-      /// @brief constructor
-      /// @param cache_folder - path of folder to use for disk cache. env vars will be expanded
+
+      /// @brief LabelImageCache constructor
       /// 
       /// may throw if cache folder doesn't exist and can't be created, or is a relative path. 
       /// Any embedded environment variables contained in the folder path will be expanded.
+      /// 
+      /// @param cache_folder - path of folder to use for disk cache. env vars will be expanded
       /// 
       explicit LabelImageCache(std::string cache_folder);
       ~LabelImageCache() noexcept;
 
 
-      /// @brief result type for loadImage() method
+      /// @brief wxImageTask - wraps FetchFileTask to return wxImage
       ///
-      using LoadImageResult  = std::expected<wxImage, tasks::ResultCode>;
-
-
-      /// @brief synchronously retrieve a wxImage for the requested label image
-      /// @param task that will be waited on to retrieve the image file
-      /// @return the requested wxBitmap if task was successful, a result code if not
+      /// This wrapper just adds a convenience method for returning the 
+      /// future value as a wxImage instead of raw bytes. 
       /// 
-      /// the task will be waited on synchronously, if that is not desirable you can poll
-      /// by calling task.is_ready() to decide when to call loadImage().
-      /// 
-      auto loadImage(tasks::FetchImageTask& task) -> LoadImageResult;
+      class wxImageTask final : public tasks::FetchFileTask
+      {
+      public:
+         using FetchFileTask = tasks::FetchFileTask;
+         using FutureType    = FetchFileTask::FutureType;
+         using ResultWrapper = std::expected<wxImage, Error>;
 
 
-      /// @brief fetch a label image asynchronously.
+         /// @brief getImage() - retrieve the future value from the task as a wxImage
+         /// 
+         /// This is a potentially long, BLOCKING call if file is still being downloaded!
+         ///
+         /// @return expected - the requested wxImage, unexpected - ctb::Error describing the failure
+         /// 
+         auto getImage() noexcept -> ResultWrapper;
+
+         wxImageTask()                               = default;
+         wxImageTask(wxImageTask&&)                  = default;
+         ~wxImageTask() noexcept                     = default;
+         wxImageTask& operator=(wxImageTask&&)       = default;
+         wxImageTask(const wxImageTask&)             = delete;
+         wxImageTask& operator=(const wxImageTask&)  = delete;
+
+      private:
+         /// @brief wxImageTask constructor (private, accessible only from LabelImageCache)
+         explicit wxImageTask(FetchFileTask::FutureType&& t) noexcept : FetchFileTask{ std::move(t) }
+         {}
+         friend class LabelImageCache;
+      };
+
+
+      /// @brief Fetch a label image asynchronously.
       ///
-      /// caller can check if result is ready by polling is_ready() on the returned task and 
-      /// then calling loadImage() to retrieve the image when it's ready, or you can use
-      /// one of the coro sync/when functions to synchronously wait for the image bytes and 
-      /// load them directly into an object of your choosing.
+      /// Caller can check if result is ready by polling the returned task and 
+      /// then calling getImage() to retrieve the image when it's ready
       /// 
-      void fetchLabelImage(uint64_t wine_id);
+      auto fetchLabelImage(uint64_t wine_id) -> wxImageTask;
 
-
-      /// @brief launch a background task that will retrieve label images for the requested wines
-      /// @return the task that should be polled or wait
-      /// 
-      auto updateCacheAsync(std::vector<uint64_t> wine_ids, std::stop_token cancel) -> tasks::UpdateCacheTask;
-      
 
       /// @brief shuts down the thread pool, attempting to cancel any remaining tasks. 
       ///
-      /// this function returns immediately, the shutdown is asynchronous
+      /// this function returns immediately, the shutdown is asynchronous. After calling shutdown,
+      /// any calls to other methods on this instance will throw a ctb::Error.
       /// 
       void shutdown() noexcept;
 
@@ -86,18 +101,29 @@ namespace ctb::app
 
    private:
       const fs::path    m_cache_folder;   // const because modifying after construction wouldn't be thread-safe
-      coro::thread_pool m_pool;
       std::stop_source  m_cancel_source{};
 
-      static auto buildFileName(uint64_t wine_id, int image_num = 1) -> std::string
+      void checkShutdown() const noexcept(false)
       {
+         if (!m_cancel_source.stop_possible())
+            throw Error{ constants::ERROR_STR_LABEL_CACHE_SHUT_DOWN }; 
+      }
+
+      static auto buildLabelPath(fs::path folder, uint64_t wine_id) -> fs::path
+      {
+         return folder / buildLabelFilename(wine_id);
+      }
+
+      static auto buildLabelFilename(uint64_t wine_id) -> std::string
+      {
+         constexpr auto image_num = 1;
          return ctb::format(constants::FMT_LABEL_IMAGE_FILENAME, wine_id, image_num);
       }
 
-      static auto buildFilePath(fs::path folder, uint64_t wine_id, int image_num = 1) -> fs::path
-      {
-         return folder / buildFileName(wine_id, image_num);
-      }
+      static auto runFetchAndSaveLabelTask(
+         fs::path folder, uint64_t wine_id, 
+         std::stop_token token) noexcept(false) -> tasks::FetchFileTask::ReturnType;
+
    };
 
    using LabelCachePtr = std::shared_ptr<LabelImageCache>;

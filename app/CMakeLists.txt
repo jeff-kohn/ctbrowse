@@ -39,7 +39,6 @@ target_link_libraries(${TARGET_NAME}
    PRIVATE
       ctBrowse::ctBrowse_lib
       wxWidgets::wxWidgets
-      libcoro
       spdlog::spdlog
 )
 

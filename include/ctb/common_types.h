@@ -10,7 +10,8 @@
 #include <string>
 #include <optional>
 #include <set>
-
+#include <span>
+#include <vector>
 
 // these are just some type aliases used throughout the application, that I don't want to
 // have to keep redeclaring.
@@ -21,6 +22,9 @@ namespace ctb
    using NullableInt    = std::optional<int32_t>;
    using NullableDouble = std::optional<double>;
 
-   using StringSet = std::set<std::string, std::less<>>;
+   using MaybeString    = std::optional<std::string>;
+   using StringSet      = std::set<std::string, std::less<>>;
 
+   using Buffer         = std::vector<std::byte>;
+   using BufferSpan     = std::span<std::byte>;
 }

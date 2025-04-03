@@ -15,6 +15,8 @@ namespace ctb::constants
    inline constexpr const char* FMT_HTTP_CT_WINE_URL        = "https://www.cellartracker.com/wine.asp?iWine={}";
    inline constexpr const char* HTTP_USER_AGENT_NAME        = "User-Agent";
    inline constexpr const char* HTTP_USER_AGENT_VALUE       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36";
+   inline constexpr const char* HTTP_HEADER_CONTENT_TYPE    = "Content-Type";
+   inline constexpr const char* HTTP_CONTENT_TYPE_JPEG      = "image/jpeg";
 
    inline constexpr const char* HTML_ELEM_LABEL_PHOTO       = "label_photo";
    inline constexpr const char* HTML_ATTR_SRC               = "src";
@@ -60,13 +62,19 @@ namespace ctb::constants
    inline constexpr const char* ERROR_STR_NO_GRID_TABLE           = "No data is currently loaded. Open a data view before searching.";
    inline constexpr const char* ERROR_STR_NULLPTR_ARG             = "Invalid Parameter (nullptr).";
    inline constexpr const char* ERROR_STR_RELATIVE_LABEL_CACHE    = "The label image cache folder must be an absolute path, not relative.";
+   inline constexpr const char* ERROR_STR_UNKNOWN                 = "Unknown Error.";
    inline constexpr const char* ERROR_VAL                         = "#Err#";
-   inline constexpr const char* FMT_ERROR_PROP_NOT_FOUND          = "Property '{}' was not found.";
    inline constexpr const char* FMT_ERROR_CURL_ERROR              = "The operation failed with CURL error {}";
    inline constexpr const char* FMT_ERROR_FILE_NOT_FOUND          = "File '{}' was not found.";
+   inline constexpr const char* FMT_ERROR_FILE_ALREADY_EXISTS     = "File '{}' already exists and will not be overwritten.";
+   inline constexpr const char* FMT_ERROR_FILE_OPEN_FAILED        = "File '{}' could not be opened.";
+   inline constexpr const char* FMT_ERROR_FILE_READ_FAILED        = "Read operation on file '{}' failed.";
+   inline constexpr const char* FMT_ERROR_FILE_WRITE_FAILED       = "Write operation on file '{}' failed.";
+   inline constexpr const char* FMT_ERROR_FILE_TOO_BIG            = "File '{}'s size of {} bytes exceeded the maximum allowable size of {}.";
    inline constexpr const char* FMT_ERROR_HTTP_STATUS_CODE        = "The operation failed with HTTP status code {}";
    inline constexpr const char* FMT_ERROR_NO_LABEL_CACHE_FOLDER   = "The image cache folder {} does not exist and could not be created.";
    inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND          = "Folder '{}' does not exist.";
+   inline constexpr const char* FMT_ERROR_PROP_NOT_FOUND          = "Property '{}' was not found.";
 
 
    inline constexpr const char* FMT_NUMBER_CURRENCY               = "${:.2f}";

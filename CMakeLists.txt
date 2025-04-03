@@ -48,18 +48,18 @@ FetchContent_MakeAvailable(HtmlParser)
 target_compile_options(HtmlParser PRIVATE "-w")
 
 # libcoro
-set(LIBCORO_EXTERNAL_DEPENDENCIES ON)
-set(LIBCORO_FEATURE_TLS OFF)
-set(LIBCORO_BUILD_TESTS OFF)
-set(LIBCORO_BUILD_EXAMPLES OFF)
-FetchContent_Declare(
-    libcoro
-    GIT_REPOSITORY https://github.com/jbaldwin/libcoro.git
-    GIT_TAG        main
-    SYSTEM
-)
-FetchContent_MakeAvailable(libcoro)
-target_compile_options(libcoro PRIVATE "-w")
+#set(LIBCORO_EXTERNAL_DEPENDENCIES ON)
+#set(LIBCORO_FEATURE_TLS OFF)
+#set(LIBCORO_BUILD_TESTS OFF)
+#set(LIBCORO_BUILD_EXAMPLES OFF)
+#FetchContent_Declare(
+#    libcoro
+#    GIT_REPOSITORY https://github.com/jbaldwin/libcoro.git
+#    GIT_TAG        main
+#    SYSTEM
+#)
+#FetchContent_MakeAvailable(libcoro)
+#target_compile_options(libcoro PRIVATE "-w")
 
 
 find_package(cpr CONFIG REQUIRED)
