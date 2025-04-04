@@ -12,13 +12,12 @@
 #include "LabelImageCache.h"
 #include "grid/ScopedEventSink.h"
 
-#include <wx/collpane.h>
-#include <wx/gdicmn.h>
-#include <wx/hyperlink.h>
-#include <wx/generic/hyperlink.h>
+
 #include <wx/panel.h>
-#include <wx/sizer.h>
-#include <wx/stattext.h>
+
+// forward declarations for member ptrs
+class wxGenericStaticBitmap;
+
 
 namespace ctb::app
 {
@@ -44,7 +43,8 @@ namespace ctb::app
       ~WineDetailsPanel() override = default;
 
    private:
-      using MaybeImageTask = std::optional<LabelImageCache::wxImageTask>;
+      using wxImageTask = LabelImageCache::wxImageTask;
+      using MaybeImageTask = std::optional<wxImageTask>;
 
       /// @brief struct that control validators will be bound to for displaying in the window
       ///
@@ -67,18 +67,33 @@ namespace ctb::app
          MaybeImageTask image_result{};
       };
 
-      LabelCachePtr   m_label_cache{};
-      ScopedEventSink m_event_sink;   // no default init
-      WineDetails     m_details{};
+      WineDetails            m_details{};
+      ScopedEventSink        m_event_sink;   // no default init
+      LabelCachePtr          m_label_cache{};
+      wxGenericStaticBitmap* m_label_image{};
+      wxTimer                m_label_timer{};
 
       // window creation
       void initControls();
+      void displayLabel();
+
+      /// @brief status of MaybeImageTask
+      //enum class LabelStatus
+      //{
+      //   Retrieved,
+      //   Pending,
+      //   Missing
+      //};
+      ///// @brief displays
+      ///// @return 
+      //auto checkForLabel() const -> LabelStatus;
 
       /// event source related handlers
       void notify(GridTableEvent event) override;
+      void updateDetails(GridTableEvent event);
 
       // windows event handlers
-      void UpdateDetails(GridTableEvent event);
+      void onLabelTimer(wxTimerEvent& event);
       void onViewWebPage(wxCommandEvent& event);
 
       // private ctor used by create()

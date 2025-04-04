@@ -34,16 +34,16 @@ namespace ctb::app
 
       /// @brief LabelImageCache constructor
       /// 
-      /// may throw if cache folder doesn't exist and can't be created, or is a relative path. 
       /// Any embedded environment variables contained in the folder path will be expanded.
       /// 
       /// @param cache_folder - path of folder to use for disk cache. env vars will be expanded
+      /// @throws ctb::Error if cache folder doesn't exist and can't be created, or is a relative path. 
       /// 
       explicit LabelImageCache(std::string cache_folder);
       ~LabelImageCache() noexcept;
 
 
-      /// @brief wxImageTask - wraps FetchFileTask to return wxImage
+      /// @brief wxImageTask - adapts FetchFileTask to return wxImage
       ///
       /// This wrapper just adds a convenience method for returning the 
       /// future value as a wxImage instead of raw bytes. 

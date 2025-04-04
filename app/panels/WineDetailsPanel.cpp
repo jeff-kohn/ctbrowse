@@ -9,17 +9,31 @@
 
 #include <ctb/utility_http.h>
 #include <cpr/cpr.h>
+
 #include <wx/commandlinkbutton.h>
+#include <wx/collpane.h>
+#include <wx/gdicmn.h>
+#include <wx/hyperlink.h>
+#include <wx/generic/hyperlink.h>
+#include <wx/generic/statbmpg.h>
+#include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/valgen.h>
 #include <wx/wupdlock.h>
+//#include <wx/stattext.h>
 
 #include <chrono>
 #include <thread>
 
+namespace ctb::constants
+{
+   constexpr auto LABEL_TIMER_1ST_INTERVAL = 10;  // ms, in case it's a local file and should already be available
+   constexpr auto LABEL_TIMER_RETRY_INTERVAL = 100; // wait a bit longer on subsequent attempts since it's downloading.
+
+} // namespace constants
+
 namespace ctb::app
 {
-
    namespace detail
    {
       auto getDrinkWindow(const CtProperty& drink_start, const CtProperty& drink_end) -> wxString
@@ -35,12 +49,12 @@ namespace ctb::app
 
          return ctb::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str(); 
       }
-   }
+   } // namespace detail
 
 
    WineDetailsPanel::WineDetailsPanel(GridTableEventSourcePtr source, LabelCachePtr cache) : 
-      m_label_cache{ cache },
-      m_event_sink{ this, source }
+      m_event_sink{ this, source },
+      m_label_cache{ cache }
    {}
 
 
@@ -76,14 +90,15 @@ namespace ctb::app
 
       const auto border_size = wxSizerFlags::GetDefaultBorder();
 
+      // configure font sizes/weights for property display
       auto default_font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
       default_font.SetPointSize(default_font.GetPointSize() + 1);
       auto title_font{ default_font.Bold() };
       auto wine_font{ default_font.Bold() };
       wine_font.SetPointSize(default_font.GetPointSize() + 1);
 
-      const auto currency_min_size = ConvertDialogToPixels( wxSize{25, -1} );
-      const auto currency_max_size = ConvertDialogToPixels( wxSize{30, -1} );
+      const auto currency_min_size = ConvertDialogToPixels( wxSize{26, -1} );
+      const auto currency_max_size = ConvertDialogToPixels( wxSize{32, -1} );
 
       auto* top_sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -230,46 +245,48 @@ namespace ctb::app
       auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, "View Online at CellarTracker.com");
       top_sizer->Add(view_online_btn, wxSizerFlags().Border(wxALL).Expand());
 
+      m_label_image = new wxGenericStaticBitmap(this, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
+      m_label_image->SetScaleMode(wxStaticBitmap::Scale_AspectFill);
+      top_sizer->Add(m_label_image, wxSizerFlags(1).Expand().Border(wxALL));
+
       top_sizer->ShowItems(false);
       SetSizerAndFit(top_sizer);
 
       // hook up event handlers
+      m_label_timer.Bind(wxEVT_TIMER, &WineDetailsPanel::onLabelTimer, this);
       view_online_btn->Bind(wxEVT_BUTTON, &WineDetailsPanel::onViewWebPage, this);
-
    }
 
-
-   void WineDetailsPanel::notify(GridTableEvent event)
+   void app::WineDetailsPanel::displayLabel()
    {
       try
       {
-         switch (event.m_event_id)
+         if (m_details.image_result)
          {
-         case GridTableEvent::Id::RowSelected:
-            UpdateDetails(event);
-            break;
+            auto result = m_details.image_result->getImage();
+            if (!result)
+               throw result.error();
 
-         case GridTableEvent::Id::TableInitialize:
-            break;
-
-         default:
-            event.m_affected_row = std::nullopt;
-            UpdateDetails(event);
-            break;
+            m_label_image->SetBitmap(wxBitmap{ *result });       
+            m_label_image->Show();
+            m_label_image->InvalidateBestSize();
+            Layout();
+            m_label_image->Refresh();
+            m_label_image->Update();
          }
       }
-      catch(Error& err)
+      catch (...)
       {
-         wxGetApp().displayErrorMessage(err);
+         m_label_image->SetBitmap(wxBitmap{});
+         m_label_image->Hide();
+         Refresh();
+         Update();
+         log::exception(packageError());
       }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
-      }  
    }
 
 
-   void WineDetailsPanel::UpdateDetails(GridTableEvent event)
+   void WineDetailsPanel::updateDetails(GridTableEvent event)
    {
       using namespace magic_enum;
       
@@ -304,6 +321,8 @@ namespace ctb::app
          GetSizer()->ShowItems(true);
 
          m_details.image_result = m_label_cache->fetchLabelImage(m_details.wine_id);
+         m_label_image->Hide();
+         m_label_timer.StartOnce(constants::LABEL_TIMER_1ST_INTERVAL);
       }
       else{
          GetSizer()->ShowItems(false);
@@ -313,6 +332,65 @@ namespace ctb::app
       TransferDataToWindow();
       Layout();
       // TODO hide/unhide fields as necessary.
+   }
+
+
+   void WineDetailsPanel::notify(GridTableEvent event)
+   {
+      try
+      {
+         switch (event.m_event_id)
+         {
+         case GridTableEvent::Id::RowSelected:
+            updateDetails(event);
+            break;
+
+         case GridTableEvent::Id::TableInitialize:
+            break;
+
+         default:
+            event.m_affected_row = std::nullopt;
+            updateDetails(event);
+            break;
+         }
+      }
+      catch(Error& err)
+      {
+         wxGetApp().displayErrorMessage(err);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }  
+   }
+
+
+   void WineDetailsPanel::onLabelTimer(wxTimerEvent&)
+   {
+      using namespace tasks;
+
+      if (auto& result = m_details.image_result)
+      {
+         switch (result->poll(0ms))
+         {
+            case wxImageTask::Status::Deferred: [[fallthrough]];
+            case wxImageTask::Status::Finished:
+               displayLabel();
+               [[fallthrough]];
+
+            case wxImageTask::Status::Invalid:
+               m_details.image_result = {};
+               break;
+
+            case wxImageTask::Status::Running:
+               m_label_timer.StartOnce(constants::LABEL_TIMER_RETRY_INTERVAL);
+               break;
+
+            default:
+               assert("Bug, new enum value wasn't accounted for" == nullptr);
+               break;
+         }
+      }
    }
 
 

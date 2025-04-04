@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <wxUiEditorData
-  data_version="16">
+  data_version="19">
   <node
     class="Project"
     base_directory="generated"
@@ -157,9 +157,14 @@
           wxEVT_BUTTON="onViewWebPage" />
         <node
           class="wxStaticBitmap"
+          class_access="protected:"
           scale_mode="AspectFit"
+          var_name="m_label_image"
           flags="wxEXPAND" />
       </node>
+      <node
+        class="wxTimer"
+        wxEVT_TIMER="onTimer" />
     </node>
   </node>
 </wxUiEditorData>

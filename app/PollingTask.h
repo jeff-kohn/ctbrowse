@@ -53,8 +53,8 @@ namespace ctb::tasks
       /// 
       /// @return enum value indicating current status
       /// 
-      template<typename Rep>
-      auto poll(std::chrono::duration<Rep> timeout = 1ms) const noexcept -> Status
+      template<typename RepT, typename PeriodT>
+      auto poll(std::chrono::duration<RepT, PeriodT> timeout = 1ms) const noexcept -> Status
       {
          using std::future_status;
 
@@ -66,6 +66,7 @@ namespace ctb::tasks
             case future_status::deferred:  return Status::Deferred;
             case future_status::timeout:   return Status::Running;
             case future_status::ready:     return Status::Finished;
+            default:                       assert(false);
          }
          return Status::Invalid;
       }
