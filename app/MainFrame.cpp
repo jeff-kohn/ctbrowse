@@ -459,8 +459,11 @@ namespace ctb::app
       if (!m_grid) return;
       try
       {
-         if ( !m_grid->filterBySubstring(m_search_ctrl->GetValue().wx_str()) )
+         if (m_grid->filterBySubstring(m_search_ctrl->GetValue().wx_str()))
          {
+            m_event_source->signal(GridTableEvent::Id::SubStringFilter);
+         }
+         else{
             // clear any previous search filter, because that search text is no longer displayed.
             m_grid->clearSubStringFilter();
          }

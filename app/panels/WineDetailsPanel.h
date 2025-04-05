@@ -25,7 +25,6 @@ namespace ctb::app
    class WineDetailsPanel final : public wxPanel, public IGridTableEventSink
    {
    public:
-
       /// @brief creates and initializes a panel for showing wine details
       ///
       /// throws a ctb::Error if parent or source = nullptr, or if the window can't be created;
@@ -33,7 +32,6 @@ namespace ctb::app
       /// its own lifetime). 
       /// 
       [[nodiscard]] static WineDetailsPanel* create(wxWindow* parent, GridTableEventSourcePtr source, LabelCachePtr cache);
-
 
       // no copy/move/assign, this class is created on the heap.
       WineDetailsPanel(const WineDetailsPanel&) = delete;
@@ -75,18 +73,8 @@ namespace ctb::app
 
       // window creation
       void initControls();
+      void checkLabelResult();
       void displayLabel();
-
-      /// @brief status of MaybeImageTask
-      //enum class LabelStatus
-      //{
-      //   Retrieved,
-      //   Pending,
-      //   Missing
-      //};
-      ///// @brief displays
-      ///// @return 
-      //auto checkForLabel() const -> LabelStatus;
 
       /// event source related handlers
       void notify(GridTableEvent event) override;

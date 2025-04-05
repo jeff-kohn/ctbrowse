@@ -29,13 +29,11 @@ namespace ctb::app
       ///
       TableSyncDialog(wxWindow* parent);
 
-
       /// @brief create the window object
       ///
       /// this should only be called if this object was default-constructed
       ///
       bool Create(wxWindow* parent);
-
 
       /// @brief set the list of tables that should be selected for download.
       ///
@@ -46,21 +44,17 @@ namespace ctb::app
                                         | rng::to<wxArrayString>();
       }
 
-
       /// @brief retrieve the list of tables the user selected for download
       ///
       [[nodiscard]] std::vector<TableId> selectedTables() const;
-
 
       /// @brief  indicates whether the user checked "Save as Default" in the dialog
       ///
       bool saveAsDefault() const noexcept { return m_save_default_val; }
 
-
       /// @brief indicates whether the user checked "Automatically Sync on Startup"
       ///
       bool syncOnStartup() const noexcept { return m_startup_sync_val; }
-
 
    protected:
       bool           m_save_default_val{ false };

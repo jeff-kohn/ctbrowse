@@ -35,7 +35,6 @@ namespace ctb
       using StringFilter = PropStringFilter<RecordType>;
       using PropId       = RecordType::PropId;
 
-
       /// @brief add a match value for the specified column filter.
       /// @return true if successful, false if filter value already existed or could not be added.
       /// 
@@ -50,7 +49,6 @@ namespace ctb
 
          return true;
       }
-
 
       /// @brief remove a match value for the specified column filter
       /// @return true if removed, false if not found.1
@@ -75,7 +73,6 @@ namespace ctb
          return ret_val;
       }
 
-
       /// @brief check if a record matches all of our filters
       /// @return true if each PropFilterString matched the record, false  
       ///         if the record failed to match one or more filters. Will
@@ -94,15 +91,13 @@ namespace ctb
          return true;
       }
 
-
       /// @brief returns the number of active property filters we have.
       /// 
       int activeFilters() const
       {
          return m_filters.size();
       }
-
-      
+            
       /// @brief retrieve a list of possible filter values for the given property in the table
       ///
       template<rng::input_range RowsT, typename PropEnumT> 

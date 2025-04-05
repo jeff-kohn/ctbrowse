@@ -38,7 +38,6 @@ namespace ctb
          Center = wxAlignment::wxALIGN_CENTER
       };
 
-
       /// @brief enum to specify the format the value will be displayed in
       ///
       enum Format
@@ -49,7 +48,6 @@ namespace ctb
          Currency
       };
 
-
       /// properties
       ///
       PropId       prop_id{};                   /// identifier for the property to display
@@ -57,7 +55,6 @@ namespace ctb
       Format       format{ Format::String };    /// format to display the value
       Align        col_align{ Align::Left };    /// how to align the column values in the cell
       Align        header_align{ Align::Left }; /// how to align the column title in the header
-
 
       /// @brief construct a column to display the specified property as a string
       ///
@@ -70,7 +67,6 @@ namespace ctb
             display_name = magic_enum::enum_name(prop);
          }
       }
-
 
       /// @brief construct a column to display the specified property in the requested format
       ///
@@ -89,7 +85,6 @@ namespace ctb
             header_align = Align::Center;
          }
       }
-
 
       /// @brief get the display text for a property value, which may include special formatting
       ///
@@ -111,7 +106,6 @@ namespace ctb
                return value.asString();
          }
       }
-
 
       DisplayColumn() = default;
       DisplayColumn(const DisplayColumn&) = default;

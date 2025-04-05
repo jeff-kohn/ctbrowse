@@ -49,7 +49,7 @@ namespace ctb::app
    }
 
 
-   /// @brief  small object that sets a frame window's status text on destruction
+   /// @brief small object that sets a frame window's status text on destruction
    ///
    template <typename WndT>
    struct ScopedStatusText
@@ -57,14 +57,12 @@ namespace ctb::app
       std::string message{};
       WndT*        target{};
 
-
       ScopedStatusText(std::string_view msg, WndT* target) : message{ msg }, target{ target } {}
       ~ScopedStatusText()
       {
          if (target)
             target->SetStatusText(message);
       }
-
 
       ScopedStatusText() noexcept = default;
       ScopedStatusText(const ScopedStatusText&) = default;

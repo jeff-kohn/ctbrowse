@@ -39,16 +39,13 @@ namespace ctb::app
       ///
       bool OnInit() override;
 
-
       /// @brief called by the framework on app shutdown, this is the place for resource cleanup and other shutdown tasks
       ///
       int OnExit() override;
 
-
       /// @brief  returns the path where the application stores data files.
       ///
       const fs::path& userDataFolder() const noexcept { return m_user_data_folder; }
-
 
       /// @brief Get the current config object.
       ///
@@ -57,12 +54,10 @@ namespace ctb::app
       wxConfigBase& getConfig() noexcept(false);
       const wxConfigBase& getConfig() const noexcept(false);
 
-
       /// @brief display a message box with an error description.
       ///
       void displayErrorMessage(const Error& err);
       void displayErrorMessage(const std::string& msg, const std::string& title = constants::ERROR_STR);
-
 
       /// @brief display a message box with inctb::formational text
       ///

@@ -33,14 +33,12 @@ namespace ctb::app
       constexpr GridTableFilter& operator=(const GridTableFilter&) = default;
       ~GridTableFilter() = default;
 
-
       /// @brief returns the name/description of this filter
       /// 
       std::string_view filterName() const
       {
          return m_filter_name;
       }
-
 
       /// @brief returns the index (into the table entry's PropId enum) of the property this filter is for
       ///
@@ -49,11 +47,9 @@ namespace ctb::app
          return m_prop_index;
       }
 
-
       /// @brief retrieve a list of available values in the table for this filter
       /// 
       StringSet getMatchValues(GridTable* grid_table) const;
-
 
       /// @brief no default ctor or move semantics
       ///

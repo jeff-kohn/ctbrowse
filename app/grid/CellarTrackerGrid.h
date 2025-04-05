@@ -21,7 +21,6 @@ namespace ctb::app
    class CellarTrackerGrid : public wxGrid, public IGridTableEventSink
    {
    public:
-
       /// @brief creates and initializes a grid window for displaying CellarTracker data
       ///
       /// throws a ctb::Error parent or source = nullptr, or if the window can't be created;
@@ -30,14 +29,12 @@ namespace ctb::app
       /// 
       [[nodiscard]] static CellarTrackerGrid* create(wxWindow* parent, GridTableEventSourcePtr source);
 
-
       /// @brief filter the table by performing a substring search across all columns
       ///
       /// note this class only supports a single substring filter, subsequent calls to
       /// either overload will overwrite any previous substring filter.
       /// 
       bool filterBySubstring(std::string_view substr);
-
 
       /// @brief filter the table by performing a substring search on the specified column
       ///
@@ -46,11 +43,9 @@ namespace ctb::app
       /// 
       bool filterBySubstring(std::string_view substr, int col_idx);
 
-
       /// @brief clear/reset the substring filter
       ///
       void clearSubStringFilter();
-
 
       /// @brief destructor
       ///

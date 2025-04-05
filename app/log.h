@@ -12,7 +12,7 @@
 #include <ctb/utility.h>
 
 #if !defined(NDEBUG)
-   #define SPDLOG_ACTIVE_LEVEL 1
+   #define SPDLOG_ACTIVE_LEVEL 1 // SPDLOG_LEVEL_DEBUG
 #endif
 
 #include <spdlog/spdlog.h>
@@ -65,7 +65,6 @@ namespace ctb::constants
    inline constexpr const char* LOG_PATTERN_DEBUGGER = "[%n Thread %t][%^%l%$] %v";
    inline constexpr const char* LOG_PATTERN_FILE     = "[%Y-%m-%d %H:%M:%S.%e][TID %t][%^%l%$] %v";
 
-
 #if !defined(NDEBUG)
    inline constexpr auto LOGLEVEL_GLOBAL   = log::level_enum::debug;
    inline constexpr auto LOGLEVEL_FILE     = log::level_enum::debug;
@@ -83,7 +82,6 @@ namespace ctb::constants
 
 namespace ctb::log
 {
-
    /// @brief Log an exception with source information. 
    /// 
    inline void exception(const std::exception& e, std::source_location source_loc = std::source_location::current())

@@ -31,7 +31,6 @@ namespace ctb::app
    class LabelImageCache final
    {
    public:
-
       /// @brief LabelImageCache constructor
       /// 
       /// Any embedded environment variables contained in the folder path will be expanded.
@@ -54,7 +53,6 @@ namespace ctb::app
          using FetchFileTask = tasks::FetchFileTask;
          using FutureType    = FetchFileTask::FutureType;
          using ResultWrapper = std::expected<wxImage, Error>;
-
 
          /// @brief getImage() - retrieve the future value from the task as a wxImage
          /// 
@@ -86,7 +84,6 @@ namespace ctb::app
       /// 
       auto fetchLabelImage(uint64_t wine_id) -> wxImageTask;
 
-
       /// @brief shuts down the thread pool, attempting to cancel any remaining tasks. 
       ///
       /// this function returns immediately, the shutdown is asynchronous. After calling shutdown,
@@ -100,7 +97,7 @@ namespace ctb::app
       LabelImageCache& operator=(const LabelImageCache&) = delete;
 
    private:
-      const fs::path    m_cache_folder;   // const because modifying after construction wouldn't be thread-safe
+      const fs::path    m_cache_folder;   // modifying after construction wouldn't be thread-safe anyways
       std::stop_source  m_cancel_source{};
 
       void checkShutdown() const noexcept(false)
@@ -120,10 +117,7 @@ namespace ctb::app
          return ctb::format(constants::FMT_LABEL_IMAGE_FILENAME, wine_id, image_num);
       }
 
-      static auto runFetchAndSaveLabelTask(
-         fs::path folder, uint64_t wine_id, 
-         std::stop_token token) noexcept(false) -> tasks::FetchFileTask::ReturnType;
-
+      static auto runFetchAndSaveLabelTask(fs::path folder, uint64_t wine_id, std::stop_token token) noexcept(false) -> tasks::FetchFileTask::ReturnType;
    };
 
    using LabelCachePtr = std::shared_ptr<LabelImageCache>;

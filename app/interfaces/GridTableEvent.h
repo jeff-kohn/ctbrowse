@@ -36,22 +36,21 @@ namespace ctb::app
       std::optional<int> m_affected_row{};
    };
 
+
    /// @brief listener interface for classes that want to receive notification events about a grid table.
    struct IGridTableEventSink
    {
-
       /// @brief called to notify the sink that a table event has occurred.
       ///
       /// the supplied pointer will remain valid until a subsequent event
       /// notification of type TableInitialized is received
       /// 
       virtual void notify(GridTableEvent event) = 0;
+      
 
-  
       /// @brief virtual destructor
       ///
-      virtual ~IGridTableEventSink()
-      {}
+      virtual ~IGridTableEventSink() = default;
    };
 
 

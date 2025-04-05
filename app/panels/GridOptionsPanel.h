@@ -26,7 +26,6 @@ namespace ctb::app
    class GridOptionsPanel final : public wxPanel, public IGridTableEventSink
    {
    public:
-
       /// @brief creates and initializes a panel for showing grid sort/filter options
       ///
       /// throws a ctb::Error if parent or source = nullptr, or if the window can't be created;

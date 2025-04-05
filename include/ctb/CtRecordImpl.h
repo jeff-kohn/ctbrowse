@@ -108,14 +108,12 @@ namespace ctb
          Traits::onRecordParse(std::span(m_props));
       }
 
-
       /// @brief get the property corresponding to the specified enum identifier
       ///
       [[nodiscard]] const TableProperty& getProperty(PropId prop) const
       {
          return getProperty(std::to_underlying(prop));
       }
-
 
       /// @brief get the property based on enum index
       ///
@@ -130,7 +128,6 @@ namespace ctb
          return m_props[static_cast<size_t>(col_idx)];
       }
 
-
       /// @brief array syntax for getting a property value
       ///
       [[nodiscard]] const TableProperty& operator[](PropId prop) const 
@@ -138,14 +135,12 @@ namespace ctb
          return getProperty(std::to_underlying(prop));
       }
 
-
       /// @brief array syntax for getting a property value
       ///
       [[nodiscard]] const TableProperty&& operator[](int col_idx) const 
       {
          return getProperty(col_idx);
       }
-
 
       /// @brief  retrieve TableProperty by property name
       /// @return the requested property if found, an error otherwise.
@@ -210,6 +205,7 @@ namespace ctb
 
       }
    };
+
 
    template <CtRecordTraits RecordTraits>
    using CtDataset = std::vector<CtRecordImpl<RecordTraits>>;

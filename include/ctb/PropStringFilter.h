@@ -29,16 +29,13 @@ namespace ctb
       using RecordType = RecordTypeT;
       using PropId  = RecordType::PropId;
 
-
       /// @brief the property that we're filtering against
       ///
       PropId prop_id{};
 
-
       /// @brief the possible values to match against
       ///
       StringSet match_values{};
-
 
       /// @brief returns true if the specified table entry is a match
       ///
