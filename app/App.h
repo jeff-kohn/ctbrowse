@@ -7,13 +7,14 @@
  *********************************************************************/
 #pragma once
 
-#include "ctb/ctb.h"
 #include "app_constants.h"
+#include "log.h"
 
+#include <ctb/TableProperty.h>
 #include <wx/wx.h>
 #include <wx/confbase.h>
 
-#include <filesystem>
+
 
 
 namespace ctb::app
@@ -21,12 +22,13 @@ namespace ctb::app
    namespace fs = std::filesystem;
 
 
+
    /// @brief forward declare top-level window class so we don't have to add header dependency
    ///
    class MainFrame;
 
 
-   /// @brief app object for the OuraCharts application.
+   /// @brief app object for the application.
    ///
    class App : public wxApp
    {
@@ -50,8 +52,7 @@ namespace ctb::app
 
       /// @brief Get the current config object.
       ///
-      /// Calling this will throw an exception  instead of returning nullptr
-      /// if there's no default config.
+      /// Calling this will throw an exception  if there's no default config.
       ///
       wxConfigBase& getConfig() noexcept(false);
       const wxConfigBase& getConfig() const noexcept(false);
@@ -62,7 +63,8 @@ namespace ctb::app
       void displayErrorMessage(const Error& err);
       void displayErrorMessage(const std::string& msg, const std::string& title = constants::ERROR_STR);
 
-      /// @brief display a message box with informational text
+
+      /// @brief display a message box with inctb::formational text
       ///
       void displayInfoMessage(const std::string& msg, const std::string& title = constants::APP_NAME_SHORT);
 

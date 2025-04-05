@@ -10,9 +10,6 @@ namespace ctb::app
 {
    class GridTable;
 
-   /// type alias
-   using StringSet = std::set<std::string, std::less<> >;
-
 
    /// @brief  class that contains a filter specification
    ///

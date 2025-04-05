@@ -24,13 +24,15 @@ target_sources(ctBrowse_lib
       "../include/ctb/table_data.h"
       "../include/ctb/table_download.h"
       "../include/ctb/utility.h"
+      "../include/ctb/utility_http.h"
+      "../include/ctb/utility_templates.h"
       "../include/ctb/WineListTraits.h"
-      "../include/ctb/winapi_util.h"
 
    PRIVATE
       "CredentialWrapper.cpp"
       "table_download.cpp"
-      "winapi_util.cpp"
+      "utility.cpp"
+      "utility_http.cpp"
 )
 
 target_include_directories(ctBrowse_lib
@@ -50,9 +52,11 @@ target_include_directories(ctBrowse_lib
 target_link_libraries(ctBrowse_lib
    PUBLIC
       cpr::cpr
+      fmt::fmt
+      HtmlParser
       magic_enum::magic_enum
-      Credui
-      shlwapi
+      "$<$<PLATFORM_ID:Windows>:Credui>"
+      "$<$<PLATFORM_ID:Windows>:shlwapi>"
 )
 
 

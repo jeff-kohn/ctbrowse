@@ -1,5 +1,5 @@
 /*******************************************************************
- * @file utility_templates.h
+ * @file utility.h
  *
  * @brief Header file for some helper templates/functions
  * 
@@ -9,59 +9,84 @@
 
 #include "ctb/ctb.h"
 
-#include <magic_enum/magic_enum.hpp>
-#include <charconv>
-#include <optional>
+#include <filesystem>
 
 
 namespace ctb
 {
-
-   /// @brief a functor object that is overloaded for multiple types 
-   template < typename... Ts >
-   struct Overloaded : Ts...
-   {
-      using Ts:: operator()...;
-   };
+   namespace fs = std::filesystem;
 
 
-   /// @brief  user-friendly version of from_chars that works with string_view and string
-   /// @return an optional containing the requested value if successful, or an empty optional otherwise.
-   template<typename T, StringViewCompatible S>
-   std::optional<T> from_str(S str)
-   {
-      T val{};
-      auto result = std::from_chars(str.data(), str.data() + str.size(), val);
-
-      if (result.ec != std::errc())
-         return std::nullopt;  // there was an error, so return null
-
-      return val;
-   }
-
-
-   /// @brief helper function to convert a zero-based index to the corresponding enum value, since the syntax is so fugly
-   ///
-   template<typename Enum>
-   constexpr Enum enumFromIndex(int idx)
-   {
-      if (static_cast<size_t>(idx) >= magic_enum::enum_count<Enum>())
-         assert("Invalid enum index, this is a bug.");
-
-      return magic_enum::enum_value<Enum>(static_cast<size_t>(idx));
-   }
-
-
-   /// @brief convert a property enum into its zero-based index
+   /// @brief read a binary file (up to max_size bytes in size) into a char buffer
    /// 
-   template<typename Enum>
-   constexpr int enumToIndex(Enum enum_val)
-   {
-      auto maybe_idx = magic_enum::enum_index(enum_val);
-      if (!maybe_idx)
-         assert(false);
+   /// @throws ctb::Error, possibly other std::exception-derived if file can't be read or is larger than max_size
+   /// 
+   auto readBinaryFile(const fs::path& file_path, uint32_t max_size = constants::ONE_MB) noexcept(false) -> Buffer;
 
-      return static_cast<int>(*maybe_idx);
+
+   /// @brief Save binary data to a file.
+   /// @throws ctb::Error, possibly other std::exception-derived
+   /// 
+   auto saveBinaryFile(const fs::path& file_path, BufferSpan buf, bool overwrite = false) noexcept(false) -> void;
+
+
+   /// @brief just dump some text to a file (no encoding or formatting applied).
+   ///
+   /// if the file_path has a parent directory and it doesn't exist, an attempt will be made to 
+   /// create it. 
+   /// 
+   /// @throws ctb::Error, possibly other std::exception-derived if file can't be written or already exists
+   ///         and overwrite = false;
+   /// 
+   auto saveTextToFile(fs::path file_path, std::string_view text, bool overwrite = false) noexcept(false) -> void;
+
+
+   /// @brief Get a view/substring of just the filename from a string containing a path
+   /// 
+   /// The returned string_view is only valid for the lifetime of fq_path. This 
+   /// function does not modify fq_path; it only takes a non-const ref to prevent 
+   /// passing an rvalue (since that would be unsafe)
+   ///
+   auto viewFilename(std::string& fq_path) noexcept -> std::string_view;
+
+
+   /// @brief ISO 8859-1 Latin 1; Western European (ISO)
+   constexpr unsigned int ISO_LATIN_1 = 28591;
+
+   /// @brief convert text to UTF8 from other narrow/multi-byte encoding.
+   ///
+   /// see https://learn.microsoft.com/en-us/windows/win32/Intl/code-page-identifiers
+   /// for a list of code page id's.
+   /// 
+   /// @return the converting string if successful, std::nullopt if not.
+   /// 
+   [[nodiscard]] auto toUTF8(const std::string& text, unsigned int code_page = ISO_LATIN_1) -> MaybeString;
+
+
+   /// @brief  Expand environment variables in place
+   /// 
+   /// In the case when the passed string does not contain any environment vars, this function
+   /// returns without any allocation or copying, which gives it a slight performance edge over
+   /// expandEnvironmentVars() if you're working with strings that may or may not contain any vars.
+   /// 
+   /// @return true if successful, false if unsuccessful in which case the parameter 'text' will be unmodified
+   /// 
+   auto tryExpandEnvironmentVars(std::string& text) -> bool;
+
+
+   /// @brief Expand environment variables and return result
+   ///
+   /// while this overload is convenient, it has the overhead of an unnecessary copy
+   /// when the passed string has no vars to expand.
+   template<StringViewCompatible Str>
+   inline auto expandEnvironmentVars(Str&& text) -> std::string
+   {
+      std::string result{std::forward<Str>(text)};
+      tryExpandEnvironmentVars(result);
+      return result;
    }
+
+
+
 
 } // namespace ctb

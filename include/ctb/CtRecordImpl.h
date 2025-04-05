@@ -9,10 +9,9 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include "ctb/CtProperty.h"
 #include "ctb/utility.h"
-#include "ctb/TableProperty.h"
 
-#include <boost/container/small_vector.hpp>
 #include <external/csv.hpp>
 #include <magic_enum/magic_enum.hpp>
 #include <magic_enum/magic_enum_utility.hpp>
@@ -47,6 +46,7 @@ namespace ctb
       PropType prop_type{};
       uint32_t csv_col_idx{};
    };
+
 
 
    /// @brief base class providing common functionality for our table record objects
@@ -211,8 +211,8 @@ namespace ctb
       }
    };
 
-
-
+   template <CtRecordTraits RecordTraits>
+   using CtDataset = std::vector<CtRecordImpl<RecordTraits>>;
 
 
 } // namespace ctb

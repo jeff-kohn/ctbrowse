@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <expected>
 #include <filesystem>
-#include <format>
 
 #include <string>
 #include <string_view>
@@ -110,7 +109,7 @@ namespace ctb
    inline std::string getTableFileName(TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT)
    {
       using magic_enum::enum_name;
-      return std::format("{}.{}", enum_name(tbl), enum_name(fmt));
+      return ctb::format("{}.{}", enum_name(tbl), enum_name(fmt));
    }
 
 

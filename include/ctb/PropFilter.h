@@ -1,3 +1,10 @@
+/*********************************************************************
+ * @file       PropFilter.h
+ *
+ * @brief      declaration for the PropFilter class
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #pragma once
 
 #include "ctb/ctb.h"
@@ -17,7 +24,7 @@ namespace ctb
    /// while this class could technically be used for string filtering, it's not really designed for that
    /// and performance would be poor. There is a different class optimized for that use case (PropStringFilter)
    /// 
-   template <CtRecord RecordTypeT, typename ValueT = CtProperty>
+   template <CtRecord RecordTypeT, typename ValueT = typename RecordTypeT::TableProperty>
    struct PropFilter
    {
       using RecordType  = RecordTypeT;

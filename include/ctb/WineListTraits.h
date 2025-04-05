@@ -14,9 +14,9 @@
 
 #include <frozen/map.h>
 
-#include <format>
 #include <utility>
 #include <span>
+#include <vector>
 
 namespace ctb
 {
@@ -33,7 +33,7 @@ namespace ctb
       /// 
       enum class PropId : uint16_t
       {
-         iWineID,
+         iWineId,
          WineName,
          Locale,
          Vintage,
@@ -69,7 +69,7 @@ namespace ctb
       /// 
       static inline constexpr frozen::map<PropId, FieldSchema, static_cast<size_t>(PropId::WineAndVintage)> CsvSchema
       {
-         { PropId::iWineID,         FieldSchema { static_cast<uint32_t>(PropId::iWineID),        PropType::String,      0 }},
+         { PropId::iWineId,         FieldSchema { static_cast<uint32_t>(PropId::iWineId),        PropType::String,      0 }},
          { PropId::WineName,        FieldSchema { static_cast<uint32_t>(PropId::WineName),       PropType::String,     13 }},
          { PropId::Locale,          FieldSchema { static_cast<uint32_t>(PropId::Locale),         PropType::String,     14 }},
          { PropId::Vintage,         FieldSchema { static_cast<uint32_t>(PropId::Vintage),        PropType::UInt16,     12 }},
@@ -127,7 +127,7 @@ namespace ctb
          // set value for the WineAndVintage property
          auto vintage   = rec[static_cast<size_t>(PropId::Vintage) ].asString();
          auto wine_name = rec[static_cast<size_t>(PropId::WineName)].asStringView();
-         rec[static_cast<size_t>(PropId::WineAndVintage)] = std::format("{} {}", vintage, wine_name);
+         rec[static_cast<size_t>(PropId::WineAndVintage)] = ctb::format("{} {}", vintage, wine_name);
 
          // total qty is in-stock + pending, this combined field displays similar to CT.com
          auto qty     = rec[static_cast<size_t>(PropId::Quantity)].asUInt16().value_or(0u);
@@ -137,7 +137,7 @@ namespace ctb
             rec[static_cast<size_t>(PropId::TotalQty)] = qty;
          }
          else{
-            rec[static_cast<size_t>(PropId::TotalQty)] = std::format("{}+{}", qty, pending);
+            rec[static_cast<size_t>(PropId::TotalQty)] = ctb::format("{}+{}", qty, pending);
          }
 
          // for drinking window, 9999 = null
@@ -152,6 +152,6 @@ namespace ctb
    };
 
    using WineListRecord = CtRecordImpl<WineListTraits>;
-   using WineListData   = std::deque<WineListRecord>;
+   using WineListData   = CtDataset<WineListTraits>;
 
 } // namespace ctb

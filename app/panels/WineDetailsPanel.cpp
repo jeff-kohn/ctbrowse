@@ -1,20 +1,43 @@
+/*********************************************************************
+ * @file       WineDetailsPanel.cpp
+ *
+ * @brief      implementation for the WineDetailsPanel class
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #include "panels/WineDetailsPanel.h"
 
+#include <ctb/utility_http.h>
+#include <cpr/cpr.h>
+
+#include <wx/commandlinkbutton.h>
+#include <wx/collpane.h>
+#include <wx/gdicmn.h>
+#include <wx/hyperlink.h>
+#include <wx/generic/hyperlink.h>
+#include <wx/generic/statbmpg.h>
+#include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/valgen.h>
 #include <wx/wupdlock.h>
+//#include <wx/stattext.h>
 
-#include <format>
+#include <chrono>
+#include <thread>
 
+namespace ctb::constants
+{
+   constexpr auto LABEL_TIMER_1ST_INTERVAL = 10;  // ms, in case it's a local file and should already be available
+   constexpr auto LABEL_TIMER_RETRY_INTERVAL = 100; // wait a bit longer on subsequent attempts since it's downloading.
+
+} // namespace constants
 
 namespace ctb::app
 {
-
    namespace detail
    {
-      wxString getDrinkWindow(const CtProperty& drink_start, const CtProperty& drink_end)
+      auto getDrinkWindow(const CtProperty& drink_start, const CtProperty& drink_end) -> wxString
       {
-
          if (drink_start.isNull() && drink_end.isNull() )
             return wxEmptyString;
 
@@ -24,16 +47,18 @@ namespace ctb::app
          if (drink_end.isNull() )
             return drink_start.asString("{} +").c_str();
 
-         return std::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str();
+         return ctb::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str(); 
       }
-   }
+   } // namespace detail
 
 
-   WineDetailsPanel::WineDetailsPanel(GridTableEventSourcePtr source) : m_event_sink{ this, source }
+   WineDetailsPanel::WineDetailsPanel(GridTableEventSourcePtr source, LabelCachePtr cache) : 
+      m_event_sink{ this, source },
+      m_label_cache{ cache }
    {}
 
 
-   WineDetailsPanel* WineDetailsPanel::create(wxWindow* parent, GridTableEventSourcePtr source)
+   WineDetailsPanel* WineDetailsPanel::create(wxWindow* parent, GridTableEventSourcePtr source, LabelCachePtr cache)
    {
       if (!source)
       {
@@ -46,7 +71,7 @@ namespace ctb::app
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
 
-      std::unique_ptr<WineDetailsPanel> wnd{ new WineDetailsPanel{source} };
+      std::unique_ptr<WineDetailsPanel> wnd{ new WineDetailsPanel{ source, cache } };
       if (!wnd->Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
@@ -65,14 +90,15 @@ namespace ctb::app
 
       const auto border_size = wxSizerFlags::GetDefaultBorder();
 
+      // configure font sizes/weights for property display
       auto default_font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
       default_font.SetPointSize(default_font.GetPointSize() + 1);
       auto title_font{ default_font.Bold() };
       auto wine_font{ default_font.Bold() };
       wine_font.SetPointSize(default_font.GetPointSize() + 1);
 
-      const auto currency_min_size = ConvertDialogToPixels( wxSize{25, -1} );
-      const auto currency_max_size = ConvertDialogToPixels( wxSize{30, -1} );
+      const auto currency_min_size = ConvertDialogToPixels( wxSize{26, -1} );
+      const auto currency_max_size = ConvertDialogToPixels( wxSize{32, -1} );
 
       auto* top_sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -83,6 +109,7 @@ namespace ctb::app
       wine_name_val->SetFont(wine_font);
       top_sizer->Add(wine_name_val, wxSizerFlags{1}.Expand().Border(wxLEFT|wxRIGHT|wxTOP));
 
+      // grid sizer gives us a property grid (eg a column of labels and values)
       auto* details_sizer = new wxFlexGridSizer(2, 0, 0);
 
       // vintage
@@ -212,40 +239,54 @@ namespace ctb::app
       auction_price_val->SetValidator(wxGenericValidator{ &m_details.auction_value });
       details_sizer->Add(auction_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
 
-      top_sizer->Add(details_sizer, wxSizerFlags{1}.Expand().FixedMinSize().Border(wxALL));
+      top_sizer->Add(details_sizer, wxSizerFlags{}.Expand().FixedMinSize().Border(wxALL));
+
+      // View Online button (also outside grid sizer, same as wine name)
+      auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, "View Online at CellarTracker.com");
+      top_sizer->Add(view_online_btn, wxSizerFlags().Border(wxALL).Expand());
+
+      m_label_image = new wxGenericStaticBitmap(this, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
+      m_label_image->SetScaleMode(wxStaticBitmap::Scale_AspectFill);
+      top_sizer->Add(m_label_image, wxSizerFlags(1).Expand().Border(wxALL));
+
       top_sizer->ShowItems(false);
       SetSizerAndFit(top_sizer);
+
+      // hook up event handlers
+      m_label_timer.Bind(wxEVT_TIMER, &WineDetailsPanel::onLabelTimer, this);
+      view_online_btn->Bind(wxEVT_BUTTON, &WineDetailsPanel::onViewWebPage, this);
    }
 
-
-   void WineDetailsPanel::notify(GridTableEvent event)
+   void app::WineDetailsPanel::displayLabel()
    {
       try
       {
-         switch (event.m_event_id)
+         if (m_details.image_result)
          {
-         case GridTableEvent::Id::RowSelected:
-            UpdateDetails(event);
-            break;
+            auto result = m_details.image_result->getImage();
+            if (!result)
+               throw result.error();
 
-         default:
-            event.m_affected_row = std::nullopt;
-            UpdateDetails(event);
-            break;
+            m_label_image->SetBitmap(wxBitmap{ *result });       
+            m_label_image->Show();
+            m_label_image->InvalidateBestSize();
+            Layout();
+            m_label_image->Refresh();
+            m_label_image->Update();
          }
       }
-      catch(Error& err)
+      catch (...)
       {
-         wxGetApp().displayErrorMessage(err);
+         m_label_image->SetBitmap(wxBitmap{});
+         m_label_image->Hide();
+         Refresh();
+         Update();
+         log::exception(packageError());
       }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
-      }  
    }
 
 
-   void WineDetailsPanel::UpdateDetails(GridTableEvent event)
+   void WineDetailsPanel::updateDetails(GridTableEvent event)
    {
       using namespace magic_enum;
       
@@ -255,6 +296,8 @@ namespace ctb::app
       {
          auto* tbl = event.m_grid_table;
          auto row_idx = event.m_affected_row.value();
+
+         m_details.wine_id     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_WINE_ID    ).asUInt64().value_or(0);
          m_details.wine_name   = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_WINE_NAME  ).asString();
          m_details.vintage     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_VINTAGE    ).asString();
          m_details.varietal    = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_VARIETAL   ).asString();
@@ -270,9 +313,16 @@ namespace ctb::app
          m_details.community_price  = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_COMMUNITY_PRICE).asString(constants::FMT_NUMBER_CURRENCY).c_str();
          m_details.my_price         = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_MY_PRICE       ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
 
-         m_details.ct_score         = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_CT_SCORE).asString(constants::FMT_NUMBER_DECIMAL).c_str();
-         m_details.my_score         = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_MY_SCORE).asString(constants::FMT_NUMBER_DECIMAL).c_str();
+         auto prop_val = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_CT_SCORE);
+         m_details.ct_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
+
+         prop_val = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_MY_SCORE);
+         m_details.my_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
          GetSizer()->ShowItems(true);
+
+         m_details.image_result = m_label_cache->fetchLabelImage(m_details.wine_id);
+         m_label_image->Hide();
+         m_label_timer.StartOnce(constants::LABEL_TIMER_1ST_INTERVAL);
       }
       else{
          GetSizer()->ShowItems(false);
@@ -282,6 +332,77 @@ namespace ctb::app
       TransferDataToWindow();
       Layout();
       // TODO hide/unhide fields as necessary.
+   }
+
+
+   void WineDetailsPanel::notify(GridTableEvent event)
+   {
+      try
+      {
+         switch (event.m_event_id)
+         {
+         case GridTableEvent::Id::RowSelected:
+            updateDetails(event);
+            break;
+
+         case GridTableEvent::Id::TableInitialize:
+            break;
+
+         default:
+            event.m_affected_row = std::nullopt;
+            updateDetails(event);
+            break;
+         }
+      }
+      catch(Error& err)
+      {
+         wxGetApp().displayErrorMessage(err);
+      }
+      catch(std::exception& e)
+      {
+         wxGetApp().displayErrorMessage(e.what());
+      }  
+   }
+
+
+   void WineDetailsPanel::onLabelTimer(wxTimerEvent&)
+   {
+      using namespace tasks;
+
+      if (auto& result = m_details.image_result)
+      {
+         switch (result->poll(0ms))
+         {
+            case wxImageTask::Status::Deferred: [[fallthrough]];
+            case wxImageTask::Status::Finished:
+               displayLabel();
+               [[fallthrough]];
+
+            case wxImageTask::Status::Invalid:
+               m_details.image_result = {};
+               break;
+
+            case wxImageTask::Status::Running:
+               m_label_timer.StartOnce(constants::LABEL_TIMER_RETRY_INTERVAL);
+               break;
+
+            default:
+               assert("Bug, new enum value wasn't accounted for" == nullptr);
+               break;
+         }
+      }
+   }
+
+
+   void WineDetailsPanel::onViewWebPage([[maybe_unused]] wxCommandEvent& event)
+   {
+      if (!m_details.wine_id)
+      {
+         wxGetApp().displayInfoMessage("no wine id available.");
+      }
+      else{
+         wxLaunchDefaultBrowser(getWineDetailsUrl(m_details.wine_id).c_str());
+      }
    }
 
 

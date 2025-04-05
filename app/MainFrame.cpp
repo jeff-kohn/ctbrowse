@@ -8,6 +8,7 @@
 
 #include "App.h"
 #include "MainFrame.h"
+#include "LabelImageCache.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
 #include "grid/CellarTrackerGrid.h"
@@ -18,7 +19,7 @@
 
 #include <ctb/CredentialWrapper.h>
 #include <ctb/table_download.h>
-#include <ctb/winapi_util.h>
+#include <ctb/utility.h>
 #include <external/HttpStatusCodes.h>
 
 #include <wx/artprov.h>
@@ -62,7 +63,8 @@ namespace ctb::app
 
    MainFrame::MainFrame() : 
       m_event_source{ GridTableEventSource::create() },
-      m_sink{ this, m_event_source }
+      m_sink{ this, m_event_source },
+      m_label_cache{ std::make_shared<LabelImageCache>(constants::APP_LABEL_FOLDER)}
    {
    }
 
@@ -136,7 +138,7 @@ namespace ctb::app
       m_grid->SetColLabelSize(FromDIP(30));
       box_sizer->Add(m_grid, wxSizerFlags(80).Expand());
 
-      m_wine_details = WineDetailsPanel::create(this, m_event_source);
+      m_wine_details = WineDetailsPanel::create(this, m_event_source, m_label_cache);
       box_sizer->Add(m_wine_details, wxSizerFlags(30).Expand());
 
       SetSizer(box_sizer.release());
@@ -345,7 +347,7 @@ namespace ctb::app
             auto folder = wxGetApp().userDataFolder();
             auto file_path{ folder / result->tableName() };
             file_path.replace_extension(constants::DATA_FILE_EXTENSION);
-            util::saveTextToFile(result->data, file_path);
+            saveTextToFile(file_path, result->data, true);
 
             setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, getTableDescription(tbl));
          }
@@ -380,6 +382,8 @@ namespace ctb::app
          tbl->applySortConfig(GridTableWineList::getSortConfig(0));
          m_event_source->signal(GridTableEvent::Id::Sort);
 
+         // submit background request to get label images not found in cache.
+         //m_label_cache->requestCacheUpdate(tbl->getWineIds());
          Update();
       }
       catch(Error& e)
@@ -504,7 +508,7 @@ namespace ctb::app
 
       if (total)
       {
-         SetStatusText(std::format(constants::FMT_LBL_TOTAL_ROWS, total), STATUS_BAR_PANE_TOTAL_ROWS);
+         SetStatusText(ctb::format(constants::FMT_LBL_TOTAL_ROWS, total), STATUS_BAR_PANE_TOTAL_ROWS);
       }
       else{
          SetStatusText("", STATUS_BAR_PANE_TOTAL_ROWS);
@@ -512,7 +516,7 @@ namespace ctb::app
 
       if (filtered < total)
       {
-         SetStatusText(std::format(constants::FMT_LBL_FILTERED_ROWS, filtered), STATUS_BAR_PANE_FILTERED_ROWS);
+         SetStatusText(ctb::format(constants::FMT_LBL_FILTERED_ROWS, filtered), STATUS_BAR_PANE_FILTERED_ROWS);
       }
       else{
          SetStatusText("", STATUS_BAR_PANE_FILTERED_ROWS);

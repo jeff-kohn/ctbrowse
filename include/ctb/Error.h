@@ -7,13 +7,12 @@
  *********************************************************************/
 #pragma once
 
+#include "ctb/ctb_format.h"
 #include <magic_enum/magic_enum.hpp>
 
 #include <exception>
-#include <format>
 #include <string>
 #include <string_view>
-// #include <winerror.h>
 
 
 namespace ctb
@@ -33,6 +32,7 @@ namespace ctb
       {
          ArgumentError,
          CurlError,
+         FileError,
          Generic,
          HttpStatus,
          OperationCanceled,
@@ -60,8 +60,14 @@ namespace ctb
          return magic_enum::enum_name(category);
       }
 
+      std::string formattedMesage() const
+      {
+         return ctb::format("Error Category '{}', code {}, {}", categoryName(), error_code, what());
+      }
 
-      /// @brief base class override, returns same value as message()
+      /// @brief base class override
+      ///
+      /// returns same value as error_message member variable, NOT formattedMessage()
       const char* what() const noexcept override
       {
          return error_message.c_str();
@@ -88,7 +94,7 @@ namespace ctb
       template <typename... T>
       Error(Category category, std::string_view fmt, T&&... args) : 
          error_code{ ERROR_CODE_GENERAL_FAILURE },
-         error_message{ std::vformat(fmt, std::make_format_args(args...)) },
+         error_message{ ctb::vformat(fmt, ctb::make_format_args(args...)) },
          category{ category }
       {}
 
@@ -97,7 +103,7 @@ namespace ctb
       template <typename... T>
       Error(int64_t code, Category category, std::string_view fmt, T&&... args) :
          error_code{ code },
-         error_message{ std::vformat(fmt, std::make_format_args(args...)) },
+         error_message{ ctb::vformat(fmt, ctb::make_format_args(args...)) },
          category{ category }
       {}
 
@@ -109,5 +115,27 @@ namespace ctb
       Error& operator=(Error&&) = default;
       ~Error() override = default;
    };
+
+
+   /// @brief tranlate an exception_ptr to a ctb::Error
+   /// 
+   /// useful for code that wants to handle all exceptions with a
+   /// catch(...) and return them as an unexpected{ Error{} }
+   /// 
+   inline auto packageError(std::exception_ptr ep = std::current_exception() ) noexcept -> Error
+   {
+      try 
+      {
+         if (ep) std::rethrow_exception(ep);
+      }
+      catch (ctb::Error e)      { return e;                 }
+      catch (std::exception e)  { return Error{ e.what() }; }
+      catch (...)
+      {
+         assert("wtf, nonstandard exception caught." == nullptr);
+      }
+
+      return Error{ constants::ERROR_STR_UNKNOWN };
+   }
 
 } // namespace ctb

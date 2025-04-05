@@ -6,7 +6,8 @@
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 #include "ctb/table_download.h"
-#include "ctb/winapi_util.h"
+#include "ctb/utility.h"
+#include "ctb/utility_http.h"
 #include "external/HttpStatusCodes.h"
 
 #include <cpr/cpr.h>
@@ -17,7 +18,7 @@ namespace ctb
 {
    /// @brief  returns true if the request returned a valid response, or an Error if it didn't
    ///
-   std::expected<bool, ctb::Error> validateResult(cpr::Response& response)
+   std::expected<bool, ctb::Error> validateCtRequest(cpr::Response& response)
    {
       using namespace magic_enum;
 
@@ -40,7 +41,7 @@ namespace ctb
       else if (response.error.code != cpr::ErrorCode::OK)
       {
          error.error_code = static_cast<int64_t>(response.error.code);
-         error.error_message = std::format(constants::FMT_ERROR_CURL_ERROR, error.error_code);
+         error.error_message = ctb::format(constants::FMT_ERROR_CURL_ERROR, error.error_code);
 
          // use a separate category for cancellation, so the caller can distinguish and avoid showing unnecessary error messages
          error.category = error.error_code == enum_index(cpr::ErrorCode::ABORTED_BY_CALLBACK) ? Error::Category::OperationCanceled
@@ -48,7 +49,7 @@ namespace ctb
       }
       else {
          error.error_code = static_cast<int64_t>(response.status_code);
-         error.error_message = std::format(constants::FMT_ERROR_HTTP_STATUS_CODE, error.error_code);
+         error.error_message = ctb::format(constants::FMT_ERROR_HTTP_STATUS_CODE, error.error_code);
          error.category = Error::Category::HttpStatus;
       }
 
@@ -69,19 +70,18 @@ namespace ctb
    {
       auto table_name = magic_enum::enum_name(table);
       auto data_format = magic_enum::enum_name(format);
-      cpr::Header header{ {constants::HTTP_HEADER_XCLIENT, constants::HTTP_HEADER_XCLIENT_VALUE} };
 
-      cpr::Url url{ std::format(constants::FMT_HTTP_CELLARTRACKER_QUERY_URL,
-                                util::percentEncode(std::string(cred.username)),
-                                util::percentEncode(std::string(cred.password)),
+      cpr::Url url{ ctb::format(constants::FMT_HTTP_CT_TABLE_URL,
+                                percentEncode(std::string(cred.username)),
+                                percentEncode(std::string(cred.password)),
                                 data_format, table_name)
       };
 
-      auto response = callback ? cpr::Get(url, header, *callback)
-                               : cpr::Get(url, header);
+      auto response = callback ? cpr::Get(url, *callback)
+                               : cpr::Get(url);
 
       // check the response for success, bail out if we got an error 
-      auto request_result = validateResult(response);
+      auto request_result = validateResponse(response);
       if (!request_result.has_value())
       {
          return std::unexpected{ request_result.error() };
@@ -91,10 +91,10 @@ namespace ctb
       // The returned data is encoded as ISO 8859-1 Latin 1, we need to convert
       // it to UTF-8 before returning it. If the conversion fails, just return the
       // original encoding as fallback.
-      auto utf_text = util::toUTF8(table_data.data);
-      if (!utf_text.empty())
+      auto utf_text = toUTF8(table_data.data);
+      if (utf_text)
       {
-         table_data.data.swap(utf_text);
+         table_data.data.swap(*utf_text);
       }
 
       return table_data;

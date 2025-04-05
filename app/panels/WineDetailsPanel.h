@@ -1,19 +1,26 @@
+/*********************************************************************
+ * @file       WineDetailsPanel.h
+ *
+ * @brief      declaration for the WineDetailsPanel class
+ *
+ * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+ *********************************************************************/
 #pragma once
+
 #include "App.h"
+#include "tasks.h"
+#include "LabelImageCache.h"
 #include "grid/ScopedEventSink.h"
 
-#include <wx/collpane.h>
-#include <wx/gdicmn.h>
-#include <wx/hyperlink.h>
-#include <wx/generic/hyperlink.h>
+
 #include <wx/panel.h>
-#include <wx/sizer.h>
-#include <wx/stattext.h>
+
+// forward declarations for member ptrs
+class wxGenericStaticBitmap;
+
 
 namespace ctb::app
 {
-
-
 
    class WineDetailsPanel final : public wxPanel, public IGridTableEventSink
    {
@@ -25,7 +32,7 @@ namespace ctb::app
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its own lifetime). 
       /// 
-      [[nodiscard]] static WineDetailsPanel* create(wxWindow* parent, GridTableEventSourcePtr source);
+      [[nodiscard]] static WineDetailsPanel* create(wxWindow* parent, GridTableEventSourcePtr source, LabelCachePtr cache);
 
 
       // no copy/move/assign, this class is created on the heap.
@@ -36,10 +43,14 @@ namespace ctb::app
       ~WineDetailsPanel() override = default;
 
    private:
+      using wxImageTask = LabelImageCache::wxImageTask;
+      using MaybeImageTask = std::optional<wxImageTask>;
+
       /// @brief struct that control validators will be bound to for displaying in the window
       ///
       struct WineDetails
       {
+         uint64_t wine_id{};
          wxString wine_name{};
          wxString vintage{};
          wxString varietal{};
@@ -53,22 +64,40 @@ namespace ctb::app
          wxString my_price{};
          wxString community_price{};
          wxString auction_value{};
+         MaybeImageTask image_result{};
       };
 
-      WineDetails       m_details{};
-      ScopedEventSink   m_event_sink;   // no default init
+      WineDetails            m_details{};
+      ScopedEventSink        m_event_sink;   // no default init
+      LabelCachePtr          m_label_cache{};
+      wxGenericStaticBitmap* m_label_image{};
+      wxTimer                m_label_timer{};
 
-      // window creation``
+      // window creation
       void initControls();
+      void displayLabel();
+
+      /// @brief status of MaybeImageTask
+      //enum class LabelStatus
+      //{
+      //   Retrieved,
+      //   Pending,
+      //   Missing
+      //};
+      ///// @brief displays
+      ///// @return 
+      //auto checkForLabel() const -> LabelStatus;
 
       /// event source related handlers
       void notify(GridTableEvent event) override;
+      void updateDetails(GridTableEvent event);
 
       // windows event handlers
-      void UpdateDetails(GridTableEvent event);
+      void onLabelTimer(wxTimerEvent& event);
+      void onViewWebPage(wxCommandEvent& event);
 
       // private ctor used by create()
-      explicit WineDetailsPanel(GridTableEventSourcePtr source);
+      explicit WineDetailsPanel(GridTableEventSourcePtr source, LabelCachePtr cache);
    };
 
 } // namespace ctb::app

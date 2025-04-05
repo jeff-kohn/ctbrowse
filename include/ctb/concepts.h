@@ -27,6 +27,7 @@ namespace ctb
    concept CtRecordTraits = requires (T t, typename T::PropId p)
    {
       t.getCsvSchema();
+      p = T::PropId::iWineId;
    };
 
 

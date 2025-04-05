@@ -14,10 +14,8 @@
 #include <wx/event.h>
 #include <wx/frame.h>
 
-#include <format>
 
-
-/// forward declare wxWidget classes to avoid header pollution.
+/// forward declare wx classes to avoid header pollution.
 class wxBoxSizer;
 class wxMenuBar;
 class wxSearchCtrl;
@@ -31,6 +29,7 @@ namespace ctb::app
    class CellarTrackerGrid;   // the grid window
    class GridOptionsPanel;    // the options panel
    class WineDetailsPanel;    // details panel
+   class LabelImageCache;     // used for retrieving label images
 
 
    /// @brief class for the main window of the application
@@ -51,24 +50,24 @@ namespace ctb::app
       [[nodiscard]] static MainFrame* create();
 
 
-      /// @brief set status bar text using std::format() syntax
+      /// @brief set status bar text using format() syntax
       ///
       template <typename... Args>
-      constexpr void setStatusText(std::format_string<Args...> fmt_str, Args&&... args)
+      constexpr void setStatusText(ctb::format_string<Args...> fmt_str, Args&&... args)
       {
-         SetStatusText(std::format(fmt_str, std::forward<Args>(args)...));
+         SetStatusText(ctb::format(fmt_str, std::forward<Args>(args)...));
       }
 
 
-      /// @brief set status bar text for a specified pane using std::format() syntax
+      /// @brief set status bar text for a specified pane using format() syntax
       ///
       /// pane-index is zero-based
       ///
       template <typename... Args>
-      constexpr void setStatusText(int pane_index, std::format_string<Args...> fmt_str, Args&&... args)
+      constexpr void setStatusText(int pane_index, ctb::format_string<Args...> fmt_str, Args&&... args)
       {
          assert(pane_index <= STATUS_BAR_PANE_FILTERED_ROWS);
-         SetStatusText(std::format(fmt_str, std::forward<Args>(args)...), pane_index);
+         SetStatusText(ctb::format(fmt_str, std::forward<Args>(args)...), pane_index);
       }
 
 
@@ -76,13 +75,15 @@ namespace ctb::app
       CellarTrackerGrid*      m_grid{};         // grid window view
       GridOptionsPanel*       m_grid_options{}; // gird options view
       GridTableEventSourcePtr m_event_source{}; // for synchronizing events between views and the underlying table
-      ScopedEventSink         m_sink;           // so we can also handle events from our source
-      wxBoxSizer*             m_main_sizer{};
       wxMenuBar*              m_menu_bar{};
       wxSearchCtrl*           m_search_ctrl{};  // substring search box on the toolbar
+      ScopedEventSink         m_sink;           // so we can also handle events from our source
       wxStatusBar*            m_status_bar{};
       wxToolBar*              m_tool_bar{};
       WineDetailsPanel*       m_wine_details{};
+
+      // we use a shared_ptr because we want to share the object with child window(s)
+      std::shared_ptr<LabelImageCache> m_label_cache{};
 
       /// @brief private ctor called by static create()
       MainFrame();

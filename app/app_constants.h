@@ -2,6 +2,12 @@
 
 namespace ctb::constants
 {
+   inline constexpr const char* APP_NAME_LONG = "ctBrowse for Windows";
+   inline constexpr const char* APP_NAME_SHORT = "ctBrowse";
+   inline constexpr const char* APP_LOG_FOLDER = "%LOCALAPPDATA%\\ctBrowse for Windows\\logs";
+   inline constexpr const char* APP_LABEL_FOLDER = "%LOCALAPPDATA%\\ctBrowse for Windows\\labels\\";
+
+
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_LBL        = "&Download Data...";
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP        = "Download data from CellarTracker";
    inline constexpr const char* CMD_FILE_SETTINGS_LBL             = "&Settings...";
@@ -28,10 +34,11 @@ namespace ctb::constants
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADED        = "Successfully downloaded file '{}'.";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADING       = "Downloading file '{}'...";
    inline constexpr const char* FMT_TITLE_TYPED_ERROR             = "Error ({})";
+   inline constexpr const char* FMT_LABEL_IMAGE_FILENAME          = "{}-{}.jpg";
 
    inline constexpr const char* INFO_MSG_NO_MATCHING_ROWS         = "No rows matched the search text.";
-
-
+   inline constexpr const char* NO_SCORE                          = " --";
+   
    // grid column labels
    inline constexpr const char* COL_CT_SCORE                      = "CT Score";
    inline constexpr const char* COL_LOCALE                        = "Region and Appellation";
@@ -81,7 +88,7 @@ namespace ctb::constants
    inline constexpr const char* DETAIL_PROP_VARIETAL              = "MasterVarietal";
    inline constexpr const char* DETAIL_PROP_VINTAGE               = "Vintage";
    inline constexpr const char* DETAIL_PROP_WINE_NAME             = "WineName";
-
+   inline constexpr const char* DETAIL_PROP_WINE_ID               = "iWineId";
 
    inline constexpr const char* RES_NAME_ICON_PRODUCT             = "IDR_PRODUCT_ICON";
    inline constexpr const char* RES_NAME_MAINFRAME                = "MAINFRAME";
@@ -109,7 +116,10 @@ namespace ctb::constants
    inline constexpr double FILTER_SCORE_MAX     = 100.0;
    inline constexpr int FILTER_SCORE_DIGITS     =     1;
    inline constexpr int WX_UNSPECIFIED_VALUE    =    -1;
-
    inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = false;
 
-}  // namespace ctb::app::constants
+   // app-specific error messages.
+   inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN  = "Label cache object is shutting down.";
+
+
+}  // namespace ctb::constants

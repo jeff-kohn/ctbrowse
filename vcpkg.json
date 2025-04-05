@@ -2,21 +2,23 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "ct-search",
   "version": "0.1.0",
-   "dependencies": [
-      "boost-algorithm",
-      "boost-container",
-      "catch2",
-      "cpr",
-      "frozen",
-      "magic-enum",
-      {
-         "name": "wxwidgets",
-         "features": [
-            "fonts",
-            "media",
-            "example"
-         ]
-      }
-   ],
-  "builtin-baseline": "d504de05dcd7b55df34976be1c824324ec6bca2b"
+  "dependencies": [
+    "boost-algorithm",
+    "boost-scope",
+    "catch2",
+    "cpr",
+    "fmt",
+    "frozen",
+    "magic-enum",
+    {
+      "name": "wxwidgets",
+      "features": [
+        "fonts",
+        "media",
+        "example"
+      ]
+    },
+    "spdlog"
+  ],
+  "builtin-baseline": "a5a48166e5b23ef25373c443d8551cdafc58abd3"
 }

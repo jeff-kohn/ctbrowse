@@ -8,17 +8,18 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/utility.h"
+#include "ctb/utility_templates.h"
 
-#include <format>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <variant>
 
 
+
 namespace ctb
 {
+
    /// @brief class to contain a property value from a table entry.
    ///
    /// this class is a lightweight wrapper around std::variant that is easier use and provides a built-in
@@ -37,7 +38,7 @@ namespace ctb
    template<typename... Args>
    struct TableProperty
    {
-      using ValueType   = std::variant<std::monostate, Args...>;
+      using ValueType = std::variant<std::monostate, Args...>;
 
 
       /// @brief construct a TableProperty from any value convertible to ValueType
@@ -73,10 +74,11 @@ namespace ctb
       constexpr std::optional<T> as() const
       {    
          // try to convert
-         auto asT = Overloaded{
-            [](const std::monostate) -> std::optional<T>    { return std::nullopt; },
-            [](const std::string& str) -> std::optional<T>  { return from_str<T>(str); },
-            [](auto val) -> std::optional<T>                { return std::optional<T>(static_cast<T>(val)); }
+         auto asT = Overloaded
+         {
+            [](const std::monostate) -> std::optional<T> { return std::nullopt; },
+            [](const std::string& str) -> std::optional<T> { return from_str<T>(str); },
+            [](auto val) -> std::optional<T> { return std::optional<T>(static_cast<T>(val)); }
          };
          return std::visit(asT, m_val);
       }
@@ -97,7 +99,7 @@ namespace ctb
       }
 
 
-      /// @brief return stringview to the internal string property
+      /// @brief return string_view to the internal string property
       /// @return the requested string_view, or an empty one if this property doesn't contain a string.
       /// 
       /// this method does not convert other types to string_view, because that would require a view on a temporary. 
@@ -172,10 +174,11 @@ namespace ctb
       /// 
       std::string asString(std::string_view fmt_str) const
       {
-         auto asStr = Overloaded{
-            [](const std::string& val)       {  return val;                                                 },
-            [](std::monostate)               {  return std::string{};                                       },
-            [&fmt_str](auto val)             {  return std::vformat(fmt_str,  std::make_format_args(val));  }
+         auto asStr = Overloaded
+         {
+            [](const std::string& val) {  return val;                                                 },
+            [](std::monostate) {  return std::string{};                                       },
+            [&fmt_str](auto val) {  return ctb::vformat(fmt_str,  ctb::make_format_args(val));  }
          };
          return std::visit(asStr, m_val);
       }

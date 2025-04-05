@@ -264,6 +264,8 @@ namespace ctb::app
          m_current_view{&m_grid_data},
          m_grid_data{std::move(data)}
       {
+         m_score_filter.enabled = false;
+         m_instock_filter.enabled = false;
       }
 
       void applyFilters();
@@ -272,6 +274,10 @@ namespace ctb::app
       bool isFilterActive()   {  return m_current_view = &m_filtered_data; }
 
       // Inherited via GridTable
+
+
+      // Inherited via GridTable
+      std::vector<uint64_t> getWineIds() override;
 
 };
 
