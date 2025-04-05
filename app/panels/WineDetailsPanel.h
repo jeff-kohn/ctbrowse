@@ -76,6 +76,17 @@ namespace ctb::app
       void checkLabelResult();
       void displayLabel();
 
+      /// @brief status of MaybeImageTask
+      //enum class LabelStatus
+      //{
+      //   Retrieved,
+      //   Pending,
+      //   Missing
+      //};
+      ///// @brief displays
+      ///// @return 
+      //auto checkForLabel() const -> LabelStatus;
+
       /// event source related handlers
       void notify(GridTableEvent event) override;
       void updateDetails(GridTableEvent event);
