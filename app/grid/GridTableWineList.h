@@ -240,11 +240,10 @@ namespace ctb::app
       void applyFilters();
       bool applySubStringFilter(const SubStringFilter& filter);
       void sortData();
-      bool isFilterActive()   {  return m_current_view = &m_filtered_data;
+      bool isFilterActive() { return m_current_view = &m_filtered_data; }
 
       // Inherited via GridTable
       std::vector<uint64_t> getWineIds() override;
-
-};
+   };
 
 } // namespace ctb::app

@@ -23,15 +23,11 @@ Checks: "*,\
   -misc-non-private-member-variables-in-classes, \
   -misc-use-internal-linkage, \
   -concurrency-mt-unsafe, \
+  -bugprone-argument-comment, \
   -performance-avoid-endl"
 WarningsAsErrors: ''
 
 CheckOptions:
-  - key: 'bugprone-argument-comment.StrictMode'
-    value: 'true'
-# Prefer using enum classes with 2 values for parameters instead of bools
-  - key: 'bugprone-argument-comment.CommentBoolLiterals'
-    value: 'true'
   - key: 'bugprone-misplaced-widening-cast.CheckImplicitCasts'
     value: 'true'
   - key: 'bugprone-sizeof-expression.WarnOnSizeOfIntegerExpression'
