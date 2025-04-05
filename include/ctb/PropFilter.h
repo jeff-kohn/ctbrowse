@@ -43,7 +43,6 @@ namespace ctb
          enabled{ true }
       {}
 
-
       /// @brief construct a PropFilter for matching the given value and predicate to one of multiple properties       
       ///
       template<std::convertible_to<ValueType> T> // requires std::same_as<rng::range_value_t<RngT>, PropId>
@@ -54,26 +53,21 @@ namespace ctb
          enabled{ true }
       {}
 
-
       /// @brief the properties that we're filtering against
       ///
       std::vector<PropId> match_props{};
-
 
       /// @brief the value the record property will be compared to using compare_pred
       ///
       ValueType compare_val{};
 
-
       /// @brief predicate that will be used to compare record properties to compare_val
       ///
       ComparePred compare_pred{ std::greater<ValueType>{} };
 
-
       /// @brief whether this fitler is active. If set to false, the operator() will always return true
       ///
       bool enabled{ false };
-
 
       /// @brief returns true if the specified table entry is a match to our predicate(s) and value
       ///
@@ -84,7 +78,6 @@ namespace ctb
 
          return true;
       }
-
 
       PropFilter() noexcept = default;
       ~PropFilter() noexcept = default;

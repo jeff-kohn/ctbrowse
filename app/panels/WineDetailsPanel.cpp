@@ -27,8 +27,7 @@
 
 namespace ctb::constants
 {
-   constexpr auto LABEL_TIMER_1ST_INTERVAL = 10;  // ms, in case it's a local file and should already be available
-   constexpr auto LABEL_TIMER_RETRY_INTERVAL = 100; // wait a bit longer on subsequent attempts since it's downloading.
+   constexpr auto LABEL_TIMER_RETRY_INTERVAL = 50; 
 
 } // namespace constants
 
@@ -49,6 +48,7 @@ namespace ctb::app
 
          return ctb::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str(); 
       }
+
    } // namespace detail
 
 
@@ -242,7 +242,7 @@ namespace ctb::app
       top_sizer->Add(details_sizer, wxSizerFlags{}.Expand().FixedMinSize().Border(wxALL));
 
       // View Online button (also outside grid sizer, same as wine name)
-      auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, "View Online at CellarTracker.com");
+      auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_VIEW_ONLINE_TITLE, constants::DETAIL_VIEW_ONLINE_NOTE);
       top_sizer->Add(view_online_btn, wxSizerFlags().Border(wxALL).Expand());
 
       m_label_image = new wxGenericStaticBitmap(this, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
@@ -257,6 +257,36 @@ namespace ctb::app
       view_online_btn->Bind(wxEVT_BUTTON, &WineDetailsPanel::onViewWebPage, this);
    }
 
+
+   void app::WineDetailsPanel::checkLabelResult()
+   {
+      using namespace tasks;
+
+      if (auto& result = m_details.image_result)
+      {
+         switch (result->poll(0ms))
+         {
+            case wxImageTask::Status::Deferred: [[fallthrough]];
+            case wxImageTask::Status::Finished:
+               displayLabel();
+               [[fallthrough]];
+
+            case wxImageTask::Status::Invalid:
+               m_details.image_result = {};
+               break;
+
+            case wxImageTask::Status::Running:
+               m_label_timer.StartOnce(constants::LABEL_TIMER_RETRY_INTERVAL);
+               break;
+
+            default:
+               assert("Bug, new enum value wasn't accounted for" == nullptr);
+               break;
+            }
+      }
+   }
+
+
    void app::WineDetailsPanel::displayLabel()
    {
       try
@@ -269,8 +299,7 @@ namespace ctb::app
 
             m_label_image->SetBitmap(wxBitmap{ *result });       
             m_label_image->Show();
-            m_label_image->InvalidateBestSize();
-            Layout();
+            Layout(); // required since the images vary in size
             m_label_image->Refresh();
             m_label_image->Update();
          }
@@ -320,9 +349,9 @@ namespace ctb::app
          m_details.my_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
          GetSizer()->ShowItems(true);
 
-         m_details.image_result = m_label_cache->fetchLabelImage(m_details.wine_id);
          m_label_image->Hide();
-         m_label_timer.StartOnce(constants::LABEL_TIMER_1ST_INTERVAL);
+         m_details.image_result = m_label_cache->fetchLabelImage(m_details.wine_id);
+         checkLabelResult();
       }
       else{
          GetSizer()->ShowItems(false);
@@ -367,30 +396,7 @@ namespace ctb::app
 
    void WineDetailsPanel::onLabelTimer(wxTimerEvent&)
    {
-      using namespace tasks;
-
-      if (auto& result = m_details.image_result)
-      {
-         switch (result->poll(0ms))
-         {
-            case wxImageTask::Status::Deferred: [[fallthrough]];
-            case wxImageTask::Status::Finished:
-               displayLabel();
-               [[fallthrough]];
-
-            case wxImageTask::Status::Invalid:
-               m_details.image_result = {};
-               break;
-
-            case wxImageTask::Status::Running:
-               m_label_timer.StartOnce(constants::LABEL_TIMER_RETRY_INTERVAL);
-               break;
-
-            default:
-               assert("Bug, new enum value wasn't accounted for" == nullptr);
-               break;
-         }
-      }
+      checkLabelResult();
    }
 
 

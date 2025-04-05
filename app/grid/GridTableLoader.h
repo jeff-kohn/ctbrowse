@@ -34,7 +34,6 @@ namespace ctb::app
          setDataFolder(folder);
       }
 
-
       /// @brief enum for the support grid tables
       ///
       enum class GridTableId
@@ -42,7 +41,6 @@ namespace ctb::app
          WineList,
          ReadyToDrinkList,
       };
-
 
       /// @brief specify the location for data files
       ///
@@ -56,7 +54,6 @@ namespace ctb::app
          m_data_folder = folder;
       }
 
-
       /// @brief returns the location used for loading data files from disk
       ///
       fs::path getDataFolder() const
@@ -64,18 +61,15 @@ namespace ctb::app
          return m_data_folder;
       }
 
-
       /// @brief the smart-ptr-to-base that this class returns to callers.
       ///
       using GridTablePtr = GridTablePtr;
-
 
       /// @brief get the requested grid table
       ///
       /// this will throw an exception if the table couldn't be loaded.
       ///
       GridTablePtr getGridTable(GridTableId tbl);
-
 
    private:
       fs::path m_data_folder{constants::CURRENT_DIRECTORY};

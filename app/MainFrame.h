@@ -41,14 +41,12 @@ namespace ctb::app
       static inline constexpr int STATUS_BAR_PANE_FILTERED_ROWS = 1;
       static inline constexpr int STATUS_BAR_PANE_TOTAL_ROWS = 2;
 
-
       /// @brief static factor method to create an initialize an instance of the MainFrame class
       /// 
       /// throws a ctb::Error if the window can't be created; otherwise returns a non-owning pointer 
       /// to the window (top-level window so it will manage its own lifetime). 
       /// 
       [[nodiscard]] static MainFrame* create();
-
 
       /// @brief set status bar text using format() syntax
       ///
@@ -57,7 +55,6 @@ namespace ctb::app
       {
          SetStatusText(ctb::format(fmt_str, std::forward<Args>(args)...));
       }
-
 
       /// @brief set status bar text for a specified pane using format() syntax
       ///
@@ -69,7 +66,6 @@ namespace ctb::app
          assert(pane_index <= STATUS_BAR_PANE_FILTERED_ROWS);
          SetStatusText(ctb::format(fmt_str, std::forward<Args>(args)...), pane_index);
       }
-
 
    private:
       CellarTrackerGrid*      m_grid{};         // grid window view

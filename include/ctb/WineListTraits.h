@@ -28,7 +28,6 @@ namespace ctb
    class WineListTraits
    {
    public:
-
       /// @brief these are the fields that this object contains properties for.
       /// 
       enum class PropId : uint16_t
@@ -59,7 +58,6 @@ namespace ctb
          WineAndVintage,
          TotalQty
       };
-
 
       /// @brief - contains the list of data fields that are parsed from CSV
       /// 
@@ -104,7 +102,6 @@ namespace ctb
          return enumToIndex(prop);
       }
 
-
       /// @brief small helper to convert a zero-based index to a Prop enum
       /// 
       static constexpr PropId propFromIndex(int idx)
@@ -112,12 +109,12 @@ namespace ctb
          return enumFromIndex<PropId>(idx);
       }
 
-
       /// @brief this gets called by CtRecordImpl to set any missing property values
-      /// @param rec span containing a TableProperty for each PropID enum value.
       /// 
-      /// properties from the CSV file are already set, this impl just provides
+      /// Properties from the CSV file are already set, this impl just provides
       /// any calculated property values or does fixup for any parsed values that need it.
+      /// 
+      /// @param rec span containing a TableProperty for each PropID enum value.
       /// 
       template<std::size_t N, typename... Args>
       static void onRecordParse(std::span<TableProperty<Args...>, N> rec)

@@ -33,7 +33,6 @@ namespace ctb::app
          }
       }
 
-
       /// @brief construct a scoped event sink, attaching it to the specified source.
       ///
       /// you can pass a null source (although there's no point), but passing a null 
@@ -51,7 +50,6 @@ namespace ctb::app
          attach();
       }
 
-
       /// @brief attach this sink to the specified source
       ///
       void reset(GridTableEventSourcePtr source)
@@ -60,7 +58,6 @@ namespace ctb::app
          m_source = source;
          attach();
       }
-
 
       /// @brief method to signal the source (if we have one) to fire an event
       ///
@@ -76,7 +73,6 @@ namespace ctb::app
          return false;
       }
 
-
       /// @brief returns the table currently associated with this source, if any
       /// 
       /// be sure to check the return value as it could be nullptr
@@ -90,7 +86,6 @@ namespace ctb::app
          return {};
       }
 
-
       /// @brief returns whether the event source has a table attached or not.
       /// 
       bool hasTable() const
@@ -98,14 +93,12 @@ namespace ctb::app
          return m_source->getTable() != nullptr;
       }
 
-
       /// @brief destructor
       ///
       ~ScopedEventSink() noexcept
       {
          detach();
       }
-
 
    private:
       IGridTableEventSink*    m_sink{ nullptr };

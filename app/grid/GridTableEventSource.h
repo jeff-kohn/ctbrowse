@@ -25,8 +25,7 @@ namespace ctb::app
    /// 
    class GridTableEventSource final : public IGridTableEventSource
    {
-   public:
-      
+   public:      
       /// @brief static method to create a class instance.
       ///
       /// note that while you can attach/detach from this object immediately, 
@@ -34,7 +33,6 @@ namespace ctb::app
       /// until a valid table ptr is passed to setTable().
       /// 
       [[nodiscard]] static GridTableEventSourcePtr create();
-
 
       /// @brief returns true if this source has a table attached, false otherwise
       ///
@@ -47,7 +45,6 @@ namespace ctb::app
       /// 
       GridTablePtr getTable() override;
 
-
       /// @brief assigns a table to this source.
       /// 
       /// triggers the TableRemove event before disconnecting the current table (if it is non-null)
@@ -58,7 +55,6 @@ namespace ctb::app
       /// 
       bool setTable(GridTablePtr table) override;
 
-
       /// @brief attaches an event sink to this source to receive event notifications
       ///
       /// detach() must be called when notifications no longer can/should be sent to 
@@ -67,33 +63,29 @@ namespace ctb::app
       /// 
       void attach(IGridTableEventSink* observer) override;
 
-
       /// @brief detach an event sink from this source to no longer receive event notifications
       /// 
       void detach(IGridTableEventSink* observer) override;
 
-
       /// @brief this is called to signal that an event needs to be sent to all listeners
       ///
-      /// @return true if every subscriber was notified without error, false if at least one
-      ///         subscriber threw an error.
-      /// 
       /// sinks should try to handle their own exceptions if it's possible to do so gracefully. Any 
       /// exceptions propagated back to this function will be displayed to the user.
+      /// 
+      /// @return true if every subscriber was notified without error, false if at least one
+      ///         subscriber threw an error.
       /// 
       bool signal(GridTableEvent::Id event_id, std::optional<int> row_idx) noexcept override;
  
-
       /// @brief this is called to signal that an event needs to be sent to all listeners
       ///
-      /// @return true if every subscriber was notified without error, false if at least one
-      ///         subscriber threw an error.
-      /// 
       /// sinks should try to handle their own exceptions if it's possible to do so gracefully. Any 
       /// exceptions propagated back to this function will be displayed to the user.
       /// 
+      /// @return true if every subscriber was notified without error, false if at least one
+      ///         subscriber threw an error.
+      /// 
       bool signal(GridTableEvent::Id event_id) noexcept override;
-
 
       /// @brief destructor
       ~GridTableEventSource() noexcept override;

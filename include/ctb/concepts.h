@@ -50,6 +50,7 @@ namespace ctb
       v1 = t.has_value() ? t.value() : v2;
    };
 
+
    /// @brief concept for a type that is either integral or floating point.
    ///
    template <typename T>

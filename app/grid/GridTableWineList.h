@@ -52,7 +52,6 @@ namespace ctb::app
       /// 
       [[nodiscard]] static GridTablePtr create(WineListData&& data);
 
-
       /// @brief list of display columns that can be used for a grid.
       ///
       static inline const std::array DefaultDisplayColumns { 
@@ -63,7 +62,6 @@ namespace ctb::app
          DisplayColumn{ PropId::MYScore,    DisplayColumn::Format::Decimal,  constants::COL_MY_SCORE },
       };
 
-
       /// @brief the available sort orders for this table.
       ///
       static inline const std::array Sorters{ 
@@ -73,7 +71,6 @@ namespace ctb::app
          TableSort{ { PropId::Region,   PropId::WineName,    PropId::Vintage }, constants::SORT_OPTION_REGION_WINE  },
       };
 
-
       /// @brief  string filters that can be used on this table.
       ///
       static inline const std::array StringFilters{
@@ -82,7 +79,6 @@ namespace ctb::app
          GridTableFilter{ constants::FILTER_REGION,     static_cast<int>(PropId::Region)         },
          GridTableFilter{ constants::FILTER_APPELATION, static_cast<int>(PropId::Appellation)    }
       };
-
 
       /// @brief returns the sort config for a Sorter based on its zero-based index. You can get the
       ///        sort configs by calling availableSortConfigs()
@@ -97,43 +93,35 @@ namespace ctb::app
          return GridTableSortConfig{ index, ts.sort_name, true };
       }
 
-
       /// @brief base class override that returns the number of rows/records in the table/grid
       ///
       int GetNumberRows() override { return static_cast<int>(m_current_view->size()); }
-
 
       /// @brief base class override that returns the number of columns displayed in the table/grid
       ///
       int GetNumberCols() override { return static_cast<int>(m_display_columns.size()); }
 
-
       /// @brief base class override to get the display name for column headers
       ///
       wxString GetColLabelValue(int col) override;
-
 
       /// @brief base class override to get the value for a given cell in the grid
       ///
       wxString GetValue(int row, int col) override;
 
-
       /// @brief this function will always throw an exception since the grid is read-only
       ///
       void SetValue(int row, int col, const wxString& value) override;
 
-
       /// @brief container alias used to hold the DisplayColumn's used for this grid
       ///
       using ColumnList = std::vector<DisplayColumn>;
-
 
       /// @brief  get a list of the columns that will be displayed in the grid
       /// 
       /// the columns are in the order they will be displayed.
       ///
       ColumnList getDisplayColumns() const { return m_display_columns; }
-
 
       /// @brief specify the columns to display in the grid
       ///
@@ -144,12 +132,10 @@ namespace ctb::app
          m_display_columns.swap(new_cols);
       }
 
-
       /// @brief this method will configure the column alignment settings for the grid based on the
       ///        settings in the DisplayColumn objects.
       ///
       void configureGridColumns(wxGridCellAttrPtr default_attr) override;
-
 
       /// @brief filter the table by performing a substring search across all columns
       ///
@@ -158,7 +144,6 @@ namespace ctb::app
       ///
       bool filterBySubstring(std::string_view substr) override;
 
-
       /// @brief filter the table by performing a substring search on the specified column
       ///
       /// note that class only supports a single substring filter, subsequent calls to
@@ -166,76 +151,60 @@ namespace ctb::app
       ///
       bool filterBySubstring(std::string_view substr, int col_idx) override;
 
-
       /// @brief clear/reset the substring filter
       ///
       void clearSubStringFilter() override;
-
 
       /// @brief get the total row count
       ///
       int totalRowCount() const override       
       {  return std::ssize(m_grid_data);  }  
 
-
       /// @brief get the filtered row count
       ///
       int filteredRowCount() const override    
       {  return std::ssize(*m_current_view); }
 
-
       // returns a collection of available sort options. 
       ///
       std::vector<GridTableSortConfig>  availableSortConfigs() const override;
 
-
       // retrieves the currently-active sort option
       ///
       GridTableSortConfig activeSortConfig() const override;
-
-
-      // sets the currently-active sort option
-      ///
+      
+      /// @brief  sets the currently-active sort option
+      /// 
       void applySortConfig(const GridTableSortConfig& config) override;
-
 
       /// @brief get a list of available filter option for this table.
       /// 
       std::vector<GridTableFilter> availableStringFilters() const override;
 
-
       /// @brief get a list of string values that can be used to filter on a column in the table
       ///
       StringSet getFilterMatchValues(int prop_idx) const override;
-
 
       /// @brief adds a match value string filter for the specified column.
       ///
       bool addPropFilterString(int prop_idx, std::string_view match_value) override;
 
-
       /// @brief adds a match value filter for the specified column.
       ///
       bool removePropFilterString(int prop_idx, std::string_view match_value) override;
 
-
       const TableProperty& getDetailProp(int row_idx, std::string_view prop_name) override;
 
-
       bool enableInStockFilter(bool enable) override;
-
 
       bool hasInStockFilter() const override 
       {  
          return true;   
       }
 
-
       NullableDouble getMinScoreFilter() const override;
 
-
       bool setMinScoreFilter(NullableDouble min_score) override;
-
 
       // default dtor, others are deleted since this object is meant to live on the heap
       ~GridTableWineList() override = default;
@@ -271,10 +240,7 @@ namespace ctb::app
       void applyFilters();
       bool applySubStringFilter(const SubStringFilter& filter);
       void sortData();
-      bool isFilterActive()   {  return m_current_view = &m_filtered_data; }
-
-      // Inherited via GridTable
-
+      bool isFilterActive()   {  return m_current_view = &m_filtered_data;
 
       // Inherited via GridTable
       std::vector<uint64_t> getWineIds() override;

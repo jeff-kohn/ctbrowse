@@ -71,7 +71,7 @@ namespace ctb::app
       auto file_path = buildLabelPath(m_cache_folder, wine_id);
       if (fs::exists(file_path))
       {
-         return wxImageTask{ async(runLoadFileTask, file_path, m_cancel_source.get_token()) };
+         return wxImageTask{ async(launch::deferred, runLoadFileTask, file_path, m_cancel_source.get_token()) };
       }
       else {
          return wxImageTask{ async(runFetchAndSaveLabelTask, m_cache_folder, wine_id, m_cancel_source.get_token()) };

@@ -89,6 +89,8 @@ namespace ctb::constants
    inline constexpr const char* DETAIL_PROP_VINTAGE               = "Vintage";
    inline constexpr const char* DETAIL_PROP_WINE_NAME             = "WineName";
    inline constexpr const char* DETAIL_PROP_WINE_ID               = "iWineId";
+   inline constexpr const char* DETAIL_VIEW_ONLINE_TITLE          = "View Online at CellarTracker.com";
+   inline constexpr const char* DETAIL_VIEW_ONLINE_NOTE           = "(Opens in default browser)";
 
    inline constexpr const char* RES_NAME_ICON_PRODUCT             = "IDR_PRODUCT_ICON";
    inline constexpr const char* RES_NAME_MAINFRAME                = "MAINFRAME";

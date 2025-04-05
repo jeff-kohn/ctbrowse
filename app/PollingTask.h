@@ -20,7 +20,6 @@ namespace ctb::tasks
       using FutureType     = std::future<ReturnType>;          // type that std::async(task function...) returns
       using ResultWrapper  = std::expected<ReturnType, Error>; // types that final result is packaged in
 
-
       /// @brief Constructor
       /// 
       /// Construct an instance from a std::future
@@ -28,15 +27,13 @@ namespace ctb::tasks
       explicit PollingTask(FutureType&& f) noexcept : m_future{ std::move(f) }
       {}
 
-
       /// @brief check validity of the task
       /// 
       /// @return true if it contains a valid future that can be waited/retrieved, 
       /// false if future is invalid (uninitialized or already retrieved)
       /// 
       auto isValid() const -> bool { return m_future.valid(); }
-      
-
+     
       /// @brief enum for the current status of the Task
       enum class Status
       {
@@ -45,7 +42,6 @@ namespace ctb::tasks
          Finished,
          Invalid
       };
-
 
       /// @brief retrieves the current status of the task.
       /// 
@@ -71,7 +67,6 @@ namespace ctb::tasks
          return Status::Invalid;
       }
 
-
       /// @brief Synchronously retrieve the value for this task.
       /// 
       /// If the task's value isn't available yet because it's still executing, this 
@@ -94,7 +89,6 @@ namespace ctb::tasks
          }
       }
 
-
       PollingTask()                              = default;
       PollingTask(PollingTask&&)                 = default;
       PollingTask& operator=(PollingTask&&)      = default;
@@ -105,6 +99,5 @@ namespace ctb::tasks
    private:
       FutureType m_future{};
    };
-
  
 } //  namespace ctb::tasks

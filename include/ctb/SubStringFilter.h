@@ -35,7 +35,6 @@ namespace ctb
       ///
       std::vector<PropId> search_props{};
 
-
       /// @brief  function operator used to perform the substring search. 
       ///
       /// this function will check each specified property to see if it contains

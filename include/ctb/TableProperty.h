@@ -40,7 +40,6 @@ namespace ctb
    {
       using ValueType = std::variant<std::monostate, Args...>;
 
-
       /// @brief construct a TableProperty from any value convertible to ValueType
       ///
       /// this is intentionally non-explicit, because callers won't always have the exact
@@ -49,7 +48,6 @@ namespace ctb
       constexpr TableProperty(T&& val) : m_val{ std::forward<T>(val) }
       {}
 
-
       /// @brief returns whether or not this object contains a 'null' value.
       ///
       bool isNull() const
@@ -57,14 +55,12 @@ namespace ctb
          return m_val.index() == 0;
       }
 
-
       /// @brief sets the contained value of this object to represent 'null' (e.g. std::monostate)
       /// 
       void setNull()
       {
          m_val = std::monostate{};
       }
-
 
       /// @brief get a numeric value out of the property
       /// 
@@ -83,7 +79,6 @@ namespace ctb
          return std::visit(asT, m_val);
       }
 
-
       /// @brief get a string value out of the property
       /// 
       /// @return the requested value, or an empty string if no value is available (e.g. null) 
@@ -97,7 +92,6 @@ namespace ctb
 
          return asString("{}");
       }
-
 
       /// @brief return string_view to the internal string property
       /// @return the requested string_view, or an empty one if this property doesn't contain a string.
@@ -113,7 +107,6 @@ namespace ctb
          return {};
       }
 
-
       /// @brief indicates whether this property contains a std::string
       /// @return true if the property type is std::string, false if it's anything else
       /// 
@@ -125,7 +118,6 @@ namespace ctb
          return std::holds_alternative<std::string>(m_val);
       }
 
-
       /// @brief convenience function getting value as int32_t
       /// 
       /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
@@ -134,7 +126,6 @@ namespace ctb
       {
          return as<int32_t>();
       }
-
 
       /// @brief convenience function getting value as uint16_t
       /// 
@@ -145,7 +136,6 @@ namespace ctb
          return as<uint16_t>();
       }
 
-
       /// @brief convenience function getting value as uint64_t
       /// 
       /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
@@ -155,7 +145,6 @@ namespace ctb
          return as<uint64_t>();
       }
 
-
       /// @brief convenience function getting value as double
       /// 
       /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
@@ -164,7 +153,6 @@ namespace ctb
       {
          return as<double>();
       }
-
 
       /// @brief get a formatted string value out of the property.
       /// @param fmt_str format string to use for formatting the value. must contain exactly 1 {} placeholder
@@ -183,15 +171,13 @@ namespace ctb
          return std::visit(asStr, m_val);
       }
 
-
       /// @brief allows for comparison of TableProperty objects, as well as putting them in ordered containers
       /// 
       [[nodiscard]] auto operator<=>(const TableProperty& prop) const 
       {
          return m_val <=> prop.m_val;
       }
-
-      
+            
       /// @brief allow assigning values, not just TableProperties
       ///
       template<typename Self, std::convertible_to<ValueType> T>
@@ -200,7 +186,6 @@ namespace ctb
          self.m_val = std::forward<T>(t);         
          return std::forward<Self>(self);
       }
-
 
       /// @brief allow checking for null in a conditional statement
       /// @return true if this object contains a non-null value, false if its value is null

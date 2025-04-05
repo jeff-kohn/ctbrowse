@@ -27,20 +27,16 @@ namespace ctb::tasks
    using FetchFileTask = PollingTask<Buffer>;
 
    /// @brief creates a task to load a binary file from disk into a buffer.
-   ///
-   /// task will be suspended until waited on or resumed() with a thread_pool
    /// 
    auto runLoadFileTask(fs::path file, std::stop_token token = {}) noexcept(false) -> FetchFileTask::ReturnType;
 
    
-   // result type and task type for HTTP Request task
+   /// @brief  result type and task type for HTTP Request task
    using HttpRequestResult = cpr::Response;
    using HttpRequestTask   = PollingTask<HttpRequestResult>;
 
-   ///// @brief runs a task to execute an HTTP request using CPR
-   /////
-   ///// task will be suspended until waited on or resumed() with a thread_pool
-   ///// 
+   /// @brief runs a task to execute an HTTP request
+   ///
    auto runHttpGetTask(std::string url, std::stop_token token = {}) noexcept(false) -> HttpRequestTask::ReturnType;
 
 
@@ -57,7 +53,7 @@ namespace ctb::tasks
 
    /// @brief helper function, throws exception if stop_token.stop_requested() == true
    /// 
-   /// @throws ctb::Error if stop_token is not in stoppable state
+   /// @throws ctb::Error if stop_token if stop has been request
    /// 
    inline auto checkStopToken(const std::stop_token& token) noexcept(false) -> void
    {

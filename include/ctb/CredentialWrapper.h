@@ -32,7 +32,6 @@ namespace ctb
       static inline constexpr int MAX_USERNAME_LENGTH = 513; /// max username length not including null terminator
       static inline constexpr int MAX_PASSWORD_LENGTH = 256; /// max password length not including null terminator
 
-
       /// @brief struct containing the username and password result from a call to PromptForCredential()
       ///
       /// any usage of a Credential object after the CredentialWrapper that it refers to is destroying results
@@ -42,7 +41,6 @@ namespace ctb
          std::string_view username{};
          std::string_view password{};
       };
-
 
       /// @brief  Enumeration for possible return codes from PromptForCredential()
       enum class ResultCode
@@ -56,10 +54,8 @@ namespace ctb
          ErrorUnknown            /// ??? shoudl never occur
       };
 
-
       /// @brief type returned from PromptForCredential
       using CredentialResult = std::expected<Credential, ResultCode>;
-
 
       /// @brief              construct a CredentialWrapper for the specified target/identifier
       /// @param target       the name that will be used to save the credential if the user chooses to save it
@@ -73,7 +69,6 @@ namespace ctb
          m_target(std::move(target)),
          m_allow_save(allow_save)
       {}
-
 
       /// @brief              construct a CredentialWrapper by specifying target, message, and caption
       /// @param target       the name that will be used to save the credential if the user chooses to save it.      ///                     
@@ -91,25 +86,20 @@ namespace ctb
          m_allow_save(allow_save)
       {}
 
-
       /// @brief move constructor
       CredentialWrapper(CredentialWrapper&&) noexcept;
-
 
       /// @brief move-assignment operator
       CredentialWrapper& operator=(CredentialWrapper&&) noexcept;
 
-
       /// @brief destructor, zero-overwrites username and password
       ~CredentialWrapper() noexcept;
-
 
       /// @brief indicates whether this CredentialWrapper allows saving successfully validated credentials.
       bool allowSave() const noexcept
       {
          return m_allow_save;
       }
-
 
       /// @brief string containing a short message to display in the dialog box (if displayed)
       const std::string& messageText() const { return m_message_text; }
@@ -121,7 +111,6 @@ namespace ctb
          return *this;
       }
 
-
       /// @brief string containing the title for the dialog box (if displayed)
       std::string_view captionText() const { return m_caption_text; }
 
@@ -132,7 +121,6 @@ namespace ctb
          return *this;
       }
 
-
       /// @brief zero-overwrites the username/password stored in this object.
       ///
       /// any Credential objects returned by a previous call to promptForCredential
@@ -140,7 +128,6 @@ namespace ctb
       /// to the same buffer we're zero-overwriting.
       /// 
       void clear() noexcept;
-
 
       /// @brief                 prompt user for a credential.
       /// @param auth_error_code should be zero for 1st prompt, can be a standard error code for subsequent prompts
@@ -150,8 +137,7 @@ namespace ctb
       /// because the initially-entered credentials did not work, for instance.
       /// 
       [[nodiscard]] CredentialResult promptForCredential(unsigned long auth_error_code = 0);
-      
-
+     
       /// @brief indicate whether the credential returned by PromptForCredential() was valid or not.
       ///
       /// If PromptForCredential() was called with allow_save == true, you must call this method after using/testing the credential
@@ -160,7 +146,6 @@ namespace ctb
       /// ensure resources are properly cleaned up.
       ///                 
       bool confirmCredential(bool valid);
-
 
       /// @brief deleted members, this class does not support default construction or copy semantics
       CredentialWrapper() = delete;
