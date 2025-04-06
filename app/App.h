@@ -9,10 +9,10 @@
 
 #include "app_constants.h"
 #include "log.h"
+#include "wx_helpers.h"
 
 #include <ctb/TableProperty.h>
 #include <wx/wx.h>
-#include <wx/confbase.h>
 
 
 
@@ -51,8 +51,7 @@ namespace ctb::app
       ///
       /// Calling this will throw an exception  if there's no default config.
       ///
-      wxConfigBase& getConfig() noexcept(false);
-      const wxConfigBase& getConfig() const noexcept(false);
+      ScopedConfigPath getConfig() noexcept(false);
 
       /// @brief display a message box with an error description.
       ///

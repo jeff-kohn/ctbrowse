@@ -97,25 +97,15 @@ namespace ctb::app
    }
 
 
-   wxConfigBase& App::getConfig() noexcept(false)
+   ScopedConfigPath App::getConfig() noexcept(false)
    {
       auto *config = wxConfigBase::Get(false);
       if (nullptr == config)
       {
          throw Error{ "No configuration object available" };
       }
-      return *config;
-   }
-
-
-   const wxConfigBase& App::getConfig() const noexcept(false)
-   {
-      auto *config = wxConfigBase::Get(false);
-      if (nullptr == config)
-      {
-         throw Error{ "No configuration object available" };
-      }
-      return *config;
+      config->SetPath("/"); // the current path is persistent/global, which is fucking stupid.
+      return ScopedConfigPath(*config);
    }
 
 

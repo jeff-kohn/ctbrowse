@@ -26,22 +26,28 @@ namespace ctb::app
 
    GridMultiView::GridMultiView(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache) : wxSplitterWindow{ parent }
    {
-      // first create the nested splitter window, contains the grid and detail views
+      constexpr auto LEFT_SPLITTER_GRAVITY = 0.25;
+      constexpr auto RIGHT_SPLITTER_GRAVITY = 0.75;
+
+      SetName("GridMultiView");
+      SetSashGravity(LEFT_SPLITTER_GRAVITY);
+
+      // top/left splitter contains options panel and right/nested splitter
       m_right_splitter = new wxSplitterWindow{ this };
+      m_options_panel = GridOptionsPanel::create(this, source);
+      SplitVertically(m_options_panel, m_right_splitter);
+      wxPersistentRegisterAndRestore(this, GetName());
+
+      // nested splitter contains grid and details1
       m_grid = CellarTrackerGrid::create(m_right_splitter, source);
       m_details_panel = WineDetailsPanel::create(m_right_splitter, source, cache);
       m_right_splitter->SplitVertically(m_grid, m_details_panel);
-
-      // Now create the options panel, and add it to "this" splitter along with the nested one
-      m_options_panel = GridOptionsPanel::create(this, source);
-      SplitVertically(m_options_panel, m_right_splitter);
-
-      //wxPersistentRegisterAndRestore(m_right_splitter, "right_splitter");
-      //wxPersistentRegisterAndRestore(this, "left_splitter");
-
-      // Need to set these after restoring window states, or it messes things up.
-      m_right_splitter->SetSashGravity(1);
-      SetSashGravity(0.1);
+      m_right_splitter->SetName("GridMultiViewNested");
+      wxPersistentRegisterAndRestore(m_right_splitter, m_right_splitter->GetName());
+      
+      // For some reason the CalLAfter() is required, otherwsise this call messes up the
+      // next splitter layout. No idea why but this works.
+      CallAfter([this] { m_right_splitter->SetSashGravity(RIGHT_SPLITTER_GRAVITY); });
    }
 
 

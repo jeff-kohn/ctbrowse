@@ -29,9 +29,9 @@ namespace ctb::app
    
    GridOptionsPanel::GridOptionsPanel(GridTableEventSourcePtr source) : m_sink{ this, source }
    {
-      auto& cfg = wxGetApp().getConfig();
-      cfg.SetPath(constants::CONFIG_PATH_SYNC);
-      cfg.Read(constants::CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY, &m_instock_only, constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT);
+      auto cfg = wxGetApp().getConfig();
+      cfg->SetPath(constants::CONFIG_PATH_SYNC);
+      cfg->Read(constants::CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY, &m_instock_only, constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT);
    }
 
 
