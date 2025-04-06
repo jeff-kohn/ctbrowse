@@ -6,8 +6,7 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
-#include "grid/CellarTrackerGrid.h"
-
+#include "views/CellarTrackerGrid.h"
 
 namespace ctb::app
 {

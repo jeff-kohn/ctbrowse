@@ -11,11 +11,12 @@
 #include "LabelImageCache.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
-#include "grid/CellarTrackerGrid.h"
+#include "views/CellarTrackerGrid.h"
 #include "grid/GridTableLoader.h"
 #include "grid/GridTableWineList.h"
-#include "panels/GridOptionsPanel.h"
-#include "panels/WineDetailsPanel.h"
+#include "views/GridOptionsPanel.h"
+#include "views/WineDetailsPanel.h"
+#include "views/GridMultiView.h"
 
 #include <ctb/CredentialWrapper.h>
 #include <ctb/table_download.h>
@@ -103,7 +104,7 @@ namespace ctb::app
       SetIcon(wxIcon{constants::RES_NAME_ICON_PRODUCT});
       SetName(constants::RES_NAME_MAINFRAME);               // needed for wxPersistence support
 
-      // No createGridWindows() call here, we'll create it once we have some data 
+      // We don't actually create the grid views until a table is opened.
       createMenuBar();
       createStatusBar();
       createToolBar();
@@ -123,27 +124,6 @@ namespace ctb::app
          SetClientSize(FromDIP(wxSize(800, 600)));
          Center(wxBOTH);
       }
-   }
-
-
-   void MainFrame::createGridWindows()
-   {
-      auto box_sizer = std::make_unique<wxBoxSizer>(wxHORIZONTAL);
-
-      m_grid_options = GridOptionsPanel::create(this, m_event_source);
-      box_sizer->Add(m_grid_options, wxSizerFlags(20).Expand());
-
-      m_grid = CellarTrackerGrid::create(this, m_event_source);
-      m_grid->SetMargins(0, 0);
-      m_grid->SetColLabelSize(FromDIP(30));
-      box_sizer->Add(m_grid, wxSizerFlags(80).Expand());
-
-      m_wine_details = WineDetailsPanel::create(this, m_event_source, m_label_cache);
-      box_sizer->Add(m_wine_details, wxSizerFlags(30).Expand());
-
-      SetSizer(box_sizer.release());
-      Layout();
-      this->SendSizeEvent();
    }
 
 
@@ -369,10 +349,9 @@ namespace ctb::app
       wxBusyCursor busy{};
       try
       {
-         if (!m_grid)
+         if (!m_view)
          {
-            createGridWindows();
-            assert(m_grid);
+            m_view = GridMultiView::create(this, m_event_source, m_label_cache);
          }
 
          // load table and connect it to the event source
@@ -382,8 +361,8 @@ namespace ctb::app
          tbl->applySortConfig(GridTableWineList::getSortConfig(0));
          m_event_source->signal(GridTableEvent::Id::Sort);
 
-         // submit background request to get label images not found in cache.
-         //m_label_cache->requestCacheUpdate(tbl->getWineIds());
+         Layout();
+         SendSizeEvent();
          Update();
       }
       catch(Error& e)
@@ -456,16 +435,16 @@ namespace ctb::app
 
    void MainFrame::doSearchFilter()
    {
-      if (!m_grid) return;
+      if (!m_view->grid()) return;
       try
       {
-         if (m_grid->filterBySubstring(m_search_ctrl->GetValue().wx_str()))
+         if (m_view->grid()->filterBySubstring(m_search_ctrl->GetValue().wx_str()))
          {
             m_event_source->signal(GridTableEvent::Id::SubStringFilter);
          }
          else{
             // clear any previous search filter, because that search text is no longer displayed.
-            m_grid->clearSubStringFilter();
+            m_view->grid()->clearSubStringFilter();
          }
       }
       catch(Error& e)
@@ -482,11 +461,11 @@ namespace ctb::app
 
    void MainFrame::clearSearchFilter()
    {
-      if (!m_grid) return;
+      if (!m_view->grid()) return;
       try
       {
          m_search_ctrl->ChangeValue("");
-         m_grid->clearSubStringFilter();
+         m_view->grid()->clearSubStringFilter();
 
       }
       catch(Error& e)

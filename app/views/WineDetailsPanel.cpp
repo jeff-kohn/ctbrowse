@@ -5,7 +5,7 @@
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
-#include "panels/WineDetailsPanel.h"
+#include "views/WineDetailsPanel.h"
 
 #include <ctb/utility_http.h>
 #include <cpr/cpr.h>
@@ -245,8 +245,9 @@ namespace ctb::app
       auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_VIEW_ONLINE_TITLE, constants::DETAIL_VIEW_ONLINE_NOTE);
       top_sizer->Add(view_online_btn, wxSizerFlags().Border(wxALL).Expand());
 
-      m_label_image = new wxGenericStaticBitmap(this, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
-      m_label_image->SetScaleMode(wxStaticBitmap::Scale_AspectFill);
+      // image won't correctly scale/redraw unless we use wxFULL_REPAINT_ON_RESIZE
+      m_label_image = new wxGenericStaticBitmap(this, wxID_ANY, wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
+      m_label_image->SetScaleMode(wxStaticBitmap::Scale_AspectFit);
       top_sizer->Add(m_label_image, wxSizerFlags(1).Expand().Border(wxALL));
 
       top_sizer->ShowItems(false);

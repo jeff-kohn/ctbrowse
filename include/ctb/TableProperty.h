@@ -181,7 +181,7 @@ namespace ctb
       /// @brief allow assigning values, not just TableProperties
       ///
       template<typename Self, std::convertible_to<ValueType> T>
-      TableProperty operator=(this Self&& self, T&& t) 
+      auto&& operator=(this Self&& self, T&& t) 
       {
          self.m_val = std::forward<T>(t);         
          return std::forward<Self>(self);
