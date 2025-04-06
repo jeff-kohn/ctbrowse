@@ -248,10 +248,10 @@ namespace ctb::app
       // image won't correctly scale/redraw unless we use wxFULL_REPAINT_ON_RESIZE
       m_label_image = new wxGenericStaticBitmap(this, wxID_ANY, wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
       m_label_image->SetScaleMode(wxStaticBitmap::Scale_AspectFit);
-      top_sizer->Add(m_label_image, wxSizerFlags().Center().Expand().Shaped().Border(wxALL));
+      top_sizer->Add(m_label_image, wxSizerFlags().CenterHorizontal().Expand().Shaped().Border(wxALL));
 
-      top_sizer->ShowItems(false);
       SetSizerAndFit(top_sizer);
+      top_sizer->ShowItems(false);
 
       // hook up event handlers
       m_label_timer.Bind(wxEVT_TIMER, &WineDetailsPanel::onLabelTimer, this);
@@ -298,7 +298,9 @@ namespace ctb::app
             if (!result)
                throw result.error();
 
-            m_label_image->SetBitmap(wxBitmap{ *result });       
+            wxBitmap bmp{ *result };
+            m_label_image->SetBitmap(bmp);    
+            //m_label_image->SetMaxSize(FromDIP(bmp.GetSize()));
             m_label_image->Show();
             Layout(); // required since the images vary in size
             m_label_image->Refresh();
