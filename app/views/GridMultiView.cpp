@@ -24,7 +24,9 @@ namespace ctb::app
    }
 
 
-   GridMultiView::GridMultiView(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache) : wxSplitterWindow{ parent }
+   GridMultiView::GridMultiView(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache) : 
+      wxSplitterWindow{ parent },
+      m_sink{ this, source }
    {
       constexpr auto LEFT_SPLITTER_GRAVITY = 0.25;
       constexpr auto RIGHT_SPLITTER_GRAVITY = 0.75;
@@ -45,9 +47,28 @@ namespace ctb::app
       m_right_splitter->SetName("GridMultiViewNested");
       wxPersistentRegisterAndRestore(m_right_splitter, m_right_splitter->GetName());
       
-      // For some reason the CalLAfter() is required, otherwsise this call messes up the
+      // For some reason the CalLAfter() is required, otherwise this call messes up the
       // next splitter layout. No idea why but this works.
       CallAfter([this] { m_right_splitter->SetSashGravity(RIGHT_SPLITTER_GRAVITY); });
+   }
+
+   void GridMultiView::notify(GridTableEvent event)
+   {
+      switch (event.m_event_id){
+         case GridTableEvent::Id::TableRemove: [[fallthrough]];
+         case GridTableEvent::Id::RowSelected:
+            break;
+
+         default:
+            // make sure everyone has had a chance to handle current event before generating a new one.
+            CallAfter([this] {
+               if (m_grid)
+               {
+                  m_grid->SelectRow(0);
+                  m_sink.signal_source(GridTableEvent::Id::RowSelected, 0);
+               }
+            });
+      }
    }
 
 

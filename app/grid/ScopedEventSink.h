@@ -28,7 +28,7 @@ namespace ctb::app
       {
          if (!m_sink)
          {
-            assert("sink ptr cannot == nullptr");
+            assert("sink ptr cannot == nullptr" and false);
             throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
          }
       }
@@ -44,7 +44,7 @@ namespace ctb::app
       {
          if (!m_sink)
          {
-            assert("sink ptr cannot == nullptr");
+            assert("sink ptr cannot == nullptr" and false);
             throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
          }
          attach();

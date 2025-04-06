@@ -98,7 +98,7 @@ namespace ctb
                catch(...)
                {
                   // not much else we can do
-                  assert("parsing field from CSV encountered unexpected error");
+                  assert("parsing field from CSV encountered unexpected error" and false);
                   m_props[fld.prop_idx].setNull();
                }
             }
@@ -123,7 +123,7 @@ namespace ctb
          // of some sort and will probably generate an exception for each row in the table, which makes
          // displaying an error message to the user a bad idea.
          if (col_idx >= std::ssize(m_props))
-            assert("this is a bug, property index out of range");
+            assert("this is a bug, property index out of range" and false);
 
          return m_props[static_cast<size_t>(col_idx)];
       }

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "App.h"
+#include "grid/ScopedEventSink.h"
+
 #include <wx/splitter.h>
 #include <memory>
 
@@ -20,7 +22,7 @@ namespace ctb::app
 
    /// @brief Window class that implements three nested grid views using splitter windows.
    ///
-   class GridMultiView : public wxSplitterWindow
+   class GridMultiView final : public wxSplitterWindow, public IGridTableEventSink
    {
    public:
       /// @brief static factory method to create an initialize an instance of the GridPanelsView class
@@ -52,8 +54,12 @@ namespace ctb::app
       GridOptionsPanel*  m_options_panel{};
       WineDetailsPanel*  m_details_panel{};
       CellarTrackerGrid* m_grid{};
+      ScopedEventSink    m_sink;
 
       GridMultiView(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache);
+
+      // Inherited via IGridTableEventSink
+      void notify(GridTableEvent event) override;
    };
 
 

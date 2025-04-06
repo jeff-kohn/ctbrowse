@@ -68,7 +68,6 @@ namespace ctb::app
          HideRowLabels();
          SetColLabelAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
          SetSelectionMode(wxGrid::wxGridSelectionModes::wxGridSelectRows);
-         //SetSortingColumn(0, true);
 
          // set the font size for the grid
          auto attr = GetOrCreateCellAttrPtr(0, 0);

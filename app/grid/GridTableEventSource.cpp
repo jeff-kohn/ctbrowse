@@ -27,6 +27,8 @@ namespace ctb::app
    /// @brief assigns a table to this source.
    bool GridTableEventSource::setTable(GridTablePtr table)
    {
+      SPDLOG_DEBUG("GridTableEventSource::setTable() called.");
+
       // We need to signal that the current table is being replaced, because
       // otherwise views that hold internal table pointers will be left with
       // dangling/garbage pointer
@@ -64,6 +66,8 @@ namespace ctb::app
    /// @brief this is called to signal that an event needs to be sent to all listeners
    bool GridTableEventSource::signal(GridTableEvent::Id event_id, std::optional<int> row_idx) noexcept
    {
+      SPDLOG_DEBUG("GridTableEventSource::signal({},{}) called", magic_enum::enum_name(event_id), row_idx.value_or(-1));
+
       bool retval{ true };
 
       if (m_grid_table)
@@ -104,7 +108,14 @@ namespace ctb::app
       {
          signal(GridTableEvent::Id::TableRemove);
       }
-      catch(...){} // TODO: logging to OutputDebugString maybe? not much we can safely do from here.
+      catch(...)
+      {
+         try {
+            auto e = packageError();
+            log::error("~GridTableEventSource caught exception from signal(TableRemove) event: {}", e.what()); 
+         }
+         catch (...) {}
+      } 
    }
 
 } // namespace ctb::app
