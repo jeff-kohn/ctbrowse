@@ -1,4 +1,4 @@
-/*********************************************************************
+﻿/*********************************************************************
  * @file       LabelImageCache.cpp
  *
  * @brief      implementation for the LabelImageCache class
@@ -48,14 +48,18 @@ namespace ctb::app
 
    LabelImageCache::LabelImageCache(std::string cache_folder) : m_cache_folder{ expandEnvironmentVars(cache_folder) }
    {
-      if (m_cache_folder.is_relative() or !fs::is_directory(m_cache_folder))
+      if (m_cache_folder.is_relative() or (fs::exists(m_cache_folder) and !fs::is_directory(m_cache_folder)) )
       {
          throw Error{ constants::ERROR_STR_RELATIVE_LABEL_CACHE };
       }
 
       if (!fs::exists(m_cache_folder) )
       {
-         if (!fs::create_directories(m_cache_folder))
+         // MS in their infinite wisdom, will return false even though the directory was created if the string had a trailing slash.
+         // This is FUCKING STUPID, and we have to work around it. 
+         std::error_code ms_sucks{};
+         fs::create_directories(m_cache_folder, ms_sucks);
+         if (ms_sucks)
          {
             throw Error{ constants::FMT_ERROR_NO_LABEL_CACHE_FOLDER };
          }
