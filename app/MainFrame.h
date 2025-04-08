@@ -92,6 +92,7 @@ namespace ctb::app
       void onMenuSyncData(wxCommandEvent&);
       void onMenuWineList(wxCommandEvent&);
       void onSearchBtn(wxCommandEvent& event);
+      void onMenuViewResizeGrid(wxCommandEvent&);
       void onSearchCancelBtn(wxCommandEvent& event);
       void onSearchTextEnter(wxCommandEvent& event);
       void onQuit(wxCommandEvent&);

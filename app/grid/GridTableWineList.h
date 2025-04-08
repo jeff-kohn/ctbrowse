@@ -65,10 +65,12 @@ namespace ctb::app
       /// @brief the available sort orders for this table.
       ///
       static inline const std::array Sorters{ 
-         TableSort{ { PropId::WineName, PropId::Vintage                      }, constants::SORT_OPTION_WINE_VINTAGE },
-         TableSort{ { PropId::Vintage,  PropId::WineName                     }, constants::SORT_OPTION_VINTAGE_WINE },
-         TableSort{ { PropId::Locale,   PropId::WineName,    PropId::Vintage }, constants::SORT_OPTION_LOCALE_WINE  },
-         TableSort{ { PropId::Region,   PropId::WineName,    PropId::Vintage }, constants::SORT_OPTION_REGION_WINE  },
+         TableSort{ { PropId::WineName, PropId::Vintage                         }, constants::SORT_OPTION_WINE_VINTAGE   },
+         TableSort{ { PropId::Vintage,  PropId::WineName                        }, constants::SORT_OPTION_VINTAGE_WINE   },
+         TableSort{ { PropId::Locale,   PropId::WineName,    PropId::Vintage    }, constants::SORT_OPTION_LOCALE_WINE    },
+         TableSort{ { PropId::Region,   PropId::WineName,    PropId::Vintage    }, constants::SORT_OPTION_REGION_WINE    },
+         TableSort{ { PropId::MYScore,  PropId::CTScore,     PropId::WineName,  }, constants::SORT_OPTION_SCORE_MY       },
+         TableSort{ { PropId::CTScore,  PropId::MYScore,     PropId::WineName,  }, constants::SORT_OPTION_SCORE_CT       }
       };
 
       /// @brief  string filters that can be used on this table.
@@ -205,6 +207,12 @@ namespace ctb::app
       NullableDouble getMinScoreFilter() const override;
 
       bool setMinScoreFilter(NullableDouble min_score) override;
+
+      /// @brief getTableName()
+      /// @return the name of the CT table this grid table represents. Not meant to be 
+      ///         displayed to the user, this is for internal use.
+      /// 
+      std::string_view getTableName() const override;
 
       // default dtor, others are deleted since this object is meant to live on the heap
       ~GridTableWineList() override = default;

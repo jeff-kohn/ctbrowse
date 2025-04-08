@@ -167,6 +167,13 @@ namespace ctb::app
       virtual std::vector<uint64_t> getWineIds() = 0;
 
 
+      /// @brief getTableName()
+      /// @return the name of the CT table this grid table represents. Not meant to be 
+      ///         displayed to the user, this is for internal use. 
+      /// 
+      virtual std::string_view getTableName() const = 0;
+
+
       /// @brief destructor
       ///
       ~GridTable() override

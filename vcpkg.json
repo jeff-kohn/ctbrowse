@@ -9,6 +9,7 @@
     "cpr",
     "fmt",
     "frozen",
+    "glaze",
     "magic-enum",
     {
       "name": "wxwidgets",

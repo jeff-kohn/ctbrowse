@@ -300,7 +300,6 @@ namespace ctb::app
 
             wxBitmap bmp{ *result };
             m_label_image->SetBitmap(bmp);    
-            //m_label_image->SetMaxSize(FromDIP(bmp.GetSize()));
             m_label_image->Show();
             Layout(); // required since the images vary in size
             m_label_image->Refresh();
@@ -377,6 +376,7 @@ namespace ctb::app
             updateDetails(event);
             break;
 
+         case GridTableEvent::Id::GridLayoutRequested: [[fallthrough]];
          case GridTableEvent::Id::TableInitialize:
             break;
 

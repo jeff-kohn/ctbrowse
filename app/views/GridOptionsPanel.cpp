@@ -352,9 +352,10 @@ namespace ctb::app
             onTableSorted(event.m_grid_table);
             break;
 
-         case GridTableEvent::Id::Filter:
-         case GridTableEvent::Id::SubStringFilter:
-         case GridTableEvent::Id::RowSelected:
+         case GridTableEvent::Id::Filter:               [[fallthrough]];
+         case GridTableEvent::Id::SubStringFilter:      [[fallthrough]];
+         case GridTableEvent::Id::RowSelected:          [[fallthrough]];
+         case GridTableEvent::Id::GridLayoutRequested:  [[fallthrough]];
          default:
             break;
          }

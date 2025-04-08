@@ -11,3 +11,8 @@
 #include "ctb/concepts.h"
 #include "ctb/common_types.h"
 #include "ctb/Error.h"
+
+namespace ctb
+{
+   using namespace std::literals;
+}

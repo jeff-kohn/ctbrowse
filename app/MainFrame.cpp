@@ -58,7 +58,8 @@ namespace ctb::app
    {
       CMD_FILE_DOWNLOAD_DATA = wxID_HIGHEST,
       CMD_FILE_SETTINGS,
-      CMD_VIEW_WINE_LIST
+      CMD_VIEW_WINE_LIST,
+      CMD_VIEW_RESIZE_GRID
    };
 
 
@@ -113,6 +114,7 @@ namespace ctb::app
       Bind(wxEVT_MENU, &MainFrame::onMenuPreferences, this, CmdId::CMD_FILE_SETTINGS);
       Bind(wxEVT_MENU, &MainFrame::onMenuSyncData, this, CmdId::CMD_FILE_DOWNLOAD_DATA);
       Bind(wxEVT_MENU, &MainFrame::onMenuWineList, this, CmdId::CMD_VIEW_WINE_LIST);
+      Bind(wxEVT_MENU, &MainFrame::onMenuViewResizeGrid, this, CmdId::CMD_VIEW_RESIZE_GRID);
       Bind(wxEVT_MENU, &MainFrame::onQuit, this, wxID_EXIT);
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_CANCEL_BTN, &MainFrame::onSearchCancelBtn, this);
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onSearchBtn, this);
@@ -171,18 +173,25 @@ namespace ctb::app
       m_menu_bar->Append(menu_edit, wxGetStockLabel(wxID_EDIT));
 
 
-      // Views Menu
+      // View Menu
       //
-      auto* menu_views = new wxMenu();
-      auto* menu_views_wine_list = new wxMenuItem{
-         menu_views, 
+      auto* menu_view = new wxMenu();
+      menu_view->Append(new wxMenuItem{
+         menu_view, 
          CmdId::CMD_VIEW_WINE_LIST, 
          constants::CMD_VIEWS_WINE_LIST_LBL, 
          constants::CMD_VIEWS_WINE_LIST_TIP,
          wxITEM_NORMAL
-      };
-      menu_views->Append(menu_views_wine_list);
-      m_menu_bar->Append(menu_views, constants::LBL_MENU_VIEWS);
+      });
+      menu_view->AppendSeparator();
+      menu_view->Append(new wxMenuItem{
+         menu_view, 
+         CmdId::CMD_VIEW_RESIZE_GRID, 
+         constants::CMD_VIEWS_RESIZE_GRID_LBL, 
+         constants::CMD_VIEWS_RESIZE_GRID_TIP,
+         wxITEM_NORMAL
+      });
+      m_menu_bar->Append(menu_view, constants::LBL_MENU_VIEW);
 
       SetMenuBar(m_menu_bar);
 
@@ -390,6 +399,12 @@ namespace ctb::app
       {
          wxGetApp().displayErrorMessage(e.what());
       }
+   }
+
+
+   void MainFrame::onMenuViewResizeGrid(wxCommandEvent&)
+   {
+      m_event_source->signal(GridTableEvent::Id::GridLayoutRequested);
    }
 
 

@@ -56,7 +56,8 @@ namespace ctb::app
    {
       switch (event.m_event_id){
          case GridTableEvent::Id::TableRemove: [[fallthrough]];
-         case GridTableEvent::Id::RowSelected:
+         case GridTableEvent::Id::RowSelected: [[fallthrough]];
+         case GridTableEvent::Id::GridLayoutRequested:
             break;
 
          default:

@@ -71,6 +71,7 @@ target_sources(${TARGET_NAME}
      "grid/ScopedEventSink.h"
      "views/CellarTrackerGrid.cpp"
      "views/CellarTrackerGrid.h"
+     "views/ColumnLayout.h"
      "views/GridOptionsPanel.cpp"
      "views/GridOptionsPanel.h"
      "views/GridMultiView.h"

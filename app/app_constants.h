@@ -14,8 +14,11 @@ namespace ctb::constants
    inline constexpr const char* CMD_FILE_SETTINGS_TIP             = "Configure app settings";
    inline constexpr const char* CMD_VIEWS_WINE_LIST_LBL           = "&Wine List\tCtrl+W";
    inline constexpr const char* CMD_VIEWS_WINE_LIST_TIP           = "View Personal Wine List";
+   inline constexpr const char* CMD_VIEWS_RESIZE_GRID_LBL         = "&Resize Grid Columns";
+   inline constexpr const char* CMD_VIEWS_RESIZE_GRID_TIP         = "Resize the grid columns to fit the data";
 
    inline constexpr const char* CONFIG_PATH_SYNC                  = "/Preferences/DataSync";
+
    inline constexpr const char* CONFIG_VALUE_DEFAULT_SYNC_TABLES  = "DefaultSyncTables";
    inline constexpr const char* CONFIG_VALUE_SYNC_ON_STARTUP      = "SyncOnStartup";
    inline constexpr const char* CONFIG_PATH_GRID_OPTIONS          = "/Preferences/GridOptions";
@@ -56,7 +59,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_CT_SCORE                      = "CT Score:";
    inline constexpr const char* LBL_DRINK_WINDOW                  = "Drink Window:";
    inline constexpr const char* LBL_FILTER_OPTIONS                = "Filter Options";
-   inline constexpr const char* LBL_MENU_VIEWS                    = "&Views";
+   inline constexpr const char* LBL_MENU_VIEW                     = "&View";
    inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
    inline constexpr const char* LBL_MY_PRICE                      = "My Price:";
    inline constexpr const char* LBL_REGION                        = "Region:";
@@ -103,6 +106,8 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_LOCALE_WINE           = "Country, Region, and Appellation";
    inline constexpr const char* SORT_OPTION_PRODUCER_WINE_NAME    = "Producer, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_REGION_WINE           = "Region, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_SCORE_MY              = "My Score";
+   inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";
    inline constexpr const char* SORT_OPTION_VARIETAL_WINE         = "Varietal, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_VINTAGE_WINE          = "Vintage and Wine";
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";
