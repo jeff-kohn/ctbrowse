@@ -66,7 +66,7 @@ namespace ctb::app
    MainFrame::MainFrame() : 
       m_event_source{ GridTableEventSource::create() },
       m_sink{ this, m_event_source },
-      m_label_cache{ std::make_shared<LabelImageCache>(constants::APP_LABEL_FOLDER)}
+      m_label_cache{ std::make_shared<LabelImageCache>(wxGetApp().labelCacheFolder().generic_string()) }
    {
    }
 

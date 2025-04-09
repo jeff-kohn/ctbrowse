@@ -37,21 +37,29 @@ namespace ctb::app
 
       /// @brief called by the framework on app startup, this is the place for program initialization 
       ///
-      bool OnInit() override;
+      auto OnInit() -> bool override;
 
       /// @brief called by the framework on app shutdown, this is the place for resource cleanup and other shutdown tasks
       ///
-      int OnExit() override;
+      auto OnExit() -> int override;
 
       /// @brief  returns the path where the application stores data files.
       ///
-      const fs::path& userDataFolder() const noexcept { return m_user_data_folder; }
+      auto userDataFolder() const noexcept  -> const fs::path& 
+      {
+         return m_user_data_folder; 
+      }
+
+      /// @brief labelCacheFolder()
+      /// @return the fully qualified path to the folder where label images are cached
+      /// 
+      auto labelCacheFolder() noexcept -> fs::path;
 
       /// @brief Get the current config object.
       ///
       /// Calling this will throw an exception  if there's no default config.
       ///
-      ScopedConfigPath getConfig() noexcept(false);
+      auto getConfig() noexcept(false) -> ScopedConfigPath;
 
       /// @brief display a message box with an error description.
       ///

@@ -114,10 +114,10 @@ namespace ctb::log
 
    /// @brief create a sink that logs to file
    /// 
-   [[nodiscard]] sinks_init_list::value_type makeFileSink(level_enum level = constants::LOGLEVEL_FILE,
-                                                          fs::path log_folder = constants::APP_LOG_FOLDER, 
+   [[nodiscard]] sinks_init_list::value_type makeFileSink(fs::path log_folder = constants::APP_DEFAULT_LOG_FOLDER, 
                                                           std::string_view log_filename_base = constants::APP_NAME_SHORT, 
-                                                          std::string_view pattern = constants::LOG_PATTERN_FILE);
+                                                          std::string_view pattern = constants::LOG_PATTERN_FILE,
+                                                          level_enum level = constants::LOGLEVEL_FILE);
 
 
    /// @brief create and set the default logger so that free-standing log functions will use it.

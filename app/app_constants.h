@@ -2,10 +2,10 @@
 
 namespace ctb::constants
 {
-   inline constexpr const char* APP_NAME_LONG = "ctBrowse for Windows";
-   inline constexpr const char* APP_NAME_SHORT = "ctBrowse";
-   inline constexpr const char* APP_LOG_FOLDER = "%LOCALAPPDATA%\\ctBrowse for Windows\\logs";
-   inline constexpr const char* APP_LABEL_FOLDER = "%LOCALAPPDATA%\\ctBrowse for Windows\\labels\\";
+   inline constexpr const char* APP_NAME_LONG                     = "ctBrowse for Windows";
+   inline constexpr const char* APP_NAME_SHORT                    = "ctBrowse";
+   inline constexpr const char* APP_LABELS_SUBFOLDER              = "labels";
+   inline constexpr const char* APP_DEFAULT_LOG_FOLDER            = "%LOCALAPPDATA%"; // safe default, but not used for windows app.
 
 
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_LBL        = "&Download Data...";
@@ -18,9 +18,11 @@ namespace ctb::constants
    inline constexpr const char* CMD_VIEWS_RESIZE_GRID_TIP         = "Resize the grid columns to fit the data";
 
    inline constexpr const char* CONFIG_PATH_SYNC                  = "/Preferences/DataSync";
+   inline constexpr const char* CONFIG_PATH_PREFERENCES           = "/Preferences";
 
    inline constexpr const char* CONFIG_VALUE_DEFAULT_SYNC_TABLES  = "DefaultSyncTables";
    inline constexpr const char* CONFIG_VALUE_SYNC_ON_STARTUP      = "SyncOnStartup";
+   inline constexpr const char* CONFIG_VALUE_LABEL_CACHE_DIR      = "LabelCacheDir";
    inline constexpr const char* CONFIG_PATH_GRID_OPTIONS          = "/Preferences/GridOptions";
    inline constexpr const char* CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY= "DefaultInStockOnly";
 
