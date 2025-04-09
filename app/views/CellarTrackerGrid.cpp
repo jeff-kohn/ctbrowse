@@ -6,8 +6,9 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
-#include "grid/CellarTrackerGrid.h"
-
+#include "views/CellarTrackerGrid.h"
+#include "views/ColumnLayout.h"
+#include "MainFrame.h"
 
 namespace ctb::app
 {
@@ -19,6 +20,7 @@ namespace ctb::app
       UseNativeColHeader(true);
 
       Bind(wxEVT_GRID_SELECT_CELL, &CellarTrackerGrid::onGridCellChanging, this);
+      Bind(wxEVT_DESTROY, &CellarTrackerGrid::onDestroyWindow, this);
    }
 
 
@@ -69,7 +71,6 @@ namespace ctb::app
          HideRowLabels();
          SetColLabelAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
          SetSelectionMode(wxGrid::wxGridSelectionModes::wxGridSelectRows);
-         //SetSortingColumn(0, true);
 
          // set the font size for the grid
          auto attr = GetOrCreateCellAttrPtr(0, 0);
@@ -81,7 +82,18 @@ namespace ctb::app
          // give the grid table a chance to configure column formatting
          m_grid_table->configureGridColumns(attr);
 
-         AutoSizeColumns(false);
+         // now either use previously-saved column widths, or set to auto size
+         ColumnLayouts cols{};
+         if (cols.loadConfig(m_grid_table->getTableName()))
+         {
+            for (auto&& [idx, col] : vws::enumerate(cols))
+            {
+               SetColSize(idx, col.width);
+            }
+         }
+         else {
+            AutoSizeColumns(false);
+         }
          AutoSizeRows(true);
       }
       ForceRefresh();
@@ -168,17 +180,36 @@ namespace ctb::app
             setGridTable(m_sink.getTable());   // we need the ref-counted smart-ptr
             break;
 
+         case GridTableEvent::Id::GridLayoutRequested:
+            AutoSizeColumns(false);
+            break;
+
          case GridTableEvent::Id::RowSelected:
          default:
             break;
       }
    }
 
+
    void CellarTrackerGrid::onGridCellChanging(wxGridEvent& event)
    {
-      // When row selection changes, we need to let the details panel know about it.
-      // we don't care about column position, only row.
-      m_sink.signal_source(GridTableEvent::Id::RowSelected,  event.GetRow());
+      if (GetGridCursorCoords().GetRow() != event.GetRow())
+      {
+         // When row selection changes, we need to let the details panel know about it.
+         // (we don't care about column position)
+         m_sink.signal_source(GridTableEvent::Id::RowSelected, event.GetRow());
+      }
+   }
+
+
+   void CellarTrackerGrid::onDestroyWindow(wxWindowDestroyEvent&)
+   {
+      ColumnLayouts cols{};
+      for (int i = 0; i < this->GetNumberCols(); ++i)
+      {
+         cols.emplace_back(ColumnLayout{ GetColSize(i), false });
+      }
+      cols.saveConfig(m_grid_table->getTableName());
    }
 
 

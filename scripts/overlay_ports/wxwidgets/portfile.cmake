@@ -14,6 +14,8 @@ vcpkg_from_github(
         sdl2.patch
 )
 
+set(CMAKE_POLICY_VERSION_MINIMUM=3.5) # temporary for wxWidget 3.2.6
+
 vcpkg_check_features(
     OUT_FEATURE_OPTIONS FEATURE_OPTIONS
     FEATURES

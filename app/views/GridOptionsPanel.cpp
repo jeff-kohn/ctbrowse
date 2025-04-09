@@ -8,7 +8,7 @@
 
 #include "App.h"
 #include "wx_helpers.h"
-#include "panels/GridOptionsPanel.h"
+#include "views/GridOptionsPanel.h"
 
 #include <wx/sizer.h>
 #include <wx/stattext.h>
@@ -29,9 +29,9 @@ namespace ctb::app
    
    GridOptionsPanel::GridOptionsPanel(GridTableEventSourcePtr source) : m_sink{ this, source }
    {
-      auto& cfg = wxGetApp().getConfig();
-      cfg.SetPath(constants::CONFIG_PATH_SYNC);
-      cfg.Read(constants::CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY, &m_instock_only, constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT);
+      auto cfg = wxGetApp().getConfig();
+      cfg->SetPath(constants::CONFIG_PATH_SYNC);
+      cfg->Read(constants::CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY, &m_instock_only, constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT);
    }
 
 
@@ -352,9 +352,10 @@ namespace ctb::app
             onTableSorted(event.m_grid_table);
             break;
 
-         case GridTableEvent::Id::Filter:
-         case GridTableEvent::Id::SubStringFilter:
-         case GridTableEvent::Id::RowSelected:
+         case GridTableEvent::Id::Filter:               [[fallthrough]];
+         case GridTableEvent::Id::SubStringFilter:      [[fallthrough]];
+         case GridTableEvent::Id::RowSelected:          [[fallthrough]];
+         case GridTableEvent::Id::GridLayoutRequested:  [[fallthrough]];
          default:
             break;
          }

@@ -5,7 +5,7 @@
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
-#include "panels/WineDetailsPanel.h"
+#include "views/WineDetailsPanel.h"
 
 #include <ctb/utility_http.h>
 #include <cpr/cpr.h>
@@ -245,12 +245,13 @@ namespace ctb::app
       auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_VIEW_ONLINE_TITLE, constants::DETAIL_VIEW_ONLINE_NOTE);
       top_sizer->Add(view_online_btn, wxSizerFlags().Border(wxALL).Expand());
 
-      m_label_image = new wxGenericStaticBitmap(this, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
-      m_label_image->SetScaleMode(wxStaticBitmap::Scale_AspectFill);
-      top_sizer->Add(m_label_image, wxSizerFlags(1).Expand().Border(wxALL));
+      // image won't correctly scale/redraw unless we use wxFULL_REPAINT_ON_RESIZE
+      m_label_image = new wxGenericStaticBitmap(this, wxID_ANY, wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
+      m_label_image->SetScaleMode(wxStaticBitmap::Scale_AspectFit);
+      top_sizer->Add(m_label_image, wxSizerFlags().CenterHorizontal().Expand().Shaped().Border(wxALL));
 
-      top_sizer->ShowItems(false);
       SetSizerAndFit(top_sizer);
+      top_sizer->ShowItems(false);
 
       // hook up event handlers
       m_label_timer.Bind(wxEVT_TIMER, &WineDetailsPanel::onLabelTimer, this);
@@ -297,7 +298,8 @@ namespace ctb::app
             if (!result)
                throw result.error();
 
-            m_label_image->SetBitmap(wxBitmap{ *result });       
+            wxBitmap bmp{ *result };
+            m_label_image->SetBitmap(bmp);    
             m_label_image->Show();
             Layout(); // required since the images vary in size
             m_label_image->Refresh();
@@ -374,6 +376,7 @@ namespace ctb::app
             updateDetails(event);
             break;
 
+         case GridTableEvent::Id::GridLayoutRequested: [[fallthrough]];
          case GridTableEvent::Id::TableInitialize:
             break;
 

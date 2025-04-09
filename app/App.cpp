@@ -31,9 +31,6 @@ namespace ctb::app
 
    App::App()
    {
-      log::setupDefaultLogger();
-      log::info("App startup.");
-
       SetAppName(constants::APP_NAME_LONG);
       SetAppDisplayName(constants::APP_NAME_LONG);
       SetUseBestVisual(true);
@@ -54,6 +51,16 @@ namespace ctb::app
                                                 wxEmptyString,  
                                                 wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_SUBDIR);
 
+      using namespace log;
+      auto log_folder = fs::path{ std_paths.GetUserDir(wxStandardPaths::Dir::Dir_Cache).wx_str() } / constants::APP_NAME_LONG;
+
+#if defined(NDEBUG)
+      setupDefaultLogger({{ makeFileSink(log_folder) }});
+#else
+      setupDefaultLogger({ {makeFileSink(log_folder)}, {makeDebuggerSink()} });
+#endif
+
+      log::info("App startup.");
       wxConfigBase::Set(cfg.release());
 
    } // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks) unfortunately no way around it with wxWidgets
@@ -97,25 +104,34 @@ namespace ctb::app
    }
 
 
-   wxConfigBase& App::getConfig() noexcept(false)
+   auto App::labelCacheFolder() noexcept -> fs::path
    {
-      auto *config = wxConfigBase::Get(false);
-      if (nullptr == config)
+      try 
       {
-         throw Error{ "No configuration object available" };
+         auto cfg = getConfig();
+         cfg->SetPath(constants::CONFIG_PATH_PREFERENCES);
+         auto val = cfg->Read(wxString{ constants::CONFIG_VALUE_LABEL_CACHE_DIR }, wxEmptyString);
+         if (!val.empty())
+         {
+            return fs::path{ val.wx_str() };
+         }
       }
-      return *config;
+      catch (...) {
+         log::warn("Couldn't retrieve label cache folder from config. {}", packageError().formattedMesage());
+      }
+      return userDataFolder() / constants::APP_LABELS_SUBFOLDER;
    }
+   
 
-
-   const wxConfigBase& App::getConfig() const noexcept(false)
+   ScopedConfigPath App::getConfig() noexcept(false)
    {
       auto *config = wxConfigBase::Get(false);
       if (nullptr == config)
       {
          throw Error{ "No configuration object available" };
       }
-      return *config;
+      config->SetPath("/"); // the current path is persistent/global, which is fucking stupid.
+      return ScopedConfigPath(*config);
    }
 
 

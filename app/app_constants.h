@@ -2,10 +2,10 @@
 
 namespace ctb::constants
 {
-   inline constexpr const char* APP_NAME_LONG = "ctBrowse for Windows";
-   inline constexpr const char* APP_NAME_SHORT = "ctBrowse";
-   inline constexpr const char* APP_LOG_FOLDER = "%LOCALAPPDATA%\\ctBrowse for Windows\\logs";
-   inline constexpr const char* APP_LABEL_FOLDER = "%LOCALAPPDATA%\\ctBrowse for Windows\\labels\\";
+   inline constexpr const char* APP_NAME_LONG                     = "ctBrowse for Windows";
+   inline constexpr const char* APP_NAME_SHORT                    = "ctBrowse";
+   inline constexpr const char* APP_LABELS_SUBFOLDER              = "labels";
+   inline constexpr const char* APP_DEFAULT_LOG_FOLDER            = "%LOCALAPPDATA%"; // safe default, but not used for windows app.
 
 
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_LBL        = "&Download Data...";
@@ -14,10 +14,15 @@ namespace ctb::constants
    inline constexpr const char* CMD_FILE_SETTINGS_TIP             = "Configure app settings";
    inline constexpr const char* CMD_VIEWS_WINE_LIST_LBL           = "&Wine List\tCtrl+W";
    inline constexpr const char* CMD_VIEWS_WINE_LIST_TIP           = "View Personal Wine List";
+   inline constexpr const char* CMD_VIEWS_RESIZE_GRID_LBL         = "&Resize Grid Columns";
+   inline constexpr const char* CMD_VIEWS_RESIZE_GRID_TIP         = "Resize the grid columns to fit the data";
 
    inline constexpr const char* CONFIG_PATH_SYNC                  = "/Preferences/DataSync";
+   inline constexpr const char* CONFIG_PATH_PREFERENCES           = "/Preferences";
+
    inline constexpr const char* CONFIG_VALUE_DEFAULT_SYNC_TABLES  = "DefaultSyncTables";
    inline constexpr const char* CONFIG_VALUE_SYNC_ON_STARTUP      = "SyncOnStartup";
+   inline constexpr const char* CONFIG_VALUE_LABEL_CACHE_DIR      = "LabelCacheDir";
    inline constexpr const char* CONFIG_PATH_GRID_OPTIONS          = "/Preferences/GridOptions";
    inline constexpr const char* CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY= "DefaultInStockOnly";
 
@@ -56,7 +61,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_CT_SCORE                      = "CT Score:";
    inline constexpr const char* LBL_DRINK_WINDOW                  = "Drink Window:";
    inline constexpr const char* LBL_FILTER_OPTIONS                = "Filter Options";
-   inline constexpr const char* LBL_MENU_VIEWS                    = "&Views";
+   inline constexpr const char* LBL_MENU_VIEW                     = "&View";
    inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
    inline constexpr const char* LBL_MY_PRICE                      = "My Price:";
    inline constexpr const char* LBL_REGION                        = "Region:";
@@ -103,6 +108,8 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_LOCALE_WINE           = "Country, Region, and Appellation";
    inline constexpr const char* SORT_OPTION_PRODUCER_WINE_NAME    = "Producer, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_REGION_WINE           = "Region, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_SCORE_MY              = "My Score";
+   inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";
    inline constexpr const char* SORT_OPTION_VARIETAL_WINE         = "Varietal, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_VINTAGE_WINE          = "Vintage and Wine";
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";
@@ -121,7 +128,8 @@ namespace ctb::constants
    inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = false;
 
    // app-specific error messages.
-   inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN  = "Label cache object is shutting down.";
+   inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN = "Label cache object is shutting down.";
+   inline constexpr const char* ERROR_STR_NULL_POINTER          = "NULL pointer argument not allowed.";
 
 
 }  // namespace ctb::constants

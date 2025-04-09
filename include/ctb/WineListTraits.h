@@ -92,8 +92,15 @@ namespace ctb
          { PropId::EndConsume,      FieldSchema { static_cast<uint32_t>(PropId::EndConsume),     PropType::UInt16,     64 }}
       };
 
-      static const auto& getCsvSchema() { return CsvSchema; }
+      /// @brief getCsvSchema()
+      /// @return the CSV schema for this CT table
+      /// 
+      static constexpr auto getCsvSchema() -> const auto&       { return CsvSchema;     }
 
+      /// @brief getTableName()
+      /// @return the name of this CT table this traits class represents
+      /// 
+      static constexpr auto getTableName() -> std::string_view  { return "WineList";  }
 
       /// @brief small helper to convert a Prop enum into its integer index
       /// 

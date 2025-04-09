@@ -23,12 +23,13 @@ namespace ctb::app
    {
       enum class Id
       {
-         TableInitialize,  /// fired when a grid table is being loaded
-         TableRemove,      /// fired when a grid table is being removed/detached.
-         Sort,             /// fired when a grid table has been sorted
-         Filter,           /// fired when a grid table has been filtered
-         SubStringFilter,  /// fired when a substring filter has been applied to the grid table
-         RowSelected       /// fired when the user selects a row
+         TableInitialize,    /// fired when a grid table is being loaded
+         TableRemove,        /// fired when a grid table is being removed/detached.
+         Sort,               /// fired when a grid table has been sorted
+         Filter,             /// fired when a grid table has been filtered
+         SubStringFilter,    /// fired when a substring filter has been applied to the grid table
+         RowSelected,        /// fired when the user selects a row
+         GridLayoutRequested /// fired when user has requested grid column auto-layout
       };
 
       Id                 m_event_id{};

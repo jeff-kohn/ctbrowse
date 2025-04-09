@@ -9,8 +9,10 @@
 
 #include "ctb/concepts.h"
 #include "ctb/utility.h"
+#include "ctb/utility_templates.h"
 
 #include <wx/activityindicator.h>
+#include <wx/config.h>
 
 
 namespace ctb::app
@@ -74,4 +76,25 @@ namespace ctb::app
    template<typename WndT> ScopedStatusText(std::string_view, WndT*) -> ScopedStatusText<WndT>;
 
 
+   /// @brief class to restore config object to root path when going out of scope
+   ///
+   /// this is useful because the config object's current path is persistent and some
+   /// of the wxWidgets code assumes starting path of "/" (eg wxPersist functionality)
+   /// 
+   class ScopedConfigPath final
+   {
+   public:
+      explicit ScopedConfigPath(wxConfigBase& config) : m_config(config)
+      {}
+      ~ScopedConfigPath()        { m_config.SetPath("/"); }
+      
+      wxConfigBase& get()        { return m_config;       }
+      wxConfigBase* operator->() { return &m_config;      }
+      wxConfigBase& operator*()  { return m_config;       }
+
+      ScopedConfigPath() = delete;
+
+   private:
+      wxConfigBase& m_config;
+   };
 } // namespace ctb::app

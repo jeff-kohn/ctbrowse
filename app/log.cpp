@@ -35,7 +35,11 @@ namespace ctb::log
    }
 
 
-   [[nodiscard]] sinks_init_list::value_type makeFileSink(level_enum level, fs::path log_folder, std::string_view log_filename_base, std::string_view pattern)
+   [[nodiscard]] sinks_init_list::value_type makeFileSink(
+      fs::path log_folder, 
+      std::string_view log_filename_base, 
+      std::string_view pattern, 
+      level_enum level)
    {
       constexpr auto MAX_FILE_SIZE = constants::ONE_MB * 100;
       constexpr auto MAX_FILE_COUNT = 4;

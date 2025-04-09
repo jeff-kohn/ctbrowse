@@ -41,7 +41,7 @@ namespace ctb
    constexpr Enum enumFromIndex(int idx)
    {
       if (static_cast<size_t>(idx) >= magic_enum::enum_count<Enum>())
-         assert("Invalid enum index, this is a bug.");
+         assert("Invalid enum index, this is a bug." and false);
 
       return magic_enum::enum_value<Enum>(static_cast<size_t>(idx));
    }

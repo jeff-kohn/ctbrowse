@@ -26,9 +26,7 @@ class wxToolBar;
 
 namespace ctb::app
 {
-   class CellarTrackerGrid;   // the grid window
-   class GridOptionsPanel;    // the options panel
-   class WineDetailsPanel;    // details panel
+   class GridMultiView;
    class LabelImageCache;     // used for retrieving label images
 
 
@@ -68,15 +66,13 @@ namespace ctb::app
       }
 
    private:
-      CellarTrackerGrid*      m_grid{};         // grid window view
-      GridOptionsPanel*       m_grid_options{}; // gird options view
+      GridMultiView*          m_view{};
       GridTableEventSourcePtr m_event_source{}; // for synchronizing events between views and the underlying table
       wxMenuBar*              m_menu_bar{};
       wxSearchCtrl*           m_search_ctrl{};  // substring search box on the toolbar
       ScopedEventSink         m_sink;           // so we can also handle events from our source
       wxStatusBar*            m_status_bar{};
       wxToolBar*              m_tool_bar{};
-      WineDetailsPanel*       m_wine_details{};
 
       // we use a shared_ptr because we want to share the object with child window(s)
       std::shared_ptr<LabelImageCache> m_label_cache{};
@@ -84,9 +80,8 @@ namespace ctb::app
       /// @brief private ctor called by static create()
       MainFrame();
 
-      // child window creation
+      // child window/control creation
       void initControls();
-      void createGridWindows();
       void createMenuBar();
       void createStatusBar();
       void createToolBar();
@@ -97,6 +92,7 @@ namespace ctb::app
       void onMenuSyncData(wxCommandEvent&);
       void onMenuWineList(wxCommandEvent&);
       void onSearchBtn(wxCommandEvent& event);
+      void onMenuViewResizeGrid(wxCommandEvent&);
       void onSearchCancelBtn(wxCommandEvent& event);
       void onSearchTextEnter(wxCommandEvent& event);
       void onQuit(wxCommandEvent&);

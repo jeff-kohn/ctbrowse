@@ -65,10 +65,11 @@ namespace ctb::app
          auto val_str = display_col.getDisplayValue(val);
          return wxString{ val_str.data(), val_str.size() };
       }
-      catch(std::exception& e)
+      catch(...)
       {
          // don't display an error message here because if there's a problem with the data in a row or column,
          // user might get dozens (or hundreds) of messages.
+         auto e = packageError();
          log::exception(e);
       }
 
@@ -308,12 +309,17 @@ namespace ctb::app
       return true;
    }
 
+   std::string_view GridTableWineList::getTableName() const
+   {
+      return RecordType::Traits::getTableName();
+   }
+
 
    const CtProperty& GridTableWineList::getDetailProp(int row_idx, std::string_view prop_name)
    {
       auto maybe_prop = magic_enum::enum_cast<PropId>(prop_name);
       if (!maybe_prop)
-         return null_prop; // can't return default-constructed becuase it would be ref to temp
+         return null_prop; // can't return default-constructed because it would be ref to temp
 
       return (*m_current_view)[static_cast<size_t>(row_idx)][*maybe_prop];
    }

@@ -63,6 +63,8 @@ namespace ctb::app
       
       void notify(GridTableEvent event) override;
       void onGridCellChanging(wxGridEvent& event);
+      void onDestroyWindow(wxWindowDestroyEvent& event);
+
 
       void initGrid();
       void setGridTable(GridTablePtr tbl);
