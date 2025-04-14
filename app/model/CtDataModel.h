@@ -22,7 +22,7 @@ namespace ctb::app
    /// filtering options for other properties.
    /// 
    template<typename DatasetT>
-   class CellarTrackerDataModel : public IDataset
+   class CtDataModel : public IDataset
    {
    public:
       using Dataset             = DatasetT;
@@ -73,7 +73,7 @@ namespace ctb::app
 
       static auto create(Dataset data) -> IDatasetPtr
       {
-         return IDatasetPtr{ static_cast<IDataset*>(new CellarTrackerDataModel{ std::move(data) }) };
+         return IDatasetPtr{ static_cast<IDataset*>(new CtDataModel{ std::move(data) }) };
       }
 
       /// @brief  get a list of the columns that will be displayed in the grid
@@ -301,12 +301,12 @@ namespace ctb::app
       }
 
       // default dtor, others are deleted since this object is meant to be heap-only
-      ~CellarTrackerDataModel() noexcept override = default;
-      CellarTrackerDataModel() = delete;
-      CellarTrackerDataModel(const CellarTrackerDataModel&) = delete;
-      CellarTrackerDataModel(CellarTrackerDataModel&&) = delete;
-      CellarTrackerDataModel& operator=(const CellarTrackerDataModel&) = delete;
-      CellarTrackerDataModel& operator=(CellarTrackerDataModel&&) = delete;
+      ~CtDataModel() noexcept override = default;
+      CtDataModel() = delete;
+      CtDataModel(const CtDataModel&) = delete;
+      CtDataModel(CtDataModel&&) = delete;
+      CtDataModel& operator=(const CtDataModel&) = delete;
+      CtDataModel& operator=(CtDataModel&&) = delete;
 
    private:
       DisplayColumns                   m_display_columns{};
@@ -320,7 +320,7 @@ namespace ctb::app
       std::optional<SubStringFilter>   m_substring_filter{};
       
       // private construction, use static factory method create();
-      explicit CellarTrackerDataModel(Dataset data) : m_data{ std::move(data) }
+      explicit CtDataModel(Dataset data) : m_data{ std::move(data) }
       {}
 
       void applyFilters()
@@ -387,7 +387,7 @@ namespace ctb::app
       }
 
       //template<typename DatasetT>
-      //CellarTrackerDataModel::create(DatasetT) -> CellarTrackerDataModel<DatasetT>;
+      //CtDataModel::create(DatasetT) -> CtDataModel<DatasetT>;
 
       // Inherited via IDataset
 };

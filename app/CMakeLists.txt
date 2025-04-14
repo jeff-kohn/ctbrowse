@@ -59,7 +59,7 @@ target_sources(${TARGET_NAME}
      "wx_helpers.h"
      "dialogs/TableSyncDialog.cpp"
      "dialogs/TableSyncDialog.h"
-     "model/CellarTrackerDataModel.h"
+     "model/CtDataModel.h"
      "model/CtStringFilter.h"
      "model/DatasetBase.h"
      "model/DatasetEvent.h"

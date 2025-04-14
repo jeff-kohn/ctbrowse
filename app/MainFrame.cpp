@@ -351,7 +351,7 @@ namespace ctb::app
       {
          if (!m_view)
          {
-            m_view = GridMultiView::create(this, m_event_source, m_label_cache);
+            m_view = DatasetMultiView::create(this, m_event_source, m_label_cache);
          }
 
          // load table and connect it to the event source

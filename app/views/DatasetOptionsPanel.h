@@ -1,7 +1,7 @@
 /*******************************************************************
- * @file GridOptionsPanel.h
+ * @file DatasetOptionsPanel.h
  *
- * @brief Header file for GridOptionsPanel class
+ * @brief Header file for DatasetOptionsPanel class
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
@@ -23,7 +23,7 @@
 namespace ctb::app
 {
    /// @brief panel class that provides UI for sorting and filtering a grid
-   class GridOptionsPanel final : public wxPanel, public IDatasetEventSink
+   class DatasetOptionsPanel final : public wxPanel, public IDatasetEventSink
    {
    public:
       /// @brief creates and initializes a panel for showing grid sort/filter options
@@ -32,14 +32,14 @@ namespace ctb::app
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its lifetime). 
       /// 
-      [[nodiscard]] static GridOptionsPanel* create(wxWindow* parent, DatasetEventSourcePtr source);
+      [[nodiscard]] static DatasetOptionsPanel* create(wxWindow* parent, DatasetEventSourcePtr source);
    
       // no copy/move/assign, this class is created on the heap.
-      GridOptionsPanel(const GridOptionsPanel&) = delete;
-      GridOptionsPanel(GridOptionsPanel&&) = delete;
-      GridOptionsPanel& operator=(const GridOptionsPanel&) = delete;
-      GridOptionsPanel& operator=(GridOptionsPanel&&) = delete;
-      ~GridOptionsPanel() override = default;
+      DatasetOptionsPanel(const DatasetOptionsPanel&) = delete;
+      DatasetOptionsPanel(DatasetOptionsPanel&&) = delete;
+      DatasetOptionsPanel& operator=(const DatasetOptionsPanel&) = delete;
+      DatasetOptionsPanel& operator=(DatasetOptionsPanel&&) = delete;
+      ~DatasetOptionsPanel() override = default;
       
    private:
       using MaybeFilter = std::optional<CtStringFilter>;
@@ -94,7 +94,7 @@ namespace ctb::app
       void onTreeFilterLeftClick(wxMouseEvent& event);
 
       /// @brief private ctor used by static create()
-      explicit GridOptionsPanel(DatasetEventSourcePtr source);
+      explicit DatasetOptionsPanel(DatasetEventSourcePtr source);
    };
 
 } // namespace ctb::app

@@ -52,7 +52,7 @@ namespace ctb::constants
    inline constexpr const char* COL_WINE                          = "Wine";
 
 
-   // WineDetailsPanel labels
+   // DetailsPanel labels
    inline constexpr const char* LBL_APPELLATION                   = "Appellation:";
    inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";
    inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only Show In-Stock Inventory";

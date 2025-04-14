@@ -26,7 +26,7 @@ class wxToolBar;
 
 namespace ctb::app
 {
-   class GridMultiView;
+   class DatasetMultiView;
    class LabelImageCache;     // used for retrieving label images
 
 
@@ -77,7 +77,7 @@ namespace ctb::app
       }
 
    private:
-      GridMultiView*          m_view{};
+      DatasetMultiView*          m_view{};
       DatasetEventSourcePtr m_event_source{}; // for synchronizing events between views and the underlying table
       wxMenuBar*              m_menu_bar{};
       wxSearchCtrl*           m_search_ctrl{};  // substring search box on the toolbar

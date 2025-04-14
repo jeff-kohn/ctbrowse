@@ -7,7 +7,7 @@
 namespace ctb::app
 {
 
-   class CellarTrackerListView final : public wxDataViewCtrl, public IDatasetEventSink
+   class DatasetListView final : public wxDataViewCtrl, public IDatasetEventSink
    {
    public:
       /// @brief creates and initializes a panel for showing grid sort/filter options
@@ -16,7 +16,7 @@ namespace ctb::app
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its lifetime). 
       /// 
-      [[nodiscard]] static CellarTrackerListView* create(wxWindow* parent, DatasetEventSourcePtr source);
+      [[nodiscard]] static DatasetListView* create(wxWindow* parent, DatasetEventSourcePtr source);
 
    private:
       ScopedEventSink m_sink;
@@ -25,7 +25,7 @@ namespace ctb::app
       void initControls();
 
       /// @brief private ctor used by static create()
-      explicit CellarTrackerListView(DatasetEventSourcePtr source);
+      explicit DatasetListView(DatasetEventSourcePtr source);
 
       // Inherited via IDatasetEventSink
       void notify(DatasetEvent event) override;

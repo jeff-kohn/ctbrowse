@@ -7,7 +7,7 @@
  *******************************************************************/
 
 #include "model/DatasetLoader.h"
-#include "model/CellarTrackerDataModel.h"
+#include "model/CtDataModel.h"
 
 #include <ctb/utility.h>
 #include <ctb/table_data.h>
@@ -31,7 +31,7 @@ namespace ctb::app
                {
                   throw table_data.error();
                }
-               return CellarTrackerDataModel<WineListDataset>::create(std::move(table_data.value()));
+               return CtDataModel<WineListDataset>::create(std::move(table_data.value()));
             }
       };
       return enum_switch(TableFactory, tbl);

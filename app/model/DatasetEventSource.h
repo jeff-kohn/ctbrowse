@@ -38,7 +38,6 @@ namespace ctb::app
       ///
       bool hasTable() const  override;
 
-
       /// @brief retrieves a pointer to the active table for this source, if any.
       ///
       /// the returned table ptr may be null if this source doesn't have an active table.

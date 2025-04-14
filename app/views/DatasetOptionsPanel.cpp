@@ -1,7 +1,7 @@
 /*******************************************************************
- * @file GridOptionsPanel.cpp
+ * @file DatasetOptionsPanel.cpp
  *
- * @brief implementation file for the GridOptionsPanel class
+ * @brief implementation file for the DatasetOptionsPanel class
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
@@ -27,7 +27,7 @@ namespace ctb::app
 
    } // namespace
    
-   GridOptionsPanel::GridOptionsPanel(DatasetEventSourcePtr source) : m_sink{ this, source }
+   DatasetOptionsPanel::DatasetOptionsPanel(DatasetEventSourcePtr source) : m_sink{ this, source }
    {
       auto cfg = wxGetApp().getConfig();
       cfg->SetPath(constants::CONFIG_PATH_PREFERENCE_DATASYNC);
@@ -35,7 +35,7 @@ namespace ctb::app
    }
 
 
-   [[nodiscard]] GridOptionsPanel* GridOptionsPanel::create(wxWindow* parent, DatasetEventSourcePtr source)
+   [[nodiscard]] DatasetOptionsPanel* DatasetOptionsPanel::create(wxWindow* parent, DatasetEventSourcePtr source)
    {
       if (!source)
       {
@@ -48,7 +48,7 @@ namespace ctb::app
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
 
-      std::unique_ptr<GridOptionsPanel> wnd{ new GridOptionsPanel{source} };
+      std::unique_ptr<DatasetOptionsPanel> wnd{ new DatasetOptionsPanel{source} };
       if (!wnd->Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
@@ -58,7 +58,7 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::initControls()
+   void DatasetOptionsPanel::initControls()
    {
       auto default_border = wxSizerFlags::GetDefaultBorder();
 
@@ -150,18 +150,18 @@ namespace ctb::app
       SetSizer(top_sizer);
 
       // event bindings.
-      m_sort_combo->Bind(wxEVT_CHOICE, &GridOptionsPanel::onSortSelection, this);
-      m_filter_tree->Bind(wxEVT_TREE_ITEM_EXPANDING, &GridOptionsPanel::onTreeFilterExpanding, this);
-      m_filter_tree->Bind(wxEVT_LEFT_DOWN, &GridOptionsPanel::onTreeFilterLeftClick, this);
-      m_score_spin_ctrl->Bind(wxEVT_SPINCTRLDOUBLE, &GridOptionsPanel::onMinScoreChanged, this);
-      opt_ascending->Bind(wxEVT_RADIOBUTTON, &GridOptionsPanel::onSortOrderClicked, this);
-      opt_descending->Bind(wxEVT_RADIOBUTTON, &GridOptionsPanel::onSortOrderClicked, this);
-      instock_filter_ctrl->Bind(wxEVT_CHECKBOX, &GridOptionsPanel::OnInStockChecked, this);
-      score_filter_chk->Bind(wxEVT_CHECKBOX, &GridOptionsPanel::onMinScoreFilterChecked, this);     
+      m_sort_combo->Bind(wxEVT_CHOICE, &DatasetOptionsPanel::onSortSelection, this);
+      m_filter_tree->Bind(wxEVT_TREE_ITEM_EXPANDING, &DatasetOptionsPanel::onTreeFilterExpanding, this);
+      m_filter_tree->Bind(wxEVT_LEFT_DOWN, &DatasetOptionsPanel::onTreeFilterLeftClick, this);
+      m_score_spin_ctrl->Bind(wxEVT_SPINCTRLDOUBLE, &DatasetOptionsPanel::onMinScoreChanged, this);
+      opt_ascending->Bind(wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
+      opt_descending->Bind(wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
+      instock_filter_ctrl->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::OnInStockChecked, this);
+      score_filter_chk->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onMinScoreFilterChecked, this);     
    }
 
 
-   void GridOptionsPanel::addPropFilter(wxTreeItemId item)
+   void DatasetOptionsPanel::addPropFilter(wxTreeItemId item)
    {
       if (m_sink.hasTable())
       {
@@ -175,7 +175,7 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::removePropFilter(wxTreeItemId item)
+   void DatasetOptionsPanel::removePropFilter(wxTreeItemId item)
    {
       if (m_sink.hasTable())
       {
@@ -189,7 +189,7 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::populateFilterTypes(IDataset* table)
+   void DatasetOptionsPanel::populateFilterTypes(IDataset* table)
    {
       assert(m_filter_tree);
 
@@ -213,7 +213,7 @@ namespace ctb::app
    }
 
 
-   GridOptionsPanel::MaybeFilter GridOptionsPanel::getPropFilterForItem(wxTreeItemId item)
+   DatasetOptionsPanel::MaybeFilter DatasetOptionsPanel::getPropFilterForItem(wxTreeItemId item)
    {
       auto table = m_sink.getTable();
       if (table)
@@ -231,7 +231,7 @@ namespace ctb::app
    }
 
 
-   wxArrayString GridOptionsPanel::getSortOptionList(IDataset* table)
+   wxArrayString DatasetOptionsPanel::getSortOptionList(IDataset* table)
    {
       return vws::all(table->availableSortConfigs()) 
                | vws::transform([](const CtSortConfig& s) {  return wxString{s.sorter_name.data(), s.sorter_name.length() };  })
@@ -239,19 +239,19 @@ namespace ctb::app
    }
 
 
-   bool GridOptionsPanel::isChecked(wxTreeItemId item)
+   bool DatasetOptionsPanel::isChecked(wxTreeItemId item)
    {
       return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CHECKED;
    }
 
 
-   bool GridOptionsPanel::isContainerNode(wxTreeItemId item)
+   bool DatasetOptionsPanel::isContainerNode(wxTreeItemId item)
    {
       return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CONTAINER;
    }
 
 
-   bool GridOptionsPanel::isMatchValueNode(wxTreeItemId item)
+   bool DatasetOptionsPanel::isMatchValueNode(wxTreeItemId item)
    {
       return item.IsOk() and m_filter_tree->GetItemImage(item) != IMG_CONTAINER;
    }
@@ -259,7 +259,7 @@ namespace ctb::app
    /// @brief updates the checked/unchecked status of a node.
    /// @return true if successful, false otherwise (ie invalid item)
    /// 
-   bool GridOptionsPanel::setMatchValueChecked(wxTreeItemId item, bool checked)
+   bool DatasetOptionsPanel::setMatchValueChecked(wxTreeItemId item, bool checked)
    {
       if ( isMatchValueNode(item) )
       {
@@ -281,7 +281,7 @@ namespace ctb::app
 
    /// @brief toggles a filter value by updating its checked/unchecked image and applying/deleting the corresponding filter.
    /// 
-   void GridOptionsPanel::toggleFilterSelection(wxTreeItemId item)
+   void DatasetOptionsPanel::toggleFilterSelection(wxTreeItemId item)
    {
       bool checked = !isChecked(item);
       if (!setMatchValueChecked(item, checked))
@@ -300,7 +300,7 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::updateFilterLabel(wxTreeItemId item)
+   void DatasetOptionsPanel::updateFilterLabel(wxTreeItemId item)
    {
       auto maybe_filter = m_filters[item];
       if ( !maybe_filter or !item.IsOk() )
@@ -320,21 +320,21 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::enableInStockFilter(bool enable)
+   void DatasetOptionsPanel::enableInStockFilter(bool enable)
    {
       constexpr size_t index = 0;
       m_filter_options_box->Show(index, enable);
    }
 
 
-   void GridOptionsPanel::resetInStockCheckbox()
+   void DatasetOptionsPanel::resetInStockCheckbox()
    {
       m_instock_only = false;
       TransferDataToWindow();
    }
 
 
-   void GridOptionsPanel::notify(DatasetEvent event)
+   void DatasetOptionsPanel::notify(DatasetEvent event)
    {
       assert(event.m_grid_table);
 
@@ -371,7 +371,7 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::onTableInitialize(IDataset* table)
+   void DatasetOptionsPanel::onTableInitialize(IDataset* table)
    {
       // reload sort/filter options
       m_sort_combo->Clear();
@@ -381,14 +381,14 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::onTableSorted(IDataset* table)
+   void DatasetOptionsPanel::onTableSorted(IDataset* table)
    {
       m_sort_config = table->activeSortConfig();
       TransferDataToWindow();
    }
 
 
-   void GridOptionsPanel::OnInStockChecked([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsPanel::OnInStockChecked([[maybe_unused]] wxCommandEvent& event)
    {
       assert(m_sink.hasTable());
 
@@ -405,7 +405,7 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::onMinScoreChanged([[maybe_unused]] wxSpinDoubleEvent& event)
+   void DatasetOptionsPanel::onMinScoreChanged([[maybe_unused]] wxSpinDoubleEvent& event)
    {
       if (m_enable_score_filter and m_sink.hasTable())
       {
@@ -417,7 +417,7 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::onMinScoreFilterChecked([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsPanel::onMinScoreFilterChecked([[maybe_unused]] wxCommandEvent& event)
    {
       if (!m_sink.hasTable())
       {
@@ -444,7 +444,7 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::onSortOrderClicked([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsPanel::onSortOrderClicked([[maybe_unused]] wxCommandEvent& event)
    {
       try
       {
@@ -468,7 +468,7 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::onSortSelection([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsPanel::onSortSelection([[maybe_unused]] wxCommandEvent& event)
    {
       try
       {
@@ -495,7 +495,7 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::onTreeFilterExpanding(wxTreeEvent& event)
+   void DatasetOptionsPanel::onTreeFilterExpanding(wxTreeEvent& event)
    {
       try
       {
@@ -533,7 +533,7 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::onTreeFilterLeftClick(wxMouseEvent& event)
+   void DatasetOptionsPanel::onTreeFilterLeftClick(wxMouseEvent& event)
    {
       try
       {

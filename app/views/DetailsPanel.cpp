@@ -1,7 +1,7 @@
 /*********************************************************************
  * @file       DetailsPanel.cpp
  *
- * @brief      implementation for the WineDetailsPanel class
+ * @brief      implementation for the DetailsPanel class
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
@@ -51,13 +51,13 @@ namespace ctb::app
    } // namespace detail
 
 
-   WineDetailsPanel::WineDetailsPanel(DatasetEventSourcePtr source, LabelCachePtr cache) : 
+   DetailsPanel::DetailsPanel(DatasetEventSourcePtr source, LabelCachePtr cache) : 
       m_event_sink{ this, source },
       m_label_cache{ cache }
    {}
 
 
-   WineDetailsPanel* WineDetailsPanel::create(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache)
+   DetailsPanel* DetailsPanel::create(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache)
    {
       if (!source)
       {
@@ -70,7 +70,7 @@ namespace ctb::app
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
 
-      std::unique_ptr<WineDetailsPanel> wnd{ new WineDetailsPanel{ source, cache } };
+      std::unique_ptr<DetailsPanel> wnd{ new DetailsPanel{ source, cache } };
       if (!wnd->Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
@@ -80,7 +80,7 @@ namespace ctb::app
    }
 
 
-   void WineDetailsPanel::initControls()
+   void DetailsPanel::initControls()
    {
       wxWindowUpdateLocker freeze_win(this);
 
@@ -253,12 +253,12 @@ namespace ctb::app
       top_sizer->ShowItems(false);
 
       // hook up event handlers
-      m_label_timer.Bind(wxEVT_TIMER, &WineDetailsPanel::onLabelTimer, this);
-      view_online_btn->Bind(wxEVT_BUTTON, &WineDetailsPanel::onViewWebPage, this);
+      m_label_timer.Bind(wxEVT_TIMER, &DetailsPanel::onLabelTimer, this);
+      view_online_btn->Bind(wxEVT_BUTTON, &DetailsPanel::onViewWebPage, this);
    }
 
 
-   void app::WineDetailsPanel::checkLabelResult()
+   void app::DetailsPanel::checkLabelResult()
    {
       using namespace tasks;
 
@@ -287,7 +287,7 @@ namespace ctb::app
    }
 
 
-   void app::WineDetailsPanel::displayLabel()
+   void app::DetailsPanel::displayLabel()
    {
       try
       {
@@ -316,7 +316,7 @@ namespace ctb::app
    }
 
 
-   void WineDetailsPanel::updateDetails(DatasetEvent event)
+   void DetailsPanel::updateDetails(DatasetEvent event)
    {
       using namespace magic_enum;
       
@@ -365,7 +365,7 @@ namespace ctb::app
    }
 
 
-   void WineDetailsPanel::notify(DatasetEvent event)
+   void DetailsPanel::notify(DatasetEvent event)
    {
       try
       {
@@ -396,13 +396,13 @@ namespace ctb::app
    }
 
 
-   void WineDetailsPanel::onLabelTimer(wxTimerEvent&)
+   void DetailsPanel::onLabelTimer(wxTimerEvent&)
    {
       checkLabelResult();
    }
 
 
-   void WineDetailsPanel::onViewWebPage([[maybe_unused]] wxCommandEvent& event)
+   void DetailsPanel::onViewWebPage([[maybe_unused]] wxCommandEvent& event)
    {
       if (!m_details.wine_id)
       {

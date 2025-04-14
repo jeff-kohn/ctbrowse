@@ -19,7 +19,8 @@
 
 namespace ctb::app
 {
-   /// @brief struct that contains name, index and direction of a sort config
+   /// @brief Struct that contains name, index and direction of a sort config.
+   ///        Used by DatasetBase class.
    ///
    struct CtSortConfig
    {

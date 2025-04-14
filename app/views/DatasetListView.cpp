@@ -1,19 +1,20 @@
+
 #include "views/DatasetListView.h"
-#include "model/CellarTrackerDataModel.h"
+#include "model/CtDataModel.h"
 #include "model/DatasetLoader.h"
 
 namespace ctb::app
 {
-   CellarTrackerListView::CellarTrackerListView(DatasetEventSourcePtr source) : m_sink{ this, source }
+   DatasetListView::DatasetListView(DatasetEventSourcePtr source) : m_sink{ this, source }
    {
    }
 
-   void CellarTrackerListView::notify([[maybe_unused]] DatasetEvent event)
+   void DatasetListView::notify([[maybe_unused]] DatasetEvent event)
    {
    }
 
 
-   [[nodiscard]] CellarTrackerListView* CellarTrackerListView::create(wxWindow* parent, DatasetEventSourcePtr source)
+   [[nodiscard]] DatasetListView* DatasetListView::create(wxWindow* parent, DatasetEventSourcePtr source)
    {
       if (!source)
       {
@@ -26,7 +27,7 @@ namespace ctb::app
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
 
-      std::unique_ptr<CellarTrackerListView> wnd{ new CellarTrackerListView{source} };
+      std::unique_ptr<DatasetListView> wnd{ new DatasetListView{source} };
       if (!wnd->Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
@@ -35,12 +36,12 @@ namespace ctb::app
       return wnd.release(); // parent owns child, so we don't need to delete
    }
 
-   void CellarTrackerListView::initControls()
+   void DatasetListView::initControls()
    {
       auto model = m_sink.getTable();
       if (!model)
       {
-         log::error("CellarTrackerListView initialized with null dataset ptr, cannot continue");
+         log::error("DatasetListView initialized with null dataset ptr, cannot continue");
          throw ctb::Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
       AssociateModel(model.get());
