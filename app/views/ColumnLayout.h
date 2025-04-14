@@ -16,19 +16,6 @@ namespace ctb::app
    };
 
 
-   /// @brief concept for array-like container of ColumnLayout structs.
-   ///
-   /// Can be used to serialize collection of ColumnLayouts to config store
-   /// 
-   //template <typename ContainerT>
-   //concept ColumnLayoutContainer = requires (ContainerT cont1, ContainerT cont2, ColumnLayout cl)
-   //{
-   //   cont1.emplace_back(cl);
-   //   cont2[0] = cl;
-   //   cont1.swap(cont2);
-   //};
-
-
    class ColumnLayouts final : public std::vector<ColumnLayout> 
    {
    public:

@@ -1,5 +1,5 @@
 /*******************************************************************
- * @file IDataset.h
+ * @file DatasetBase.h
  *
  * @brief Header file for the IDataset base class
  * 
@@ -11,14 +11,8 @@
 #include "model/CtStringFilter.h"
 
 #include <ctb/CtProperty.h>
-//#include <ctb/DisplayColumn.h>
-//#include <ctb/CtRecordImpl.h>
-//#include <ctb/PropFilter.h>
-//#include <ctb/PropStringFilterMgr.h>
-//#include <ctb/SubStringFilter.h>
-//#include <ctb/TableSorter.h>
-
 #include <wx/dataview.h>
+
 #include <set>
 #include <memory>
 

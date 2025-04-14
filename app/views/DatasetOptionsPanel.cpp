@@ -8,7 +8,7 @@
 
 #include "App.h"
 #include "wx_helpers.h"
-#include "views/GridOptionsPanel.h"
+#include "views/DatasetOptionsPanel.h"
 
 #include <wx/sizer.h>
 #include <wx/stattext.h>

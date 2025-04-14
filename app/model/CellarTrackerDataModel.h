@@ -1,6 +1,6 @@
 #pragma once
 #include "App.h"
-#include "interfaces/IDataset.h"
+#include "model/DatasetBase.h"
 #include <ctb/CtRecordImpl.h>
 #include <ctb/DisplayColumn.h>
 #include <ctb/PropFilter.h>

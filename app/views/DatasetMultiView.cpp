@@ -1,8 +1,7 @@
-#include "views/GridMultiView.h"
-#include "views/CellarTrackerGrid.h"
-#include "views/CellarTrackerListView.h"
-#include "views/GridOptionsPanel.h"
-#include "views/WineDetailsPanel.h"
+#include "views/DatasetListView.h"
+#include "views/DatasetMultiView.h"
+#include "views/DatasetOptionsPanel.h"
+#include "views/DetailsPanel.h"
 
 #include <wx/persist/splitter.h>
 

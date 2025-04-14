@@ -8,7 +8,7 @@
 #pragma once
 
 #include "App.h"
-#include "interfaces/DatasetEvent.h"
+#include "model/DatasetEvent.h"
 
 #include <memory>
 #include <unordered_set>

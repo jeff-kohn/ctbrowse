@@ -1,11 +1,11 @@
 /*********************************************************************
- * @file       WineDetailsPanel.cpp
+ * @file       DetailsPanel.cpp
  *
  * @brief      implementation for the WineDetailsPanel class
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
-#include "views/WineDetailsPanel.h"
+#include "views/DetailsPanel.h"
 
 #include <ctb/utility_http.h>
 #include <cpr/cpr.h>
@@ -20,7 +20,6 @@
 #include <wx/stattext.h>
 #include <wx/valgen.h>
 #include <wx/wupdlock.h>
-//#include <wx/stattext.h>
 
 #include <chrono>
 #include <thread>

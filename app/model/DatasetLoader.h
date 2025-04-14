@@ -8,7 +8,7 @@
 #pragma once
 
 #include "App.h"
-#include "interfaces/IDataset.h"
+#include "model/DatasetBase.h"
 
 #include <ctb/table_data.h>
 #include <filesystem>

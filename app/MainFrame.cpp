@@ -13,9 +13,9 @@
 #include "dialogs/TableSyncDialog.h"
 #include "model/DatasetEventSource.h"
 #include "model/DatasetLoader.h"
-#include "views/GridOptionsPanel.h"
-#include "views/WineDetailsPanel.h"
-#include "views/GridMultiView.h"
+#include "views/DatasetMultiView.h"
+#include "views/DatasetOptionsPanel.h"
+#include "views/DetailsPanel.h"
 
 #include <ctb/CredentialWrapper.h>
 #include <ctb/table_download.h>
