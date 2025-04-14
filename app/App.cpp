@@ -77,6 +77,8 @@ namespace ctb::app
          m_main_frame->Show();
          SetTopWindow(m_main_frame);
 
+         CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_VIEW_WINE_LIST }); });
+
          return true;
       }
       catch(Error& err)

@@ -20,7 +20,7 @@
 namespace ctb::app
 {
 
-   [[nodiscard]] GridTablePtr GridTableWineList::create(WineListData&& data)
+   [[nodiscard]] IDatasetPtr GridTableWineList::create(WineListDataset&& data)
    {
       return std::shared_ptr<GridTableWineList>{ new GridTableWineList{ std::move(data) } };  
    }
@@ -124,7 +124,7 @@ namespace ctb::app
 
    bool GridTableWineList::filterBySubstring(std::string_view substr, int col_idx)
    {
-      auto prop = RecordType::Traits::propFromIndex(col_idx);
+      auto prop = Record::Traits::propFromIndex(col_idx);
       auto cols = std::vector{ prop };
 
       return applySubStringFilter(SubStringFilter{ std::string{substr}, cols });
@@ -175,14 +175,14 @@ namespace ctb::app
 
    StringSet GridTableWineList::getFilterMatchValues(int prop_idx) const
    {
-      return PropStringFilterMgr::getFilterMatchValues(m_grid_data, RecordType::Traits::propFromIndex(prop_idx));
+      return PropStringFilterMgr::getFilterMatchValues(m_grid_data, Record::Traits::propFromIndex(prop_idx));
    }
 
 
    bool GridTableWineList::addPropFilterString(int prop_idx, std::string_view value)
    {
       // if we somehow get passed a filter we already have, don't waste our time.
-      if ( m_prop_string_filters.addFilter(RecordType::Traits::propFromIndex(prop_idx), value) )
+      if ( m_prop_string_filters.addFilter(Record::Traits::propFromIndex(prop_idx), value) )
       {
          applyFilters();
          return true;
@@ -194,7 +194,7 @@ namespace ctb::app
    bool GridTableWineList::removePropFilterString(int prop_idx, std::string_view match_value)
    {
       // if we somehow get passed filter that we aren't using, don't waste our time.
-      if ( m_prop_string_filters.removeFilter(RecordType::Traits::propFromIndex(prop_idx), match_value) )
+      if ( m_prop_string_filters.removeFilter(Record::Traits::propFromIndex(prop_idx), match_value) )
       {
          applyFilters();
          return true;
@@ -311,7 +311,7 @@ namespace ctb::app
 
    std::string_view GridTableWineList::getTableName() const
    {
-      return RecordType::Traits::getTableName();
+      return Record::Traits::getTableName();
    }
 
 

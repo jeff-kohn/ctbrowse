@@ -22,12 +22,12 @@ namespace ctb
 
    /// @brief struct containing everything needed to know about how to display a table column
    ///
-   template<CtRecord RecordType>
+   template<CtRecord Record>
    struct DisplayColumn
    {
       // some types we borrow from our template parameter
-      using PropId         = RecordType::PropId;
-      using TableProperty  = RecordType::TableProperty;
+      using PropId         = Record::PropId;
+      using TableProperty  = Record::TableProperty;
 
       /// @brief enum to specify the alignment for column headers and cell text
       ///

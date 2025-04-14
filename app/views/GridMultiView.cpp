@@ -1,5 +1,6 @@
 #include "views/GridMultiView.h"
 #include "views/CellarTrackerGrid.h"
+#include "views/CellarTrackerListView.h"
 #include "views/GridOptionsPanel.h"
 #include "views/WineDetailsPanel.h"
 
@@ -41,7 +42,7 @@ namespace ctb::app
       wxPersistentRegisterAndRestore(this, GetName());
 
       // nested splitter contains grid and details1
-      m_grid = CellarTrackerGrid::create(m_right_splitter, source);
+      m_grid = CellarTrackerListView::create(m_right_splitter, source);
       m_details_panel = WineDetailsPanel::create(m_right_splitter, source, cache);
       m_right_splitter->SplitVertically(m_grid, m_details_panel);
       m_right_splitter->SetName("GridMultiViewNested");
@@ -52,12 +53,12 @@ namespace ctb::app
       CallAfter([this] { m_right_splitter->SetSashGravity(RIGHT_SPLITTER_GRAVITY); });
    }
 
-   void GridMultiView::notify(GridTableEvent event)
+   void GridMultiView::notify(DatasetEvent event)
    {
       switch (event.m_event_id){
-         case GridTableEvent::Id::TableRemove: [[fallthrough]];
-         case GridTableEvent::Id::RowSelected: [[fallthrough]];
-         case GridTableEvent::Id::GridLayoutRequested:
+         case DatasetEvent::Id::TableRemove: [[fallthrough]];
+         case DatasetEvent::Id::RowSelected: [[fallthrough]];
+         case DatasetEvent::Id::GridLayoutRequested:
             break;
 
          default:
@@ -65,8 +66,8 @@ namespace ctb::app
             CallAfter([this] {
                if (m_grid)
                {
-                  m_grid->SelectRow(0);
-                  m_sink.signal_source(GridTableEvent::Id::RowSelected, 0);
+                  //m_grid->SelectRow(0);
+                  m_sink.signal_source(DatasetEvent::Id::RowSelected, 0);
                }
             });
       }

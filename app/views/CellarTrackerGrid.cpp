@@ -24,7 +24,7 @@ namespace ctb::app
    }
 
 
-   [[nodiscard]] CellarTrackerGrid* CellarTrackerGrid::create(wxWindow* parent, GridTableEventSourcePtr source)
+   [[nodiscard]] CellarTrackerGrid* CellarTrackerGrid::create(wxWindow* parent, DatasetEventSourcePtr source)
    {
       if (!source)
       {
@@ -164,27 +164,27 @@ namespace ctb::app
    }
 
 
-   void CellarTrackerGrid::notify(GridTableEvent event)
+   void CellarTrackerGrid::notify(DatasetEvent event)
    {
       switch (event.m_event_id)
       { 
-         case GridTableEvent::Id::TableRemove:
+         case DatasetEvent::Id::TableRemove:
             SetTable(nullptr);
             m_grid_table.reset();
             break;
 
-         case GridTableEvent::Id::TableInitialize:
-         case GridTableEvent::Id::Sort:
-         case GridTableEvent::Id::Filter:
-         case GridTableEvent::Id::SubStringFilter:
+         case DatasetEvent::Id::TableInitialize:
+         case DatasetEvent::Id::Sort:
+         case DatasetEvent::Id::Filter:
+         case DatasetEvent::Id::SubStringFilter:
             setGridTable(m_sink.getTable());   // we need the ref-counted smart-ptr
             break;
 
-         case GridTableEvent::Id::GridLayoutRequested:
+         case DatasetEvent::Id::GridLayoutRequested:
             AutoSizeColumns(false);
             break;
 
-         case GridTableEvent::Id::RowSelected:
+         case DatasetEvent::Id::RowSelected:
          default:
             break;
       }
@@ -197,7 +197,7 @@ namespace ctb::app
       {
          // When row selection changes, we need to let the details panel know about it.
          // (we don't care about column position)
-         m_sink.signal_source(GridTableEvent::Id::RowSelected, event.GetRow());
+         m_sink.signal_source(DatasetEvent::Id::RowSelected, event.GetRow());
       }
    }
 

@@ -27,15 +27,15 @@ namespace ctb::app
 
    } // namespace
    
-   GridOptionsPanel::GridOptionsPanel(GridTableEventSourcePtr source) : m_sink{ this, source }
+   GridOptionsPanel::GridOptionsPanel(DatasetEventSourcePtr source) : m_sink{ this, source }
    {
       auto cfg = wxGetApp().getConfig();
-      cfg->SetPath(constants::CONFIG_PATH_SYNC);
+      cfg->SetPath(constants::CONFIG_PATH_PREFERENCE_DATASYNC);
       cfg->Read(constants::CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY, &m_instock_only, constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT);
    }
 
 
-   [[nodiscard]] GridOptionsPanel* GridOptionsPanel::create(wxWindow* parent, GridTableEventSourcePtr source)
+   [[nodiscard]] GridOptionsPanel* GridOptionsPanel::create(wxWindow* parent, DatasetEventSourcePtr source)
    {
       if (!source)
       {
@@ -76,7 +76,7 @@ namespace ctb::app
       // sort fields combo
       m_sort_combo = new wxChoice(sort_options_box->GetStaticBox(), wxID_ANY);
       m_sort_combo->SetFocus();
-      m_sort_combo->SetValidator(wxGenericValidator(&m_sort_config.sort_index));
+      m_sort_combo->SetValidator(wxGenericValidator(&m_sort_config.sorter_index));
       sort_options_box->Add(m_sort_combo, wxSizerFlags{}.Expand().Border(wxALL));
 
       // ascending sort order radio. validator tied to GridTableSortConfig.ascending
@@ -169,7 +169,7 @@ namespace ctb::app
          if (filter)
          {
             m_sink.getTable()->addPropFilterString(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
-            m_sink.signal_source(GridTableEvent::Id::Filter);
+            m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
    }
@@ -183,13 +183,13 @@ namespace ctb::app
          if (filter)
          {
             m_sink.getTable()->removePropFilterString(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
-            m_sink.signal_source(GridTableEvent::Id::Filter);
+            m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
    }
 
 
-   void GridOptionsPanel::populateFilterTypes(GridTable* grid_table)
+   void GridOptionsPanel::populateFilterTypes(IDataset* table)
    {
       assert(m_filter_tree);
 
@@ -200,7 +200,7 @@ namespace ctb::app
       m_check_map.clear();
 
       // get the available filters for this grid table, and add them to the tree.
-      auto filters = grid_table->availableStringFilters();
+      auto filters = table->availableStringFilters();
       auto root = m_filter_tree->AddRoot(wxEmptyString);
       for (auto& filter : filters)
       {
@@ -231,10 +231,10 @@ namespace ctb::app
    }
 
 
-   wxArrayString GridOptionsPanel::getSortOptionList(GridTable* grid_table)
+   wxArrayString GridOptionsPanel::getSortOptionList(IDataset* table)
    {
-      return vws::all(grid_table->availableSortConfigs()) 
-               | vws::transform([](const GridTableSortConfig& s) {  return wxString{s.sort_name.data(), s.sort_name.length() };  })
+      return vws::all(table->availableSortConfigs()) 
+               | vws::transform([](const CtSortConfig& s) {  return wxString{s.sorter_name.data(), s.sorter_name.length() };  })
                | rng::to<wxArrayString>();
    }
 
@@ -306,7 +306,7 @@ namespace ctb::app
       if ( !maybe_filter or !item.IsOk() )
          return;
 
-      // if the filter node has selected childen, update the lable with the count
+      // if the filter node has selected children, update the label with the count
       wxString filter_name{ wxFromSV(maybe_filter->filterName()) };
       auto count = m_check_map[item];
       if (count)
@@ -334,7 +334,7 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::notify(GridTableEvent event)
+   void GridOptionsPanel::notify(DatasetEvent event)
    {
       assert(event.m_grid_table);
 
@@ -342,20 +342,20 @@ namespace ctb::app
       {
          switch (event.m_event_id)
          {
-         case GridTableEvent::Id::TableInitialize:
+         case DatasetEvent::Id::TableInitialize:
             onTableInitialize(event.m_grid_table);
             enableInStockFilter(event.m_grid_table->hasInStockFilter());
             resetInStockCheckbox();
             break;
 
-         case GridTableEvent::Id::Sort:
+         case DatasetEvent::Id::Sort:
             onTableSorted(event.m_grid_table);
             break;
 
-         case GridTableEvent::Id::Filter:               [[fallthrough]];
-         case GridTableEvent::Id::SubStringFilter:      [[fallthrough]];
-         case GridTableEvent::Id::RowSelected:          [[fallthrough]];
-         case GridTableEvent::Id::GridLayoutRequested:  [[fallthrough]];
+         case DatasetEvent::Id::Filter:               [[fallthrough]];
+         case DatasetEvent::Id::SubStringFilter:      [[fallthrough]];
+         case DatasetEvent::Id::RowSelected:          [[fallthrough]];
+         case DatasetEvent::Id::GridLayoutRequested:  [[fallthrough]];
          default:
             break;
          }
@@ -371,19 +371,19 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::onTableInitialize(GridTable* grid_table)
+   void GridOptionsPanel::onTableInitialize(IDataset* table)
    {
       // reload sort/filter options
       m_sort_combo->Clear();
-      m_sort_combo->Append(getSortOptionList(grid_table));
-      onTableSorted(grid_table);
-      populateFilterTypes(grid_table);
+      m_sort_combo->Append(getSortOptionList(table));
+      onTableSorted(table);
+      populateFilterTypes(table);
    }
 
 
-   void GridOptionsPanel::onTableSorted(GridTable* grid_table)
+   void GridOptionsPanel::onTableSorted(IDataset* table)
    {
-      m_sort_config = grid_table->activeSortConfig();
+      m_sort_config = table->activeSortConfig();
       TransferDataToWindow();
    }
 
@@ -395,7 +395,7 @@ namespace ctb::app
       TransferDataFromWindow();
       if (m_sink.hasTable() and m_sink.getTable()->enableInStockFilter(m_instock_only))
       {
-         m_sink.signal_source(GridTableEvent::Id::Filter);
+         m_sink.signal_source(DatasetEvent::Id::Filter);
       }
       else{
          // something went wrong, so clear checkbox.
@@ -411,7 +411,7 @@ namespace ctb::app
       {
          if ( m_sink.getTable()->setMinScoreFilter(event.GetValue()) )
          {
-            m_sink.signal_source(GridTableEvent::Id::Filter);
+            m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
    }
@@ -431,14 +431,14 @@ namespace ctb::app
       {
          if (m_sink.getTable()->setMinScoreFilter(m_score_filter_val))
          {
-            m_sink.signal_source(GridTableEvent::Id::Filter);
+            m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
       else 
       {
          if (m_sink.getTable()->setMinScoreFilter(std::nullopt))
          {
-            m_sink.signal_source(GridTableEvent::Id::Filter);
+            m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
    }
@@ -453,7 +453,7 @@ namespace ctb::app
          if (table)
          {
             table->applySortConfig(m_sort_config);
-            m_sink.signal_source(GridTableEvent::Id::Sort);
+            m_sink.signal_source(DatasetEvent::Id::Sort);
          }
       }
       catch(Error& err)
@@ -480,7 +480,7 @@ namespace ctb::app
             if (table)
             {
                table->applySortConfig(m_sort_config);
-               m_sink.signal_source(GridTableEvent::Id::Sort);
+               m_sink.signal_source(DatasetEvent::Id::Sort);
             }
             });
       }
@@ -512,11 +512,11 @@ namespace ctb::app
             return;
          }
 
-         auto grid_table = m_sink.getTable();
-         assert(grid_table);
+         auto data = m_sink.getTable();
+         assert(data);
 
          auto& filter = m_filters[filter_node.m_pItem]; 
-         for (auto& match_val : filter->getMatchValues(grid_table.get()) )
+         for (auto& match_val : filter->getMatchValues(data.get()) )
          {
             auto item = m_filter_tree->AppendItem(filter_node, match_val.c_str());
             m_filter_tree->SetItemImage(item, 1);

@@ -8,7 +8,7 @@
 #pragma once
 
 #include "App.h"
-#include "interfaces/GridTableEvent.h"
+#include "interfaces/DatasetEvent.h"
 
 #include <ctb/DisplayColumn.h>
 #include <ctb/PropFilter.h>
@@ -25,32 +25,33 @@
 #include <vector>
 
 
+
 namespace ctb::app
 {
 
-   /// @brief GridTable-derived class used with CellarTrackerGrid to display table data from CellarTracker.com
+   /// @brief IDataset-derived class used with CellarTrackerGrid to display table data from CellarTracker.com
    ///
    /// This class is NOT THREADSAFE at the instance level. This shouldn't be a problem since this class is meant
    /// to be used from UI code (specifically CellarTrackerGrid). 
    /// 
-   class GridTableWineList : public GridTable
+   class GridTableWineList : public IDataset
    {
    public:
       /// @brief type used for describing how to display a column in the grid
-      using RecordType          = WineListRecord;
-      using TableType           = WineListData;
-      using TableProperty       = RecordType::TableProperty;
-      using PropId              = RecordType::PropId;
-      using DisplayColumn       = DisplayColumn<RecordType>;
-      using PropStringFilterMgr = PropStringFilterMgr<RecordType>;
-      using SubStringFilter     = SubStringFilter<RecordType>;
-      using TableSort           = TableSorter<RecordType>;
+      using Record          = WineListRecord;
+      using TableType           = TableType;
+      using TableProperty       = Record::TableProperty;
+      using PropId              = Record::PropId;
+      using DisplayColumn       = DisplayColumn<Record>;
+      using PropStringFilterMgr = PropStringFilterMgr<Record>;
+      using SubStringFilter     = SubStringFilter<Record>;
+      using TableSort           = TableSorter<Record>;
       using GridTableSortConfig = GridTableSortConfig;
-      using PropFilter          = PropFilter<RecordType, TableProperty>;
+      using PropFilter          = PropFilter<Record, TableProperty>;
 
       /// @brief static factory method to create an instance of the GridTableWineList class
       /// 
-      [[nodiscard]] static GridTablePtr create(WineListData&& data);
+      [[nodiscard]] static IDatasetPtr create(TableType&& data);
 
       /// @brief list of display columns that can be used for a grid.
       ///
@@ -227,14 +228,14 @@ namespace ctb::app
       PropFilter                       m_instock_filter{};
       PropFilter                       m_score_filter{};
       PropStringFilterMgr              m_prop_string_filters{};
-      WineListData*                    m_current_view{};         // may point to m_grid_data or m_filtered_data depending if filter is active
-      WineListData                     m_grid_data{};            // the underlying data records for this table.
-      WineListData                     m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
+      TableType*                       m_current_view{};         // may point to m_grid_data or m_filtered_data depending if filter is active
+      TableType                        m_grid_data{};            // the underlying data records for this table.
+      TableType                        m_filtered_data{};        // due to mechanics of wxGrid, we need to copy the dataset when filtering
       GridTableSortConfig              m_sort_config{};
       std::optional<SubStringFilter>   m_substring_filter{};
 
       /// @brief private constructor used by static create()
-      GridTableWineList(WineListData&& data) : 
+      GridTableWineList(TableType&& data) : 
          m_display_columns(DefaultDisplayColumns.begin(), DefaultDisplayColumns.end()),
          m_instock_filter{ PropId::Quantity, std::greater<TableProperty>(), uint16_t{0} },
          m_score_filter{ {PropId::CTScore, PropId::MYScore}, std::greater_equal<TableProperty>(), constants::FILTER_SCORE_DEFAULT },
@@ -250,7 +251,7 @@ namespace ctb::app
       void sortData();
       bool isFilterActive() { return m_current_view = &m_filtered_data; }
 
-      // Inherited via GridTable
+      // Inherited via IDataset
       std::vector<uint64_t> getWineIds() override;
    };
 

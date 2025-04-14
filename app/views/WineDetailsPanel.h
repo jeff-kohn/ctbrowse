@@ -10,7 +10,7 @@
 #include "App.h"
 #include "tasks.h"
 #include "LabelImageCache.h"
-#include "grid/ScopedEventSink.h"
+#include "model/ScopedEventSink.h"
 
 
 #include <wx/panel.h>
@@ -22,7 +22,7 @@ class wxGenericStaticBitmap;
 namespace ctb::app
 {
 
-   class WineDetailsPanel final : public wxPanel, public IGridTableEventSink
+   class WineDetailsPanel final : public wxPanel, public IDatasetEventSink
    {
    public:
       /// @brief creates and initializes a panel for showing wine details
@@ -31,7 +31,7 @@ namespace ctb::app
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its own lifetime). 
       /// 
-      [[nodiscard]] static WineDetailsPanel* create(wxWindow* parent, GridTableEventSourcePtr source, LabelCachePtr cache);
+      [[nodiscard]] static WineDetailsPanel* create(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache);
 
       // no copy/move/assign, this class is created on the heap.
       WineDetailsPanel(const WineDetailsPanel&) = delete;
@@ -88,15 +88,15 @@ namespace ctb::app
       //auto checkForLabel() const -> LabelStatus;
 
       /// event source related handlers
-      void notify(GridTableEvent event) override;
-      void updateDetails(GridTableEvent event);
+      void notify(DatasetEvent event) override;
+      void updateDetails(DatasetEvent event);
 
       // windows event handlers
       void onLabelTimer(wxTimerEvent& event);
       void onViewWebPage(wxCommandEvent& event);
 
       // private ctor used by create()
-      explicit WineDetailsPanel(GridTableEventSourcePtr source, LabelCachePtr cache);
+      explicit WineDetailsPanel(DatasetEventSourcePtr source, LabelCachePtr cache);
    };
 
 } // namespace ctb::app

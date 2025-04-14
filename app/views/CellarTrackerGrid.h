@@ -8,7 +8,7 @@
 #pragma once
 
 #include "App.h"
-#include "grid/ScopedEventSink.h"
+#include "model/ScopedEventSink.h"
 
 #include <wx/grid.h>
 
@@ -18,7 +18,7 @@ namespace ctb::app
    /// @brief grid class used for displaying CellarTracker table data
    ///
    /// 
-   class CellarTrackerGrid : public wxGrid, public IGridTableEventSink
+   class CellarTrackerGrid : public wxGrid, public IDatasetEventSink
    {
    public:
       /// @brief creates and initializes a grid window for displaying CellarTracker data
@@ -27,7 +27,7 @@ namespace ctb::app
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its lifetime). 
       /// 
-      [[nodiscard]] static CellarTrackerGrid* create(wxWindow* parent, GridTableEventSourcePtr source);
+      [[nodiscard]] static CellarTrackerGrid* create(wxWindow* parent, DatasetEventSourcePtr source);
 
       /// @brief filter the table by performing a substring search across all columns
       ///
@@ -58,19 +58,19 @@ namespace ctb::app
       CellarTrackerGrid& operator=(CellarTrackerGrid&&) = delete;
 
    protected:
-      GridTablePtr    m_grid_table{};
+      IDatasetPtr    m_grid_table{};
       ScopedEventSink m_sink;
       
-      void notify(GridTableEvent event) override;
+      void notify(DatasetEvent event) override;
       void onGridCellChanging(wxGridEvent& event);
       void onDestroyWindow(wxWindowDestroyEvent& event);
 
 
       void initGrid();
-      void setGridTable(GridTablePtr tbl);
+      void setGridTable(IDatasetPtr tbl);
 
       /// @brief private ctor used by static create()
-      explicit CellarTrackerGrid(GridTableEventSourcePtr source) : m_sink{ this, source }
+      explicit CellarTrackerGrid(DatasetEventSourcePtr source) : m_sink{ this, source }
       {}
    };
 

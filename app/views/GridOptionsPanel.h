@@ -8,7 +8,7 @@
 #pragma once
 
 #include "App.h"
-#include "grid/ScopedEventSink.h"
+#include "model/ScopedEventSink.h"
 
 #include <wx/choice.h>
 #include <wx/dataview.h>
@@ -23,7 +23,7 @@
 namespace ctb::app
 {
    /// @brief panel class that provides UI for sorting and filtering a grid
-   class GridOptionsPanel final : public wxPanel, public IGridTableEventSink
+   class GridOptionsPanel final : public wxPanel, public IDatasetEventSink
    {
    public:
       /// @brief creates and initializes a panel for showing grid sort/filter options
@@ -32,7 +32,7 @@ namespace ctb::app
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its lifetime). 
       /// 
-      [[nodiscard]] static GridOptionsPanel* create(wxWindow* parent, GridTableEventSourcePtr source);
+      [[nodiscard]] static GridOptionsPanel* create(wxWindow* parent, DatasetEventSourcePtr source);
    
       // no copy/move/assign, this class is created on the heap.
       GridOptionsPanel(const GridOptionsPanel&) = delete;
@@ -42,7 +42,7 @@ namespace ctb::app
       ~GridOptionsPanel() override = default;
       
    private:
-      using MaybeFilter = std::optional<GridTableFilter>;
+      using MaybeFilter = std::optional<CtStringFilter>;
       using FilterMap = std::map<wxTreeItemId, MaybeFilter>; // map tree node to corresponding filter config
       using CheckCountMap = std::map<wxTreeItemId, int>;     // for keeping track of number of filter items selected 
 
@@ -57,7 +57,7 @@ namespace ctb::app
       double                m_score_filter_val{};
       ScopedEventSink       m_sink;           // no default init
       wxChoice*             m_sort_combo{};
-      GridTableSortConfig   m_sort_config{};
+      CtSortConfig          m_sort_config{};
 
       // window creation
       void initControls();
@@ -66,7 +66,7 @@ namespace ctb::app
       void addPropFilter(wxTreeItemId item);
       void removePropFilter(wxTreeItemId item);
       MaybeFilter getPropFilterForItem(wxTreeItemId item);
-      wxArrayString getSortOptionList(GridTable* grid_table);
+      wxArrayString getSortOptionList(IDataset* grid_table);
       bool isChecked(wxTreeItemId item);
       bool isContainerNode(wxTreeItemId item);
       bool isMatchValueNode(wxTreeItemId item);
@@ -79,10 +79,10 @@ namespace ctb::app
       void resetInStockCheckbox();
 
       /// event source related handlers
-      void notify(GridTableEvent event) override;
-      void onTableInitialize(GridTable* grid_table);
-      void onTableSorted(GridTable* grid_table);
-      void populateFilterTypes(GridTable* grid_table);
+      void notify(DatasetEvent event) override;
+      void onTableInitialize(IDataset* grid_table);
+      void onTableSorted(IDataset* grid_table);
+      void populateFilterTypes(IDataset* grid_table);
 
       /// event handlers
       void OnInStockChecked(wxCommandEvent& event);
@@ -94,7 +94,7 @@ namespace ctb::app
       void onTreeFilterLeftClick(wxMouseEvent& event);
 
       /// @brief private ctor used by static create()
-      explicit GridOptionsPanel(GridTableEventSourcePtr source);
+      explicit GridOptionsPanel(DatasetEventSourcePtr source);
    };
 
 } // namespace ctb::app

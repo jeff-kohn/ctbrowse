@@ -70,7 +70,7 @@ namespace ctb::app
 
          // need to read some defaults from config settings.
          auto cfg = wxGetApp().getConfig();
-         cfg->SetPath(constants::CONFIG_PATH_SYNC);
+         cfg->SetPath(constants::CONFIG_PATH_PREFERENCE_DATASYNC);
 
          // default-selected tables are stored as a string of enum values (e.g int values not names)
          // delimited by ENUM_DELIMTER. The default value is the table enum value 0 (List)
@@ -128,7 +128,7 @@ namespace ctb::app
 
          // Save relevant settings to config
          auto cfg = wxGetApp().getConfig();
-         cfg->SetPath(constants::CONFIG_PATH_SYNC);
+         cfg->SetPath(constants::CONFIG_PATH_PREFERENCE_DATASYNC);
          cfg->Write(wxString(constants::CONFIG_VALUE_SYNC_ON_STARTUP), m_startup_sync_val);
          if (m_save_default_val)
          {

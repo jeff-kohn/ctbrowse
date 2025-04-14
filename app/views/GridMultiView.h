@@ -1,7 +1,7 @@
 #pragma once
 
 #include "App.h"
-#include "grid/ScopedEventSink.h"
+#include "model/ScopedEventSink.h"
 
 #include <wx/splitter.h>
 #include <memory>
@@ -16,13 +16,13 @@ namespace ctb::app
    class LabelImageCache;
    using LabelCachePtr = std::shared_ptr<LabelImageCache>;
 
-   struct IGridTableEventSource;
-   using EventSourcePtr = std::shared_ptr<IGridTableEventSource>;
+   struct IDatasetEventSource;
+   using EventSourcePtr = std::shared_ptr<IDatasetEventSource>;
 
 
    /// @brief Window class that implements three nested grid views using splitter windows.
    ///
-   class GridMultiView final : public wxSplitterWindow, public IGridTableEventSink
+   class GridMultiView final : public wxSplitterWindow, public IDatasetEventSink
    {
    public:
       /// @brief static factory method to create an initialize an instance of the GridPanelsView class
@@ -53,13 +53,13 @@ namespace ctb::app
       wxSplitterWindow*  m_right_splitter{};
       GridOptionsPanel*  m_options_panel{};
       WineDetailsPanel*  m_details_panel{};
-      CellarTrackerGrid* m_grid{};
+      wxWindow* m_grid{};
       ScopedEventSink    m_sink;
 
       GridMultiView(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache);
 
-      // Inherited via IGridTableEventSink
-      void notify(GridTableEvent event) override;
+      // Inherited via IDatasetEventSink
+      void notify(DatasetEvent event) override;
    };
 
 

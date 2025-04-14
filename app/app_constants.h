@@ -17,8 +17,8 @@ namespace ctb::constants
    inline constexpr const char* CMD_VIEWS_RESIZE_GRID_LBL         = "&Resize Grid Columns";
    inline constexpr const char* CMD_VIEWS_RESIZE_GRID_TIP         = "Resize the grid columns to fit the data";
 
-   inline constexpr const char* CONFIG_PATH_SYNC                  = "/Preferences/DataSync";
    inline constexpr const char* CONFIG_PATH_PREFERENCES           = "/Preferences";
+   inline constexpr const char* CONFIG_PATH_PREFERENCE_DATASYNC   = "/Preferences/DataSync";
 
    inline constexpr const char* CONFIG_VALUE_DEFAULT_SYNC_TABLES  = "DefaultSyncTables";
    inline constexpr const char* CONFIG_VALUE_SYNC_ON_STARTUP      = "SyncOnStartup";
@@ -110,6 +110,7 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_REGION_WINE           = "Region, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_SCORE_MY              = "My Score";
    inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";
+   inline constexpr const char* SORT_OPTION_MY_VALUE              = "My Value";
    inline constexpr const char* SORT_OPTION_VARIETAL_WINE         = "Varietal, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_VINTAGE_WINE          = "Vintage and Wine";
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";

@@ -52,13 +52,13 @@ namespace ctb::app
    } // namespace detail
 
 
-   WineDetailsPanel::WineDetailsPanel(GridTableEventSourcePtr source, LabelCachePtr cache) : 
+   WineDetailsPanel::WineDetailsPanel(DatasetEventSourcePtr source, LabelCachePtr cache) : 
       m_event_sink{ this, source },
       m_label_cache{ cache }
    {}
 
 
-   WineDetailsPanel* WineDetailsPanel::create(wxWindow* parent, GridTableEventSourcePtr source, LabelCachePtr cache)
+   WineDetailsPanel* WineDetailsPanel::create(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache)
    {
       if (!source)
       {
@@ -243,7 +243,7 @@ namespace ctb::app
 
       // View Online button (also outside grid sizer, same as wine name)
       auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_VIEW_ONLINE_TITLE, constants::DETAIL_VIEW_ONLINE_NOTE);
-      top_sizer->Add(view_online_btn, wxSizerFlags().Border(wxALL).Expand());
+      top_sizer->Add(view_online_btn, wxSizerFlags().CenterHorizontal().Border(wxALL));
 
       // image won't correctly scale/redraw unless we use wxFULL_REPAINT_ON_RESIZE
       m_label_image = new wxGenericStaticBitmap(this, wxID_ANY, wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
@@ -317,7 +317,7 @@ namespace ctb::app
    }
 
 
-   void WineDetailsPanel::updateDetails(GridTableEvent event)
+   void WineDetailsPanel::updateDetails(DatasetEvent event)
    {
       using namespace magic_enum;
       
@@ -366,18 +366,18 @@ namespace ctb::app
    }
 
 
-   void WineDetailsPanel::notify(GridTableEvent event)
+   void WineDetailsPanel::notify(DatasetEvent event)
    {
       try
       {
          switch (event.m_event_id)
          {
-         case GridTableEvent::Id::RowSelected:
+         case DatasetEvent::Id::RowSelected:
             updateDetails(event);
             break;
 
-         case GridTableEvent::Id::GridLayoutRequested: [[fallthrough]];
-         case GridTableEvent::Id::TableInitialize:
+         case DatasetEvent::Id::GridLayoutRequested: [[fallthrough]];
+         case DatasetEvent::Id::TableInitialize:
             break;
 
          default:

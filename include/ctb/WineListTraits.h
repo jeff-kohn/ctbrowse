@@ -95,25 +95,36 @@ namespace ctb
       /// @brief getCsvSchema()
       /// @return the CSV schema for this CT table
       /// 
-      static constexpr auto getCsvSchema() -> const auto&       { return CsvSchema;     }
+      static constexpr auto getCsvSchema() -> const auto&
+      {
+         return CsvSchema;
+      }
 
       /// @brief getTableName()
       /// @return the name of this CT table this traits class represents
       /// 
-      static constexpr auto getTableName() -> std::string_view  { return "WineList";  }
+      static constexpr auto getTableName() -> std::string_view 
+      { 
+         return "WineList"; 
+      }
 
       /// @brief small helper to convert a Prop enum into its integer index
       /// 
-      static constexpr int propToIndex(PropId prop)
+      static constexpr auto propToIndex(PropId prop) -> int 
       {
          return enumToIndex(prop);
       }
 
       /// @brief small helper to convert a zero-based index to a Prop enum
       /// 
-      static constexpr PropId propFromIndex(int idx)
+      static constexpr auto propFromIndex(int idx) -> PropId
       {
          return enumFromIndex<PropId>(idx);
+      }
+
+      static constexpr auto supportsInStockFilter() -> bool
+      {
+         return true;
       }
 
       /// @brief this gets called by CtRecordImpl to set any missing property values
@@ -155,7 +166,7 @@ namespace ctb
       }
    };
 
-   using WineListRecord = CtRecordImpl<WineListTraits>;
-   using WineListData   = CtDataset<WineListTraits>;
+   using WineListRecord    = CtRecordImpl<WineListTraits>;
+   using WineListDataset   = CtDataset<WineListTraits>;
 
 } // namespace ctb

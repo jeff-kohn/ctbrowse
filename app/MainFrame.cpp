@@ -11,9 +11,8 @@
 #include "LabelImageCache.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
-#include "views/CellarTrackerGrid.h"
-#include "grid/GridTableLoader.h"
-#include "grid/GridTableWineList.h"
+#include "model/DatasetEventSource.h"
+#include "model/DatasetLoader.h"
 #include "views/GridOptionsPanel.h"
 #include "views/WineDetailsPanel.h"
 #include "views/GridMultiView.h"
@@ -51,20 +50,10 @@ namespace ctb::app
 
    using namespace magic_enum;
 
-   // we don't use enum class because then every time we need to pass an ID to wxObject,
-   // we'd have to cast or use std::to_underlying and that's just an ugly waste of time 
-   // with no benefit for this use-case.
-   enum CmdId : uint16_t
-   {
-      CMD_FILE_DOWNLOAD_DATA = wxID_HIGHEST,
-      CMD_FILE_SETTINGS,
-      CMD_VIEW_WINE_LIST,
-      CMD_VIEW_RESIZE_GRID
-   };
 
 
    MainFrame::MainFrame() : 
-      m_event_source{ GridTableEventSource::create() },
+      m_event_source{ DatasetEventSource::create() },
       m_sink{ this, m_event_source },
       m_label_cache{ std::make_shared<LabelImageCache>(wxGetApp().labelCacheFolder().generic_string()) }
    {
@@ -126,6 +115,8 @@ namespace ctb::app
          SetClientSize(FromDIP(wxSize(800, 600)));
          Center(wxBOTH);
       }
+
+      
    }
 
 
@@ -364,11 +355,11 @@ namespace ctb::app
          }
 
          // load table and connect it to the event source
-         GridTableLoader loader{ wxGetApp().userDataFolder() };
-         auto tbl = loader.getGridTable(GridTableLoader::GridTableId::WineList);
+         DatasetLoader loader{ wxGetApp().userDataFolder() };
+         auto tbl = loader.getDataset(TableId::List);
          m_event_source->setTable(tbl);
-         tbl->applySortConfig(GridTableWineList::getSortConfig(0));
-         m_event_source->signal(GridTableEvent::Id::Sort);
+//         tbl->applySortConfig(GridTableWineList::getSortConfig(0));
+        // m_event_source->signal(DatasetEvent::Id::Sort);
 
          Layout();
          SendSizeEvent();
@@ -404,7 +395,7 @@ namespace ctb::app
 
    void MainFrame::onMenuViewResizeGrid(wxCommandEvent&)
    {
-      m_event_source->signal(GridTableEvent::Id::GridLayoutRequested);
+      m_event_source->signal(DatasetEvent::Id::GridLayoutRequested);
    }
 
 
@@ -450,27 +441,28 @@ namespace ctb::app
 
    void MainFrame::doSearchFilter()
    {
-      if (!m_view->grid()) return;
-      try
-      {
-         if (m_view->grid()->filterBySubstring(m_search_ctrl->GetValue().wx_str()))
-         {
-            m_event_source->signal(GridTableEvent::Id::SubStringFilter);
-         }
-         else{
-            // clear any previous search filter, because that search text is no longer displayed.
-            m_view->grid()->clearSubStringFilter();
-         }
-      }
-      catch(Error& e)
-      {
-         wxGetApp().displayErrorMessage(e);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
-      }
-      updateStatusBarCounts();
+      return;
+      //if (!m_view->grid()) return;
+      //try
+      //{
+      //   if (m_view->grid()->filterBySubstring(m_search_ctrl->GetValue().wx_str()))
+      //   {
+      //      m_event_source->signal(DatasetEvent::Id::SubStringFilter);
+      //   }
+      //   else{
+      //      // clear any previous search filter, because that search text is no longer displayed.
+      //      m_view->grid()->clearSubStringFilter();
+      //   }
+      //}
+      //catch(Error& e)
+      //{
+      //   wxGetApp().displayErrorMessage(e);
+      //}
+      //catch(std::exception& e)
+      //{
+      //   wxGetApp().displayErrorMessage(e.what());
+      //}
+      //updateStatusBarCounts();
    }
 
 
@@ -480,7 +472,7 @@ namespace ctb::app
       try
       {
          m_search_ctrl->ChangeValue("");
-         m_view->grid()->clearSubStringFilter();
+         //m_view->grid()->clearSubStringFilter();
 
       }
       catch(Error& e)
@@ -521,7 +513,7 @@ namespace ctb::app
    }
 
 
-   void MainFrame::notify([[maybe_unused]] GridTableEvent event)
+   void MainFrame::notify([[maybe_unused]] DatasetEvent event)
    {
       updateStatusBarCounts();
    }
