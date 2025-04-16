@@ -5,14 +5,6 @@
 
 namespace ctb::app
 {
-   DatasetListView::DatasetListView(DatasetEventSourcePtr source) : m_sink{ this, source }
-   {
-   }
-
-   void DatasetListView::notify([[maybe_unused]] DatasetEvent event)
-   {
-   }
-
 
    [[nodiscard]] DatasetListView* DatasetListView::create(wxWindow* parent, DatasetEventSourcePtr source)
    {
@@ -38,19 +30,43 @@ namespace ctb::app
 
    void DatasetListView::initControls()
    {
-      auto model = m_sink.getTable();
-      if (!model)
-      {
-         log::error("DatasetListView initialized with null dataset ptr, cannot continue");
-         throw ctb::Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
-      }
-      AssociateModel(model.get());
-      //AppendTextColumn("Wine", enumToIndex(WineListTraits::PropId::WineAndVintage));
-      //AppendTextColumn("Region/Appellation", enumToIndex(WineListTraits::PropId::Locale));
+      AppendTextColumn("Wine", 0);
+      AppendTextColumn("Region/Appellation", 1);
    }
 
-   void DatasetListView::setDataset()
+   void DatasetListView::setDataset(DatasetBase* dataset)
    {
+      if (!dataset)
+      {
+         assert("DatasetBase* cannot == nullptr" and false);
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      }
+      m_dataset = dataset;
+      AssociateModel(m_dataset.get());
+   }
+
+   void DatasetListView::notify([[maybe_unused]] DatasetEvent event)
+   {
+      switch (event.m_event_id)
+      {
+         case DatasetEvent::Id::TableInitialize:
+            setDataset(event.m_data);
+            break;
+
+         case DatasetEvent::Id::TableRemove:
+            setDataset(nullptr);
+            break;
+
+         case DatasetEvent::Id::Sort:   [[fallthrough]];
+         case DatasetEvent::Id::Filter: [[fallthrough]];
+         case DatasetEvent::Id::SubStringFilter:
+            m_dataset->Reset(m_dataset->GetCount());
+            break;
+
+         case DatasetEvent::Id::ColLayoutRequested: [[fallthrough]];
+         case DatasetEvent::Id::RowSelected:        [[fallthrough]];
+         default:
+      }
    }
 
 } // namespace ctb::app

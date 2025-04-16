@@ -77,13 +77,13 @@ namespace ctb::app
       /// 
       /// be sure to check the return value as it could be nullptr
       /// 
-      [[nodiscard]] IDatasetPtr getTable()
+      [[nodiscard]] DatasetPtr getTable()
       {
          if (m_source)
          {
             return m_source->getTable();
          }
-         return IDatasetPtr{};
+         return DatasetPtr{};
       }
 
       /// @brief returns whether the event source has a table attached or not.

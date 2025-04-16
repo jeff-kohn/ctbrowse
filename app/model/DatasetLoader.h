@@ -59,7 +59,7 @@ namespace ctb::app
       ///
       /// this will throw an exception if the table couldn't be loaded.
       ///
-      auto getDataset(TableId tbl) -> IDatasetPtr;
+      auto getDataset(TableId tbl) -> DatasetPtr;
 
    private:
       fs::path m_data_folder{constants::CURRENT_DIRECTORY};

@@ -21,10 +21,10 @@ namespace ctb::app
 {
    using namespace magic_enum;
 
-   auto DatasetLoader::getDataset(TableId tbl) -> IDatasetPtr
+   auto DatasetLoader::getDataset(TableId tbl) -> DatasetPtr
    {
       Overloaded TableFactory{
-         [this](enum_constant<TableId::List>)  -> IDatasetPtr
+         [this](enum_constant<TableId::List>)  -> DatasetPtr
             { 
                auto table_data = loadTableData<WineListDataset>(m_data_folder, TableId::List);
                if (!table_data)

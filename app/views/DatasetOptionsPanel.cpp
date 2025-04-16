@@ -189,7 +189,7 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::populateFilterTypes(IDataset* table)
+   void DatasetOptionsPanel::populateFilterTypes(DatasetBase* table)
    {
       assert(m_filter_tree);
 
@@ -231,7 +231,7 @@ namespace ctb::app
    }
 
 
-   wxArrayString DatasetOptionsPanel::getSortOptionList(IDataset* table)
+   wxArrayString DatasetOptionsPanel::getSortOptionList(DatasetBase* table)
    {
       return vws::all(table->availableSortConfigs()) 
                | vws::transform([](const CtSortConfig& s) {  return wxString{s.sorter_name.data(), s.sorter_name.length() };  })
@@ -366,7 +366,7 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onTableInitialize(IDataset* table)
+   void DatasetOptionsPanel::onTableInitialize(DatasetBase* table)
    {
       // reload sort/filter options
       m_sort_combo->Clear();
@@ -376,7 +376,7 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onTableSorted(IDataset* table)
+   void DatasetOptionsPanel::onTableSorted(DatasetBase* table)
    {
       m_sort_config = table->activeSortConfig();
       TransferDataToWindow();

@@ -25,7 +25,7 @@ namespace ctb::app
 
 
    /// @brief assigns a table to this source.
-   bool DatasetEventSource::setTable(IDatasetPtr table)
+   bool DatasetEventSource::setTable(DatasetPtr table)
    {
       SPDLOG_DEBUG("DatasetEventSource::setTable() called.");
 
@@ -41,7 +41,7 @@ namespace ctb::app
 
 
    /// @brief retrieves a pointer to the active table for this source, if any.
-   IDatasetPtr DatasetEventSource::getTable()
+   DatasetPtr DatasetEventSource::getTable()
    {
       return m_data;
    }
@@ -76,7 +76,7 @@ namespace ctb::app
          { 
             try
             {
-               observer->notify({ event_id, m_data.get(), row_idx }); 
+               observer->notify({ event_id, m_data.get(), row_idx});
             }
             catch(...){
                retval = false;

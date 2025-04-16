@@ -1,7 +1,7 @@
 /*******************************************************************
  * @file DatasetBase.h
  *
- * @brief Header file for the IDataset base class
+ * @brief Header file for the DatasetBase base class
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
@@ -32,13 +32,14 @@ namespace ctb::app
    };
 
 
-   /// @brief our "data model", provides a base class interface for accessing CellarTracker data
+   /// @brief Data model class that provides a base implementation for accessing CellarTracker data
    /// 
-   /// users of this interface should gain access through 
-   /// IDatasetEventSource::getTable() or using the ptr supplied when
-   /// handling IDatasetEventSource::notify()
+   /// Each CT table the app uses will derive form this class.
    /// 
-   class IDataset : public wxDataViewVirtualListModel
+   /// Users of this interface should gain access through IDatasetEventSource::getTable() or 
+   /// using the ptr supplied when handling IDatasetEventSource::notify()
+   /// 
+   class DatasetBase : public wxDataViewVirtualListModel
    {
    public:
       using SortConfigs = std::vector<CtSortConfig>;
@@ -48,11 +49,11 @@ namespace ctb::app
       /// the index in this vector corresponds to the index in the sort_index
       /// property.
       /// 
-      virtual auto availableSortConfigs() const -> SortConfigs = 0;
+      virtual auto availableSortConfigs() const->SortConfigs = 0;
 
       /// @brief returns the currently active sort option
       ///
-      virtual auto activeSortConfig() const -> CtSortConfig = 0;
+      virtual auto activeSortConfig() const->CtSortConfig = 0;
 
       /// @brief specifies a new sort option, triggers DatasetEvent::Sort
       ///
@@ -60,11 +61,11 @@ namespace ctb::app
 
       /// @brief retrieves a list of available filters for this table.
       ///
-      virtual auto availableStringFilters() const -> CtStringFilters = 0;
+      virtual auto availableStringFilters() const->CtStringFilters = 0;
 
       /// @brief get a list of values that can be used to filter on a column in the table
       ///
-      virtual auto getFilterMatchValues(int prop_idx) const -> StringSet = 0;
+      virtual auto getFilterMatchValues(int prop_idx) const->StringSet = 0;
 
       /// @brief adds a match value filter for the specified column.
       ///
@@ -115,7 +116,7 @@ namespace ctb::app
 
       /// @brief retrieves the minimum score filter value if active.
       /// 
-      virtual auto getMinScoreFilter() const -> NullableDouble = 0;
+      virtual auto getMinScoreFilter() const->NullableDouble = 0;
 
       /// @brief set the minimum score filter
       ///
@@ -128,12 +129,12 @@ namespace ctb::app
       /// 
       /// @return the property value formatted as a string if found, std::nullopt if not found 
       ///
-      virtual auto getDetailProp(int row_idx, std::string_view prop_name) const -> const CtProperty& = 0;
+      virtual auto getDetailProp(int row_idx, std::string_view prop_name) const -> const CtProperty & = 0;
 
       /// @return the name of the CT table this dataset represents. Not meant to be 
       ///         displayed to the user, this is for internal use. 
       /// 
-      virtual auto getTableName() const -> std::string_view = 0;
+      virtual auto getTableName() const->std::string_view = 0;
 
       /// @brief returns the total number of records in the underlying dataset
       ///
@@ -142,18 +143,19 @@ namespace ctb::app
 
       /// @brief returns the number of records with filters applied.
       ///
-      virtual int filteredRowCount() const  = 0;
+      virtual int filteredRowCount() const = 0;
 
       /// @brief destructor
       ///
-      ~IDataset() noexcept override
-      {}
+      ~DatasetBase() noexcept override
+      {
+      }
    };
 
 
-   /// @brief the smart-ptr-to-base that's used to work with the IDataset interface 
+   /// @brief the smart-ptr-to-base that's used to work with the DatasetBase interface 
    ///
-   using IDatasetPtr = wxObjectDataPtr<IDataset>;
+   using DatasetPtr = wxObjectDataPtr<DatasetBase>;
 
 
 }  // namespace ctb::app

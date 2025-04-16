@@ -15,11 +15,9 @@ namespace ctb::app
          std::unique_ptr<DatasetMultiView> wnd{ new DatasetMultiView{ parent, source, cache } };
          return wnd.release(); // top-level window manages its own lifetime, we return non-owning pointer
       }
-      catch (...)
-      {
-         auto e = packageError();
-         log::exception(e);
-         throw e;
+      catch (...){
+         log::exception(packageError());
+         throw;
       }
    }
 

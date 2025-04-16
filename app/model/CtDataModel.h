@@ -22,7 +22,7 @@ namespace ctb::app
    /// filtering options for other properties.
    /// 
    template<typename DatasetT>
-   class CtDataModel : public IDataset
+   class CtDataModel : public DatasetBase
    {
    public:
       using Dataset             = DatasetT;
@@ -37,7 +37,7 @@ namespace ctb::app
       using PropStringFilterMgr = PropStringFilterMgr<Record>;
       using SubStringFilter     = SubStringFilter<Record>;
       using TableSort           = TableSorter<Record>;
-      using SortConfigs         = IDataset::SortConfigs;
+      using SortConfigs         = DatasetBase::SortConfigs;
 
 
       /// @brief list of display columns that will show in the list view
@@ -71,9 +71,9 @@ namespace ctb::app
          CtStringFilter{ constants::FILTER_APPELATION, static_cast<int>(PropId::Appellation)    }
       };
 
-      static auto create(Dataset data) -> IDatasetPtr
+      static auto create(Dataset data) -> DatasetPtr
       {
-         return IDatasetPtr{ static_cast<IDataset*>(new CtDataModel{ std::move(data) }) };
+         return DatasetPtr{ static_cast<DatasetBase*>(new CtDataModel{ std::move(data) }) };
       }
 
       /// @brief  get a list of the columns that will be displayed in the list
@@ -280,16 +280,6 @@ namespace ctb::app
          return Traits::getTableName();
       }
 
-      void GetValueByRow(wxVariant& variant, unsigned row, unsigned col) const override
-      {
-         // TODO
-      }
-
-      bool SetValueByRow(const wxVariant& variant, unsigned row, unsigned col) override
-      {
-         return false; // not supported
-      }
-
       int totalRowCount() const override
       {
          return std::ssize(m_data);
@@ -299,6 +289,7 @@ namespace ctb::app
       {
          return std::ssize(*m_current_view);
       }
+
 
       // default dtor, others are deleted since this object is meant to be heap-only
       ~CtDataModel() noexcept override = default;
@@ -384,6 +375,33 @@ namespace ctb::app
       bool isFilterActive() 
       { 
          return m_current_view = &m_filtered_data; 
+      }
+
+      void GetValueByRow(wxVariant& variant, unsigned row, unsigned col) const override
+      {
+         if (row >= m_current_view->size() or col >= m_display_columns.size())
+         {
+            assert(false);
+            SPDLOG_DEBUG("CtDataModel::GetValueByRow() called with invalid coordinates.");
+            return;
+         }
+         auto display_col = m_display_columns[col];
+         auto prop = display_col.prop_id;
+
+         // format as string and return it to caller
+         auto val = (*m_current_view)[row][prop];
+         auto val_str = display_col.getDisplayValue(val);
+         variant = wxString{ val_str.data(), val_str.size() };
+      }
+
+      bool SetValueByRow(const wxVariant&, unsigned, unsigned) override
+      {
+         return false; // not supported
+      }
+
+      unsigned int GetCount()	const override
+      {
+         return static_cast<uint32_t>(m_current_view->size());
       }
    };
 

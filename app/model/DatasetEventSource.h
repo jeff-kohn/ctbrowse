@@ -42,7 +42,7 @@ namespace ctb::app
       ///
       /// the returned table ptr may be null if this source doesn't have an active table.
       /// 
-      IDatasetPtr getTable() override;
+      DatasetPtr getTable() override;
 
       /// @brief assigns a table to this source.
       /// 
@@ -52,7 +52,7 @@ namespace ctb::app
       /// If a null table ptr is passed, this source will no longer fire events 
       /// until a subsequent call to setTable() passes a valid pointer.
       /// 
-      bool setTable(IDatasetPtr table) override;
+      bool setTable(DatasetPtr table) override;
 
       /// @brief attaches an event sink to this source to receive event notifications
       ///
@@ -90,7 +90,7 @@ namespace ctb::app
       ~DatasetEventSource() noexcept override;
 
    private:
-      IDatasetPtr m_data{};
+      DatasetPtr m_data{};
       std::unordered_set<IDatasetEventSink*> m_observers{};
    
       /// @brief default ctor is private, use static create()

@@ -20,14 +20,16 @@ namespace ctb::app
 
    private:
       ScopedEventSink m_sink;
+      DatasetPtr      m_dataset{};
 
       /// @brief private ctor used by static create()
-      explicit DatasetListView(DatasetEventSourcePtr source);
+      explicit DatasetListView(DatasetEventSourcePtr source) : m_sink{ this, source }
+      {}
 
       // window creation
       void initControls();
 
-      void setDataset();
+      void setDataset(DatasetBase* dataset);
 
       // Inherited via IDatasetEventSink
       void notify(DatasetEvent event) override;

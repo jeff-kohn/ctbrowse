@@ -67,7 +67,7 @@ namespace ctb::app
       void addPropFilter(wxTreeItemId item);
       void removePropFilter(wxTreeItemId item);
       MaybeFilter getPropFilterForItem(wxTreeItemId item);
-      wxArrayString getSortOptionList(IDataset* dataset);
+      wxArrayString getSortOptionList(DatasetBase* dataset);
       bool isChecked(wxTreeItemId item);
       bool isContainerNode(wxTreeItemId item);
       bool isMatchValueNode(wxTreeItemId item);
@@ -81,9 +81,9 @@ namespace ctb::app
 
       /// event source related handlers
       void notify(DatasetEvent event) override;
-      void onTableInitialize(IDataset* dataset);
-      void onTableSorted(IDataset* dataset);
-      void populateFilterTypes(IDataset* dataset);
+      void onTableInitialize(DatasetBase* dataset);
+      void onTableSorted(DatasetBase* dataset);
+      void populateFilterTypes(DatasetBase* dataset);
 
       /// event handlers
       void OnInStockChecked(wxCommandEvent& event);

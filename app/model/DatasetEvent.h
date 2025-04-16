@@ -1,7 +1,7 @@
 /*******************************************************************
  * @file DatasetEvent.h
  *
- * @brief Header file defining IDataset event class and related 
+ * @brief Header file defining DatasetBase event class and related 
           source/sink interfaces.
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
@@ -33,7 +33,7 @@ namespace ctb::app
       };
 
       Id                 m_event_id{};
-      IDataset*          m_data{};
+      DatasetBase*       m_data{};
       std::optional<int> m_affected_row{};
    };
 
@@ -73,7 +73,7 @@ namespace ctb::app
       ///
       /// the returned table ptr may be null if this source doesn't have an active table.
       /// 
-      virtual IDatasetPtr getTable() = 0;
+      virtual DatasetPtr getTable() = 0;
 
 
       /// @brief assigns a table to this source.
@@ -83,7 +83,7 @@ namespace ctb::app
       /// If a null table ptr is passed, this view will no longer fire events 
       /// until a subsequent call to setTable() passes a valid pointer.
       /// 
-      virtual bool setTable(IDatasetPtr table) = 0;
+      virtual bool setTable(DatasetPtr table) = 0;
 
 
       /// @brief attaches an event sink to this source to receive event notifications
