@@ -10,7 +10,7 @@ namespace ctb::app
    class DatasetListView final : public wxDataViewCtrl, public IDatasetEventSink
    {
    public:
-      /// @brief creates and initializes a panel for showing grid sort/filter options
+      /// @brief creates and initializes a panel for showing sort/filter options
       ///
       /// throws a ctb::Error if parent or source = nullptr, or if the window can't be created;
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
@@ -21,11 +21,13 @@ namespace ctb::app
    private:
       ScopedEventSink m_sink;
 
+      /// @brief private ctor used by static create()
+      explicit DatasetListView(DatasetEventSourcePtr source);
+
       // window creation
       void initControls();
 
-      /// @brief private ctor used by static create()
-      explicit DatasetListView(DatasetEventSourcePtr source);
+      void setDataset();
 
       // Inherited via IDatasetEventSink
       void notify(DatasetEvent event) override;

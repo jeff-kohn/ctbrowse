@@ -22,11 +22,12 @@
 
 namespace ctb::app
 {
-   /// @brief panel class that provides UI for sorting and filtering a grid
+   /// @brief panel class that provides UI for setting sorting and filtering options
+   ///
    class DatasetOptionsPanel final : public wxPanel, public IDatasetEventSink
    {
    public:
-      /// @brief creates and initializes a panel for showing grid sort/filter options
+      /// @brief creates and initializes a panel for showing sort/filter options
       ///
       /// throws a ctb::Error if parent or source = nullptr, or if the window can't be created;
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
@@ -66,7 +67,7 @@ namespace ctb::app
       void addPropFilter(wxTreeItemId item);
       void removePropFilter(wxTreeItemId item);
       MaybeFilter getPropFilterForItem(wxTreeItemId item);
-      wxArrayString getSortOptionList(IDataset* grid_table);
+      wxArrayString getSortOptionList(IDataset* dataset);
       bool isChecked(wxTreeItemId item);
       bool isContainerNode(wxTreeItemId item);
       bool isMatchValueNode(wxTreeItemId item);
@@ -80,9 +81,9 @@ namespace ctb::app
 
       /// event source related handlers
       void notify(DatasetEvent event) override;
-      void onTableInitialize(IDataset* grid_table);
-      void onTableSorted(IDataset* grid_table);
-      void populateFilterTypes(IDataset* grid_table);
+      void onTableInitialize(IDataset* dataset);
+      void onTableSorted(IDataset* dataset);
+      void populateFilterTypes(IDataset* dataset);
 
       /// event handlers
       void OnInStockChecked(wxCommandEvent& event);

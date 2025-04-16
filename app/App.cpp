@@ -81,13 +81,8 @@ namespace ctb::app
 
          return true;
       }
-      catch(Error& err)
-      {
-         displayErrorMessage(err);
-      }
-      catch(std::exception& e)
-      {
-         displayErrorMessage(e.what());
+      catch(...){
+         displayErrorMessage(packageError());
       }
       return false;
    } 
@@ -137,15 +132,19 @@ namespace ctb::app
    }
 
 
-   void App::displayErrorMessage(const Error& err)
+   void App::displayErrorMessage(const Error& err, bool log_error, std::source_location source_loc)
    {
       auto title = ctb::format(constants::FMT_TITLE_TYPED_ERROR, err.categoryName());
-      displayErrorMessage(err.error_message, title);
+      displayErrorMessage(err.formattedMesage(), log_error, title, source_loc);
    }
 
 
-   void App::displayErrorMessage(const std::string& msg, const std::string& title)
+   void App::displayErrorMessage(const std::string& msg, bool log_error, const std::string& title, std::source_location source_loc)
    {
+      if (log_error)
+      {
+         log::error("Error in '{}:{}' - {}", source_loc.file_name(), source_loc.line(), msg);
+      }
       wxMessageBox(msg, title, wxICON_ERROR | wxOK, m_main_frame);
    }
 

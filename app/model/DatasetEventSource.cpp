@@ -20,7 +20,7 @@ namespace ctb::app
 
    bool DatasetEventSource::hasTable() const
    { 
-      return m_grid_table ? true : false; 
+      return m_data ? true : false; 
    }
 
 
@@ -35,7 +35,7 @@ namespace ctb::app
       if (!signal(DatasetEvent::Id::TableRemove))
          return false;
 
-      m_grid_table = table;
+      m_data = table;
       return signal(DatasetEvent::Id::TableInitialize);
    }
 
@@ -43,7 +43,7 @@ namespace ctb::app
    /// @brief retrieves a pointer to the active table for this source, if any.
    IDatasetPtr DatasetEventSource::getTable()
    {
-      return m_grid_table;
+      return m_data;
    }
 
 
@@ -70,23 +70,17 @@ namespace ctb::app
 
       bool retval{ true };
 
-      if (m_grid_table)
+      if (m_data)
       {
          for (auto observer : m_observers) 
          { 
             try
             {
-               observer->notify({ event_id, m_grid_table.get(), row_idx }); 
+               observer->notify({ event_id, m_data.get(), row_idx }); 
             }
-            catch(Error& err)
-            {
+            catch(...){
                retval = false;
-               wxGetApp().displayErrorMessage(err);
-            }
-            catch(std::exception& e)
-            {
-               retval = false;
-               wxGetApp().displayErrorMessage(e.what());
+               wxGetApp().displayErrorMessage(packageError(), true);
             }
          }
       }

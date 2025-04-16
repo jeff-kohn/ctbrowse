@@ -16,7 +16,7 @@ namespace ctb::app
    /// 
    /// This class contains a dataset representing one of the CT user tables (Wine List, Pending Wines, etc)
    /// It provides access to all properties of the underlying dataset, but also has DisplayColumns, which are 
-   /// the properties displayed in the main listview/grid. 
+   /// the properties displayed in the main listview. 
    /// 
    /// There are methods for searching or sorting value in the list view (i.e. DisplayColumns). There are also 
    /// filtering options for other properties.
@@ -76,7 +76,7 @@ namespace ctb::app
          return IDatasetPtr{ static_cast<IDataset*>(new CtDataModel{ std::move(data) }) };
       }
 
-      /// @brief  get a list of the columns that will be displayed in the grid
+      /// @brief  get a list of the columns that will be displayed in the list
       /// 
       /// the columns are in the order they will be displayed.
       ///
@@ -172,7 +172,7 @@ namespace ctb::app
       ///
       auto filterBySubstring(std::string_view substr) -> bool override
       {
-         // this overload searches all columns in the current grid, so get the prop_id's 
+         // this overload searches all columns in the current listview, so get the prop_id's 
          auto cols = getDisplayColumns() | vws::transform([](const DisplayColumn& disp_col) -> auto { return disp_col.prop_id; })
                                          | rng::to<std::vector>();
 
@@ -205,7 +205,7 @@ namespace ctb::app
       /// @brief apples "in-stock only" filter to the data set, if supported.
       /// @return true if the filter was applied, false if it was not 
       /// 
-      /// not all grid table support this filter, you can check by calling hasInStockFilter()
+      /// not all datasets support this filter, you can check by calling hasInStockFilter()
       /// 
       auto enableInStockFilter(bool enable) -> bool override
       {
@@ -220,7 +220,7 @@ namespace ctb::app
          return true;
       }
 
-      /// @brief indicates whether the grid table supports filtering to in-stock only 
+      /// @brief indicates whether the dataset supports filtering to in-stock only 
       /// @return true if supported, false otherwise.
       /// 
       constexpr auto hasInStockFilter() const -> bool override
@@ -255,7 +255,7 @@ namespace ctb::app
          return true;
       }
 
-      /// @brief Retrieve a property from the underlying table record (as opposed to a grid column)
+      /// @brief Retrieve a property from the underlying dataset for this view
       /// 
       /// Since we don't have table-neutral indices to use, this lookup has to be done by
       /// property name as a string that corresponds to correct enum. 
@@ -272,7 +272,7 @@ namespace ctb::app
       }
 
       /// @brief getTableName()
-      /// @return the name of the CT table this grid table represents. Not meant to be 
+      /// @return the name of the CT table this dataset represents. Not meant to be 
       ///         displayed to the user, this is for internal use. 
       /// 
       auto getTableName() const -> std::string_view override
@@ -328,9 +328,9 @@ namespace ctb::app
          if (m_prop_string_filters.activeFilters() or m_instock_filter.enabled or m_score_filter.enabled)
          {
             m_filtered_data = vws::all(m_data) | vws::filter(m_prop_string_filters)
-               | vws::filter(m_instock_filter)
-               | vws::filter(m_score_filter)
-               | rng::to<Dataset>();
+                                               | vws::filter(m_instock_filter)
+                                               | vws::filter(m_score_filter)
+                                               | rng::to<Dataset>();
             m_current_view = &m_filtered_data;
          }
          else
@@ -385,11 +385,6 @@ namespace ctb::app
       { 
          return m_current_view = &m_filtered_data; 
       }
-
-      //template<typename DatasetT>
-      //CtDataModel::create(DatasetT) -> CtDataModel<DatasetT>;
-
-      // Inherited via IDataset
-};
+   };
 
 } // namespace ctb::app

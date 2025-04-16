@@ -9,9 +9,9 @@
 
 namespace ctb::app
 {
-   class CellarTrackerGrid;   // the grid window
-   class DatasetOptionsPanel;    // the options panel
-   class DetailsPanel;    // details panel
+   class DatasetListView;      // the wine-list window
+   class DatasetOptionsPanel;  // the sort/filter options panel
+   class DetailsPanel;         // details panel
 
    class LabelImageCache;
    using LabelCachePtr = std::shared_ptr<LabelImageCache>;
@@ -20,7 +20,7 @@ namespace ctb::app
    using EventSourcePtr = std::shared_ptr<IDatasetEventSource>;
 
 
-   /// @brief Window class that implements three nested grid views using splitter windows.
+   /// @brief Window class that implements three side-by-side views using splitter windows.
    ///
    class DatasetMultiView final : public wxSplitterWindow, public IDatasetEventSink
    {
@@ -32,13 +32,13 @@ namespace ctb::app
       /// 
       [[nodiscard]] static auto create(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache) -> DatasetMultiView*;
 
-      /// @brief Retrieves the grid window for the view.
-      /// @return pointer to the CellarTrackerGrid window for this view. will always be valid, not nullptr
+      /// @brief Retrieves pointer to the child listview window.
+      /// Will always be valid, not nullptr
       /// 
       template<typename Self>
-      auto* grid(this Self&& self)
+      auto* listView(this Self&& self)
       {
-         return std::forward<Self>(self).m_grid;
+         return std::forward<Self>(self).m_listView;
       }
 
       // no copy/move/assign, this class is created on the heap.
@@ -50,15 +50,16 @@ namespace ctb::app
 
    private:
       // non-owning child window pointers.
-      wxSplitterWindow*  m_right_splitter{};
-      DatasetOptionsPanel*  m_options_panel{};
-      DetailsPanel*  m_details_panel{};
-      wxWindow* m_grid{};
-      ScopedEventSink    m_sink;
+      DatasetOptionsPanel* m_options_panel{};
+      DetailsPanel*        m_details_panel{};
+      DatasetListView*     m_listView{};
+      ScopedEventSink      m_sink;
+      wxSplitterWindow*    m_right_splitter{};
 
+      /// @brief Private constructor, used by DatasetMultiView::create()
       DatasetMultiView(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache);
 
-      // Inherited via IDatasetEventSink
+      // notification of dataset events
       void notify(DatasetEvent event) override;
    };
 

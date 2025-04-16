@@ -21,7 +21,8 @@ namespace ctb::app
    namespace fs = std::filesystem;
 
 
-   /// @brief class to manage a cached collection of grid tables, which are use for grid view in the application
+   /// @brief class to load dataset files from disk.
+   ///
    class DatasetLoader
    {
    public:
@@ -54,7 +55,7 @@ namespace ctb::app
          return m_data_folder;
       }
 
-      /// @brief get the requested grid table
+      /// @brief Get the requested dataset
       ///
       /// this will throw an exception if the table couldn't be loaded.
       ///

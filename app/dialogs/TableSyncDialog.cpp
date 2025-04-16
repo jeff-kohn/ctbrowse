@@ -88,13 +88,8 @@ namespace ctb::app
          TransferDataToWindow();
          return true;
       }
-      catch(Error& err)
-      {
-         wxGetApp().displayErrorMessage(err);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
       return false;
    }
@@ -122,7 +117,7 @@ namespace ctb::app
       {
          if (!TransferDataFromWindow())
          {
-            wxGetApp().displayErrorMessage(constants::ERROR_STR_DIALOG_TRANSFER_FAILED);
+            wxGetApp().displayErrorMessage(constants::ERROR_STR_DIALOG_TRANSFER_FAILED, false);
             return;
          }
 
@@ -138,13 +133,8 @@ namespace ctb::app
 
          EndDialog(wxID_OK);
       }
-      catch(Error& err)
-      {
-         wxGetApp().displayErrorMessage(err);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 

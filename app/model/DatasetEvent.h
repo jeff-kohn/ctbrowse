@@ -29,11 +29,11 @@ namespace ctb::app
          Filter,             /// fired when a dataset has been filtered
          SubStringFilter,    /// fired when a substring filter has been applied to the dataset
          RowSelected,        /// fired when the user selects a row
-         GridLayoutRequested /// fired when user has requested grid column auto-layout
+         ColLayoutRequested /// fired when user has requested listview column auto-layout
       };
 
       Id                 m_event_id{};
-      IDataset*          m_grid_table{};
+      IDataset*          m_data{};
       std::optional<int> m_affected_row{};
    };
 
@@ -80,7 +80,7 @@ namespace ctb::app
       /// 
       /// triggers the TableInitialize event IF a non-null table ptr is passed.
       /// 
-      /// If a null table ptr is passed, this grid will no longer fire events 
+      /// If a null table ptr is passed, this view will no longer fire events 
       /// until a subsequent call to setTable() passes a valid pointer.
       /// 
       virtual bool setTable(IDatasetPtr table) = 0;

@@ -199,7 +199,7 @@ namespace ctb::app
       m_filters.clear();
       m_check_map.clear();
 
-      // get the available filters for this grid table, and add them to the tree.
+      // get the available filters for this dataset, and add them to the tree.
       auto filters = table->availableStringFilters();
       auto root = m_filter_tree->AddRoot(wxEmptyString);
       for (auto& filter : filters)
@@ -336,37 +336,32 @@ namespace ctb::app
 
    void DatasetOptionsPanel::notify(DatasetEvent event)
    {
-      assert(event.m_grid_table);
+      assert(event.m_data);
 
       try
       {
          switch (event.m_event_id)
          {
          case DatasetEvent::Id::TableInitialize:
-            onTableInitialize(event.m_grid_table);
-            enableInStockFilter(event.m_grid_table->hasInStockFilter());
+            onTableInitialize(event.m_data);
+            enableInStockFilter(event.m_data->hasInStockFilter());
             resetInStockCheckbox();
             break;
 
          case DatasetEvent::Id::Sort:
-            onTableSorted(event.m_grid_table);
+            onTableSorted(event.m_data);
             break;
 
          case DatasetEvent::Id::Filter:               [[fallthrough]];
          case DatasetEvent::Id::SubStringFilter:      [[fallthrough]];
          case DatasetEvent::Id::RowSelected:          [[fallthrough]];
-         case DatasetEvent::Id::GridLayoutRequested:  [[fallthrough]];
+         case DatasetEvent::Id::ColLayoutRequested:  [[fallthrough]];
          default:
             break;
          }
       }
-      catch(Error& err)
-      {
-         wxGetApp().displayErrorMessage(err);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
@@ -456,13 +451,8 @@ namespace ctb::app
             m_sink.signal_source(DatasetEvent::Id::Sort);
          }
       }
-      catch(Error& err)
-      {
-         wxGetApp().displayErrorMessage(err);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
 
    }
@@ -474,7 +464,7 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         // let the combo close its list before we reload the grid
+         // let the combo close its list before we reload the dataset
          CallAfter([this](){
             auto table = m_sink.getTable();
             if (table)
@@ -484,13 +474,8 @@ namespace ctb::app
             }
             });
       }
-      catch(Error& err)
-      {
-         wxGetApp().displayErrorMessage(err);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
@@ -522,13 +507,8 @@ namespace ctb::app
             m_filter_tree->SetItemImage(item, 1);
          }
       }
-      catch(Error& err)
-      {
-         wxGetApp().displayErrorMessage(err);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
@@ -548,13 +528,8 @@ namespace ctb::app
             event.Skip(); // need default processing for parent node's +/- button
          }
       }
-      catch(Error& err)
-      {
-         wxGetApp().displayErrorMessage(err);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 

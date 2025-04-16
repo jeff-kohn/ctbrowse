@@ -1,6 +1,6 @@
 
-#include "views/DatasetListView.h"
 #include "model/CtDataModel.h"
+#include "views/DatasetListView.h"
 #include "model/DatasetLoader.h"
 
 namespace ctb::app
@@ -47,6 +47,10 @@ namespace ctb::app
       AssociateModel(model.get());
       //AppendTextColumn("Wine", enumToIndex(WineListTraits::PropId::WineAndVintage));
       //AppendTextColumn("Region/Appellation", enumToIndex(WineListTraits::PropId::Locale));
+   }
+
+   void DatasetListView::setDataset()
+   {
    }
 
 } // namespace ctb::app

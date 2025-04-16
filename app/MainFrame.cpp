@@ -26,7 +26,6 @@
 #include <wx/bitmap.h>
 #include <wx/frame.h>
 #include <wx/gdicmn.h>
-#include <wx/grid.h>
 #include <wx/icon.h>
 #include <wx/image.h>
 #include <wx/menu.h>
@@ -75,14 +74,8 @@ namespace ctb::app
          wnd->initControls();
          return wnd.release(); // top-level window manages its own lifetime, we return non-owning pointer
       }
-      catch(Error& err)
-      {
-         wxGetApp().displayErrorMessage(err);
-         throw;
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
          throw;
       }
    }
@@ -94,7 +87,7 @@ namespace ctb::app
       SetIcon(wxIcon{constants::RES_NAME_ICON_PRODUCT});
       SetName(constants::RES_NAME_MAINFRAME);               // needed for wxPersistence support
 
-      // We don't actually create the grid views until a table is opened.
+      // We don't actually create the child view until a dataset is opened.
       createMenuBar();
       createStatusBar();
       createToolBar();
@@ -178,8 +171,8 @@ namespace ctb::app
       menu_view->Append(new wxMenuItem{
          menu_view, 
          CmdId::CMD_VIEW_RESIZE_GRID, 
-         constants::CMD_VIEWS_RESIZE_GRID_LBL, 
-         constants::CMD_VIEWS_RESIZE_GRID_TIP,
+         constants::CMD_VIEWS_RESIZE_COLS_LBL, 
+         constants::CMD_VIEWS_RESIZE_COLS_TIP,
          wxITEM_NORMAL
       });
       m_menu_bar->Append(menu_view, constants::LBL_MENU_VIEW);
@@ -234,13 +227,8 @@ namespace ctb::app
          m_tool_bar->SetFocus();
          m_search_ctrl->SetFocus();
       }
-      catch(Error& e)
-      {
-         wxGetApp().displayErrorMessage(e);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
@@ -332,13 +320,8 @@ namespace ctb::app
             setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, getTableDescription(tbl));
          }
       }
-      catch(Error& e)
-      {
-         wxGetApp().displayErrorMessage(e);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
 
    }
@@ -365,13 +348,8 @@ namespace ctb::app
          SendSizeEvent();
          Update();
       }
-      catch(Error& e)
-      {
-         wxGetApp().displayErrorMessage(e);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
@@ -382,20 +360,15 @@ namespace ctb::app
       {
          doSearchFilter();
       }
-      catch(Error& e)
-      {
-         wxGetApp().displayErrorMessage(e);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
 
    void MainFrame::onMenuViewResizeGrid(wxCommandEvent&)
    {
-      m_event_source->signal(DatasetEvent::Id::GridLayoutRequested);
+      m_event_source->signal(DatasetEvent::Id::ColLayoutRequested);
    }
 
 
@@ -405,13 +378,8 @@ namespace ctb::app
       {
          clearSearchFilter();
       }
-      catch(Error& e)
-      {
-         wxGetApp().displayErrorMessage(e);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
@@ -422,13 +390,8 @@ namespace ctb::app
       {
          doSearchFilter();
       }
-      catch(Error& e)
-      {
-         wxGetApp().displayErrorMessage(e);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
@@ -441,39 +404,35 @@ namespace ctb::app
 
    void MainFrame::doSearchFilter()
    {
-      return;
-      //if (!m_view->grid()) return;
-      //try
-      //{
-      //   if (m_view->grid()->filterBySubstring(m_search_ctrl->GetValue().wx_str()))
-      //   {
-      //      m_event_source->signal(DatasetEvent::Id::SubStringFilter);
-      //   }
-      //   else{
-      //      // clear any previous search filter, because that search text is no longer displayed.
-      //      m_view->grid()->clearSubStringFilter();
-      //   }
-      //}
-      //catch(Error& e)
-      //{
-      //   wxGetApp().displayErrorMessage(e);
-      //}
-      //catch(std::exception& e)
-      //{
-      //   wxGetApp().displayErrorMessage(e.what());
-      //}
-      //updateStatusBarCounts();
+      if (!m_event_source->hasTable()) return;
+      try
+      {
+         auto dataset = m_event_source->getTable();
+         if (dataset->filterBySubstring(m_search_ctrl->GetValue().wx_str()))
+         {
+
+         }
+         else{
+            // clear any previous search filter, because that search text is no longer displayed.
+            dataset->clearSubStringFilter();
+         }
+         m_event_source->signal(DatasetEvent::Id::SubStringFilter);
+      }
+      catch (...) {
+
+      }
+      updateStatusBarCounts();
    }
 
 
    void MainFrame::clearSearchFilter()
    {
-      if (!m_view->grid()) return;
+      if (!m_event_source->hasTable()) return;
       try
       {
          m_search_ctrl->ChangeValue("");
-         //m_view->grid()->clearSubStringFilter();
-
+         m_event_source->getTable()->clearSubStringFilter();
+         m_event_source->signal(DatasetEvent::Id::Filter);
       }
       catch(Error& e)
       {

@@ -49,7 +49,7 @@ namespace ctb::app
       /// triggers the TableRemove event before disconnecting the current table (if it is non-null)
       /// triggers the TableInitialize event for the new table-ptr (if it is non-null)
       /// 
-      /// If a null table ptr is passed, this grid will no longer fire events 
+      /// If a null table ptr is passed, this source will no longer fire events 
       /// until a subsequent call to setTable() passes a valid pointer.
       /// 
       bool setTable(IDatasetPtr table) override;
@@ -90,7 +90,7 @@ namespace ctb::app
       ~DatasetEventSource() noexcept override;
 
    private:
-      IDatasetPtr m_grid_table{};
+      IDatasetPtr m_data{};
       std::unordered_set<IDatasetEventSink*> m_observers{};
    
       /// @brief default ctor is private, use static create()

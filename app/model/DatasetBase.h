@@ -104,11 +104,11 @@ namespace ctb::app
       /// @brief apples "in-stock only" filter to the data set, if supported.
       /// @return true if the filter was applied, false if it was not 
       /// 
-      /// not all grid table support this filter, you can check by calling hasInStockFilter()
+      /// not all datasets support this filter, you can check by calling hasInStockFilter()
       /// 
       virtual auto enableInStockFilter(bool enable) -> bool = 0;
 
-      /// @brief indicates whether the grid table supports filtering to in-stock only 
+      /// @brief indicates whether the dataset supports filtering to in-stock only 
       /// @return true if supported, false otherwise.
       /// 
       virtual constexpr auto hasInStockFilter() const -> bool = 0;
@@ -121,7 +121,7 @@ namespace ctb::app
       ///
       virtual auto setMinScoreFilter(NullableDouble min_score) -> bool = 0;
 
-      /// @brief Retrieve a property from the underlying table record (as opposed to a grid column)
+      /// @brief Retrieve a property from the underlying dataset
       /// 
       /// Since we don't have table-neutral indices to use, this lookup has to be done by
       /// property name as a string that corresponds to correct enum. 
@@ -130,7 +130,7 @@ namespace ctb::app
       ///
       virtual auto getDetailProp(int row_idx, std::string_view prop_name) const -> const CtProperty& = 0;
 
-      /// @return the name of the CT table this grid table represents. Not meant to be 
+      /// @return the name of the CT table this dataset represents. Not meant to be 
       ///         displayed to the user, this is for internal use. 
       /// 
       virtual auto getTableName() const -> std::string_view = 0;

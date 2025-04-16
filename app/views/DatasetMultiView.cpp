@@ -40,10 +40,10 @@ namespace ctb::app
       SplitVertically(m_options_panel, m_right_splitter);
       wxPersistentRegisterAndRestore(this, GetName());
 
-      // nested splitter contains grid and details1
-      m_grid = DatasetListView::create(m_right_splitter, source);
+      // nested splitter contains grid and details
+      m_listView = DatasetListView::create(m_right_splitter, source);
       m_details_panel = DetailsPanel::create(m_right_splitter, source, cache);
-      m_right_splitter->SplitVertically(m_grid, m_details_panel);
+      m_right_splitter->SplitVertically(m_listView, m_details_panel);
       m_right_splitter->SetName("GridMultiViewNested");
       wxPersistentRegisterAndRestore(m_right_splitter, m_right_splitter->GetName());
       
@@ -57,15 +57,15 @@ namespace ctb::app
       switch (event.m_event_id){
          case DatasetEvent::Id::TableRemove: [[fallthrough]];
          case DatasetEvent::Id::RowSelected: [[fallthrough]];
-         case DatasetEvent::Id::GridLayoutRequested:
+         case DatasetEvent::Id::ColLayoutRequested:
             break;
 
          default:
             // make sure everyone has had a chance to handle current event before generating a new one.
             CallAfter([this] {
-               if (m_grid)
+               if (m_listView)
                {
-                  //m_grid->SelectRow(0);
+                  //m_listView->SelectRow(0);
                   m_sink.signal_source(DatasetEvent::Id::RowSelected, 0);
                }
             });

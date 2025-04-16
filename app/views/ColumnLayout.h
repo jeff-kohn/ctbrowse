@@ -24,7 +24,7 @@ namespace ctb::app
       using ContainerBase = std::vector<ColumnLayout>;
        
       /// @brief Load a collection of column layouts from the config store
-      /// @param table_name - name of the grid table to load layouts for
+      /// @param table_name - name of the dataset to load layouts for
       /// @return true if successful, false if not in which case this container will be unchanged
       /// (strong exception guarantee)
       /// 

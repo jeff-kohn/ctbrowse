@@ -324,7 +324,7 @@ namespace ctb::app
 
       if (event.m_affected_row and event.m_affected_row.value() >= 0)
       {
-         auto* tbl = event.m_grid_table;
+         auto* tbl = event.m_data;
          auto row_idx = event.m_affected_row.value();
 
          m_details.wine_id     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_WINE_ID    ).asUInt64().value_or(0);
@@ -375,7 +375,7 @@ namespace ctb::app
             updateDetails(event);
             break;
 
-         case DatasetEvent::Id::GridLayoutRequested: [[fallthrough]];
+         case DatasetEvent::Id::ColLayoutRequested: [[fallthrough]];
          case DatasetEvent::Id::TableInitialize:
             break;
 
@@ -385,14 +385,9 @@ namespace ctb::app
             break;
          }
       }
-      catch(Error& err)
-      {
-         wxGetApp().displayErrorMessage(err);
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
-      }  
    }
 
 

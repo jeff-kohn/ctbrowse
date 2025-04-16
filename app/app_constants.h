@@ -14,8 +14,8 @@ namespace ctb::constants
    inline constexpr const char* CMD_FILE_SETTINGS_TIP             = "Configure app settings";
    inline constexpr const char* CMD_VIEWS_WINE_LIST_LBL           = "&Wine List\tCtrl+W";
    inline constexpr const char* CMD_VIEWS_WINE_LIST_TIP           = "View Personal Wine List";
-   inline constexpr const char* CMD_VIEWS_RESIZE_GRID_LBL         = "&Resize Grid Columns";
-   inline constexpr const char* CMD_VIEWS_RESIZE_GRID_TIP         = "Resize the grid columns to fit the data";
+   inline constexpr const char* CMD_VIEWS_RESIZE_COLS_LBL         = "&Resize Data Columns";
+   inline constexpr const char* CMD_VIEWS_RESIZE_COLS_TIP         = "Resize the data columns to fit the data";
 
    inline constexpr const char* CONFIG_PATH_PREFERENCES           = "/Preferences";
    inline constexpr const char* CONFIG_PATH_PREFERENCE_DATASYNC   = "/Preferences/DataSync";
@@ -38,13 +38,13 @@ namespace ctb::constants
    inline constexpr const char* FMT_LBL_TOTAL_ROWS                = "Total Rows: {}";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADED        = "Successfully downloaded file '{}'.";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADING       = "Downloading file '{}'...";
-   inline constexpr const char* FMT_TITLE_TYPED_ERROR             = "Error ({})";
+   inline constexpr const char* FMT_TITLE_TYPED_ERROR             = "{} Error";
    inline constexpr const char* FMT_LABEL_IMAGE_FILENAME          = "{}-{}.jpg";
 
    inline constexpr const char* INFO_MSG_NO_MATCHING_ROWS         = "No rows matched the search text.";
    inline constexpr const char* NO_SCORE                          = " --";
    
-   // grid column labels
+   // column labels
    inline constexpr const char* COL_CT_SCORE                      = "CT Score";
    inline constexpr const char* COL_LOCALE                        = "Region and Appellation";
    inline constexpr const char* COL_MY_SCORE                      = "My Score";

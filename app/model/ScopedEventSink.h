@@ -13,9 +13,9 @@
 
 namespace ctb::app
 {
-   /// @brief scoped RAII wrapper for subscribing/unsubscribing from a grid table event source
+   /// @brief Scoped RAII wrapper for subscribing/unsubscribing from a dataset event source
    ///
-   /// to handle grid-table events, all a class needs to do is instantiate a member of this
+   /// To handle dataset events, all a class needs to do is instantiate a member of this
    /// class, passing a pointer to the IDatasetEventSink interface to its ctor (usually 'this'
    /// when the containing class itself inherits from IDatasetEventSink to ensure that the sink
    /// interface is available for the lifetime of the event source).
