@@ -126,7 +126,7 @@ namespace ctb
       catch (std::exception e)  { return Error{ e.what() }; }
       catch (...)
       {
-         assert("wtf, nonstandard exception caught." == nullptr);
+         assert("wtf, nonstandard exception caught." and false);
       }
 
       return Error{ constants::ERROR_STR_UNKNOWN };

@@ -280,9 +280,9 @@ namespace ctb::app
                break;
 
             default:
-               assert("Bug, new enum value wasn't accounted for" == nullptr);
+               assert("Bug, new enum value wasn't accounted for" and false);
                break;
-            }
+         }
       }
    }
 

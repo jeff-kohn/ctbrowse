@@ -45,7 +45,7 @@ namespace ctb::app
       AssociateModel(m_dataset.get());
    }
 
-   void DatasetListView::notify([[maybe_unused]] DatasetEvent event)
+   void DatasetListView::notify(DatasetEvent event)
    {
       switch (event.m_event_id)
       {
@@ -66,7 +66,9 @@ namespace ctb::app
          case DatasetEvent::Id::ColLayoutRequested: [[fallthrough]];
          case DatasetEvent::Id::RowSelected:        [[fallthrough]];
          default:
+            assert("Unexpected event type" and false);
       }
    }
+
 
 } // namespace ctb::app
