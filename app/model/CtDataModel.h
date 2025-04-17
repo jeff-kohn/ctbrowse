@@ -301,9 +301,9 @@ namespace ctb::app
 
    private:
       DisplayColumns                   m_display_columns{};
-      Dataset*                         m_current_view{};         // may point to m_data or m_filtered_data depending if filter is active
       Dataset                          m_data{};                 // the underlying data records for this table.
       Dataset                          m_filtered_data{};        // we need a copy for the filtered data, so we can bind our views to it
+      Dataset*                         m_current_view{};         // may point to m_data or m_filtered_data depending if filter is active
       PropFilter                       m_instock_filter{};
       PropFilter                       m_score_filter{};
       PropStringFilterMgr              m_prop_string_filters{};
@@ -311,7 +311,10 @@ namespace ctb::app
       std::optional<SubStringFilter>   m_substring_filter{};
       
       // private construction, use static factory method create();
-      explicit CtDataModel(Dataset data) : m_data{ std::move(data) }
+      explicit CtDataModel(Dataset data) : 
+         m_display_columns{ std::from_range, DefaultDisplayColumns },
+         m_data{ std::move(data) },
+         m_current_view{ &m_data }
       {}
 
       void applyFilters()

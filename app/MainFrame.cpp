@@ -410,7 +410,7 @@ namespace ctb::app
          auto dataset = m_event_source->getTable();
          if (dataset->filterBySubstring(m_search_ctrl->GetValue().wx_str()))
          {
-
+            // TODO 
          }
          else{
             // clear any previous search filter, because that search text is no longer displayed.
@@ -434,9 +434,8 @@ namespace ctb::app
          m_event_source->getTable()->clearSubStringFilter();
          m_event_source->signal(DatasetEvent::Id::Filter);
       }
-      catch(Error& e)
-      {
-         wxGetApp().displayErrorMessage(e);
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError());
       }
       updateStatusBarCounts();
    }

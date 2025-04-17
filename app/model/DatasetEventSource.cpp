@@ -50,6 +50,7 @@ namespace ctb::app
    /// @brief  attaches an event sink to this source to receive event notifications
    void DatasetEventSource::attach(IDatasetEventSink* observer) 
    {
+      SPDLOG_DEBUG("DatasetEventSource::attach() called.");
       m_observers.insert(observer);
    }
 
@@ -57,6 +58,7 @@ namespace ctb::app
    /// @brief detach an event sink from this source to no longer receive event notifications
    void DatasetEventSource::detach(IDatasetEventSink* observer)
    {
+      SPDLOG_DEBUG("DatasetEventSource::detach() called.");
       auto it = m_observers.find(observer);
       if (it != m_observers.end()) 
          m_observers.erase(it);
@@ -69,7 +71,6 @@ namespace ctb::app
       SPDLOG_DEBUG("DatasetEventSource::signal({},{}) called", magic_enum::enum_name(event_id), row_idx.value_or(-1));
 
       bool retval{ true };
-
       if (m_data)
       {
          for (auto observer : m_observers) 

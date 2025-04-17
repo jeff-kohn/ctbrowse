@@ -36,13 +36,13 @@ namespace ctb::app
 
    void DatasetListView::setDataset(DatasetBase* dataset)
    {
-      if (!dataset)
-      {
-         assert("DatasetBase* cannot == nullptr" and false);
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
-      }
       m_dataset = dataset;
       AssociateModel(m_dataset.get());
+      if (m_dataset)
+      {
+         m_dataset->IncRef();// wxWidgets is lame
+         m_dataset->Reset(m_dataset->GetCount());
+      }
    }
 
    void DatasetListView::notify(DatasetEvent event)
@@ -64,7 +64,9 @@ namespace ctb::app
             break;
 
          case DatasetEvent::Id::ColLayoutRequested: [[fallthrough]];
-         case DatasetEvent::Id::RowSelected:        [[fallthrough]];
+         case DatasetEvent::Id::RowSelected:
+            break;
+
          default:
             assert("Unexpected event type" and false);
       }
