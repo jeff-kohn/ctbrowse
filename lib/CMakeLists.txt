@@ -13,7 +13,6 @@ target_sources(ctBrowse_lib
       "../include/ctb/CredentialWrapper.h"
       "../include/ctb/ctb.h"
       "../include/ctb/CtRecordImpl.h"
-      "../include/ctb/DisplayColumn.h"
       "../include/ctb/Error.h"
       "../include/ctb/PropFilter.h"
       "../include/ctb/PropStringFilter.h"

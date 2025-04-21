@@ -324,7 +324,8 @@ namespace ctb::app
 
       if (event.m_affected_row and event.m_affected_row.value() >= 0)
       {
-         auto* tbl = event.m_data;
+         auto* tbl = event.m_data.get();
+         assert(tbl != nullptr);
          auto row_idx = event.m_affected_row.value();
 
          m_details.wine_id     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_WINE_ID    ).asUInt64().value_or(0);

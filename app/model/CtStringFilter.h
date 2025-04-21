@@ -35,7 +35,7 @@ namespace ctb::app
          return m_filter_name;
       }
 
-      /// @brief returns the index (into the table entry's PropId enum) of the property this filter is for
+      /// @brief returns the zero-based index (into the table entry's PropId enum) of the property this filter is for
       ///
       auto propIndex() const -> int
       {

@@ -33,7 +33,7 @@ namespace ctb::app
       };
 
       Id                 m_event_id{};
-      DatasetBase*       m_data{};
+      DatasetPtr         m_data{};
       std::optional<int> m_affected_row{};
    };
 

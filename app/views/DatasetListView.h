@@ -26,10 +26,8 @@ namespace ctb::app
       explicit DatasetListView(DatasetEventSourcePtr source) : m_sink{ this, source }
       {}
 
-      // window creation
-      void initControls();
-
-      void setDataset(DatasetBase* dataset);
+      void configureColumns();
+      void setDataset(DatasetPtr dataset);
 
       // Inherited via IDatasetEventSink
       void notify(DatasetEvent event) override;

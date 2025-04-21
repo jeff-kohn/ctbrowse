@@ -24,24 +24,38 @@ namespace ctb::app
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
       }
-      wnd->initControls();
       return wnd.release(); // parent owns child, so we don't need to delete
    }
 
-   void DatasetListView::initControls()
+
+   void DatasetListView::configureColumns()
    {
-      AppendTextColumn("Wine", 0);
-      AppendTextColumn("Region/Appellation", 1);
+      assert(m_dataset.get() and "This pointer should never be null here.");
+      try
+      {
+         ClearColumns();
+         auto cols = m_dataset->defaultDisplayColumns();
+         for (const auto&& [idx, col] : vws::enumerate(cols))
+         {
+            AppendTextColumn(col.display_name.c_str(), static_cast<uint32_t>(idx));
+         }
+      }
+      catch (...) {
+         wxGetApp().displayErrorMessage(packageError());
+      }
    }
 
-   void DatasetListView::setDataset(DatasetBase* dataset)
+
+   void DatasetListView::setDataset(DatasetPtr dataset)
    {
       m_dataset = dataset;
       AssociateModel(m_dataset.get());
       if (m_dataset)
       {
-         m_dataset->IncRef();// wxWidgets is lame
+         configureColumns();
          m_dataset->Reset(m_dataset->GetCount());
+         m_dataset->IncRef();// wxWidgets is lame
+         dataset->Cleared();
       }
    }
 
@@ -54,7 +68,7 @@ namespace ctb::app
             break;
 
          case DatasetEvent::Id::TableRemove:
-            setDataset(nullptr);
+            setDataset(DatasetPtr{});
             break;
 
          case DatasetEvent::Id::Sort:   [[fallthrough]];

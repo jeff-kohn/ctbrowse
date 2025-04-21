@@ -39,6 +39,7 @@
 #include <wx/statusbr.h>
 #include <wx/stockitem.h>
 #include <wx/toolbar.h>
+#include <wx/wupdlock.h>
 #include <wx/xrc/xmlres.h>
 
 #include <memory>
@@ -330,6 +331,7 @@ namespace ctb::app
    void MainFrame::onMenuWineList([[maybe_unused]] wxCommandEvent& event)
    {
       wxBusyCursor busy{};
+      wxWindowUpdateLocker lock{ this };
       try
       {
          if (!m_view)

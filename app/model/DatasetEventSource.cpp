@@ -77,7 +77,7 @@ namespace ctb::app
          { 
             try
             {
-               observer->notify({ event_id, m_data.get(), row_idx});
+               observer->notify({ event_id, m_data, row_idx});
             }
             catch(...){
                retval = false;

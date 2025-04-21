@@ -343,13 +343,13 @@ namespace ctb::app
          switch (event.m_event_id)
          {
          case DatasetEvent::Id::TableInitialize:
-            onTableInitialize(event.m_data);
+            onTableInitialize(event.m_data.get());
             enableInStockFilter(event.m_data->hasInStockFilter());
             resetInStockCheckbox();
             break;
 
          case DatasetEvent::Id::Sort:
-            onTableSorted(event.m_data);
+            onTableSorted(event.m_data.get());
             break;
 
          case DatasetEvent::Id::Filter:               [[fallthrough]];

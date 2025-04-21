@@ -1,8 +1,8 @@
 #pragma once
 #include "App.h"
 #include "model/DatasetBase.h"
+#include "model/DisplayColumn.h"
 #include <ctb/CtRecordImpl.h>
-#include <ctb/DisplayColumn.h>
 #include <ctb/PropFilter.h>
 #include <ctb/PropStringFilterMgr.h>
 #include <ctb/SubStringFilter.h>
@@ -31,8 +31,6 @@ namespace ctb::app
       using Property            = Record::TableProperty;
       using Traits              = Record::Traits;
 
-      using DisplayColumn       = DisplayColumn<Record>;
-      using DisplayColumns      = std::vector<DisplayColumn>;
       using PropFilter          = PropFilter<Record, Property>;
       using PropStringFilterMgr = PropStringFilterMgr<Record>;
       using SubStringFilter     = SubStringFilter<Record>;
@@ -43,11 +41,11 @@ namespace ctb::app
       /// @brief list of display columns that will show in the list view
       ///
       static inline const std::array DefaultDisplayColumns { 
-         DisplayColumn{ PropId::WineAndVintage,                              constants::COL_WINE     },
-         DisplayColumn{ PropId::Locale,                                      constants::COL_LOCALE   },
-         DisplayColumn{ PropId::TotalQty,   DisplayColumn::Format::Number,   constants::COL_QTY      },
-         DisplayColumn{ PropId::CTScore,    DisplayColumn::Format::Decimal,  constants::COL_CT_SCORE },
-         DisplayColumn{ PropId::MYScore,    DisplayColumn::Format::Decimal,  constants::COL_MY_SCORE },
+         DisplayColumn{ Traits::propToIndex(PropId::WineAndVintage),                              constants::COL_WINE     },
+         DisplayColumn{ Traits::propToIndex(PropId::Locale),                                      constants::COL_LOCALE   },
+         DisplayColumn{ Traits::propToIndex(PropId::TotalQty),   DisplayColumn::Format::Number,   constants::COL_QTY      },
+         DisplayColumn{ Traits::propToIndex(PropId::CTScore),    DisplayColumn::Format::Decimal,  constants::COL_CT_SCORE },
+         DisplayColumn{ Traits::propToIndex(PropId::MYScore),    DisplayColumn::Format::Decimal,  constants::COL_MY_SCORE },
       };
 
       /// @brief the available sort orders for this table.
@@ -173,7 +171,8 @@ namespace ctb::app
       auto filterBySubstring(std::string_view substr) -> bool override
       {
          // this overload searches all columns in the current listview, so get the prop_id's 
-         auto cols = getDisplayColumns() | vws::transform([](const DisplayColumn& disp_col) -> auto { return disp_col.prop_id; })
+         auto cols = getDisplayColumns() | vws::transform([](const DisplayColumn& disp_col) -> auto { return disp_col.prop_index; })
+                                         | vws::transform([](int prop_idx) -> PropId { return Traits::propFromIndex(prop_idx); })
                                          | rng::to<std::vector>();
 
          return applySubStringFilter(SubStringFilter{ std::string{substr}, cols });
@@ -389,7 +388,7 @@ namespace ctb::app
             return;
          }
          auto display_col = m_display_columns[col];
-         auto prop = display_col.prop_id;
+         auto prop = display_col.prop_index;
 
          // format as string and return it to caller
          auto val = (*m_current_view)[row][prop];
@@ -406,6 +405,12 @@ namespace ctb::app
       {
          return static_cast<uint32_t>(m_current_view->size());
       }
-   };
+
+      // Inherited via DatasetBase
+      auto defaultDisplayColumns() const -> DisplayColumns override
+      {
+         return std::vector{std::from_range, DefaultDisplayColumns };
+      }
+};
 
 } // namespace ctb::app

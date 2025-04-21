@@ -9,7 +9,7 @@
 
 #include "App.h"
 #include "model/CtStringFilter.h"
-
+#include "model/DisplayColumn.h"
 #include <ctb/CtProperty.h>
 #include <wx/dataview.h>
 
@@ -49,23 +49,25 @@ namespace ctb::app
       /// the index in this vector corresponds to the index in the sort_index
       /// property.
       /// 
-      virtual auto availableSortConfigs() const->SortConfigs = 0;
+      virtual auto availableSortConfigs() const -> SortConfigs = 0;
 
       /// @brief returns the currently active sort option
       ///
-      virtual auto activeSortConfig() const->CtSortConfig = 0;
+      virtual auto activeSortConfig() const -> CtSortConfig = 0;
 
       /// @brief specifies a new sort option, triggers DatasetEvent::Sort
       ///
       virtual void applySortConfig(const CtSortConfig& config) = 0;
 
+      virtual auto defaultDisplayColumns() const -> DisplayColumns = 0;
+
       /// @brief retrieves a list of available filters for this table.
       ///
-      virtual auto availableStringFilters() const->CtStringFilters = 0;
+      virtual auto availableStringFilters() const -> CtStringFilters = 0;
 
       /// @brief get a list of values that can be used to filter on a column in the table
       ///
-      virtual auto getFilterMatchValues(int prop_idx) const->StringSet = 0;
+      virtual auto getFilterMatchValues(int prop_idx) const -> StringSet = 0;
 
       /// @brief adds a match value filter for the specified column.
       ///
@@ -134,7 +136,7 @@ namespace ctb::app
       /// @return the name of the CT table this dataset represents. Not meant to be 
       ///         displayed to the user, this is for internal use. 
       /// 
-      virtual auto getTableName() const->std::string_view = 0;
+      virtual auto getTableName() const -> std::string_view = 0;
 
       /// @brief returns the total number of records in the underlying dataset
       ///
