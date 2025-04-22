@@ -19,14 +19,15 @@ namespace ctb::app
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
 
-      std::unique_ptr<DatasetListView> wnd{ new DatasetListView{source} };
-      if (!wnd->Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
-      {
-         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
-      }
+      std::unique_ptr<DatasetListView> wnd{ new DatasetListView{ parent, source } };
+      wnd->init();
       return wnd.release(); // parent owns child, so we don't need to delete
    }
 
+   void DatasetListView::init()
+   {
+      Bind(wxEVT_DATAVIEW_SELECTION_CHANGED, &DatasetListView::onSelectionChanged, this);
+   }
 
    void DatasetListView::configureColumns()
    {
@@ -37,7 +38,7 @@ namespace ctb::app
          auto cols = m_dataset->defaultDisplayColumns();
          for (const auto&& [idx, col] : vws::enumerate(cols))
          {
-            AppendTextColumn(col.display_name.c_str(), static_cast<uint32_t>(idx));
+            AppendTextColumn(col.display_name.c_str(), static_cast<uint32_t>(idx), wxDATAVIEW_CELL_INERT, wxCOL_WIDTH_AUTOSIZE, wxALIGN_LEFT);
          }
       }
       catch (...) {
@@ -54,7 +55,7 @@ namespace ctb::app
       {
          configureColumns();
          m_dataset->Reset(m_dataset->GetCount());
-         m_dataset->IncRef();// wxWidgets is lame
+         //m_dataset->IncRef();// wxWidgets is lame
          dataset->Cleared();
       }
    }
@@ -84,6 +85,14 @@ namespace ctb::app
          default:
             assert("Unexpected event type" and false);
       }
+   }
+
+   void DatasetListView::onSelectionChanged(wxDataViewEvent& event)
+   {
+      if (!m_sink.hasTable()) return;
+
+      auto row = m_sink.getTable()->GetRow(event.GetItem());
+      m_sink.signal_source(DatasetEvent::Id::RowSelected, static_cast<int>(row));
    }
 
 

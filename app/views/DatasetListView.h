@@ -23,14 +23,18 @@ namespace ctb::app
       DatasetPtr      m_dataset{};
 
       /// @brief private ctor used by static create()
-      explicit DatasetListView(DatasetEventSourcePtr source) : m_sink{ this, source }
+      explicit DatasetListView(wxWindow* parent, DatasetEventSourcePtr source) : 
+         wxDataViewCtrl{ parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME },
+         m_sink{ this, source }
       {}
 
+      void init();
       void configureColumns();
       void setDataset(DatasetPtr dataset);
 
-      // Inherited via IDatasetEventSink
       void notify(DatasetEvent event) override;
+      void onSelectionChanged(wxDataViewEvent& event);
+
    };
 
 } // namespace ctb::app

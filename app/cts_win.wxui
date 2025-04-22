@@ -105,11 +105,9 @@
           flags="wxEXPAND"
           proportion="1" />
         <node
-          class="wxGrid"
-          window_style="wxBORDER_THEME"
-          borders=""
-          flags="wxEXPAND"
-          proportion="4" />
+          class="wxDataViewCtrl"
+          var_name="m_data_view_ctrl"
+          wxEVT_DATAVIEW_SELECTION_CHANGED="onSelectionChanged" />
       </node>
     </node>
     <node

@@ -86,6 +86,15 @@ namespace ctb::app
       virtual bool setTable(DatasetPtr table) = 0;
 
 
+      /// @brief assigns a table to this source.
+      /// 
+      /// triggers the TableInitialize event IF a non-null table ptr is passed.
+      /// 
+      /// If a null table ptr is passed, this view will no longer fire events 
+      /// until a subsequent call to setTable() passes a valid pointer.
+      /// 
+      virtual bool setTable(DatasetPtr table, bool signal_event) = 0;
+
       /// @brief attaches an event sink to this source to receive event notifications
       ///
       /// detach() must be called when notifications no longer can/should be sent to 

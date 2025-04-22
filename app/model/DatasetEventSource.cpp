@@ -25,7 +25,7 @@ namespace ctb::app
 
 
    /// @brief assigns a table to this source.
-   bool DatasetEventSource::setTable(DatasetPtr table)
+   bool DatasetEventSource::setTable(DatasetPtr table, bool signal_event)
    {
       SPDLOG_DEBUG("DatasetEventSource::setTable() called.");
 
@@ -36,7 +36,7 @@ namespace ctb::app
          return false;
 
       m_data = table;
-      return signal(DatasetEvent::Id::TableInitialize);
+      return signal_event ? signal(DatasetEvent::Id::TableInitialize) : true;
    }
 
 

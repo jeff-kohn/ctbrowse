@@ -352,9 +352,9 @@ namespace ctb::app
             onTableSorted(event.m_data.get());
             break;
 
-         case DatasetEvent::Id::Filter:               [[fallthrough]];
-         case DatasetEvent::Id::SubStringFilter:      [[fallthrough]];
-         case DatasetEvent::Id::RowSelected:          [[fallthrough]];
+         case DatasetEvent::Id::Filter:              [[fallthrough]];
+         case DatasetEvent::Id::SubStringFilter:     [[fallthrough]];
+         case DatasetEvent::Id::RowSelected:         [[fallthrough]];
          case DatasetEvent::Id::ColLayoutRequested:  [[fallthrough]];
          default:
             break;

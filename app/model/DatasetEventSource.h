@@ -52,8 +52,22 @@ namespace ctb::app
       /// If a null table ptr is passed, this source will no longer fire events 
       /// until a subsequent call to setTable() passes a valid pointer.
       /// 
-      bool setTable(DatasetPtr table) override;
+      bool setTable(DatasetPtr table) override
+      {
+         return setTable(table, true);
+      }
 
+      /// @brief assigns a table to this source.
+      /// 
+      /// triggers the TableRemove event before disconnecting the current table (if it is non-null)
+      /// triggers the TableInitialize event for the new table-ptr (if it is non-null and signal_event
+      /// is true)
+      /// 
+      /// If a null table ptr is passed, this source will no longer fire events 
+      /// until a subsequent call to setTable() passes a valid pointer.
+      /// 
+      bool setTable(DatasetPtr table, bool signal_event) override;
+      
       /// @brief attaches an event sink to this source to receive event notifications
       ///
       /// detach() must be called when notifications no longer can/should be sent to 

@@ -90,7 +90,7 @@ namespace ctb::app
       /// 
       auto availableSortConfigs() const -> SortConfigs override
       {
-         SortConfigs configs(Sorters.size());
+         SortConfigs configs{};
          for (const auto&& [i, table_sort] : vws::enumerate(Sorters))
          {
             configs.emplace_back(CtSortConfig{ static_cast<int>(i), table_sort.sort_name  });
@@ -313,8 +313,13 @@ namespace ctb::app
       explicit CtDataModel(Dataset data) : 
          m_display_columns{ std::from_range, DefaultDisplayColumns },
          m_data{ std::move(data) },
-         m_current_view{ &m_data }
-      {}
+         m_current_view{ &m_data },
+         m_instock_filter{ PropId::Quantity, std::greater<CtProperty>{}, uint16_t{0} },
+         m_score_filter{ {PropId::CTScore, PropId::MYScore}, std::greater_equal<CtProperty>{}, constants::FILTER_SCORE_DEFAULT }
+      {
+         m_score_filter.enabled = false;
+         m_instock_filter.enabled = false;
+      }
 
       void applyFilters()
       {
@@ -335,24 +340,26 @@ namespace ctb::app
          {
             applySubStringFilter(*m_substring_filter);
          }
+         Cleared();
       }
 
       bool applySubStringFilter(const SubStringFilter& filter)
       {
          // clear any existing substring filter first, only one at a time. The new filter will be 
          // applied if there are any matches. If no matches, substring filter will be cleared
-         // since we dont' restore it (by design, previous search text no longer in the toolbar
+         // since we don't restore it (by design, previous search text no longer in the toolbar
          // so it wouldn't make sense).
          m_substring_filter = {};
          applyFilters();
          auto filtered = vws::all(*m_current_view) | vws::filter(filter)
-            | rng::to<Dataset>();
+                                                   | rng::to<Dataset>();
          if (filtered.empty())
             return false;
 
          m_substring_filter = filter;
          m_filtered_data.swap(filtered);
          m_current_view = &m_filtered_data;
+         Cleared();
          return true;
       }
       
@@ -376,7 +383,7 @@ namespace ctb::app
 
       bool isFilterActive() 
       { 
-         return m_current_view = &m_filtered_data; 
+         return m_current_view == &m_filtered_data; 
       }
 
       void GetValueByRow(wxVariant& variant, unsigned row, unsigned col) const override

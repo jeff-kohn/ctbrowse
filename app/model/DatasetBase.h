@@ -142,7 +142,6 @@ namespace ctb::app
       ///
       virtual int totalRowCount() const = 0;
 
-
       /// @brief returns the number of records with filters applied.
       ///
       virtual int filteredRowCount() const = 0;
