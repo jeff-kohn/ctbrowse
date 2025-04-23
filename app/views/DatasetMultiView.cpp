@@ -50,24 +50,14 @@ namespace ctb::app
       CallAfter([this] { m_right_splitter->SetSashGravity(RIGHT_SPLITTER_GRAVITY); });
    }
 
-   void DatasetMultiView::notify(DatasetEvent event)
+   void DatasetMultiView::notify([[maybe_unused]] DatasetEvent event)
    {
-      switch (event.m_event_id){
-         case DatasetEvent::Id::TableRemove: [[fallthrough]];
-         case DatasetEvent::Id::RowSelected: [[fallthrough]];
-         case DatasetEvent::Id::ColLayoutRequested:
-            break;
-
-         default:
-            // make sure everyone has had a chance to handle current event before generating a new one.
-            CallAfter([this] {
-               if (m_listView)
-               {
-                  //m_listView->SelectRow(0);
-                  m_sink.signal_source(DatasetEvent::Id::RowSelected, 0);
-               }
-            });
-      }
+      //switch (event.m_event_id){
+      //   case DatasetEvent::Id::TableRemove: [[fallthrough]];
+      //   case DatasetEvent::Id::RowSelected: [[fallthrough]];
+      //   case DatasetEvent::Id::ColLayoutRequested:
+      //      break;
+      //}
    }
 
 

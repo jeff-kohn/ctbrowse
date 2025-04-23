@@ -3,6 +3,9 @@
 #include "views/DatasetListView.h"
 #include "model/DatasetLoader.h"
 
+#include <wx/persist/dataview.h>
+#include <wx/wupdlock.h>
+
 namespace ctb::app
 {
 
@@ -38,8 +41,11 @@ namespace ctb::app
          auto cols = m_dataset->defaultDisplayColumns();
          for (const auto&& [idx, col] : vws::enumerate(cols))
          {
-            AppendTextColumn(col.display_name.c_str(), static_cast<uint32_t>(idx), wxDATAVIEW_CELL_INERT, wxCOL_WIDTH_AUTOSIZE, wxALIGN_LEFT);
+            AppendTextColumn(col.display_name.c_str(), 
+               static_cast<uint32_t>(idx), wxDATAVIEW_CELL_INERT, 
+               wxCOL_WIDTH_AUTOSIZE, static_cast<wxAlignment>(col.col_align));
          }
+         wxPersistentRegisterAndRestore(this, wxFromSV(m_dataset->getTableName()));
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError());
@@ -49,16 +55,36 @@ namespace ctb::app
 
    void DatasetListView::setDataset(DatasetPtr dataset)
    {
-      m_dataset = dataset;
-      AssociateModel(m_dataset.get());
       if (m_dataset)
       {
-         configureColumns();
-         m_dataset->Reset(m_dataset->GetCount());
-         //m_dataset->IncRef();// wxWidgets is lame
-         dataset->Cleared();
+         // save off current table's view settings. we'll restore/register again
+         // (possibly for a different table) when we call configureColumns()
+         wxPersistenceManager::Get().SaveAndUnregister(this);
       }
+      wxWindowUpdateLocker freeze_updates{ this };
+
+      // re-associate this class with the new model* (nullptr is OK)
+      m_dataset = dataset;
+      AssociateModel(m_dataset.get());
+      if (!m_dataset)
+         return;
+
+      // since we have a new model*, re-initialize the listview.
+      configureColumns();
+      m_dataset->Cleared();
+      selectFirstRow();
    }
+
+
+   void DatasetListView::selectFirstRow()
+   {
+      auto item = m_dataset->GetItem(0);
+      Select(item);
+      EnsureVisible(item);
+      SetFocus();
+      QueueEvent(new wxDataViewEvent{ wxEVT_DATAVIEW_SELECTION_CHANGED, this, nullptr, item });
+   }
+
 
    void DatasetListView::notify(DatasetEvent event)
    {
@@ -75,7 +101,8 @@ namespace ctb::app
          case DatasetEvent::Id::Sort:   [[fallthrough]];
          case DatasetEvent::Id::Filter: [[fallthrough]];
          case DatasetEvent::Id::SubStringFilter:
-            m_dataset->Reset(m_dataset->GetCount());
+            m_dataset->Cleared();
+            selectFirstRow();
             break;
 
          case DatasetEvent::Id::ColLayoutRequested: [[fallthrough]];

@@ -86,7 +86,6 @@ namespace ctb::app
    {
       SetTitle(constants::APP_NAME_LONG);
       SetIcon(wxIcon{constants::RES_NAME_ICON_PRODUCT});
-      SetName(constants::RES_NAME_MAINFRAME);               // needed for wxPersistence support
 
       // We don't actually create the child view until a dataset is opened.
       createMenuBar();
@@ -96,6 +95,7 @@ namespace ctb::app
       // Event handlers
       Bind(wxEVT_MENU, &MainFrame::onMenuPreferences, this, CmdId::CMD_FILE_SETTINGS);
       Bind(wxEVT_MENU, &MainFrame::onMenuSyncData, this, CmdId::CMD_FILE_DOWNLOAD_DATA);
+      Bind(wxEVT_MENU, &MainFrame::onMenuEditFind, this, wxID_FIND);
       Bind(wxEVT_MENU, &MainFrame::onMenuWineList, this, CmdId::CMD_VIEW_WINE_LIST);
       Bind(wxEVT_MENU, &MainFrame::onMenuViewResizeGrid, this, CmdId::CMD_VIEW_RESIZE_GRID);
       Bind(wxEVT_MENU, &MainFrame::onQuit, this, wxID_EXIT);
@@ -103,14 +103,12 @@ namespace ctb::app
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onSearchBtn, this);
       m_search_ctrl->Bind(wxEVT_TEXT_ENTER, &MainFrame::onSearchTextEnter, this);
 
-      if ( !wxPersistentRegisterAndRestore(this, GetName()) )
+      if ( !wxPersistentRegisterAndRestore(this, constants::RES_NAME_MAINFRAME) )
       {
          // Choose some custom default size for the first run
          SetClientSize(FromDIP(wxSize(800, 600)));
          Center(wxBOTH);
       }
-
-      
    }
 
 
@@ -225,7 +223,6 @@ namespace ctb::app
    {
       try
       {
-         m_tool_bar->SetFocus();
          m_search_ctrl->SetFocus();
       }
       catch(...){
@@ -342,10 +339,9 @@ namespace ctb::app
          // load table and connect it to the event source
          DatasetLoader loader{ wxGetApp().userDataFolder() };
          auto tbl = loader.getDataset(TableId::List);
-         m_event_source->setTable(tbl);
-//         tbl->applySortConfig(GridTableWineList::getSortConfig(0));
-        // m_event_source->signal(DatasetEvent::Id::Sort);
+         m_event_source->setTable(tbl, true);
 
+         // Force a complete redraw of everything
          Layout();
          SendSizeEvent();
          Update();
@@ -412,16 +408,16 @@ namespace ctb::app
          auto dataset = m_event_source->getTable();
          if (dataset->filterBySubstring(m_search_ctrl->GetValue().wx_str()))
          {
-            // TODO 
+            m_event_source->signal(DatasetEvent::Id::SubStringFilter);
          }
-         else{
-            // clear any previous search filter, because that search text is no longer displayed.
-            dataset->clearSubStringFilter();
+         else {
+            wxGetApp().displayInfoMessage(constants::INFO_MSG_NO_MATCHING_ROWS);
+            m_search_ctrl->SetFocus();
+            m_search_ctrl->SelectAll();
          }
-         m_event_source->signal(DatasetEvent::Id::SubStringFilter);
       }
       catch (...) {
-
+         wxGetApp().displayErrorMessage(packageError());
       }
       updateStatusBarCounts();
    }

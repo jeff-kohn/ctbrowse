@@ -118,7 +118,7 @@ namespace ctb::app
 
       /// @brief retrieves a list of available filters for this table.
       ///
-      auto availableStringFilters() const -> CtStringFilters override
+      constexpr auto availableStringFilters() const -> CtStringFilters override
       {
          return CtStringFilters{ std::from_range, StringFilters };
       }
@@ -315,10 +315,12 @@ namespace ctb::app
          m_data{ std::move(data) },
          m_current_view{ &m_data },
          m_instock_filter{ PropId::Quantity, std::greater<CtProperty>{}, uint16_t{0} },
-         m_score_filter{ {PropId::CTScore, PropId::MYScore}, std::greater_equal<CtProperty>{}, constants::FILTER_SCORE_DEFAULT }
+         m_score_filter{ {PropId::CTScore, PropId::MYScore}, std::greater_equal<CtProperty>{}, constants::FILTER_SCORE_DEFAULT },
+         m_sort_config{ availableSortConfigs()[0] }
       {
          m_score_filter.enabled = false;
          m_instock_filter.enabled = false;
+         sortData();
       }
 
       void applyFilters()
@@ -345,10 +347,10 @@ namespace ctb::app
 
       bool applySubStringFilter(const SubStringFilter& filter)
       {
-         // clear any existing substring filter first, only one at a time. The new filter will be 
-         // applied if there are any matches. If no matches, substring filter will be cleared
-         // since we don't restore it (by design, previous search text no longer in the toolbar
-         // so it wouldn't make sense).
+         // clear any existing substring filter first, since we can only one at a time. The 
+         // new filter will be applied if there are any matches. If no matches, substring filter 
+         // will be cleared since we don't restore it (by design, previous search text is no longer 
+         // in the toolbar so it wouldn't make sense).
          m_substring_filter = {};
          applyFilters();
          auto filtered = vws::all(*m_current_view) | vws::filter(filter)

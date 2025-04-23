@@ -31,6 +31,7 @@ namespace ctb::app
       void init();
       void configureColumns();
       void setDataset(DatasetPtr dataset);
+      void selectFirstRow();
 
       void notify(DatasetEvent event) override;
       void onSelectionChanged(wxDataViewEvent& event);
