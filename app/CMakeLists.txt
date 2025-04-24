@@ -69,7 +69,6 @@ target_sources(${TARGET_NAME}
      "model/DatasetLoader.h"
      "model/DisplayColumn.h"
      "model/ScopedEventSink.h"
-     "views/ColumnLayout.h"
      "views/DatasetListView.cpp"
      "views/DatasetListView.h"
      "views/DatasetMultiView.cpp"
