@@ -79,7 +79,7 @@ namespace ctb::app
       m_sort_combo->SetValidator(wxGenericValidator(&m_sort_config.sorter_index));
       sort_options_box->Add(m_sort_combo, wxSizerFlags{}.Expand().Border(wxALL));
 
-      // ascending sort order radio. validator tied to GridTableSortConfig.ascending
+      // ascending sort order radio. validator tied to SortConfig.descending
       auto opt_ascending = new wxRadioButton{
          sort_options_box->GetStaticBox(),
          wxID_ANY, 
@@ -89,11 +89,13 @@ namespace ctb::app
          wxRB_GROUP
       };
       opt_ascending->SetValue(true);
-      opt_ascending->SetValidator(wxGenericValidator{ &m_sort_config.ascending });
+      opt_ascending->SetValidator(wxGenericValidator{ &m_sort_ascending });
       sort_options_box->Add(opt_ascending, wxSizerFlags{}.Expand().Border(wxALL));
 
-      // descending sort order radio. no validator needed 
+      // descending sort order radio. Since radiobuttons aren't in a group box, the validator treats them as bool
+      // so we have a seperate flag for the descending radio that we have to manually keep in sync (see onTableSorted)
       auto opt_descending = new wxRadioButton{ sort_options_box->GetStaticBox(), wxID_ANY, constants::LBL_SORT_DESCENDING };
+      opt_descending->SetValidator(wxGenericValidator{ &m_sort_config.descending });
       sort_options_box->Add(opt_descending, wxSizerFlags{1}.Expand().Border(wxALL));
       top_sizer->Add(sort_options_box, wxSizerFlags().Expand().Border(wxALL));
       top_sizer->AddSpacer(default_border);
@@ -379,6 +381,7 @@ namespace ctb::app
    void DatasetOptionsPanel::onTableSorted(DatasetBase* table)
    {
       m_sort_config = table->activeSortConfig();
+      m_sort_ascending = not m_sort_config.descending;
       TransferDataToWindow();
    }
 
@@ -444,6 +447,7 @@ namespace ctb::app
       try
       {
          TransferDataFromWindow();
+
          auto table = m_sink.getTable();
          if (table)
          {
@@ -462,17 +466,26 @@ namespace ctb::app
    {
       try
       {
+         // event could get generated even if they didn't change the selection, don't waste our time.
+         auto old_index = m_sort_config.sorter_index;
          TransferDataFromWindow();
+         if (old_index == m_sort_config.sorter_index)
+            return;
 
          // let the combo close its list before we reload the dataset
          CallAfter([this](){
             auto table = m_sink.getTable();
             if (table)
             {
+               // we re-fetch sorter based on index, because when a sort is selected from the combo
+               // we want to use the default order for that sort, not necessarily whatever the current
+               // selection is (e.g. sort Scores descending by default).
+               auto configs = table->availableSortConfigs();
+               m_sort_config = configs.at(static_cast<size_t>(m_sort_config.sorter_index));
                table->applySortConfig(m_sort_config);
                m_sink.signal_source(DatasetEvent::Id::Sort);
             }
-            });
+         });
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);

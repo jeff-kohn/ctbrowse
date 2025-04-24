@@ -49,6 +49,7 @@ namespace ctb::app
 
       CheckCountMap         m_check_map{};
       bool                  m_enable_score_filter{ false };
+      bool                  m_sort_ascending{ true };
       wxStaticBoxSizer*     m_filter_options_box{};
       bool                  m_instock_only{ constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT };
       wxTreeCtrl*           m_filter_tree{};

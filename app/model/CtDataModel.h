@@ -88,12 +88,13 @@ namespace ctb::app
       /// the index in this vector corresponds to the index in the sort_index
       /// property.
       /// 
-      auto availableSortConfigs() const -> SortConfigs override
+      constexpr auto availableSortConfigs() const -> SortConfigs override
       {
          SortConfigs configs{};
          for (const auto&& [i, table_sort] : vws::enumerate(Sorters))
          {
-            configs.emplace_back(CtSortConfig{ static_cast<int>(i), table_sort.sort_name  });
+            bool descending = (table_sort.sort_props[0] == PropId::MYScore or table_sort.sort_props[0] == PropId::CTScore) ? true : false;
+            configs.emplace_back(CtSortConfig{ static_cast<int>(i), table_sort.sort_name, descending  });
          }
          return configs;
       }
@@ -368,12 +369,12 @@ namespace ctb::app
       void sortData()
       {
          // sort the data table, then re-apply any filters to the view. Otherwise we'd have to sort twice
-         if (m_sort_config.ascending)
+         if (m_sort_config.descending)
          {
-            rng::sort(m_data, Sorters[static_cast<size_t>(m_sort_config.sorter_index)]);
+            rng::sort(vws::reverse(m_data), Sorters[static_cast<size_t>(m_sort_config.sorter_index)]);
          }
          else {
-            rng::sort(vws::reverse(m_data), Sorters[static_cast<size_t>(m_sort_config.sorter_index)]);
+            rng::sort(m_data, Sorters[static_cast<size_t>(m_sort_config.sorter_index)]);
          }
 
          applyFilters();

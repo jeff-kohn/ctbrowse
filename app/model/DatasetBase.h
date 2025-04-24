@@ -26,7 +26,7 @@ namespace ctb::app
    {
       int               sorter_index{}; // index of the sorter in model::Sorters, not a property index
       std::string_view  sorter_name{};
-      bool              ascending{ true };
+      bool              descending{ false };
 
       [[nodiscard]] std::strong_ordering operator<=>(const CtSortConfig&) const = default;
    };
