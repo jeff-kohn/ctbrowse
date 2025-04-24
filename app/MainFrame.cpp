@@ -102,6 +102,7 @@ namespace ctb::app
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_CANCEL_BTN, &MainFrame::onSearchCancelBtn, this);
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onSearchBtn, this);
       m_search_ctrl->Bind(wxEVT_TEXT_ENTER, &MainFrame::onSearchTextEnter, this);
+      m_search_ctrl->Bind(wxEVT_KEY_DOWN, &MainFrame::onSearchKeyDown, this);
 
       if ( !wxPersistentRegisterAndRestore(this, constants::RES_NAME_MAINFRAME) )
       {
@@ -387,6 +388,29 @@ namespace ctb::app
       try
       {
          doSearchFilter();
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+   void MainFrame::onSearchKeyDown(wxKeyEvent& event)
+   {
+      try
+      {
+         switch (event.GetKeyCode())
+         {
+            case WXK_TAB:
+               m_view->SetFocus();
+               break;
+
+            case WXK_ESCAPE:
+               clearSearchFilter();
+               break;
+
+            default:
+               event.Skip();
+         }
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);

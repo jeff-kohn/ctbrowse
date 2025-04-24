@@ -27,10 +27,12 @@ namespace ctb::app
       return wnd.release(); // parent owns child, so we don't need to delete
    }
 
+
    void DatasetListView::init()
    {
       Bind(wxEVT_DATAVIEW_SELECTION_CHANGED, &DatasetListView::onSelectionChanged, this);
    }
+
 
    void DatasetListView::configureColumns()
    {
@@ -78,6 +80,8 @@ namespace ctb::app
 
    void DatasetListView::selectFirstRow()
    {
+      if (0 == m_dataset->filteredRowCount()) return;
+
       auto item = m_dataset->GetItem(0);
       Select(item);
       EnsureVisible(item);
@@ -113,6 +117,7 @@ namespace ctb::app
             assert("Unexpected event type" and false);
       }
    }
+
 
    void DatasetListView::onSelectionChanged(wxDataViewEvent& event)
    {

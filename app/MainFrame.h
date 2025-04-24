@@ -106,6 +106,7 @@ namespace ctb::app
       void onMenuViewResizeGrid(wxCommandEvent&);
       void onSearchCancelBtn(wxCommandEvent& event);
       void onSearchTextEnter(wxCommandEvent& event);
+      void onSearchKeyDown(wxKeyEvent& event);
       void onQuit(wxCommandEvent&);
 
       // implementation details
