@@ -196,7 +196,7 @@ namespace ctb::app
 
    void MainFrame::createToolBar()
    {
-      const auto toolbar_size = FromDIP(wxSize{24,24});
+      const auto toolbar_size = wxSize{24,24};
 
       m_tool_bar = CreateToolBar();
 

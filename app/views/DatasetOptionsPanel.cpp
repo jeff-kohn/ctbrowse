@@ -102,7 +102,7 @@ namespace ctb::app
       m_filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_FILTER_OPTIONS);
 
       // load images for the checkboxes in our filter tree.
-      const auto tr_img_size = FromDIP(wxSize{ 16, 16 });
+      const auto tr_img_size = wxSize{ 16, 16 };
       m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_FILTER_IMG, tr_img_size));
       m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_UNCHECKED_IMG, tr_img_size));
       m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_CHECKED_IMG, tr_img_size));
