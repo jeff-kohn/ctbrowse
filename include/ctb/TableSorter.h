@@ -23,9 +23,10 @@ namespace ctb
    /// note there's no ascending/descending option, because that decision should be made
    /// by the range passed to the sort algorithm, not here.
    /// 
-   template<CtRecord Record>
+   template<CtRecord RecordT>
    struct TableSorter
    {
+      using Record = RecordT;
       using PropId = Record::PropId;
 
       std::vector<PropId> sort_props{};      // properties to use for sorting, in order
@@ -46,5 +47,6 @@ namespace ctb
          return false; // all props equal
       }
    };
+
 
 }  // ctb

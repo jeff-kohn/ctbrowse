@@ -77,15 +77,12 @@ namespace ctb::app
          m_main_frame->Show();
          SetTopWindow(m_main_frame);
 
+         CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_VIEW_WINE_LIST }); });
+
          return true;
       }
-      catch(Error& err)
-      {
-         displayErrorMessage(err);
-      }
-      catch(std::exception& e)
-      {
-         displayErrorMessage(e.what());
+      catch(...){
+         displayErrorMessage(packageError());
       }
       return false;
    } 
@@ -108,8 +105,7 @@ namespace ctb::app
    {
       try 
       {
-         auto cfg = getConfig();
-         cfg->SetPath(constants::CONFIG_PATH_PREFERENCES);
+         auto cfg = getConfig(constants::CONFIG_PATH_PREFERENCES);
          auto val = cfg->Read(wxString{ constants::CONFIG_VALUE_LABEL_CACHE_DIR }, wxEmptyString);
          if (!val.empty())
          {
@@ -123,27 +119,31 @@ namespace ctb::app
    }
    
 
-   ScopedConfigPath App::getConfig() noexcept(false)
+   ScopedConfigPath App::getConfig(std::string_view initial_path) noexcept(false)
    {
       auto *config = wxConfigBase::Get(false);
       if (nullptr == config)
       {
-         throw Error{ "No configuration object available" };
+         throw Error{ constants::ERROR_STR_NO_CONFIG_STORE };
       }
-      config->SetPath("/"); // the current path is persistent/global, which is fucking stupid.
+      config->SetPath(wxFromSV(initial_path)); 
       return ScopedConfigPath(*config);
    }
 
 
-   void App::displayErrorMessage(const Error& err)
+   void App::displayErrorMessage(const Error& err, bool log_error, std::source_location source_loc)
    {
       auto title = ctb::format(constants::FMT_TITLE_TYPED_ERROR, err.categoryName());
-      displayErrorMessage(err.error_message, title);
+      displayErrorMessage(err.formattedMesage(), log_error, title, source_loc);
    }
 
 
-   void App::displayErrorMessage(const std::string& msg, const std::string& title)
+   void App::displayErrorMessage(const std::string& msg, bool log_error, const std::string& title, std::source_location source_loc)
    {
+      if (log_error)
+      {
+         log::error("Error in '{}:{}' - {}", source_loc.file_name(), source_loc.line(), msg);
+      }
       wxMessageBox(msg, title, wxICON_ERROR | wxOK, m_main_frame);
    }
 

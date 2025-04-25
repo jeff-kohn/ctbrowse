@@ -2,7 +2,7 @@
  * @file       CtProperty.h
  *
  * @brief      declaration for the CtProperty type, which is used by
- *             all of our data tables/grids
+ *             all of our datasets
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/

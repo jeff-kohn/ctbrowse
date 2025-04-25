@@ -84,9 +84,11 @@ namespace ctb::app
    class ScopedConfigPath final
    {
    public:
+      static inline constexpr const char* CONFIG_ROOT = "/";
+
       explicit ScopedConfigPath(wxConfigBase& config) : m_config(config)
       {}
-      ~ScopedConfigPath()        { m_config.SetPath("/"); }
+      ~ScopedConfigPath()        { m_config.SetPath(CONFIG_ROOT); }
       
       wxConfigBase& get()        { return m_config;       }
       wxConfigBase* operator->() { return &m_config;      }

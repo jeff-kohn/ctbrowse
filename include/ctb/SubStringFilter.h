@@ -24,8 +24,8 @@ namespace ctb
    struct SubStringFilter
    {
    public:
-      using RecordType = RecordTypeT;
-      using PropId = RecordType::PropId;
+      using Record = RecordTypeT;
+      using PropId = Record::PropId;
 
       /// @brief the substring to search for.
       ///
@@ -41,7 +41,7 @@ namespace ctb
       /// the search substring, returning true if a match was round. case-neutral
       /// search is used
       /// 
-      bool operator()(const RecordType& rec) const
+      bool operator()(const Record& rec) const
       {
          for (auto prop : search_props)
          {

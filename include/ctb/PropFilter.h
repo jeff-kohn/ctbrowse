@@ -27,8 +27,8 @@ namespace ctb
    template <CtRecord RecordTypeT, typename ValueT = typename RecordTypeT::TableProperty>
    struct PropFilter
    {
-      using RecordType  = RecordTypeT;
-      using PropId      = RecordType::PropId;
+      using Record  = RecordTypeT;
+      using PropId      = Record::PropId;
       using ValueType   = ValueT;
       using ComparePred = std::function<bool(const ValueType&, const ValueType&)>;
 
@@ -71,7 +71,7 @@ namespace ctb
 
       /// @brief returns true if the specified table entry is a match to our predicate(s) and value
       ///
-      bool operator()(const RecordType& rec) const
+      bool operator()(const Record& rec) const
       {
          if (enabled)
             return rng::find_if(match_props, [&rec, this](PropId prop_id){ return compare_pred(rec[prop_id], compare_val); }) != match_props.end();

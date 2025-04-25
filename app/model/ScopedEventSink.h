@@ -8,23 +8,23 @@
 #pragma once
 
 #include "App.h"
-#include "interfaces/GridTableEvent.h"
+#include "model/DatasetEvent.h"
 
 
 namespace ctb::app
 {
-   /// @brief scoped RAII wrapper for subscribing/unsubscribing from a grid table event source
+   /// @brief Scoped RAII wrapper for subscribing/unsubscribing from a dataset event source
    ///
-   /// to handle grid-table events, all a class needs to do is instantiate a member of this
-   /// class, passing a pointer to the IGridTableEventSink interface to its ctor (usually 'this'
-   /// when the containing class itself inherits from IGridTableEventSink to ensure that the sink
+   /// To handle dataset events, all a class needs to do is instantiate a member of this
+   /// class, passing a pointer to the IDatasetEventSink interface to its ctor (usually 'this'
+   /// when the containing class itself inherits from IDatasetEventSink to ensure that the sink
    /// interface is available for the lifetime of the event source).
    class ScopedEventSink final
    {
    public:
       /// @brief construct a scoped event sink without attaching it to a source
       ///
-      explicit ScopedEventSink(IGridTableEventSink* sink) : m_sink{ sink }
+      explicit ScopedEventSink(IDatasetEventSink* sink) : m_sink{ sink }
       {
          if (!m_sink)
          {
@@ -38,7 +38,7 @@ namespace ctb::app
       /// you can pass a null source (although there's no point), but passing a null 
       /// sink will throw an exception.
       /// 
-      ScopedEventSink(IGridTableEventSink* sink, GridTableEventSourcePtr source) : 
+      ScopedEventSink(IDatasetEventSink* sink, DatasetEventSourcePtr source) : 
          m_sink{ sink },
          m_source{ source }
       {
@@ -52,7 +52,7 @@ namespace ctb::app
 
       /// @brief attach this sink to the specified source
       ///
-      void reset(GridTableEventSourcePtr source)
+      void reset(DatasetEventSourcePtr source)
       {
          detach();
          m_source = source;
@@ -64,7 +64,7 @@ namespace ctb::app
       /// returns true if successful, false if we don't have a source or the source 
       /// couldn't send notifications (because of no current table, for instance)
       /// 
-      bool signal_source(GridTableEvent::Id event_id, std::optional<int> row_idx = std::nullopt)
+      bool signal_source(DatasetEvent::Id event_id, std::optional<int> row_idx = std::nullopt)
       {
          if (m_source)
          {
@@ -77,13 +77,13 @@ namespace ctb::app
       /// 
       /// be sure to check the return value as it could be nullptr
       /// 
-      [[nodiscard]] GridTablePtr getTable()
+      [[nodiscard]] DatasetPtr getTable()
       {
          if (m_source)
          {
             return m_source->getTable();
          }
-         return {};
+         return DatasetPtr{};
       }
 
       /// @brief returns whether the event source has a table attached or not.
@@ -101,8 +101,8 @@ namespace ctb::app
       }
 
    private:
-      IGridTableEventSink*    m_sink{ nullptr };
-      GridTableEventSourcePtr m_source{ nullptr };
+      IDatasetEventSink*    m_sink{ nullptr };
+      DatasetEventSourcePtr m_source{ nullptr };
 
       void attach() noexcept
       {

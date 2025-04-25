@@ -29,7 +29,7 @@
 namespace ctb::log
 {
 
-   // import these symbols into our namespace, so logging interface looks like logging::warn(...) and there's
+   // import these symbols into our namespace, so logging interface looks like log::warn(...) and there's
    // possibility to replace logging backend with minimal impact if needed.
    //
    namespace fs = std::filesystem;
@@ -89,6 +89,16 @@ namespace ctb::log
       std::string path{ source_loc.file_name() };
       auto file_name = viewFilename(path);
       error("{} (in {}:{}) - {}", file_name, source_loc.line(), source_loc.function_name(), e.what());
+   }
+
+
+   /// @brief Log an exception with source information. 
+   /// 
+   inline void exception(const ctb::Error& e, std::source_location source_loc = std::source_location::current())
+   {
+      std::string path{ source_loc.file_name() };
+      auto file_name = viewFilename(path);
+      error("{} (in {}:{}) - {}", file_name, source_loc.line(), source_loc.function_name(), e.formattedMesage());
    }
 
 

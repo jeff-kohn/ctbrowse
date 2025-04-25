@@ -29,7 +29,7 @@ namespace ctb
    /// 
    /// these enums indicate how to attempt to parse/interpret the CSV field for a given property.
    ///
-   enum PropType
+   enum class PropType
    {
       String,
       UInt16,
@@ -137,7 +137,7 @@ namespace ctb
 
       /// @brief array syntax for getting a property value
       ///
-      [[nodiscard]] const TableProperty&& operator[](int col_idx) const 
+      [[nodiscard]] const TableProperty& operator[](int col_idx) const 
       {
          return getProperty(col_idx);
       }
@@ -206,9 +206,20 @@ namespace ctb
       }
    };
 
-
+   /// @brief type alias for 
+   /// 
    template <CtRecordTraits RecordTraits>
    using CtDataset = std::vector<CtRecordImpl<RecordTraits>>;
 
+
+   /// @brief concept for a CtDataSet<TableTraits>
+   //
+   template <typename T>
+   concept CellarTrackerDataset = requires (T data, typename T::PropId prop, typename T::Record rec, typename T::TableProperty val, std::string str)
+   {
+      rec = data[0];
+      val = rec[0];
+      str = val.asString();
+   };
 
 } // namespace ctb

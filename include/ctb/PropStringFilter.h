@@ -26,8 +26,8 @@ namespace ctb
    struct PropStringFilter
    {
       // some types we borrow from our template parameters
-      using RecordType = RecordTypeT;
-      using PropId  = RecordType::PropId;
+      using Record = RecordTypeT;
+      using PropId  = Record::PropId;
 
       /// @brief the property that we're filtering against
       ///
@@ -39,7 +39,7 @@ namespace ctb
 
       /// @brief returns true if the specified table entry is a match
       ///
-      bool operator()(const RecordType& rec) const
+      bool operator()(const Record& rec) const
       {
          if (match_values.empty())
             return true;

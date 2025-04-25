@@ -162,7 +162,7 @@ namespace ctb
 
 
 #else
-   // TODO: provie implementation for other platforms when needed.
+   // TODO: provide implementation for other platforms when needed.
 #endif
 
 

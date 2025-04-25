@@ -8,8 +8,8 @@
 #pragma once
 
 #include "App.h"
-#include "grid/GridTableEventSource.h"
-#include "grid/ScopedEventSink.h"
+#include "model/DatasetEventSource.h"
+#include "model/ScopedEventSink.h"
 
 #include <wx/event.h>
 #include <wx/frame.h>
@@ -26,13 +26,24 @@ class wxToolBar;
 
 namespace ctb::app
 {
-   class GridMultiView;
+   class DatasetMultiView;
    class LabelImageCache;     // used for retrieving label images
 
 
+   // we don't use enum class because then every time we need to pass an ID to wxObject,
+   // we'd have to cast or use std::to_underlying and that's just an ugly waste of time 
+   // with no benefit for this use-case.
+   enum CmdId : uint16_t
+   {
+      CMD_FILE_DOWNLOAD_DATA = wxID_HIGHEST,
+      CMD_FILE_SETTINGS,
+      CMD_VIEW_WINE_LIST,
+      CMD_VIEW_RESIZE_GRID
+   };
+
    /// @brief class for the main window of the application
    ///
-   class MainFrame final : public wxFrame, public IGridTableEventSink
+   class MainFrame final : public wxFrame, public IDatasetEventSink
    {
    public:
       static inline constexpr int STATUS_BAR_PANE_STATUS = 0;
@@ -66,8 +77,8 @@ namespace ctb::app
       }
 
    private:
-      GridMultiView*          m_view{};
-      GridTableEventSourcePtr m_event_source{}; // for synchronizing events between views and the underlying table
+      DatasetMultiView*       m_view{};
+      DatasetEventSourcePtr   m_event_source{}; // for synchronizing events between views and the underlying table
       wxMenuBar*              m_menu_bar{};
       wxSearchCtrl*           m_search_ctrl{};  // substring search box on the toolbar
       ScopedEventSink         m_sink;           // so we can also handle events from our source
@@ -95,6 +106,7 @@ namespace ctb::app
       void onMenuViewResizeGrid(wxCommandEvent&);
       void onSearchCancelBtn(wxCommandEvent& event);
       void onSearchTextEnter(wxCommandEvent& event);
+      void onSearchKeyDown(wxKeyEvent& event);
       void onQuit(wxCommandEvent&);
 
       // implementation details
@@ -102,8 +114,8 @@ namespace ctb::app
       void clearSearchFilter();
       void updateStatusBarCounts();
 
-      // Inherited via IGridTableEventSink
-      void notify(GridTableEvent event) override;
+      // Inherited via IDatasetEventSink
+      void notify(DatasetEvent event) override;
    };
 
 

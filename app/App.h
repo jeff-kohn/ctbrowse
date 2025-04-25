@@ -57,14 +57,17 @@ namespace ctb::app
 
       /// @brief Get the current config object.
       ///
-      /// Calling this will throw an exception  if there's no default config.
+      /// Calling this will throw an exception if there's no default config. AFAIK the wxWidgets config store is 
+      /// not thread-safe since multiple calls to SetPath() would be problematic. This should only be used from UI thread.
       ///
-      auto getConfig() noexcept(false) -> ScopedConfigPath;
+      auto getConfig(std::string_view initial_path = ScopedConfigPath::CONFIG_ROOT) noexcept(false) -> ScopedConfigPath;
 
-      /// @brief display a message box with an error description.
+      /// @brief Display a message box with an error description.
       ///
-      void displayErrorMessage(const Error& err);
-      void displayErrorMessage(const std::string& msg, const std::string& title = constants::ERROR_STR);
+      /// If log_error is true, the exception will also be logged. source_loc is only used for logging.
+      /// 
+      void displayErrorMessage(const Error& err, bool log_error = true, std::source_location source_loc = std::source_location::current());
+      void displayErrorMessage(const std::string& msg, bool log_error, const std::string& title = constants::ERROR_STR, std::source_location source_loc = std::source_location::current());
 
       /// @brief display a message box with inctb::formational text
       ///

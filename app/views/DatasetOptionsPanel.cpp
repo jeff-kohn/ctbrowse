@@ -1,14 +1,14 @@
 /*******************************************************************
- * @file GridOptionsPanel.cpp
+ * @file DatasetOptionsPanel.cpp
  *
- * @brief implementation file for the GridOptionsPanel class
+ * @brief implementation file for the DatasetOptionsPanel class
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
 #include "App.h"
 #include "wx_helpers.h"
-#include "views/GridOptionsPanel.h"
+#include "views/DatasetOptionsPanel.h"
 
 #include <wx/sizer.h>
 #include <wx/stattext.h>
@@ -27,15 +27,13 @@ namespace ctb::app
 
    } // namespace
    
-   GridOptionsPanel::GridOptionsPanel(GridTableEventSourcePtr source) : m_sink{ this, source }
+   DatasetOptionsPanel::DatasetOptionsPanel(DatasetEventSourcePtr source) : m_sink{ this, source }
    {
-      auto cfg = wxGetApp().getConfig();
-      cfg->SetPath(constants::CONFIG_PATH_SYNC);
-      cfg->Read(constants::CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY, &m_instock_only, constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT);
+
    }
 
 
-   [[nodiscard]] GridOptionsPanel* GridOptionsPanel::create(wxWindow* parent, GridTableEventSourcePtr source)
+   [[nodiscard]] DatasetOptionsPanel* DatasetOptionsPanel::create(wxWindow* parent, DatasetEventSourcePtr source)
    {
       if (!source)
       {
@@ -48,7 +46,7 @@ namespace ctb::app
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
 
-      std::unique_ptr<GridOptionsPanel> wnd{ new GridOptionsPanel{source} };
+      std::unique_ptr<DatasetOptionsPanel> wnd{ new DatasetOptionsPanel{source} };
       if (!wnd->Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
@@ -58,7 +56,7 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::initControls()
+   void DatasetOptionsPanel::initControls()
    {
       auto default_border = wxSizerFlags::GetDefaultBorder();
 
@@ -76,10 +74,10 @@ namespace ctb::app
       // sort fields combo
       m_sort_combo = new wxChoice(sort_options_box->GetStaticBox(), wxID_ANY);
       m_sort_combo->SetFocus();
-      m_sort_combo->SetValidator(wxGenericValidator(&m_sort_config.sort_index));
+      m_sort_combo->SetValidator(wxGenericValidator(&m_sort_config.sorter_index));
       sort_options_box->Add(m_sort_combo, wxSizerFlags{}.Expand().Border(wxALL));
 
-      // ascending sort order radio. validator tied to GridTableSortConfig.ascending
+      // ascending sort order radio. validator tied to SortConfig.descending
       auto opt_ascending = new wxRadioButton{
          sort_options_box->GetStaticBox(),
          wxID_ANY, 
@@ -89,11 +87,13 @@ namespace ctb::app
          wxRB_GROUP
       };
       opt_ascending->SetValue(true);
-      opt_ascending->SetValidator(wxGenericValidator{ &m_sort_config.ascending });
+      opt_ascending->SetValidator(wxGenericValidator{ &m_sort_ascending });
       sort_options_box->Add(opt_ascending, wxSizerFlags{}.Expand().Border(wxALL));
 
-      // descending sort order radio. no validator needed 
+      // descending sort order radio. Since radiobuttons aren't in a group box, the validator treats them as bool
+      // so we have a seperate flag for the descending radio that we have to manually keep in sync (see onTableSorted)
       auto opt_descending = new wxRadioButton{ sort_options_box->GetStaticBox(), wxID_ANY, constants::LBL_SORT_DESCENDING };
+      opt_descending->SetValidator(wxGenericValidator{ &m_sort_config.descending });
       sort_options_box->Add(opt_descending, wxSizerFlags{1}.Expand().Border(wxALL));
       top_sizer->Add(sort_options_box, wxSizerFlags().Expand().Border(wxALL));
       top_sizer->AddSpacer(default_border);
@@ -102,7 +102,7 @@ namespace ctb::app
       m_filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_FILTER_OPTIONS);
 
       // load images for the checkboxes in our filter tree.
-      const auto tr_img_size = FromDIP(wxSize{ 16, 16 });
+      const auto tr_img_size = wxSize{ 16, 16 };
       m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_FILTER_IMG, tr_img_size));
       m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_UNCHECKED_IMG, tr_img_size));
       m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_CHECKED_IMG, tr_img_size));
@@ -150,18 +150,18 @@ namespace ctb::app
       SetSizer(top_sizer);
 
       // event bindings.
-      m_sort_combo->Bind(wxEVT_CHOICE, &GridOptionsPanel::onSortSelection, this);
-      m_filter_tree->Bind(wxEVT_TREE_ITEM_EXPANDING, &GridOptionsPanel::onTreeFilterExpanding, this);
-      m_filter_tree->Bind(wxEVT_LEFT_DOWN, &GridOptionsPanel::onTreeFilterLeftClick, this);
-      m_score_spin_ctrl->Bind(wxEVT_SPINCTRLDOUBLE, &GridOptionsPanel::onMinScoreChanged, this);
-      opt_ascending->Bind(wxEVT_RADIOBUTTON, &GridOptionsPanel::onSortOrderClicked, this);
-      opt_descending->Bind(wxEVT_RADIOBUTTON, &GridOptionsPanel::onSortOrderClicked, this);
-      instock_filter_ctrl->Bind(wxEVT_CHECKBOX, &GridOptionsPanel::OnInStockChecked, this);
-      score_filter_chk->Bind(wxEVT_CHECKBOX, &GridOptionsPanel::onMinScoreFilterChecked, this);     
+      m_sort_combo->Bind(wxEVT_CHOICE, &DatasetOptionsPanel::onSortSelection, this);
+      m_filter_tree->Bind(wxEVT_TREE_ITEM_EXPANDING, &DatasetOptionsPanel::onTreeFilterExpanding, this);
+      m_filter_tree->Bind(wxEVT_LEFT_DOWN, &DatasetOptionsPanel::onTreeFilterLeftClick, this);
+      m_score_spin_ctrl->Bind(wxEVT_SPINCTRLDOUBLE, &DatasetOptionsPanel::onMinScoreChanged, this);
+      opt_ascending->Bind(wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
+      opt_descending->Bind(wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
+      instock_filter_ctrl->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::OnInStockChecked, this);
+      score_filter_chk->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onMinScoreFilterChecked, this);     
    }
 
 
-   void GridOptionsPanel::addPropFilter(wxTreeItemId item)
+   void DatasetOptionsPanel::addPropFilter(wxTreeItemId item)
    {
       if (m_sink.hasTable())
       {
@@ -169,13 +169,13 @@ namespace ctb::app
          if (filter)
          {
             m_sink.getTable()->addPropFilterString(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
-            m_sink.signal_source(GridTableEvent::Id::Filter);
+            m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
    }
 
 
-   void GridOptionsPanel::removePropFilter(wxTreeItemId item)
+   void DatasetOptionsPanel::removePropFilter(wxTreeItemId item)
    {
       if (m_sink.hasTable())
       {
@@ -183,13 +183,13 @@ namespace ctb::app
          if (filter)
          {
             m_sink.getTable()->removePropFilterString(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
-            m_sink.signal_source(GridTableEvent::Id::Filter);
+            m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
    }
 
 
-   void GridOptionsPanel::populateFilterTypes(GridTable* grid_table)
+   void DatasetOptionsPanel::populateFilterTypes(DatasetBase* table)
    {
       assert(m_filter_tree);
 
@@ -199,8 +199,8 @@ namespace ctb::app
       m_filters.clear();
       m_check_map.clear();
 
-      // get the available filters for this grid table, and add them to the tree.
-      auto filters = grid_table->availableStringFilters();
+      // get the available filters for this dataset, and add them to the tree.
+      auto filters = table->availableStringFilters();
       auto root = m_filter_tree->AddRoot(wxEmptyString);
       for (auto& filter : filters)
       {
@@ -213,7 +213,7 @@ namespace ctb::app
    }
 
 
-   GridOptionsPanel::MaybeFilter GridOptionsPanel::getPropFilterForItem(wxTreeItemId item)
+   DatasetOptionsPanel::MaybeFilter DatasetOptionsPanel::getPropFilterForItem(wxTreeItemId item)
    {
       auto table = m_sink.getTable();
       if (table)
@@ -231,27 +231,27 @@ namespace ctb::app
    }
 
 
-   wxArrayString GridOptionsPanel::getSortOptionList(GridTable* grid_table)
+   wxArrayString DatasetOptionsPanel::getSortOptionList(DatasetBase* table)
    {
-      return vws::all(grid_table->availableSortConfigs()) 
-               | vws::transform([](const GridTableSortConfig& s) {  return wxString{s.sort_name.data(), s.sort_name.length() };  })
+      return vws::all(table->availableSortConfigs()) 
+               | vws::transform([](const CtSortConfig& s) {  return wxString{s.sorter_name.data(), s.sorter_name.length() };  })
                | rng::to<wxArrayString>();
    }
 
 
-   bool GridOptionsPanel::isChecked(wxTreeItemId item)
+   bool DatasetOptionsPanel::isChecked(wxTreeItemId item)
    {
       return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CHECKED;
    }
 
 
-   bool GridOptionsPanel::isContainerNode(wxTreeItemId item)
+   bool DatasetOptionsPanel::isContainerNode(wxTreeItemId item)
    {
       return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CONTAINER;
    }
 
 
-   bool GridOptionsPanel::isMatchValueNode(wxTreeItemId item)
+   bool DatasetOptionsPanel::isMatchValueNode(wxTreeItemId item)
    {
       return item.IsOk() and m_filter_tree->GetItemImage(item) != IMG_CONTAINER;
    }
@@ -259,7 +259,7 @@ namespace ctb::app
    /// @brief updates the checked/unchecked status of a node.
    /// @return true if successful, false otherwise (ie invalid item)
    /// 
-   bool GridOptionsPanel::setMatchValueChecked(wxTreeItemId item, bool checked)
+   bool DatasetOptionsPanel::setMatchValueChecked(wxTreeItemId item, bool checked)
    {
       if ( isMatchValueNode(item) )
       {
@@ -281,7 +281,7 @@ namespace ctb::app
 
    /// @brief toggles a filter value by updating its checked/unchecked image and applying/deleting the corresponding filter.
    /// 
-   void GridOptionsPanel::toggleFilterSelection(wxTreeItemId item)
+   void DatasetOptionsPanel::toggleFilterSelection(wxTreeItemId item)
    {
       bool checked = !isChecked(item);
       if (!setMatchValueChecked(item, checked))
@@ -300,13 +300,13 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::updateFilterLabel(wxTreeItemId item)
+   void DatasetOptionsPanel::updateFilterLabel(wxTreeItemId item)
    {
       auto maybe_filter = m_filters[item];
       if ( !maybe_filter or !item.IsOk() )
          return;
 
-      // if the filter node has selected childen, update the lable with the count
+      // if the filter node has selected children, update the label with the count
       wxString filter_name{ wxFromSV(maybe_filter->filterName()) };
       auto count = m_check_map[item];
       if (count)
@@ -320,82 +320,80 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::enableInStockFilter(bool enable)
+   void DatasetOptionsPanel::enableInStockFilter(bool enable)
    {
       constexpr size_t index = 0;
       m_filter_options_box->Show(index, enable);
    }
 
 
-   void GridOptionsPanel::resetInStockCheckbox()
+   void DatasetOptionsPanel::resetInStockCheckbox()
    {
       m_instock_only = false;
       TransferDataToWindow();
    }
 
 
-   void GridOptionsPanel::notify(GridTableEvent event)
+   void DatasetOptionsPanel::notify(DatasetEvent event)
    {
-      assert(event.m_grid_table);
+      assert(event.m_data);
 
       try
       {
          switch (event.m_event_id)
          {
-         case GridTableEvent::Id::TableInitialize:
-            onTableInitialize(event.m_grid_table);
-            enableInStockFilter(event.m_grid_table->hasInStockFilter());
-            resetInStockCheckbox();
+         case DatasetEvent::Id::TableInitialize:
+            onTableInitialize(event.m_data.get());
+            enableInStockFilter(event.m_data->hasInStockFilter());
             break;
 
-         case GridTableEvent::Id::Sort:
-            onTableSorted(event.m_grid_table);
+         case DatasetEvent::Id::Sort:
+            onTableSorted(event.m_data.get());
             break;
 
-         case GridTableEvent::Id::Filter:               [[fallthrough]];
-         case GridTableEvent::Id::SubStringFilter:      [[fallthrough]];
-         case GridTableEvent::Id::RowSelected:          [[fallthrough]];
-         case GridTableEvent::Id::GridLayoutRequested:  [[fallthrough]];
+         case DatasetEvent::Id::Filter:              [[fallthrough]];
+         case DatasetEvent::Id::SubStringFilter:     [[fallthrough]];
+         case DatasetEvent::Id::RowSelected:         [[fallthrough]];
+         case DatasetEvent::Id::ColLayoutRequested:  [[fallthrough]];
          default:
             break;
          }
       }
-      catch(Error& err)
-      {
-         wxGetApp().displayErrorMessage(err);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
 
-   void GridOptionsPanel::onTableInitialize(GridTable* grid_table)
+   void DatasetOptionsPanel::onTableInitialize(DatasetBase* table)
    {
       // reload sort/filter options
       m_sort_combo->Clear();
-      m_sort_combo->Append(getSortOptionList(grid_table));
-      onTableSorted(grid_table);
-      populateFilterTypes(grid_table);
-   }
+      m_sort_combo->Append(getSortOptionList(table));
+      onTableSorted(table);
+      populateFilterTypes(table);
 
-
-   void GridOptionsPanel::onTableSorted(GridTable* grid_table)
-   {
-      m_sort_config = grid_table->activeSortConfig();
+      m_instock_only = table->getInStockFilter();
       TransferDataToWindow();
    }
 
 
-   void GridOptionsPanel::OnInStockChecked([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsPanel::onTableSorted(DatasetBase* table)
+   {
+      m_sort_config = table->activeSortConfig();
+      m_sort_ascending = not m_sort_config.descending;
+      TransferDataToWindow();
+   }
+
+
+   void DatasetOptionsPanel::OnInStockChecked([[maybe_unused]] wxCommandEvent& event)
    {
       assert(m_sink.hasTable());
 
       TransferDataFromWindow();
-      if (m_sink.hasTable() and m_sink.getTable()->enableInStockFilter(m_instock_only))
+      if (m_sink.hasTable() and m_sink.getTable()->setInStockFilter(m_instock_only))
       {
-         m_sink.signal_source(GridTableEvent::Id::Filter);
+         m_sink.signal_source(DatasetEvent::Id::Filter);
       }
       else{
          // something went wrong, so clear checkbox.
@@ -405,19 +403,19 @@ namespace ctb::app
    }
 
 
-   void GridOptionsPanel::onMinScoreChanged([[maybe_unused]] wxSpinDoubleEvent& event)
+   void DatasetOptionsPanel::onMinScoreChanged([[maybe_unused]] wxSpinDoubleEvent& event)
    {
       if (m_enable_score_filter and m_sink.hasTable())
       {
          if ( m_sink.getTable()->setMinScoreFilter(event.GetValue()) )
          {
-            m_sink.signal_source(GridTableEvent::Id::Filter);
+            m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
    }
 
 
-   void GridOptionsPanel::onMinScoreFilterChecked([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsPanel::onMinScoreFilterChecked([[maybe_unused]] wxCommandEvent& event)
    {
       if (!m_sink.hasTable())
       {
@@ -431,71 +429,71 @@ namespace ctb::app
       {
          if (m_sink.getTable()->setMinScoreFilter(m_score_filter_val))
          {
-            m_sink.signal_source(GridTableEvent::Id::Filter);
+            m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
       else 
       {
          if (m_sink.getTable()->setMinScoreFilter(std::nullopt))
          {
-            m_sink.signal_source(GridTableEvent::Id::Filter);
+            m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
    }
 
 
-   void GridOptionsPanel::onSortOrderClicked([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsPanel::onSortOrderClicked([[maybe_unused]] wxCommandEvent& event)
    {
       try
       {
          TransferDataFromWindow();
+
          auto table = m_sink.getTable();
          if (table)
          {
             table->applySortConfig(m_sort_config);
-            m_sink.signal_source(GridTableEvent::Id::Sort);
+            m_sink.signal_source(DatasetEvent::Id::Sort);
          }
       }
-      catch(Error& err)
-      {
-         wxGetApp().displayErrorMessage(err);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
 
    }
 
 
-   void GridOptionsPanel::onSortSelection([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsPanel::onSortSelection([[maybe_unused]] wxCommandEvent& event)
    {
       try
       {
+         // event could get generated even if they didn't change the selection, don't waste our time.
+         auto old_index = m_sort_config.sorter_index;
          TransferDataFromWindow();
+         if (old_index == m_sort_config.sorter_index)
+            return;
 
-         // let the combo close its list before we reload the grid
+         // let the combo close its list before we reload the dataset
          CallAfter([this](){
             auto table = m_sink.getTable();
             if (table)
             {
+               // we re-fetch sorter based on index, because when a sort is selected from the combo
+               // we want to use the default order for that sort, not necessarily whatever the current
+               // selection is (e.g. sort Scores descending by default).
+               auto configs = table->availableSortConfigs();
+               m_sort_config = configs.at(static_cast<size_t>(m_sort_config.sorter_index));
                table->applySortConfig(m_sort_config);
-               m_sink.signal_source(GridTableEvent::Id::Sort);
+               m_sink.signal_source(DatasetEvent::Id::Sort);
             }
-            });
+         });
       }
-      catch(Error& err)
-      {
-         wxGetApp().displayErrorMessage(err);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
 
-   void GridOptionsPanel::onTreeFilterExpanding(wxTreeEvent& event)
+   void DatasetOptionsPanel::onTreeFilterExpanding(wxTreeEvent& event)
    {
       try
       {
@@ -512,28 +510,23 @@ namespace ctb::app
             return;
          }
 
-         auto grid_table = m_sink.getTable();
-         assert(grid_table);
+         auto data = m_sink.getTable();
+         assert(data);
 
          auto& filter = m_filters[filter_node.m_pItem]; 
-         for (auto& match_val : filter->getMatchValues(grid_table.get()) )
+         for (auto& match_val : filter->getMatchValues(data.get()) )
          {
             auto item = m_filter_tree->AppendItem(filter_node, match_val.c_str());
             m_filter_tree->SetItemImage(item, 1);
          }
       }
-      catch(Error& err)
-      {
-         wxGetApp().displayErrorMessage(err);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
 
-   void GridOptionsPanel::onTreeFilterLeftClick(wxMouseEvent& event)
+   void DatasetOptionsPanel::onTreeFilterLeftClick(wxMouseEvent& event)
    {
       try
       {
@@ -548,13 +541,8 @@ namespace ctb::app
             event.Skip(); // need default processing for parent node's +/- button
          }
       }
-      catch(Error& err)
-      {
-         wxGetApp().displayErrorMessage(err);
-      }
-      catch(std::exception& e)
-      {
-         wxGetApp().displayErrorMessage(e.what());
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 

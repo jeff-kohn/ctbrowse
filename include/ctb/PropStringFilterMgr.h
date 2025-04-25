@@ -31,9 +31,9 @@ namespace ctb
    class PropStringFilterMgr
    {
    public:
-      using RecordType   = RecordTypeT;
-      using StringFilter = PropStringFilter<RecordType>;
-      using PropId       = RecordType::PropId;
+      using Record   = RecordTypeT;
+      using StringFilter = PropStringFilter<Record>;
+      using PropId       = Record::PropId;
 
       /// @brief add a match value for the specified column filter.
       /// @return true if successful, false if filter value already existed or could not be added.
@@ -78,7 +78,7 @@ namespace ctb
       ///         if the record failed to match one or more filters. Will
       ///         also return true if there are no active filters.
       /// 
-      bool operator()(const RecordType& rec) const
+      bool operator()(const Record& rec) const
       {
          if (activeFilters())
          {

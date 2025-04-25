@@ -14,11 +14,11 @@ namespace ctb::constants
    inline constexpr const char* CMD_FILE_SETTINGS_TIP             = "Configure app settings";
    inline constexpr const char* CMD_VIEWS_WINE_LIST_LBL           = "&Wine List\tCtrl+W";
    inline constexpr const char* CMD_VIEWS_WINE_LIST_TIP           = "View Personal Wine List";
-   inline constexpr const char* CMD_VIEWS_RESIZE_GRID_LBL         = "&Resize Grid Columns";
-   inline constexpr const char* CMD_VIEWS_RESIZE_GRID_TIP         = "Resize the grid columns to fit the data";
+   inline constexpr const char* CMD_VIEWS_RESIZE_COLS_LBL         = "&Resize Data Columns";
+   inline constexpr const char* CMD_VIEWS_RESIZE_COLS_TIP         = "Resize the data columns to fit the data";
 
-   inline constexpr const char* CONFIG_PATH_SYNC                  = "/Preferences/DataSync";
    inline constexpr const char* CONFIG_PATH_PREFERENCES           = "/Preferences";
+   inline constexpr const char* CONFIG_PATH_PREFERENCE_DATASYNC   = "/Preferences/DataSync";
 
    inline constexpr const char* CONFIG_VALUE_DEFAULT_SYNC_TABLES  = "DefaultSyncTables";
    inline constexpr const char* CONFIG_VALUE_SYNC_ON_STARTUP      = "SyncOnStartup";
@@ -38,13 +38,13 @@ namespace ctb::constants
    inline constexpr const char* FMT_LBL_TOTAL_ROWS                = "Total Rows: {}";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADED        = "Successfully downloaded file '{}'.";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADING       = "Downloading file '{}'...";
-   inline constexpr const char* FMT_TITLE_TYPED_ERROR             = "Error ({})";
+   inline constexpr const char* FMT_TITLE_TYPED_ERROR             = "{} Error";
    inline constexpr const char* FMT_LABEL_IMAGE_FILENAME          = "{}-{}.jpg";
 
    inline constexpr const char* INFO_MSG_NO_MATCHING_ROWS         = "No rows matched the search text.";
    inline constexpr const char* NO_SCORE                          = " --";
    
-   // grid column labels
+   // column labels
    inline constexpr const char* COL_CT_SCORE                      = "CT Score";
    inline constexpr const char* COL_LOCALE                        = "Region and Appellation";
    inline constexpr const char* COL_MY_SCORE                      = "My Score";
@@ -52,7 +52,7 @@ namespace ctb::constants
    inline constexpr const char* COL_WINE                          = "Wine";
 
 
-   // WineDetailsPanel labels
+   // DetailsPanel labels
    inline constexpr const char* LBL_APPELLATION                   = "Appellation:";
    inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";
    inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only Show In-Stock Inventory";
@@ -73,8 +73,8 @@ namespace ctb::constants
    inline constexpr const char* LBL_SORT_OPTIONS                  = "Sort Options";
    inline constexpr const char* LBL_SUB_REGION                    = "Subregion:";
    inline constexpr const char* LBL_VALUATION                     = "Valuation";
-   inline constexpr const char* LBL_VARIETAL                      = "Varietal:";
-   inline constexpr const char* LBL_VINTAGE                       = "Vintage:";
+   inline constexpr const char* LBL_VARIETAL                      = "Master Varietal:";
+   inline constexpr const char* LBL_VINTAGE                       = "Vintage Year:";
 
 
    // Detail property names
@@ -110,6 +110,7 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_REGION_WINE           = "Region, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_SCORE_MY              = "My Score";
    inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";
+   inline constexpr const char* SORT_OPTION_MY_VALUE              = "My Value";
    inline constexpr const char* SORT_OPTION_VARIETAL_WINE         = "Varietal, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_VINTAGE_WINE          = "Vintage and Wine";
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";
@@ -130,6 +131,7 @@ namespace ctb::constants
    // app-specific error messages.
    inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN = "Label cache object is shutting down.";
    inline constexpr const char* ERROR_STR_NULL_POINTER          = "NULL pointer argument not allowed.";
+   inline constexpr const char* ERROR_STR_NO_CONFIG_STORE       = "No configuration store available.";
 
 
 }  // namespace ctb::constants

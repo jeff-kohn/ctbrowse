@@ -7,28 +7,21 @@
  *******************************************************************/
 #pragma once
 
-#include "ctb/ctb.h"
-#include "ctb/utility.h"
-#include "ctb/TableProperty.h"
-#include "ctb/table_data.h"
+#include "App.h"
 
+#include <ctb/TableProperty.h>
 #include <magic_enum/magic_enum.hpp>
 #include <wx/defs.h>
 
 #include <variant>
 
-namespace ctb
+namespace ctb::app
 {
 
    /// @brief struct containing everything needed to know about how to display a table column
    ///
-   template<CtRecord RecordType>
    struct DisplayColumn
    {
-      // some types we borrow from our template parameter
-      using PropId         = RecordType::PropId;
-      using TableProperty  = RecordType::TableProperty;
-
       /// @brief enum to specify the alignment for column headers and cell text
       ///
       enum Align : uint16_t
@@ -48,37 +41,42 @@ namespace ctb
          Currency
       };
 
-      /// properties
+      /// @brief The zero-based index into the record type' PropId enum of the property this object represents 
       ///
-      PropId       prop_id{};                   /// identifier for the property to display
-      std::string  display_name{};              /// column header title to use
-      Format       format{ Format::String };    /// format to display the value
-      Align        col_align{ Align::Left };    /// how to align the column values in the cell
-      Align        header_align{ Align::Left }; /// how to align the column title in the header
+      /// We have to use a int instead of the enum because this class needs to be used through a type-erased 
+      /// interface and can't refer to types specific to a CtRecordImpl<> instantiation.
+      /// 
+      int prop_index{};                  
+
+      /// @brief Title to use for the column's header 
+      std::string display_name{};
+
+      /// @brief The format to use when displaying the value 
+      Format format{ Format::String };    
+      
+      /// @brief How the column's values should be aligned
+      Align col_align{ Align::Left };    
+
+      /// @brief How the column header should be aligned
+      Align header_align{ Align::Left }; 
 
       /// @brief construct a column to display the specified property as a string
       ///
       /// column header value is option and will use the table column name by default
       ///
-      explicit DisplayColumn(PropId prop, std::string_view col_name = {}) : prop_id{ prop }, display_name{ col_name }
-      {
-         if (display_name.empty())
-         {
-            display_name = magic_enum::enum_name(prop);
-         }
-      }
+      explicit DisplayColumn(int prop_idx, std::string_view col_name) : 
+         prop_index{ prop_idx }, 
+         display_name{ col_name }
+      {}
 
       /// @brief construct a column to display the specified property in the requested format
       ///
-      /// column header value is option and will use the table column name by default
+      /// column header value is optional and will use the table column name by default
       ///
-      DisplayColumn(PropId prop, Format fmt, std::string_view col_name = {}) : prop_id{ prop }, display_name{ col_name }, format{ fmt }
+      DisplayColumn(int prop_idx, Format fmt, std::string_view col_name) : 
+         prop_index{ prop_idx }, 
+         display_name{ col_name }, format{ fmt }
       {
-         if (display_name.empty())
-         {
-            display_name = magic_enum::enum_name(prop);
-         }
-
          if (fmt != Format::String)
          {
             col_align = Align::Right;
@@ -91,7 +89,8 @@ namespace ctb
       /// currency values will use a dollar sign and 2 decimal places, decimal values  will be 
       /// displayed with 1 decimal place.
       ///
-      std::string getDisplayValue(const TableProperty& value) const
+      template<typename... Args>
+      std::string getDisplayValue(const TableProperty<Args...>& value) const
       {       
          switch (format)
          {
@@ -115,5 +114,6 @@ namespace ctb
       ~DisplayColumn() = default;
    };
 
+   using DisplayColumns = std::vector<DisplayColumn>;
 
 } // namespace ctb

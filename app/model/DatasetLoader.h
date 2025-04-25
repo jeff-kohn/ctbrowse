@@ -1,15 +1,16 @@
 /*******************************************************************
- * @file GridTableLoader.h
+ * @file DatasetLoader.h
  *
- * @brief Header file for the class GridTableLoader
+ * @brief Header file for the class DatasetLoader
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 #pragma once
 
 #include "App.h"
-#include "interfaces/GridTableEvent.h"
+#include "model/DatasetBase.h"
 
+#include <ctb/table_data.h>
 #include <filesystem>
 #include <memory>
 #include <unordered_map>
@@ -20,32 +21,25 @@ namespace ctb::app
    namespace fs = std::filesystem;
 
 
-   /// @brief class to manage a cached collection of grid tables, which are use for grid view in the application
-   class GridTableLoader
+   /// @brief class to load dataset files from disk.
+   ///
+   class DatasetLoader
    {
    public:
       /// @brief default ctor, initializes data folder to "." unless overriden by a call to setDataFolder()
-      GridTableLoader() = default;
+      DatasetLoader() = default;
 
-      /// @brief construct a GridTableLoader specifying the data folder. May throw if folder is invalid.
+      /// @brief construct a DatasetLoader specifying the data folder. May throw if folder is invalid.
       ///
-      explicit GridTableLoader(const fs::path& folder)
+      explicit DatasetLoader(const fs::path& folder) noexcept(false)
       {
          setDataFolder(folder);
       }
 
-      /// @brief enum for the support grid tables
-      ///
-      enum class GridTableId
-      {
-         WineList,
-         ReadyToDrinkList,
-      };
-
       /// @brief specify the location for data files
       ///
       /// throws an exception if the folder doesn't exist
-      void setDataFolder(const fs::path& folder)
+      void setDataFolder(const fs::path& folder) noexcept(false)
       {
          if (not fs::exists(folder))
          {
@@ -56,20 +50,16 @@ namespace ctb::app
 
       /// @brief returns the location used for loading data files from disk
       ///
-      fs::path getDataFolder() const
+      auto getDataFolder() const -> fs::path
       {
          return m_data_folder;
       }
 
-      /// @brief the smart-ptr-to-base that this class returns to callers.
-      ///
-      using GridTablePtr = GridTablePtr;
-
-      /// @brief get the requested grid table
+      /// @brief Get the requested dataset
       ///
       /// this will throw an exception if the table couldn't be loaded.
       ///
-      GridTablePtr getGridTable(GridTableId tbl);
+      auto getDataset(TableId tbl) -> DatasetPtr;
 
    private:
       fs::path m_data_folder{constants::CURRENT_DIRECTORY};

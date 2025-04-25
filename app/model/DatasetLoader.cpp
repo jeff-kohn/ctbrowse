@@ -1,13 +1,13 @@
 /*******************************************************************
- * @file GridTableLoader.cpp
+ * @file DatasetLoader.cpp
  *
- * @brief Header file for the GridTableLoader class
+ * @brief Header file for the DatasetLoader class
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
-#include "grid/GridTableLoader.h"
-#include "grid/GridTableWineList.h"
+#include "model/DatasetLoader.h"
+#include "model/CtDataModel.h"
 
 #include <ctb/utility.h>
 #include <ctb/table_data.h>
@@ -21,17 +21,17 @@ namespace ctb::app
 {
    using namespace magic_enum;
 
-   GridTablePtr GridTableLoader::getGridTable(GridTableId tbl)
+   auto DatasetLoader::getDataset(TableId tbl) -> DatasetPtr
    {
       Overloaded TableFactory{
-         [this](enum_constant<GridTableId::WineList>) 
+         [this](enum_constant<TableId::List>)  -> DatasetPtr
             { 
-               auto table_data = loadTableData<WineListData>(m_data_folder, TableId::List);
+               auto table_data = loadTableData<WineListDataset>(m_data_folder, TableId::List);
                if (!table_data)
                {
                   throw table_data.error();
                }
-               return GridTableWineList::create(std::move(table_data.value())); 
+               return CtDataModel<WineListDataset>::create(std::move(table_data.value()));
             }
       };
       return enum_switch(TableFactory, tbl);
