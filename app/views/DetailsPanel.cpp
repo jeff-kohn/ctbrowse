@@ -26,7 +26,7 @@
 
 namespace ctb::constants
 {
-   constexpr auto LABEL_TIMER_RETRY_INTERVAL = 50; 
+   constexpr auto LABEL_TIMER_RETRY_INTERVAL = 100; 
 
 } // namespace constants
 
@@ -96,8 +96,8 @@ namespace ctb::app
       auto wine_font{ default_font.Bold() };
       wine_font.SetPointSize(default_font.GetPointSize() + 1);
 
-      const auto currency_min_size = ConvertDialogToPixels( wxSize{26, -1} );
-      const auto currency_max_size = ConvertDialogToPixels( wxSize{32, -1} );
+      const auto currency_min_size = ConvertDialogToPixels( wxSize{28, -1} );
+      const auto currency_max_size = ConvertDialogToPixels( wxSize{36, -1} );
 
       auto* top_sizer = new wxBoxSizer(wxVERTICAL);
 
