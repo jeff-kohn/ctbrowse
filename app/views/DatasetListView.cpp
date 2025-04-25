@@ -47,13 +47,14 @@ namespace ctb::app
             AppendTextColumn(col.display_name.c_str(), 
                static_cast<uint32_t>(idx), wxDATAVIEW_CELL_INERT, 
                wxCOL_WIDTH_AUTOSIZE, static_cast<wxAlignment>(col.col_align));
-
-            // TODO: GetBestColumnWidth()
          }
          wxPersistentRegisterAndRestore(this, wxFromSV(m_dataset->getTableName()));
+         
+         // Set column header text size.
+         auto font = GetFont();
+         font.SetPointSize(font.GetPointSize() + 1);
          wxItemAttr attr{};
-         attr.SetFont(wxNORMAL_FONT->Larger());
-         attr.SetTextColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT));
+         attr.SetFont(font);
          SetHeaderAttr(attr);
       }
       catch (...) {
