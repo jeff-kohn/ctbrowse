@@ -29,9 +29,7 @@ namespace ctb::app
    
    DatasetOptionsPanel::DatasetOptionsPanel(DatasetEventSourcePtr source) : m_sink{ this, source }
    {
-      auto cfg = wxGetApp().getConfig();
-      cfg->SetPath(constants::CONFIG_PATH_PREFERENCE_DATASYNC);
-      cfg->Read(constants::CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY, &m_instock_only, constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT);
+
    }
 
 
@@ -347,7 +345,6 @@ namespace ctb::app
          case DatasetEvent::Id::TableInitialize:
             onTableInitialize(event.m_data.get());
             enableInStockFilter(event.m_data->hasInStockFilter());
-            resetInStockCheckbox();
             break;
 
          case DatasetEvent::Id::Sort:
@@ -375,6 +372,9 @@ namespace ctb::app
       m_sort_combo->Append(getSortOptionList(table));
       onTableSorted(table);
       populateFilterTypes(table);
+
+      m_instock_only = table->getInStockFilter();
+      TransferDataToWindow();
    }
 
 
@@ -391,7 +391,7 @@ namespace ctb::app
       assert(m_sink.hasTable());
 
       TransferDataFromWindow();
-      if (m_sink.hasTable() and m_sink.getTable()->enableInStockFilter(m_instock_only))
+      if (m_sink.hasTable() and m_sink.getTable()->setInStockFilter(m_instock_only))
       {
          m_sink.signal_source(DatasetEvent::Id::Filter);
       }

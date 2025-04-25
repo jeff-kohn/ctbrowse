@@ -57,9 +57,10 @@ namespace ctb::app
 
       /// @brief Get the current config object.
       ///
-      /// Calling this will throw an exception  if there's no default config.
+      /// Calling this will throw an exception if there's no default config. AFAIK the wxWidgets config store is 
+      /// not thread-safe since multiple calls to SetPath() would be problematic. This should only be used from UI thread.
       ///
-      auto getConfig() noexcept(false) -> ScopedConfigPath;
+      auto getConfig(std::string_view initial_path = ScopedConfigPath::CONFIG_ROOT) noexcept(false) -> ScopedConfigPath;
 
       /// @brief Display a message box with an error description.
       ///

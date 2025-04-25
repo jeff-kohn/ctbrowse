@@ -131,6 +131,7 @@ namespace ctb::constants
    // app-specific error messages.
    inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN = "Label cache object is shutting down.";
    inline constexpr const char* ERROR_STR_NULL_POINTER          = "NULL pointer argument not allowed.";
+   inline constexpr const char* ERROR_STR_NO_CONFIG_STORE       = "No configuration store available.";
 
 
 }  // namespace ctb::constants

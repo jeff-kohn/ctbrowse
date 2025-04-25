@@ -104,12 +104,19 @@ namespace ctb::app
       /// 
       virtual void clearSubStringFilter() = 0;
 
-      /// @brief apples "in-stock only" filter to the data set, if supported.
+      /// @brief Used to enable/disable "in-stock only" filter to the data set, if supported.
       /// @return true if the filter was applied, false if it was not 
       /// 
       /// not all datasets support this filter, you can check by calling hasInStockFilter()
       /// 
-      virtual auto enableInStockFilter(bool enable) -> bool = 0;
+      virtual auto setInStockFilter(bool enable) -> bool = 0;
+
+      /// @brief Returns whether "in-stock only" filter to the data set, if supported.
+      /// @return true if the filter is active, false if it was not 
+      /// 
+      /// not all datasets support this filter, you can check by calling hasInStockFilter()
+      /// 
+      virtual auto getInStockFilter() const -> bool = 0;
 
       /// @brief indicates whether the dataset supports filtering to in-stock only 
       /// @return true if supported, false otherwise.

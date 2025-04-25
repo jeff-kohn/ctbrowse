@@ -105,8 +105,7 @@ namespace ctb::app
    {
       try 
       {
-         auto cfg = getConfig();
-         cfg->SetPath(constants::CONFIG_PATH_PREFERENCES);
+         auto cfg = getConfig(constants::CONFIG_PATH_PREFERENCES);
          auto val = cfg->Read(wxString{ constants::CONFIG_VALUE_LABEL_CACHE_DIR }, wxEmptyString);
          if (!val.empty())
          {
@@ -120,14 +119,14 @@ namespace ctb::app
    }
    
 
-   ScopedConfigPath App::getConfig() noexcept(false)
+   ScopedConfigPath App::getConfig(std::string_view initial_path) noexcept(false)
    {
       auto *config = wxConfigBase::Get(false);
       if (nullptr == config)
       {
-         throw Error{ "No configuration object available" };
+         throw Error{ constants::ERROR_STR_NO_CONFIG_STORE };
       }
-      config->SetPath("/"); // the current path is persistent/global, which is fucking stupid.
+      config->SetPath(wxFromSV(initial_path)); 
       return ScopedConfigPath(*config);
    }
 

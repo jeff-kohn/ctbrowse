@@ -340,6 +340,12 @@ namespace ctb::app
          // load table and connect it to the event source
          DatasetLoader loader{ wxGetApp().userDataFolder() };
          auto tbl = loader.getDataset(TableId::List);
+
+         // Apply in-stock filter by default?
+         if (wxGetApp().getConfig(constants::CONFIG_PATH_PREFERENCES)->ReadBool(constants::CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY, constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT))
+         {
+            tbl->setInStockFilter(true);
+         }
          m_event_source->setTable(tbl, true);
 
          // Force a complete redraw of everything

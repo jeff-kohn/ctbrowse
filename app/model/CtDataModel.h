@@ -202,12 +202,12 @@ namespace ctb::app
          applyFilters();
       }
 
-      /// @brief apples "in-stock only" filter to the data set, if supported.
+      /// @brief Used to enable/disable "in-stock only" filter to the data set, if supported.
       /// @return true if the filter was applied, false if it was not 
       /// 
       /// not all datasets support this filter, you can check by calling hasInStockFilter()
       /// 
-      auto enableInStockFilter(bool enable) -> bool override
+      auto setInStockFilter(bool enable) -> bool override
       {
          if (!hasInStockFilter()) 
             return false;
@@ -217,6 +217,19 @@ namespace ctb::app
 
          m_instock_filter.enabled = enable;
          applyFilters();
+         return true;
+      }
+
+      /// @brief Returns whether "in-stock only" filter to the data set, if supported.
+      /// @return true if the filter is active, false if it was not 
+      /// 
+      /// not all datasets support this filter, you can check by calling hasInStockFilter()
+      /// 
+      auto getInStockFilter() const -> bool override
+      {
+         if (!hasInStockFilter() or !m_instock_filter.enabled)
+            return false;
+
          return true;
       }
 
