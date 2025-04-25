@@ -22,9 +22,7 @@ namespace ctb::app
    }
 
 
-   DatasetMultiView::DatasetMultiView(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache) : 
-      wxSplitterWindow{ parent },
-      m_sink{ this, source }
+   DatasetMultiView::DatasetMultiView(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache) : wxSplitterWindow{ parent }
    {
       constexpr auto LEFT_SPLITTER_GRAVITY = 0.25;
       constexpr auto RIGHT_SPLITTER_GRAVITY = 0.75;
@@ -51,16 +49,5 @@ namespace ctb::app
       // next splitter layout. No idea why but this works.
       CallAfter([this] { m_right_splitter->SetSashGravity(RIGHT_SPLITTER_GRAVITY); });
    }
-
-   void DatasetMultiView::notify([[maybe_unused]] DatasetEvent event)
-   {
-      //switch (event.m_event_id){
-      //   case DatasetEvent::Id::TableRemove: [[fallthrough]];
-      //   case DatasetEvent::Id::RowSelected: [[fallthrough]];
-      //   case DatasetEvent::Id::ColLayoutRequested:
-      //      break;
-      //}
-   }
-
 
 } // namespace ctb::app

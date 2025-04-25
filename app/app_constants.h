@@ -73,8 +73,8 @@ namespace ctb::constants
    inline constexpr const char* LBL_SORT_OPTIONS                  = "Sort Options";
    inline constexpr const char* LBL_SUB_REGION                    = "Subregion:";
    inline constexpr const char* LBL_VALUATION                     = "Valuation";
-   inline constexpr const char* LBL_VARIETAL                      = "Varietal:";
-   inline constexpr const char* LBL_VINTAGE                       = "Vintage:";
+   inline constexpr const char* LBL_VARIETAL                      = "Master Varietal:";
+   inline constexpr const char* LBL_VINTAGE                       = "Vintage Year:";
 
 
    // Detail property names

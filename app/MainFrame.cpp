@@ -51,7 +51,6 @@ namespace ctb::app
    using namespace magic_enum;
 
 
-
    MainFrame::MainFrame() : 
       m_event_source{ DatasetEventSource::create() },
       m_sink{ this, m_event_source },
@@ -167,14 +166,14 @@ namespace ctb::app
          constants::CMD_VIEWS_WINE_LIST_TIP,
          wxITEM_NORMAL
       });
-      menu_view->AppendSeparator();
-      menu_view->Append(new wxMenuItem{
-         menu_view, 
-         CmdId::CMD_VIEW_RESIZE_GRID, 
-         constants::CMD_VIEWS_RESIZE_COLS_LBL, 
-         constants::CMD_VIEWS_RESIZE_COLS_TIP,
-         wxITEM_NORMAL
-      });
+      //menu_view->AppendSeparator();
+      //menu_view->Append(new wxMenuItem{
+      //   menu_view, 
+      //   CmdId::CMD_VIEW_RESIZE_GRID, 
+      //   constants::CMD_VIEWS_RESIZE_COLS_LBL, 
+      //   constants::CMD_VIEWS_RESIZE_COLS_TIP,
+      //   wxITEM_NORMAL
+      //});
       m_menu_bar->Append(menu_view, constants::LBL_MENU_VIEW);
 
       SetMenuBar(m_menu_bar);
@@ -399,6 +398,7 @@ namespace ctb::app
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
+
 
    void MainFrame::onSearchKeyDown(wxKeyEvent& event)
    {
