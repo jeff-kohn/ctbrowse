@@ -67,7 +67,7 @@ namespace ctb::app
          // give base class a chance set up controls etc
          std::unique_ptr<MainFrame> wnd{ new MainFrame{} };
 
-         const auto default_size = wnd->FromDIP(wxSize{640, 480});
+         const auto default_size = wnd->FromDIP(wxSize{800, 600});
          if (!wnd->Create(nullptr, wxID_ANY, constants::APP_NAME_LONG, wxDefaultPosition, default_size))
          {
             throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
@@ -84,6 +84,8 @@ namespace ctb::app
 
    void MainFrame::initControls()
    {
+      static const auto default_window_size = wxSize{ 800, 600 };
+
       SetTitle(constants::APP_NAME_LONG);
       SetIcon(wxIcon{constants::RES_NAME_ICON_PRODUCT});
 
@@ -106,8 +108,6 @@ namespace ctb::app
 
       if ( !wxPersistentRegisterAndRestore(this, constants::RES_NAME_MAINFRAME) )
       {
-         // Choose some custom default size for the first run
-         SetClientSize(FromDIP(wxSize(800, 600)));
          Center(wxBOTH);
       }
    }

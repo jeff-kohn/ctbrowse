@@ -29,21 +29,23 @@ namespace ctb::app
       constexpr auto LEFT_SPLITTER_GRAVITY = 0.25;
       constexpr auto RIGHT_SPLITTER_GRAVITY = 0.75;
 
-      SetName("DatasetMultiView");
+      auto font = GetFont();
+      font.SetPointSize(font.GetPointSize() + 1);
+      SetFont(font);
+
       SetSashGravity(LEFT_SPLITTER_GRAVITY);
 
       // top/left splitter contains options panel and right/nested splitter
       m_right_splitter = new wxSplitterWindow{ this };
       m_options_panel = DatasetOptionsPanel::create(this, source);
       SplitVertically(m_options_panel, m_right_splitter);
-      wxPersistentRegisterAndRestore(this, GetName());
+      wxPersistentRegisterAndRestore(this, "DatasetMultiView");
 
       // nested splitter contains grid and details
       m_listView = DatasetListView::create(m_right_splitter, source);
       m_details_panel = DetailsPanel::create(m_right_splitter, source, cache);
       m_right_splitter->SplitVertically(m_listView, m_details_panel);
-      m_right_splitter->SetName("GridMultiViewNested");
-      wxPersistentRegisterAndRestore(m_right_splitter, m_right_splitter->GetName());
+      wxPersistentRegisterAndRestore(m_right_splitter, "DatasetMultiViewNested");
       
       // For some reason the CalLAfter() is required, otherwise this call messes up the
       // next splitter layout. No idea why but this works.

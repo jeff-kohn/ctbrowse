@@ -96,13 +96,10 @@ namespace ctb::app
       auto wine_font{ default_font.Bold() };
       wine_font.SetPointSize(default_font.GetPointSize() + 1);
 
-      const auto currency_min_size = ConvertDialogToPixels( wxSize{28, -1} );
-      const auto currency_max_size = ConvertDialogToPixels( wxSize{36, -1} );
-
       auto* top_sizer = new wxBoxSizer(wxVERTICAL);
 
       // wine name is above the grid sizer so it can span both columns
-      auto* wine_name_val = new wxStaticText(this, wxID_ANY, "");
+      auto* wine_name_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
       wine_name_val->SetValidator(wxGenericValidator(&m_details.wine_name));
       wine_name_val->SetMaxSize(ConvertDialogToPixels( wxSize{-1, 22} ));
       wine_name_val->SetFont(wine_font);
@@ -211,8 +208,6 @@ namespace ctb::app
       details_sizer->Add(lbl_my_price, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
       auto* my_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       my_price_val->SetFont(default_font);
-      my_price_val->SetMinSize(currency_min_size);
-      my_price_val->SetMaxSize(currency_max_size);
       my_price_val->SetValidator(wxGenericValidator{ &m_details.my_price });
       details_sizer->Add(my_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
 
@@ -222,8 +217,6 @@ namespace ctb::app
       details_sizer->Add(lbl_ct_price, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
       auto* ct_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       ct_price_val->SetFont(default_font);
-      ct_price_val->SetMinSize(currency_min_size);
-      ct_price_val->SetMaxSize(currency_max_size);
       ct_price_val->SetValidator(wxGenericValidator{ &m_details.community_price });
       details_sizer->Add(ct_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
 
@@ -233,12 +226,10 @@ namespace ctb::app
       details_sizer->Add(lbl_auction_value, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
       auto* auction_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       auction_price_val->SetFont(default_font);
-      auction_price_val->SetMinSize(currency_min_size);
-      auction_price_val->SetMaxSize(currency_max_size);
       auction_price_val->SetValidator(wxGenericValidator{ &m_details.auction_value });
       details_sizer->Add(auction_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
 
-      top_sizer->Add(details_sizer, wxSizerFlags{}.Expand().FixedMinSize().Border(wxALL));
+      top_sizer->Add(details_sizer, wxSizerFlags{}.CenterHorizontal().FixedMinSize().Border(wxALL));
 
       // View Online button (also outside grid sizer, same as wine name)
       auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_VIEW_ONLINE_TITLE, constants::DETAIL_VIEW_ONLINE_NOTE);

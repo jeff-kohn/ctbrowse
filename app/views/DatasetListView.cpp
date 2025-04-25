@@ -3,6 +3,7 @@
 #include "views/DatasetListView.h"
 #include "model/DatasetLoader.h"
 
+#include <wx/itemattr.h>
 #include <wx/persist/dataview.h>
 #include <wx/wupdlock.h>
 
@@ -46,8 +47,14 @@ namespace ctb::app
             AppendTextColumn(col.display_name.c_str(), 
                static_cast<uint32_t>(idx), wxDATAVIEW_CELL_INERT, 
                wxCOL_WIDTH_AUTOSIZE, static_cast<wxAlignment>(col.col_align));
+
+            // TODO: GetBestColumnWidth()
          }
          wxPersistentRegisterAndRestore(this, wxFromSV(m_dataset->getTableName()));
+         wxItemAttr attr{};
+         attr.SetFont(wxNORMAL_FONT->Larger());
+         attr.SetTextColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT));
+         SetHeaderAttr(attr);
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError());
