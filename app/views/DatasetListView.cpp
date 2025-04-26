@@ -51,11 +51,11 @@ namespace ctb::app
          wxPersistentRegisterAndRestore(this, wxFromSV(m_dataset->getTableName()));
          
          // Set column header text size.
-         auto font = GetFont();
-         font.SetPointSize(font.GetPointSize() + 1);
-         wxItemAttr attr{};
-         attr.SetFont(font);
-         SetHeaderAttr(attr);
+         //auto font = GetFont();
+         //font.SetPointSize(font.GetPointSize() + 1);
+         //wxItemAttr attr{};
+         //attr.SetFont(font);
+         //SetHeaderAttr(attr);
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError());

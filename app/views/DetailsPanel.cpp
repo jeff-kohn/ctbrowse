@@ -103,60 +103,60 @@ namespace ctb::app
       wine_name_val->SetFont(wine_font);
       wine_name_val->SetForegroundColour(heading_color);
 
-      top_sizer->Add(wine_name_val, wxSizerFlags{1}.Expand().Border(wxLEFT|wxRIGHT|wxTOP));
+      top_sizer->Add(wine_name_val, wxSizerFlags{2}.Expand().Border(wxRIGHT|wxTOP));
 
       // grid sizer gives us a property grid (eg a column of labels and values)
       auto* details_sizer = new wxFlexGridSizer(2, 0, 0);
 
       // vintage
       auto* lbl_vintage = new wxStaticText(this, wxID_ANY, constants::LBL_VINTAGE);
-      details_sizer->Add(lbl_vintage, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(lbl_vintage, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* vintage_val = new wxStaticText(this, wxID_ANY, "");
       vintage_val->SetValidator(wxGenericValidator{ &m_details.vintage });
-      details_sizer->Add(vintage_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(vintage_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // varietal
       auto* lbl_varietal = new wxStaticText(this, wxID_ANY, constants::LBL_VARIETAL);
-      details_sizer->Add(lbl_varietal, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(lbl_varietal, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* varietal_val = new wxStaticText(this, wxID_ANY, "");
       varietal_val->SetValidator(wxGenericValidator{ &m_details.varietal });
-      details_sizer->Add(varietal_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(varietal_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
 
       // country
       auto* lbl_country = new wxStaticText(this, wxID_ANY, constants::LBL_COUNTRY);
-      details_sizer->Add(lbl_country, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(lbl_country, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* country_region_val = new wxStaticText(this, wxID_ANY, "");
       country_region_val->SetValidator(wxGenericValidator{ &m_details.country });
-      details_sizer->Add(country_region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(country_region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // region
       auto* lbl_region = new wxStaticText(this, wxID_ANY, constants::LBL_REGION);
-      details_sizer->Add(lbl_region, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(lbl_region, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* region_val = new wxStaticText(this, wxID_ANY, "");
       region_val->SetValidator(wxGenericValidator{ &m_details.region });
-      details_sizer->Add(region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // subregion
       auto* lbl_sub_region = new wxStaticText(this, wxID_ANY, constants::LBL_SUB_REGION);
-      details_sizer->Add(lbl_sub_region, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(lbl_sub_region, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* sub_region_val = new wxStaticText(this, wxID_ANY, "");
       sub_region_val->SetValidator(wxGenericValidator{ &m_details.sub_region });
-      details_sizer->Add(sub_region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(sub_region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // appellation
       auto* lbl_appellation = new wxStaticText(this, wxID_ANY, constants::LBL_APPELLATION);
-      details_sizer->Add(lbl_appellation, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(lbl_appellation, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* appellation_val = new wxStaticText(this, wxID_ANY, "");
       appellation_val->SetValidator(wxGenericValidator{ &m_details.appellation });
-      details_sizer->Add(appellation_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(appellation_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // drink window
       auto* lbl_drink_window = new wxStaticText(this, wxID_ANY, constants::LBL_DRINK_WINDOW);
-      details_sizer->Add(lbl_drink_window, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(lbl_drink_window, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* drink_window_val = new wxStaticText(this, wxID_ANY, "");
       drink_window_val->SetValidator(wxGenericValidator{ &m_details.drink_window });
-      details_sizer->Add(drink_window_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(drink_window_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // Scores heading
       auto* lbl_scores_header = new wxStaticText(this, wxID_ANY, constants::LBL_SCORES);
@@ -167,17 +167,17 @@ namespace ctb::app
 
       // My Score
       auto* lbl_my_score = new wxStaticText(this, wxID_ANY, constants::LBL_MY_SCORE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_my_score, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(lbl_my_score, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* my_score_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       my_score_val->SetValidator(wxGenericValidator(&m_details.my_score));
-      details_sizer->Add(my_score_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(my_score_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
 
       // CT Score
       auto* lbl_ct_score = new wxStaticText(this, wxID_ANY, constants::LBL_CT_SCORE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_ct_score, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(lbl_ct_score, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* ct_score_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       ct_score_val->SetValidator(wxGenericValidator{ &m_details.ct_score });
-      details_sizer->Add(ct_score_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(ct_score_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
 
       // Valuation heading
       auto* lbl_value_header = new wxStaticText(this, wxID_ANY, constants::LBL_VALUATION);
@@ -188,24 +188,24 @@ namespace ctb::app
 
       // My Price
       auto* lbl_my_price = new wxStaticText(this, wxID_ANY, constants::LBL_MY_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_my_price, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(lbl_my_price, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* my_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       my_price_val->SetValidator(wxGenericValidator{ &m_details.my_price });
-      details_sizer->Add(my_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(my_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
 
       // Community Avg
       auto* lbl_ct_price = new wxStaticText(this, wxID_ANY, constants::LBL_CT_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_ct_price, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(lbl_ct_price, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* ct_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       ct_price_val->SetValidator(wxGenericValidator{ &m_details.community_price });
-      details_sizer->Add(ct_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(ct_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
 
       // Auction value
       auto* lbl_auction_value = new wxStaticText(this, wxID_ANY, constants::LBL_AUCTION_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_auction_value, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(lbl_auction_value, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* auction_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       auction_price_val->SetValidator(wxGenericValidator{ &m_details.auction_value });
-      details_sizer->Add(auction_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(auction_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
 
       top_sizer->Add(details_sizer, wxSizerFlags{}.CenterHorizontal().FixedMinSize().Border(wxALL));
 
