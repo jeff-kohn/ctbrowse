@@ -29,8 +29,8 @@ target_sources(ctBrowse_lib
       "../include/ctb/utility_templates.h"
       "../include/ctb/WineListTraits.h"
 
-      "../include/ctb/tasks/PollingTask.h"
-      "../include/ctb/tasks/tasks.h"
+      "../include/ctb/task/PollingTask.h"
+      "../include/ctb/task/tasks.h"
 
    PRIVATE
       "CredentialWrapper.cpp"

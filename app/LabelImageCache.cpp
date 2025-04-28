@@ -8,7 +8,7 @@
 
 #include "LabelImageCache.h"
 
-#include <ctb/tasks/tasks.h>
+#include <ctb/task/tasks.h>
 #include <ctb/utility.h>  
 #include <wx/mstream.h>
 

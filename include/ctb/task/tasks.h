@@ -10,7 +10,7 @@
 
 #include "ctb/ctb.h"
 #include "ctb/utility_http.h"
-#include "ctb/tasks/PollingTask.h"
+#include "ctb/task/PollingTask.h"
 
 #include <cpr/response.h>
 

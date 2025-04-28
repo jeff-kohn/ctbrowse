@@ -9,7 +9,7 @@
 
 #include "App.h"
 
-#include <ctb/tasks/tasks.h>
+#include <ctb/task/tasks.h>
 #include <wx/image.h>
 
 #include <expected>
