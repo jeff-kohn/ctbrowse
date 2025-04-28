@@ -34,7 +34,8 @@ namespace ctb
       String,
       UInt16,
       UInt64,
-      Double
+      Double,
+      Date
    };
 
 

@@ -49,13 +49,6 @@ namespace ctb::app
                wxCOL_WIDTH_AUTOSIZE, static_cast<wxAlignment>(col.col_align));
          }
          wxPersistentRegisterAndRestore(this, wxFromSV(m_dataset->getTableName()));
-         
-         // Set column header text size.
-         //auto font = GetFont();
-         //font.SetPointSize(font.GetPointSize() + 1);
-         //wxItemAttr attr{};
-         //attr.SetFont(font);
-         //SetHeaderAttr(attr);
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError());
@@ -113,7 +106,7 @@ namespace ctb::app
          case DatasetEvent::Id::Sort:   [[fallthrough]];
          case DatasetEvent::Id::Filter: [[fallthrough]];
          case DatasetEvent::Id::SubStringFilter:
-            m_dataset->Cleared();
+            m_dataset->Cleared(); // force a refresh, name is unfortunate
             selectFirstRow();
             break;
 

@@ -13,6 +13,7 @@
 #include "model/ScopedEventSink.h"
 
 #include <wx/panel.h>
+#include <wx/timer.h>
 
 
 // forward declaration for member ptr

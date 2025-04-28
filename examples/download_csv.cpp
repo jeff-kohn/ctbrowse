@@ -42,7 +42,7 @@ int main()
          if (!cred)
             throw Error{ "Authentication failed." };
 
-         result = downloadRawTableData(cred.value(), TableId::Notes, DataFormatId::csv);
+         result = downloadRawTableData(cred.value(), TableId::List, DataFormatId::csv);
          if (!result.has_value() && result.error().error_code == static_cast<int>(HttpStatus::Code::Unauthorized))
             prompt_again = true; // wrong user/pass, try again
          else 

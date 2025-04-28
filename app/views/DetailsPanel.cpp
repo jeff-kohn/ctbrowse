@@ -26,7 +26,7 @@
 
 namespace ctb::constants
 {
-   constexpr auto LABEL_TIMER_RETRY_INTERVAL = 100; 
+   constexpr auto LABEL_TIMER_RETRY_INTERVAL = 33; 
 
 } // namespace constants
 
@@ -270,17 +270,16 @@ namespace ctb::app
             m_label_image->SetBitmap(bmp);    
             m_label_image->Show();
             Layout(); // required since the images vary in size
-            m_label_image->Refresh();
             m_label_image->Update();
          }
       }
       catch (...)
       {
+         log::exception(packageError());
          m_label_image->SetBitmap(wxBitmap{});
          m_label_image->Hide();
          Refresh();
          Update();
-         log::exception(packageError());
       }
    }
 

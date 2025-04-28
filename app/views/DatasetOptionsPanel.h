@@ -15,6 +15,7 @@
 #include <wx/gdicmn.h>
 #include <wx/panel.h>
 #include <wx/spinctrl.h>
+#include <wx/sizer.h>
 #include <wx/treectrl.h>
 
 #include <map>

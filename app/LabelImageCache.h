@@ -33,8 +33,6 @@ namespace ctb::app
    public:
       /// @brief LabelImageCache constructor
       /// 
-      /// Any embedded environment variables contained in the folder path will be expanded.
-      /// 
       /// @param cache_folder - path of folder to use for disk cache. env vars will be expanded
       /// @throws ctb::Error if cache folder doesn't exist and can't be created, or is a relative path. 
       /// 
@@ -58,7 +56,7 @@ namespace ctb::app
          /// 
          /// This is a potentially long, BLOCKING call if file is still being downloaded!
          ///
-         /// @return expected - the requested wxImage, unexpected - ctb::Error describing the failure
+         /// @return expected - the requested wxImage; unexpected - ctb::Error describing the failure
          /// 
          auto getImage() noexcept -> ResultWrapper;
 
@@ -106,7 +104,7 @@ namespace ctb::app
             throw Error{ constants::ERROR_STR_LABEL_CACHE_SHUT_DOWN }; 
       }
 
-      static auto buildLabelPath(fs::path folder, uint64_t wine_id) -> fs::path
+      static auto buildLabelPath(const fs::path& folder, uint64_t wine_id) -> fs::path
       {
          return folder / buildLabelFilename(wine_id);
       }

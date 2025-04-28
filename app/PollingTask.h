@@ -79,13 +79,14 @@ namespace ctb::tasks
       ///
       auto getValue() noexcept -> ResultWrapper
       {
-         using std::unexpected;
          try 
          {
             return m_future.get();
          }
          catch (...) {
-            return unexpected{ packageError(std::current_exception()) };
+            auto err = packageError();
+            log::error("PollingTask::getValue() threw an exception: {}", err.formattedMesage());
+            return std::unexpected{ err };
          }
       }
 

@@ -51,7 +51,7 @@ namespace ctb
          ErrorInvalidParameter,  /// One or more invalid parameter values were supplied
          ErrorNoLogonSession,    /// The credential manager cannot be used; try again with allow_save = false
          ErrorNotFound,          ///
-         ErrorUnknown            /// ??? shoudl never occur
+         ErrorUnknown            /// ??? should never occur
       };
 
       /// @brief type returned from PromptForCredential
@@ -71,7 +71,7 @@ namespace ctb
       {}
 
       /// @brief              construct a CredentialWrapper by specifying target, message, and caption
-      /// @param target       the name that will be used to save the credential if the user chooses to save it.      ///                     
+      /// @param target       the name that will be used to save the credential if the user chooses to save it.                  
       /// @param allow_save   if true, user will have option to save credential 
       /// @param message_text The message that will be displayed in the prompt dialog (if displayed)
       /// @param caption_text The caption that will be displayed in the title bar of the prompt dialog.

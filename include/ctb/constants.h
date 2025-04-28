@@ -84,4 +84,9 @@ namespace ctb::constants
    inline constexpr uint16_t CT_NULL_YEAR                         = 9999;
    inline constexpr auto     ONE_MB                               = 1024 * 1024;
 
+   inline constexpr const char* PARSE_FMT_STR_ISO_DATETIME_LOCAL  = "%FT%T%Ez";
+   inline constexpr const char* PARSE_FMT_STR_ISO_DATETIME_UTC    = "%FT%T%Z";
+   inline constexpr const char* PARSE_FMT_STR_ISO_DATE_ONLY       = "%F";
+
+
 } // namespace ctb::constants

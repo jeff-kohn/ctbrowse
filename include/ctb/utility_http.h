@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include "ctb/CredentialWrapper.h"
 
 #include <cpr/response.h>
 #include <cpr/cprtypes.h>
@@ -53,7 +54,7 @@ namespace ctb
    }
 
 
-   /// @brief Retrieves buffer view and its content-type from a HTTP response
+   /// @brief Retrieves view of HTTP response's content as a byte span along with its content-type
    /// 
    /// Note that both values are views into the  Response they  were generated 
    /// from. This function only accepts l-value reference to avoid returning 
@@ -87,4 +88,18 @@ namespace ctb
    {
       return ctb::format(constants::FMT_HTTP_CT_WINE_URL, wine_id);
    }
+
+
+   /// @brief result type for doCellarTrackerLogin()
+   ///
+   using CookieResult = std::expected<cpr::Cookies, ctb::Error>;
+
+   /// @brief Create a logon session for interacting with the CellarTracker website
+   /// 
+   /// Connects to the CT website using the supplied credential and retrieves user Cookies
+   /// for connection to and interacting with CT website.
+   /// 
+   /// @return the requested cookies if successful, a ctb::Error if unsuccessful.
+   /// 
+   auto doCellarTrackerLogin(CredentialWrapper::Credential& cred) -> cpr::Cookies;
 }

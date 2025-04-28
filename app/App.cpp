@@ -9,9 +9,15 @@
 #include "App.h"
 #include "MainFrame.h"
 
+#include <ctb/utility_http.h>
+
+#include <cpr/cpr.h>
 #include <wx/fileconf.h>
+#include <wx/msgdlg.h>
 #include <wx/stdpaths.h>
+#include <wx/secretstore.h>
 #include <wx/xrc/xmlres.h>
+
 
 #include <chrono>
 #include <filesystem>
@@ -100,6 +106,33 @@ namespace ctb::app
       return wxApp::OnExit();
    }
 
+
+   //auto App::getCellarTrackerCookies(bool prompt_for_cred) -> CookieResult
+   //{
+   //   if (m_ct_cookies) return *m_ct_cookies;
+
+   //   try
+   //   {
+   //      cpr::Url url{ "https://www.cellartracker.com/password.asp" };
+   //      cpr::Payload form_data{
+   //         { "Referrer", "/default.asp" },
+   //         { "szUser", "Jeff Kohn" },
+   //         { "szPassword", "lkj243df" },
+   //         { "UseCookie", "true" } };
+
+   //      auto response = cpr::Post(url, form_data, getDefaultHeaders());
+
+   //      // check the response for success, bail out if we got an error 
+   //      auto request_result = validateResponse(response);
+   //      if (!request_result.has_value())
+   //      {
+   //         throw request_result.error();
+   //      }
+   //   }
+   //   catch(...){
+   //      wxGetApp().displayErrorMessage(packageError(), true);
+   //   }
+   //}
 
    auto App::labelCacheFolder() noexcept -> fs::path
    {

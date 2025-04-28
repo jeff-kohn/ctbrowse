@@ -16,7 +16,8 @@
       "features": [
         "fonts",
         "media",
-        "example"
+        "example",
+        "secretstore"
       ]
     },
     "spdlog"

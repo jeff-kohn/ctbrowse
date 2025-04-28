@@ -17,6 +17,7 @@
 #include "views/DatasetOptionsPanel.h"
 #include "views/DetailsPanel.h"
 
+#include <cpr/cpr.h>
 #include <ctb/CredentialWrapper.h>
 #include <ctb/table_download.h>
 #include <ctb/utility.h>
@@ -166,14 +167,14 @@ namespace ctb::app
          constants::CMD_VIEWS_WINE_LIST_TIP,
          wxITEM_NORMAL
       });
-      //menu_view->AppendSeparator();
-      //menu_view->Append(new wxMenuItem{
-      //   menu_view, 
-      //   CmdId::CMD_VIEW_RESIZE_GRID, 
-      //   constants::CMD_VIEWS_RESIZE_COLS_LBL, 
-      //   constants::CMD_VIEWS_RESIZE_COLS_TIP,
-      //   wxITEM_NORMAL
-      //});
+      menu_view->AppendSeparator();
+      menu_view->Append(new wxMenuItem{
+         menu_view, 
+         CmdId::CMD_VIEW_RESIZE_GRID, 
+         constants::CMD_VIEWS_RESIZE_COLS_LBL, 
+         constants::CMD_VIEWS_RESIZE_COLS_TIP,
+         wxITEM_NORMAL
+      });
       m_menu_bar->Append(menu_view, constants::LBL_MENU_VIEW);
 
       SetMenuBar(m_menu_bar);
@@ -372,7 +373,27 @@ namespace ctb::app
 
    void MainFrame::onMenuViewResizeGrid(wxCommandEvent&)
    {
-      m_event_source->signal(DatasetEvent::Id::ColLayoutRequested);
+      try
+      {
+         cpr::Url url{ "https://www.cellartracker.com/password.asp" };
+         cpr::Payload form_data{
+            { "Referrer", "/default.asp" },
+            { "szUser", "Jeff Kohn" },
+            { "szPassword", "lkj243df" },
+            { "UseCookie", "true" } };
+
+         auto response = cpr::Post(url, form_data, getDefaultHeaders());
+
+         // check the response for success, bail out if we got an error 
+         auto request_result = validateResponse(response);
+         if (!request_result.has_value())
+         {
+           throw request_result.error();
+         }
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
    }
 
 

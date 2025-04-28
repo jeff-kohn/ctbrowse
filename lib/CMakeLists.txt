@@ -23,6 +23,7 @@ target_sources(ctBrowse_lib
       "../include/ctb/table_data.h"
       "../include/ctb/table_download.h"
       "../include/ctb/utility.h"
+      "../include/ctb/utility_chrono.h"
       "../include/ctb/utility_http.h"
       "../include/ctb/utility_templates.h"
       "../include/ctb/WineListTraits.h"

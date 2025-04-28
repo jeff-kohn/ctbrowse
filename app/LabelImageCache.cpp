@@ -40,7 +40,7 @@ namespace ctb::app
          return label_img;
       }
       catch (...) {
-         return unexpected{ packageError(std::current_exception()) };
+         return unexpected{ packageError() };
       }
 
    }
@@ -48,7 +48,7 @@ namespace ctb::app
 
    LabelImageCache::LabelImageCache(std::string cache_folder) : m_cache_folder{ expandEnvironmentVars(cache_folder) }
    {
-      if (m_cache_folder.is_relative() or (fs::exists(m_cache_folder) and !fs::is_directory(m_cache_folder)) )
+      if (m_cache_folder.is_relative() or ( (fs::exists(m_cache_folder) and !fs::is_directory(m_cache_folder)) ))
       {
          throw Error{ constants::ERROR_STR_RELATIVE_LABEL_CACHE };
       }
@@ -101,9 +101,7 @@ namespace ctb::app
    }
 
 
-   auto LabelImageCache::runFetchAndSaveLabelTask(
-      fs::path folder, uint64_t wine_id, 
-      std::stop_token token) noexcept(false) -> FetchFileTask::ReturnType
+   auto LabelImageCache::runFetchAndSaveLabelTask(fs::path folder, uint64_t wine_id, std::stop_token token) noexcept(false) -> FetchFileTask::ReturnType
    {
       try
       {

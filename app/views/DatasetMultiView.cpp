@@ -33,9 +33,9 @@ namespace ctb::app
 
       SetSashGravity(LEFT_SPLITTER_GRAVITY);
 
-      // top/left splitter contains options panel and right/nested splitter
-      m_right_splitter = new wxSplitterWindow{ this };
+      // this splitter window contains options panel and right/nested splitter
       m_options_panel = DatasetOptionsPanel::create(this, source);
+      m_right_splitter = new wxSplitterWindow{ this };
       SplitVertically(m_options_panel, m_right_splitter);
       wxPersistentRegisterAndRestore(this, "DatasetMultiView");
 
