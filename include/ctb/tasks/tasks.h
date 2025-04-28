@@ -8,9 +8,10 @@
  *********************************************************************/
 #pragma once
 
-#include "PollingTask.h"
+#include "ctb/ctb.h"
+#include "ctb/utility_http.h"
+#include "ctb/tasks/PollingTask.h"
 
-#include <ctb/utility_http.h>
 #include <cpr/response.h>
 
 #include <stop_token>

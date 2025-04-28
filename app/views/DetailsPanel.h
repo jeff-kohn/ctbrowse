@@ -8,10 +8,10 @@
 #pragma once
 
 #include "App.h"
-#include "tasks.h"
 #include "LabelImageCache.h"
 #include "model/ScopedEventSink.h"
 
+#include <ctb/tasks/tasks.h>
 #include <wx/panel.h>
 #include <wx/timer.h>
 

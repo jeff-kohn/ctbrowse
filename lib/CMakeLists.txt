@@ -14,6 +14,7 @@ target_sources(ctBrowse_lib
       "../include/ctb/ctb.h"
       "../include/ctb/CtRecordImpl.h"
       "../include/ctb/Error.h"
+      "../include/ctb/log.h"
       "../include/ctb/PropFilter.h"
       "../include/ctb/PropStringFilter.h"
       "../include/ctb/PropStringFilterMgr.h"
@@ -28,9 +29,14 @@ target_sources(ctBrowse_lib
       "../include/ctb/utility_templates.h"
       "../include/ctb/WineListTraits.h"
 
+      "../include/ctb/tasks/PollingTask.h"
+      "../include/ctb/tasks/tasks.h"
+
    PRIVATE
       "CredentialWrapper.cpp"
+      "log.cpp"
       "table_download.cpp"
+      "tasks.cpp"
       "utility.cpp"
       "utility_http.cpp"
 )
@@ -55,6 +61,7 @@ target_link_libraries(ctBrowse_lib
       fmt::fmt
       HtmlParser
       magic_enum::magic_enum
+      spdlog::spdlog
       "$<$<PLATFORM_ID:Windows>:Credui>"
       "$<$<PLATFORM_ID:Windows>:shlwapi>"
 )

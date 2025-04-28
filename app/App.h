@@ -8,10 +8,11 @@
 #pragma once
 
 #include "app_constants.h"
-#include "log.h"
 #include "wx_helpers.h"
 
+#include <ctb/log.h>
 #include <ctb/TableProperty.h>
+
 #include <cpr/cookies.h>
 #include <wx/app.h>
 

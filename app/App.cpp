@@ -63,7 +63,7 @@ namespace ctb::app
 #if defined(NDEBUG)
       setupDefaultLogger({{ makeFileSink(log_folder) }});
 #else
-      setupDefaultLogger({ {makeFileSink(log_folder)}, {makeDebuggerSink()} });
+      setupDefaultLogger({ { makeFileSink(log_folder,  constants::APP_NAME_SHORT) }, { makeDebuggerSink() } });
 #endif
 
       log::info("App startup.");

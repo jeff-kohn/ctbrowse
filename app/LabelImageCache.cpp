@@ -7,8 +7,8 @@
  *********************************************************************/
 
 #include "LabelImageCache.h"
-#include "tasks.h"
 
+#include <ctb/tasks/tasks.h>
 #include <ctb/utility.h>  
 #include <wx/mstream.h>
 
@@ -105,7 +105,7 @@ namespace ctb::app
    {
       try
       {
-         SPDLOG_DEBUG("runFetchAndSaveLabelTask({}, {}), starting execution", folder.generic_string(), wine_id);
+         SPDLOG_DEBUG("runFetchAndSaveLabelTask({}, {}) starting execution", folder.generic_string(), wine_id);
          checkStopToken(token);
          auto buffer = runLabelDownloadTask(wine_id, token);
 

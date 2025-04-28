@@ -1,16 +1,18 @@
 /*********************************************************************
  * @file       log.h
  *
- * @brief      logging interface for the app. wxWidgets logging sucks so 
- *             we use spdlog instead, exposed through this ctb::log
+ * @brief      logging interface for the app. 
  *             namespace
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 #pragma once
 
-#include <ctb/utility.h>
+#include "ctb/Error.h"
 
+// default active level is Info, which means in release builds all
+// logging done with SPDLOG_DEBUG() will be omitted at compile time but 
+// included for debug builds.
 #if !defined(NDEBUG)
    #define SPDLOG_ACTIVE_LEVEL 1 // SPDLOG_LEVEL_DEBUG
 #endif
@@ -20,17 +22,26 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/msvc_sink.h>
+
 #include <memory>
 #include <filesystem>
 #include <string>
 #include <string_view>
 #include <source_location>
 
+
+/// @brief Logging namespace for ctBrowse. 
+/// 
+/// This ctBrowse_lib library logs debug-level messages only in Debug builds. Release builds do not generate any log output.
+/// 
+/// The ctBrowse_lib library uses the default spdlog sink, which just outputs messages to stdout/stderr, unless an application
+/// calls setupDefaultLogger() to configure other log outputs.
+///        
 namespace ctb::log
 {
 
    // import these symbols into our namespace, so logging interface looks like log::warn(...) and there's
-   // possibility to replace logging backend with minimal impact if needed.
+   // possibility to replace logging backend with minimal impact if needed in the future.
    //
    namespace fs = std::filesystem;
    namespace sinks = spdlog::sinks;
@@ -84,22 +95,12 @@ namespace ctb::log
 {
    /// @brief Log an exception with source information. 
    /// 
-   inline void exception(const std::exception& e, std::source_location source_loc = std::source_location::current())
-   {
-      std::string path{ source_loc.file_name() };
-      auto file_name = viewFilename(path);
-      error("{} (in {}:{}) - {}", file_name, source_loc.line(), source_loc.function_name(), e.what());
-   }
+   void exception(const std::exception& e, std::source_location source_loc = std::source_location::current());
 
 
    /// @brief Log an exception with source information. 
    /// 
-   inline void exception(const ctb::Error& e, std::source_location source_loc = std::source_location::current())
-   {
-      std::string path{ source_loc.file_name() };
-      auto file_name = viewFilename(path);
-      error("{} (in {}:{}) - {}", file_name, source_loc.line(), source_loc.function_name(), e.formattedMesage());
-   }
+   void exception(const ctb::Error& e, std::source_location source_loc = std::source_location::current());
 
 
    /// @brief flush the active default logger's queue to disk
@@ -113,21 +114,20 @@ namespace ctb::log
    /// @brief create a color stdout logging sink
    /// @return the requested sink. may throw on error
    /// 
-   [[nodiscard]] sink_ptr_t makeConsoleSink(level_enum level, std::string_view pattern = constants::LOG_PATTERN_CONSOLE);
+   [[nodiscard]] auto makeConsoleSink(level_enum level, std::string_view pattern = constants::LOG_PATTERN_CONSOLE) -> sink_ptr_t;
 
 
    /// @brief create a logging sink that outputs to OutputDebugString()
    /// @return the requested sink if enabled (debug windows), or null_sink if not
    /// 
-   [[nodiscard]] sinks_init_list::value_type makeDebuggerSink();
+   [[nodiscard]] auto makeDebuggerSink() -> sinks_init_list::value_type;
 
 
    /// @brief create a sink that logs to file
    /// 
-   [[nodiscard]] sinks_init_list::value_type makeFileSink(fs::path log_folder = constants::APP_DEFAULT_LOG_FOLDER, 
-                                                          std::string_view log_filename_base = constants::APP_NAME_SHORT, 
-                                                          std::string_view pattern = constants::LOG_PATTERN_FILE,
-                                                          level_enum level = constants::LOGLEVEL_FILE);
+   [[nodiscard]] auto makeFileSink(fs::path log_folder, std::string_view log_filename_base, 
+                                   std::string_view pattern = constants::LOG_PATTERN_FILE,
+                                   level_enum level = constants::LOGLEVEL_FILE) -> sinks_init_list::value_type;
 
 
    /// @brief create and set the default logger so that free-standing log functions will use it.
@@ -136,7 +136,7 @@ namespace ctb::log
    /// while a pointer to the created logger is returned, you don't need to use or hold it since
    /// spdlog has its own internal shared_ptr to the default logger.
    /// 
-   log_ptr_t setupDefaultLogger(sinks_init_list sinks = { makeDebuggerSink(), makeFileSink() });
+   auto setupDefaultLogger(sinks_init_list sinks) -> log_ptr_t;
 
 
 } // namespace ctb::log

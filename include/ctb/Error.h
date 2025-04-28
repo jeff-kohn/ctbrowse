@@ -7,6 +7,7 @@
  *********************************************************************/
 #pragma once
 
+#include "ctb/constants.h"
 #include "ctb/ctb_format.h"
 #include <magic_enum/magic_enum.hpp>
 

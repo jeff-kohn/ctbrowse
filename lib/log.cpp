@@ -5,13 +5,33 @@
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
-#include "app_constants.h"
-#include "log.h"
+#include "ctb/log.h"
+#include "ctb/utility.h"
+
 #include <spdlog/sinks/null_sink.h>
 
 
 namespace ctb::log
 {
+   /// @brief Log an exception with source information. 
+   /// 
+   void exception(const std::exception& e, std::source_location source_loc)
+   {
+      std::string path{ source_loc.file_name() };
+      auto file_name = viewFilename(path);
+      log::error("{} (in {}:{}) - {}", file_name, source_loc.line(), source_loc.function_name(), e.what());
+   }
+
+
+   /// @brief Log an exception with source information. 
+   /// 
+   void exception(const ctb::Error& e, std::source_location source_loc)
+   {
+      std::string path{ source_loc.file_name() };
+      auto file_name = viewFilename(path);
+      log::error("{} (in {}:{}) - {}", file_name, source_loc.line(), source_loc.function_name(), e.formattedMesage());
+   }
+
 
    [[nodiscard]] sink_ptr_t makeConsoleSink(level_enum level, std::string_view pattern)
    {

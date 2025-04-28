@@ -39,7 +39,6 @@ target_link_libraries(${TARGET_NAME}
    PRIVATE
       ctBrowse::ctBrowse_lib
       wxWidgets::wxWidgets
-      spdlog::spdlog
 )
 
 target_sources(${TARGET_NAME}
@@ -49,13 +48,8 @@ target_sources(${TARGET_NAME}
      "app_constants.h"
      "LabelImageCache.cpp"
      "LabelImageCache.h"
-     "log.cpp"
-     "log.h"
      "MainFrame.cpp"
      "MainFrame.h"
-     "PollingTask.h"
-     "tasks.cpp"
-     "tasks.h"
      "wx_helpers.h"
      "dialogs/TableSyncDialog.cpp"
      "dialogs/TableSyncDialog.h"
