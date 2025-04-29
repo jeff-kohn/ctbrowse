@@ -11,8 +11,9 @@
 
 namespace ctb::constants
 {
-   inline constexpr const char* FMT_HTTP_CT_TABLE_URL       = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
-   inline constexpr const char* FMT_HTTP_CT_WINE_URL        = "https://www.cellartracker.com/wine.asp?iWine={}";
+   inline constexpr const char* URL_CT_LOGIN_FORM           = "https://www.cellartracker.com/password.asp";
+   inline constexpr const char* FMT_URL_CT_TABLE            = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
+   inline constexpr const char* FMT_URL_CT_WINE_DETAILS     = "https://www.cellartracker.com/wine.asp?iWine={}";
    inline constexpr const char* HTTP_USER_AGENT_NAME        = "User-Agent";
    inline constexpr const char* HTTP_USER_AGENT_VALUE       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36";
    inline constexpr const char* HTTP_HEADER_CONTENT_TYPE    = "Content-Type";
@@ -28,6 +29,12 @@ namespace ctb::constants
    inline constexpr const char* HTTP_PARAM_TABLE            = "Table";
    inline constexpr const char* HTTP_PARAM_FORMAT           = "Format";
    inline constexpr int         HTTP_TIMEOUT_SEC            = 30;
+   inline constexpr const char* HTTP_PARAM_KEY_REFERRER     = "Referrer";
+   inline constexpr const char* HTTP_PARAM_VAL_REFERRER     = "/default.asp";
+   inline constexpr const char* HTTP_PARAM_KEY_USER         = "szUser";
+   inline constexpr const char* HTTP_PARAM_KEY_PASSWORD     = "szPassword";
+   inline constexpr const char* HTTP_PARAM_KEY_USE_COOKIE   = "UseCookie";
+   inline constexpr const char* HTTP_PARAM_VAL_USE_COOKIE   = "true";
 
    inline constexpr const char* DATA_FILE_EXTENSION         = "csv";
    inline constexpr int         MAX_ENV_VAR_LENGTH          = 128;

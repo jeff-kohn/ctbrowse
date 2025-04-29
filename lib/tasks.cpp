@@ -63,9 +63,22 @@ namespace ctb::tasks
    }
 
 
-   auto runCellarTrackerLogin(CredentialWrapper::Credential cred) noexcept(false) -> LoginTask
+   auto runCellarTrackerLogin(CredentialWrapper::Credential cred, std::stop_token token) noexcept(false) -> LoginTask::ReturnType
    {
-      return LoginTask{};
+      using std::string;
+
+      checkStopToken(token);
+
+      cpr::Url url{ constants::URL_CT_LOGIN_FORM };
+      cpr::Payload form_data{
+         { string{ constants::HTTP_PARAM_KEY_REFERRER   }, string{ constants::HTTP_PARAM_VAL_REFERRER   } },
+         { string{ constants::HTTP_PARAM_KEY_USER       }, string{ cred.username                        } },
+         { string{ constants::HTTP_PARAM_KEY_PASSWORD   }, string{ cred.password                        } },
+         { string{ constants::HTTP_PARAM_KEY_USE_COOKIE }, string{ constants::HTTP_PARAM_VAL_USE_COOKIE } }
+      };
+
+      auto response = validateOrThrow(cpr::Post(url, form_data, getDefaultHeaders()));
+      return response.cookies;     
    }
 
 } // namespace ctb::tasks

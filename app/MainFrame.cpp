@@ -373,27 +373,6 @@ namespace ctb::app
 
    void MainFrame::onMenuViewResizeGrid(wxCommandEvent&)
    {
-      try
-      {
-         cpr::Url url{ "https://www.cellartracker.com/password.asp" };
-         cpr::Payload form_data{
-            { "Referrer", "/default.asp" },
-            { "szUser", "Jeff Kohn" },
-            { "szPassword", "lkj243df" },
-            { "UseCookie", "true" } };
-
-         auto response = cpr::Post(url, form_data, getDefaultHeaders());
-
-         // check the response for success, bail out if we got an error 
-         auto request_result = validateResponse(response);
-         if (!request_result.has_value())
-         {
-           throw request_result.error();
-         }
-      }
-      catch(...){
-         wxGetApp().displayErrorMessage(packageError(), true);
-      }
    }
 
 

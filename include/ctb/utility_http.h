@@ -86,7 +86,7 @@ namespace ctb
    ///
    inline auto getWineDetailsUrl(uint64_t wine_id) noexcept -> std::string
    {
-      return ctb::format(constants::FMT_HTTP_CT_WINE_URL, wine_id);
+      return ctb::format(constants::FMT_URL_CT_WINE_DETAILS, wine_id);
    }
 
 }
