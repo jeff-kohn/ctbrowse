@@ -61,7 +61,7 @@ namespace ctb::app
       auto log_folder = fs::path{ std_paths.GetUserDir(wxStandardPaths::Dir::Dir_Cache).wx_str() } / constants::APP_NAME_LONG;
 
 #if defined(NDEBUG)
-      setupDefaultLogger({{ makeFileSink(log_folder) }});
+      setupDefaultLogger({{ makeFileSink(log_folder,  constants::APP_NAME_SHORT) }});
 #else
       setupDefaultLogger({ { makeFileSink(log_folder,  constants::APP_NAME_SHORT) }, { makeDebuggerSink() } });
 #endif
