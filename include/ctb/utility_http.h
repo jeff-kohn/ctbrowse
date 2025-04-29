@@ -89,17 +89,4 @@ namespace ctb
       return ctb::format(constants::FMT_HTTP_CT_WINE_URL, wine_id);
    }
 
-
-   /// @brief result type for doCellarTrackerLogin()
-   ///
-   using CookieResult = std::expected<cpr::Cookies, ctb::Error>;
-
-   /// @brief Create a logon session for interacting with the CellarTracker website
-   /// 
-   /// Connects to the CT website using the supplied credential and retrieves user Cookies
-   /// for connection to and interacting with CT website.
-   /// 
-   /// @return the requested cookies if successful, a ctb::Error if unsuccessful.
-   /// 
-   auto doCellarTrackerLogin(CredentialWrapper::Credential& cred) -> cpr::Cookies;
 }

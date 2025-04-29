@@ -9,6 +9,7 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include "ctb/CredentialWrapper.h"
 #include "ctb/utility_http.h"
 #include "ctb/task/PollingTask.h"
 
@@ -52,6 +53,19 @@ namespace ctb::tasks
    auto runLabelDownloadTask(uint64_t wine_id, std::stop_token token) noexcept(false) -> FetchFileTask::ReturnType;
 
 
+   using LoginResult = cpr::Cookies;
+   using LoginTask   = PollingTask<LoginResult>;
+
+   /// @brief Runs a task to create a logon session for interacting with the CellarTracker website
+   /// 
+   /// Connects to the CT website using the supplied credential and retrieves user Cookies
+   /// for connecting to and interacting with CT website.
+   /// 
+   /// @return the requested cookies if successful, a ctb::Error if unsuccessful.
+   /// 
+   auto runCellarTrackerLogin(CredentialWrapper::Credential cred) noexcept(false) -> LoginTask;
+
+
    /// @brief helper function, throws exception if stop_token.stop_requested() == true
    /// 
    /// @throws ctb::Error if stop_token if stop has been request
@@ -61,6 +75,8 @@ namespace ctb::tasks
       if (token.stop_requested())
          throw Error{ constants::ERROR_STR_OPERATION_CANCELED, Error::Category::OperationCanceled };
    }
+
+
 
 
 } // namespace ctb::tasks

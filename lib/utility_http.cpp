@@ -115,12 +115,4 @@ namespace ctb
       return {};
    }
 
-   auto doCellarTrackerLogin(CredentialWrapper::Credential& cred) -> cpr::Cookies
-   {
-       return cpr::Cookies();
-   }
-
-
-
-
 } // namespace ctb

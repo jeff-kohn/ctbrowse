@@ -63,4 +63,9 @@ namespace ctb::tasks
    }
 
 
+   auto runCellarTrackerLogin(CredentialWrapper::Credential cred) noexcept(false) -> LoginTask
+   {
+      return LoginTask{};
+   }
+
 } // namespace ctb::tasks
