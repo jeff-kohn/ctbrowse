@@ -63,7 +63,7 @@ namespace ctb::tasks
    }
 
 
-   auto runCellarTrackerLogin(CredentialWrapper cred, std::stop_token token) noexcept(false) -> LoginTask::ReturnType
+   auto runCellarTrackerLogin(CredentialWrapper&& cred, std::stop_token token) noexcept(false) -> LoginTask::ReturnType
    {
       using std::string;
 
@@ -83,3 +83,4 @@ namespace ctb::tasks
 
 } // namespace ctb::tasks
 
+ 

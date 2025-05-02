@@ -8,8 +8,10 @@
 
 #include "App.h"
 #include "MainFrame.h"
+#include "wx_CredentialManager.h"
 
 #include <ctb/utility_http.h>
+#include <ctb/task/tasks.h>
 
 #include <cpr/cpr.h>
 #include <wx/fileconf.h>
@@ -21,19 +23,12 @@
 
 #include <chrono>
 #include <filesystem>
+#include <thread>
 
 
 
 namespace ctb::app
 {
-   namespace fs = std::filesystem;
-
-   namespace
-   {
-      const wxSize g_default_frame_size{ 400, 600 }; // NOLINT(cert-err58-cpp) this ctor doesn't throw it's just not marked noexcept
-
-   } //namespace
-
 
    App::App()
    {
@@ -79,11 +74,14 @@ namespace ctb::app
          if (!wxApp::OnInit())
             return false;
 
+         // background thread to log into CT and get session cookie.
+         std::thread{ &App::loginThread, this }.detach();
+
          m_main_frame = MainFrame::create();
          m_main_frame->Show();
          SetTopWindow(m_main_frame);
 
-
+         Bind(wx_LoginEvent::EventType, &App::OnCellarTrackerLogin, this);
          CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_VIEW_WINE_LIST }); });
 
          return true;
@@ -94,51 +92,24 @@ namespace ctb::app
       return false;
    } 
 
-
+   
    int App::OnExit()
    {
+      m_stop_source.request_stop();
+
+      log::warn("App shutting down.");
+      log::flush();
+      log::shutdown();
+      
 #ifdef _DEBUG
       // to prevent the tzdb allocations from being reported as memory leaks
       std::chrono::get_tzdb_list().~tzdb_list();
 #endif
-      log::warn("App shutting down.");
-      log::flush();
-      log::shutdown();
+
       return wxApp::OnExit();
    }
 
-   auto App::getCellarTrackerCredential(bool prompt) -> CredentialWrapper
-   {
-      throw Error{"Not Implemented"};
-   }
 
-
-   //auto App::getCellarTrackerCookies(bool prompt_for_cred) -> CookieResult
-   //{
-   //   if (m_ct_cookies) return *m_ct_cookies;
-
-   //   try
-   //   {
-   //      cpr::Url url{ "https://www.cellartracker.com/password.asp" };
-   //      cpr::Payload form_data{
-   //         { "Referrer", "/default.asp" },
-   //         { "szUser", "Jeff Kohn" },
-   //         { "szPassword", "lkj243df" },
-   //         { "UseCookie", "true" } };
-
-   //      auto response = cpr::Post(url, form_data, getDefaultHeaders());
-
-   //      // check the response for success, bail out if we got an error 
-   //      auto request_result = validateResponse(response);
-   //      if (!request_result.has_value())
-   //      {
-   //         throw request_result.error();
-   //      }
-   //   }
-   //   catch(...){
-   //      wxGetApp().displayErrorMessage(packageError(), true);
-   //   }
-   //}
 
    auto App::labelCacheFolder() noexcept -> fs::path
    {
@@ -192,13 +163,40 @@ namespace ctb::app
       wxMessageBox(msg, title, wxICON_INFORMATION | wxOK, m_main_frame);
    }
 
-   void App::doBackgroundWebLogin()
-   {
-      // start a background thread to run the task. wxWidget classes are not threadsafe and can only be called from main thread
-      // so use CallAfter() to update the member.
 
+
+   void App::OnCellarTrackerLogin(wx_LoginEvent& event)
+   {
+      m_cookies = std::move(event.m_result);
    }
 
+   void App::loginThread()
+   {
+      using namespace ctb::tasks;
+      using std::launch;
+      using std::unexpected;
+      
+      try
+      {
+         auto token = m_stop_source.get_token();
+         checkStopToken(token);
+
+         // we can only do the login if we have a saved credential, no prompting from background thread.
+         wx_CredentialManager mgr{};
+         auto cred = mgr.loadCredential(constants::CELLARTRACKER_DOT_COM).or_else([](auto e) -> CredentialResult { throw e; }).value(); 
+
+         checkStopToken(token);
+         auto result = std::async(launch::deferred, runCellarTrackerLogin, std::move(cred), token).get();
+
+         // Need to update App object from main thread to avoid concurrency issues.
+         checkStopToken(token);
+         QueueEvent(new wx_LoginEvent{ std::move(result) });
+      }
+      catch (...) {
+         auto err = packageError();
+         log::error("App::loginThread() exiting with error. {}", err.formattedMesage());
+      }
+   }
 
 }  // namespace ctb::app
 

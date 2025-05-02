@@ -64,7 +64,7 @@ namespace ctb::tasks
    /// @return the requested cookies if successful, a ctb::Error if unsuccessful.
    /// @throws ctb::Error if 
    /// 
-   auto runCellarTrackerLogin(CredentialWrapper cred, std::stop_token token) noexcept(false) -> LoginTask::ReturnType;
+   auto runCellarTrackerLogin(CredentialWrapper&& cred, std::stop_token token) noexcept(false) -> LoginTask::ReturnType;
 
 
    /// @brief helper function, throws exception if stop_token.stop_requested() == true

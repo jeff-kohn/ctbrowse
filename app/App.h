@@ -8,13 +8,10 @@
 #pragma once
 
 #include "app_constants.h"
+#include "wx_LoginEvent.h"
 #include "wx_helpers.h"
 
 #include <ctb/log.h>
-#include <ctb/CredentialWrapper.h>
-#include <ctb/TableProperty.h>
-
-#include <cpr/cookies.h>
 #include <wx/app.h>
 
 #include <expected>
@@ -23,7 +20,6 @@
 namespace ctb::app
 {
    namespace fs = std::filesystem;
-
 
 
    /// @brief forward declare top-level window class so we don't have to add header dependency
@@ -54,12 +50,15 @@ namespace ctb::app
       }
 
 
-      auto getCellarTrackerCredential(bool prompt) -> CredentialWrapper;
+      using CookieResult = tasks::LoginTask::ResultWrapper;
 
-
-      using MaybeCookies  = std::optional<cpr::Cookies>;
-
-      auto getCellarTrackerCookies(bool prompt_for_cred) const -> const MaybeCookies&
+      /// @brief Get a cookie for the CellarTracker website, if available
+      /// 
+      /// If we have saved credentials, this cookie will be retrieved in the background.
+      /// 
+      /// @return the requested cookie, or std::nullopt if cookie isn't available.
+      /// 
+      auto getCellarTrackerCookies() const -> const CookieResult&
       {
          return m_cookies;
       }
@@ -89,11 +88,14 @@ namespace ctb::app
       void displayInfoMessage(const std::string& msg, const std::string& title = constants::APP_NAME_SHORT);
 
    private:
-      MaybeCookies m_cookies{};
-      MainFrame*   m_main_frame{};
-      fs::path     m_user_data_folder{}; 
+      CookieResult       m_cookies{};
+      MainFrame*         m_main_frame{};
+      fs::path           m_user_data_folder{};
+      std::stop_source   m_stop_source{};
 
-      void doBackgroundWebLogin();
+      void OnCellarTrackerLogin(wx_LoginEvent& event);
+
+      void loginThread();
    };
 
 }  // namespace ctb::app
