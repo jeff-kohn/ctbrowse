@@ -11,16 +11,15 @@ namespace ctb::app
    {
    public:
       CredentialDialog(wxWindow* parent, std::string_view credential_name, std::string_view prompt_msg, bool allow_save);
-      CredentialDialog(CredentialDialog&&) = default;
-      CredentialDialog& operator=(CredentialDialog&&) = default;
       ~CredentialDialog() override;
 
       CredentialWrapper getCredential();
 
-      // move only, no default ctor
       CredentialDialog() = delete;
       CredentialDialog(CredentialDialog&) = delete;
+      CredentialDialog(CredentialDialog&&) = delete;
       CredentialDialog& operator=(CredentialDialog&) = delete;
+      CredentialDialog& operator=(CredentialDialog&&) = delete;
 
    private:
       std::string m_cred_name{};   // only used for getCredential()

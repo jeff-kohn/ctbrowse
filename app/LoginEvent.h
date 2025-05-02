@@ -16,7 +16,7 @@ namespace ctb::app
       }
 
       LoginEvent(LoginEvent&&) noexcept = default;
-      LoginEvent& operator=(LoginEvent&&) noexcept = default;
+      LoginEvent& operator=(LoginEvent&&) noexcept = delete;
       ~LoginEvent() noexcept override = default;
 
       LoginEvent() = delete;

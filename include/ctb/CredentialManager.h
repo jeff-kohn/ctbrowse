@@ -50,17 +50,17 @@ namespace ctb
    ///
    struct CredPersistDisabled
    {
-      auto credentialExists(std::string_view cred_name) -> bool
+      auto credentialExists(std::string_view) -> bool
       {
          return false;
       }
 
-      auto loadCredential(std::string_view& cred_name) -> CredentialResult
+      auto loadCredential(std::string_view&) -> CredentialResult
       {
          return std::unexpected{ Error{ "Credential not loaded because persistence is disabled", Error::Category::NotSupported }};
       }
 
-      auto saveCredential(CredentialWrapper& cred) -> bool
+      auto saveCredential(CredentialWrapper&) -> bool
       {
          return false;
       }
@@ -98,7 +98,7 @@ namespace ctb
       /// @brief Load the requested credential from persistent storage if available, optionally prompting user if not found.
       /// 
       /// @param cred_name - the name of the credential to load
-      /// @param prompt_message - true if we should interactively prompt user if credential couldn't be loaded.
+      /// @param prompt_msg - true if we should interactively prompt user if credential couldn't be loaded.
       /// @return The requested credential if successful, a ctb::Error if unsuccessful.
       /// 
       auto loadCredential(std::string_view cred_name, std::string_view prompt_msg, bool allow_save = true) -> CredentialResult
@@ -110,7 +110,6 @@ namespace ctb
       /// @brief Load the requested credential from persistent storage if available, optionally prompting user if not found.
       /// 
       /// @param cred_name - the name of the credential to load
-      /// @param prompt_message - true if we should interactively prompt user if credential couldn't be loaded.
       /// @return The requested credential if successful, a ctb::Error if unsuccessful.
       /// 
       auto loadCredential(std::string_view cred_name) -> CredentialResult
@@ -147,8 +146,7 @@ namespace ctb
       }
 
       /// @brief Delete a credential from persistent storage
-      /// @param cred_name 
-      /// @return 
+      ///  
       auto deleteCredential(const std::string_view cred_name) -> int
       {
          if (credentialExists(cred_name))
