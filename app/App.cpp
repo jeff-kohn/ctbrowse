@@ -7,8 +7,8 @@
  *********************************************************************/
 
 #include "App.h"
+#include "CtCredentialManager.h"
 #include "MainFrame.h"
-#include "wx_CredentialManager.h"
 
 #include <ctb/utility_http.h>
 #include <ctb/task/tasks.h>
@@ -81,7 +81,7 @@ namespace ctb::app
          m_main_frame->Show();
          SetTopWindow(m_main_frame);
 
-         Bind(wx_LoginEvent::EventType, &App::OnCellarTrackerLogin, this);
+         Bind(LoginEvent::EventType, &App::OnCellarTrackerLogin, this);
          CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_VIEW_WINE_LIST }); });
 
          return true;
@@ -165,7 +165,7 @@ namespace ctb::app
 
 
 
-   void App::OnCellarTrackerLogin(wx_LoginEvent& event)
+   void App::OnCellarTrackerLogin(LoginEvent& event)
    {
       m_cookies = std::move(event.m_result);
    }
@@ -182,7 +182,7 @@ namespace ctb::app
          checkStopToken(token);
 
          // we can only do the login if we have a saved credential, no prompting from background thread.
-         wx_CredentialManager mgr{};
+         CtCredentialManager mgr{};
          auto cred = mgr.loadCredential(constants::CELLARTRACKER_DOT_COM).or_else([](auto e) -> CredentialResult { throw e; }).value(); 
 
          checkStopToken(token);
@@ -190,7 +190,7 @@ namespace ctb::app
 
          // Need to update App object from main thread to avoid concurrency issues.
          checkStopToken(token);
-         QueueEvent(new wx_LoginEvent{ std::move(result) });
+         QueueEvent(new LoginEvent{ std::move(result) });
       }
       catch (...) {
          auto err = packageError();

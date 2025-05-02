@@ -8,7 +8,7 @@
 #pragma once
 
 #include "app_constants.h"
-#include "wx_LoginEvent.h"
+#include "LoginEvent.h"
 #include "wx_helpers.h"
 
 #include <ctb/log.h>
@@ -93,7 +93,7 @@ namespace ctb::app
       fs::path           m_user_data_folder{};
       std::stop_source   m_stop_source{};
 
-      void OnCellarTrackerLogin(wx_LoginEvent& event);
+      void OnCellarTrackerLogin(LoginEvent& event);
 
       void loginThread();
    };

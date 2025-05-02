@@ -9,7 +9,7 @@
 #include "App.h"
 #include "MainFrame.h"
 #include "LabelImageCache.h"
-#include "wx_CredentialManager.h"
+#include "CtCredentialManager.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
 #include "model/DatasetEventSource.h"
@@ -251,7 +251,7 @@ namespace ctb::app
          wxBusyCursor busy{};
          ScopedStatusText end_status{ constants::STATUS_DOWNLOAD_COMPLETE, this };
 
-         wx_CredentialManager cred_mgr{};
+         CtCredentialManager cred_mgr{};
          auto cred_name = constants::CELLARTRACKER_DOT_COM;
          auto prompt_msg = ctb::format(constants::FMT_CREDENTIALDLG_PROMPT_MSG, cred_name);
 

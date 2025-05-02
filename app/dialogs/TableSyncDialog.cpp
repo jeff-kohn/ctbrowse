@@ -8,7 +8,7 @@
 
 #include "App.h"
 #include "dialogs/TableSyncDialog.h"
-#include "wx_CredentialManager.h"
+#include "CtCredentialManager.h"
 #include "wx_helpers.h"
 
 #include <magic_enum/magic_enum.hpp>

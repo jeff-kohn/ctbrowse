@@ -1,5 +1,5 @@
 
-#include "wx_CredentialManager.h"
+#include "CtCredentialManager.h"
 #include "dialogs/CredentialDialog.h"
 
 #include <wx/secretstore.h>
@@ -11,11 +11,11 @@ namespace ctb::app
    {
       [[nodiscard]] auto buildCredServiceName(const std::string_view cred_name) -> std::string
       {
-         return ctb::format("{}/{}", wx_CredentialPersist::CRED_SERVICE_BASE, cred_name);
+         return ctb::format("{}/{}", CtCredentialPersist::CRED_SERVICE_BASE, cred_name);
       }
    }
 
-   [[nodiscard]] auto wx_CredentialPersist::credentialExists(std::string_view cred_name) -> bool
+   [[nodiscard]] auto CtCredentialPersist::credentialExists(std::string_view cred_name) -> bool
    {
       // no query capability in wxSecretStore so we have to try and load it.
       auto result = loadCredential(cred_name);
@@ -23,7 +23,7 @@ namespace ctb::app
    }
 
 
-   [[nodiscard]] auto wx_CredentialPersist::loadCredential(std::string_view cred_name) -> CredentialResult
+   [[nodiscard]] auto CtCredentialPersist::loadCredential(std::string_view cred_name) -> CredentialResult
    {
       using std::unexpected;
 
@@ -46,7 +46,7 @@ namespace ctb::app
    }
 
 
-   [[nodiscard]] auto wx_CredentialPersist::saveCredential(CredentialWrapper& cred) -> bool
+   [[nodiscard]] auto CtCredentialPersist::saveCredential(CredentialWrapper& cred) -> bool
    {
       auto secret_store = wxSecretStore::GetDefault();
       auto username = cred.username();
@@ -59,7 +59,7 @@ namespace ctb::app
    }
 
 
-   [[nodiscard]] auto wx_CredentialPromptFunc::operator()(std::string_view cred_name, std::string_view prompt_message, bool allow_save) -> CredentialResult
+   [[nodiscard]] auto CtCredentialPromptFunc::operator()(std::string_view cred_name, std::string_view prompt_message, bool allow_save) -> CredentialResult
    {
       try 
       {
