@@ -69,6 +69,7 @@ namespace ctb::constants
    inline constexpr const char* ERROR_STR_NO_GRID_TABLE           = "No data is currently loaded. Open a data view before searching.";
    inline constexpr const char* ERROR_STR_NULLPTR_ARG             = "Invalid Parameter (nullptr).";
    inline constexpr const char* ERROR_STR_RELATIVE_LABEL_CACHE    = "The label image cache folder must be an absolute path, not relative.";
+   inline constexpr const char* ERORR_STR_NO_SECRET_STORE         = "Secret Store not available.";
    inline constexpr const char* ERROR_STR_UNKNOWN                 = "Unknown Error.";
    inline constexpr const char* ERROR_VAL                         = "#Err#";
    inline constexpr const char* FMT_ERROR_CURL_ERROR              = "The operation failed with CURL error {}";
@@ -79,6 +80,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_ERROR_FILE_WRITE_FAILED       = "Write operation on file '{}' failed.";
    inline constexpr const char* FMT_ERROR_FILE_TOO_BIG            = "File '{}'s size of {} bytes exceeded the maximum allowable size of {}.";
    inline constexpr const char* FMT_ERROR_HTTP_STATUS_CODE        = "The operation failed with HTTP status code {}";
+   inline constexpr const char* FMT_ERORR_NO_CREDENTIAL           = "Credential '{}' was not found or could not be loaded."; 
    inline constexpr const char* FMT_ERROR_NO_LABEL_CACHE_FOLDER   = "The image cache folder {} does not exist and could not be created.";
    inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND          = "Folder '{}' does not exist.";
    inline constexpr const char* FMT_ERROR_PROP_NOT_FOUND          = "Property '{}' was not found.";

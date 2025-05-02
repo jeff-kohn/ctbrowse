@@ -45,7 +45,7 @@ namespace ctb::app
          if (drink_end.isNull() )
             return drink_start.asString("{} +").c_str();
 
-         return ctb::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str(); 
+         return wxString::FromUTF8(ctb::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str()); 
       }
 
    } // namespace detail
@@ -270,7 +270,9 @@ namespace ctb::app
             m_label_image->SetBitmap(bmp);    
             m_label_image->Show();
             Layout(); // required since the images vary in size
-            m_label_image->Update();
+            SendSizeEvent();
+            Update();
+            //m_label_image->Update();
          }
       }
       catch (...)
@@ -327,10 +329,11 @@ namespace ctb::app
          GetSizer()->ShowItems(false);
          m_details = WineDetails{};
       }
-
+      // TODO hide/unhide fields as necessary.
       TransferDataToWindow();
       Layout();
-      // TODO hide/unhide fields as necessary.
+      SendSizeEvent();
+      Update();
    }
 
 

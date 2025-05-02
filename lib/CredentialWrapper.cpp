@@ -7,130 +7,105 @@
  *********************************************************************/
 #include "ctb/CredentialWrapper.h"
 
-#include "Windows.h"
-#include "wincred.h"
+#if defined(_WIN32)
+   #include <Windows.h>
+#else
+   #include <string.h>
+#endif
 
-#include <array>
 
 namespace ctb
 {
 
-   namespace
-   {
-      inline CredentialWrapper::ResultCode getCode(DWORD result)
-      {
-         using enum CredentialWrapper::ResultCode;
-
-         switch (result)
-         {
-            case NO_ERROR:
-               return Success;
-
-            case ERROR_INVALID_FLAGS:
-               return ErrorInvalidFlags;
-
-            case ERROR_INVALID_PARAMETER:
-               return ErrorInvalidFlags;
-
-            case ERROR_NO_SUCH_LOGON_SESSION:
-               return ErrorNoLogonSession;
-
-            case ERROR_CANCELLED:
-               return ErrorCanceled;
-
-            default:
-               return ErrorUnknown;
-         }
-      }
-   } // namespace
-
-
-   void CredentialWrapper::swap(CredentialWrapper& other) noexcept
-   {
-      using std::swap;
-
-      swap(m_target, other.m_target);
-      swap(m_message_text, other.m_message_text);
-      swap(m_caption_text, other.m_caption_text);
-      swap(m_username, other.m_username);
-      swap(m_password, other.m_password);
-      swap(m_save_checked, other.m_save_checked);
-      swap(m_confirmed, other.m_confirmed);
-   }
+   CredentialWrapper::CredentialWrapper(std::string_view cred_name, std::string&& username, std::string&& password, bool save_requested) :
+      m_cred_name{ cred_name },
+      m_username{ std::move(username) },
+      m_password{ std::move(password) },
+      m_cleared{ false },
+      m_save_requested{ save_requested }
+   {}
 
 
    CredentialWrapper::CredentialWrapper(CredentialWrapper&& other) noexcept
    {
       swap(other);
-      other.clear();
    }
 
 
-   CredentialWrapper& CredentialWrapper::operator=(CredentialWrapper&& other) noexcept
+   CredentialWrapper& CredentialWrapper::operator=(CredentialWrapper&& rhs) noexcept
    {
-      swap(other);
-      other.clear();
-
+      swap(rhs);
+      rhs.clear();
       return *this;
    }
 
 
    CredentialWrapper::~CredentialWrapper() noexcept
    {
-      if (m_save_checked && !m_confirmed)
-         // User chose to save but credential was never confirmed, so we don't want to save it.
-         confirmCredential(false);
-
-      clear();
+      if (!m_cleared) clear();
    }
 
+
+   auto CredentialWrapper::saveRequested() const -> bool
+   {
+      return m_save_requested;
+   }
+
+
+   /// @brief Name used to identify this credential when persisting to/from storage.
+   /// 
+   auto CredentialWrapper::credentialName() const -> const std::string&
+   {
+      return m_cred_name;
+   }
+
+
+   /// @brief Returns temporary view of credential username
+   ///
+   /// the returned view is only valid until clear() or this object's destructor is called
+   /// 
+   auto CredentialWrapper::username() const -> std::string_view
+   {
+      return m_username;
+   }
+
+
+   /// @brief Returns temporary view of credential password
+   ///
+   /// the returned view is only valid until clear() or this object's destructor is called
+   /// 
+   auto CredentialWrapper::password() const -> std::string_view
+   {
+      return m_password;
+   }
+
+
+   /// @brief Clears the credential values from this object
+   ///
    void CredentialWrapper::clear() noexcept
    {
+#if defined(_WIN32)
       SecureZeroMemory(m_username.data(), m_username.size());
       SecureZeroMemory(m_password.data(), m_password.size());
-      m_confirmed = false;
-      m_save_checked = false;
+#else
+      memset_explicit(m_username.data(), m_username.size());
+      memset_explicit(m_password.data(), m_password.size());
+#endif
+      m_cleared = true;
    }
 
 
-   [[nodiscard]] CredentialWrapper::CredentialResult CredentialWrapper::promptForCredential(unsigned long auth_error_code)
+   void CredentialWrapper::swap(CredentialWrapper& other) noexcept
    {
+      using std::swap;
 
-      m_confirmed = false;
-      BOOL save{ allowSave() };
-      DWORD retval{ ERROR_SUCCESS };
-
-
-      auto flags = (allowSave() ? CREDUI_FLAGS_GENERIC_CREDENTIALS | CREDUI_FLAGS_EXPECT_CONFIRMATION
-                                : CREDUI_FLAGS_GENERIC_CREDENTIALS | CREDUI_FLAGS_ALWAYS_SHOW_UI | CREDUI_FLAGS_DO_NOT_PERSIST);
-
-      CREDUI_INFOA cui{};
-      cui.cbSize = sizeof(CREDUI_INFO);
-      cui.hwndParent = nullptr;
-      cui.pszMessageText = m_message_text.c_str();
-      cui.pszCaptionText = m_caption_text.c_str();
-      cui.hbmBanner = nullptr;
-
-      retval = CredUIPromptForCredentialsA(&cui, m_target.c_str(), nullptr, auth_error_code,
-                                           m_username.data(), static_cast<ULONG>(m_username.size()),
-                                           m_password.data(), static_cast<ULONG>(m_password.size()),
-                                           &save, static_cast<DWORD>(flags));
-      auto resultCode = getCode(retval);
-      m_save_checked = allowSave() && static_cast<bool>(save);
-
-      if (ResultCode::Success == resultCode)
-         return Credential{ m_username.data(), m_password.data() };
-      else
-         return std::unexpected{ resultCode };
+      swap(m_cred_name, other.m_cred_name);
+      swap(m_username, other.m_username);
+      swap(m_password, other.m_password);
+      swap(m_cleared, other.m_cleared);
+      swap(m_save_requested, other.m_save_requested);
    }
 
-
-   bool CredentialWrapper::confirmCredential(bool valid)
-   {
-      /// We always set confirmed = true because even if the call fails, calling again in the dtor wouldn't make sense.
-      m_confirmed = true;
-      return NO_ERROR == CredUIConfirmCredentialsA(m_target.c_str(), valid);
-   }
 
 
 }  // namespace ctb

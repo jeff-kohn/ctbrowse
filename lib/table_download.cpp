@@ -62,18 +62,14 @@ namespace ctb
 namespace ctb
 {
 
-   [[nodiscard]] DownloadResult downloadRawTableData(
-      const CredentialWrapper::Credential& cred,
-      TableId table,
-      DataFormatId format,
-      ProgressCallback* callback )
+   [[nodiscard]] DownloadResult downloadRawTableData(const CredentialWrapper& cred, TableId table, DataFormatId format, ProgressCallback* callback )
    {
       auto table_name = magic_enum::enum_name(table);
       auto data_format = magic_enum::enum_name(format);
 
       cpr::Url url{ ctb::format(constants::FMT_URL_CT_TABLE,
-                                percentEncode(std::string(cred.username)),
-                                percentEncode(std::string(cred.password)),
+                                percentEncode(cred.username()),
+                                percentEncode(cred.password()),
                                 data_format, table_name)
       };
 

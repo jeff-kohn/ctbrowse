@@ -11,12 +11,19 @@
 #include "ctb/utility.h"
 #include "ctb/utility_templates.h"
 
-#include <wx/activityindicator.h>
 #include <wx/config.h>
 
 
 namespace ctb::app
 {
+
+   /// @brief just a convenience wrapper for converting a string_view to a wxString
+   ///
+   inline wxString wxFromSV(std::string_view sv)
+   {
+      return wxString::FromUTF8(sv.data(), sv.size());
+   }
+
 
    /// @brief convert a range of strings/string_views to a wxArrayString
    ///
@@ -26,11 +33,11 @@ namespace ctb::app
       Overloaded overloaded{
          [](std::string&& str)
          {
-            return wxString{ str };
+            return wxString::FromUTF8(str);
          },
          [] (std::string_view sv)
          {
-            return wxString{ sv.data(), sv.length() };
+            return wxFromSV(sv);
          },
          [] (auto&& str)
          {
@@ -42,13 +49,6 @@ namespace ctb::app
                                                       | rng::to<wxArrayString>();
    }
 
-
-   /// @brief just a convenience wrapper for converting a string_view to a wxString
-   ///
-   inline wxString wxFromSV(std::string_view sv)
-   {
-      return wxString{sv.data(), sv.size() };
-   }
 
 
    /// @brief small object that sets a frame window's status text on destruction
@@ -99,4 +99,6 @@ namespace ctb::app
    private:
       wxConfigBase& m_config;
    };
+
+
 } // namespace ctb::app

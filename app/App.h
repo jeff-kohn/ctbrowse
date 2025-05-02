@@ -11,6 +11,7 @@
 #include "wx_helpers.h"
 
 #include <ctb/log.h>
+#include <ctb/CredentialWrapper.h>
 #include <ctb/TableProperty.h>
 
 #include <cpr/cookies.h>
@@ -53,18 +54,15 @@ namespace ctb::app
       }
 
 
+      auto getCellarTrackerCredential(bool prompt) -> CredentialWrapper;
 
-      /// @brief Retrieve the cookies for use with CT website.
-      /// 
-      /// Connects to the CT website using saved or user-prompted credential and retrieves user Cookie
-      /// for connection to and interacting with CT website.
-      /// 
-      /// @param prompt_for_cred - if true and the saved cred is not available, user will be prompted for 
-      ///        username and password.
-      /// 
-      /// @return the requested cookies if successful, a ctb::Error if unsuccessful.
-      /// 
-      //auto getCellarTrackerCookies(bool prompt_for_cred) -> CookieResult;
+
+      using MaybeCookies  = std::optional<cpr::Cookies>;
+
+      auto getCellarTrackerCookies(bool prompt_for_cred) const -> const MaybeCookies&
+      {
+         return m_cookies;
+      }
 
 
       /// @brief labelCacheFolder()
@@ -86,15 +84,16 @@ namespace ctb::app
       void displayErrorMessage(const Error& err, bool log_error = true, std::source_location source_loc = std::source_location::current());
       void displayErrorMessage(const std::string& msg, bool log_error, const std::string& title = constants::ERROR_STR, std::source_location source_loc = std::source_location::current());
 
-      /// @brief display a message box with inctb::formational text
+      /// @brief display a message box with informational text
       ///
       void displayInfoMessage(const std::string& msg, const std::string& title = constants::APP_NAME_SHORT);
 
    private:
-      using MaybeCookies  = std::optional<cpr::Cookies>;
-      MaybeCookies m_ct_cookies{};
-      MainFrame* m_main_frame{};
-      fs::path m_user_data_folder{ constants::CURRENT_DIRECTORY }; // safe default but should never actually be used since we set re-initialize it in OnInit()
+      MaybeCookies m_cookies{};
+      MainFrame*   m_main_frame{};
+      fs::path     m_user_data_folder{}; 
+
+      void doBackgroundWebLogin();
    };
 
 }  // namespace ctb::app

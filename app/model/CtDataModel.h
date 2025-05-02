@@ -416,7 +416,7 @@ namespace ctb::app
          // format as string and return it to caller
          auto val = (*m_current_view)[row][prop];
          auto val_str = display_col.getDisplayValue(val);
-         variant = wxString{ val_str.data(), val_str.size() };
+         variant = wxString::FromUTF8(val_str);
       }
 
       bool SetValueByRow(const wxVariant&, unsigned, unsigned) override

@@ -83,6 +83,7 @@ namespace ctb::app
          m_main_frame->Show();
          SetTopWindow(m_main_frame);
 
+
          CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_VIEW_WINE_LIST }); });
 
          return true;
@@ -104,6 +105,11 @@ namespace ctb::app
       log::flush();
       log::shutdown();
       return wxApp::OnExit();
+   }
+
+   auto App::getCellarTrackerCredential(bool prompt) -> CredentialWrapper
+   {
+      throw Error{"Not Implemented"};
    }
 
 
@@ -139,7 +145,7 @@ namespace ctb::app
       try 
       {
          auto cfg = getConfig(constants::CONFIG_PATH_PREFERENCES);
-         auto val = cfg->Read(wxString{ constants::CONFIG_VALUE_LABEL_CACHE_DIR }, wxEmptyString);
+         auto val = cfg->Read(wxString::FromUTF8(constants::CONFIG_VALUE_LABEL_CACHE_DIR), wxEmptyString);
          if (!val.empty())
          {
             return fs::path{ val.wx_str() };
@@ -184,6 +190,13 @@ namespace ctb::app
    void App::displayInfoMessage(const std::string& msg, const std::string& title /*= constants::APP_NAME_SHORT*/)
    {
       wxMessageBox(msg, title, wxICON_INFORMATION | wxOK, m_main_frame);
+   }
+
+   void App::doBackgroundWebLogin()
+   {
+      // start a background thread to run the task. wxWidget classes are not threadsafe and can only be called from main thread
+      // so use CallAfter() to update the member.
+
    }
 
 

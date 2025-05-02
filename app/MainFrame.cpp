@@ -9,6 +9,7 @@
 #include "App.h"
 #include "MainFrame.h"
 #include "LabelImageCache.h"
+#include "wx_CredentialManager.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
 #include "model/DatasetEventSource.h"
@@ -18,7 +19,6 @@
 #include "views/DetailsPanel.h"
 
 #include <cpr/cpr.h>
-#include <ctb/CredentialWrapper.h>
 #include <ctb/table_download.h>
 #include <ctb/utility.h>
 #include <external/HttpStatusCodes.h>
@@ -243,6 +243,7 @@ namespace ctb::app
       // TODO: refactor this
       try
       {
+
          TableSyncDialog dlg(this);
          if (dlg.ShowModal() != wxID_OK)
             return;
@@ -250,18 +251,23 @@ namespace ctb::app
          wxBusyCursor busy{};
          ScopedStatusText end_status{ constants::STATUS_DOWNLOAD_COMPLETE, this };
 
-         CredentialWrapper cred_wrapper{
-            constants::CELLARTRACKER_DOT_COM, true,
-            constants::CELLARTRACKER_LOGON_CAPTION,
-            constants::CELLARTRACKER_LOGON_TITLE
-         };
+         wx_CredentialManager cred_mgr{};
+         auto cred_name = constants::CELLARTRACKER_DOT_COM;
+         auto prompt_msg = ctb::format(constants::FMT_CREDENTIALDLG_PROMPT_MSG, cred_name);
 
-         auto cred_result = cred_wrapper.promptForCredential();
-         if (!cred_result.has_value())
+         auto cred_result = cred_mgr.loadCredential(cred_name, prompt_msg, true);
+
+         if (!cred_result)
          {
-            end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
+            auto error = cred_result.error();
+            if (error.category == Error::Category::OperationCanceled)
+               return;
+
+            throw error;
          }
-         auto& cred = cred_result.value();
+
+         // If cred doesn't work we need to reprompt so udpate prompt message.
+         prompt_msg = ctb::format(constants::FMT_CREDENTIALDLG_REPROMPT_MSG, cred_name);
 
          wxProgressDialog progress_dlg{"Download Progress", "Downloading Data Files", 100, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL };
 
@@ -278,36 +284,43 @@ namespace ctb::app
             setStatusText(constants::FMT_STATUS_FILE_DOWNLOADING, getTableDescription(tbl));
 
             DownloadResult result{};
-            result = downloadRawTableData(cred, tbl, DataFormatId::csv, &progress_callback);
+            result = downloadRawTableData(*cred_result, tbl, DataFormatId::csv, &progress_callback);
 
-            // we may need to re-prompt 
-            while (!result.has_value() && result.error().error_code == enum_index(HttpStatus::Code::Unauthorized))
+            while (!result)
             {
-               cred_result = cred_wrapper.promptForCredential();
-               if (cred_result)
+               auto error = result.error();
+               if (error.error_code == std::to_underlying(HttpStatus::Code::Unauthorized))
                {
-                  cred = cred_result.value();
+                  // login failure, need to re-prompt for credentials.
+                  cred_result = cred_mgr.promptCredential(cred_name, prompt_msg, true);
+                  if (cred_result)
+                  {
+                     // got a new cred, try again
+                     result = downloadRawTableData(*cred_result, tbl, DataFormatId::csv, &progress_callback);
+                  }
+                  else{
+                     // user canceled login dialog so just exit out
+                     end_status.message = constants::ERROR_STR_DOWNLOAD_AUTH_FAILURE;
+                     return;
+                  }
                }
-               else
+               else if (error.category == Error::Category::OperationCanceled)
                {
-                  end_status.message = constants::ERROR_STR_DOWNLOAD_AUTH_FAILURE;
+                  // user hit cancel in progress dilaog, so just exit out.
+                  end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
+                  return;
+               }               
+               else {
+                  // some unknown error happened, let user know before bailing.
+                  wxGetApp().displayErrorMessage(result.error());
+                  end_status.message = constants::STATUS_DOWNLOAD_FAILED;
                   return;
                }
             }
-
-            if (!result)
+            // did user ask to save cred?
+            if (cred_result->saveRequested())
             {
-               // we didn't get a result, so indicate error to user.
-               if (result.error().category == Error::Category::OperationCanceled)
-               {
-                  end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
-               }
-               else
-               {
-                  wxGetApp().displayErrorMessage(result.error());
-                  end_status.message = constants::STATUS_DOWNLOAD_FAILED;
-               }
-               return;
+               cred_mgr.saveCredential(*cred_result);
             }
 
             // if we get here we have the data, so save it to file.

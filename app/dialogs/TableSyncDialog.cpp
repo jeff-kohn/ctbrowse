@@ -8,6 +8,7 @@
 
 #include "App.h"
 #include "dialogs/TableSyncDialog.h"
+#include "wx_CredentialManager.h"
 #include "wx_helpers.h"
 
 #include <magic_enum/magic_enum.hpp>
@@ -31,8 +32,8 @@ namespace ctb::app
 
       /// @brief serialize a range of integer values to a delimited string
       template<rng::input_range Rng, typename I = rng::range_value_t<Rng> >
-         requires std::is_same_v<std::decay_t<rng::range_value_t<Rng>>, I>
-      std::string serializeIntegers(Rng rg, char delim = ENUM_DELIMETER)
+         requires std::is_same_v<std::decay_t<rng::range_value_t<Rng>>, I> and std::is_integral_v<I>
+      std::string serializeIntegrals(Rng rg, char delim = ENUM_DELIMETER)
       {
          std::ostringstream str{};
          for (I i : rg)
@@ -122,10 +123,10 @@ namespace ctb::app
 
          // Save relevant settings to config
          auto cfg = wxGetApp().getConfig(constants::CONFIG_PATH_PREFERENCE_DATASYNC);
-         cfg->Write(wxString(constants::CONFIG_VALUE_SYNC_ON_STARTUP), m_startup_sync_val);
+         cfg->Write(wxString::FromUTF8(constants::CONFIG_VALUE_SYNC_ON_STARTUP), m_startup_sync_val);
          if (m_save_default_val)
          {
-            cfg->Write(wxString(constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES), wxString(serializeIntegers(vws::all(m_table_selection_val))));
+            cfg->Write(wxString::FromUTF8(constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES), wxString::FromUTF8(serializeIntegrals(vws::all(m_table_selection_val))));
          }
          cfg->Flush();
 

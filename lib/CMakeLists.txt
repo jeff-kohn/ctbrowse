@@ -7,11 +7,12 @@ add_library(${PROJECT_NAME}::ctBrowse_lib ALIAS ctBrowse_lib)
 
 target_sources(ctBrowse_lib
    PUBLIC
+      "../include/ctb/ctb.h"
       "../include/ctb/common_types.h"
       "../include/ctb/concepts.h"
       "../include/ctb/constants.h"
+      "../include/ctb/CredentialManager.h"
       "../include/ctb/CredentialWrapper.h"
-      "../include/ctb/ctb.h"
       "../include/ctb/CtRecordImpl.h"
       "../include/ctb/Error.h"
       "../include/ctb/log.h"

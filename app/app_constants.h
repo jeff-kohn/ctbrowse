@@ -33,6 +33,13 @@ namespace ctb::constants
    inline constexpr const char* FILTER_REGION                     = "Region";
    inline constexpr const char* FILTER_VARIETAL                   = "Varietal";
 
+   inline constexpr const char* FMT_CREDENTIALDLG_PROMPT_MSG      = "Enter the username and password for {}:";
+   inline constexpr const char* FMT_CREDENTIALDLG_REPROMPT_MSG    = "Authentication failed. Re-enter username and password for {}:";
+   inline constexpr const char* CREDENTIALDLG_LBL_USERNAME        = "&Username:";
+   inline constexpr const char* CREDENTIALDLG_LBL_PASSWORD        = "&Password:";
+   inline constexpr const char* CREDENTIALDLG_LBL_SAVE            = "&Save Credential";
+   inline constexpr const char* FMT_CREDENTIALDLG_LBL_TITLE       = "{} Login";
+   
    inline constexpr const char* FMT_LBL_FILTERED_ROWS             = "Filtered Rows: {}";
    inline constexpr const char* FMT_LBL_FILTERS_SELECTED          = "{}  ({} selected)";
    inline constexpr const char* FMT_LBL_TOTAL_ROWS                = "Total Rows: {}";
@@ -42,6 +49,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_LABEL_IMAGE_FILENAME          = "{}-{}.jpg";
 
    inline constexpr const char* INFO_MSG_NO_MATCHING_ROWS         = "No rows matched the search text.";
+   inline constexpr const char* ERROR_USER_CANCELED               = "User canceled operation.";
    inline constexpr const char* NO_SCORE                          = " --";
    
    // column labels

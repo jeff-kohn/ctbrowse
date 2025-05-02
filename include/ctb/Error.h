@@ -33,15 +33,16 @@ namespace ctb
       {
          ArgumentError,
          CurlError,
+         DataError,
          FileError,
-         Generic,
+         GenericError,
          HttpStatus,
          OperationCanceled,
-         DataError,
+         NotSupported,
          UiError
       };
 
-            /// @brief numeric error code, 0 indicates success, -1 indicates general/unknown failure, other numbers can
+      /// @brief numeric error code, 0 indicates success, -1 indicates general/unknown failure, other numbers can
       ///        be used for contextual error codes.
       int64_t error_code{};
 
@@ -49,7 +50,7 @@ namespace ctb
       std::string error_message{};
 
       /// @brief the category of error this object represents
-      Category category{ Category::Generic };
+      Category category{ Category::GenericError };
 
       /// @brief  the textual name of the Error::Category
       std::string_view categoryName() const
@@ -57,7 +58,7 @@ namespace ctb
          return magic_enum::enum_name(category);
       }
 
-      /// @brief formattedMesage()
+      /// @brief formattedMessage()
       /// @return a formatted error message combining the properties of this object.
       /// 
       std::string formattedMesage() const
@@ -74,14 +75,14 @@ namespace ctb
       }
 
       /// @brief construct an Error with numeric error code, textual error message, and category
-      Error(int64_t code, std::string error_message, Category category = Category::Generic) noexcept :
+      Error(int64_t code, std::string error_message, Category category = Category::GenericError) noexcept :
          error_code{ static_cast<int64_t>(code) },
          error_message{ std::move(error_message) },
          category{ category }
       {}
 
       /// @brief construct an Error with message and optional category
-      explicit Error(std::string error_message, Category category = Category::Generic) noexcept :
+      explicit Error(std::string error_message, Category category = Category::GenericError) noexcept :
          error_code{ ERROR_CODE_GENERAL_FAILURE },
          error_message{ std::move(error_message) },
          category{ category }

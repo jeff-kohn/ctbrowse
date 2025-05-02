@@ -47,7 +47,7 @@ namespace ctb
    /// @param callback     optional callback to receive progress updates
    /// @return             expected/successful value is the requested table data, unexpected/error value is HTTP status code
    ///
-   [[nodiscard]] DownloadResult downloadRawTableData(const CredentialWrapper::Credential& cred, TableId table, 
+   [[nodiscard]] DownloadResult downloadRawTableData(const CredentialWrapper& cred, TableId table, 
                                                      DataFormatId format, ProgressCallback* callback = nullptr);
 
 } // namespace ctb
