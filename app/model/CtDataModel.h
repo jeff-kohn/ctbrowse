@@ -66,7 +66,8 @@ namespace ctb::app
          CtStringFilter{ constants::FILTER_VARIETAL,   static_cast<int>(PropId::MasterVarietal) },
          CtStringFilter{ constants::FILTER_COUNTRY,    static_cast<int>(PropId::Country)        },
          CtStringFilter{ constants::FILTER_REGION,     static_cast<int>(PropId::Region)         },
-         CtStringFilter{ constants::FILTER_APPELATION, static_cast<int>(PropId::Appellation)    }
+         CtStringFilter{ constants::FILTER_APPELATION, static_cast<int>(PropId::Appellation)    },
+         CtStringFilter{ constants::FILTER_VINTAGE,    static_cast<int>(PropId::Vintage)        }
       };
 
       static auto create(Dataset data) -> DatasetPtr

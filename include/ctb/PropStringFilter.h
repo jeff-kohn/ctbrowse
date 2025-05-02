@@ -47,8 +47,9 @@ namespace ctb
          auto prop_val = rec[prop_id];
          if (prop_val.isNull())
             return false;
-         
-        return match_values.find(prop_val.asStringView()) != match_values.end();
+
+        // asStringView() would be faster but wouldn't allow searching the non-text properties
+        return match_values.find(prop_val.asString()) != match_values.end();
       }
    };
 

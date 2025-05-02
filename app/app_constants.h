@@ -32,6 +32,7 @@ namespace ctb::constants
    inline constexpr const char* FILTER_COUNTRY                    = "Country";
    inline constexpr const char* FILTER_REGION                     = "Region";
    inline constexpr const char* FILTER_VARIETAL                   = "Varietal";
+   inline constexpr const char* FILTER_VINTAGE                    = "Vintage";
 
    inline constexpr const char* FMT_CREDENTIALDLG_PROMPT_MSG      = "Enter the username and password for {}:";
    inline constexpr const char* FMT_CREDENTIALDLG_REPROMPT_MSG    = "Authentication failed. Re-enter username and password for {}:";

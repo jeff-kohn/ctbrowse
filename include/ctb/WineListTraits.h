@@ -2,7 +2,7 @@
 * @file  WineListTraits.h
 *
 * @brief defines the traits template class WineListTraits which is 
-*        used in conjuction with CtRecordImpl to implement the
+*        used in conjunction with CtRecordImpl to implement the
 *        'List' CellarTracker table.
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
