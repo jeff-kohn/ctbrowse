@@ -8,13 +8,10 @@
 #pragma once
 
 #include "app_constants.h"
-#include "LoginEvent.h"
 #include "wx_helpers.h"
 
 #include <ctb/log.h>
 #include <wx/app.h>
-
-#include <expected>
 
 
 namespace ctb::app
@@ -50,20 +47,6 @@ namespace ctb::app
       }
 
 
-      using CookieResult = tasks::LoginTask::ResultWrapper;
-
-      /// @brief Get a cookie for the CellarTracker website, if available
-      /// 
-      /// If we have saved credentials, this cookie will be retrieved in the background.
-      /// 
-      /// @return the requested cookie, or std::nullopt if cookie isn't available.
-      /// 
-      auto getCellarTrackerCookies() const -> const CookieResult&
-      {
-         return m_cookies;
-      }
-
-
       /// @brief labelCacheFolder()
       /// @return the fully qualified path to the folder where label images are cached
       /// 
@@ -88,14 +71,8 @@ namespace ctb::app
       void displayInfoMessage(const std::string& msg, const std::string& title = constants::APP_NAME_SHORT);
 
    private:
-      CookieResult       m_cookies{};
       MainFrame*         m_main_frame{};
       fs::path           m_user_data_folder{};
-      std::stop_source   m_stop_source{};
-
-      void OnCellarTrackerLogin(LoginEvent& event);
-
-      void loginThread();
    };
 
 }  // namespace ctb::app

@@ -11,18 +11,16 @@
 
 namespace ctb::constants
 {
+   inline constexpr const char* CELLARTRACKER_DOT_COM       = "CellarTracker.com";
+   inline constexpr const char* URL_CT_DOT_COM              = "https://cellartracker.com";
    inline constexpr const char* URL_CT_LOGIN_FORM           = "https://www.cellartracker.com/password.asp";
+   inline constexpr const char* URL_CT_TABLE_LIST           = "https://www.cellartracker.com/list.asp?Table=List";
    inline constexpr const char* FMT_URL_CT_TABLE            = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
    inline constexpr const char* FMT_URL_CT_WINE_DETAILS     = "https://www.cellartracker.com/wine.asp?iWine={}";
-   inline constexpr const char* HTTP_USER_AGENT_NAME        = "User-Agent";
-   inline constexpr const char* HTTP_USER_AGENT_VALUE       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36";
-   inline constexpr const char* HTTP_HEADER_CONTENT_TYPE    = "Content-Type";
-   inline constexpr const char* HTTP_CONTENT_TYPE_JPEG      = "image/jpeg";
 
    inline constexpr const char* HTML_ELEM_LABEL_PHOTO       = "label_photo";
    inline constexpr const char* HTML_ATTR_SRC               = "src";
 
-   inline constexpr const char* CELLARTRACKER_DOT_COM       = "CellarTracker.com";
    inline constexpr const char* CELLARTRACKER_LOGON_CAPTION = "Enter login information for CellarTracker.com:";
    inline constexpr const char* CELLARTRACKER_LOGON_TITLE   = "CellarTracker Login";
 

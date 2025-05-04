@@ -11,6 +11,7 @@
 #include "ctb/utility.h"
 #include "ctb/utility_templates.h"
 
+#include <wx/arrstr.h>
 #include <wx/config.h>
 
 

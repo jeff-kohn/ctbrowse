@@ -78,7 +78,7 @@ namespace ctb::app
          return wxImageTask{ async(launch::deferred, runLoadFileTask, file_path, m_cancel_source.get_token()) };
       }
       else {
-         return wxImageTask{ async(runFetchAndSaveLabelTask, m_cache_folder, wine_id, m_cancel_source.get_token()) };
+         return wxImageTask{ async(launch::async, runFetchAndSaveLabelTask, m_cache_folder, wine_id, m_cancel_source.get_token()) };
       }
    }
 

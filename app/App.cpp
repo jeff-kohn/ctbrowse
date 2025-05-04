@@ -74,14 +74,10 @@ namespace ctb::app
          if (!wxApp::OnInit())
             return false;
 
-         // background thread to log into CT and get session cookie.
-         std::thread{ &App::loginThread, this }.detach();
-
          m_main_frame = MainFrame::create();
          m_main_frame->Show();
          SetTopWindow(m_main_frame);
 
-         Bind(LoginEvent::EventType, &App::OnCellarTrackerLogin, this);
          CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_VIEW_WINE_LIST }); });
 
          return true;
@@ -95,8 +91,6 @@ namespace ctb::app
    
    int App::OnExit()
    {
-      m_stop_source.request_stop();
-
       log::warn("App shutting down.");
       log::flush();
       log::shutdown();
@@ -165,38 +159,38 @@ namespace ctb::app
 
 
 
-   void App::OnCellarTrackerLogin(LoginEvent& event)
-   {
-      m_cookies = std::move(event.m_result);
-   }
+   //void App::OnCellarTrackerLogin(LoginEvent& event)
+   //{
+   //   m_session = event.m_result ? std::optional{ std::move(event.m_result.value()) } : std::nullopt;
+   //}
 
-   void App::loginThread()
-   {
-      using namespace ctb::tasks;
-      using std::launch;
-      using std::unexpected;
-      
-      try
-      {
-         auto token = m_stop_source.get_token();
-         checkStopToken(token);
+   //void App::loginThread()
+   //{
+   //   using namespace ctb::tasks;
+   //   using std::launch;
+   //   using std::unexpected;
+   //   
+   //   try
+   //   {
+   //      auto token = m_stop_source.get_token();
+   //      checkStopToken(token);
 
-         // we can only do the login if we have a saved credential, no prompting from background thread.
-         CtCredentialManager mgr{};
-         auto cred = mgr.loadCredential(constants::CELLARTRACKER_DOT_COM).or_else([](auto e) -> CredentialResult { throw e; }).value(); 
+   //      // we can only do the login if we have a saved credential, no prompting from background thread.
+   //      CtCredentialManager mgr{};
+   //      auto cred = mgr.loadCredential(constants::CELLARTRACKER_DOT_COM).or_else([](auto e) -> CredentialResult { throw e; }).value(); 
 
-         checkStopToken(token);
-         auto result = std::async(launch::deferred, runCellarTrackerLogin, std::move(cred), token).get();
+   //      checkStopToken(token);
+   //      auto result = std::async(launch::deferred, runCellarTrackerLogin, std::move(cred), token).get();
 
-         // Need to update App object from main thread to avoid concurrency issues.
-         checkStopToken(token);
-         QueueEvent(new LoginEvent{ std::move(result) });
-      }
-      catch (...) {
-         auto err = packageError();
-         log::error("App::loginThread() exiting with error. {}", err.formattedMesage());
-      }
-   }
+   //      // Need to update App object from main thread to avoid concurrency issues.
+   //      checkStopToken(token);
+   //      QueueEvent(new LoginEvent{ std::move(result) });
+   //   }
+   //   catch (...) {
+   //      auto err = packageError();
+   //      log::error("App::loginThread() exiting with error. {}", err.formattedMesage());
+   //   }
+   //}
 
 }  // namespace ctb::app
 

@@ -13,58 +13,17 @@
 #include "ctb/utility_http.h"
 #include "ctb/task/PollingTask.h"
 
-#include <cpr/response.h>
+#include <cpr/api.h>
+#include <cpr/cprtypes.h>
 
+#include <optional>
 #include <stop_token>
 #include <string>
-#include <vector>
 
 
 namespace ctb::tasks
 {
    namespace fs = std::filesystem;
-
-   /// @brief Task type use for LoadFile, SaveFile, LabelDownload tasks while all return file bytes.
-   ///
-   using FetchFileTask = PollingTask<Buffer>;
-
-   /// @brief creates a task to load a binary file from disk into a buffer.
-   /// 
-   auto runLoadFileTask(fs::path file, std::stop_token token = {}) noexcept(false) -> FetchFileTask::ReturnType;
-
-   
-   /// @brief  result type and task type for HTTP Request task
-   using HttpRequestResult = cpr::Response;
-   using HttpRequestTask   = PollingTask<HttpRequestResult>;
-
-   /// @brief runs a task to execute an HTTP request
-   ///
-   auto runHttpGetTask(std::string url, std::stop_token token = {}) noexcept(false) -> HttpRequestTask::ReturnType;
-
-
-   /// @brief Runs a task to download a label image from CT website.
-   /// 
-   /// This task downloads the wine details page, parses it to find the img url, and 
-   /// then downloads the image and loads the image bytes into a buffer.
-   /// 
-   /// @return a buffer containing the requested image's bytes
-   /// @throws ctb::Error if file couldn't be downloaded.
-   /// 
-   auto runLabelDownloadTask(uint64_t wine_id, std::stop_token token) noexcept(false) -> FetchFileTask::ReturnType;
-
-
-   using LoginResult = cpr::Cookies;
-   using LoginTask   = PollingTask<LoginResult>;
-
-   /// @brief Runs a task to create a logon session for interacting with the CellarTracker website
-   /// 
-   /// Connects to the CT website using the supplied credential and retrieves user Cookies
-   /// for connecting to and interacting with CT website.
-   /// 
-   /// @return the requested cookies if successful, a ctb::Error if unsuccessful.
-   /// @throws ctb::Error if 
-   /// 
-   auto runCellarTrackerLogin(CredentialWrapper&& cred, std::stop_token token) noexcept(false) -> LoginTask::ReturnType;
 
 
    /// @brief helper function, throws exception if stop_token.stop_requested() == true
@@ -78,6 +37,71 @@ namespace ctb::tasks
    }
 
 
+   //using LoginResult = cpr::Cookies;
+   //using LoginTask   = PollingTask<LoginResult>;
 
+   /// @brief Runs a task to create a logon session for interacting with the CellarTracker website
+   /// 
+   /// Connects to the CT website using the supplied credential and retrieves user Cookies
+   /// for connecting to and interacting with CT website.
+   /// 
+   /// @return the requested cookies if successful, a ctb::Error if unsuccessful.
+   /// @throws ctb::Error if the operation fails
+   /// 
+   //auto runCellarTrackerLogin(CredentialWrapper&& cred, std::stop_token token) noexcept(false) -> LoginTask::ReturnType;
+
+   
+   /// @brief Task type use for LoadFile, SaveFile, LabelDownload tasks while all return file bytes.
+   ///
+   using FetchFileTask = PollingTask<Buffer>;
+
+   /// @brief creates a task to load a binary file from disk into a buffer.
+   /// @param file - path of the file to read
+   /// @param token - cancellation support
+   /// @return  the requested file bytes
+   /// @throws ctb::Error if the operation fails
+   /// 
+   auto runLoadFileTask(fs::path file, std::stop_token token = {}) noexcept(false) -> FetchFileTask::ReturnType;
+   
+   
+   /// @brief  result type and task type for HTTP Request task
+   ///
+   using HttpRequestResult = cpr::Response;
+   using HttpRequestTask   = PollingTask<HttpRequestResult>;
+
+   /// @brief Run a HTTP GET request for the specified URL
+   /// @param url - url for the request
+   /// @param token - cancellation support
+   /// @return the HTTP response returned by the request
+   /// @throws ctb::Error if the operation fails
+   /// 
+   //auto runHttpGetTask(std::string url, std::stop_token token = {}) noexcept(false) -> HttpRequestTask::ReturnType;
+
+   /// @brief Run a HTTP GET request for the specified URL
+   /// @param url - url for the request
+   /// @param token - cancellation support
+   /// @param args - variadic args to pass to the cpr request
+   /// @return the HTTP response returned by the request
+   /// @throws ctb::Error if the operation fails
+   /// 
+   template<typename... CprArgs>
+   auto runHttpGetTask(std::string url, std::stop_token token, CprArgs...args) noexcept(false) -> HttpRequestTask::ReturnType
+   {
+      checkStopToken(token);
+      return validateOrThrow(cpr::Get(cpr::Url{ url }, args...));
+   }
+
+
+   /// @brief Runs a task to download a label image from CT website.
+   /// 
+   /// This task downloads the wine details page, parses it to find the img url, and 
+   /// then downloads the image and loads the image bytes into a buffer.
+   /// 
+   /// @param wine_id - id of the wine to download image for
+   /// @param token - cancellation support
+   /// @return a buffer containing the requested image's bytes
+   /// @throws ctb::Error if file couldn't be downloaded.
+   /// 
+   auto runLabelDownloadTask(uint64_t wine_id, std::stop_token token = {}) noexcept(false) -> FetchFileTask::ReturnType;
 
 } // namespace ctb::tasks
