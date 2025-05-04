@@ -105,7 +105,7 @@ namespace ctb
             }
          }
 
-         // give the traits class a chance to provide any missing values
+         // give the traits class a chance to provide any missing values (calc values not in the CSV)
          Traits::onRecordParse(std::span(m_props));
       }
 
