@@ -207,7 +207,7 @@ namespace ctb
       }
    };
 
-   /// @brief type alias for 
+   /// @brief type alias for dataset based on std::vector
    /// 
    template <CtRecordTraits RecordTraits>
    using CtDataset = std::vector<CtRecordImpl<RecordTraits>>;

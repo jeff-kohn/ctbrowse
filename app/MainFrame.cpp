@@ -5,7 +5,6 @@
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
-
 #include "App.h"
 #include "MainFrame.h"
 #include "LabelImageCache.h"
@@ -18,7 +17,6 @@
 #include "views/DatasetOptionsPanel.h"
 #include "views/DetailsPanel.h"
 
-#include <cpr/cpr.h>
 #include <ctb/table_download.h>
 #include <ctb/utility.h>
 #include <external/HttpStatusCodes.h>
@@ -31,10 +29,8 @@
 #include <wx/image.h>
 #include <wx/menu.h>
 #include <wx/msgdlg.h>
-#include <wx/panel.h>
 #include <wx/persist/toplevel.h>
 #include <wx/progdlg.h>
-#include <wx/splitter.h>
 #include <wx/sizer.h>
 #include <wx/srchctrl.h>
 #include <wx/statusbr.h>
@@ -51,6 +47,19 @@ namespace ctb::app
 
    using namespace magic_enum;
 
+   namespace
+   {
+      auto eventIdToTableId(int event_id) -> TableId
+      {
+         switch (event_id)
+         {
+            case CMD_DATA_WINE_LIST:      return TableId::List;
+            case CMD_DATA_PENDING_WINE:   return TableId::Pending;
+            default:
+               throw Error(Error::Category::ArgumentError, "Table corresponding to ID {} not found.", event_id);
+         }
+      }
+   }
 
    MainFrame::MainFrame() : 
       m_event_source{ DatasetEventSource::create() },
@@ -98,8 +107,9 @@ namespace ctb::app
       Bind(wxEVT_MENU, &MainFrame::onMenuPreferences, this, CmdId::CMD_FILE_SETTINGS);
       Bind(wxEVT_MENU, &MainFrame::onMenuSyncData, this, CmdId::CMD_FILE_DOWNLOAD_DATA);
       Bind(wxEVT_MENU, &MainFrame::onMenuEditFind, this, wxID_FIND);
-      Bind(wxEVT_MENU, &MainFrame::onMenuWineList, this, CmdId::CMD_VIEW_WINE_LIST);
-      Bind(wxEVT_MENU, &MainFrame::onMenuViewResizeGrid, this, CmdId::CMD_VIEW_RESIZE_GRID);
+      Bind(wxEVT_MENU, &MainFrame::onMenuDataTable, this, CmdId::CMD_DATA_WINE_LIST);
+      Bind(wxEVT_MENU, &MainFrame::onMenuDataTable, this, CmdId::CMD_DATA_PENDING_WINE);
+      Bind(wxEVT_MENU, &MainFrame::onMenuViewResizeGrid, this, CmdId::CMD_VIEW_AUTOLAYOUT_COLS);
       Bind(wxEVT_MENU, &MainFrame::onQuit, this, wxID_EXIT);
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_CANCEL_BTN, &MainFrame::onSearchCancelBtn, this);
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onSearchBtn, this);
@@ -120,7 +130,6 @@ namespace ctb::app
       m_menu_bar = new wxMenuBar();
 
       // File menu
-      //
       auto* menu_file = new wxMenu();
 
       auto* menu_sync_data = new wxMenuItem{
@@ -149,7 +158,6 @@ namespace ctb::app
    
 
       // Edit Menu
-      //
       auto* menu_edit = new wxMenu();
       auto* menu_edit_find = new wxMenuItem(menu_edit, wxID_FIND);
       menu_edit_find->SetBitmap(wxArtProvider::GetBitmapBundle(wxART_FIND, wxART_MENU));
@@ -157,25 +165,69 @@ namespace ctb::app
       m_menu_bar->Append(menu_edit, wxGetStockLabel(wxID_EDIT));
 
 
+      // Data Menu
+      auto* menu_data = new wxMenu();
+      menu_data->Append(new wxMenuItem{
+         menu_data, 
+         CmdId::CMD_DATA_WINE_LIST, 
+         constants::CMD_DATA_WINE_LIST_LBL, 
+         constants::CMD_DATA_WINE_LIST_TIP,
+         wxITEM_NORMAL
+      });
+      menu_data->Append(new wxMenuItem{
+         menu_data, 
+         CmdId::CMD_DATA_PENDING_WINE, 
+         constants::CMD_DATA_PENDING_WINE_LBL, 
+         constants::CMD_DATA_PENDING_WINE_TIP,
+         wxITEM_NORMAL
+         });
+      m_menu_bar->Append(menu_data, constants::LBL_MENU_DATA);
+
+
+      // Wine Menu
+      auto* menu_wine = new wxMenu();
+      menu_wine->Append(new wxMenuItem{
+         menu_data, 
+         CmdId::CMD_WINE_ONLINE_DETAILS, 
+         constants::CMD_WINE_ONLINE_DETAILS_LBL, 
+         constants::CMD_WINE_ONLINE_DETAILS_TIP,
+         wxITEM_NORMAL
+      });
+      menu_wine->Append(new wxMenuItem{
+         menu_data, 
+         CmdId::CMD_WINE_ONLINE_VINTAGES, 
+         constants::CMD_WINE_ONLINE_VINTAGES_LBL, 
+         constants::CMD_WINE_ONLINE_VINTAGES_TIP,
+         wxITEM_NORMAL
+         });
+      menu_wine->Append(new wxMenuItem{
+         menu_data, 
+         CmdId::CMD_WINE_ONLINE_PRODUCER, 
+         constants::CMD_WINE_ONLINE_PRODUCER_LBL, 
+         constants::CMD_WINE_ONLINE_PRODUCER_TIP,
+         wxITEM_NORMAL
+      });
+      menu_wine->AppendSeparator();
+      menu_wine->Append(new wxMenuItem{
+         menu_data, 
+         CmdId::CMD_WINE_ONLINE_ACCEPT_WINE, 
+         constants::CMD_WINE_ONLINE_ACCEPT_WINE_LBL, 
+         constants::CMD_WINE_ONLINE_ACCEPT_WINE_TIP,
+         wxITEM_NORMAL
+      });
+      m_menu_bar->Append(menu_wine, constants::LBL_MENU_WINE);
+
       // View Menu
-      //
       auto* menu_view = new wxMenu();
       menu_view->Append(new wxMenuItem{
          menu_view, 
-         CmdId::CMD_VIEW_WINE_LIST, 
-         constants::CMD_VIEWS_WINE_LIST_LBL, 
-         constants::CMD_VIEWS_WINE_LIST_TIP,
+         CmdId::CMD_VIEW_AUTOLAYOUT_COLS, 
+         constants::CMD_VIEW_AUTOLAYOUT_COLS_LBL, 
+         constants::CMD_VIEW_AUTOLAYOUT_COLS_TIP,
          wxITEM_NORMAL
-      });
-      menu_view->AppendSeparator();
-      menu_view->Append(new wxMenuItem{
-         menu_view, 
-         CmdId::CMD_VIEW_RESIZE_GRID, 
-         constants::CMD_VIEWS_RESIZE_COLS_LBL, 
-         constants::CMD_VIEWS_RESIZE_COLS_TIP,
-         wxITEM_NORMAL
-      });
+         });
       m_menu_bar->Append(menu_view, constants::LBL_MENU_VIEW);
+
 
       SetMenuBar(m_menu_bar);
 
@@ -339,7 +391,7 @@ namespace ctb::app
    }
 
 
-   void MainFrame::onMenuWineList([[maybe_unused]] wxCommandEvent& event)
+   void MainFrame::onMenuDataTable([[maybe_unused]] wxCommandEvent& event)
    {
       wxBusyCursor busy{};
       wxWindowUpdateLocker lock{ this };
@@ -350,9 +402,11 @@ namespace ctb::app
             m_view = DatasetMultiView::create(this, m_event_source, m_label_cache);
          }
 
+
          // load table and connect it to the event source
          DatasetLoader loader{ wxGetApp().userDataFolder() };
-         auto tbl = loader.getDataset(TableId::List);
+         auto table_id = eventIdToTableId(event.GetId());;
+         auto tbl = loader.getDataset(table_id);
 
          // Apply in-stock filter by default?
          if (wxGetApp().getConfig(constants::CONFIG_PATH_PREFERENCES)->ReadBool(constants::CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY, constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT))

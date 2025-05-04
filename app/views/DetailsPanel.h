@@ -33,6 +33,11 @@ namespace ctb::app
       /// 
       [[nodiscard]] static DetailsPanel* create(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache);
 
+      /// @brief Indicates whether the details for a selected wine are currently displayed.
+      /// @return true if a wine is displayed in details, false otherwise.
+      /// 
+      auto wineDetailsActive() const -> bool;
+
       // no copy/move/assign, this class is created on the heap.
       DetailsPanel(const DetailsPanel&) = delete;
       DetailsPanel(DetailsPanel&&) = delete;

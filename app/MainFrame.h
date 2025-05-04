@@ -37,8 +37,13 @@ namespace ctb::app
    {
       CMD_FILE_DOWNLOAD_DATA = wxID_HIGHEST,
       CMD_FILE_SETTINGS,
-      CMD_VIEW_WINE_LIST,
-      CMD_VIEW_RESIZE_GRID
+      CMD_DATA_WINE_LIST,
+      CMD_DATA_PENDING_WINE,
+      CMD_WINE_ONLINE_DETAILS,
+      CMD_WINE_ONLINE_VINTAGES,
+      CMD_WINE_ONLINE_PRODUCER,
+      CMD_WINE_ONLINE_ACCEPT_WINE,
+      CMD_VIEW_AUTOLAYOUT_COLS
    };
 
    /// @brief class for the main window of the application
@@ -101,7 +106,7 @@ namespace ctb::app
       void onMenuEditFind(wxCommandEvent& event);
       void onMenuPreferences(wxCommandEvent&);
       void onMenuSyncData(wxCommandEvent&);
-      void onMenuWineList(wxCommandEvent&);
+      void onMenuDataTable(wxCommandEvent&);
       void onSearchBtn(wxCommandEvent& event);
       void onMenuViewResizeGrid(wxCommandEvent&);
       void onSearchCancelBtn(wxCommandEvent& event);

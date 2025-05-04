@@ -80,6 +80,12 @@ namespace ctb::app
    }
 
 
+   auto DetailsPanel::wineDetailsActive() const -> bool
+   {
+      return GetSizer()->AreAnyItemsShown();
+   }
+
+
    void DetailsPanel::initControls()
    {
       wxWindowUpdateLocker freeze_win(this);
@@ -272,7 +278,6 @@ namespace ctb::app
             Layout(); // required since the images vary in size
             SendSizeEvent();
             Update();
-            //m_label_image->Update();
          }
       }
       catch (...)

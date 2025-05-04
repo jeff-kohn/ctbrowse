@@ -32,6 +32,12 @@ namespace ctb::app
       /// 
       [[nodiscard]] static auto create(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache) -> DatasetMultiView*;
 
+
+      /// @brief Indicates whether the details for a selected wine are currently displayed.
+      /// @return true if a wine is displayed in details, false otherwise.
+      /// 
+      auto wineDetailsActive() const -> bool;
+
       // no copy/move/assign, this class is created on the heap.
       DatasetMultiView(const DatasetMultiView&) = delete;
       DatasetMultiView(DatasetMultiView&&) = delete;

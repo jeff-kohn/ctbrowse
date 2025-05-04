@@ -21,7 +21,7 @@ namespace ctb::app
       }
    }
 
-
+   
    DatasetMultiView::DatasetMultiView(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache) : wxSplitterWindow{ parent }
    {
       constexpr auto LEFT_SPLITTER_GRAVITY = 0.25;
@@ -48,6 +48,12 @@ namespace ctb::app
       // For some reason the CalLAfter() is required, otherwise this call messes up the
       // next splitter layout. No idea why but this works.
       CallAfter([this] { m_right_splitter->SetSashGravity(RIGHT_SPLITTER_GRAVITY); });
+   }
+
+
+   auto DatasetMultiView::wineDetailsActive() const -> bool
+   {
+      return m_details_panel ? m_details_panel->wineDetailsActive() : false;
    }
 
 } // namespace ctb::app
