@@ -7,7 +7,7 @@
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 #pragma once
-#include "ctb/TableProperty.h"
+#include "ctb/table/TableProperty.h"
 
 namespace ctb
 {

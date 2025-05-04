@@ -1,12 +1,12 @@
 #pragma once
-#include "App.h"
+//#include "App.h"
 #include "model/DatasetBase.h"
 #include "model/DisplayColumn.h"
 #include <ctb/CtRecordImpl.h>
 #include <ctb/PropFilter.h>
 #include <ctb/PropStringFilterMgr.h>
 #include <ctb/SubStringFilter.h>
-#include <ctb/TableSorter.h>
+#include <ctb/table/TableSorter.h>
 
 #include <vector>
 

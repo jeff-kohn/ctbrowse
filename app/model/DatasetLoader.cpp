@@ -10,7 +10,7 @@
 #include "model/CtDataModel.h"
 
 #include <ctb/utility.h>
-#include <ctb/table_data.h>
+#include <ctb/table/table_data.h>
 #include <ctb/WineListTraits.h>
 #include <ctb/PendingWineTraits.h>
 

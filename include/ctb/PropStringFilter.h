@@ -8,8 +8,8 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/table_data.h"
-#include "ctb/TableProperty.h"
+#include "ctb/table/table_data.h"
+#include "ctb/table/TableProperty.h"
 #include "ctb/utility.h"
 
 #include <string>

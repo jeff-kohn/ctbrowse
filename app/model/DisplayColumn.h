@@ -7,13 +7,10 @@
  *******************************************************************/
 #pragma once
 
-#include "App.h"
 
-#include <ctb/TableProperty.h>
-#include <magic_enum/magic_enum.hpp>
-#include <wx/defs.h>
+#include <ctb/table/TableProperty.h>
 
-#include <variant>
+#include <vector>
 
 namespace ctb::app
 {
@@ -24,11 +21,14 @@ namespace ctb::app
    {
       /// @brief enum to specify the alignment for column headers and cell text
       ///
+      /// these values align with wxWidgets' wxALIGN_xxxx values, but we don't want the dependency
+      /// in the lib so just use the value directly.
+      /// 
       enum Align : uint16_t
       {
-         Left = wxAlignment::wxALIGN_LEFT,
-         Right = wxAlignment::wxALIGN_RIGHT,
-         Center = wxAlignment::wxALIGN_CENTER
+         Left     = 0x0000,
+         Right    = 0x0200,
+         Center   = 0x0900
       };
 
       /// @brief enum to specify the format the value will be displayed in
@@ -41,7 +41,7 @@ namespace ctb::app
          Currency
       };
 
-      /// @brief The zero-based index into the record type' PropId enum of the property this object represents 
+      /// @brief The zero-based index into the record type's PropId enum of the property this object represents 
       ///
       /// We have to use a int instead of the enum because this class needs to be used through a type-erased 
       /// interface and can't refer to types specific to a CtRecordImpl<> instantiation.

@@ -17,7 +17,7 @@
 #include "views/DatasetOptionsPanel.h"
 #include "views/DetailsPanel.h"
 
-#include <ctb/table_download.h>
+#include <ctb/table/table_download.h>
 #include <ctb/utility.h>
 #include <external/HttpStatusCodes.h>
 
