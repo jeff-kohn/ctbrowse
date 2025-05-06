@@ -6,9 +6,6 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
-//#include <ctb/table/table_data.h>
-//#include <ctb/utility.h>
-
 #include "ctb/table/PendingWineTraits.h"
 #include "ctb/table/WineListTraits.h"
 

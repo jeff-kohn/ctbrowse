@@ -10,11 +10,9 @@
 
 #include "ctb/ctb.h"
 #include "ctb/table/CtProperty.h"
-//#include "ctb/utility.h"
 
 #include <external/csv.hpp>
 #include <magic_enum/magic_enum.hpp>
-//#include <magic_enum/magic_enum_utility.hpp>
 
 #include <array>
 #include <cassert>
@@ -64,7 +62,7 @@ namespace ctb
    public:
       using Traits        = RecordTraits;
       using PropId        = RecordTraits::PropId;
-      using TableProperty = CtProperty;
+      using TableProperty = CtProperty; // this needs temlatized
       using Properties    = std::array<TableProperty, magic_enum::enum_count<PropId>()>;
       using RowType       = csv::CSVRow;
 

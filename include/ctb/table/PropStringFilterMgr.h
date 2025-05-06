@@ -11,7 +11,6 @@
 #include "ctb/table/PropStringFilter.h"
 
 #include <map>
-//#include <set>
 #include <string>
 #include <string_view>
 

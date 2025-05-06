@@ -69,8 +69,7 @@ namespace ctb::app
    bool DatasetEventSource::signal(DatasetEvent::Id event_id, std::optional<int> row_idx) noexcept
    {
       auto event_name = magic_enum::enum_name(event_id);
-      auto row = row_idx.value_or(-1);
-      SPDLOG_DEBUG("DatasetEventSource::signal({},{}) called", event_name, row);
+      SPDLOG_DEBUG("DatasetEventSource::signal({},{}) called", event_name, row_idx.value_or(-1));
 
       bool retval{ true };
       if (m_data)
@@ -86,7 +85,7 @@ namespace ctb::app
                SPDLOG_DEBUG(
                   "DatasetEventSource::signal({}, {}) caught exception from observer. {}", 
                   event_name, 
-                  row,
+                  row_idx.value_or(-1),
                   packageError().formattedMesage()
                );
             }

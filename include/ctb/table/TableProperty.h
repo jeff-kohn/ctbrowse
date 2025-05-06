@@ -20,7 +20,7 @@
 namespace ctb
 {
 
-   /// @brief class to contain a property value from a table entry.
+   /// @brief class to contain a property value from a table record.
    ///
    /// this class is a lightweight wrapper around std::variant that is easier use and provides a built-in
    /// concept of 'null' so that we don't have to handle a mix of normal and std::optional<> types.
@@ -28,7 +28,7 @@ namespace ctb
    /// We use std::monostate to indicate null, but callers don't need to bother with that, just use
    /// setNull()/isNull() before trying to get a non-string value out of this object. This class doesn't
    /// differentiate between Null and "" for string properties, because there's no way to distinguish them
-   /// as distinct values in CSV. Default-constructed TableProperties will be null until assigned a non-null value.
+   /// as distinct values in CSV. 
    /// 
    /// Note that while it's possible to put std::optional<> types into this class, there's not much 
    /// point since it has built-in support for null/empty in the variant.
