@@ -7,7 +7,7 @@
  *******************************************************************/
 #pragma once
 
-#include "ctb/tables/table_data.h"
+#include "ctb/table_data.h"
 #include "ctb/model/DatasetBase.h"
 
 #include <filesystem>

@@ -13,7 +13,7 @@
 #include <vector>
 
 
-namespace ctb
+namespace ctb::detail
 {
 
    /// @brief implements a substring-matching filter for a table entry/record
@@ -57,4 +57,4 @@ namespace ctb
    };
 
 
-} // namespace ctb
+} // namespace ctb::detail

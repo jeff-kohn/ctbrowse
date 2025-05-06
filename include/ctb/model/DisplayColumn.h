@@ -8,12 +8,13 @@
 #pragma once
 
 
-#include <ctb/tables/TableProperty.h>
+#include <ctb/tables/detail/TableProperty.h>
 
 #include <vector>
 
 namespace ctb::app
 {
+   using detail::TableProperty;
 
    /// @brief struct containing everything needed to know about how to display a table column
    ///

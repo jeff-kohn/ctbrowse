@@ -14,7 +14,7 @@
 #include <vector>
 
 
-namespace ctb
+namespace ctb::detail
 {
 
    /// @brief template class that implements filter logic allowing to match a value to at least one specified property.
@@ -88,4 +88,4 @@ namespace ctb
       PropFilter& operator=(PropFilter&&) = default;
    };
 
-} // namespace ctb
+} // namespace ctb::detail

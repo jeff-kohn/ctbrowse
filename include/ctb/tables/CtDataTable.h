@@ -8,15 +8,17 @@
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 #pragma once
-#include "ctb/tables/TableProperty.h"
-#include "ctb/tables/TableRecord.h"
+#include "ctb/tables/detail/TableProperty.h"
+#include "ctb/tables/detail/TableRecord.h"
+
+#include <vector>
 
 namespace ctb
 {
 
    /// @brief Type alias for the property type used in CellarTracker data tables.
    ///
-   using CtProperty = TableProperty<uint16_t, uint64_t, double, std::string>;
+   using CtProperty = detail::TableProperty<uint16_t, uint64_t, double, std::string>;
 
    /// @brief useful if you need to return a const ref to a null property value
    ///
@@ -26,7 +28,7 @@ namespace ctb
    /// @brief Type alias for a record in a CellarTracker data table
    /// 
    template <RecordTraitsType RecordTraits>
-   using CtTableRecord = TableRecord<RecordTraits, CtProperty>;
+   using CtTableRecord = detail::TableRecord<RecordTraits, CtProperty>;
 
 
    /// @brief Type alias for a data table of CellarTracker records

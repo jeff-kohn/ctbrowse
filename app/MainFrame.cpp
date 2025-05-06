@@ -16,7 +16,7 @@
 #include "views/DetailsPanel.h"
 
 #include <ctb/utility.h>
-#include <ctb/tables/table_download.h>
+#include <ctb/table_download.h>
 #include <ctb/model/DatasetEventSource.h>
 #include <ctb/model/DatasetLoader.h>
 

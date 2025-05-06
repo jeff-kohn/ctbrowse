@@ -18,6 +18,11 @@
 
 namespace ctb
 {
+   using detail::FieldSchema;
+   using detail::PropType;
+   using detail::TableProperty;
+   using detail::TableRecord;
+
 
    /// @brief Traits class for a table record from the 'List' CellarTracker CSV table.
    /// 

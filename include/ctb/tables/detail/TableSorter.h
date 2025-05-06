@@ -13,7 +13,7 @@
 #include <vector>
 
 
-namespace ctb
+namespace ctb::detail
 {
 
    /// @brief defines a functor that can be used to sort a container/range of table entries
@@ -47,4 +47,4 @@ namespace ctb
    };
 
 
-}  // ctb
+}  // namespace ctb::detail

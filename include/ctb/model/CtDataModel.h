@@ -3,16 +3,26 @@
 #include "ctb/model/DatasetBase.h"
 #include "ctb/model/DisplayColumn.h"
 
-#include "ctb/tables/TableRecord.h"
-#include "ctb/tables/PropFilter.h"
-#include "ctb/tables/PropStringFilterMgr.h"
-#include "ctb/tables/SubStringFilter.h"
-#include "ctb/tables/TableSorter.h"
+#include "ctb/tables/detail/TableRecord.h"
+#include "ctb/tables/detail/PropFilter.h"
+#include "ctb/tables/detail/PropStringFilterMgr.h"
+#include "ctb/tables/detail/SubStringFilter.h"
+#include "ctb/tables/detail/TableSorter.h"
 
 #include <vector>
 
 namespace ctb::app
 {
+   using detail::FieldSchema;
+   using detail::PropFilter;
+   using detail::PropStringFilter;
+   using detail::PropStringFilterMgr;
+   using detail::PropType;
+   using detail::SubStringFilter;
+   using detail::TableProperty;
+   using detail::TableRecord;
+   using detail::TableSorter;
+
    /// @brief This is the data model class for displaying and interacting with CellarTracker datasets.
    /// 
    /// This class contains a dataset representing one of the CT user tables (Wine List, Pending Wines, etc)

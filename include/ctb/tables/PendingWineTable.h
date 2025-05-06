@@ -9,8 +9,8 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/tables/TableRecord.h"
 #include "ctb/tables/CtDataTable.h"
+
 #include <frozen/map.h>
 
 #include <utility>
@@ -19,6 +19,10 @@
 
 namespace ctb
 {
+   using detail::FieldSchema;
+   using detail::PropType;
+   using detail::TableProperty;
+   using detail::TableRecord;
 
    /// @brief Traits class for a table record from the 'Pending Wine' CellarTracker CSV table.
    /// 

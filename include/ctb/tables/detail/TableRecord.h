@@ -19,7 +19,7 @@
 #include <vector>
 
 
-namespace ctb
+namespace ctb::detail
 {
    /// @brief enum to specify the data formats a property value can contain.
    /// 
@@ -204,4 +204,4 @@ namespace ctb
    };
 
 
-} // namespace ctb
+} // namespace ctb::detail

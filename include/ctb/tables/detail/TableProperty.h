@@ -17,7 +17,7 @@
 
 
 
-namespace ctb
+namespace ctb::detail
 {
 
    /// @brief class to contain a property value from a table record.
@@ -206,4 +206,4 @@ namespace ctb
    };
 
 
-}  // namespace ctb
+}  // namespace ctb::detail

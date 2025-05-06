@@ -8,18 +8,16 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/tables/PropStringFilter.h"
+#include "ctb/tables/detail/PropStringFilter.h"
 
 #include <map>
 #include <string>
 #include <string_view>
 
 
-namespace ctb
+namespace ctb::detail
 {
    
-
-
    /// @brief class to manage property filters for a data table.
    /// 
    /// this class currently only works with strings. Numeric table properties
@@ -119,4 +117,4 @@ namespace ctb
       std::map<PropId, StringFilter> m_filters{};
    };
 
-} // namespace ctb
+} // namespace ctb::detail

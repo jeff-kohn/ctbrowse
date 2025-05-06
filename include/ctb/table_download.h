@@ -12,7 +12,7 @@
 #include "ctb/ctb.h"
 
 #include "ctb/CredentialWrapper.h"
-#include "ctb/tables/table_data.h"
+#include "ctb/table_data.h"
 
 namespace ctb
 {

@@ -10,7 +10,7 @@
 #include "ctb/ctb.h"
 
 
-namespace ctb
+namespace ctb::detail
 {
 
    /// @brief class that can be used to filter table entry records based
@@ -48,4 +48,4 @@ namespace ctb
    };
 
 
-} // namespace ctb
+} // namespace ctb::detail
