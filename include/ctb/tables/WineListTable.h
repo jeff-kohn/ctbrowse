@@ -1,16 +1,15 @@
-/*******************************************************************
-* @file  WineListTraits.h
+/**************************************************************************************************
+* @file  WineListTable.h
 *
-* @brief defines the traits template class WineListTraits which is 
-*        used in conjunction with CtRecordImpl to implement the
-*        'List' CellarTracker table.
+* @brief defines the WineListTable class, which is an instantiation of CtDataTable<> 
+*        implemented using the traits template WineListTraits 
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
-*******************************************************************/
+**************************************************************************************************/
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/table/CtRecordImpl.h"
+#include "ctb/tables/CtDataTable.h"
 
 #include <frozen/map.h>
 
@@ -19,10 +18,8 @@
 
 namespace ctb
 {
-   /// @brief class representing a table record from the 'List' CellarTracker CSV table.
-   ///
-   /// since our CRTP base doesn't implement any interfaces and is just providing implementation
-   /// we can use protected inheritance
+
+   /// @brief Traits class for a table record from the 'List' CellarTracker CSV table.
    /// 
    class WineListTraits
    {
@@ -126,7 +123,7 @@ namespace ctb
          return true;
       }
 
-      /// @brief this gets called by CtRecordImpl to set any missing property values
+      /// @brief this gets called by TableRecord to set any missing property values
       /// 
       /// Properties from the CSV file are already set, this impl just provides
       /// any calculated property values or does fixup for any parsed values that need it.
@@ -165,7 +162,9 @@ namespace ctb
       }
    };
 
-   using WineListRecord    = CtRecordImpl<WineListTraits>;
-   using WineListDataset   = CtDataset<WineListTraits>;
+
+   /// @brief Type alias for a CtDataTable representing the WineList table.
+   ///
+   using WineListTable  = CtDataTable<WineListTraits>;
 
 } // namespace ctb

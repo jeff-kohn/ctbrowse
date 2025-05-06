@@ -1,17 +1,16 @@
-/*******************************************************************
-* @file  PendingWineTraits.h
+/**************************************************************************************************
+* @file  PendingWineTable.h
 *
-* @brief defines the traits template class PendingWineTraits which is 
-*        used in conjuction with CtRecordImpl to implement the
-*        'List' CellarTracker table.
+* @brief defines the PendingWineTable class, which is an instantiation
+*        of CtDataTable<> implemented using the traits template PendingWineTraits 
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
-*******************************************************************/
+**************************************************************************************************/
 #pragma once
 
 #include "ctb/ctb.h"
-#include "CtRecordImpl.h"
-
+#include "ctb/tables/TableRecord.h"
+#include "ctb/tables/CtDataTable.h"
 #include <frozen/map.h>
 
 #include <utility>
@@ -20,10 +19,8 @@
 
 namespace ctb
 {
-   /// @brief class representing a table record from the 'List' CellarTracker CSV table.
-   ///
-   /// since our CRTP base doesn't implement any interfaces and is just providing implementation
-   /// we can use protected inheritance
+
+   /// @brief Traits class for a table record from the 'Pending Wine' CellarTracker CSV table.
    /// 
    class PendingWineTraits
    {
@@ -124,7 +121,7 @@ namespace ctb
          return false;
       }
 
-      /// @brief this gets called by CtRecordImpl to set any missing property values
+      /// @brief this gets called by TableRecord to set any missing property values
       /// 
       /// Properties from the CSV file are already set, this impl just provides
       /// any calculated property values or does fixup for any parsed values that need it.
@@ -143,7 +140,9 @@ namespace ctb
       }
    };
 
-   using PendingWineRecord    = CtRecordImpl<PendingWineTraits>;
-   using PendingWineDataset   = CtDataset<PendingWineTraits>;
+
+   /// @brief Type alias for a CtDataTable representing the PendingWines table.
+   ///
+   using PendingWineTable  = CtDataTable<PendingWineTraits>;
 
 } // namespace ctb

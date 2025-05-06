@@ -8,7 +8,7 @@
 #pragma once
 
 #include "App.h"
-#include <ctb/table/table_data.h>
+#include <ctb/tables/table_data.h>
 
 #include <wx/checkbox.h>
 #include <wx/checklst.h>

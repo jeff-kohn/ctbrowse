@@ -8,7 +8,7 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/table/PropStringFilter.h"
+#include "ctb/tables/PropStringFilter.h"
 
 #include <map>
 #include <string>
@@ -26,7 +26,7 @@ namespace ctb
    /// will be converted to string for filtering purposes. Not ideal for 
    /// performance, but most of our filters are text base. Will revisit this later.
    /// 
-   template <CtRecord RecordTypeT>
+   template <TableRecordType RecordTypeT>
    class PropStringFilterMgr
    {
    public:

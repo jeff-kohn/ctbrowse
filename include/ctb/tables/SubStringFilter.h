@@ -18,7 +18,7 @@ namespace ctb
 
    /// @brief implements a substring-matching filter for a table entry/record
    ///
-   template <CtRecord RecordTypeT>
+   template <TableRecordType RecordTypeT>
    struct SubStringFilter
    {
    public:

@@ -16,7 +16,7 @@ namespace ctb
    /// @brief class that can be used to filter table entry records based
    ///        on one or more match values for a given property.
    /// 
-   template <CtRecord RecordTypeT>
+   template <TableRecordType RecordTypeT>
    struct PropStringFilter
    {
       // some types we borrow from our template parameters

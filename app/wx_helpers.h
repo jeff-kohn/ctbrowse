@@ -28,7 +28,7 @@ namespace ctb::app
 
    /// @brief convert a range of strings/string_views to a wxArrayString
    ///
-   template <rng::input_range Rng> requires StringViewCompatible<rng::range_value_t<Rng> >
+   template <rng::input_range Rng> requires StringViewCompatibleType<rng::range_value_t<Rng> >
    wxArrayString wxToArrayString(Rng&& strings)
    {
       Overloaded overloaded{

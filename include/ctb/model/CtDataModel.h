@@ -3,11 +3,11 @@
 #include "ctb/model/DatasetBase.h"
 #include "ctb/model/DisplayColumn.h"
 
-#include "ctb/table/CtRecordImpl.h"
-#include "ctb/table/PropFilter.h"
-#include "ctb/table/PropStringFilterMgr.h"
-#include "ctb/table/SubStringFilter.h"
-#include "ctb/table/TableSorter.h"
+#include "ctb/tables/TableRecord.h"
+#include "ctb/tables/PropFilter.h"
+#include "ctb/tables/PropStringFilterMgr.h"
+#include "ctb/tables/SubStringFilter.h"
+#include "ctb/tables/TableSorter.h"
 
 #include <vector>
 

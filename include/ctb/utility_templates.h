@@ -22,7 +22,7 @@ namespace ctb
    /// @brief  user-friendly version of from_chars that works with string_view and string
    /// @return an optional containing the requested value if successful, or an empty optional otherwise.
    /// 
-   template<typename T, StringViewCompatible S>
+   template<typename T, StringViewCompatibleType S>
    std::optional<T> from_str(S str)
    {
       T val{};

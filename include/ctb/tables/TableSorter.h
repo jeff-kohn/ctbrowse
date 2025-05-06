@@ -21,7 +21,7 @@ namespace ctb
    /// note there's no ascending/descending option, because that decision should be made
    /// by the range passed to the sort algorithm, not here.
    /// 
-   template<CtRecord RecordT>
+   template<TableRecordType RecordT>
    struct TableSorter
    {
       using Record = RecordT;

@@ -7,7 +7,7 @@
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 #include "ctb/constants.h"
-#include "ctb/table/table_download.h"
+#include "ctb/tables/table_download.h"
 #include "ctb/utility.h"
 #include "external/HttpStatusCodes.h"
 #include "ctb/CredentialManager.h"

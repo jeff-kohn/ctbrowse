@@ -7,7 +7,7 @@
  *******************************************************************/
 #pragma once
 
-#include "ctb/table/CtProperty.h"
+#include "ctb/tables/CtDataTable.h"
 
 #include "ctb/model/CtStringFilter.h"
 #include "ctb/model/DisplayColumn.h"

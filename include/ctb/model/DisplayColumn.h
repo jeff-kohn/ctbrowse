@@ -8,7 +8,7 @@
 #pragma once
 
 
-#include <ctb/table/TableProperty.h>
+#include <ctb/tables/TableProperty.h>
 
 #include <vector>
 
@@ -44,7 +44,7 @@ namespace ctb::app
       /// @brief The zero-based index into the record type's PropId enum of the property this object represents 
       ///
       /// We have to use a int instead of the enum because this class needs to be used through a type-erased 
-      /// interface and can't refer to types specific to a CtRecordImpl<> instantiation.
+      /// interface and can't refer to types specific to a TableRecord<> instantiation.
       /// 
       int prop_index{};                  
 

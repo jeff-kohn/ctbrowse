@@ -66,7 +66,7 @@ namespace ctb
       /// 
       /// returns an optional in case this property doesn't contain a value or it can't be converted to T.
       /// 
-      template<Arithmetic T> 
+      template<ArithmeticType T> 
       constexpr std::optional<T> as() const
       {    
          // try to convert

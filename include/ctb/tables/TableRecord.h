@@ -1,7 +1,7 @@
 /*******************************************************************
-* @file  CtRecordImpl.h
+* @file  TableRecord.h
 *
-* @brief defines the template class CtRecordImpl as well as some
+* @brief defines the template class TableRecord as well as some
 *        small related types.
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
@@ -9,7 +9,6 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/table/CtProperty.h"
 
 #include <external/csv.hpp>
 #include <magic_enum/magic_enum.hpp>
@@ -50,19 +49,19 @@ namespace ctb
    /// @brief base class providing common functionality for our table record objects
    /// 
    /// this class provides support for parsing CSV records into C++ objects. The derived class
-   /// must meet the requirements of the CtRecordTraits concept.
+   /// must meet the requirements of the RecordTraitsType concept.
    /// 
    /// it may seem a little odd to use a template param and deducing this for CRTP, but the 
    /// template param gives us access to types from the derived class from outside function
    /// bodies (e.g. member variables).
    /// 
-   template<CtRecordTraits RecordTraits>
-   class CtRecordImpl
+   template<RecordTraitsType RecordTraitsT, typename TablePropertyT>
+   class TableRecord
    {
    public:
-      using Traits        = RecordTraits;
-      using PropId        = RecordTraits::PropId;
-      using TableProperty = CtProperty; // this needs temlatized
+      using Traits        = RecordTraitsT;
+      using PropId        = Traits::PropId;
+      using TableProperty = TablePropertyT; 
       using Properties    = std::array<TableProperty, magic_enum::enum_count<PropId>()>;
       using RowType       = csv::CSVRow;
 
@@ -204,20 +203,5 @@ namespace ctb
       }
    };
 
-   /// @brief type alias for dataset based on std::vector
-   /// 
-   template <CtRecordTraits RecordTraits>
-   using CtDataset = std::vector<CtRecordImpl<RecordTraits>>;
-
-
-   /// @brief concept for a CtDataSet<TableTraits>
-   //
-   template <typename T>
-   concept CellarTrackerDataset = requires (T data, typename T::PropId prop, typename T::Record rec, typename T::TableProperty val, std::string str)
-   {
-      rec = data[0];
-      val = rec[0];
-      str = val.asString();
-   };
 
 } // namespace ctb

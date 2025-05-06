@@ -6,8 +6,8 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
-#include "ctb/table/PendingWineTraits.h"
-#include "ctb/table/WineListTraits.h"
+#include "ctb/tables/PendingWineTable.h"
+#include "ctb/tables/WineListTable.h"
 
 #include "ctb/model/DatasetLoader.h"
 #include "ctb/model/CtDataModel.h"
@@ -25,12 +25,12 @@ namespace ctb::app
       Overloaded TableFactory{
          [this](enum_constant<TableId::List>)  -> DatasetPtr
             { 
-               auto table_data = loadTableData<WineListDataset>(m_data_folder, TableId::List);
+               auto table_data = loadTableData<WineListTable>(m_data_folder, TableId::List);
                if (!table_data)
                {
                   throw table_data.error();
                }
-               return CtDataModel<WineListDataset>::create(std::move(table_data.value()));
+               return CtDataModel<WineListTable>::create(std::move(table_data.value()));
             },
 
 /*         [this](enum_constant<TableId::List>)  -> DatasetPtr
