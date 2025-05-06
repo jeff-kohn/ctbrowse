@@ -6,13 +6,14 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
-#include "model/DatasetLoader.h"
-#include "model/CtDataModel.h"
+//#include <ctb/table/table_data.h>
+//#include <ctb/utility.h>
 
-#include <ctb/utility.h>
-#include <ctb/table/table_data.h>
-#include <ctb/WineListTraits.h>
-#include <ctb/PendingWineTraits.h>
+#include "ctb/table/PendingWineTraits.h"
+#include "ctb/table/WineListTraits.h"
+
+#include "ctb/model/DatasetLoader.h"
+#include "ctb/model/CtDataModel.h"
 
 #include <magic_enum/magic_enum.hpp>
 #include <magic_enum/magic_enum_switch.hpp>

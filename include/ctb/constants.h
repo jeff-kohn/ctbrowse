@@ -23,6 +23,25 @@ namespace ctb::constants
 
    inline constexpr const char* CELLARTRACKER_LOGON_CAPTION = "Enter login information for CellarTracker.com:";
    inline constexpr const char* CELLARTRACKER_LOGON_TITLE   = "CellarTracker Login";
+   inline constexpr const char* CT_PASSWORD                 = "CT_PASSWORD";
+   inline constexpr const char* CURRENT_DIRECTORY           = ".";
+   inline constexpr const char* DATA_FILE_EXTENSION         = "csv";
+   inline constexpr int         MAX_ENV_VAR_LENGTH          = 128;
+
+   // column labels
+   inline constexpr const char* DISPLAY_COL_CT_SCORE        = "CT Score";
+   inline constexpr const char* DISPLAY_COL_LOCALE          = "Region and Appellation";
+   inline constexpr const char* DISPLAY_COL_MY_SCORE        = "My Score";
+   inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
+   inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
+
+   // filter names
+   inline constexpr const char* FILTER_APPELATION                 = "Appellation";
+   inline constexpr const char* FILTER_COUNTRY                    = "Country";
+   inline constexpr const char* FILTER_REGION                     = "Region";
+   inline constexpr const char* FILTER_VARIETAL                   = "Varietal";
+   inline constexpr const char* FILTER_VINTAGE                    = "Vintage";
+
 
    inline constexpr const char* HTTP_PARAM_TABLE            = "Table";
    inline constexpr const char* HTTP_PARAM_FORMAT           = "Format";
@@ -34,11 +53,20 @@ namespace ctb::constants
    inline constexpr const char* HTTP_PARAM_KEY_USE_COOKIE   = "UseCookie";
    inline constexpr const char* HTTP_PARAM_VAL_USE_COOKIE   = "true";
 
-   inline constexpr const char* DATA_FILE_EXTENSION         = "csv";
-   inline constexpr int         MAX_ENV_VAR_LENGTH          = 128;
-   inline constexpr const char* CT_PASSWORD                 = "CT_PASSWORD";
-   inline constexpr const char* CURRENT_DIRECTORY           = ".";
+   // sort option names
+   inline constexpr const char* SORT_OPTION_APPELATION_WINE       = "Appellation, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_COUNTRY_APPELATION    = "Country, Appellation and Wine";
+   inline constexpr const char* SORT_OPTION_LOCALE_WINE           = "Country, Region, and Appellation";
+   inline constexpr const char* SORT_OPTION_PRODUCER_WINE_NAME    = "Producer, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_REGION_WINE           = "Region, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_SCORE_MY              = "My Score";
+   inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";
+   inline constexpr const char* SORT_OPTION_MY_VALUE              = "My Value";
+   inline constexpr const char* SORT_OPTION_VARIETAL_WINE         = "Varietal, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_VINTAGE_WINE          = "Vintage and Wine";
+   inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";
 
+   // table names
    inline constexpr const char* TABLE_NAME_LIST             = "Personal Wine List";
    inline constexpr const char* TABLE_NAME_INVENTORY        = "Bottle Inventory";
    inline constexpr const char* TABLE_NAME_NOTES            = "Tasting Notes";
@@ -88,8 +116,13 @@ namespace ctb::constants
    inline constexpr const char* FMT_NUMBER_DECIMAL                = "{:.1f}";
    inline constexpr const char* FMT_NUMBER_INTEGRAL               = "{:.0f}";
 
-   inline constexpr uint16_t CT_NULL_YEAR                         = 9999;
    inline constexpr auto     ONE_MB                               = 1024 * 1024;
+   inline constexpr uint16_t CT_NULL_YEAR                         =        9999;
+   inline constexpr double   FILTER_SCORE_DEFAULT                 =        90.0;
+   inline constexpr double   FILTER_SCORE_INCR                    =         0.1;
+   inline constexpr double   FILTER_SCORE_MIN                     =          50;
+   inline constexpr double   FILTER_SCORE_MAX                     =       100.0;
+   inline constexpr int      FILTER_SCORE_DIGITS                  =           1;
 
    inline constexpr const char* PARSE_FMT_STR_ISO_DATETIME_LOCAL  = "%FT%T%Ez";
    inline constexpr const char* PARSE_FMT_STR_ISO_DATETIME_UTC    = "%FT%T%Z";

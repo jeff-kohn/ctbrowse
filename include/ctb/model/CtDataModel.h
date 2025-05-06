@@ -1,12 +1,13 @@
 #pragma once
-//#include "App.h"
-#include "model/DatasetBase.h"
-#include "model/DisplayColumn.h"
-#include <ctb/CtRecordImpl.h>
-#include <ctb/PropFilter.h>
-#include <ctb/PropStringFilterMgr.h>
-#include <ctb/SubStringFilter.h>
-#include <ctb/table/TableSorter.h>
+
+#include "ctb/model/DatasetBase.h"
+#include "ctb/model/DisplayColumn.h"
+
+#include "ctb/table/CtRecordImpl.h"
+#include "ctb/table/PropFilter.h"
+#include "ctb/table/PropStringFilterMgr.h"
+#include "ctb/table/SubStringFilter.h"
+#include "ctb/table/TableSorter.h"
 
 #include <vector>
 
@@ -41,11 +42,11 @@ namespace ctb::app
       /// @brief list of display columns that will show in the list view
       ///
       static inline const std::array DefaultDisplayColumns { 
-         DisplayColumn{ Traits::propToIndex(PropId::WineAndVintage),                              constants::COL_WINE     },
-         DisplayColumn{ Traits::propToIndex(PropId::Locale),                                      constants::COL_LOCALE   },
-         DisplayColumn{ Traits::propToIndex(PropId::TotalQty),   DisplayColumn::Format::Number,   constants::COL_QTY      },
-         DisplayColumn{ Traits::propToIndex(PropId::CTScore),    DisplayColumn::Format::Decimal,  constants::COL_CT_SCORE },
-         DisplayColumn{ Traits::propToIndex(PropId::MYScore),    DisplayColumn::Format::Decimal,  constants::COL_MY_SCORE },
+         DisplayColumn{ Traits::propToIndex(PropId::WineAndVintage),                              constants::DISPLAY_COL_WINE     },
+         DisplayColumn{ Traits::propToIndex(PropId::Locale),                                      constants::DISPLAY_COL_LOCALE   },
+         DisplayColumn{ Traits::propToIndex(PropId::TotalQty),   DisplayColumn::Format::Number,   constants::DISPLAY_COL_QTY      },
+         DisplayColumn{ Traits::propToIndex(PropId::CTScore),    DisplayColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE },
+         DisplayColumn{ Traits::propToIndex(PropId::MYScore),    DisplayColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE },
       };
 
       /// @brief the available sort orders for this table.
@@ -79,10 +80,11 @@ namespace ctb::app
       /// 
       /// the columns are in the order they will be displayed.
       ///
-      auto getDisplayColumns() const -> DisplayColumns 
+      auto displayColumns() const -> const DisplayColumns&
       { 
          return m_display_columns; 
       }
+
 
       /// @brief retrieves list of available SortConfigs, in order of display
       /// 
@@ -172,10 +174,10 @@ namespace ctb::app
       ///
       auto filterBySubstring(std::string_view substr) -> bool override
       {
-         // this overload searches all columns in the current listview, so get the prop_id's 
-         auto cols = getDisplayColumns() | vws::transform([](const DisplayColumn& disp_col) -> auto { return disp_col.prop_index; })
-                                         | vws::transform([](int prop_idx) -> PropId { return Traits::propFromIndex(prop_idx); })
-                                         | rng::to<std::vector>();
+         // this overload searches all columns in the current list view, so get the prop_id's 
+         auto cols = displayColumns() | vws::transform([](const DisplayColumn& disp_col) -> auto { return disp_col.prop_index; })
+                                      | vws::transform([](int prop_idx) -> PropId { return Traits::propFromIndex(prop_idx); })
+                                      | rng::to<std::vector>();
 
          return applySubStringFilter(SubStringFilter{ std::string{substr}, cols });
       }
@@ -289,17 +291,17 @@ namespace ctb::app
       /// @return the name of the CT table this dataset represents. Not meant to be 
       ///         displayed to the user, this is for internal use. 
       /// 
-      auto getTableName() const -> std::string_view override
+      constexpr auto getTableName() const -> std::string_view override
       {
          return Traits::getTableName();
       }
 
-      int totalRowCount() const override
+      int64_t totalRowCount() const override
       {
          return std::ssize(m_data);
       }
 
-      int filteredRowCount() const override
+      int64_t filteredRowCount() const override
       {
          return std::ssize(*m_current_view);
       }
@@ -312,6 +314,12 @@ namespace ctb::app
       CtDataModel(CtDataModel&&) = delete;
       CtDataModel& operator=(const CtDataModel&) = delete;
       CtDataModel& operator=(CtDataModel&&) = delete;
+
+   protected:
+      auto getDetailProp(int row_idx, int prop_index) const -> const CtProperty&
+      {
+         return m_filtered_data.at(static_cast<size_t>(row_idx))[prop_index];
+      }
 
    private:
       DisplayColumns                   m_display_columns{};
@@ -357,7 +365,6 @@ namespace ctb::app
          {
             applySubStringFilter(*m_substring_filter);
          }
-         Cleared();
       }
 
       bool applySubStringFilter(const SubStringFilter& filter)
@@ -376,7 +383,6 @@ namespace ctb::app
          m_substring_filter = filter;
          m_filtered_data.swap(filtered);
          m_current_view = &m_filtered_data;
-         Cleared();
          return true;
       }
       
@@ -403,38 +409,6 @@ namespace ctb::app
          return m_current_view == &m_filtered_data; 
       }
 
-      void GetValueByRow(wxVariant& variant, unsigned row, unsigned col) const override
-      {
-         if (row >= m_current_view->size() or col >= m_display_columns.size())
-         {
-            assert(false);
-            SPDLOG_DEBUG("CtDataModel::GetValueByRow() called with invalid coordinates.");
-            return;
-         }
-         auto display_col = m_display_columns[col];
-         auto prop = display_col.prop_index;
-
-         // format as string and return it to caller
-         auto val = (*m_current_view)[row][prop];
-         auto val_str = display_col.getDisplayValue(val);
-         variant = wxString::FromUTF8(val_str);
-      }
-
-      bool SetValueByRow(const wxVariant&, unsigned, unsigned) override
-      {
-         return false; // not supported
-      }
-
-      unsigned int GetCount()	const override
-      {
-         return static_cast<uint32_t>(m_current_view->size());
-      }
-
-      // Inherited via DatasetBase
-      auto defaultDisplayColumns() const -> DisplayColumns override
-      {
-         return std::vector{std::from_range, DefaultDisplayColumns };
-      }
 };
 
 } // namespace ctb::app

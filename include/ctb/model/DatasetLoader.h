@@ -7,10 +7,9 @@
  *******************************************************************/
 #pragma once
 
-#include "App.h"
-#include "model/DatasetBase.h"
+#include "ctb/table/table_data.h"
+#include "ctb/model/DatasetBase.h"
 
-#include <ctb/table/table_data.h>
 #include <filesystem>
 #include <memory>
 #include <unordered_map>

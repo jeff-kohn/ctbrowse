@@ -9,17 +9,16 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/CtProperty.h"
-#include "ctb/utility.h"
+#include "ctb/table/CtProperty.h"
+//#include "ctb/utility.h"
 
 #include <external/csv.hpp>
 #include <magic_enum/magic_enum.hpp>
-#include <magic_enum/magic_enum_utility.hpp>
+//#include <magic_enum/magic_enum_utility.hpp>
 
 #include <array>
 #include <cassert>
 #include <expected>
-#include <optional>
 #include <vector>
 
 

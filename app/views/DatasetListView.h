@@ -1,8 +1,8 @@
 #pragma once
+#include "App.h"
+#include "model/CtDataViewModel.h"
 
-#include "model/ScopedEventSink.h"
-
-#include <wx/dataview.h>
+#include <ctb/model/ScopedEventSink.h>
 
 namespace ctb::app
 {
@@ -20,7 +20,7 @@ namespace ctb::app
 
    private:
       ScopedEventSink m_sink;
-      DatasetPtr      m_dataset{};
+      CtDataViewModel m_model;
 
       /// @brief private ctor used by static create()
       explicit DatasetListView(wxWindow* parent, DatasetEventSourcePtr source) : 

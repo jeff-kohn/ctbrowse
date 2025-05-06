@@ -8,8 +8,7 @@
  *******************************************************************/
 #pragma once
 
-#include "App.h"
-#include "model/DatasetBase.h"
+#include "ctb/model/DatasetBase.h"
 
 #include <memory>
 #include <optional>

@@ -7,9 +7,9 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *
  *******************************************************************/
-#include "ctb/constants.h"
-#include "ctb/WineListTraits.h"
-#include "ctb/Error.h"
+#include <ctb/constants.h>
+#include <ctb/Error.h>
+#include <ctb/table/WineListTraits.h>
 
 #include <cassert>
 #include <deque>

@@ -38,12 +38,6 @@ namespace ctb::constants
 
    inline constexpr const char* ERROR_WINDOW_CREATION_FAILED      = "Window creation failed. You may need to restart the app.";
 
-   inline constexpr const char* FILTER_APPELATION                 = "Appellation";
-   inline constexpr const char* FILTER_COUNTRY                    = "Country";
-   inline constexpr const char* FILTER_REGION                     = "Region";
-   inline constexpr const char* FILTER_VARIETAL                   = "Varietal";
-   inline constexpr const char* FILTER_VINTAGE                    = "Vintage";
-
    inline constexpr const char* FMT_CREDENTIALDLG_PROMPT_MSG      = "Enter the username and password for {}:";
    inline constexpr const char* FMT_CREDENTIALDLG_REPROMPT_MSG    = "Authentication failed. Re-enter username and password for {}:";
    inline constexpr const char* CREDENTIALDLG_LBL_USERNAME        = "&Username:";
@@ -63,12 +57,6 @@ namespace ctb::constants
    inline constexpr const char* ERROR_USER_CANCELED               = "User canceled operation.";
    inline constexpr const char* NO_SCORE                          = " --";
    
-   // column labels
-   inline constexpr const char* COL_CT_SCORE                      = "CT Score";
-   inline constexpr const char* COL_LOCALE                        = "Region and Appellation";
-   inline constexpr const char* COL_MY_SCORE                      = "My Score";
-   inline constexpr const char* COL_QTY                           = "Qty";
-   inline constexpr const char* COL_WINE                          = "Wine";
 
 
    // DetailsPanel labels
@@ -124,28 +112,11 @@ namespace ctb::constants
    inline constexpr const char* RES_NAME_TREE_FILTER_IMG          = "TREE_FILTER_IMG";
    inline constexpr const char* RES_NAME_TREE_UNCHECKED_IMG       = "TREE_UNCHECKED_IMG";
 
-   inline constexpr const char* SORT_OPTION_APPELATION_WINE       = "Appellation, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_COUNTRY_APPELATION    = "Country, Appellation and Wine";
-   inline constexpr const char* SORT_OPTION_LOCALE_WINE           = "Country, Region, and Appellation";
-   inline constexpr const char* SORT_OPTION_PRODUCER_WINE_NAME    = "Producer, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_REGION_WINE           = "Region, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_SCORE_MY              = "My Score";
-   inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";
-   inline constexpr const char* SORT_OPTION_MY_VALUE              = "My Value";
-   inline constexpr const char* SORT_OPTION_VARIETAL_WINE         = "Varietal, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_VINTAGE_WINE          = "Vintage and Wine";
-   inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";
-
    inline constexpr const char* STATUS_DOWNLOAD_CANCELED          = "Download operation canceled.";
    inline constexpr const char* STATUS_DOWNLOAD_COMPLETE          = "Download operation completed.";
    inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
    inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
 
-   inline constexpr double FILTER_SCORE_DEFAULT =  90.0;
-   inline constexpr double FILTER_SCORE_INCR    =   0.1;
-   inline constexpr double FILTER_SCORE_MIN     =    50;
-   inline constexpr double FILTER_SCORE_MAX     = 100.0;
-   inline constexpr int FILTER_SCORE_DIGITS     =     1;
    inline constexpr int WX_UNSPECIFIED_VALUE    =    -1;
    inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = false;
 

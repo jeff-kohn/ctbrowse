@@ -8,8 +8,8 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/utility.h"
-#include "ctb/table/TableProperty.h"
+//#include "ctb/utility.h"
+//#include "ctb/table/TableProperty.h"
 
 #include <compare>
 #include <vector>

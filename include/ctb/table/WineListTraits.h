@@ -10,11 +10,11 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "CtRecordImpl.h"
+#include "ctb/table/CtRecordImpl.h"
 
 #include <frozen/map.h>
 
-#include <utility>
+//#include <utility>
 #include <span>
 #include <vector>
 

@@ -8,7 +8,7 @@
 #pragma once
 
 #include "App.h"
-#include "model/ScopedEventSink.h"
+#include <ctb/model/ScopedEventSink.h>
 
 #include <wx/choice.h>
 #include <wx/dataview.h>

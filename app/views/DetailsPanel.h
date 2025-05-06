@@ -9,9 +9,9 @@
 
 #include "App.h"
 #include "LabelImageCache.h"
-#include "model/ScopedEventSink.h"
+#include <ctb/model/ScopedEventSink.h>
 
-#include <ctb/task/tasks.h>
+#include <ctb/tasks/tasks.h>
 #include <wx/panel.h>
 #include <wx/timer.h>
 

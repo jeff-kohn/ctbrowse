@@ -8,13 +8,13 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/table/table_data.h"
-#include "ctb/table/TableProperty.h"
-#include "ctb/utility.h"
-
-#include <string>
-#include <set>
-#include <variant>
+//#include "ctb/table/table_data.h"
+//#include "ctb/table/TableProperty.h"
+//#include "ctb/utility.h"
+//
+//#include <string>
+//#include <set>
+//#include <variant>
 
 namespace ctb
 {

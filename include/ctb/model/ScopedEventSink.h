@@ -7,8 +7,7 @@
  *******************************************************************/
 #pragma once
 
-#include "App.h"
-#include "model/DatasetEvent.h"
+#include "ctb/model/DatasetEvent.h"
 
 
 namespace ctb::app

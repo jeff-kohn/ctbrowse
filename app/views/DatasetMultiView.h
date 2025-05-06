@@ -1,7 +1,7 @@
 #pragma once
 
 #include "App.h"
-#include "model/ScopedEventSink.h"
+#include <ctb/model/ScopedEventSink.h>
 
 #include <wx/splitter.h>
 #include <memory>

@@ -11,7 +11,7 @@
 #include "MainFrame.h"
 
 #include <ctb/utility_http.h>
-#include <ctb/task/tasks.h>
+#include <ctb/tasks/tasks.h>
 
 #include <cpr/cpr.h>
 #include <wx/fileconf.h>

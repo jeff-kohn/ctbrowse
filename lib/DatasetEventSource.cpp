@@ -6,7 +6,7 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
-#include "model/DatasetEventSource.h"
+#include "ctb/model/DatasetEventSource.h"
 
 
 namespace ctb::app
@@ -68,7 +68,9 @@ namespace ctb::app
    /// @brief this is called to signal that an event needs to be sent to all listeners
    bool DatasetEventSource::signal(DatasetEvent::Id event_id, std::optional<int> row_idx) noexcept
    {
-      SPDLOG_DEBUG("DatasetEventSource::signal({},{}) called", magic_enum::enum_name(event_id), row_idx.value_or(-1));
+      auto event_name = magic_enum::enum_name(event_id);
+      auto row = row_idx.value_or(-1);
+      SPDLOG_DEBUG("DatasetEventSource::signal({},{}) called", event_name, row);
 
       bool retval{ true };
       if (m_data)
@@ -81,11 +83,15 @@ namespace ctb::app
             }
             catch(...){
                retval = false;
-               wxGetApp().displayErrorMessage(packageError(), true);
+               SPDLOG_DEBUG(
+                  "DatasetEventSource::signal({}, {}) caught exception from observer. {}", 
+                  event_name, 
+                  row,
+                  packageError().formattedMesage()
+               );
             }
          }
       }
-
       return retval;
    }
 

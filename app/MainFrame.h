@@ -8,8 +8,8 @@
 #pragma once
 
 #include "App.h"
-#include "model/DatasetEventSource.h"
-#include "model/ScopedEventSink.h"
+#include <ctb/model/DatasetEventSource.h>
+#include <ctb/model/ScopedEventSink.h>
 
 #include <wx/event.h>
 #include <wx/frame.h>

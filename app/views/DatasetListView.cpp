@@ -1,7 +1,8 @@
-
-#include "model/CtDataModel.h"
 #include "views/DatasetListView.h"
-#include "model/DatasetLoader.h"
+#include "wx_helpers.h"
+
+#include <ctb/model/CtDataModel.h>
+#include <ctb/model/DatasetLoader.h>
 
 #include <wx/itemattr.h>
 #include <wx/persist/dataview.h>
@@ -37,18 +38,18 @@ namespace ctb::app
 
    void DatasetListView::configureColumns()
    {
-      assert(m_dataset.get() and "This pointer should never be null here.");
+      assert(m_model.getDataset() and "This pointer should never be null here.");
       try
       {
          ClearColumns();
-         auto cols = m_dataset->defaultDisplayColumns();
+         auto& cols = m_model.getDataset()->displayColumns();
          for (const auto&& [idx, col] : vws::enumerate(cols))
          {
             AppendTextColumn(col.display_name.c_str(), 
                static_cast<uint32_t>(idx), wxDATAVIEW_CELL_INERT, 
                wxCOL_WIDTH_AUTOSIZE, static_cast<wxAlignment>(col.col_align));
          }
-         wxPersistentRegisterAndRestore(this, wxFromSV(m_dataset->getTableName()));
+         wxPersistentRegisterAndRestore(this, wxFromSV(m_model.getDataset()->getTableName()));
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError());
@@ -58,7 +59,7 @@ namespace ctb::app
 
    void DatasetListView::setDataset(DatasetPtr dataset)
    {
-      if (m_dataset)
+      if (m_model.getDataset())
       {
          // save off current table's view settings. we'll restore/register again
          // (possibly for a different table) when we call configureColumns()
@@ -66,28 +67,32 @@ namespace ctb::app
       }
       wxWindowUpdateLocker freeze_updates{ this };
 
-      // re-associate this class with the new model* (nullptr is OK)
-      m_dataset = dataset;
-      AssociateModel(m_dataset.get());
-      if (!m_dataset)
-         return;
-
-      // since we have a new model*, re-initialize the listview.
-      configureColumns();
-      m_dataset->Cleared();
-      selectFirstRow();
+      // re-associate the model with the new dataset (nullptr is OK)
+      m_model.setDataset(dataset);
+      if (dataset)
+      {
+         // since we have a new dataset, re-initialize the list-view.
+         configureColumns();
+         m_model.Cleared();
+         selectFirstRow();
+      }
+      else {
+         m_model.Cleared();
+      }
    }
 
 
    void DatasetListView::selectFirstRow()
    {
-      if (0 == m_dataset->filteredRowCount()) return;
+      throw Error{"Not implemented"};
 
-      auto item = m_dataset->GetItem(0);
-      Select(item);
-      EnsureVisible(item);
-      SetFocus();
-      QueueEvent(new wxDataViewEvent{ wxEVT_DATAVIEW_SELECTION_CHANGED, this, nullptr, item });
+      //if (0 == m_dataset->filteredRowCount()) return;
+
+      //auto item = m_dataset->GetItem(0);
+      //Select(item);
+      //EnsureVisible(item);
+      //SetFocus();
+      //QueueEvent(new wxDataViewEvent{ wxEVT_DATAVIEW_SELECTION_CHANGED, this, nullptr, item });
    }
 
 
@@ -96,7 +101,7 @@ namespace ctb::app
       switch (event.m_event_id)
       {
          case DatasetEvent::Id::TableInitialize:
-            setDataset(event.m_data);
+            m_model.setDataset(event.m_data);
             break;
 
          case DatasetEvent::Id::TableRemove:
@@ -106,7 +111,7 @@ namespace ctb::app
          case DatasetEvent::Id::Sort:   [[fallthrough]];
          case DatasetEvent::Id::Filter: [[fallthrough]];
          case DatasetEvent::Id::SubStringFilter:
-            m_dataset->Cleared(); // force a refresh, name is unfortunate
+            m_model.Cleared(); // force a refresh, name is unfortunate
             selectFirstRow();
             break;
 
@@ -124,8 +129,8 @@ namespace ctb::app
    {
       if (!m_sink.hasTable()) return;
 
-      auto row = m_sink.getTable()->GetRow(event.GetItem());
-      m_sink.signal_source(DatasetEvent::Id::RowSelected, static_cast<int>(row));
+      /*auto row = m_sink.getTable()->GetRow(event.GetItem());
+      m_sink.signal_source(DatasetEvent::Id::RowSelected, static_cast<int>(row));*/
    }
 
 

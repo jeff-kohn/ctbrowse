@@ -11,14 +11,15 @@
 #include "CtCredentialManager.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
-#include "model/DatasetEventSource.h"
-#include "model/DatasetLoader.h"
 #include "views/DatasetMultiView.h"
 #include "views/DatasetOptionsPanel.h"
 #include "views/DetailsPanel.h"
 
-#include <ctb/table/table_download.h>
 #include <ctb/utility.h>
+#include <ctb/table/table_download.h>
+#include <ctb/model/DatasetEventSource.h>
+#include <ctb/model/DatasetLoader.h>
+
 #include <external/HttpStatusCodes.h>
 
 #include <wx/artprov.h>

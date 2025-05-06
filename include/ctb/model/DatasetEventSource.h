@@ -7,8 +7,7 @@
  *******************************************************************/
 #pragma once
 
-#include "App.h"
-#include "model/DatasetEvent.h"
+#include "ctb/model/DatasetEvent.h"
 
 #include <memory>
 #include <unordered_set>
@@ -82,8 +81,8 @@ namespace ctb::app
 
       /// @brief this is called to signal that an event needs to be sent to all listeners
       ///
-      /// sinks should try to handle their own exceptions if it's possible to do so gracefully. Any 
-      /// exceptions propagated back to this function will be displayed to the user.
+      /// sinks should try to handle their own exceptions if it's possible to do so gracefully, but
+      /// exceptions caught in this function will be logged in debug builds but otherwise lost
       /// 
       /// @return true if every subscriber was notified without error, false if at least one
       ///         subscriber threw an error.

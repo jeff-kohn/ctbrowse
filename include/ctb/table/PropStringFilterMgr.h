@@ -8,10 +8,10 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/PropStringFilter.h"
+#include "ctb/table/PropStringFilter.h"
 
 #include <map>
-#include <set>
+//#include <set>
 #include <string>
 #include <string_view>
 
@@ -95,7 +95,7 @@ namespace ctb
       /// 
       int activeFilters() const
       {
-         return m_filters.size();
+         return static_cast<int>(m_filters.size());
       }
             
       /// @brief retrieve a list of possible filter values for the given property in the table

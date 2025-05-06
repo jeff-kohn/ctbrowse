@@ -7,11 +7,10 @@
  *******************************************************************/
 #pragma once
 
-#include "App.h"
-#include "model/CtStringFilter.h"
-#include "model/DisplayColumn.h"
-#include <ctb/CtProperty.h>
-#include <wx/dataview.h>
+#include "ctb/table/CtProperty.h"
+
+#include "ctb/model/CtStringFilter.h"
+#include "ctb/model/DisplayColumn.h"
 
 #include <set>
 #include <memory>
@@ -39,7 +38,7 @@ namespace ctb::app
    /// Users of this interface should gain access through IDatasetEventSource::getTable() or 
    /// using the ptr supplied when handling IDatasetEventSource::notify()
    /// 
-   class DatasetBase : public wxDataViewVirtualListModel
+   class DatasetBase
    {
    public:
       using SortConfigs = std::vector<CtSortConfig>;
@@ -59,7 +58,11 @@ namespace ctb::app
       ///
       virtual void applySortConfig(const CtSortConfig& config) = 0;
 
-      virtual auto defaultDisplayColumns() const -> DisplayColumns = 0;
+      /// @brief Gets the collection of active display columns 
+      /// 
+      /// Note that some may be hidden and not visible.
+      /// 
+      virtual auto displayColumns() const -> const DisplayColumns& = 0;
 
       /// @brief retrieves a list of available filters for this table.
       ///
@@ -131,14 +134,25 @@ namespace ctb::app
       ///
       virtual auto setMinScoreFilter(NullableDouble min_score) -> bool = 0;
 
+
       /// @brief Retrieve a property from the underlying dataset
       /// 
-      /// Since we don't have table-neutral indices to use, this lookup has to be done by
+      /// Since we don't have table-neutral indices to use, this lookup is done by
       /// property name as a string that corresponds to correct enum. 
       /// 
       /// @return the property value formatted as a string if found, std::nullopt if not found 
       ///
       virtual auto getDetailProp(int row_idx, std::string_view prop_name) const -> const CtProperty & = 0;
+
+      /// @brief Retrieve a property from the underlying dataset
+      /// 
+      /// This overload is protected because the prop_index is table-specific which makes it not
+      /// useful through type-erased base class interface. But derived class implementations will
+      /// need to use it.
+      /// 
+      /// @return the property value formatted as a string if found, std::nullopt if not found 
+      ///
+      virtual auto getDetailProp(int row_idx, int prop_index) const -> const CtProperty & = 0;
 
       /// @return the name of the CT table this dataset represents. Not meant to be 
       ///         displayed to the user, this is for internal use. 
@@ -147,23 +161,24 @@ namespace ctb::app
 
       /// @brief returns the total number of records in the underlying dataset
       ///
-      virtual int totalRowCount() const = 0;
+      virtual int64_t totalRowCount() const = 0;
 
       /// @brief returns the number of records with filters applied.
       ///
-      virtual int filteredRowCount() const = 0;
+      virtual int64_t filteredRowCount() const = 0;
 
       /// @brief destructor
       ///
-      ~DatasetBase() noexcept override
+      virtual ~DatasetBase() noexcept
       {
       }
+
    };
 
 
    /// @brief the smart-ptr-to-base that's used to work with the DatasetBase interface 
    ///
-   using DatasetPtr = wxObjectDataPtr<DatasetBase>;
+   using DatasetPtr = std::shared_ptr<DatasetBase>;
 
 
 }  // namespace ctb::app

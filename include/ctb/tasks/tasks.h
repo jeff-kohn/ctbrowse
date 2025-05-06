@@ -9,14 +9,12 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/CredentialWrapper.h"
 #include "ctb/utility_http.h"
-#include "ctb/task/PollingTask.h"
+#include "ctb/tasks/PollingTask.h"
 
 #include <cpr/api.h>
 #include <cpr/cprtypes.h>
 
-#include <optional>
 #include <stop_token>
 #include <string>
 
