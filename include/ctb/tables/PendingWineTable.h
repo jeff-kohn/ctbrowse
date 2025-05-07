@@ -10,7 +10,6 @@
 
 #include "ctb/ctb.h"
 #include "ctb/tables/CtDataTable.h"
-
 #include <frozen/map.h>
 
 #include <utility>
@@ -29,34 +28,7 @@ namespace ctb
    class PendingWineTraits
    {
    public:
-      /// @brief these are the fields that this object contains properties for.
-      /// 
-      enum class PropId : uint16_t
-      {
-         iWineId,
-         iPurchaseId,
-         WineName,
-         Locale,
-         Vintage,
-         PurchaseDate,
-         DeliveryDate,
-         StoreName,
-         NativePrice,
-         NativeCurrency,
-         QtyOrdered,
-         QtyPending,
-         OrderNumber,
-         Size,
-         Country,
-         Region,
-         SubRegion,
-         Appellation,
-         Producer,
-         Color,
-         Category,
-         MasterVarietal,
-         WineAndVintage
-      };
+      using PropId = CtPropId;
 
       /// @brief - contains the list of data fields that are parsed from CSV
       /// 
@@ -66,28 +38,28 @@ namespace ctb
       /// 
       static inline constexpr frozen::map<PropId, FieldSchema, static_cast<size_t>(PropId::WineAndVintage)> CsvSchema
       {
-         { PropId::iWineId,         FieldSchema { static_cast<uint32_t>(PropId::iWineId),        PropType::String,      0 }},
-         { PropId::iPurchaseId,     FieldSchema { static_cast<uint32_t>(PropId::iPurchaseId),    PropType::String,      1 }},
-         { PropId::WineName,        FieldSchema { static_cast<uint32_t>(PropId::WineName),       PropType::String,     17 }},
-         { PropId::Locale,          FieldSchema { static_cast<uint32_t>(PropId::Locale),         PropType::String,     19 }},
-         { PropId::Vintage,         FieldSchema { static_cast<uint32_t>(PropId::Vintage),        PropType::UInt16,     17 }},
-         { PropId::PurchaseDate,    FieldSchema { static_cast<uint32_t>(PropId::PurchaseDate),   PropType::Date,        2 }}, 
-         { PropId::DeliveryDate,    FieldSchema { static_cast<uint32_t>(PropId::DeliveryDate),   PropType::Date,        3 }}, 
-         { PropId::StoreName,       FieldSchema { static_cast<uint32_t>(PropId::StoreName),      PropType::String,      4 }},
-         { PropId::QtyPending,      FieldSchema { static_cast<uint32_t>(PropId::QtyPending),     PropType::UInt16,     10 }},
-         { PropId::QtyOrdered,      FieldSchema { static_cast<uint32_t>(PropId::QtyOrdered),     PropType::UInt16,     11 }},
-         { PropId::OrderNumber,     FieldSchema { static_cast<uint32_t>(PropId::OrderNumber),    PropType::String,     12 }},
-         { PropId::Size,            FieldSchema { static_cast<uint32_t>(PropId::Size),           PropType::String,     14 }},
-         { PropId::NativePrice,     FieldSchema { static_cast<uint32_t>(PropId::NativePrice),    PropType::Double,      8 }},
-         { PropId::NativeCurrency,  FieldSchema { static_cast<uint32_t>(PropId::NativeCurrency), PropType::String,      9 }},
-         { PropId::Country,         FieldSchema { static_cast<uint32_t>(PropId::Country),        PropType::String,     28 }},
-         { PropId::Region,          FieldSchema { static_cast<uint32_t>(PropId::Region),         PropType::String,     29 }},
-         { PropId::SubRegion,       FieldSchema { static_cast<uint32_t>(PropId::SubRegion),      PropType::String,     30 }},
-         { PropId::Appellation,     FieldSchema { static_cast<uint32_t>(PropId::Appellation),    PropType::String,     31 }},
-         { PropId::Producer,        FieldSchema { static_cast<uint32_t>(PropId::Producer),       PropType::String,     23 }},
-         { PropId::Color,           FieldSchema { static_cast<uint32_t>(PropId::Color),          PropType::String,     21 }},
-         { PropId::Category,        FieldSchema { static_cast<uint32_t>(PropId::Category),       PropType::String,     22 }},
-         { PropId::MasterVarietal,  FieldSchema { static_cast<uint32_t>(PropId::MasterVarietal), PropType::String,     25 }}
+         { PropId::iWineId,                FieldSchema { static_cast<uint32_t>(PropId::iWineId),               PropType::String,      0 }},
+         { PropId::PendingPurchaseId,      FieldSchema { static_cast<uint32_t>(PropId::PendingPurchaseId),     PropType::String,      1 }},
+         { PropId::WineName,               FieldSchema { static_cast<uint32_t>(PropId::WineName),              PropType::String,     17 }},
+         { PropId::Locale,                 FieldSchema { static_cast<uint32_t>(PropId::Locale),                PropType::String,     19 }},
+         { PropId::Vintage,                FieldSchema { static_cast<uint32_t>(PropId::Vintage),               PropType::UInt16,     17 }},
+         { PropId::PendingPurchaseDate,    FieldSchema { static_cast<uint32_t>(PropId::PendingPurchaseDate),   PropType::Date,        2 }}, 
+         { PropId::PendingDeliveryDate,    FieldSchema { static_cast<uint32_t>(PropId::PendingDeliveryDate),   PropType::Date,        3 }}, 
+         { PropId::PendingStoreName,       FieldSchema { static_cast<uint32_t>(PropId::PendingStoreName),      PropType::String,      4 }},
+         { PropId::QtyPending,             FieldSchema { static_cast<uint32_t>(PropId::QtyPending),            PropType::UInt16,     10 }},
+         { PropId::PendingQtyOrdered,      FieldSchema { static_cast<uint32_t>(PropId::PendingQtyOrdered),     PropType::UInt16,     11 }},
+         { PropId::PendingOrderNumber,     FieldSchema { static_cast<uint32_t>(PropId::PendingOrderNumber),    PropType::String,     12 }},
+         { PropId::Size,                   FieldSchema { static_cast<uint32_t>(PropId::Size),                  PropType::String,     14 }},
+         { PropId::PendingPrice,           FieldSchema { static_cast<uint32_t>(PropId::PendingPrice),          PropType::Double,      8 }},
+         { PropId::Currency,               FieldSchema { static_cast<uint32_t>(PropId::Currency),              PropType::String,      9 }},
+         { PropId::Country,                FieldSchema { static_cast<uint32_t>(PropId::Country),               PropType::String,     28 }},
+         { PropId::Region,                 FieldSchema { static_cast<uint32_t>(PropId::Region),                PropType::String,     29 }},
+         { PropId::SubRegion,              FieldSchema { static_cast<uint32_t>(PropId::SubRegion),             PropType::String,     30 }},
+         { PropId::Appellation,            FieldSchema { static_cast<uint32_t>(PropId::Appellation),           PropType::String,     31 }},
+         { PropId::Producer,               FieldSchema { static_cast<uint32_t>(PropId::Producer),              PropType::String,     23 }},
+         { PropId::Color,                  FieldSchema { static_cast<uint32_t>(PropId::Color),                 PropType::String,     21 }},
+         { PropId::Category,               FieldSchema { static_cast<uint32_t>(PropId::Category),              PropType::String,     22 }},
+         { PropId::Varietal,               FieldSchema { static_cast<uint32_t>(PropId::Varietal),              PropType::String,     25 }}
       };
 
       /// @brief getCsvSchema()

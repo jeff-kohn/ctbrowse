@@ -32,6 +32,7 @@ target_sources(ctBrowse_lib
       "../include/ctb/model/ScopedEventSink.h"
       
       "../include/ctb/tables/CtDataTable.h"
+      "../include/ctb/tables/CtProperty.h"
       "../include/ctb/tables/PendingWineTable.h"
       "../include/ctb/tables/WineListTable.h"
 

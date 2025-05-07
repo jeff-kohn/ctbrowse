@@ -29,36 +29,7 @@ namespace ctb
    class WineListTraits
    {
    public:
-      /// @brief these are the fields that this object contains properties for.
-      /// 
-      enum class PropId : uint16_t
-      {
-         iWineId,
-         WineName,
-         Locale,
-         Vintage,
-         Quantity,
-         Pending,
-         Size,
-         Price,
-         AuctionPrice,
-         CtPrice,
-         Country,
-         Region,
-         SubRegion,
-         Appellation,
-         Producer,
-         SortProducer,
-         Color,
-         Category,
-         MasterVarietal,
-         CTScore,
-         MYScore,
-         BeginConsume,
-         EndConsume,
-         WineAndVintage,
-         TotalQty
-      };
+      using PropId = CtPropId;
 
       /// @brief - contains the list of data fields that are parsed from CSV
       /// 
@@ -72,10 +43,10 @@ namespace ctb
          { PropId::WineName,        FieldSchema { static_cast<uint32_t>(PropId::WineName),       PropType::String,     13 }},
          { PropId::Locale,          FieldSchema { static_cast<uint32_t>(PropId::Locale),         PropType::String,     14 }},
          { PropId::Vintage,         FieldSchema { static_cast<uint32_t>(PropId::Vintage),        PropType::UInt16,     12 }},
-         { PropId::Quantity,        FieldSchema { static_cast<uint32_t>(PropId::Quantity),       PropType::UInt16,      2 }},
-         { PropId::Pending,         FieldSchema { static_cast<uint32_t>(PropId::Pending),        PropType::UInt16,      3 }},
+         { PropId::QtyOnHand,       FieldSchema { static_cast<uint32_t>(PropId::QtyOnHand),      PropType::UInt16,      2 }},
+         { PropId::QtyPending,      FieldSchema { static_cast<uint32_t>(PropId::QtyPending),     PropType::UInt16,      3 }},
          { PropId::Size,            FieldSchema { static_cast<uint32_t>(PropId::Size),           PropType::String,      4 }},
-         { PropId::Price,           FieldSchema { static_cast<uint32_t>(PropId::Price),          PropType::Double,      5 }},
+         { PropId::MyPrice,         FieldSchema { static_cast<uint32_t>(PropId::MyPrice),        PropType::Double,      5 }},
          { PropId::AuctionPrice,    FieldSchema { static_cast<uint32_t>(PropId::AuctionPrice),   PropType::Double,      8 }},
          { PropId::CtPrice,         FieldSchema { static_cast<uint32_t>(PropId::CtPrice),        PropType::Double,      9 }},
          { PropId::Country,         FieldSchema { static_cast<uint32_t>(PropId::Country),        PropType::String,     15 }},
@@ -83,12 +54,11 @@ namespace ctb
          { PropId::SubRegion,       FieldSchema { static_cast<uint32_t>(PropId::SubRegion),      PropType::String,     17 }},
          { PropId::Appellation,     FieldSchema { static_cast<uint32_t>(PropId::Appellation),    PropType::String,     18 }},
          { PropId::Producer,        FieldSchema { static_cast<uint32_t>(PropId::Producer),       PropType::String,     19 }},
-         { PropId::SortProducer,    FieldSchema { static_cast<uint32_t>(PropId::SortProducer),   PropType::String,     20 }},
          { PropId::Color,           FieldSchema { static_cast<uint32_t>(PropId::Color),          PropType::String,     22 }},
          { PropId::Category,        FieldSchema { static_cast<uint32_t>(PropId::Category),       PropType::String,     23 }},
-         { PropId::MasterVarietal,  FieldSchema { static_cast<uint32_t>(PropId::MasterVarietal), PropType::String,     25 }},
-         { PropId::CTScore,         FieldSchema { static_cast<uint32_t>(PropId::CTScore),        PropType::Double,     59 }},
-         { PropId::MYScore,         FieldSchema { static_cast<uint32_t>(PropId::MYScore),        PropType::Double,     61 }},
+         { PropId::Varietal,        FieldSchema { static_cast<uint32_t>(PropId::Varietal),       PropType::String,     25 }},
+         { PropId::CtScore,         FieldSchema { static_cast<uint32_t>(PropId::CtScore),        PropType::Double,     59 }},
+         { PropId::MyScore,         FieldSchema { static_cast<uint32_t>(PropId::MyScore),        PropType::Double,     61 }},
          { PropId::BeginConsume,    FieldSchema { static_cast<uint32_t>(PropId::BeginConsume),   PropType::UInt16,     63 }},
          { PropId::EndConsume,      FieldSchema { static_cast<uint32_t>(PropId::EndConsume),     PropType::UInt16,     64 }}
       };
@@ -146,14 +116,14 @@ namespace ctb
          rec[static_cast<size_t>(PropId::WineAndVintage)] = ctb::format("{} {}", vintage, wine_name);
 
          // total qty is in-stock + pending, this combined field displays similar to CT.com
-         auto qty     = rec[static_cast<size_t>(PropId::Quantity)].asUInt16().value_or(0u);
-         auto pending = rec[static_cast<size_t>(PropId::Pending) ].asUInt16().value_or(0u);
+         auto qty     = rec[static_cast<size_t>(PropId::QtyOnHand)].asUInt16().value_or(0u);
+         auto pending = rec[static_cast<size_t>(PropId::QtyPending) ].asUInt16().value_or(0u);
          if (pending == 0)
          {
-            rec[static_cast<size_t>(PropId::TotalQty)] = qty;
+            rec[static_cast<size_t>(PropId::QtyTotal)] = qty;
          }
          else{
-            rec[static_cast<size_t>(PropId::TotalQty)] = ctb::format("{}+{}", qty, pending);
+            rec[static_cast<size_t>(PropId::QtyTotal)] = ctb::format("{}+{}", qty, pending);
          }
 
          // for drinking window, 9999 = null

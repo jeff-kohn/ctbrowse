@@ -54,9 +54,9 @@ namespace ctb::app
       static inline const std::array DefaultDisplayColumns { 
          DisplayColumn{ Traits::propToIndex(PropId::WineAndVintage),                              constants::DISPLAY_COL_WINE     },
          DisplayColumn{ Traits::propToIndex(PropId::Locale),                                      constants::DISPLAY_COL_LOCALE   },
-         DisplayColumn{ Traits::propToIndex(PropId::TotalQty),   DisplayColumn::Format::Number,   constants::DISPLAY_COL_QTY      },
-         DisplayColumn{ Traits::propToIndex(PropId::CTScore),    DisplayColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE },
-         DisplayColumn{ Traits::propToIndex(PropId::MYScore),    DisplayColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE },
+         DisplayColumn{ Traits::propToIndex(PropId::QtyTotal),   DisplayColumn::Format::Number,   constants::DISPLAY_COL_QTY      },
+         DisplayColumn{ Traits::propToIndex(PropId::CtScore),    DisplayColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE },
+         DisplayColumn{ Traits::propToIndex(PropId::MyScore),    DisplayColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE },
       };
 
       /// @brief the available sort orders for this table.
@@ -66,15 +66,15 @@ namespace ctb::app
          TableSort{ { PropId::Vintage,  PropId::WineName                        }, constants::SORT_OPTION_VINTAGE_WINE   },
          TableSort{ { PropId::Locale,   PropId::WineName,    PropId::Vintage    }, constants::SORT_OPTION_LOCALE_WINE    },
          TableSort{ { PropId::Region,   PropId::WineName,    PropId::Vintage    }, constants::SORT_OPTION_REGION_WINE    },
-         TableSort{ { PropId::MYScore,  PropId::CTScore,     PropId::WineName,  }, constants::SORT_OPTION_SCORE_MY       },
-         TableSort{ { PropId::CTScore,  PropId::MYScore,     PropId::WineName,  }, constants::SORT_OPTION_SCORE_CT       },
-         TableSort{ { PropId::Price,    PropId::WineName,    PropId::Vintage ,  }, constants::SORT_OPTION_MY_VALUE       }
+         TableSort{ { PropId::MyScore,  PropId::CtScore,     PropId::WineName,  }, constants::SORT_OPTION_SCORE_MY       },
+         TableSort{ { PropId::CtScore,  PropId::MyScore,     PropId::WineName,  }, constants::SORT_OPTION_SCORE_CT       },
+         TableSort{ { PropId::MyPrice,  PropId::WineName,    PropId::Vintage ,  }, constants::SORT_OPTION_MY_VALUE       }
       };
 
       /// @brief string filters that can be used on this table.
       ///
       static inline const std::array StringFilters{
-         CtStringFilter{ constants::FILTER_VARIETAL,   static_cast<int>(PropId::MasterVarietal) },
+         CtStringFilter{ constants::FILTER_VARIETAL,   static_cast<int>(PropId::Varietal) },
          CtStringFilter{ constants::FILTER_COUNTRY,    static_cast<int>(PropId::Country)        },
          CtStringFilter{ constants::FILTER_REGION,     static_cast<int>(PropId::Region)         },
          CtStringFilter{ constants::FILTER_APPELATION, static_cast<int>(PropId::Appellation)    },
@@ -106,7 +106,7 @@ namespace ctb::app
          SortConfigs configs{};
          for (const auto&& [i, table_sort] : vws::enumerate(Sorters))
          {
-            bool descending = (table_sort.sort_props[0] == PropId::MYScore or table_sort.sort_props[0] == PropId::CTScore) ? true : false;
+            bool descending = (table_sort.sort_props[0] == PropId::MyScore or table_sort.sort_props[0] == PropId::CtScore) ? true : false;
             configs.emplace_back(CtSortConfig{ static_cast<int>(i), table_sort.sort_name, descending  });
          }
          return configs;
@@ -347,8 +347,8 @@ namespace ctb::app
          m_display_columns{ std::from_range, DefaultDisplayColumns },
          m_data{ std::move(data) },
          m_current_view{ &m_data },
-         m_instock_filter{ PropId::Quantity, std::greater<CtProperty>{}, uint16_t{0} },
-         m_score_filter{ {PropId::CTScore, PropId::MYScore}, std::greater_equal<CtProperty>{}, constants::FILTER_SCORE_DEFAULT },
+         m_instock_filter{ PropId::QtyOnHand, std::greater<CtProperty>{}, uint16_t{0} },
+         m_score_filter{ {PropId::CtScore, PropId::MyScore}, std::greater_equal<CtProperty>{}, constants::FILTER_SCORE_DEFAULT },
          m_sort_config{ availableSortConfigs()[0] }
       {
          m_score_filter.enabled = false;
