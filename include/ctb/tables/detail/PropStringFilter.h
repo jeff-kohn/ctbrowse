@@ -21,11 +21,11 @@ namespace ctb::detail
    {
       // some types we borrow from our template parameters
       using Record = RecordTypeT;
-      using PropId  = Record::PropId;
+      using Prop   = Record::Prop;
 
       /// @brief the property that we're filtering against
       ///
-      PropId prop_id{};
+      Prop prop_id{};
 
       /// @brief the possible values to match against
       ///

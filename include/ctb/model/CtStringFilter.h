@@ -1,12 +1,13 @@
 ﻿#pragma once
 #include "ctb/ctb.h"
+#include "ctb/tables/CtProperty.h"
 
-#include <string_view>
 #include <set>
+#include <string_view>
 #include <vector>
 
 
-namespace ctb::app
+namespace ctb
 {
    /// @brief  class that contains a filter specification
    ///
@@ -17,12 +18,14 @@ namespace ctb::app
    class CtStringFilter
    {
    public:
+      using Prop     = CtProp;
+      using Property = CtProperty;
+
       /// @brief compile-time ctor, the only way to create an instance besides copy/assignment
       ///
-      consteval CtStringFilter(const char* filter_name, int prop_index) : 
-         m_filter_name(filter_name),
-         m_prop_index(prop_index)
+      consteval CtStringFilter(const char* filter_name, Prop prop_id) :  m_filter_name(filter_name), m_prop_id(prop_id)
       {}
+
       constexpr CtStringFilter(const CtStringFilter&) = default;
       constexpr CtStringFilter& operator=(const CtStringFilter&) = default;
       ~CtStringFilter() = default;
@@ -34,11 +37,11 @@ namespace ctb::app
          return m_filter_name;
       }
 
-      /// @brief returns the zero-based index (into the table entry's PropId enum) of the property this filter is for
+      /// @brief returns the zero-based index (into the table entry's CtProp enum) of the property this filter is for
       ///
-      auto propIndex() const -> int
+      auto propId() const -> Prop
       {
-         return m_prop_index;
+         return m_prop_id;
       }
 
       /// @brief retrieve a list of available values in the table for this filter
@@ -46,7 +49,7 @@ namespace ctb::app
       template<typename DatasetT>
       auto getMatchValues(DatasetT* data) const -> StringSet
       {
-         return data->getFilterMatchValues(m_prop_index);
+         return data->getFilterMatchValues(m_prop_id);
       }
 
       /// @brief no default ctor or move semantics
@@ -57,9 +60,9 @@ namespace ctb::app
 
    private:
       const char* m_filter_name{};
-      int         m_prop_index{};
+      Prop        m_prop_id{};
    };
 
    using CtStringFilters = std::vector<CtStringFilter>;
 
-} // namespace ctb::app
+} // namespace ctb

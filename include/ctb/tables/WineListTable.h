@@ -10,67 +10,60 @@
 
 #include "ctb/ctb.h"
 #include "ctb/tables/CtDataTable.h"
+#include <boost/unordered/unordered_flat_map.hpp>
 
 #include <frozen/map.h>
-
 #include <span>
 
 
 namespace ctb
 {
-   using detail::FieldSchema;
-   using detail::PropType;
-   using detail::TableProperty;
-   using detail::TableRecord;
-
-
    /// @brief Traits class for a table record from the 'List' CellarTracker CSV table.
    /// 
    class WineListTraits
    {
    public:
-      using PropId = CtPropId;
+      using Prop        = CtProp;
+      using Property    = CtProperty;
+      using Properties  = CtPropertyMap;
+      using FieldSchema = FieldSchema;
 
+   private:
       /// @brief - contains the list of data fields that are parsed from CSV
       /// 
       /// this collection contains the list of properties that we actually parse from the CSV file. Any
       /// calculated properties are not included here which explains why this array doesn't contain 
-      /// every PropId enum value.
+      /// every Prop enum value.
       /// 
-      static inline constexpr frozen::map<PropId, FieldSchema, static_cast<size_t>(PropId::WineAndVintage)> CsvSchema
+      static inline constexpr auto s_schema = frozen::make_map<Prop, FieldSchema>(
       {
-         { PropId::iWineId,         FieldSchema { static_cast<uint32_t>(PropId::iWineId),        PropType::String,      0 }},
-         { PropId::WineName,        FieldSchema { static_cast<uint32_t>(PropId::WineName),       PropType::String,     13 }},
-         { PropId::Locale,          FieldSchema { static_cast<uint32_t>(PropId::Locale),         PropType::String,     14 }},
-         { PropId::Vintage,         FieldSchema { static_cast<uint32_t>(PropId::Vintage),        PropType::UInt16,     12 }},
-         { PropId::QtyOnHand,       FieldSchema { static_cast<uint32_t>(PropId::QtyOnHand),      PropType::UInt16,      2 }},
-         { PropId::QtyPending,      FieldSchema { static_cast<uint32_t>(PropId::QtyPending),     PropType::UInt16,      3 }},
-         { PropId::Size,            FieldSchema { static_cast<uint32_t>(PropId::Size),           PropType::String,      4 }},
-         { PropId::MyPrice,         FieldSchema { static_cast<uint32_t>(PropId::MyPrice),        PropType::Double,      5 }},
-         { PropId::AuctionPrice,    FieldSchema { static_cast<uint32_t>(PropId::AuctionPrice),   PropType::Double,      8 }},
-         { PropId::CtPrice,         FieldSchema { static_cast<uint32_t>(PropId::CtPrice),        PropType::Double,      9 }},
-         { PropId::Country,         FieldSchema { static_cast<uint32_t>(PropId::Country),        PropType::String,     15 }},
-         { PropId::Region,          FieldSchema { static_cast<uint32_t>(PropId::Region),         PropType::String,     16 }},
-         { PropId::SubRegion,       FieldSchema { static_cast<uint32_t>(PropId::SubRegion),      PropType::String,     17 }},
-         { PropId::Appellation,     FieldSchema { static_cast<uint32_t>(PropId::Appellation),    PropType::String,     18 }},
-         { PropId::Producer,        FieldSchema { static_cast<uint32_t>(PropId::Producer),       PropType::String,     19 }},
-         { PropId::Color,           FieldSchema { static_cast<uint32_t>(PropId::Color),          PropType::String,     22 }},
-         { PropId::Category,        FieldSchema { static_cast<uint32_t>(PropId::Category),       PropType::String,     23 }},
-         { PropId::Varietal,        FieldSchema { static_cast<uint32_t>(PropId::Varietal),       PropType::String,     25 }},
-         { PropId::CtScore,         FieldSchema { static_cast<uint32_t>(PropId::CtScore),        PropType::Double,     59 }},
-         { PropId::MyScore,         FieldSchema { static_cast<uint32_t>(PropId::MyScore),        PropType::Double,     61 }},
-         { PropId::BeginConsume,    FieldSchema { static_cast<uint32_t>(PropId::BeginConsume),   PropType::UInt16,     63 }},
-         { PropId::EndConsume,      FieldSchema { static_cast<uint32_t>(PropId::EndConsume),     PropType::UInt16,     64 }}
-      };
+         { Prop::iWineId,         FieldSchema { Prop::iWineId,        PropType::String,      0 }},
+         { Prop::WineName,        FieldSchema { Prop::WineName,       PropType::String,     13 }},
+         { Prop::Locale,          FieldSchema { Prop::Locale,         PropType::String,     14 }},
+         { Prop::Vintage,         FieldSchema { Prop::Vintage,        PropType::UInt16,     12 }},
+         { Prop::Producer,        FieldSchema { Prop::Producer,       PropType::String,     19 }},
+         { Prop::Country,         FieldSchema { Prop::Country,        PropType::String,     15 }},
+         { Prop::Region,          FieldSchema { Prop::Region,         PropType::String,     16 }},
+         { Prop::SubRegion,       FieldSchema { Prop::SubRegion,      PropType::String,     17 }},
+         { Prop::Appellation,     FieldSchema { Prop::Appellation,    PropType::String,     18 }},
+         { Prop::Color,           FieldSchema { Prop::Color,          PropType::String,     22 }},
+         { Prop::Category,        FieldSchema { Prop::Category,       PropType::String,     23 }},
+         { Prop::Varietal,        FieldSchema { Prop::Varietal,       PropType::String,     25 }},
+         { Prop::CtScore,         FieldSchema { Prop::CtScore,        PropType::Double,     59 }},
+         { Prop::MyScore,         FieldSchema { Prop::MyScore,        PropType::Double,     61 }},
+         { Prop::QtyOnHand,       FieldSchema { Prop::QtyOnHand,      PropType::UInt16,      2 }},
+         { Prop::QtyPending,      FieldSchema { Prop::QtyPending,     PropType::UInt16,      3 }},
+         { Prop::Size,            FieldSchema { Prop::Size,           PropType::String,      4 }},
+         { Prop::BeginConsume,    FieldSchema { Prop::BeginConsume,   PropType::UInt16,     63 }},
+         { Prop::EndConsume,      FieldSchema { Prop::EndConsume,     PropType::UInt16,     64 }},
+         { Prop::MyPrice,         FieldSchema { Prop::MyPrice,        PropType::Double,      5 }},
+         { Prop::CtPrice,         FieldSchema { Prop::CtPrice,        PropType::Double,      9 }},
+         { Prop::AuctionPrice,    FieldSchema { Prop::AuctionPrice,   PropType::Double,      8 }},
+         { Prop::WineAndVintage,  FieldSchema { Prop::WineAndVintage, PropType::Double,     {} }},
+         { Prop::QtyTotal,        FieldSchema { Prop::QtyTotal,       PropType::Double,     {} }}
+      });
 
-      /// @brief getCsvSchema()
-      /// @return the CSV schema for this CT table
-      /// 
-      static constexpr auto getCsvSchema() -> const auto&
-      {
-         return CsvSchema;
-      }
-
+   public:
       /// @brief getTableName()
       /// @return the name of this CT table this traits class represents
       /// 
@@ -79,23 +72,14 @@ namespace ctb
          return "WineList"; 
       }
 
-      /// @brief small helper to convert a Prop enum into its integer index
-      /// 
-      static constexpr auto propToIndex(PropId prop) -> int 
-      {
-         return enumToIndex(prop);
-      }
+      using SchemaMap = decltype(s_schema);
 
-      /// @brief small helper to convert a zero-based index to a Prop enum
+      /// @brief getCsvSchema()
+      /// @return the CSV schema for this CT table
       /// 
-      static constexpr auto propFromIndex(int idx) -> PropId
+      static constexpr auto getSchema() -> const SchemaMap&
       {
-         return enumFromIndex<PropId>(idx);
-      }
-
-      static constexpr auto supportsInStockFilter() -> bool
-      {
-         return true;
+         return s_schema;
       }
 
       /// @brief this gets called by TableRecord to set any missing property values
@@ -105,36 +89,36 @@ namespace ctb
       /// 
       /// @param rec span containing a TableProperty for each PropID enum value.
       /// 
-      template<std::size_t N, typename... Args>
-      static void onRecordParse(std::span<TableProperty<Args...>, N> rec)
+      static void onRecordParse(Properties rec)
       {
-         using enum PropId;
+         using enum Prop;
 
          // set value for the WineAndVintage property
-         auto vintage   = rec[static_cast<size_t>(PropId::Vintage) ].asString();
-         auto wine_name = rec[static_cast<size_t>(PropId::WineName)].asStringView();
-         rec[static_cast<size_t>(PropId::WineAndVintage)] = ctb::format("{} {}", vintage, wine_name);
+         auto vintage   = rec[Vintage ].asString();
+         auto wine_name = rec[WineName].asStringView();
+         rec[WineAndVintage] = ctb::format("{} {}", vintage, wine_name);
 
-         // total qty is in-stock + pending, this combined field displays similar to CT.com
-         auto qty     = rec[static_cast<size_t>(PropId::QtyOnHand)].asUInt16().value_or(0u);
-         auto pending = rec[static_cast<size_t>(PropId::QtyPending) ].asUInt16().value_or(0u);
+         // QtyTotal is in-stock + pending, this combined field displays similar to CT.com
+         auto qty     = rec[QtyOnHand ].asUInt16().value_or(0u);
+         auto pending = rec[QtyPending].asUInt16().value_or(0u);
          if (pending == 0)
          {
-            rec[static_cast<size_t>(PropId::QtyTotal)] = qty;
+            rec[QtyTotal] = qty;
          }
          else{
-            rec[static_cast<size_t>(PropId::QtyTotal)] = ctb::format("{}+{}", qty, pending);
+            rec[QtyTotal] = ctb::format("{}+{}", qty, pending);
          }
 
          // for drinking window, 9999 = null
-         auto& drink_start = rec[static_cast<size_t>(PropId::BeginConsume)];
+         auto& drink_start = rec[BeginConsume];
          if (drink_start.asUInt16() == constants::CT_NULL_YEAR)
             drink_start.setNull();
 
-         auto& drink_end = rec[static_cast<size_t>(PropId::EndConsume)];
+         auto& drink_end = rec[EndConsume];
          if (drink_end.asUInt16() == constants::CT_NULL_YEAR)
             drink_end.setNull();
       }
+
    };
 
 

@@ -23,7 +23,7 @@ namespace ctb::detail
    {
    public:
       using Record = RecordTypeT;
-      using PropId = Record::PropId;
+      using Prop   = Record::Prop;
 
       /// @brief the substring to search for.
       ///
@@ -31,7 +31,7 @@ namespace ctb::detail
 
       /// @brief the properties to search in.
       ///
-      std::vector<PropId> search_props{};
+      std::vector<Prop> search_props{};
 
       /// @brief  function operator used to perform the substring search. 
       ///

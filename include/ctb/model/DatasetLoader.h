@@ -8,14 +8,15 @@
 #pragma once
 
 #include "ctb/table_data.h"
-#include "ctb/model/DatasetBase.h"
+#include "ctb/tables/CtProperty.h"
+#include "ctb/interfaces/IDataset.h"
 
 #include <filesystem>
 #include <memory>
 #include <unordered_map>
 
 
-namespace ctb::app
+namespace ctb
 {
    namespace fs = std::filesystem;
 
@@ -65,4 +66,4 @@ namespace ctb::app
    };
 
 
-} // namespace ctb::app
+} // namespace ctb

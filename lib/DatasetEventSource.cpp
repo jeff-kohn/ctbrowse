@@ -9,23 +9,31 @@
 #include "ctb/model/DatasetEventSource.h"
 
 
-namespace ctb::app
+namespace ctb
 {
 
    /// @brief static method to create a class instance.
-   [[nodiscard]] DatasetEventSourcePtr DatasetEventSource::create()
+   [[nodiscard]] 
+   auto DatasetEventSource::create() -> DatasetEventSource::DatasetEventSourcePtr
    { 
       return DatasetEventSourcePtr{ new DatasetEventSource{} }; 
    }
 
-   bool DatasetEventSource::hasTable() const
+   auto DatasetEventSource::hasTable() const -> bool
    { 
       return m_data ? true : false; 
    }
 
 
+   /// @brief retrieves a pointer to the active table for this source, if any.
+   auto DatasetEventSource::getTable() const -> DatasetPtr
+   {
+      return m_data;
+   }
+
+
    /// @brief assigns a table to this source.
-   bool DatasetEventSource::setTable(DatasetPtr table, bool signal_event)
+   auto DatasetEventSource::setTable(DatasetPtr dataset, bool signal_event) -> bool
    {
       SPDLOG_DEBUG("DatasetEventSource::setTable() called.");
 
@@ -35,15 +43,8 @@ namespace ctb::app
       if (!signal(DatasetEvent::Id::TableRemove))
          return false;
 
-      m_data = table;
+      m_data = dataset;
       return signal_event ? signal(DatasetEvent::Id::TableInitialize) : true;
-   }
-
-
-   /// @brief retrieves a pointer to the active table for this source, if any.
-   DatasetPtr DatasetEventSource::getTable()
-   {
-      return m_data;
    }
 
 
@@ -66,10 +67,10 @@ namespace ctb::app
 
 
    /// @brief this is called to signal that an event needs to be sent to all listeners
-   bool DatasetEventSource::signal(DatasetEvent::Id event_id, std::optional<int> row_idx) noexcept
+   auto DatasetEventSource::signal(DatasetEvent::Id event_id, NullableInt rec_idx) noexcept -> bool
    {
       auto event_name = magic_enum::enum_name(event_id);
-      SPDLOG_DEBUG("DatasetEventSource::signal({},{}) called", event_name, row_idx.value_or(-1));
+      SPDLOG_DEBUG("DatasetEventSource::signal({},{}) called", event_name, rec_idx.value_or(-1));
 
       bool retval{ true };
       if (m_data)
@@ -78,14 +79,14 @@ namespace ctb::app
          { 
             try
             {
-               observer->notify({ event_id, m_data, row_idx});
+               observer->notify({ event_id, m_data, rec_idx});
             }
             catch(...){
                retval = false;
                SPDLOG_DEBUG(
                   "DatasetEventSource::signal({}, {}) caught exception from observer. {}", 
                   event_name, 
-                  row_idx.value_or(-1),
+                  rec_idx.value_or(-1),
                   packageError().formattedMesage()
                );
             }
@@ -95,7 +96,7 @@ namespace ctb::app
    }
 
 
-   bool DatasetEventSource::signal(DatasetEvent::Id event_id) noexcept
+   auto DatasetEventSource::signal(DatasetEvent::Id event_id) noexcept -> bool
    {
       return signal(event_id, std::nullopt);
    }
@@ -118,4 +119,4 @@ namespace ctb::app
       } 
    }
 
-} // namespace ctb::app
+} // namespace ctb

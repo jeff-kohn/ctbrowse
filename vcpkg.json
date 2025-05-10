@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "dependencies": [
     "boost-algorithm",
-    "boost-scope",
+    "boost-unordered",
     "catch2",
     "cpr",
     "fmt",
@@ -22,5 +22,5 @@
     },
     "spdlog"
   ],
-  "builtin-baseline": "96d5fb3de135b86d7222c53f2352ca92827a156b"
+  "builtin-baseline": "b8970ecfc803f93e1b95d81ada1de7ea3a51fc8b"
 }

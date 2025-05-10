@@ -545,8 +545,8 @@ namespace ctb::app
       if (m_event_source->hasTable())
       {
          auto tbl = m_event_source->getTable();
-         total = tbl->totalRowCount();
-         filtered = tbl->filteredRowCount();
+         total = tbl->totalRecCount();
+         filtered = tbl->filteredRecCount();
       }
 
       if (total)

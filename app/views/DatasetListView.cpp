@@ -98,10 +98,10 @@ namespace ctb::app
 
    void DatasetListView::notify(DatasetEvent event)
    {
-      switch (event.m_event_id)
+      switch (event.event_id)
       {
          case DatasetEvent::Id::TableInitialize:
-            m_model.setDataset(event.m_data);
+            m_model.setDataset(event.dataset);
             break;
 
          case DatasetEvent::Id::TableRemove:

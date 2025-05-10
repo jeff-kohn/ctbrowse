@@ -12,9 +12,8 @@
 
 #include <vector>
 
-namespace ctb::app
+namespace ctb::detail
 {
-   using detail::TableProperty;
 
    /// @brief struct containing everything needed to know about how to display a table column
    ///
@@ -42,12 +41,12 @@ namespace ctb::app
          Currency
       };
 
-      /// @brief The zero-based index into the record type's PropId enum of the property this object represents 
+      /// @brief The zero-based index into the record type's CtProp enum of the property this object represents 
       ///
       /// We have to use a int instead of the enum because this class needs to be used through a type-erased 
       /// interface and can't refer to types specific to a TableRecord<> instantiation.
       /// 
-      int prop_index{};                  
+      CtProp prop_id{};                  
 
       /// @brief Title to use for the column's header 
       std::string display_name{};
@@ -65,18 +64,14 @@ namespace ctb::app
       ///
       /// column header value is option and will use the table column name by default
       ///
-      explicit DisplayColumn(int prop_idx, std::string_view col_name) : 
-         prop_index{ prop_idx }, 
-         display_name{ col_name }
+      DisplayColumn(CtProp prop_id, std::string_view col_name) : prop_id{ prop_id },  display_name{ col_name }
       {}
 
       /// @brief construct a column to display the specified property in the requested format
       ///
       /// column header value is optional and will use the table column name by default
       ///
-      DisplayColumn(int prop_idx, Format fmt, std::string_view col_name) : 
-         prop_index{ prop_idx }, 
-         display_name{ col_name }, format{ fmt }
+      DisplayColumn(CtProp prop_id, Format fmt, std::string_view col_name) :  prop_id{ prop_id },  display_name{ col_name }, format{ fmt }
       {
          if (fmt != Format::String)
          {
@@ -91,7 +86,7 @@ namespace ctb::app
       /// displayed with 1 decimal place.
       ///
       template<typename... Args>
-      std::string getDisplayValue(const TableProperty<Args...>& value) const
+      std::string getDisplayValue(const detail::TableProperty<Args...>& value) const
       {       
          switch (format)
          {
@@ -117,4 +112,4 @@ namespace ctb::app
 
    using DisplayColumns = std::vector<DisplayColumn>;
 
-} // namespace ctb
+} // namespace ctb::detail

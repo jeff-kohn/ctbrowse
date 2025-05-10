@@ -8,7 +8,7 @@
 
 namespace ctb::app
 {
-   auto DatasetMultiView::create(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache) -> DatasetMultiView*
+   auto DatasetMultiView::create(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache) -> DatasetMultiView*
    {
       try
       {
@@ -22,7 +22,7 @@ namespace ctb::app
    }
 
    
-   DatasetMultiView::DatasetMultiView(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache) : wxSplitterWindow{ parent }
+   DatasetMultiView::DatasetMultiView(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache) : wxSplitterWindow{ parent }
    {
       constexpr auto LEFT_SPLITTER_GRAVITY = 0.25;
       constexpr auto RIGHT_SPLITTER_GRAVITY = 0.75;

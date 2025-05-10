@@ -1,6 +1,6 @@
 #include "App.h"
 
-#include <ctb/model/DatasetBase.h>
+#include <ctb/model/CtDataModel.h>
 #include <wx/dataview.h>
 
 namespace ctb::app
@@ -8,6 +8,7 @@ namespace ctb::app
    class CtDataViewModel final : public wxDataViewVirtualListModel
    {
    public:
+
       CtDataViewModel() = default;
       explicit CtDataViewModel(DatasetPtr dataset) : m_dataset{ dataset }
       {}
@@ -27,7 +28,7 @@ namespace ctb::app
       {
 
 #if !defined(NDEBUG)
-         if ( row >= m_dataset->filteredRowCount() or col >= std::ssize(m_dataset->displayColumns()) )
+         if ( row >= m_dataset->filteredRecCount() or col >= std::ssize(m_dataset->displayColumns()) )
          {
             assert(false);
             SPDLOG_DEBUG("CtDataViewModel::GetValueByRow() called with invalid coordinates.");
@@ -36,10 +37,9 @@ namespace ctb::app
 #endif
 
          auto display_col = m_dataset->displayColumns().at(col);
-         auto prop = display_col.prop_index;
 
          // format as string and return it to caller
-         auto val = m_dataset->getDetailProp(static_cast<int>(row), prop);
+         auto val = m_dataset->getProperty(static_cast<int>(row), display_col.prop_id);
          auto val_str = display_col.getDisplayValue(val);
          variant = wxString::FromUTF8(val_str);
       }
@@ -49,10 +49,9 @@ namespace ctb::app
          return false; // editing not supported
       }
 
-
       unsigned int GetCount()	const override
       {
-         return static_cast<uint32_t>(m_dataset->filteredRowCount());
+         return static_cast<uint32_t>(m_dataset->filteredRecCount());
       }
 
    private:

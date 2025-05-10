@@ -7,17 +7,17 @@
  *******************************************************************/
 #pragma once
 
-#include "ctb/model/DatasetEvent.h"
+#include "ctb/model/DatasetEventSource.h"
 
 
-namespace ctb::app
+namespace ctb
 {
    /// @brief Scoped RAII wrapper for subscribing/unsubscribing from a dataset event source
    ///
    /// To handle dataset events, all a class needs to do is instantiate a member of this
-   /// class, passing a pointer to the IDatasetEventSink interface to its ctor (usually 'this'
-   /// when the containing class itself inherits from IDatasetEventSink to ensure that the sink
-   /// interface is available for the lifetime of the event source).
+   /// class, passing a pointer to the IDatasetEventSink interface to its ctor. This class
+   /// will automatically subscribe/unsubscribe to the event source in its ctor/dtor
+   /// 
    class ScopedEventSink final
    {
    public:
@@ -37,9 +37,7 @@ namespace ctb::app
       /// you can pass a null source (although there's no point), but passing a null 
       /// sink will throw an exception.
       /// 
-      ScopedEventSink(IDatasetEventSink* sink, DatasetEventSourcePtr source) : 
-         m_sink{ sink },
-         m_source{ source }
+      ScopedEventSink(IDatasetEventSink* sink, DatasetEventSourcePtr source) : m_sink{ sink }, m_source{ source }
       {
          if (!m_sink)
          {
@@ -63,11 +61,11 @@ namespace ctb::app
       /// returns true if successful, false if we don't have a source or the source 
       /// couldn't send notifications (because of no current table, for instance)
       /// 
-      bool signal_source(DatasetEvent::Id event_id, std::optional<int> row_idx = std::nullopt)
+      bool signal_source(DatasetEvent::Id event_id, NullableInt rec_idx = std::nullopt)
       {
          if (m_source)
          {
-            return m_source->signal(event_id, row_idx);
+            return m_source->signal(event_id, rec_idx);
          }
          return false;
       }
@@ -122,4 +120,4 @@ namespace ctb::app
    };
 
 
-}  // namespace ctb::app
+}  // namespace ctb

@@ -22,10 +22,11 @@ target_sources(ctBrowse_lib
       "../include/ctb/utility_http.h"
       "../include/ctb/utility_templates.h"
       
+      "../include/ctb/interfaces/IDataset.h"
+      "../include/ctb/interfaces/IDatasetEvent.h"
+            
       "../include/ctb/model/CtDataModel.h"
       "../include/ctb/model/CtStringFilter.h"
-      "../include/ctb/model/DatasetBase.h"
-      "../include/ctb/model/DatasetEvent.h"
       "../include/ctb/model/DatasetEventSource.h"
       "../include/ctb/model/DatasetLoader.h"
       "../include/ctb/model/DisplayColumn.h"
@@ -39,6 +40,7 @@ target_sources(ctBrowse_lib
       "../include/ctb/tables/detail/PropFilter.h"
       "../include/ctb/tables/detail/PropStringFilter.h"
       "../include/ctb/tables/detail/PropStringFilterMgr.h"
+      "../include/ctb/tables/detail/SortConfig.h"
       "../include/ctb/tables/detail/SubstringFilter.h"
       "../include/ctb/tables/detail/TableProperty.h"
       "../include/ctb/tables/detail/TableRecord.h"

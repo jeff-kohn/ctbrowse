@@ -31,7 +31,8 @@ namespace ctb::app
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its own lifetime). 
       /// 
-      [[nodiscard]] static DetailsPanel* create(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache);
+      [[nodiscard]] static 
+      auto create(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache) -> DetailsPanel*;
 
       /// @brief Indicates whether the details for a selected wine are currently displayed.
       /// @return true if a wine is displayed in details, false otherwise.
@@ -46,7 +47,7 @@ namespace ctb::app
       ~DetailsPanel() override = default;
 
    private:
-      using wxImageTask = LabelImageCache::wxImageTask;
+      using wxImageTask    = LabelImageCache::wxImageTask;
       using MaybeImageTask = std::optional<wxImageTask>;
 
       /// @brief struct that control validators will be bound to for displaying in the window

@@ -33,7 +33,7 @@ int main()
       WineListTable::value_type rec{};
       for (csv::CSVRow& row : reader)
       {
-         rec.parse(row);
+         rec.parseRow(row);
          wines.emplace_back(std::move(rec));
       }
    }

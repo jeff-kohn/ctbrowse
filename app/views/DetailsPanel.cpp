@@ -297,32 +297,32 @@ namespace ctb::app
       
       wxWindowUpdateLocker freeze_win(this);
 
-      if (event.m_affected_row and event.m_affected_row.value() >= 0)
+      if (event.affected_row and event.affected_row.value() >= 0)
       {
-         auto* tbl = event.m_data.get();
+         auto* tbl = event.dataset.get();
          assert(tbl != nullptr);
-         auto row_idx = event.m_affected_row.value();
+         auto rec_idx = event.affected_row.value();
 
-         m_details.wine_id     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_WINE_ID    ).asUInt64().value_or(0);
-         m_details.wine_name   = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_WINE_NAME  ).asString();
-         m_details.vintage     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_VINTAGE    ).asString();
-         m_details.varietal    = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_VARIETAL   ).asString();
-         m_details.country     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_COUNTRY    ).asString();
-         m_details.region      = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_REGION     ).asString();
-         m_details.sub_region  = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_SUB_REGION ).asString();
-         m_details.appellation = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_APPELLATION).asString();
+         m_details.wine_id     = tbl->getProperty(rec_idx, CtProp::iWineId     ).asUInt64().value_or(0);
+         m_details.wine_name   = tbl->getProperty(rec_idx, CtProp::WineName    ).asString();
+         m_details.vintage     = tbl->getProperty(rec_idx, CtProp::Vintage     ).asString();
+         m_details.varietal    = tbl->getProperty(rec_idx, CtProp::Varietal    ).asString();
+         m_details.country     = tbl->getProperty(rec_idx, CtProp::Country     ).asString();
+         m_details.region      = tbl->getProperty(rec_idx, CtProp::Region      ).asString();
+         m_details.sub_region  = tbl->getProperty(rec_idx, CtProp::SubRegion   ).asString();
+         m_details.appellation = tbl->getProperty(rec_idx, CtProp::Appellation ).asString();
 
-         m_details.drink_window     = detail::getDrinkWindow(tbl->getDetailProp(row_idx, constants::DETAIL_PROP_DRINK_START),
-                                                             tbl->getDetailProp(row_idx, constants::DETAIL_PROP_DRINK_END));
+         m_details.drink_window     = detail::getDrinkWindow(tbl->getProperty(rec_idx, CtProp::BeginConsume ),
+                                                             tbl->getProperty(rec_idx, CtProp::EndConsume   ));
 
-         m_details.auction_value    = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_AUCTION_VALUE  ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
-         m_details.community_price  = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_COMMUNITY_PRICE).asString(constants::FMT_NUMBER_CURRENCY).c_str();
-         m_details.my_price         = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_MY_PRICE       ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
+         m_details.auction_value    = tbl->getProperty(rec_idx, CtProp::AuctionPrice ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
+         m_details.community_price  = tbl->getProperty(rec_idx, CtProp::CtPrice      ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
+         m_details.my_price         = tbl->getProperty(rec_idx, CtProp::MyPrice      ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
 
-         auto prop_val = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_CT_SCORE);
+         auto prop_val = tbl->getProperty(rec_idx, CtProp::CtScore);
          m_details.ct_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
 
-         prop_val = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_MY_SCORE);
+         prop_val = tbl->getProperty(rec_idx, CtProp::MyScore);
          m_details.my_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
          GetSizer()->ShowItems(true);
 
@@ -346,7 +346,7 @@ namespace ctb::app
    {
       try
       {
-         switch (event.m_event_id)
+         switch (event.event_id)
          {
          case DatasetEvent::Id::RowSelected:
             updateDetails(event);
@@ -357,7 +357,7 @@ namespace ctb::app
             break;
 
          default:
-            event.m_affected_row = std::nullopt;
+            event.affected_row = std::nullopt;
             updateDetails(event);
             break;
          }

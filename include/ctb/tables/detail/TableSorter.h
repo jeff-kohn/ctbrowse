@@ -16,33 +16,42 @@
 namespace ctb::detail
 {
 
-   /// @brief defines a functor that can be used to sort a container/range of table entries
+   /// @brief Defines a functor that can be used to sort a container/range of table entries
    ///
-   /// note there's no ascending/descending option, because that decision should be made
-   /// by the range passed to the sort algorithm, not here.
+   /// Default sort is less-than, if reverse=true it will be greater-than
    /// 
-   template<TableRecordType RecordT>
+   template<EnumType PropT, PropertyMapType PropMapT>
    struct TableSorter
    {
-      using Record = RecordT;
-      using PropId = Record::PropId;
+      using PropertyMap = PropMapT;
+      using Prop        = PropT;
 
-      std::vector<PropId> sort_props{};      // properties to use for sorting, in order
+      std::vector<Prop>   sort_props{};      // properties to use for sorting, in order
       std::string         sort_name{};       // for display purposes in selection lists etc
+      bool                reverse{ false };  // set to true to sort in reverse order
 
       /// @brief function operator that does the comparison.
       ///
-      bool operator()(const Record& r1, const Record& r2)
+      bool operator()(const PropertyMap& r1, const PropertyMap& r2)
       {
          for (auto prop : sort_props)
          {
             auto cmp = r1[prop] <=> r2[prop];
             if (cmp < 0)
-               return true;
+            {
+               return reverse ? false : true;
+            }
             else if (cmp > 0)
-               return false;
+            {
+               return reverse ? true : false;
+            }
          }
          return false; // all props equal
+      }
+
+      const auto operator==(const TableSorter& other)
+      {
+         return reverse == other.reverse and sort_props == other.sort_props and sort_name == other.sort_name;
       }
    };
 

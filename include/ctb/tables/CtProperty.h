@@ -3,7 +3,7 @@
 *
 * @brief      Declares the type alias CtProperty, which is used for 
 *             our CellarTracker data tables. It also defines the 
-*             CtPropId enum, which contains the property identifiers
+*             CtProp enum, which contains the property identifiers
 *             for all of the properties supported by the application.
 *
 * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
@@ -13,9 +13,10 @@
 #include "ctb/ctb.h"
 #include "ctb/tables/detail/TableProperty.h"
 
+#include <boost/unordered/unordered_flat_map.hpp>
+
 namespace ctb
 {
-
 
    /// @brief Type alias for the property type used in CellarTracker data tables.
    ///
@@ -30,7 +31,7 @@ namespace ctb
    /// @brief Enumeration for all of the properties supported by CellarTracker data tables.
    ///        Many properties are common across all tables, some are table-specific. 
    /// 
-   enum class CtPropId : uint16_t
+   enum class CtProp : uint16_t
    {
       iWineId,
       WineName,
@@ -70,11 +71,10 @@ namespace ctb
       PendingQtyOrdered,
       PendingStoreName,
       PendingDeliveryDate,
-      PendingPurchaseId,
-
-      /// hidden, used for searching de-accented version of wine/producer
-      SearchWine,
-      SearchProducer,
+      PendingPurchaseId
    };
+
+
+   using CtPropertyMap = boost::unordered_flat_map<CtProp, CtProperty>; 
 
 } // namespace ctb

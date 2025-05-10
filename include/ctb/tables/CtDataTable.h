@@ -10,24 +10,30 @@
 #pragma once
 
 #include "ctb/tables/CtProperty.h"
-#include "ctb/tables/detail/TableRecord.h"
+#include "ctb/tables/TableRecord.h"
 
 #include <vector>
 
 namespace ctb
 {
-   using ctb::detail::TableRecord;
 
    /// @brief Type alias for a record in a CellarTracker data table
    /// 
    template <RecordTraitsType RecordTraits>
-   using CtTableRecord = TableRecord<RecordTraits, CtProperty>;
+   using CtTableRecord = TableRecord<RecordTraits, CtPropertyMap>;
 
 
    /// @brief Type alias for a data table of CellarTracker records
    /// 
    template <RecordTraitsType RecordTraits>
    using CtDataTable = std::vector<CtTableRecord<RecordTraits> >;
+
+
+
+   /// @brief type alias for Ct-specific DisplayColumn types
+   ///
+   //using CtDisplayColumn   = DisplayColumn<CtProp>;
+   //using CtDisplayColumns  = DisplayColumns<CtProp>;
 
 
 } // namespace ctb

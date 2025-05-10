@@ -6,7 +6,7 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
-#include "ctb/tables/PendingWineTable.h"
+//#include "ctb/tables/PendingWineTable.h"
 #include "ctb/tables/WineListTable.h"
 
 #include "ctb/model/DatasetLoader.h"
@@ -16,9 +16,10 @@
 #include <magic_enum/magic_enum_switch.hpp>
 
 
-namespace ctb::app
+namespace ctb
 {
    using namespace magic_enum;
+
 
    auto DatasetLoader::getDataset(TableId tbl) -> DatasetPtr
    {
@@ -31,9 +32,9 @@ namespace ctb::app
                   throw table_data.error();
                }
                return CtDataModel<WineListTable>::create(std::move(table_data.value()));
-            },
+            }/*,
 
-/*         [this](enum_constant<TableId::List>)  -> DatasetPtr
+         [this](enum_constant<TableId::List>)  -> DatasetPtr
          { 
             auto table_data = loadTableData<PendingWineDataset>(m_data_folder, TableId::Pending);
             if (!table_data)
@@ -46,4 +47,4 @@ namespace ctb::app
       return enum_switch(TableFactory, tbl);
    }
 
-}  // ctb::app
+}  // ctb

@@ -1,11 +1,15 @@
 #pragma once
 
 #include "App.h"
-#include <ctb/model/ScopedEventSink.h>
 
 #include <wx/splitter.h>
 #include <memory>
 
+
+namespace ctb
+{
+   struct IDatasetEventSource; // no need to pull in a bunch of datamodel headers
+}
 
 namespace ctb::app
 {
@@ -15,9 +19,6 @@ namespace ctb::app
 
    class LabelImageCache;
    using LabelCachePtr = std::shared_ptr<LabelImageCache>;
-
-   struct IDatasetEventSource;
-   using EventSourcePtr = std::shared_ptr<IDatasetEventSource>;
 
 
    /// @brief Window class that implements three side-by-side views using splitter windows.
@@ -30,7 +31,8 @@ namespace ctb::app
       /// throws a ctb::Error if the window can't be created; otherwise returns a non-owning pointer 
       /// to the window (wx windows are self-deleting).
       /// 
-      [[nodiscard]] static auto create(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache) -> DatasetMultiView*;
+      [[nodiscard]] static 
+      auto create(wxWindow* parent, std::shared_ptr<IDatasetEventSource> source, LabelCachePtr cache) -> DatasetMultiView*;
 
 
       /// @brief Indicates whether the details for a selected wine are currently displayed.
@@ -53,7 +55,7 @@ namespace ctb::app
       wxSplitterWindow*    m_right_splitter{};
 
       /// @brief Private constructor, used by DatasetMultiView::create()
-      DatasetMultiView(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache);
+      DatasetMultiView(wxWindow* parent, std::shared_ptr<IDatasetEventSource> source, LabelCachePtr cache);
    };
 
 

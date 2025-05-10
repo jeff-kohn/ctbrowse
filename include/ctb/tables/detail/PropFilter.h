@@ -29,7 +29,7 @@ namespace ctb::detail
    struct PropFilter
    {
       using Record  = RecordTypeT;
-      using PropId      = Record::PropId;
+      using Prop      = Record::Prop;
       using ValueType   = ValueT;
       using ComparePred = std::function<bool(const ValueType&, const ValueType&)>;
 
@@ -37,7 +37,7 @@ namespace ctb::detail
       /// @brief construct a PropFilter from any value convertible to ValueT for the specified property
       ///
       template<std::convertible_to<ValueType> T>
-      constexpr PropFilter(PropId prop, ComparePred pred, T&& val) noexcept :
+      constexpr PropFilter(Prop prop, ComparePred pred, T&& val) noexcept :
          match_props{ prop }, 
          compare_val{ std::forward<T>(val) },
          compare_pred{ std::move(pred) },
@@ -46,8 +46,8 @@ namespace ctb::detail
 
       /// @brief construct a PropFilter for matching the given value and predicate to one of multiple properties       
       ///
-      template<std::convertible_to<ValueType> T> // requires std::same_as<rng::range_value_t<RngT>, PropId>
-      constexpr PropFilter(std::initializer_list<PropId> props, ComparePred pred, T&& val) noexcept : 
+      template<std::convertible_to<ValueType> T> // requires std::same_as<rng::range_value_t<RngT>, Prop>
+      constexpr PropFilter(std::initializer_list<Prop> props, ComparePred pred, T&& val) noexcept : 
          match_props(props.begin(), props.end()), 
          compare_val{ std::forward<T>(val) },
          compare_pred{ std::move(pred) },
@@ -56,7 +56,7 @@ namespace ctb::detail
 
       /// @brief the properties that we're filtering against
       ///
-      std::vector<PropId> match_props{};
+      std::vector<Prop> match_props{};
 
       /// @brief the value the record property will be compared to using compare_pred
       ///
@@ -75,7 +75,7 @@ namespace ctb::detail
       bool operator()(const Record& rec) const
       {
          if (enabled)
-            return rng::find_if(match_props, [&rec, this](PropId prop_id){ return compare_pred(rec[prop_id], compare_val); }) != match_props.end();
+            return rng::find_if(match_props, [&rec, this](Prop prop_id){ return compare_pred(rec[prop_id], compare_val); }) != match_props.end();
 
          return true;
       }

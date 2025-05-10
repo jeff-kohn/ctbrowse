@@ -28,14 +28,14 @@ namespace ctb::detail
    class PropStringFilterMgr
    {
    public:
-      using Record   = RecordTypeT;
+      using Record       = RecordTypeT;
       using StringFilter = PropStringFilter<Record>;
-      using PropId       = Record::PropId;
+      using Prop         = Record::Prop;
 
       /// @brief add a match value for the specified column filter.
       /// @return true if successful, false if filter value already existed or could not be added.
       /// 
-      bool addFilter(PropId prop_id, std::string_view match_value)
+      bool addFilter(Prop prop_id, std::string_view match_value)
       {
          auto& filter = m_filters[prop_id];
 
@@ -50,7 +50,7 @@ namespace ctb::detail
       /// @brief remove a match value for the specified column filter
       /// @return true if removed, false if not found.1
       /// 
-      bool removeFilter(PropId prop_id, std::string_view match_value)
+      bool removeFilter(Prop prop_id, std::string_view match_value)
       {
          bool ret_val{ false };
 
@@ -114,7 +114,7 @@ namespace ctb::detail
 
 
    private:
-      std::map<PropId, StringFilter> m_filters{};
+      std::map<Prop, StringFilter> m_filters{};
    };
 
 } // namespace ctb::detail
