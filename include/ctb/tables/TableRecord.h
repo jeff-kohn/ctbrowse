@@ -62,15 +62,20 @@ namespace ctb
    public:
       using Traits        = RecordTraitsT;
       using Prop          = Traits::Prop;
-      using Properties    = PropertyMapT;
-      using Property      = Properties::mapped_type; 
+      using PropertyMap   = PropertyMapT;
+      using Property      = PropertyMap::mapped_type; 
       using RowType       = csv::CSVRow;
 
+      /// @brief Construct a TableRecord from a RowType
       explicit TableRecord(const RowType& row)
       {
          parseRow(row);
       }
-      TableRecord() = default;
+
+      /// @brief Construct a TableRecord from a PropertyMap.
+      explicit TableRecord(PropertyMap props) : m_props{ std::move(props) }
+      {}
+
       TableRecord(TableRecord&&) = default;
       TableRecord& operator=(TableRecord&&) = default;
 
@@ -143,16 +148,17 @@ namespace ctb
 
       /// @brief  Gets a reference to the map of all properties for this record.
       /// 
-      auto getProperties() const -> const Properties&
+      auto getProperties() const -> const PropertyMap&
       {
          return m_props;
       }
 
+      TableRecord() = delete;
       TableRecord(const TableRecord&) = delete;
       TableRecord& operator=(const TableRecord&) = delete;
 
    private:
-      Properties m_props{ Traits::getSchema().size()};
+      PropertyMap m_props{ Traits::getSchema().size()};
 
       // @brief converts a CSVField into a TableProperty
       Property fieldToProperty(csv::CSVField& fld, PropType prop_type)

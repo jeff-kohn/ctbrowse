@@ -9,6 +9,8 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include "ctb/table_data.h"
+
 #include "ctb/tables/CtDataTable.h"
 #include <boost/unordered/unordered_flat_map.hpp>
 
@@ -25,7 +27,7 @@ namespace ctb
    public:
       using Prop        = CtProp;
       using Property    = CtProperty;
-      using Properties  = CtPropertyMap;
+      using PropertyMap = CtPropertyMap;
       using FieldSchema = FieldSchema;
 
    private:
@@ -67,6 +69,14 @@ namespace ctb
       /// @brief getTableName()
       /// @return the name of this CT table this traits class represents
       /// 
+      static constexpr auto getTableId() -> TableId
+      { 
+         return TableId::List; 
+      }
+
+      /// @brief getTableName()
+      /// @return the name of this CT table this traits class represents
+      /// 
       static constexpr auto getTableName() -> std::string_view 
       { 
          return "WineList"; 
@@ -82,14 +92,19 @@ namespace ctb
          return s_schema;
       }
 
+      static constexpr auto hasProperty(Prop prop_id) -> bool
+      {
+         return s_schema.contains(prop_id);
+      }
+
       /// @brief this gets called by TableRecord to set any missing property values
       /// 
-      /// Properties from the CSV file are already set, this impl just provides
+      /// PropertyMap from the CSV file are already set, this impl just provides
       /// any calculated property values or does fixup for any parsed values that need it.
       /// 
       /// @param rec span containing a TableProperty for each PropID enum value.
       /// 
-      static void onRecordParse(Properties rec)
+      static void onRecordParse(PropertyMap rec)
       {
          using enum Prop;
 

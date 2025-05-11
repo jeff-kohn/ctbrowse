@@ -45,25 +45,25 @@ namespace ctb::app
       ~DatasetOptionsPanel() override = default;
       
    private:
-      using MaybeFilter = std::optional<CtStringFilter>;
-      using FilterMap = std::map<wxTreeItemId, MaybeFilter>; // map tree node to corresponding filter config
+      using MaybeFilter   = std::optional<CtMultiMatchFilter>;
+      using FilterMap     = std::map<wxTreeItemId, MaybeFilter>; // map tree node to corresponding MaybeFilter 
       using CheckCountMap = std::map<wxTreeItemId, int>;     
 
-      CheckCountMap         m_check_map{};                  // for keeping track of number of filter items selected 
       bool                  m_enable_score_filter{ false }; // whether score filter is active
-      wxStaticBoxSizer*     m_filter_options_box{};         
       bool                  m_instock_only{ constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT };
-      wxTreeCtrl*           m_filter_tree{};
-      wxWithImages::Images  m_filter_tree_images{};
-      FilterMap             m_filters{};
-      wxSpinCtrlDouble*     m_score_spin_ctrl{};
+      bool                  m_sort_ascending{ true };       // whether ascending sort order is active
+      bool                  m_sort_descending{ false };     // whether descending sort ordes is active
+      CheckCountMap         m_check_map{};                  // for keeping track of number of filter items selected 
       double                m_score_filter_val{};
+      int                   m_sort_selection{0};            // index of selected sort in combo, which matches a sort in availableSorts()
+      IDataset::TableSort   m_sort_config{};                // the sort object that will be used to sort the dataset 
+      FilterMap             m_filters{};
       ScopedEventSink       m_sink;           
       wxChoice*             m_sort_combo{};
-      int                   m_sort_selection{0};            // index of selected sort in combo, which matches a sort in availableSorts()
-      bool                  m_sort_ascending{ true };       // whether ascending sort order is active
-      bool                  m_sort_reverse{ false };        // whether descending sort ordes is active
-      IDataset::TableSort   m_sort_config{};                // the sort object that will be used to sort the dataset 
+      wxSpinCtrlDouble*     m_score_spin_ctrl{};
+      wxStaticBoxSizer*     m_filter_options_box{};         
+      wxTreeCtrl*           m_filter_tree{};
+      wxWithImages::Images  m_filter_tree_images{};
 
       // window creation
       void initControls();
@@ -71,12 +71,12 @@ namespace ctb::app
       // implementation functions for the property filter tree-view
       void addPropFilter(wxTreeItemId item);
       void removePropFilter(wxTreeItemId item);
-      MaybeFilter getPropFilterForItem(wxTreeItemId item);
-      wxArrayString getSortOptionList(IDataset* dataset);
-      bool isChecked(wxTreeItemId item);
-      bool isContainerNode(wxTreeItemId item);
-      bool isMatchValueNode(wxTreeItemId item);
-      bool setMatchValueChecked(wxTreeItemId item, bool checked = true);
+      auto getPropFilterForItem(wxTreeItemId item) -> MaybeFilter;
+      auto getSortOptionList(IDataset* dataset) -> wxArrayString;
+      auto isChecked(wxTreeItemId item) -> bool;
+      auto isContainerNode(wxTreeItemId item) -> bool;
+      auto isMatchValueNode(wxTreeItemId item) -> bool;
+      auto setMatchValueChecked(wxTreeItemId item, bool checked = true) -> bool;
       void toggleFilterSelection(wxTreeItemId item);
       void updateFilterLabel(wxTreeItemId item);
 

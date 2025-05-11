@@ -1,15 +1,17 @@
 #pragma once
 
 
-#include "ctb/tables/detail/PropFilter.h"
-#include "ctb/tables/detail/PropStringFilterMgr.h"
+#include "ctb/interfaces/IDataset.h"
+
+#include "ctb/tables/detail/MultiMatchPropertyFilterMgr.h"
+#include "ctb/tables/detail/PropertyFilter.h"
 #include "ctb/tables/detail/SubStringFilter.h"
 #include "ctb/tables/detail/TableSorter.h"
 
-#include "ctb/interfaces/IDataset.h"
-#include "ctb/model/DisplayColumn.h"
+#include "ctb/model/CtDisplayColumn.h"
 
 #include <vector>
+
 
 namespace ctb
 {
@@ -26,52 +28,22 @@ namespace ctb
    class CtDataModel final : protected IDataset
    {
    public:
+      using base                = IDataset;
       using DataTable           = DataTableT;
+      using DisplayColumn       = base::DisplayColumn;
+      using DisplayColumns      = base::DisplayColumns;
+      using MultiMatchFilterMgr = detail::MultiMatchPropertyFilterMgr<Prop, PropertyMap>;
+      using MultiMatchFilter    = MultiMatchFilterMgr::Filter;
+      using Prop                = base::Prop;
+      using Property            = base::Property;
+      using PropertyFilter      = detail::PropertyFilter<Prop, PropertyMap>;
+      using PropertyMap         = base::PropertyMap;
+      using PropertyValueSet      = base::PropertyValueSet;
       using Record              = DataTable::value_type;
-      using Prop                = Record::Prop;
-      using Property            = Record::Property;
-      using Properties          = Record::Properties;
-      using Traits              = Record::Traits;
-
-      using DisplayColumn       = detail::DisplayColumn;
-      using DisplayColumns      = detail::DisplayColumns;
-      using PropFilter          = detail::PropFilter<Record, Property>;
-      using PropStringFilterMgr = detail::PropStringFilterMgr<Record>;
       using SubStringFilter     = detail::SubStringFilter<Record>;
-      using TableSort           = detail::TableSorter<Prop, Properties>;
-
-
-      /// @brief list of display columns that will show in the list view
-      ///
-      static inline const std::array DefaultDisplayColumns { 
-         DisplayColumn{ Prop::WineAndVintage,                              constants::DISPLAY_COL_WINE     },
-         DisplayColumn{ Prop::Locale,                                      constants::DISPLAY_COL_LOCALE   },
-         DisplayColumn{ Prop::QtyTotal,   DisplayColumn::Format::Number,   constants::DISPLAY_COL_QTY      },
-         DisplayColumn{ Prop::CtScore,    DisplayColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE },
-         DisplayColumn{ Prop::MyScore,    DisplayColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE },
-      };
-
-      /// @brief the available sort orders for this table.
-      ///
-      static inline const std::vector Sorters{ 
-         TableSort{ { Prop::WineName, Prop::Vintage                       }, constants::SORT_OPTION_WINE_VINTAGE   },
-         TableSort{ { Prop::Vintage,  Prop::WineName                      }, constants::SORT_OPTION_VINTAGE_WINE   },
-         TableSort{ { Prop::Locale,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_LOCALE_WINE    },
-         TableSort{ { Prop::Region,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_REGION_WINE    },
-         TableSort{ { Prop::MyScore,  Prop::CtScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_MY       },
-         TableSort{ { Prop::CtScore,  Prop::MyScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_CT       },
-         TableSort{ { Prop::MyPrice,  Prop::WineName,    Prop::Vintage ,  }, constants::SORT_OPTION_MY_VALUE       }
-      };
-
-      /// @brief string filters that can be used on this table.
-      ///
-      static inline const std::array StringFilters{
-         CtStringFilter{ constants::FILTER_VARIETAL,   Prop::Varietal       },
-         CtStringFilter{ constants::FILTER_COUNTRY,    Prop::Country        },
-         CtStringFilter{ constants::FILTER_REGION,     Prop::Region         },
-         CtStringFilter{ constants::FILTER_APPELATION, Prop::Appellation    },
-         CtStringFilter{ constants::FILTER_VINTAGE,    Prop::Vintage        }
-      };
+      using TableSort           = base::TableSort;
+      using TableSortSpan       = base::TableSortSpan;
+      using Traits              = Record::Traits;
 
       /// @brief Create a data model object for the specified table
       /// 
@@ -81,66 +53,63 @@ namespace ctb
          return DatasetPtr{ static_cast<IDataset*>(new CtDataModel{ std::move(data) }) };
       }
 
-
       /// @brief retrieves list of available SortConfigs, in order of display
       /// 
       /// the index in this vector corresponds to the index in the sort_index
       /// property.
-      /// 
-      constexpr auto availableSorts() const -> const TableSorts& override
+      auto availableSorts() const -> TableSortSpan override
       {
          return Sorters;
       }
 
       /// @brief returns the currently active sort option
-      ///
       auto activeSort() const -> const TableSort& override
       {
-         return m_sort_config;
+         return m_current_sort;
       }
 
       /// @brief specifies a new sort option
-      ///
-      void applySort(const TableSort& config) override
+      void applySort(const TableSort& sort) override
       {
-         if (config != m_sort_config)
+         if (sort != m_current_sort)
          {
-            m_sort_config = config;
+            m_current_sort = sort;
             sortData();
          }
       }
 
-      /// @brief  get a list of the columns that will be displayed in the list
+      /// @brief Gets the collection of active display columns 
       /// 
-      /// the columns are in the order they will be displayed.
-      ///
+      /// Note that some may be hidden and not visible.
       auto displayColumns() const -> const DisplayColumns& override
       { 
          return m_display_columns; 
       }
 
       /// @brief retrieves a list of available filters for this table.
-      constexpr auto availableStringFilters() const -> CtStringFilters override
+      auto multiMatchFilters() const -> CtMultiMatchFilterSpan
       {
-         return CtStringFilters{ std::from_range, StringFilters };
+         return MultiMatchFilters;
       }
 
-      /// @brief get a list of values that can be used to filter on a column in the table
-      auto getFilterMatchValues(Prop prop_id) const -> StringSet override
-      {
-         return PropStringFilterMgr::getFilterMatchValues(m_data, prop_id);
-      }
-
-      /// @brief adds a match value filter for the specified column.
-      ///
-      /// @return true if the filter was applied, false it it wasn't because there were no matches
+      /// @brief Get a list of all distinct values from the table for the specified property.
       /// 
-      /// a record must match at least one match_value for each property that 
-      /// has a filter to be considered a match.
-      auto addPropFilterString(Prop prop_id, std::string_view match_value) -> bool override
+      /// This can be used to get filter values for match-filters.
+      auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet override
+      {
+         return MultiMatchFilterMgr::getFilterMatchValues(m_data, prop_id);
+      }
+
+      /// @brief Adds a match value filter for the specified column.
+      ///
+      /// a record must match at least one match_value for each property that has a filter 
+      /// to be considered a match.
+      /// 
+      /// @return true if the filter was applied, false it it wasn't because there were no matches
+      auto addMultiMatchFilter(CtProp prop_id, const Property& match_value) -> bool override
       {
          // if we somehow get passed a filter we already have, don't waste our time.
-         if ( m_prop_string_filters.addFilter(prop_id, match_value) )
+         if ( m_mm_filters.addFilter(prop_id, match_value) )
          {
             applyFilters();
             return true;
@@ -151,11 +120,10 @@ namespace ctb
       /// @brief removes a match value filter for the specified column.
       ///
       /// @return true if the filter was removed, false if it wasn't found
-      /// 
-      auto removePropFilterString(Prop prop_id, std::string_view match_value) -> bool override
+      auto removeMultiMatchFilter(CtProp prop_id, const Property& match_value) -> bool override
       {
          // if we somehow get passed filter that we aren't using, don't waste our time.
-         if ( m_prop_string_filters.removeFilter(prop_id, match_value) )
+         if ( m_mm_filters.removeFilter(prop_id, match_value) )
          {
             applyFilters();
             return true;
@@ -163,59 +131,44 @@ namespace ctb
          return false;
       }
 
-      /// @brief filter does substring matching on ANY column in the table view
-      ///
-      /// returns true if filter was applied, false if there were no matches in which
-      /// case the filter was not applied. triggers DatasetEvent::SubStringFilter
-      ///
+      /// @brief Apply a search filter that does substring matching on ANY column in the table view
+      /// 
+      /// If applied this filter will replace any previous substring filter, as there can be only
+      /// one at a time.
+      /// 
+      /// @return true if filter was applied, false if there were no matches in which
+      /// case the filter was not applied. 
       auto filterBySubstring(std::string_view substr) -> bool override
       {
          // this overload searches all columns in the current list view, so get the prop_id's 
-         auto cols = displayColumns() | vws::transform([](const DisplayColumn& disp_col) -> auto { return disp_col.prop_id; })
+         auto cols = displayColumns() | vws::transform([](const CtDisplayColumn& disp_col) -> auto { return disp_col.prop_id; })
                                       | rng::to<std::vector>();
 
          return applySubStringFilter(SubStringFilter{ std::string{substr}, cols });
       }
 
-      /// @brief sets filter that does substring matching on the specified column
+      /// @brief Apply a search filter that does substring matching on the specified column
       ///
-      /// returns true if filter was applied, false if there were no matches in which
-      /// case the filter was not applied. triggers DatasetEvent::SubStringFilter
+      /// If applied this filter will replace any previous substring filter, as there can be only
+      /// one at a time.
       /// 
-      auto filterBySubstring(std::string_view substr, Prop prop) -> bool override
+      /// @return true if filter was applied, false if there were no matches in which
+      /// case the filter was not applied. 
+      auto filterBySubstring(std::string_view substr, CtProp prop_id) -> bool override
       {
-         auto cols = std::vector{ prop };
+         auto cols = std::vector{ prop_id };
          return applySubStringFilter(SubStringFilter{ std::string{substr}, cols });
       }
 
       /// @brief clear the substring filter
-      ///
-      /// triggers DatasetEvent::SubStringFilter
-      /// 
       void clearSubStringFilter() override
       {
          m_substring_filter = std::nullopt;
          applyFilters();
       }
 
-      /// @brief Returns whether "in-stock only" filter to the data set, if supported.
-      /// @return true if the filter is active, false if it was not 
-      /// 
-      /// not all datasets support this filter, you can check by calling hasInStockFilter()
-      /// 
-      auto getInStockFilter() const -> bool override
-      {
-         if (!hasProperty(Prop::QtyOnHand) or !m_instock_filter.enabled)
-            return false;
-
-         return true;
-      }
-
       /// @brief Used to enable/disable "in-stock only" filter to the data set, if supported.
       /// @return true if the filter was applied, false if it was not 
-      /// 
-      /// not all datasets support this filter, you can check by calling hasInStockFilter()
-      /// 
       auto setInStockFilter(bool enable) -> bool override
       {
          if (!hasProperty(Prop::QtyOnHand)) 
@@ -226,6 +179,16 @@ namespace ctb
 
          m_instock_filter.enabled = enable;
          applyFilters();
+         return true;
+      }
+
+      /// @brief Returns whether "in-stock only" filter to the data set, if supported.
+      /// @return true if the filter is active, false if it was not 
+      auto getInStockFilter() const -> bool override
+      {
+         if (!hasProperty(Prop::QtyOnHand) or !m_instock_filter.enabled)
+            return false;
+
          return true;
       }
 
@@ -240,7 +203,7 @@ namespace ctb
       }
 
       /// @brief set the minimum score filter
-      auto setMinScoreFilter(NullableDouble min_score = std::nullopt) -> bool override
+      auto setMinScoreFilter(NullableDouble min_score) -> bool override
       {
          if (min_score)
          {
@@ -254,20 +217,63 @@ namespace ctb
          return true;
       }
 
-      int64_t totalRecCount() const override
+      /// @brief Check whether the current dataset supports the given property
+      /// 
+      /// Since getProperty() will return a null value for missing properties, calling this function
+      /// is the only way to distinguish between a null property value and a property that is missing
+      /// altogether.
+      /// 
+      /// @return True if the property is available, false if not.
+      auto hasProperty(CtProp prop_id) const -> bool
+      {
+         return Traits::hasProperty(prop_id);
+      }
+
+      /// @brief Retrieve a property for a specified record/row in the dataset
+      /// 
+      /// This function returns a reference to null for not-found properties. Since
+      /// found properties could also have null value, the only way to differentiate
+      /// is by calling hasProperty()
+      /// 
+      /// The returned reference will remain valid until a modifying (non-const) method
+      /// is called on this dataset, after which it may be invalid. You should copy-construct 
+      /// a new object if you need to hold onto it for a while rather than holding the reference.
+      /// 
+      /// @return const reference to the requested property. It may be a null value, but it 
+      ///  will always be a valid CtProperty&.
+      auto getProperty(int rec_idx, CtProp prop_id) const -> const Property&
+      {
+         if (rec_idx > filteredRecCount() or !hasProperty(prop_id))
+            return null_prop;
+
+         return m_current_view->at(static_cast<size_t>(rec_idx))[prop_id];
+      }
+
+      /// @brief returns the total number of records in the underlying dataset
+      auto totalRecCount() const -> int64_t
       {
          return std::ssize(m_data);
       }
 
-      int64_t filteredRecCount() const override
+      /// @brief returns the number of records with filters applied.
+      auto filteredRecCount() const -> int64_t
       {
          return std::ssize(*m_current_view);
       }
 
-      constexpr auto getTableName() const -> std::string_view override
+      /// @return the name of the CT table this dataset represents. Not meant to be 
+      ///         displayed to the user, this is for internal use. 
+      auto getTableName() const -> std::string_view
       {
          return Traits::getTableName();
       }
+
+      /// @brief Returns the TableId enum for this dataset's underlying table.
+      auto getTableId() const -> TableId
+      {
+         return Traits::getTableId();
+      }
+
 
       // default dtor, others are deleted since this object is meant to be heap-only
       ~CtDataModel() noexcept override = default;
@@ -277,52 +283,90 @@ namespace ctb
       CtDataModel& operator=(const CtDataModel&) = delete;
       CtDataModel& operator=(CtDataModel&&) = delete;
 
-
    private:
-      DisplayColumns                   m_display_columns{};
+      /// @brief list of display columns that will show in the list view
+      ///
+      static inline const std::array DefaultDisplayColumns { 
+         CtDisplayColumn{ Prop::WineAndVintage,                              constants::DISPLAY_COL_WINE     },
+         CtDisplayColumn{ Prop::Locale,                                      constants::DISPLAY_COL_LOCALE   },
+         CtDisplayColumn{ Prop::QtyTotal,   CtDisplayColumn::Format::Number,   constants::DISPLAY_COL_QTY      },
+         CtDisplayColumn{ Prop::CtScore,    CtDisplayColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE },
+         CtDisplayColumn{ Prop::MyScore,    CtDisplayColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE },
+      };
+
+      /// @brief the available sort orders for this table.
+      ///
+      static inline const std::array Sorters{ 
+         TableSort{ { Prop::WineName, Prop::Vintage                       }, constants::SORT_OPTION_WINE_VINTAGE   },
+         TableSort{ { Prop::Vintage,  Prop::WineName                      }, constants::SORT_OPTION_VINTAGE_WINE   },
+         TableSort{ { Prop::Locale,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_LOCALE_WINE    },
+         TableSort{ { Prop::Region,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_REGION_WINE    },
+         TableSort{ { Prop::MyScore,  Prop::CtScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_MY       },
+         TableSort{ { Prop::CtScore,  Prop::MyScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_CT       },
+         TableSort{ { Prop::MyPrice,  Prop::WineName,    Prop::Vintage ,  }, constants::SORT_OPTION_MY_VALUE       }
+      };
+
+      /// @brief string filters that can be used on this table.
+      ///
+      static inline const std::array MultiMatchFilters{
+         MultiMatchFilter{ Prop::Varietal,    constants::FILTER_VARIETAL   },
+         MultiMatchFilter{ Prop::Country,     constants::FILTER_COUNTRY    },
+         MultiMatchFilter{ Prop::Region,      constants::FILTER_REGION     },
+         MultiMatchFilter{ Prop::Appellation, constants::FILTER_APPELATION },
+         MultiMatchFilter{ Prop::Vintage,     constants::FILTER_VINTAGE    }
+      };
+
       DataTable                        m_data{};                 // the underlying data records for this table.
       DataTable                        m_filtered_data{};        // we need a copy for the filtered data, so we can bind our views to it
       DataTable*                       m_current_view{};         // may point to m_data or m_filtered_data depending if filter is active
-      PropFilter                       m_instock_filter{};
-      PropFilter                       m_score_filter{};
-      PropStringFilterMgr              m_prop_string_filters{};
-      TableSort                        m_sort_config{};
+      DisplayColumns                   m_display_columns{};
+      PropertyFilter                   m_instock_filter{};
+      PropertyFilter                   m_score_filter{};
+      MultiMatchFilterMgr              m_mm_filters{};
+      TableSort                        m_current_sort{};
       std::optional<SubStringFilter>   m_substring_filter{};
       
       // private construction, use static factory method create();
       explicit CtDataModel(DataTable&& data) : 
-         m_display_columns{ std::from_range, DefaultDisplayColumns },
          m_data{ std::move(data) },
          m_current_view{ &m_data },
+         m_display_columns{ std::from_range, DefaultDisplayColumns },
          m_instock_filter{ Prop::QtyOnHand, std::greater<CtProperty>{}, uint16_t{0} },
          m_score_filter{ {Prop::CtScore, Prop::MyScore}, std::greater_equal<CtProperty>{}, constants::FILTER_SCORE_DEFAULT },
-         m_sort_config{ availableSorts()[0] }
+         m_current_sort{ availableSorts()[0] }
       {
          m_score_filter.enabled = false;
          m_instock_filter.enabled = false;
          sortData();
       }
 
+      auto isDataFiltered() const -> bool 
+      { 
+         return m_current_view == &m_filtered_data; 
+      }
+
       void applyFilters()
       {
-         throw Error{"FUCK"};
-         //if (m_prop_string_filters.activeFilters() or m_instock_filter.enabled or m_score_filter.enabled)
-         //{
-         //   m_filtered_data = vws::all(m_data) | vws::filter(m_prop_string_filters)
-         //                                      | vws::filter(m_instock_filter)
-         //                                      | vws::filter(m_score_filter)
-         //                                      | rng::to<decltype(m_data)>();
-         //   m_current_view = &m_filtered_data;
-         //}
-         //else
-         //{
-         //   m_current_view = &m_data;
-         //}
+         //throw Error{"FUCK"};
+         if (m_mm_filters.activeFilters() or m_instock_filter.enabled or m_score_filter.enabled)
+         {
+            m_filtered_data = vws::all(m_data) | vws::transform([](auto&& rec) { return rec.getProperties(); }) // filters work with property maps, not records
+                                               | vws::filter(m_mm_filters)
+                                               | vws::filter(m_instock_filter)
+                                               | vws::filter(m_score_filter)
+                                               | vws::transform([](auto&& map) { return Record{ map }; })        // back to record
+                                               | rng::to<std::vector>();
+            m_current_view = &m_filtered_data;
+         }
+         else
+         {
+            m_current_view = &m_data;
+         }
 
-         //if (m_substring_filter)
-         //{
-         //   applySubStringFilter(*m_substring_filter);
-         //}
+         if (m_substring_filter)
+         {
+            applySubStringFilter(*m_substring_filter);
+         }
       }
 
       bool applySubStringFilter(const SubStringFilter& filter)
@@ -349,12 +393,12 @@ namespace ctb
       {
          throw Error{ "Not Implemented"};
          // sort the data table, then re-apply any filters to the view. Otherwise we'd have to sort twice
-         //if (m_sort_config.descending)
+         //if (m_current_sort.descending)
          //{
-         //   rng::sort(vws::reverse(m_data), Sorters[static_cast<size_t>(m_sort_config.sorter_index)]);
+         //   rng::sort(vws::reverse(m_data), Sorters[static_cast<size_t>(m_current_sort.sorter_index)]);
          //}
          //else {
-         //   rng::sort(m_data, Sorters[static_cast<size_t>(m_sort_config.sorter_index)]);
+         //   rng::sort(m_data, Sorters[static_cast<size_t>(m_current_sort.sorter_index)]);
          //}
 
          //applyFilters();
@@ -362,24 +406,6 @@ namespace ctb
          //{
          //   applySubStringFilter(*m_substring_filter);
          //}
-      }
-
-      bool isFilterActive() 
-      { 
-         return m_current_view == &m_filtered_data; 
-      }
-
-      auto hasProperty(Prop prop_id) const -> bool override
-      {
-         return false;
-      }
-
-      auto getProperty(int rec_idx, Prop prop_id) const -> const Property & override
-      {
-         if (rec_idx > filteredRecCount() or !hasProperty(prop_id))
-            return null_prop;
-
-         return m_current_view->at(static_cast<size_t>(rec_idx))[prop_id];
       }
 
 };

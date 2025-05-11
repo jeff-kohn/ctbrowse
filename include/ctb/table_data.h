@@ -168,9 +168,7 @@ namespace ctb
       TableDataT data{};
       for (csv::CSVRow& row : reader)
       {
-         typename TableDataT::value_type record{};
-         record.parseRow(row);
-         data.emplace_back(std::move(record));
+         data.emplace_back(row);
       }
       return data;
    }

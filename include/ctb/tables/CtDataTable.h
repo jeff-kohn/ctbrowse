@@ -30,9 +30,9 @@ namespace ctb
 
 
 
-   /// @brief type alias for Ct-specific DisplayColumn types
+   /// @brief type alias for Ct-specific CtDisplayColumn types
    ///
-   //using CtDisplayColumn   = DisplayColumn<CtProp>;
+   //using CtDisplayColumn   = CtDisplayColumn<CtProp>;
    //using CtDisplayColumns  = DisplayColumns<CtProp>;
 
 

@@ -98,7 +98,7 @@ namespace ctb::app
       // descending sort order radio. Since the radiobuttons aren't in a group box, the validator treats them as bool
       // so we have a separate flag for the descending radio that we have to manually keep in sync (see onTableSorted)
       auto opt_descending = new wxRadioButton{ sort_options_box->GetStaticBox(), wxID_ANY, constants::LBL_SORT_DESCENDING };
-      opt_descending->SetValidator(wxGenericValidator{ &m_sort_reverse });
+      opt_descending->SetValidator(wxGenericValidator{ &m_sort_descending });
       sort_options_box->Add(opt_descending, wxSizerFlags{1}.Expand().Border(wxALL));
       top_sizer->Add(sort_options_box, wxSizerFlags().Expand().Border(wxALL));
       top_sizer->AddSpacer(default_border);
@@ -173,7 +173,7 @@ namespace ctb::app
          auto filter = getPropFilterForItem(item);
          if (filter)
          {
-            m_sink.getTable()->addPropFilterString(filter->propId(), m_filter_tree->GetItemText(item).wx_str());
+            m_sink.getTable()->addMultiMatchFilter(filter->prop_id, m_filter_tree->GetItemText(item).wx_str());
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
@@ -187,7 +187,7 @@ namespace ctb::app
          auto filter = getPropFilterForItem(item);
          if (filter)
          {
-            m_sink.getTable()->removePropFilterString(filter->propId(), m_filter_tree->GetItemText(item).wx_str());
+            m_sink.getTable()->removeMultiMatchFilter(filter->prop_id, m_filter_tree->GetItemText(item).wx_str());
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
@@ -205,11 +205,11 @@ namespace ctb::app
       m_check_map.clear();
 
       // get the available filters for this dataset, and add them to the tree.
-      auto filters = table->availableStringFilters();
+      auto filters = table->multiMatchFilters();
       auto root = m_filter_tree->AddRoot(wxEmptyString);
       for (auto& filter : filters)
       {
-         wxString filter_name{ wxFromSV(filter.filterName()) };
+         wxString filter_name{ wxString::FromUTF8(filter.filter_name) };
          auto item = m_filter_tree->AppendItem(root, filter_name);
          m_filter_tree->SetItemHasChildren(item, true);
          m_filter_tree->SetItemImage(item, IMG_CONTAINER);
@@ -312,7 +312,7 @@ namespace ctb::app
          return;
 
       // if the filter node has selected children, update the label with the count
-      wxString filter_name{ wxFromSV(maybe_filter->filterName()) };
+      wxString filter_name{ wxFromSV(maybe_filter->filter_name) };
       auto count = m_check_map[item];
       if (count)
       {
@@ -486,7 +486,7 @@ namespace ctb::app
                // we want to use the default order for that sort, not necessarily whatever the current
                // selection is (e.g. sort Scores descending by default).
                auto sorts = table->availableSorts();
-               m_sort_config = sorts.at(static_cast<size_t>(m_sort_selection));
+               m_sort_config = sorts[static_cast<size_t>(m_sort_selection)];
                table->applySort(m_sort_config);
                m_sink.signal_source(DatasetEvent::Id::Sort);
             }
@@ -509,7 +509,7 @@ namespace ctb::app
 
          // if the node has a filter in our map and it doesn't already have a list of 
          // available filter values as children, we need to populate the child nodes.
-         // if not just return.
+         // otherwise just return.
          if( !m_filters.contains(filter_node.GetID()) || m_filter_tree->GetChildrenCount(filter_node) > 0 )
          {
             return;
@@ -519,9 +519,9 @@ namespace ctb::app
          assert(data);
 
          auto& filter = m_filters[filter_node.m_pItem]; 
-         for (auto& match_val : filter->getMatchValues(data.get()) )
+         for (auto& match_val : data->getDistinctValues(filter->prop_id))
          {
-            auto item = m_filter_tree->AppendItem(filter_node, match_val.c_str());
+            auto item = m_filter_tree->AppendItem(filter_node, wxString::FromUTF8(match_val.asString()));
             m_filter_tree->SetItemImage(item, 1);
          }
       }

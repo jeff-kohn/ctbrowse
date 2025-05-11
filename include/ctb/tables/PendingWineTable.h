@@ -132,7 +132,7 @@ namespace ctb
 
       /// @brief this gets called by TableRecord to set any missing property values
       /// 
-      /// Properties from the CSV file are already set, this impl just provides
+      /// PropertyMap from the CSV file are already set, this impl just provides
       /// any calculated property values or does fixup for any parsed values that need it.
       /// 
       /// @param rec span containing a TableProperty for each PropID enum value.

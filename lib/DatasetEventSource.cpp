@@ -39,7 +39,7 @@ namespace ctb
 
       // We need to signal that the current table is being replaced, because
       // otherwise views that hold internal table pointers will be left with
-      // dangling/garbage pointer
+      // obsolete
       if (!signal(DatasetEvent::Id::TableRemove))
          return false;
 

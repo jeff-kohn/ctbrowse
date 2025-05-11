@@ -1,7 +1,7 @@
 /*******************************************************************
- * @file DisplayColumn.h
+ * @file CtDisplayColumn.h
  *
- * @brief defines the template class DisplayColumn
+ * @brief defines the template class CtDisplayColumn
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
@@ -12,12 +12,12 @@
 
 #include <vector>
 
-namespace ctb::detail
+namespace ctb
 {
 
    /// @brief struct containing everything needed to know about how to display a table column
    ///
-   struct DisplayColumn
+   struct CtDisplayColumn
    {
       /// @brief enum to specify the alignment for column headers and cell text
       ///
@@ -64,14 +64,14 @@ namespace ctb::detail
       ///
       /// column header value is option and will use the table column name by default
       ///
-      DisplayColumn(CtProp prop_id, std::string_view col_name) : prop_id{ prop_id },  display_name{ col_name }
+      CtDisplayColumn(CtProp prop_id, std::string_view col_name) : prop_id{ prop_id },  display_name{ col_name }
       {}
 
       /// @brief construct a column to display the specified property in the requested format
       ///
       /// column header value is optional and will use the table column name by default
       ///
-      DisplayColumn(CtProp prop_id, Format fmt, std::string_view col_name) :  prop_id{ prop_id },  display_name{ col_name }, format{ fmt }
+      CtDisplayColumn(CtProp prop_id, Format fmt, std::string_view col_name) :  prop_id{ prop_id },  display_name{ col_name }, format{ fmt }
       {
          if (fmt != Format::String)
          {
@@ -102,14 +102,14 @@ namespace ctb::detail
          }
       }
 
-      DisplayColumn() = default;
-      DisplayColumn(const DisplayColumn&) = default;
-      DisplayColumn(DisplayColumn&&) = default;
-      DisplayColumn& operator=(const DisplayColumn&) = default;
-      DisplayColumn& operator=(DisplayColumn&&) = default;
-      ~DisplayColumn() = default;
+      CtDisplayColumn() = default;
+      CtDisplayColumn(const CtDisplayColumn&) = default;
+      CtDisplayColumn(CtDisplayColumn&&) = default;
+      CtDisplayColumn& operator=(const CtDisplayColumn&) = default;
+      CtDisplayColumn& operator=(CtDisplayColumn&&) = default;
+      ~CtDisplayColumn() = default;
    };
 
-   using DisplayColumns = std::vector<DisplayColumn>;
+   using CtDisplayColumns = std::vector<CtDisplayColumn>;
 
-} // namespace ctb::detail
+} // namespace ctb

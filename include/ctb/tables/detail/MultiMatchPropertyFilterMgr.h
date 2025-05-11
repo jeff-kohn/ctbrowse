@@ -1,16 +1,16 @@
 /*******************************************************************7
-* @file PropStringFilterMgr.h
+* @file MultiMatchPropertyFilterMgr.h
 *
-* @brief defines the template class PropStringFilterMgr
+* @brief defines the template class MultiMatchPropertyFilterMgr
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
 *******************************************************************/
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/tables/detail/PropStringFilter.h"
+#include "ctb/tables/detail/MultiMatchPropertyFilter.h"
 
-#include <map>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <string>
 #include <string_view>
 
@@ -18,39 +18,36 @@
 namespace ctb::detail
 {
    
-   /// @brief class to manage property filters for a data table.
+   /// @brief Class to manage multi-match property filters for a data table.
    /// 
-   /// this class currently only works with strings. Numeric table properties
-   /// will be converted to string for filtering purposes. Not ideal for 
-   /// performance, but most of our filters are text base. Will revisit this later.
    /// 
-   template <TableRecordType RecordTypeT>
-   class PropStringFilterMgr
+   template<EnumType PropT, PropertyMapType PropMapT>
+   class MultiMatchPropertyFilterMgr
    {
    public:
-      using Record       = RecordTypeT;
-      using StringFilter = PropStringFilter<Record>;
-      using Prop         = Record::Prop;
+      using Prop          = PropT;
+      using PropertyMap   = PropMapT;
+      using Property = PropertyMap::mapped_type;
+      using Filter        = MultiMatchPropertyFilter<Prop, PropertyMap>;
+      using MatchValues   = Filter::MatchValues;
 
       /// @brief add a match value for the specified column filter.
       /// @return true if successful, false if filter value already existed or could not be added.
       /// 
-      bool addFilter(Prop prop_id, std::string_view match_value)
+      bool addFilter(Prop prop_id, const Property& match_value)
       {
          auto& filter = m_filters[prop_id];
 
          // note we always assign the filter object's prop-id because if the filter
          // is being default-constructed on-demand it won't have the correct prop_id.
          filter.prop_id = prop_id;
-         filter.match_values.insert(std::string{ match_value });
-
-         return true;
+         return filter.match_values.insert(match_value).second;
       }
 
       /// @brief remove a match value for the specified column filter
-      /// @return true if removed, false if not found.1
+      /// @return true if removed, false if not found.
       /// 
-      bool removeFilter(Prop prop_id, std::string_view match_value)
+      bool removeFilter(Prop prop_id, const Property& match_value)
       {
          bool ret_val{ false };
 
@@ -58,15 +55,14 @@ namespace ctb::detail
          if (filt_it != m_filters.end())
          {
             auto& filter = filt_it->second;
-
-            // if we're removing the last match value, remove the filter altogether because it won't match anything
             ret_val = filter.match_values.erase(match_value);
+
+            // if we're removing the last match value, remove the filter altogether so we don't keep checking it
             if (filter.match_values.empty())
             {
                m_filters.erase(filt_it);
             }
          }
-
          return ret_val;
       }
 
@@ -75,7 +71,7 @@ namespace ctb::detail
       ///         if the record failed to match one or more filters. Will
       ///         also return true if there are no active filters.
       /// 
-      bool operator()(const Record& rec) const
+      bool operator()(const PropertyMap& rec) const
       {
          if (activeFilters())
          {
@@ -98,15 +94,15 @@ namespace ctb::detail
       /// @brief retrieve a list of possible filter values for the given property in the table
       ///
       template<rng::input_range RowsT, typename PropEnumT> 
-      static StringSet getFilterMatchValues(const RowsT& rows, PropEnumT prop_id) 
+      static MatchValues getFilterMatchValues(const RowsT& rows, PropEnumT prop_id) 
       {
-         StringSet result{};
+         MatchValues result{};
          for (auto& row : rows)
          {
             auto val = row[prop_id];
             if (val)
             {
-               result.emplace(val.asString());
+               result.emplace(val);
             }
          }
          return result;
@@ -114,7 +110,8 @@ namespace ctb::detail
 
 
    private:
-      std::map<Prop, StringFilter> m_filters{};
+      using FilterMap = boost::unordered_flat_map<Prop, Filter>;
+      FilterMap m_filters{};
    };
 
 } // namespace ctb::detail

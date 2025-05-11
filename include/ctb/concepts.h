@@ -66,7 +66,7 @@ namespace ctb
    concept RecordTraitsType = requires (std::string_view sv,
                                         typename T::Prop pid, 
                                         typename T::Property prop,
-                                        typename T::Properties props,
+                                        typename T::PropertyMap props,
                                         typename T::FieldSchema schema,
                                         typename T::SchemaMap smap)
    {
