@@ -43,9 +43,9 @@ namespace ctb::detail
       {
          for (auto prop : search_props)
          {
-            auto val = rec.getProperty(prop);
+            const auto& val = rec.getProperty(prop);
 
-            if ( val.hasString() and boost::icontains(val.asStringView(), search_value) )
+            if (val.hasString() and boost::icontains(val.asStringView(), search_value))
                return true;
             
             if (boost::icontains(val.asString(), search_value))

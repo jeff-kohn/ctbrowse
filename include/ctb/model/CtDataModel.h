@@ -38,7 +38,7 @@ namespace ctb
       using Property            = base::Property;
       using PropertyFilter      = detail::PropertyFilter<Prop, PropertyMap>;
       using PropertyMap         = base::PropertyMap;
-      using PropertyValueSet      = base::PropertyValueSet;
+      using PropertyValueSet    = base::PropertyValueSet;
       using Record              = DataTable::value_type;
       using SubStringFilter     = detail::SubStringFilter<Record>;
       using TableSort           = base::TableSort;
@@ -95,9 +95,18 @@ namespace ctb
       /// @brief Get a list of all distinct values from the table for the specified property.
       /// 
       /// This can be used to get filter values for match-filters.
+      [[nodiscard]]
       auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet override
       {
-         return MultiMatchFilterMgr::getFilterMatchValues(m_data, prop_id);
+         PropertyValueSet values{};
+         if (hasProperty(prop_id))
+         {
+            for (const Record& rec : m_data)
+            {
+               values.emplace(rec[prop_id]);
+            }
+         }
+         return values;
       }
 
       /// @brief Adds a match value filter for the specified column.
@@ -369,43 +378,43 @@ namespace ctb
          }
       }
 
-      bool applySubStringFilter(const SubStringFilter& filter)
+      bool applySubStringFilter(const SubStringFilter& search_filter)
       {
-         throw ctb::Error{" FUCKITY FUCKING FUCK"};
-         //// clear any existing substring filter first, since we can only one at a time. The 
-         //// new filter will be applied if there are any matches. If no matches, substring filter 
-         //// will be cleared since we don't restore it (by design, previous search text is no longer 
-         //// in the toolbar so it wouldn't make sense).
-         //m_substring_filter = {};
-         //applyFilters();
-         //auto filtered = vws::all(*m_current_view) | vws::filter(filter)
-         //                                          | rng::to<std::vector<Record> >();
-         //if (filtered.empty())
-         //   return false;
+         // clear any existing substring filter first, since we can only have one at a time. The 
+         // new filter will be applied if there are any matches. If no matches, substring filter 
+         // will be cleared (we don't restore old one because previous search text is no longer 
+         // in the toolbar so it wouldn't make sense).
+         m_substring_filter = {};
+         applyFilters();
+         auto filtered = vws::all(*m_current_view) | vws::filter(search_filter)
+                                                   | vws::transform([] (auto&& rec) { return static_cast<const Record&>(rec); } )
+                                                   | rng::to<std::vector>();
+         if (filtered.empty())
+            return false;
 
-         //m_substring_filter = filter;
-         //m_filtered_data.swap(filtered);
-         //m_current_view = &m_filtered_data;
-         //return true;
+         m_substring_filter = search_filter;
+         m_filtered_data.swap(filtered);
+         m_current_view = &m_filtered_data;
+         return true;
       }
       
       void sortData()
       {
-         throw Error{ "Not Implemented"};
-         // sort the data table, then re-apply any filters to the view. Otherwise we'd have to sort twice
-         //if (m_current_sort.descending)
-         //{
-         //   rng::sort(vws::reverse(m_data), Sorters[static_cast<size_t>(m_current_sort.sorter_index)]);
-         //}
-         //else {
-         //   rng::sort(m_data, Sorters[static_cast<size_t>(m_current_sort.sorter_index)]);
-         //}
+         // the fact that our TableSorter class deals with PropertyMaps is a problem, because we actually need to 
+         // sort a vector<TableRecordType>. But that would make a table-neutral CtTableSort impossible. So we have to use an 
+         // adapter to allow us to use the sorter object.
+         static const auto sort_adapter = [this](const Record& rec1, const Record& rec2) -> bool
+            {
+               return m_current_sort(rec1.getProperties(), rec2.getProperties());
+            };
 
-         //applyFilters();
-         //if (m_substring_filter)
-         //{
-         //   applySubStringFilter(*m_substring_filter);
-         //}
+         // sort the data table, then re-apply any filters to the view. Otherwise we'd have to sort twice
+         rng::sort(m_data, sort_adapter);
+         applyFilters();
+         if (m_substring_filter)
+         {
+            applySubStringFilter(*m_substring_filter);
+         }
       }
 
 };

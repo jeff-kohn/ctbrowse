@@ -72,6 +72,7 @@ namespace ctb
       /// @brief Get a list of all distinct values from the table for the specified property.
       /// 
       /// This can be used to get filter values for match-filters.
+      [[nodiscard]]
       virtual auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet = 0;
 
       /// @brief Adds a match value filter for the specified column.

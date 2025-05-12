@@ -36,7 +36,13 @@ namespace ctb::detail
       {
          for (auto prop : sort_props)
          {
-            auto cmp = r1[prop] <=> r2[prop];
+            auto it1 = r1.find(prop);
+            const auto& p1 = (it1 == r1.end()) ? null_prop : it1->second;
+
+            auto it2 = r2.find(prop);
+            const auto& p2 = (it2 == r2.end()) ? null_prop : it2->second;
+
+            auto cmp = p1 <=> p2;
             if (cmp < 0)
             {
                return reverse ? false : true;

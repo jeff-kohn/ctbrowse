@@ -18,7 +18,7 @@
 namespace ctb::detail
 {
    
-   /// @brief Class to manage multi-match property filters for a data table.
+   /// @brief Class to manage multi-match property filters for a dataset.
    /// 
    /// 
    template<EnumType PropT, PropertyMapType PropMapT>
@@ -91,24 +91,6 @@ namespace ctb::detail
          return static_cast<int>(m_filters.size());
       }
             
-      /// @brief retrieve a list of possible filter values for the given property in the table
-      ///
-      template<rng::input_range RowsT, typename PropEnumT> 
-      static MatchValues getFilterMatchValues(const RowsT& rows, PropEnumT prop_id) 
-      {
-         MatchValues result{};
-         for (auto& row : rows)
-         {
-            auto val = row[prop_id];
-            if (val)
-            {
-               result.emplace(val);
-            }
-         }
-         return result;
-      }
-
-
    private:
       using FilterMap = boost::unordered_flat_map<Prop, Filter>;
       FilterMap m_filters{};
