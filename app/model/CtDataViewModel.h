@@ -1,61 +1,52 @@
 #include "App.h"
 
-#include <ctb/model/CtDataModel.h>
+#include <ctb/interfaces/IDataset.h>
 #include <wx/dataview.h>
 
 namespace ctb::app
 {
-   class CtDataViewModel final : public wxDataViewVirtualListModel
+   class CtDataViewModel final : protected wxDataViewVirtualListModel
    {
    public:
+      using base     = wxDataViewVirtualListModel;
+      using ModelPtr = wxObjectDataPtr<CtDataViewModel>;
 
-      CtDataViewModel() = default;
-      explicit CtDataViewModel(DatasetPtr dataset) : m_dataset{ dataset }
-      {}
+      /// @brief Returns a pointer to the active dataset (if any)
+      /// @return the current dataset, may be nullptr/empty
+      static [[nodiscard]] auto create(DatasetPtr dataset = {}) -> ModelPtr;
 
-      void setDataset(DatasetPtr dataset)
-      {
-         m_dataset = dataset;
-      }
 
-      template<typename Self>
-      auto getDataset(this Self&& self) -> DatasetPtr 
-      {
-         return std::forward<Self>(self).m_dataset;
-      }
+      auto getDataset() -> DatasetPtr;
 
-      void GetValueByRow(wxVariant& variant, unsigned row, unsigned col) const override
-      {
+      void setDataset(DatasetPtr dataset);
 
-#if !defined(NDEBUG)
-         if ( row >= m_dataset->filteredRecCount() or col >= std::ssize(m_dataset->displayColumns()) )
-         {
-            assert(false);
-            SPDLOG_DEBUG("CtDataViewModel::GetValueByRow() called with invalid coordinates.");
-            return;
-         }
-#endif
+      /// @brief Forces a refresh of the dataview after large changes to underlying dataset
+      void reQuery();
 
-         auto display_col = m_dataset->displayColumns().at(col);
+      void associateView(wxDataViewCtrl* view);
 
-         // format as string and return it to caller
-         auto val = m_dataset->getProperty(static_cast<int>(row), display_col.prop_id);
-         auto val_str = display_col.getDisplayValue(val);
-         variant = wxString::FromUTF8(val_str);
-      }
+      // we only expose a limited amount of base-class API
+      using base::GetItem;
+      using base::GetRow;
 
-      bool SetValueByRow(const wxVariant&, unsigned, unsigned) override
-      {
-         return false; // editing not supported
-      }
-
-      unsigned int GetCount()	const override
-      {
-         return static_cast<uint32_t>(m_dataset->filteredRecCount());
-      }
+      // these need to be accessible for wxObjectDataPtr to call, but users of this class
+      // should just use ModelPtr so that ref counting is automatic.
+      using base::IncRef;
+      using base::DecRef;
 
    private:
       DatasetPtr m_dataset{};
+
+      explicit CtDataViewModel(DatasetPtr dataset = {}) : m_dataset{ dataset }
+      {}
+
+      // these are the real purpose of this class, they're called by the base class to
+      // provide data when the list-view needs it.
+      void GetValueByRow(wxVariant& variant, unsigned row, unsigned col) const override;
+      auto SetValueByRow(const wxVariant&, unsigned, unsigned) -> bool override;
+      auto GetCount() const -> unsigned int override;
    };
+
+   using DataViewModelPtr = CtDataViewModel::ModelPtr;
 
 } // namespace ctb::app

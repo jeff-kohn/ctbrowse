@@ -19,13 +19,14 @@ namespace ctb::app
       [[nodiscard]] static DatasetListView* create(wxWindow* parent, DatasetEventSourcePtr source);
 
    private:
-      ScopedEventSink m_sink;
-      CtDataViewModel m_model;
+      ScopedEventSink  m_sink;
+      DataViewModelPtr m_model{};
 
       /// @brief private ctor used by static create()
       explicit DatasetListView(wxWindow* parent, DatasetEventSourcePtr source) : 
          wxDataViewCtrl{ parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME },
-         m_sink{ this, source }
+         m_sink { this, source },
+         m_model{ CtDataViewModel::create() }
       {}
 
       void init();

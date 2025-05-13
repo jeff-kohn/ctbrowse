@@ -38,18 +38,18 @@ namespace ctb::app
 
    void DatasetListView::configureColumns()
    {
-      assert(m_model.getDataset() and "This pointer should never be null here.");
+      assert(m_model->getDataset() and "This pointer should never be null here.");
       try
       {
          ClearColumns();
-         auto& cols = m_model.getDataset()->displayColumns();
+         const auto& cols = m_model->getDataset()->displayColumns();
          for (const auto&& [idx, col] : vws::enumerate(cols))
          {
             AppendTextColumn(col.display_name.c_str(), 
                static_cast<uint32_t>(idx), wxDATAVIEW_CELL_INERT, 
                wxCOL_WIDTH_AUTOSIZE, static_cast<wxAlignment>(col.col_align));
          }
-         wxPersistentRegisterAndRestore(this, wxFromSV(m_model.getDataset()->getTableName()));
+         wxPersistentRegisterAndRestore(this, wxFromSV(m_model->getDataset()->getTableName()));
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError());
@@ -59,7 +59,7 @@ namespace ctb::app
 
    void DatasetListView::setDataset(DatasetPtr dataset)
    {
-      if (m_model.getDataset())
+      if (m_model->getDataset())
       {
          // save off current table's view settings. we'll restore/register again
          // (possibly for a different table) when we call configureColumns()
@@ -68,31 +68,31 @@ namespace ctb::app
       wxWindowUpdateLocker freeze_updates{ this };
 
       // re-associate the model with the new dataset (nullptr is OK)
-      m_model.setDataset(dataset);
+      m_model->setDataset(dataset);
+      m_model->associateView(this);
       if (dataset)
       {
          // since we have a new dataset, re-initialize the list-view.
          configureColumns();
-         m_model.Cleared();
+         m_model->reQuery();
          selectFirstRow();
       }
       else {
-         m_model.Cleared();
+         m_model->reQuery();
       }
    }
 
 
    void DatasetListView::selectFirstRow()
    {
-      throw Error{"Not implemented"};
+      if (!m_model->getDataset())
+         return;
 
-      //if (0 == m_dataset->filteredRowCount()) return;
-
-      //auto item = m_dataset->GetItem(0);
-      //Select(item);
-      //EnsureVisible(item);
-      //SetFocus();
-      //QueueEvent(new wxDataViewEvent{ wxEVT_DATAVIEW_SELECTION_CHANGED, this, nullptr, item });
+      auto item = m_model->GetItem(0);
+      Select(item);
+      EnsureVisible(item);
+      SetFocus();
+      QueueEvent(new wxDataViewEvent{ wxEVT_DATAVIEW_SELECTION_CHANGED, this, nullptr, item });
    }
 
 
@@ -101,7 +101,7 @@ namespace ctb::app
       switch (event.event_id)
       {
          case DatasetEvent::Id::TableInitialize:
-            m_model.setDataset(event.dataset);
+            setDataset(event.dataset);
             break;
 
          case DatasetEvent::Id::TableRemove:
@@ -111,7 +111,7 @@ namespace ctb::app
          case DatasetEvent::Id::Sort:   [[fallthrough]];
          case DatasetEvent::Id::Filter: [[fallthrough]];
          case DatasetEvent::Id::SubStringFilter:
-            m_model.Cleared(); // force a refresh, name is unfortunate
+            m_model->reQuery();
             selectFirstRow();
             break;
 
@@ -129,8 +129,8 @@ namespace ctb::app
    {
       if (!m_sink.hasTable()) return;
 
-      /*auto row = m_sink.getTable()->GetRow(event.GetItem());
-      m_sink.signal_source(DatasetEvent::Id::RowSelected, static_cast<int>(row));*/
+      auto row = m_model->GetRow(event.GetItem());
+      m_sink.signal_source(DatasetEvent::Id::RowSelected, static_cast<int>(row));
    }
 
 

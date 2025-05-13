@@ -25,7 +25,7 @@ namespace ctb
    /// filtering options for other properties.
    /// 
    template<typename DataTableT>
-   class CtDataModel final : protected IDataset
+   class CtDataModel final : public IDataset
    {
    public:
       using base                = IDataset;

@@ -54,11 +54,15 @@ target_sources(${TARGET_NAME}
      "CtCredentialManager.h"
      "LoginEvent.h"
      "wx_helpers.h"
+
      "dialogs/CredentialDialog.cpp"
      "dialogs/CredentialDialog.h"
      "dialogs/TableSyncDialog.cpp"
      "dialogs/TableSyncDialog.h"
+
+     "model/CtDataViewModel.cpp"
      "model/CtDataViewModel.h"
+
      "views/DatasetListView.cpp"
      "views/DatasetListView.h"
      "views/DatasetMultiView.cpp"
@@ -67,6 +71,7 @@ target_sources(${TARGET_NAME}
      "views/DatasetOptionsPanel.h"
      "views/DetailsPanel.cpp"
      "views/DetailsPanel.h"
+
      "resources/utf-8.manifest"
      "resources/resource.rc"
      ${${PROJECT_NAME}_VERSION_RESOURCE}

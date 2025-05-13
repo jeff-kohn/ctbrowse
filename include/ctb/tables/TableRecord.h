@@ -75,6 +75,8 @@ namespace ctb
       /// @brief Construct a TableRecord from a PropertyMap.
       explicit TableRecord(PropertyMap props) : m_props{ std::move(props) }
       {}
+
+      TableRecord() = default;
       TableRecord(const TableRecord&) = default;
       TableRecord(TableRecord&&) = default;
       TableRecord& operator=(TableRecord&&) = default;
@@ -153,7 +155,6 @@ namespace ctb
          return m_props;
       }
 
-      TableRecord() = delete;
       TableRecord& operator=(const TableRecord&) = delete;
 
    private:
