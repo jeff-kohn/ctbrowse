@@ -104,7 +104,7 @@ namespace ctb
       /// 
       /// @param rec span containing a TableProperty for each PropID enum value.
       /// 
-      static void onRecordParse(PropertyMap rec)
+      static void onRecordParse(PropertyMap& rec)
       {
          using enum Prop;
 

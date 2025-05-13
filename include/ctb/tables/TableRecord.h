@@ -108,9 +108,6 @@ namespace ctb
             }
          }
 
-         auto custom_props = vws::values(Traits::getSchema())
-                           | vws::filter([](auto& field) { return !field.csv_col.has_value(); });
-
          // give the traits class a chance to provide any missing values (calculated values not in the CSV)
          Traits::onRecordParse(m_props);
       }

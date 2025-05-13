@@ -32,7 +32,7 @@ namespace ctb::detail
 
       /// @brief function operator that does the comparison.
       ///
-      bool operator()(const PropertyMap& r1, const PropertyMap& r2)
+      auto operator()(const PropertyMap& r1, const PropertyMap& r2) const -> bool
       {
          for (auto prop : sort_props)
          {
@@ -55,7 +55,7 @@ namespace ctb::detail
          return false; // all props equal
       }
 
-      const auto operator==(const TableSorter& other)
+      auto operator==(const TableSorter& other) const -> bool
       {
          return reverse == other.reverse and sort_props == other.sort_props and sort_name == other.sort_name;
       }

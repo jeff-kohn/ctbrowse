@@ -403,10 +403,9 @@ namespace ctb::app
             m_view = DatasetMultiView::create(this, m_event_source, m_label_cache);
          }
 
-
          // load table and connect it to the event source
          DatasetLoader loader{ wxGetApp().userDataFolder() };
-         auto table_id = eventIdToTableId(event.GetId());;
+         auto table_id = eventIdToTableId(event.GetId());
          auto tbl = loader.getDataset(table_id);
 
          // Apply in-stock filter by default?

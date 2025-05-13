@@ -87,7 +87,7 @@ namespace ctb
       }
 
       /// @brief retrieves a list of available filters for this table.
-      auto multiMatchFilters() const -> CtMultiMatchFilterSpan
+      auto multiMatchFilters() const -> CtMultiMatchFilterSpan override
       {
          return MultiMatchFilters;
       }
@@ -233,7 +233,7 @@ namespace ctb
       /// altogether.
       /// 
       /// @return True if the property is available, false if not.
-      auto hasProperty(CtProp prop_id) const -> bool
+      auto hasProperty(CtProp prop_id) const -> bool override
       {
          return Traits::hasProperty(prop_id);
       }
@@ -250,7 +250,7 @@ namespace ctb
       /// 
       /// @return const reference to the requested property. It may be a null value, but it 
       ///  will always be a valid CtProperty&.
-      auto getProperty(int rec_idx, CtProp prop_id) const -> const Property&
+      auto getProperty(int rec_idx, CtProp prop_id) const -> const Property& override
       {
          if (rec_idx > filteredRecCount() or !hasProperty(prop_id))
             return null_prop;
@@ -259,26 +259,26 @@ namespace ctb
       }
 
       /// @brief returns the total number of records in the underlying dataset
-      auto totalRecCount() const -> int64_t
+      auto totalRecCount() const -> int64_t override
       {
          return std::ssize(m_data);
       }
 
       /// @brief returns the number of records with filters applied.
-      auto filteredRecCount() const -> int64_t
+      auto filteredRecCount() const -> int64_t override
       {
          return std::ssize(*m_current_view);
       }
 
       /// @return the name of the CT table this dataset represents. Not meant to be 
       ///         displayed to the user, this is for internal use. 
-      auto getTableName() const -> std::string_view
+      auto getTableName() const -> std::string_view override
       {
          return Traits::getTableName();
       }
 
       /// @brief Returns the TableId enum for this dataset's underlying table.
-      auto getTableId() const -> TableId
+      auto getTableId() const -> TableId override
       {
          return Traits::getTableId();
       }
@@ -296,8 +296,8 @@ namespace ctb
       /// @brief list of display columns that will show in the list view
       ///
       static inline const std::array DefaultDisplayColumns { 
-         CtDisplayColumn{ Prop::WineAndVintage,                              constants::DISPLAY_COL_WINE     },
-         CtDisplayColumn{ Prop::Locale,                                      constants::DISPLAY_COL_LOCALE   },
+         CtDisplayColumn{ Prop::WineAndVintage,                                constants::DISPLAY_COL_WINE     },
+         CtDisplayColumn{ Prop::Locale,                                        constants::DISPLAY_COL_LOCALE   },
          CtDisplayColumn{ Prop::QtyTotal,   CtDisplayColumn::Format::Number,   constants::DISPLAY_COL_QTY      },
          CtDisplayColumn{ Prop::CtScore,    CtDisplayColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE },
          CtDisplayColumn{ Prop::MyScore,    CtDisplayColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE },
@@ -310,8 +310,8 @@ namespace ctb
          TableSort{ { Prop::Vintage,  Prop::WineName                      }, constants::SORT_OPTION_VINTAGE_WINE   },
          TableSort{ { Prop::Locale,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_LOCALE_WINE    },
          TableSort{ { Prop::Region,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_REGION_WINE    },
-         TableSort{ { Prop::MyScore,  Prop::CtScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_MY       },
-         TableSort{ { Prop::CtScore,  Prop::MyScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_CT       },
+         TableSort{ { Prop::MyScore,  Prop::CtScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_MY, true },
+         TableSort{ { Prop::CtScore,  Prop::MyScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_CT, true },
          TableSort{ { Prop::MyPrice,  Prop::WineName,    Prop::Vintage ,  }, constants::SORT_OPTION_MY_VALUE       }
       };
 
@@ -356,7 +356,6 @@ namespace ctb
 
       void applyFilters()
       {
-         //throw Error{"FUCK"};
          if (m_mm_filters.activeFilters() or m_instock_filter.enabled or m_score_filter.enabled)
          {
             m_filtered_data = vws::all(m_data) | vws::transform([](auto&& rec) { return rec.getProperties(); }) // filters work with property maps, not records

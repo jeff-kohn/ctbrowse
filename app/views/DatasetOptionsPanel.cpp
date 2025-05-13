@@ -387,6 +387,7 @@ namespace ctb::app
    {
       m_sort_config = table->activeSort();
       m_sort_ascending = !m_sort_config.reverse;
+      m_sort_descending = m_sort_config.reverse;
       TransferDataToWindow();
    }
 
@@ -456,6 +457,7 @@ namespace ctb::app
          auto table = m_sink.getTable();
          if (table)
          {
+            m_sort_config.reverse = m_sort_descending;
             table->applySort(m_sort_config);
             m_sink.signal_source(DatasetEvent::Id::Sort);
          }

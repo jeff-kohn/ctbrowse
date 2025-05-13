@@ -85,7 +85,8 @@ namespace ctb::app
 
    void DatasetListView::selectFirstRow()
    {
-      if (!m_model->getDataset())
+      auto dataset = m_model->getDataset();
+      if (!dataset or dataset->filteredRecCount() == 0)
          return;
 
       auto item = m_model->GetItem(0);

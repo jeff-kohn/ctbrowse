@@ -13,7 +13,7 @@ namespace ctb::app
 
       /// @brief Returns a pointer to the active dataset (if any)
       /// @return the current dataset, may be nullptr/empty
-      static [[nodiscard]] auto create(DatasetPtr dataset = {}) -> ModelPtr;
+      [[nodiscard]] static auto create(DatasetPtr dataset = {}) -> ModelPtr;
 
 
       auto getDataset() -> DatasetPtr;
