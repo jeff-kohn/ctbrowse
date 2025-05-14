@@ -63,7 +63,7 @@ namespace ctb::detail
       bool enabled{ false };
 
       /// @brief returns true if the specified record is a match 
-      bool operator()(const PropertyMap& rec) const
+      auto operator()(const PropertyMap& rec) const -> bool
       {
          auto matcher = [&rec, this](Prop prop_id) -> bool
                         {

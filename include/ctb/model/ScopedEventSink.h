@@ -22,8 +22,7 @@ namespace ctb
    {
    public:
       /// @brief construct a scoped event sink without attaching it to a source
-      ///
-      explicit ScopedEventSink(IDatasetEventSink* sink) : m_sink{ sink }
+      explicit ScopedEventSink(IDatasetEventSink* sink) noexcept(false) : m_sink{sink}
       {
          if (!m_sink)
          {
@@ -36,8 +35,7 @@ namespace ctb
       ///
       /// you can pass a null source (although there's no point), but passing a null 
       /// sink will throw an exception.
-      /// 
-      ScopedEventSink(IDatasetEventSink* sink, DatasetEventSourcePtr source) : m_sink{ sink }, m_source{ source }
+      ScopedEventSink(IDatasetEventSink* sink, DatasetEventSourcePtr source) noexcept(false) : m_sink{sink}, m_source{source}
       {
          if (!m_sink)
          {
@@ -48,7 +46,6 @@ namespace ctb
       }
 
       /// @brief attach this sink to the specified source
-      ///
       void reset(DatasetEventSourcePtr source)
       {
          detach();
@@ -59,8 +56,7 @@ namespace ctb
       /// @brief method to signal the source (if we have one) to fire an event
       ///
       /// returns true if successful, false if we don't have a source or the source 
-      /// couldn't send notifications (because of no current table, for instance)
-      /// 
+      /// couldn't send notifications (because of no current dataset, for instance)
       bool signal_source(DatasetEvent::Id event_id, NullableInt rec_idx = std::nullopt)
       {
          if (m_source)
@@ -70,28 +66,25 @@ namespace ctb
          return false;
       }
 
-      /// @brief returns the table currently associated with this source, if any
+      /// @brief returns the dataset currently associated with this source, if any
       /// 
       /// be sure to check the return value as it could be nullptr
-      /// 
-      [[nodiscard]] DatasetPtr getTable()
+      [[nodiscard]] DatasetPtr getDataset()
       {
          if (m_source)
          {
-            return m_source->getTable();
+            return m_source->getDataset();
          }
          return DatasetPtr{};
       }
 
-      /// @brief returns whether the event source has a table attached or not.
-      /// 
-      bool hasTable() const
+      /// @brief returns whether the event source has a dataset attached or not.
+      bool hasDataset() const
       {
-         return m_source->getTable() != nullptr;
+         return m_source->getDataset() != nullptr;
       }
 
       /// @brief destructor
-      ///
       ~ScopedEventSink() noexcept
       {
          detach();

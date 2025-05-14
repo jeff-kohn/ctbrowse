@@ -82,7 +82,7 @@ namespace ctb::app
       m_sort_combo->SetValidator(wxGenericValidator(&m_sort_selection));
       sort_options_box->Add(m_sort_combo, wxSizerFlags{}.Expand().Border(wxALL));
 
-      // ascending sort order radio. validator tied to SortConfig.descending
+      // ascending sort order radio. 
       auto opt_ascending = new wxRadioButton{
          sort_options_box->GetStaticBox(),
          wxID_ANY, 
@@ -95,7 +95,7 @@ namespace ctb::app
       opt_ascending->SetValidator(wxGenericValidator{ &m_sort_ascending });
       sort_options_box->Add(opt_ascending, wxSizerFlags{}.Expand().Border(wxALL));
 
-      // descending sort order radio. Since the radiobuttons aren't in a group box, the validator treats them as bool
+      // descending sort order radio. Since the radio buttons aren't in a group box, the validator treats them as bool
       // so we have a separate flag for the descending radio that we have to manually keep in sync (see onTableSorted)
       auto opt_descending = new wxRadioButton{ sort_options_box->GetStaticBox(), wxID_ANY, constants::LBL_SORT_DESCENDING };
       opt_descending->SetValidator(wxGenericValidator{ &m_sort_descending });
@@ -168,12 +168,12 @@ namespace ctb::app
 
    void DatasetOptionsPanel::addPropFilter(wxTreeItemId item)
    {
-      if (m_sink.hasTable())
+      if (m_sink.hasDataset())
       {
          auto filter = getPropFilterForItem(item);
          if (filter)
          {
-            m_sink.getTable()->addMultiMatchFilter(filter->prop_id, m_filter_tree->GetItemText(item).wx_str());
+            m_sink.getDataset()->addMultiMatchFilter(filter->prop_id, m_filter_tree->GetItemText(item).wx_str());
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
@@ -182,19 +182,19 @@ namespace ctb::app
 
    void DatasetOptionsPanel::removePropFilter(wxTreeItemId item)
    {
-      if (m_sink.hasTable())
+      if (m_sink.hasDataset())
       {
          auto filter = getPropFilterForItem(item);
          if (filter)
          {
-            m_sink.getTable()->removeMultiMatchFilter(filter->prop_id, m_filter_tree->GetItemText(item).wx_str());
+            m_sink.getDataset()->removeMultiMatchFilter(filter->prop_id, m_filter_tree->GetItemText(item).wx_str());
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
    }
 
 
-   void DatasetOptionsPanel::populateFilterTypes(IDataset* table)
+   void DatasetOptionsPanel::populateFilterTypes(IDataset* dataset)
    {
       assert(m_filter_tree);
 
@@ -205,7 +205,7 @@ namespace ctb::app
       m_check_map.clear();
 
       // get the available filters for this dataset, and add them to the tree.
-      auto filters = table->multiMatchFilters();
+      auto filters = dataset->multiMatchFilters();
       auto root = m_filter_tree->AddRoot(wxEmptyString);
       for (auto& filter : filters)
       {
@@ -220,8 +220,8 @@ namespace ctb::app
 
    DatasetOptionsPanel::MaybeFilter DatasetOptionsPanel::getPropFilterForItem(wxTreeItemId item)
    {
-      auto table = m_sink.getTable();
-      if (table)
+      auto dataset = m_sink.getDataset();
+      if (dataset)
       {
          // we need to get the parent node's item, since that's what's in the map.
          auto parent = m_filter_tree->GetItemParent(item);
@@ -236,9 +236,9 @@ namespace ctb::app
    }
 
 
-   wxArrayString DatasetOptionsPanel::getSortOptionList(IDataset* table)
+   wxArrayString DatasetOptionsPanel::getSortOptionList(IDataset* dataset)
    {
-      return vws::all(table->availableSorts()) 
+      return vws::all(dataset->availableSorts()) 
                | vws::transform([](const IDataset::TableSort& s) {  return wxFromSV(s.sort_name); })
                | rng::to<wxArrayString>();
    }
@@ -347,7 +347,7 @@ namespace ctb::app
       {
          switch (event.event_id)
          {
-         case DatasetEvent::Id::TableInitialize:
+         case DatasetEvent::Id::DatasetInitialize:
             onTableInitialize(event.dataset.get());
             enableInStockFilter(event.dataset->hasProperty(CtProp::QtyOnHand));
             break;
@@ -370,22 +370,22 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onTableInitialize(IDataset* table)
+   void DatasetOptionsPanel::onTableInitialize(IDataset* dataset)
    {
       // reload sort/filter options
       m_sort_combo->Clear();
-      m_sort_combo->Append(getSortOptionList(table));
-      onTableSorted(table);
-      populateFilterTypes(table);
+      m_sort_combo->Append(getSortOptionList(dataset));
+      onTableSorted(dataset);
+      populateFilterTypes(dataset);
 
-      m_instock_only = table->getInStockFilter();
+      m_instock_only = dataset->getInStockFilter();
       TransferDataToWindow();
    }
 
 
-   void DatasetOptionsPanel::onTableSorted(IDataset* table)
+   void DatasetOptionsPanel::onTableSorted(IDataset* dataset)
    {
-      m_sort_config = table->activeSort();
+      m_sort_config = dataset->activeSort();
       m_sort_ascending = !m_sort_config.reverse;
       m_sort_descending = m_sort_config.reverse;
       TransferDataToWindow();
@@ -394,10 +394,10 @@ namespace ctb::app
 
    void DatasetOptionsPanel::onInStockChecked([[maybe_unused]] wxCommandEvent& event)
    {
-      assert(m_sink.hasTable());
+      assert(m_sink.hasDataset());
 
       TransferDataFromWindow();
-      if (m_sink.hasTable() and m_sink.getTable()->setInStockFilter(m_instock_only))
+      if (m_sink.hasDataset() and m_sink.getDataset()->setInStockFilter(m_instock_only))
       {
          m_sink.signal_source(DatasetEvent::Id::Filter);
       }
@@ -411,9 +411,9 @@ namespace ctb::app
 
    void DatasetOptionsPanel::onMinScoreChanged([[maybe_unused]] wxSpinDoubleEvent& event)
    {
-      if (m_enable_score_filter and m_sink.hasTable())
+      if (m_enable_score_filter and m_sink.hasDataset())
       {
-         if ( m_sink.getTable()->setMinScoreFilter(event.GetValue()) )
+         if ( m_sink.getDataset()->setMinScoreFilter(event.GetValue()) )
          {
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
@@ -423,7 +423,7 @@ namespace ctb::app
 
    void DatasetOptionsPanel::onMinScoreFilterChecked([[maybe_unused]] wxCommandEvent& event)
    {
-      if (!m_sink.hasTable())
+      if (!m_sink.hasDataset())
       {
          assert(false);
          return;
@@ -433,14 +433,14 @@ namespace ctb::app
       m_score_spin_ctrl->Enable(m_enable_score_filter);
       if (m_enable_score_filter) 
       {
-         if (m_sink.getTable()->setMinScoreFilter(m_score_filter_val))
+         if (m_sink.getDataset()->setMinScoreFilter(m_score_filter_val))
          {
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
       else 
       {
-         if (m_sink.getTable()->setMinScoreFilter(std::nullopt))
+         if (m_sink.getDataset()->setMinScoreFilter(std::nullopt))
          {
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
@@ -454,11 +454,11 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         auto table = m_sink.getTable();
-         if (table)
+         auto dataset = m_sink.getDataset();
+         if (dataset)
          {
             m_sort_config.reverse = m_sort_descending;
-            table->applySort(m_sort_config);
+            dataset->applySort(m_sort_config);
             m_sink.signal_source(DatasetEvent::Id::Sort);
          }
       }
@@ -481,15 +481,15 @@ namespace ctb::app
 
          // let the combo close its list before we reload the dataset
          CallAfter([this](){
-            auto table = m_sink.getTable();
-            if (table)
+            auto dataset = m_sink.getDataset();
+            if (dataset)
             {
                // we re-fetch sorter based on index, because when a sort is selected from the combo
                // we want to use the default order for that sort, not necessarily whatever the current
                // selection is (e.g. sort Scores descending by default).
-               auto sorts = table->availableSorts();
+               auto sorts = dataset->availableSorts();
                m_sort_config = sorts[static_cast<size_t>(m_sort_selection)];
-               table->applySort(m_sort_config);
+               dataset->applySort(m_sort_config);
                m_sink.signal_source(DatasetEvent::Id::Sort);
             }
          });
@@ -517,7 +517,7 @@ namespace ctb::app
             return;
          }
 
-         auto data = m_sink.getTable();
+         auto data = m_sink.getDataset();
          assert(data);
 
          auto& filter = m_filters[filter_node.m_pItem]; 

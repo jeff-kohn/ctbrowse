@@ -19,32 +19,32 @@ namespace ctb
       return DatasetEventSourcePtr{ new DatasetEventSource{} }; 
    }
 
-   auto DatasetEventSource::hasTable() const -> bool
+   auto DatasetEventSource::hasDataset() const -> bool
    { 
       return m_data ? true : false; 
    }
 
 
    /// @brief retrieves a pointer to the active table for this source, if any.
-   auto DatasetEventSource::getTable() const -> DatasetPtr
+   auto DatasetEventSource::getDataset() const -> DatasetPtr
    {
       return m_data;
    }
 
 
    /// @brief assigns a table to this source.
-   auto DatasetEventSource::setTable(DatasetPtr dataset, bool signal_event) -> bool
+   auto DatasetEventSource::setDataset(DatasetPtr dataset, bool signal_event) -> bool
    {
-      SPDLOG_DEBUG("DatasetEventSource::setTable() called.");
+      SPDLOG_DEBUG("DatasetEventSource::setDataset() called.");
 
       // We need to signal that the current table is being replaced, because
       // otherwise views that hold internal table pointers will be left with
       // obsolete
-      if (!signal(DatasetEvent::Id::TableRemove))
+      if (!signal(DatasetEvent::Id::DatasetRemove))
          return false;
 
       m_data = dataset;
-      return signal_event ? signal(DatasetEvent::Id::TableInitialize) : true;
+      return signal_event ? signal(DatasetEvent::Id::DatasetInitialize) : true;
    }
 
 
@@ -107,13 +107,13 @@ namespace ctb
       // We can't guarantee that some event sink won't throw, so best to be safe.
       try
       {
-         signal(DatasetEvent::Id::TableRemove);
+         signal(DatasetEvent::Id::DatasetRemove);
       }
       catch(...)
       {
          try {
             auto e = packageError();
-            log::error("~DatasetEventSource caught exception from signal(TableRemove) event: {}", e.what()); 
+            log::error("~DatasetEventSource caught exception from signal(DatasetRemove) event: {}", e.what()); 
          }
          catch (...) {}
       } 

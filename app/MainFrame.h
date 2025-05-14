@@ -83,7 +83,7 @@ namespace ctb::app
 
    private:
       DatasetMultiView*       m_view{};
-      DatasetEventSourcePtr   m_event_source{}; // for synchronizing events between views and the underlying table
+      DatasetEventSourcePtr   m_event_source{}; // for synchronizing events between views and the underlying dataset
       wxMenuBar*              m_menu_bar{};
       wxSearchCtrl*           m_search_ctrl{};  // substring search box on the toolbar
       ScopedEventSink         m_sink;           // so we can also handle events from our source

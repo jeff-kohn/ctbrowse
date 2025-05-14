@@ -37,7 +37,7 @@ namespace ctb::detail
       MatchValues match_values{};
 
       /// @brief returns true if the specified record is a match or we have no match values to check.
-      bool operator()(const PropertyMap& rec) const noexcept
+      auto operator()(const PropertyMap& rec) const noexcept -> bool
       {
          if (match_values.empty())
             return true;

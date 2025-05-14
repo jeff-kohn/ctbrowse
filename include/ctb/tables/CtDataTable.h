@@ -29,11 +29,4 @@ namespace ctb
    using CtDataTable = std::vector<CtTableRecord<RecordTraits> >;
 
 
-
-   /// @brief type alias for Ct-specific CtDisplayColumn types
-   ///
-   //using CtDisplayColumn   = CtDisplayColumn<CtProp>;
-   //using CtDisplayColumns  = DisplayColumns<CtProp>;
-
-
 } // namespace ctb

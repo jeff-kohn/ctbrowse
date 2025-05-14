@@ -1,5 +1,11 @@
+/*******************************************************************
+* @file CtDataModel.h
+*
+* @brief Header file declaring the CtDataModel template class
+* 
+* @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+*******************************************************************/
 #pragma once
-
 
 #include "ctb/interfaces/IDataset.h"
 
@@ -10,19 +16,14 @@
 
 #include "ctb/model/CtDisplayColumn.h"
 
-#include <vector>
-
 
 namespace ctb
 {
    /// @brief This is the data model class for interacting with CellarTracker datasets.
    /// 
-   /// This class contains a dataset representing one of the CT user tables (Wine List, Pending Wines, etc)
+   /// This class ipmlements a dataset representing one of the CT user tables (Wine List, Pending Wines, etc)
    /// It provides access to all properties of the underlying dataset, but also has DisplayColumns, which are 
    /// the properties displayed in the main list-view. 
-   /// 
-   /// There are methods for searching or sorting value in the list view (i.e. DisplayColumns). There are also 
-   /// filtering options for other properties.
    /// 
    template<typename DataTableT>
    class CtDataModel final : public IDataset
@@ -53,7 +54,7 @@ namespace ctb
          return DatasetPtr{ static_cast<IDataset*>(new CtDataModel{ std::move(data) }) };
       }
 
-      /// @brief retrieves list of available SortConfigs, in order of display
+      /// @brief retrieves list of available sorters, in order of display
       /// 
       /// the index in this vector corresponds to the index in the sort_index
       /// property.
@@ -362,7 +363,7 @@ namespace ctb
                                                | vws::filter(m_mm_filters)
                                                | vws::filter(m_instock_filter)
                                                | vws::filter(m_score_filter)
-                                               | vws::transform([](auto&& map) { return Record{ map }; })        // back to record
+                                               | vws::transform([](auto&& map) { return Record{ map }; })       // back to record
                                                | rng::to<std::vector>();
             m_current_view = &m_filtered_data;
          }

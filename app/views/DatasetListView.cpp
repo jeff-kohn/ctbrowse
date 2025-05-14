@@ -101,11 +101,11 @@ namespace ctb::app
    {
       switch (event.event_id)
       {
-         case DatasetEvent::Id::TableInitialize:
+         case DatasetEvent::Id::DatasetInitialize:
             setDataset(event.dataset);
             break;
 
-         case DatasetEvent::Id::TableRemove:
+         case DatasetEvent::Id::DatasetRemove:
             setDataset(DatasetPtr{});
             break;
 
@@ -128,7 +128,7 @@ namespace ctb::app
 
    void DatasetListView::onSelectionChanged(wxDataViewEvent& event)
    {
-      if (!m_sink.hasTable()) return;
+      if (!m_sink.hasDataset()) return;
 
       auto row = m_model->GetRow(event.GetItem());
       m_sink.signal_source(DatasetEvent::Id::RowSelected, static_cast<int>(row));

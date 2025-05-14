@@ -30,7 +30,6 @@ namespace ctb
       DatasetLoader() = default;
 
       /// @brief construct a DatasetLoader specifying the data folder. May throw if folder is invalid.
-      ///
       explicit DatasetLoader(const fs::path& folder) noexcept(false)
       {
          setDataFolder(folder);
@@ -38,7 +37,7 @@ namespace ctb
 
       /// @brief specify the location for data files
       ///
-      /// throws an exception if the folder doesn't exist
+      /// @throws ctb::Error if the folder doesn't exist
       void setDataFolder(const fs::path& folder) noexcept(false)
       {
          if (not fs::exists(folder))
@@ -49,7 +48,6 @@ namespace ctb
       }
 
       /// @brief returns the location used for loading data files from disk
-      ///
       auto getDataFolder() const -> fs::path
       {
          return m_data_folder;
@@ -57,8 +55,7 @@ namespace ctb
 
       /// @brief Get the requested dataset
       ///
-      /// this will throw an exception if the table couldn't be loaded.
-      ///
+      /// @throws ctb::Error if the dataset couldn't be loaded.
       auto getDataset(TableId tbl) -> DatasetPtr;
 
    private:

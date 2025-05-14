@@ -9,7 +9,6 @@
 
 #include "App.h"
 #include <ctb/model/ScopedEventSink.h>
-#include <ctb/tables/detail/SortConfig.h>
 
 #include <wx/choice.h>
 #include <wx/dataview.h>

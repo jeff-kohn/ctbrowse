@@ -26,11 +26,9 @@ namespace ctb::detail
       using Prop   = Record::Prop;
 
       /// @brief the substring to search for.
-      ///
       std::string search_value{};
 
       /// @brief the properties to search in.
-      ///
       std::vector<Prop> search_props{};
 
       /// @brief  function operator used to perform the substring search. 
@@ -38,8 +36,7 @@ namespace ctb::detail
       /// this function will check each specified property to see if it contains
       /// the search substring, returning true if a match was round. case-neutral
       /// search is used
-      /// 
-      bool operator()(const Record& rec) const
+      operator()(const Record& rec) const -> bool 
       {
          for (auto prop : search_props)
          {
@@ -53,7 +50,6 @@ namespace ctb::detail
          }
          return false;
       }
-
    };
 
 

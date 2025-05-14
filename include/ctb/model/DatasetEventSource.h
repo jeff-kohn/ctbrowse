@@ -32,44 +32,42 @@ namespace ctb
       /// @brief static method to create a class instance.
       ///
       /// note that while you can attach/detach from this object immediately, 
-      /// getTable() will return nullptr and the object won't fire any events 
-      /// until a valid table ptr is passed to setTable().
-      /// 
-      [[nodiscard]] static 
-      auto create() -> DatasetEventSourcePtr;
+      /// getDataset() will return nullptr and the object won't fire any events 
+      /// until a valid table ptr is passed to setDataset().
+      [[nodiscard]] static auto create() -> DatasetEventSourcePtr;
 
       /// @brief returns true if this source has a table attached, false otherwise
       ///
-      auto hasTable() const -> bool override;
+      auto hasDataset() const -> bool override;
 
       /// @brief retrieves a pointer to the active table for this source, if any.
       ///
       /// the returned table ptr may be null if this source doesn't have an active table.
       /// 
-      auto getTable() const -> DatasetPtr override;
+      auto getDataset() const -> DatasetPtr override;
 
       /// @brief assigns a table to this source.
       /// 
-      /// triggers the TableRemove event before disconnecting the current table (if it is non-null)
-      /// triggers the TableInitialize event for the new table-ptr (if it is non-null and signal_event
+      /// triggers the DatasetRemove event before disconnecting the current table (if it is non-null)
+      /// triggers the DatasetInitialize event for the new table-ptr (if it is non-null and signal_event
       /// is true)
       /// 
       /// If a null table ptr is passed, this source will no longer fire events 
-      /// until a subsequent call to setTable() passes a valid pointer.
+      /// until a subsequent call to setDataset() passes a valid pointer.
       /// 
-      auto setTable(DatasetPtr dataset, bool signal_event) -> bool override;
+      auto setDataset(DatasetPtr dataset, bool signal_event) -> bool override;
       
       /// @brief assigns a table to this source.
       /// 
-      /// triggers the TableRemove event before disconnecting the current table (if it is non-null)
-      /// triggers the TableInitialize event for the new table-ptr (if it is non-null)
+      /// Triggers the DatasetRemove event before disconnecting the current table (if it is non-null)
+      /// Triggers the DatasetInitialize event for the new table-ptr (if it is non-null)
       /// 
       /// If a null table ptr is passed, this source will no longer fire events 
-      /// until a subsequent call to setTable() passes a valid pointer.
+      /// until a subsequent call to setDataset() passes a valid pointer.
       /// 
-      void setTable(DatasetPtr dataset) override
+      void setDataset(DatasetPtr dataset) override
       {
-         setTable(dataset, true);
+         setDataset(dataset, true);
       }
 
       /// @brief attaches an event sink to this source to receive event notifications
@@ -81,17 +79,15 @@ namespace ctb
       void attach(IDatasetEventSink* observer) override;
 
       /// @brief detach an event sink from this source to no longer receive event notifications
-      /// 
       void detach(IDatasetEventSink* observer) override;
 
       /// @brief this is called to signal that an event needs to be sent to all listeners
       ///
-      /// sinks should try to handle their own exceptions if it's possible to do so gracefully, but
+      /// sinks should try to handle their own exceptions if it's possible to do so gracefully;
       /// exceptions caught in this function will be logged in debug builds but otherwise lost
       /// 
       /// @return true if every subscriber was notified without error, false if at least one
       ///         subscriber threw an error.
-      /// 
       auto signal(DatasetEvent::Id event, NullableInt rec_idx) noexcept -> bool override;
  
       /// @brief this is called to signal that an event needs to be sent to all listeners
@@ -101,7 +97,6 @@ namespace ctb
       /// 
       /// @return true if every subscriber was notified without error, false if at least one
       ///         subscriber threw an error.
-      /// 
       auto signal(DatasetEvent::Id event_id) noexcept -> bool override;
 
       /// @brief destructor

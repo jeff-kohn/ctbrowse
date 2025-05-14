@@ -353,7 +353,7 @@ namespace ctb::app
             break;
 
          case DatasetEvent::Id::ColLayoutRequested: [[fallthrough]];
-         case DatasetEvent::Id::TableInitialize:
+         case DatasetEvent::Id::DatasetInitialize:
             break;
 
          default:

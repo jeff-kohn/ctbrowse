@@ -413,7 +413,7 @@ namespace ctb::app
          {
             tbl->setInStockFilter(true);
          }
-         m_event_source->setTable(tbl, true);
+         m_event_source->setDataset(tbl, true);
 
          // Force a complete redraw of everything
          Layout();
@@ -499,10 +499,10 @@ namespace ctb::app
 
    void MainFrame::doSearchFilter()
    {
-      if (!m_event_source->hasTable()) return;
+      if (!m_event_source->hasDataset()) return;
       try
       {
-         auto dataset = m_event_source->getTable();
+         auto dataset = m_event_source->getDataset();
          if (dataset->filterBySubstring(m_search_ctrl->GetValue().wx_str()))
          {
             m_event_source->signal(DatasetEvent::Id::SubStringFilter);
@@ -522,11 +522,11 @@ namespace ctb::app
 
    void MainFrame::clearSearchFilter()
    {
-      if (!m_event_source->hasTable()) return;
+      if (!m_event_source->hasDataset()) return;
       try
       {
          m_search_ctrl->ChangeValue("");
-         m_event_source->getTable()->clearSubStringFilter();
+         m_event_source->getDataset()->clearSubStringFilter();
          m_event_source->signal(DatasetEvent::Id::Filter);
       }
       catch(...){
@@ -541,9 +541,9 @@ namespace ctb::app
       int total{0};
       int filtered{0};
       
-      if (m_event_source->hasTable())
+      if (m_event_source->hasDataset())
       {
-         auto tbl = m_event_source->getTable();
+         auto tbl = m_event_source->getDataset();
          total = tbl->totalRecCount();
          filtered = tbl->filteredRecCount();
       }

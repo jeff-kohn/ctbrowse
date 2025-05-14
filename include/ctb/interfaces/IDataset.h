@@ -1,7 +1,7 @@
 /*******************************************************************
  * @file IDataset.h
  *
- * @brief Header file for the DatasetBase base class
+ * @brief Header file for the IDataset interface
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
@@ -19,23 +19,19 @@
 
 #include <span>
 #include <memory>
+#include <string>
+#include <string_view>
 
 
 namespace ctb
 {
    using CtMultiMatchFilter     = detail::MultiMatchPropertyFilter<CtProp, CtPropertyMap>;
-   //using CtMultiMatchFilters    = std::vector<CtMultiMatchFilter>;
    using CtMultiMatchFilterSpan = std::span<const CtMultiMatchFilter>;
    using CtTableSort            = detail::TableSorter<CtProp, CtPropertyMap>;
    using CtTableSortSpan        = std::span<const CtTableSort>;
 
 
-   /// @brief Data model class that provides a base implementation for accessing CellarTracker data
-   /// 
-   /// Each CT table the app uses will derive form this class.
-   /// 
-   /// Users of this interface should gain access through IDatasetEventSource::getTable() or 
-   /// using the ptr supplied when handling IDatasetEventSource::notify()
+   /// @brief Data model class that provides a base implementation for accessing CellarTracker data files
    /// 
    class IDataset
    {
@@ -49,7 +45,7 @@ namespace ctb
       using TableSort         = CtTableSort;
       using TableSortSpan     = CtTableSortSpan;
 
-      /// @brief retrieves list of available SortConfigs, in order of display
+      /// @brief retrieves list of available sorters, in order of display
       /// 
       /// the index in this vector corresponds to the index in the sort_index
       /// property.
@@ -66,10 +62,10 @@ namespace ctb
       /// Note that some may be hidden and not visible.
       virtual auto displayColumns() const -> const DisplayColumns& = 0;
 
-      /// @brief retrieves a list of available filters for this table.
+      /// @brief retrieves a list of available filters for this dataset.
       virtual auto multiMatchFilters() const -> CtMultiMatchFilterSpan = 0;
 
-      /// @brief Get a list of all distinct values from the table for the specified property.
+      /// @brief Get a list of all distinct values from the dataset for the specified property.
       /// 
       /// This can be used to get filter values for match-filters.
       [[nodiscard]]
@@ -88,7 +84,7 @@ namespace ctb
       /// @return true if the filter was removed, false if it wasn't found
       virtual auto removeMultiMatchFilter(CtProp prop_id, const Property& match_value) -> bool = 0;
 
-      /// @brief Apply a search filter that does substring matching on ANY column in the table view
+      /// @brief Apply a search filter that does substring matching on ANY column in the dataset view
       /// 
       /// If applied this filter will replace any previous substring filter, as there can be only
       /// one at a time.

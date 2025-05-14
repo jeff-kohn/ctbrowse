@@ -11,8 +11,6 @@
 #include "ctb/tables/detail/MultiMatchPropertyFilter.h"
 
 #include <boost/unordered/unordered_flat_map.hpp>
-#include <string>
-#include <string_view>
 
 
 namespace ctb::detail
@@ -27,14 +25,13 @@ namespace ctb::detail
    public:
       using Prop          = PropT;
       using PropertyMap   = PropMapT;
-      using Property = PropertyMap::mapped_type;
+      using Property      = PropertyMap::mapped_type;
       using Filter        = MultiMatchPropertyFilter<Prop, PropertyMap>;
       using MatchValues   = Filter::MatchValues;
 
       /// @brief add a match value for the specified column filter.
       /// @return true if successful, false if filter value already existed or could not be added.
-      /// 
-      bool addFilter(Prop prop_id, const Property& match_value)
+      auto addFilter(Prop prop_id, const Property& match_value) -> bool
       {
          auto& filter = m_filters[prop_id];
 
@@ -46,8 +43,7 @@ namespace ctb::detail
 
       /// @brief remove a match value for the specified column filter
       /// @return true if removed, false if not found.
-      /// 
-      bool removeFilter(Prop prop_id, const Property& match_value)
+      removeFilter(Prop prop_id, const Property& match_value) -> bool
       {
          bool ret_val{ false };
 
@@ -70,8 +66,7 @@ namespace ctb::detail
       /// @return true if each PropFilterString matched the record, false  
       ///         if the record failed to match one or more filters. Will
       ///         also return true if there are no active filters.
-      /// 
-      bool operator()(const PropertyMap& rec) const
+      operator()(const PropertyMap& rec) const -> bool
       {
          if (activeFilters())
          {
@@ -85,8 +80,7 @@ namespace ctb::detail
       }
 
       /// @brief returns the number of active property filters we have.
-      /// 
-      int activeFilters() const
+      auto activeFilters() const -> int
       {
          return static_cast<int>(m_filters.size());
       }

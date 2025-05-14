@@ -31,7 +31,6 @@ namespace ctb::detail
       bool                reverse{ false };  // set to true to sort in reverse order
 
       /// @brief function operator that does the comparison.
-      ///
       auto operator()(const PropertyMap& r1, const PropertyMap& r2) const -> bool
       {
          for (auto prop : sort_props)

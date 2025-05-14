@@ -50,7 +50,7 @@ namespace ctb::detail
 
       /// @brief returns whether or not this object contains a 'null' value.
       ///
-      bool isNull() const
+      auto isNull() const -> bool
       {
          return m_val.index() == 0;
       }
@@ -67,14 +67,14 @@ namespace ctb::detail
       /// returns an optional in case this property doesn't contain a value or it can't be converted to T.
       /// 
       template<ArithmeticType T> 
-      constexpr std::optional<T> as() const
+      constexpr auto as() const -> std::optional<T>
       {    
          // try to convert
          auto asT = Overloaded
          {
-            [](const std::monostate) -> std::optional<T> { return std::nullopt; },
-            [](const std::string& str) -> std::optional<T> { return from_str<T>(str); },
-            [](auto val) -> std::optional<T> { return std::optional<T>(static_cast<T>(val)); }
+            [](const std::monostate)   -> std::optional<T> { return std::nullopt;                          },
+            [](const std::string& str) -> std::optional<T> { return from_str<T>(str);                      },
+            [](auto val)               -> std::optional<T> { return std::optional<T>(static_cast<T>(val)); }
          };
          return std::visit(asT, m_val);
       }
@@ -82,14 +82,12 @@ namespace ctb::detail
       /// @brief get a string value out of the property
       /// 
       /// @return the requested value, or an empty string if no value is available (e.g. null) 
-      /// 
-      std::string asString() const
+      auto asString() const -> std::string
       {
          if (std::holds_alternative<std::string>(m_val))
          {
             return std::get<std::string>(m_val);
          }
-
          return asString("{}");
       }
 
@@ -98,7 +96,7 @@ namespace ctb::detail
       /// 
       /// this method does not convert other types to string_view, because that would require a view on a temporary. 
       /// if the contained property is not a valid string, you'll get an empty string_view back.
-      std::string_view asStringView() const
+      auto asStringView() const -> std::string_view
       {
          if (std::holds_alternative<std::string>(m_val))
          {
@@ -113,7 +111,7 @@ namespace ctb::detail
       /// this can be useful in determining whether you want to call asString() or asStringView()
       /// since the former will convert numbers to string and the latter will not.
       /// 
-      constexpr bool hasString() const
+      constexpr auto hasString() const -> bool
       {
          return std::holds_alternative<std::string>(m_val);
       }
@@ -122,7 +120,7 @@ namespace ctb::detail
       /// 
       /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
       /// 
-      std::optional<int32_t> asInt32() const
+      auto asInt32() const -> NullableInt
       {
          return as<int32_t>();
       }
@@ -131,7 +129,7 @@ namespace ctb::detail
       /// 
       /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
       /// 
-      std::optional<uint16_t> asUInt16() const
+      auto asUInt16() const -> NullableShort
       {
          return as<uint16_t>();
       }
@@ -140,7 +138,7 @@ namespace ctb::detail
       /// 
       /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
       /// 
-      std::optional<uint64_t> asUInt64() const
+      auto asUInt64() const -> NullableSize_t
       {
          return as<uint64_t>();
       }
@@ -149,7 +147,7 @@ namespace ctb::detail
       /// 
       /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
       /// 
-      std::optional<double> asDouble() const
+      auto asDouble() const -> NullableDouble
       {
          return as<double>();
       }
@@ -160,7 +158,7 @@ namespace ctb::detail
       /// 
       /// Note that if the property isNull(), the fmt_str will not be used - you will always get an empty string
       /// 
-      std::string asString(std::string_view fmt_str) const
+      auto asString(std::string_view fmt_str) const -> std::string 
       {
          auto asStr = Overloaded
          {

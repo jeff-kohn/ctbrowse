@@ -20,17 +20,15 @@ namespace ctb
       /// @brief called to notify the sink that a dataset event has occurred.
       ///
       /// The supplied pointer will remain valid until a subsequent event
-      /// notification of type TableInitialize is received.
+      /// notification of type DatasetInitialize is received.
       /// 
       /// Event is passed by value because it can't be const-ref and we want to be able to pass
       /// temporaries. Also makes clear that changes to the event itself don't
       /// propagate back to caller.
-      /// 
       virtual void notify(DatasetEvent event) = 0;
 
 
       /// @brief virtual destructor
-      ///
       virtual ~IDatasetEventSink() noexcept = default;
    };
 

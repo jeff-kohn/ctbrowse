@@ -1,6 +1,7 @@
 #include "App.h"
 
 #include <ctb/interfaces/IDataset.h>
+
 #include <wx/dataview.h>
 
 namespace ctb::app
@@ -13,16 +14,16 @@ namespace ctb::app
 
       /// @brief Returns a pointer to the active dataset (if any)
       /// @return the current dataset, may be nullptr/empty
-      [[nodiscard]] static auto create(DatasetPtr dataset = {}) -> ModelPtr;
+      [[nodiscard]] static auto create() -> ModelPtr;
 
 
+      /// @brief Returns the active dataset for this model (may be empty/null)
       auto getDataset() -> DatasetPtr;
 
-      void setDataset(DatasetPtr dataset);
-
-      /// @brief Forces a refresh of the dataview after large changes to underlying dataset
+      /// @brief Forces a refresh of the data view after large changes to underlying dataset
       void reQuery();
 
+      /// @brief associate a data view ctrl with this model. we only support one associated view, last call wins.
       void associateView(wxDataViewCtrl* view);
 
       // we only expose a limited amount of base-class API
@@ -35,9 +36,10 @@ namespace ctb::app
       using base::DecRef;
 
    private:
-      DatasetPtr m_dataset{};
+      DatasetPtr       m_dataset{};
+      wxDataViewCtrl*  m_view{};
 
-      explicit CtDataViewModel(DatasetPtr dataset = {}) : m_dataset{ dataset }
+      explicit CtDataViewModel(DatasetEventSourcePtr source)
       {}
 
       // these are the real purpose of this class, they're called by the base class to

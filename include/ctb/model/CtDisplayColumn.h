@@ -10,6 +10,9 @@
 
 #include <ctb/tables/detail/TableProperty.h>
 
+#include <string>
+#include <string_view>
+#include <span>
 #include <vector>
 
 namespace ctb
@@ -23,7 +26,6 @@ namespace ctb
       ///
       /// these values align with wxWidgets' wxALIGN_xxxx values, but we don't want the dependency
       /// in the lib so just use the value directly.
-      /// 
       enum Align : uint16_t
       {
          Left     = 0x0000,
@@ -32,7 +34,6 @@ namespace ctb
       };
 
       /// @brief enum to specify the format the value will be displayed in
-      ///
       enum Format
       {
          String,
@@ -45,7 +46,6 @@ namespace ctb
       ///
       /// We have to use a int instead of the enum because this class needs to be used through a type-erased 
       /// interface and can't refer to types specific to a TableRecord<> instantiation.
-      /// 
       CtProp prop_id{};                  
 
       /// @brief Title to use for the column's header 
@@ -61,16 +61,10 @@ namespace ctb
       Align header_align{ Align::Left }; 
 
       /// @brief construct a column to display the specified property as a string
-      ///
-      /// column header value is option and will use the table column name by default
-      ///
       CtDisplayColumn(CtProp prop_id, std::string_view col_name) : prop_id{ prop_id },  display_name{ col_name }
       {}
 
       /// @brief construct a column to display the specified property in the requested format
-      ///
-      /// column header value is optional and will use the table column name by default
-      ///
       CtDisplayColumn(CtProp prop_id, Format fmt, std::string_view col_name) :  prop_id{ prop_id },  display_name{ col_name }, format{ fmt }
       {
          if (fmt != Format::String)
@@ -110,6 +104,7 @@ namespace ctb
       ~CtDisplayColumn() = default;
    };
 
-   using CtDisplayColumns = std::vector<CtDisplayColumn>;
+   using CtDisplayColumns    = std::vector<CtDisplayColumn>;
+   using CtDisplayColumnSpan = std::span<const CtDisplaycolumn>;
 
 } // namespace ctb

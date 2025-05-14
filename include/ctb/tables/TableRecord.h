@@ -11,7 +11,6 @@
 #include "ctb/ctb.h"
 #include "ctb/tables/CtProperty.h"
 
-#include <boost/unordered/unordered_flat_map.hpp>
 #include <external/csv.hpp>
 #include <magic_enum/magic_enum.hpp>
 
