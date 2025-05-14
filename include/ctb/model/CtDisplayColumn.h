@@ -105,6 +105,6 @@ namespace ctb
    };
 
    using CtDisplayColumns    = std::vector<CtDisplayColumn>;
-   using CtDisplayColumnSpan = std::span<const CtDisplaycolumn>;
+   using CtDisplayColumnSpan = std::span<const CtDisplayColumn>;
 
 } // namespace ctb

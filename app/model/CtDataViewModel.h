@@ -14,11 +14,13 @@ namespace ctb::app
 
       /// @brief Returns a pointer to the active dataset (if any)
       /// @return the current dataset, may be nullptr/empty
-      [[nodiscard]] static auto create() -> ModelPtr;
-
+      [[nodiscard]] static auto create(DatasetPtr dataset = {}) -> ModelPtr;
 
       /// @brief Returns the active dataset for this model (may be empty/null)
       auto getDataset() -> DatasetPtr;
+
+      /// @brief Associates a new dataset with this model
+      void setDataset(DatasetPtr dataset);
 
       /// @brief Forces a refresh of the data view after large changes to underlying dataset
       void reQuery();
@@ -37,9 +39,8 @@ namespace ctb::app
 
    private:
       DatasetPtr       m_dataset{};
-      wxDataViewCtrl*  m_view{};
 
-      explicit CtDataViewModel(DatasetEventSourcePtr source)
+      explicit CtDataViewModel(DatasetPtr dataset = {}) : m_dataset{ dataset }
       {}
 
       // these are the real purpose of this class, they're called by the base class to

@@ -43,7 +43,7 @@ namespace ctb::detail
 
       /// @brief remove a match value for the specified column filter
       /// @return true if removed, false if not found.
-      removeFilter(Prop prop_id, const Property& match_value) -> bool
+      auto removeFilter(Prop prop_id, const Property& match_value) -> bool
       {
          bool ret_val{ false };
 
@@ -66,7 +66,7 @@ namespace ctb::detail
       /// @return true if each PropFilterString matched the record, false  
       ///         if the record failed to match one or more filters. Will
       ///         also return true if there are no active filters.
-      operator()(const PropertyMap& rec) const -> bool
+      auto operator()(const PropertyMap& rec) const -> bool
       {
          if (activeFilters())
          {

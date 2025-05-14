@@ -36,7 +36,7 @@ namespace ctb::detail
       /// this function will check each specified property to see if it contains
       /// the search substring, returning true if a match was round. case-neutral
       /// search is used
-      operator()(const Record& rec) const -> bool 
+      auto operator()(const Record& rec) const -> bool 
       {
          for (auto prop : search_props)
          {

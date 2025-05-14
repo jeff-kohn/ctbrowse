@@ -19,7 +19,7 @@ namespace ctb::app
    void CtDataViewModel::setDataset(DatasetPtr dataset)
    {
       m_dataset = dataset;
-      Cleared();
+      reQuery();
    }
 
 
