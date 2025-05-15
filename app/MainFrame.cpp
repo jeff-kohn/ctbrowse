@@ -18,7 +18,7 @@
 #include <ctb/utility.h>
 #include <ctb/table_download.h>
 #include <ctb/model/DatasetEventSource.h>
-#include <ctb/model/DatasetLoader.h>
+#include <ctb/model/CtDatasetLoader.h>
 
 #include <external/HttpStatusCodes.h>
 
@@ -404,7 +404,7 @@ namespace ctb::app
          }
 
          // load table and connect it to the event source
-         DatasetLoader loader{ wxGetApp().userDataFolder() };
+         CtDatasetLoader loader{ wxGetApp().userDataFolder() };
          auto table_id = eventIdToTableId(event.GetId());
          auto tbl = loader.getDataset(table_id);
 

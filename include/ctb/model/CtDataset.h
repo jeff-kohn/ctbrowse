@@ -1,7 +1,7 @@
 /*******************************************************************
-* @file CtDataModel.h
+* @file CtDataset.h
 *
-* @brief Header file declaring the CtDataModel template class
+* @brief Header file declaring the CtDataset template class
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
 *******************************************************************/
@@ -14,7 +14,7 @@
 #include "ctb/tables/detail/SubStringFilter.h"
 #include "ctb/tables/detail/TableSorter.h"
 
-#include "ctb/model/CtDisplayColumn.h"
+#include "ctb/model/CtListColumn.h"
 
 
 namespace ctb
@@ -22,17 +22,17 @@ namespace ctb
    /// @brief This is the data model class for interacting with CellarTracker datasets.
    /// 
    /// This class ipmlements a dataset representing one of the CT user tables (Wine List, Pending Wines, etc)
-   /// It provides access to all properties of the underlying dataset, but also has DisplayColumns, which are 
+   /// It provides access to all properties of the underlying dataset, but also has ListColumns, which are 
    /// the properties displayed in the main list-view. 
    /// 
    template<typename DataTableT>
-   class CtDataModel final : public IDataset
+   class CtDataset final : public IDataset
    {
    public:
       using base                = IDataset;
       using DataTable           = DataTableT;
-      using DisplayColumn       = base::DisplayColumn;
-      using DisplayColumns      = base::DisplayColumns;
+      using ListColumn          = base::ListColumn;
+      using ListColumns         = base::ListColumns;
       using MultiMatchFilterMgr = detail::MultiMatchPropertyFilterMgr<Prop, PropertyMap>;
       using MultiMatchFilter    = MultiMatchFilterMgr::Filter;
       using Prop                = base::Prop;
@@ -51,7 +51,7 @@ namespace ctb
       /// @return shared_ptr to the requested object
       static auto create(DataTable data) -> DatasetPtr
       {
-         return DatasetPtr{ static_cast<IDataset*>(new CtDataModel{ std::move(data) }) };
+         return DatasetPtr{ static_cast<IDataset*>(new CtDataset{ std::move(data) }) };
       }
 
       /// @brief retrieves list of available sorters, in order of display
@@ -82,9 +82,9 @@ namespace ctb
       /// @brief Gets the collection of active display columns 
       /// 
       /// Note that some may be hidden and not visible.
-      auto displayColumns() const -> const DisplayColumns& override
+      auto listColumns() const -> const ListColumns& override
       { 
-         return m_display_columns; 
+         return m_list_columns; 
       }
 
       /// @brief retrieves a list of available filters for this table.
@@ -151,7 +151,7 @@ namespace ctb
       auto filterBySubstring(std::string_view substr) -> bool override
       {
          // this overload searches all columns in the current list view, so get the prop_id's 
-         auto cols = displayColumns() | vws::transform([](const CtDisplayColumn& disp_col) -> auto { return disp_col.prop_id; })
+         auto cols = listColumns() | vws::transform([](const CtListColumn& disp_col) -> auto { return disp_col.prop_id; })
                                       | rng::to<std::vector>();
 
          return applySubStringFilter(SubStringFilter{ std::string{substr}, cols });
@@ -286,22 +286,22 @@ namespace ctb
 
 
       // default dtor, others are deleted since this object is meant to be heap-only
-      ~CtDataModel() noexcept override = default;
-      CtDataModel() = delete;
-      CtDataModel(const CtDataModel&) = delete;
-      CtDataModel(CtDataModel&&) = delete;
-      CtDataModel& operator=(const CtDataModel&) = delete;
-      CtDataModel& operator=(CtDataModel&&) = delete;
+      ~CtDataset() noexcept override = default;
+      CtDataset() = delete;
+      CtDataset(const CtDataset&) = delete;
+      CtDataset(CtDataset&&) = delete;
+      CtDataset& operator=(const CtDataset&) = delete;
+      CtDataset& operator=(CtDataset&&) = delete;
 
    private:
       /// @brief list of display columns that will show in the list view
       ///
-      static inline const std::array DefaultDisplayColumns { 
-         CtDisplayColumn{ Prop::WineAndVintage,                                constants::DISPLAY_COL_WINE     },
-         CtDisplayColumn{ Prop::Locale,                                        constants::DISPLAY_COL_LOCALE   },
-         CtDisplayColumn{ Prop::QtyTotal,   CtDisplayColumn::Format::Number,   constants::DISPLAY_COL_QTY      },
-         CtDisplayColumn{ Prop::CtScore,    CtDisplayColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE },
-         CtDisplayColumn{ Prop::MyScore,    CtDisplayColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE },
+      static inline const std::array DefaultListColumns { 
+         CtListColumn{ Prop::WineAndVintage,                                constants::DISPLAY_COL_WINE     },
+         CtListColumn{ Prop::Locale,                                        constants::DISPLAY_COL_LOCALE   },
+         CtListColumn{ Prop::QtyTotal,   CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY      },
+         CtListColumn{ Prop::CtScore,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE },
+         CtListColumn{ Prop::MyScore,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE },
       };
 
       /// @brief the available sort orders for this table.
@@ -329,7 +329,7 @@ namespace ctb
       DataTable                        m_data{};                 // the underlying data records for this table.
       DataTable                        m_filtered_data{};        // we need a copy for the filtered data, so we can bind our views to it
       DataTable*                       m_current_view{};         // may point to m_data or m_filtered_data depending if filter is active
-      DisplayColumns                   m_display_columns{};
+      ListColumns                      m_list_columns{};
       PropertyFilter                   m_instock_filter{};
       PropertyFilter                   m_score_filter{};
       MultiMatchFilterMgr              m_mm_filters{};
@@ -337,10 +337,10 @@ namespace ctb
       std::optional<SubStringFilter>   m_substring_filter{};
       
       // private construction, use static factory method create();
-      explicit CtDataModel(DataTable&& data) : 
+      explicit CtDataset(DataTable&& data) : 
          m_data{ std::move(data) },
          m_current_view{ &m_data },
-         m_display_columns{ std::from_range, DefaultDisplayColumns },
+         m_list_columns{ std::from_range, DefaultListColumns },
          m_instock_filter{ Prop::QtyOnHand, std::greater<CtProperty>{}, uint16_t{0} },
          m_score_filter{ {Prop::CtScore, Prop::MyScore}, std::greater_equal<CtProperty>{}, constants::FILTER_SCORE_DEFAULT },
          m_current_sort{ availableSorts()[0] }

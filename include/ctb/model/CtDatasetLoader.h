@@ -1,7 +1,7 @@
 /*******************************************************************
- * @file DatasetLoader.h
+ * @file CtCtDatasetLoader
  *
- * @brief Header file for the class DatasetLoader
+ * @brief Header file for the class CtDatasetLoader
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
@@ -23,14 +23,14 @@ namespace ctb
 
    /// @brief class to load dataset files from disk.
    ///
-   class DatasetLoader
+   class CtDatasetLoader
    {
    public:
       /// @brief default ctor, initializes data folder to "." unless overriden by a call to setDataFolder()
-      DatasetLoader() = default;
+      CtDatasetLoader() = default;
 
-      /// @brief construct a DatasetLoader specifying the data folder. May throw if folder is invalid.
-      explicit DatasetLoader(const fs::path& folder) noexcept(false)
+      /// @brief construct a CtDatasetLoader specifying the data folder. May throw if folder is invalid.
+      explicit CtDatasetLoader(const fs::path& folder) noexcept(false)
       {
          setDataFolder(folder);
       }

@@ -15,7 +15,7 @@
 #include "ctb/tables/detail/MultiMatchPropertyFilter.h"
 #include "ctb/tables/detail/TableSorter.h"
 
-#include "ctb/model/CtDisplayColumn.h"
+#include "ctb/model/CtListColumn.h"
 
 #include <span>
 #include <memory>
@@ -40,8 +40,8 @@ namespace ctb
       using Property          = CtProperty;
       using PropertyMap       = CtPropertyMap;
       using PropertyValueSet  = CtPropertyValueSet;
-      using DisplayColumn     = CtDisplayColumn;
-      using DisplayColumns    = CtDisplayColumns;
+      using ListColumn        = CtListColumn;
+      using ListColumns       = CtListColumns;
       using TableSort         = CtTableSort;
       using TableSortSpan     = CtTableSortSpan;
 
@@ -57,10 +57,10 @@ namespace ctb
       /// @brief specifies a new sort option
       virtual void applySort(const TableSort& sort) = 0;
 
-      /// @brief Gets the collection of active display columns 
+      /// @brief Gets the collection of columns for the list display
       /// 
       /// Note that some may be hidden and not visible.
-      virtual auto displayColumns() const -> const DisplayColumns& = 0;
+      virtual auto listColumns() const -> const ListColumns& = 0;
 
       /// @brief retrieves a list of available filters for this dataset.
       virtual auto multiMatchFilters() const -> CtMultiMatchFilterSpan = 0;

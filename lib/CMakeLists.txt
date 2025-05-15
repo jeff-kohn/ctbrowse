@@ -27,10 +27,10 @@ target_sources(ctBrowse_lib
       "../include/ctb/interfaces/IDatasetEventSink.h"
       "../include/ctb/interfaces/IDatasetEventSource.h"
             
-      "../include/ctb/model/CtDataModel.h"
-      "../include/ctb/model/CtDisplayColumn.h"
+      "../include/ctb/model/CtDataset.h"
+      "../include/ctb/model/CtDatasetLoader.h"
+      "../include/ctb/model/CtListColumn.h"
       "../include/ctb/model/DatasetEventSource.h"
-      "../include/ctb/model/DatasetLoader.h"
       "../include/ctb/model/ScopedEventSink.h"
       
       "../include/ctb/tables/CtDataTable.h"
@@ -51,8 +51,8 @@ target_sources(ctBrowse_lib
 
    PRIVATE
       "CredentialWrapper.cpp"
+      "CtDatasetLoader.cpp"
       "DatasetEventSource.cpp"
-      "DatasetLoader.cpp"
       "log.cpp"
       "table_download.cpp"
       "tasks.cpp"

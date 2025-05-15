@@ -39,18 +39,18 @@ namespace ctb::app
    {
 
 #if !defined(NDEBUG)
-      if ( row >= m_dataset->filteredRecCount() or col >= std::ssize(m_dataset->displayColumns()) )
+      if ( row >= m_dataset->filteredRecCount() or col >= std::ssize(m_dataset->listColumns()) )
       {
          SPDLOG_DEBUG("CtDataViewModel::GetValueByRow() called with invalid coordinates.");
          assert(false);
          return;
       }
 #endif
-      const auto& display_col = m_dataset->displayColumns()[col];
+      const auto& list_col = m_dataset->listColumns()[col];
 
       // format as string and return it to caller
-      auto& val = m_dataset->getProperty(static_cast<int>(row), display_col.prop_id);
-      variant = wxString::FromUTF8(display_col.getDisplayValue(val));
+      auto& val = m_dataset->getProperty(static_cast<int>(row), list_col.prop_id);
+      variant = wxString::FromUTF8(list_col.getDisplayValue(val));
    }
 
 

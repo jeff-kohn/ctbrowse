@@ -12,12 +12,12 @@ namespace ctb::constants
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP        = "Download data from CellarTracker";
    inline constexpr const char* CMD_FILE_SETTINGS_LBL             = "&Settings...";
    inline constexpr const char* CMD_FILE_SETTINGS_TIP             = "Configure app settings";
-   inline constexpr const char* CMD_DATA_WINE_LIST_LBL            = "&Wine List\tCtrl+W";
+   inline constexpr const char* CMD_DATA_WINE_LIST_LBL            = "&My Cellar\tCtrl+W";
    inline constexpr const char* CMD_DATA_WINE_LIST_TIP            = "View Personal Wine List";
    inline constexpr const char* CMD_DATA_PENDING_WINE_LBL         = "&Pending Wines\tCtrl+P";
    inline constexpr const char* CMD_DATA_PENDING_WINE_TIP         = "View Pending Wine Deliveries";
-   inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_LBL      = "&Resize Data Columns";
-   inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_TIP      = "Resize the data columns to fit the data";
+   inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_LBL      = "&Resize List Columns";
+   inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_TIP      = "Resize the list columns to fit the data";
    inline constexpr const char* CMD_WINE_ONLINE_DETAILS_LBL       = "View &Details Online";
    inline constexpr const char* CMD_WINE_ONLINE_DETAILS_TIP       = "View the current wine's details on website";
    inline constexpr const char* CMD_WINE_ONLINE_VINTAGES_LBL      = "View &Vintages Online";

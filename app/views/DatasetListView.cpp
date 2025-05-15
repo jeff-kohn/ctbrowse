@@ -1,8 +1,8 @@
 #include "views/DatasetListView.h"
 #include "wx_helpers.h"
 
-#include <ctb/model/CtDataModel.h>
-#include <ctb/model/DatasetLoader.h>
+#include <ctb/model/CtDataset.h>
+#include <ctb/model/CtDatasetLoader.h>
 
 #include <wx/itemattr.h>
 #include <wx/persist/dataview.h>
@@ -42,7 +42,7 @@ namespace ctb::app
       try
       {
          ClearColumns();
-         const auto& cols = m_model->getDataset()->displayColumns();
+         const auto& cols = m_model->getDataset()->listColumns();
          for (const auto&& [idx, col] : vws::enumerate(cols))
          {
             AppendTextColumn(col.display_name.c_str(), 
