@@ -12,10 +12,8 @@
 #include "ctb/table_data.h"
 
 #include "ctb/tables/CtDataTable.h"
-#include <boost/unordered/unordered_flat_map.hpp>
 
 #include <frozen/map.h>
-#include <span>
 
 
 namespace ctb
@@ -62,7 +60,7 @@ namespace ctb
          { Prop::CtPrice,         FieldSchema { Prop::CtPrice,        PropType::Double,      9 }},
          { Prop::AuctionPrice,    FieldSchema { Prop::AuctionPrice,   PropType::Double,      8 }},
          { Prop::WineAndVintage,  FieldSchema { Prop::WineAndVintage, PropType::Double,     {} }},
-         { Prop::QtyTotal,        FieldSchema { Prop::QtyTotal,       PropType::Double,     {} }}
+         { Prop::QtyTotal,        FieldSchema { Prop::QtyTotal,       PropType::UInt16,     {} }}
       });
 
    public:
@@ -79,7 +77,7 @@ namespace ctb
       /// 
       static constexpr auto getTableName() -> std::string_view 
       { 
-         return "WineList"; 
+         return TableDescriptions.at(getTableId());
       }
 
       using SchemaMap = decltype(s_schema);

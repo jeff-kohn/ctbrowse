@@ -38,6 +38,7 @@ namespace ctb
          GenericError,
          HttpStatus,
          OperationCanceled,
+         ParseError,
          NotSupported,
          UiError
       };

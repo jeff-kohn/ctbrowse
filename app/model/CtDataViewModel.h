@@ -32,16 +32,14 @@ namespace ctb::app
       using base::GetItem;
       using base::GetRow;
 
-      // these need to be accessible for wxObjectDataPtr to call, but users of this class
-      // should just use ModelPtr so that ref counting is automatic.
-      using base::IncRef;
-      using base::DecRef;
-
    private:
       DatasetPtr       m_dataset{};
 
       explicit CtDataViewModel(DatasetPtr dataset = {}) : m_dataset{ dataset }
       {}
+
+      // instrusive ref counting in wxWidgets means smart ptr need access to ref-counting methods.
+      friend ModelPtr;
 
       // these are the real purpose of this class, they're called by the base class to
       // provide data when the list-view needs it.

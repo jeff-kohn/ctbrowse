@@ -9,6 +9,7 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include "ctb/utility_chrono.h"
 #include "ctb/tables/CtProperty.h"
 
 #include <external/csv.hpp>
@@ -181,9 +182,18 @@ namespace ctb
                else
                   return {};
             }
+            case PropType::Date:
+            {
+               auto result = parseIsoDate(fld.get<std::string_view>());
+               if (result) 
+               {
+                  return Property{ *result };
+               }
+               return Property{};
+            }
             default:
-               assert(false);
-               throw Error{ "PropType enum contains unexpected value, this is a bug" };
+               assert(false and "PropType enum contains unexpected value, this is a bug!");
+               throw Error{ "PropType enum contains unexpected value, this is a bug!" };
          }
 
       }

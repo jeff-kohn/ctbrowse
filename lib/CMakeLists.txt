@@ -42,7 +42,6 @@ target_sources(ctBrowse_lib
       "../include/ctb/tables/detail/MultiMatchPropertyFilter.h"
       "../include/ctb/tables/detail/MultiMatchPropertyFilterMgr.h"
       "../include/ctb/tables/detail/PropertyFilter.h"
-      "../include/ctb/tables/detail/SortConfig.h"
       "../include/ctb/tables/detail/SubstringFilter.h"
       "../include/ctb/tables/detail/TableProperty.h"
       "../include/ctb/tables/detail/TableSorter.h"

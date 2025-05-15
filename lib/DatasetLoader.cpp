@@ -6,7 +6,7 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
-//#include "ctb/tables/PendingWineTable.h"
+#include "ctb/tables/PendingWineTable.h"
 #include "ctb/tables/WineListTable.h"
 
 #include "ctb/model/DatasetLoader.h"
@@ -32,17 +32,17 @@ namespace ctb
                   throw table_data.error();
                }
                return CtDataModel<WineListTable>::create(std::move(table_data.value()));
-            }/*,
+            },
 
-         [this](enum_constant<TableId::List>)  -> DatasetPtr
-         { 
-            auto table_data = loadTableData<PendingWineDataset>(m_data_folder, TableId::Pending);
-            if (!table_data)
-            {
-               throw table_data.error();
-            }
-            return CtDataModel<PendingWineDataset>::create(std::move(table_data.value()));
-         } */     
+         [this](enum_constant<TableId::Pending>) -> DatasetPtr
+            { 
+               auto table_data = loadTableData<PendingWineTable>(m_data_folder, TableId::Pending);
+               if (!table_data)
+               {
+                  throw table_data.error();
+               }
+               return CtDataModel<PendingWineTable>::create(std::move(table_data.value()));
+            } 
       };
       return enum_switch(TableFactory, tbl);
    }

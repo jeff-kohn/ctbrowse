@@ -1,3 +1,10 @@
+/*******************************************************************
+* @file utility.h
+*
+* @brief Header file for some helper templates
+* 
+* @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+*******************************************************************/
 #pragma once
 
 #include "ctb/ctb.h"

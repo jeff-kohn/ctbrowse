@@ -9,98 +9,60 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include "ctb/table_data.h"
 #include "ctb/tables/CtDataTable.h"
 
 #include <frozen/map.h>
 
-#include <span>
-
 
 namespace ctb
 {
-   using detail::FieldSchema;
-   using detail::PropType;
-   using detail::TableProperty;
-   using detail::TableRecord;
-
 
    /// @brief Traits class for a table record from the 'Pending Wine' CellarTracker CSV table.
    /// 
    class PendingWineTraits
    {
    public:
-      using CtProp      = CtProp;
-      using FieldSchema = FieldSchema<CtProp>;
-      using SchemaMap   = frozen::map<CtProp, FieldSchema, static_cast<size_t>(CtProp::WineAndVintage)>;
+      using Prop        = CtProp;
+      using Property    = CtProperty;
+      using PropertyMap = CtPropertyMap;
+      using FieldSchema = FieldSchema;
 
-
-      static inline constexpr std::array s_supported_properties = 
-         {
-            CtProp::iWineId,
-            CtProp::WineName,
-            CtProp::Locale,
-            CtProp::Vintage,
-            CtProp::Producer,
-            CtProp::Country,
-            CtProp::Region,
-            CtProp::SubRegion,
-            CtProp::Appellation,
-            CtProp::Color,
-            CtProp::Category,
-            CtProp::Varietal,
-            CtProp::QtyPending,
-            CtProp::Size,
-            CtProp::Currency,
-            CtProp::PendingPrice,
-            CtProp::PendingPurchaseId,
-            CtProp::PendingStoreName,
-            CtProp::PendingOrderNumber,
-            CtProp::PendingQtyOrdered,
-            CtProp::PendingPurchaseDate,
-            CtProp::PendingDeliveryDate,
-            CtProp::WineAndVintage,
-            CtProp::QtyTotal
-         };
-
-
-      /// @brief - contains the list of data fields that are parsed from CSV
-      /// 
-      /// this collection contains the list of properties that we actually parse from the CSV file. Any
-      /// calculated properties are not included here which explains why this array doesn't contain 
-      /// every CtProp enum value.
-      /// 
-      static inline constexpr SchemaMap s_csv_schema
+   private:
+      static inline constexpr auto s_schema = frozen::make_map<Prop, FieldSchema>(
       {
-         { CtProp::iWineId,                FieldSchema { CtProp::iWineId,               PropType::String,      0 }},
-         { CtProp::WineName,               FieldSchema { CtProp::WineName,              PropType::String,     17 }},
-         { CtProp::Locale,                 FieldSchema { CtProp::Locale,                PropType::String,     19 }},
-         { CtProp::Vintage,                FieldSchema { CtProp::Vintage,               PropType::UInt16,     17 }},
-         { CtProp::Producer,               FieldSchema { CtProp::Producer,              PropType::String,     23 }},
-         { CtProp::Country,                FieldSchema { CtProp::Country,               PropType::String,     28 }},
-         { CtProp::Region,                 FieldSchema { CtProp::Region,                PropType::String,     29 }},
-         { CtProp::SubRegion,              FieldSchema { CtProp::SubRegion,             PropType::String,     30 }},
-         { CtProp::Appellation,            FieldSchema { CtProp::Appellation,           PropType::String,     31 }},
-         { CtProp::Color,                  FieldSchema { CtProp::Color,                 PropType::String,     21 }},
-         { CtProp::Category,               FieldSchema { CtProp::Category,              PropType::String,     22 }},
-         { CtProp::Varietal,               FieldSchema { CtProp::Varietal,              PropType::String,     25 }},
-         { CtProp::QtyPending,             FieldSchema { CtProp::QtyPending,            PropType::UInt16,     10 }},
-         { CtProp::Size,                   FieldSchema { CtProp::Size,                  PropType::String,     14 }},
-         { CtProp::Currency,               FieldSchema { CtProp::Currency,              PropType::String,      9 }},
-         { CtProp::PendingPrice,           FieldSchema { CtProp::PendingPrice,          PropType::Double,      8 }},
-         { CtProp::PendingPurchaseId,      FieldSchema { CtProp::PendingPurchaseId,     PropType::String,      1 }},
-         { CtProp::PendingStoreName,       FieldSchema { CtProp::PendingStoreName,      PropType::String,      4 }},
-         { CtProp::PendingOrderNumber,     FieldSchema { CtProp::PendingOrderNumber,    PropType::String,     12 }},
-         { CtProp::PendingQtyOrdered,      FieldSchema { CtProp::PendingQtyOrdered,     PropType::UInt16,     11 }},
-         { CtProp::PendingPurchaseDate,    FieldSchema { CtProp::PendingPurchaseDate,   PropType::Date,        2 }}, 
-         { CtProp::PendingDeliveryDate,    FieldSchema { CtProp::PendingDeliveryDate,   PropType::Date,        3 }} 
-      };
+         { Prop::iWineId,                FieldSchema { Prop::iWineId,               PropType::String,      0 }},
+         { Prop::WineName,               FieldSchema { Prop::WineName,              PropType::String,     17 }},
+         { Prop::Locale,                 FieldSchema { Prop::Locale,                PropType::String,     19 }},
+         { Prop::Vintage,                FieldSchema { Prop::Vintage,               PropType::UInt16,     16 }},
+         { Prop::Producer,               FieldSchema { Prop::Producer,              PropType::String,     23 }},
+         { Prop::Country,                FieldSchema { Prop::Country,               PropType::String,     28 }},
+         { Prop::Region,                 FieldSchema { Prop::Region,                PropType::String,     29 }},
+         { Prop::SubRegion,              FieldSchema { Prop::SubRegion,             PropType::String,     30 }},
+         { Prop::Appellation,            FieldSchema { Prop::Appellation,           PropType::String,     31 }},
+         { Prop::Color,                  FieldSchema { Prop::Color,                 PropType::String,     21 }},
+         { Prop::Category,               FieldSchema { Prop::Category,              PropType::String,     22 }},
+         { Prop::Varietal,               FieldSchema { Prop::Varietal,              PropType::String,     25 }},
+         { Prop::QtyPending,             FieldSchema { Prop::QtyPending,            PropType::UInt16,     11 }},
+         { Prop::Size,                   FieldSchema { Prop::Size,                  PropType::String,     14 }},
+         { Prop::Currency,               FieldSchema { Prop::Currency,              PropType::String,      5 }},
+         { Prop::PendingPrice,           FieldSchema { Prop::PendingPrice,          PropType::Double,      7 }},
+         { Prop::PendingPurchaseId,      FieldSchema { Prop::PendingPurchaseId,     PropType::String,      1 }},
+         { Prop::PendingStoreName,       FieldSchema { Prop::PendingStoreName,      PropType::String,      4 }},
+         { Prop::PendingOrderNumber,     FieldSchema { Prop::PendingOrderNumber,    PropType::String,     12 }},
+         { Prop::PendingQtyOrdered,      FieldSchema { Prop::PendingQtyOrdered,     PropType::UInt16,     10 }},
+         { Prop::PendingPurchaseDate,    FieldSchema { Prop::PendingPurchaseDate,   PropType::Date,        2 }}, 
+         { Prop::PendingDeliveryDate,    FieldSchema { Prop::PendingDeliveryDate,   PropType::Date,        3 }},
+         { Prop::WineAndVintage,         FieldSchema { Prop::WineAndVintage,        PropType::Double,     {} }},
+      });
 
-      /// @brief getCsvSchema()
-      /// @return the CSV schema for this CT table
+   public:
+      /// @brief getTableName()
+      /// @return the name of this CT table this traits class represents
       /// 
-      static constexpr auto getCsvSchema() -> const auto&
-      {
-         return CsvSchema;
+      static constexpr auto getTableId() -> TableId
+      { 
+         return TableId::Pending;
       }
 
       /// @brief getTableName()
@@ -108,44 +70,39 @@ namespace ctb
       /// 
       static constexpr auto getTableName() -> std::string_view 
       { 
-         return "PendingWine"; 
+         return TableDescriptions.at(getTableId());
       }
 
-      /// @brief small helper to convert a Prop enum into its integer index
+      using SchemaMap = decltype(s_schema);
+
+      /// @brief getCsvSchema()
+      /// @return the CSV schema for this CT table
       /// 
-      static constexpr auto propToIndex(CtProp prop) -> int 
+      static constexpr auto getSchema() -> const SchemaMap&
       {
-         return enumToIndex(prop);
+         return s_schema;
       }
 
-      /// @brief small helper to convert a zero-based index to a Prop enum
-      /// 
-      static constexpr auto propFromIndex(int idx) -> CtProp
+      static constexpr auto hasProperty(Prop prop_id) -> bool
       {
-         return enumFromIndex<CtProp>(idx);
-      }
-
-      static constexpr auto supportsInStockFilter() -> bool
-      {
-         return false;
+         return s_schema.contains(prop_id);
       }
 
       /// @brief this gets called by TableRecord to set any missing property values
       /// 
-      /// PropertyMap from the CSV file are already set, this impl just provides
+      /// PropertyMap values from the CSV file are already set, this impl just provides
       /// any calculated property values or does fixup for any parsed values that need it.
       /// 
-      /// @param rec span containing a TableProperty for each PropID enum value.
+      /// @param rec - a map containing a property value for each field the table supports
       /// 
-      template<std::size_t N, typename... Args>
-      static void onRecordParse(std::span<TableProperty<Args...>, N> rec)
+      static void onRecordParse(PropertyMap& rec)
       {
-         using enum CtProp;
+         using enum Prop;
 
          // set value for the WineAndVintage property
-         auto vintage   = rec[static_cast<size_t>(CtProp::Vintage) ].asString();
-         auto wine_name = rec[static_cast<size_t>(CtProp::WineName)].asStringView();
-         rec[static_cast<size_t>(CtProp::WineAndVintage)] = ctb::format("{} {}", vintage, wine_name);
+         auto vintage   = rec[Vintage ].asString();
+         auto wine_name = rec[WineName].asStringView();
+         rec[WineAndVintage] = ctb::format("{} {}", vintage, wine_name);
       }
    };
 

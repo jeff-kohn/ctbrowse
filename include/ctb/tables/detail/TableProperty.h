@@ -62,19 +62,27 @@ namespace ctb::detail
          m_val = std::monostate{};
       }
 
-      /// @brief get a numeric value out of the property
+      /// @brief Get a numeric value out of the property
       /// 
-      /// returns an optional in case this property doesn't contain a value or it can't be converted to T.
+      /// If the property contains a string, parsing will be attempted. For anything else, the result
+      /// will be a static_cast to T if possible, or std::nullopt if not.
+      /// 
+      /// @returns an optional containing the result if successful, std::nullopt if not.
+      /// 
+      /// Note: compile error in this function means the type you're casting to isn't compatible with any
+      /// of the overloads, either use a different type or add a new overload to asT for the needed type.
       /// 
       template<ArithmeticType T> 
       constexpr auto as() const -> std::optional<T>
-      {    
+      {  
          // try to convert
+         using MaybeT = std::optional<T>;
          auto asT = Overloaded
          {
-            [](const std::monostate)   -> std::optional<T> { return std::nullopt;                          },
-            [](const std::string& str) -> std::optional<T> { return from_str<T>(str);                      },
-            [](auto val)               -> std::optional<T> { return std::optional<T>(static_cast<T>(val)); }
+            [](const std::monostate)          -> MaybeT { return std::nullopt;                            },
+            [](const std::string& str)        -> MaybeT { return from_str<T>(str);                        },
+            [](const chrono::year_month_day&) -> MaybeT { return {}; /* no conversion that makes sense */ },
+            [](const auto& val)               -> MaybeT { return std::optional<T>(static_cast<T>(val));   }
          };
          return std::visit(asT, m_val);
       }
@@ -163,8 +171,8 @@ namespace ctb::detail
          auto asStr = Overloaded
          {
             [](const std::string& val) {  return val;                                                 },
-            [](std::monostate) {  return std::string{};                                       },
-            [&fmt_str](auto val) {  return ctb::vformat(fmt_str,  ctb::make_format_args(val));  }
+            [](std::monostate)         {  return std::string{};                                       },
+            [&fmt_str](auto val)       {  return ctb::vformat(fmt_str,  ctb::make_format_args(val));  }
          };
          return std::visit(asStr, m_val);
       }

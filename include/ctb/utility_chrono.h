@@ -1,9 +1,20 @@
-#pragma once
+/*******************************************************************
+* @file utility_chrono.h
+*
+* @brief Header file for some chrono-related helper functions
+* 
+* @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+*******************************************************************/#pragma once
 
 #include "ctb/ctb.h"
 
+#include <fmt/chrono.h>
 #include <chrono>
 #include <expected>
+#include <spanstream>
+#include <string_view>
+#include <string>
+
 
 namespace ctb
 {
@@ -31,23 +42,23 @@ namespace ctb
          dt_strm >> parse(constants::PARSE_FMT_STR_ISO_DATETIME_UTC, ts);
       }
       if (dt_strm.fail())
-         return std::unexpected{ oura_exception{ ErrorCategory::Category::Parse. "The intput string '{}' could not be parsed as a valid date/time", dt_str) } };
+         return std::unexpected{ Error{ Error::Category::ParseError, "The intput string '{}' could not be parsed as a valid date/time", dt_str } };
       else return ts;
    }
 
 
    /// @brief Parse an ISO date string into a year_month_day
    /// 
-   [[nodiscard]] inline auto parseIsoDate(std::string_view dt_str) -> std::expected<chrono::year_month_day, oura_exception> 
+   [[nodiscard]] inline auto parseIsoDate(std::string_view dt_str) -> std::expected<chrono::year_month_day, Error> 
    {
       constexpr auto format_str{ constants::PARSE_FMT_STR_ISO_DATE_ONLY };
 
       std::ispanstream dt_strm{ dt_str, };
-      sys_days days{};
+      chrono::sys_days days{};
       if ((dt_strm >> parse(format_str, days)))
-         return year_month_day(days);
+         return chrono::year_month_day(days);
       else
-         return std::unexpected{ Error{ Error::Category::Parse, "The intput string '{}' could not be parsed as a valid date", dt_str) } };
+         return std::unexpected{ Error{ Error::Category::ParseError, "The intput string '{}' could not be parsed as a valid date", dt_str } };
    }
 
 

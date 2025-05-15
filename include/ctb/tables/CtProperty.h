@@ -11,16 +11,17 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include "ctb/utility_chrono.h"
 #include "ctb/tables/detail/TableProperty.h"
 
 #include <boost/unordered/unordered_flat_map.hpp>
+
 
 namespace ctb
 {
 
    /// @brief Type alias for the property type used in CellarTracker data tables
-   using CtProperty = detail::TableProperty<uint16_t, uint64_t, double, std::string>;
-
+   using CtProperty = detail::TableProperty<std::string, uint16_t, uint64_t, double, chrono::year_month_day>;
 
    // @brief Type alias for an iterable span of property CtProperties
    //using CtPropertyValues = std::span<CtProperty>;
