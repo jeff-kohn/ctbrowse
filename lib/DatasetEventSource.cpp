@@ -69,7 +69,7 @@ namespace ctb
    /// @brief this is called to signal that an event needs to be sent to all listeners
    auto DatasetEventSource::signal(DatasetEvent::Id event_id, NullableInt rec_idx) noexcept -> bool
    {
-      auto event_name = magic_enum::enum_name(event_id);
+      auto [[maybe_unused]] event_name = magic_enum::enum_name(event_id);
       SPDLOG_DEBUG("DatasetEventSource::signal({},{}) called", event_name, rec_idx.value_or(-1));
 
       bool retval{ true };

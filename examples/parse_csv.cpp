@@ -9,7 +9,7 @@
  *******************************************************************/
 #include <ctb/constants.h>
 #include <ctb/Error.h>
-#include <ctb/tables/WineListTable.h>
+#include <ctb/tables/WineListTraits.h>
 
 #include <cassert>
 #include <print>

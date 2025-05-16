@@ -9,26 +9,15 @@
 
 #include "ctb/ctb.h"
 #include "ctb/table_data.h"
+#include "ctb/tables/CtSchema.h"
 
-#include "ctb/tables/CtProperty.h"
-
-#include "ctb/tables/detail/MultiMatchPropertyFilter.h"
-#include "ctb/tables/detail/TableSorter.h"
-
-#include "ctb/model/CtListColumn.h"
-
-#include <span>
 #include <memory>
-#include <string>
 #include <string_view>
 
 
 namespace ctb
 {
-   using CtMultiMatchFilter     = detail::MultiMatchPropertyFilter<CtProp, CtPropertyMap>;
-   using CtMultiMatchFilterSpan = std::span<const CtMultiMatchFilter>;
-   using CtTableSort            = detail::TableSorter<CtProp, CtPropertyMap>;
-   using CtTableSortSpan        = std::span<const CtTableSort>;
+
 
 
    /// @brief Data model class that provides a base implementation for accessing CellarTracker data files
@@ -41,7 +30,7 @@ namespace ctb
       using PropertyMap       = CtPropertyMap;
       using PropertyValueSet  = CtPropertyValueSet;
       using ListColumn        = CtListColumn;
-      using ListColumns       = CtListColumns;
+      using ListColumnSpan    = CtListColumnSpan;
       using TableSort         = CtTableSort;
       using TableSortSpan     = CtTableSortSpan;
 
@@ -60,7 +49,7 @@ namespace ctb
       /// @brief Gets the collection of columns for the list display
       /// 
       /// Note that some may be hidden and not visible.
-      virtual auto listColumns() const -> const ListColumns& = 0;
+      virtual auto listColumns() const -> ListColumnSpan = 0;
 
       /// @brief retrieves a list of available filters for this dataset.
       virtual auto multiMatchFilters() const -> CtMultiMatchFilterSpan = 0;
@@ -68,8 +57,7 @@ namespace ctb
       /// @brief Get a list of all distinct values from the dataset for the specified property.
       /// 
       /// This can be used to get filter values for match-filters.
-      [[nodiscard]]
-      virtual auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet = 0;
+      [[nodiscard]] virtual auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet = 0;
 
       /// @brief Adds a match value filter for the specified column.
       ///
@@ -160,8 +148,7 @@ namespace ctb
    };
 
 
-   /// @brief the smart-ptr-to-base that's used to work with the IDataset interface 
-   ///
+   /// @brief the smart-ptr-to-base that's used to work with the IDataset-derived datasets
    using DatasetPtr = std::shared_ptr<IDataset>;
 
 

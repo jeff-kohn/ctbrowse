@@ -29,21 +29,21 @@ target_sources(ctBrowse_lib
             
       "../include/ctb/model/CtDataset.h"
       "../include/ctb/model/CtDatasetLoader.h"
-      "../include/ctb/model/CtListColumn.h"
       "../include/ctb/model/DatasetEventSource.h"
       "../include/ctb/model/ScopedEventSink.h"
       
-      "../include/ctb/tables/CtDataTable.h"
-      "../include/ctb/tables/CtProperty.h"
-      "../include/ctb/tables/PendingWineTable.h"
-      "../include/ctb/tables/TableRecord.h"
-      "../include/ctb/tables/WineListTable.h"
+      "../include/ctb/tables/CtSchema.h"
+      "../include/ctb/tables/PendingWineTraits.h"
+      "../include/ctb/tables/WineListTraits.h"
 
+      "../include/ctb/tables/detail/FieldSchema.h"
+      "../include/ctb/tables/detail/ListColumn.h"
       "../include/ctb/tables/detail/MultiMatchPropertyFilter.h"
       "../include/ctb/tables/detail/MultiMatchPropertyFilterMgr.h"
       "../include/ctb/tables/detail/PropertyFilter.h"
       "../include/ctb/tables/detail/SubstringFilter.h"
       "../include/ctb/tables/detail/TableProperty.h"
+      "../include/ctb/tables/detail/TableRecord.h"
       "../include/ctb/tables/detail/TableSorter.h"
 
       "../include/ctb/tasks/PollingTask.h"

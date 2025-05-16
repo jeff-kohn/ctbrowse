@@ -1,27 +1,27 @@
 /*******************************************************************
- * @file CtListColumn.h
+ * @file ListColumn.h
  *
- * @brief defines the template class CtListColumn
+ * @brief defines the template class ListColumn
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 #pragma once
 
-
-#include <ctb/tables/detail/TableProperty.h>
+#include "ctb/ctb.h"
+#include "ctb/tables/detail/TableProperty.h"
 
 #include <string>
 #include <string_view>
-#include <span>
-#include <vector>
 
-namespace ctb
+namespace ctb::detail
 {
-
-   /// @brief struct containing everything needed to know about how to display a table column
+   /// @brief struct containing everything needed to know about how to display a list column from a table
    ///
-   struct CtListColumn
+   template<typename PropT> requires std::is_enum_v<PropT>
+   struct ListColumn
    {
+      using Prop = PropT;
+
       /// @brief enum to specify the alignment for column headers and cell text
       ///
       /// these values align with wxWidgets' wxALIGN_xxxx values, but we don't want the dependency
@@ -42,11 +42,8 @@ namespace ctb
          Currency
       };
 
-      /// @brief The zero-based index into the record type's CtProp enum of the property this object represents 
-      ///
-      /// We have to use a int instead of the enum because this class needs to be used through a type-erased 
-      /// interface and can't refer to types specific to a TableRecord<> instantiation.
-      CtProp prop_id{};                  
+      /// @brief The property identifer for this ListColumn
+      Prop prop_id{};                  
 
       /// @brief Title to use for the column's header 
       std::string display_name{};
@@ -61,11 +58,11 @@ namespace ctb
       Align header_align{ Align::Left }; 
 
       /// @brief construct a column to display the specified property as a string
-      CtListColumn(CtProp prop_id, std::string_view col_name) : prop_id{ prop_id },  display_name{ col_name }
+      ListColumn(Prop prop_id, std::string_view col_name) : prop_id{ prop_id },  display_name{ col_name }
       {}
 
       /// @brief construct a column to display the specified property in the requested format
-      CtListColumn(CtProp prop_id, Format fmt, std::string_view col_name) :  prop_id{ prop_id },  display_name{ col_name }, format{ fmt }
+      ListColumn(Prop prop_id, Format fmt, std::string_view col_name) :  prop_id{ prop_id },  display_name{ col_name }, format{ fmt }
       {
          if (fmt != Format::String)
          {
@@ -96,15 +93,12 @@ namespace ctb
          }
       }
 
-      CtListColumn() = default;
-      CtListColumn(const CtListColumn&) = default;
-      CtListColumn(CtListColumn&&) = default;
-      CtListColumn& operator=(const CtListColumn&) = default;
-      CtListColumn& operator=(CtListColumn&&) = default;
-      ~CtListColumn() = default;
+      ListColumn() = default;
+      ListColumn(const ListColumn&) = default;
+      ListColumn(ListColumn&&) = default;
+      ListColumn& operator=(const ListColumn&) = default;
+      ListColumn& operator=(ListColumn&&) = default;
+      ~ListColumn() = default;
    };
 
-   using CtListColumns    = std::vector<CtListColumn>;
-   using CtListColumnSpan = std::span<const CtListColumn>;
-
-} // namespace ctb
+} // namespace ctb::detail

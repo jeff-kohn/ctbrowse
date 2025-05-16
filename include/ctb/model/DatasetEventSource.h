@@ -7,8 +7,8 @@
  *******************************************************************/
 #pragma once
 
+#include "ctb/ctb.h"
 #include "ctb/interfaces/IDatasetEventSource.h"
-#include "ctb/tables/CtProperty.h"
 
 #include <memory>
 #include <unordered_set>

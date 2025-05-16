@@ -33,6 +33,8 @@ namespace ctb::detail
       /// @brief function operator that does the comparison.
       auto operator()(const PropertyMap& r1, const PropertyMap& r2) const -> bool
       {
+         static constexpr typename PropertyMap::mapped_type null_prop{};
+
          for (auto prop : sort_props)
          {
             auto it1 = r1.find(prop);

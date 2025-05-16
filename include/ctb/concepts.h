@@ -63,15 +63,16 @@ namespace ctb
    /// @brief Concept for a traits type defining the schema for a TableRecordType instantiation
    ///
    template <typename T> 
-   concept RecordTraitsType = requires (std::string_view sv,
-                                        typename T::Prop pid, 
-                                        typename T::Property prop,
-                                        typename T::PropertyMap props,
-                                        typename T::FieldSchema schema,
-                                        typename T::SchemaMap smap)
+   concept RecordTraitsType = requires (typename T::Prop pid, typename T::PropertyMap props)
    {
-      T::getSchema();
-      T::getTableName();
+      { T::Schema.find(pid)->second } -> std::same_as<const typename T::FieldSchema&>;
+      { T::DefaultListColumns[0]    } -> std::same_as<const typename T::ListColumn&>;
+      { T::AvailableSorts[0]        } -> std::same_as<const typename T::TableSort&>;
+      { T::MultiMatchFilters[0]     } -> std::same_as<const typename T::MultiMatchFilter&>;
+      { T::getTableName()           } -> std::same_as<std::string_view>;
+      { T::hasProperty(pid)         } -> std::same_as<bool>;
+
+      T::getTableId();
       T::onRecordParse(props);
    };
 
@@ -90,6 +91,15 @@ namespace ctb
      t.getProperty(T::Prop::iWineId);
      prop = t[pid];
      t.getProperties();
+   };
+
+
+   template <typename T>
+   concept DataTableType = rng::random_access_range<T> and requires (T t, typename T::value_type::Prop pid)
+   {
+      { t.size()   } -> std::same_as<size_t>;
+      { t[0]       } -> std::same_as<typename T::value_type&>;
+      { t[0][pid]  } -> std::same_as<const typename T::value_type::Property&>; 
    };
 
 

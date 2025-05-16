@@ -10,10 +10,9 @@
 
 #include "ctb/ctb.h"
 #include "ctb/table_data.h"
-#include "ctb/tables/CtDataTable.h"
+#include "ctb/tables/CtSchema.h"
 
 #include <frozen/map.h>
-
 
 namespace ctb
 {
@@ -23,13 +22,17 @@ namespace ctb
    class PendingWineTraits
    {
    public:
-      using Prop        = CtProp;
-      using Property    = CtProperty;
-      using PropertyMap = CtPropertyMap;
-      using FieldSchema = FieldSchema;
+      using Prop             = CtProp;
+      using Property         = CtProperty;
+      using PropType         = detail::PropType;
+      using PropertyMap      = CtPropertyMap;
+      using FieldSchema      = CtFieldSchema;
+      using ListColumn       = CtListColumn;
+      using ListColumnSpan   = CtListColumnSpan;
+      using MultiMatchFilter = detail::MultiMatchPropertyFilter<Prop, PropertyMap>;
+      using TableSort        = detail::TableSorter<CtProp, CtPropertyMap>;
 
-   private:
-      static inline constexpr auto s_schema = frozen::make_map<Prop, FieldSchema>(
+      static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
       {
          { Prop::iWineId,                FieldSchema { Prop::iWineId,               PropType::String,      0 }},
          { Prop::WineName,               FieldSchema { Prop::WineName,              PropType::String,     17 }},
@@ -56,10 +59,35 @@ namespace ctb
          { Prop::WineAndVintage,         FieldSchema { Prop::WineAndVintage,        PropType::Double,     {} }},
       });
 
-   public:
+      /// @brief list of display columns that will show in the list view
+      static inline const std::array DefaultListColumns { 
+         CtListColumn{ Prop::WineAndVintage,                                      constants::DISPLAY_COL_WINE       },
+         CtListColumn{ Prop::PendingQtyOrdered,   CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY        },
+         CtListColumn{ Prop::PendingPurchaseDate, CtListColumn::Format::String,   constants::DISPLAY_COL_PURCH_DATE },
+         CtListColumn{ Prop::PendingStoreName,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_STORE      },
+         CtListColumn{ Prop::PendingPrice,        CtListColumn::Format::Currency, constants::DISPLAY_COL_PRICE      },
+      };
+
+      /// @brief the available sort orders for this table.
+      static inline const std::array AvailableSorts{ 
+         TableSort{ { Prop::WineName,            Prop::Vintage                  }, constants::SORT_OPTION_WINE_VINTAGE  },
+         TableSort{ { Prop::Vintage,             Prop::WineName                 }, constants::SORT_OPTION_VINTAGE_WINE  },
+         TableSort{ { Prop::PendingPurchaseDate, Prop::WineName, Prop::Vintage  }, constants::SORT_OPTION_PURCHASE_DATE },
+         TableSort{ { Prop::PendingStoreName,    Prop::WineName, Prop::Vintage, }, constants::SORT_OPTION_STORE_NAME    }
+      };
+
+      /// @brief multi-value filters that can be used on this table.
+      static inline const std::array MultiMatchFilters{
+         MultiMatchFilter{ Prop::Varietal,    constants::FILTER_VARIETAL    },
+         MultiMatchFilter{ Prop::Country,     constants::FILTER_COUNTRY     },
+         MultiMatchFilter{ Prop::Region,      constants::FILTER_REGION      },
+         MultiMatchFilter{ Prop::Appellation, constants::FILTER_APPELATION  },
+         MultiMatchFilter{ Prop::Vintage,     constants::FILTER_VINTAGE     },
+         MultiMatchFilter{ Prop::PendingStoreName,  constants::FILTER_STORE }
+      };
+
       /// @brief getTableName()
       /// @return the name of this CT table this traits class represents
-      /// 
       static constexpr auto getTableId() -> TableId
       { 
          return TableId::Pending;
@@ -67,25 +95,15 @@ namespace ctb
 
       /// @brief getTableName()
       /// @return the name of this CT table this traits class represents
-      /// 
       static constexpr auto getTableName() -> std::string_view 
       { 
          return TableDescriptions.at(getTableId());
       }
 
-      using SchemaMap = decltype(s_schema);
-
-      /// @brief getCsvSchema()
-      /// @return the CSV schema for this CT table
-      /// 
-      static constexpr auto getSchema() -> const SchemaMap&
-      {
-         return s_schema;
-      }
-
+      /// @return true if the table supports the specified property, false otherwise
       static constexpr auto hasProperty(Prop prop_id) -> bool
       {
-         return s_schema.contains(prop_id);
+         return Schema.contains(prop_id);
       }
 
       /// @brief this gets called by TableRecord to set any missing property values
@@ -94,21 +112,19 @@ namespace ctb
       /// any calculated property values or does fixup for any parsed values that need it.
       /// 
       /// @param rec - a map containing a property value for each field the table supports
-      /// 
       static void onRecordParse(PropertyMap& rec)
       {
          using enum Prop;
+
 
          // set value for the WineAndVintage property
          auto vintage   = rec[Vintage ].asString();
          auto wine_name = rec[WineName].asStringView();
          rec[WineAndVintage] = ctb::format("{} {}", vintage, wine_name);
       }
+      
    };
 
-
-   /// @brief Type alias for a CtDataTable representing the PendingWines table.
-   ///
-   using PendingWineTable  = CtDataTable<PendingWineTraits>;
+   using PendingWineTable = CtDataTable<PendingWineTraits>;
 
 } // namespace ctb

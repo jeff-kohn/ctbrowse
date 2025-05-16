@@ -10,11 +10,11 @@
 
 #include "ctb/ctb.h"
 #include "ctb/table_data.h"
-
-#include "ctb/tables/CtDataTable.h"
+#include "ctb/tables/CtSchema.h"
 
 #include <frozen/map.h>
-
+#include <array>
+#include <string_view>
 
 namespace ctb
 {
@@ -23,19 +23,17 @@ namespace ctb
    class WineListTraits
    {
    public:
-      using Prop        = CtProp;
-      using Property    = CtProperty;
-      using PropertyMap = CtPropertyMap;
-      using FieldSchema = FieldSchema;
+      using Prop                 = CtProp;
+      using Property             = CtProperty;
+      using PropType             = detail::PropType;
+      using PropertyMap          = CtPropertyMap;
+      using FieldSchema          = detail::FieldSchema<Prop>;
+      using ListColumn           = CtListColumn;
+      using ListColumnSpan       = CtListColumnSpan;
+      using MultiMatchFilter     = detail::MultiMatchPropertyFilter<Prop, PropertyMap>;
+      using TableSort            = detail::TableSorter<CtProp, CtPropertyMap>;
 
-   private:
-      /// @brief - contains the list of data fields that are parsed from CSV
-      /// 
-      /// this collection contains the list of properties that we actually parse from the CSV file. Any
-      /// calculated properties are not included here which explains why this array doesn't contain 
-      /// every Prop enum value.
-      /// 
-      static inline constexpr auto s_schema = frozen::make_map<Prop, FieldSchema>(
+      static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
       {
          { Prop::iWineId,         FieldSchema { Prop::iWineId,        PropType::String,      0 }},
          { Prop::WineName,        FieldSchema { Prop::WineName,       PropType::String,     13 }},
@@ -63,10 +61,37 @@ namespace ctb
          { Prop::QtyTotal,        FieldSchema { Prop::QtyTotal,       PropType::UInt16,     {} }}
       });
 
-   public:
+      /// @brief list of display columns that will show in the list view
+      static inline const std::array DefaultListColumns { 
+         CtListColumn{ Prop::WineAndVintage,                             constants::DISPLAY_COL_WINE     },
+         CtListColumn{ Prop::Locale,                                     constants::DISPLAY_COL_LOCALE   },
+         CtListColumn{ Prop::QtyTotal,   CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY      },
+         CtListColumn{ Prop::CtScore,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE },
+         CtListColumn{ Prop::MyScore,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE },
+      };
+
+      /// @brief the available sort orders for this table.
+      static inline const std::array AvailableSorts{ 
+         TableSort{ { Prop::WineName, Prop::Vintage                       }, constants::SORT_OPTION_WINE_VINTAGE   },
+         TableSort{ { Prop::Vintage,  Prop::WineName                      }, constants::SORT_OPTION_VINTAGE_WINE   },
+         TableSort{ { Prop::Locale,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_LOCALE_WINE    },
+         TableSort{ { Prop::Region,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_REGION_WINE    },
+         TableSort{ { Prop::MyScore,  Prop::CtScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_MY, true },
+         TableSort{ { Prop::CtScore,  Prop::MyScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_CT, true },
+         TableSort{ { Prop::MyPrice,  Prop::WineName,    Prop::Vintage ,  }, constants::SORT_OPTION_MY_VALUE       }
+      };
+
+      /// @brief multi-value filters that can be used on this table.
+      static inline const std::array MultiMatchFilters{
+         MultiMatchFilter{ Prop::Varietal,    constants::FILTER_VARIETAL   },
+         MultiMatchFilter{ Prop::Country,     constants::FILTER_COUNTRY    },
+         MultiMatchFilter{ Prop::Region,      constants::FILTER_REGION     },
+         MultiMatchFilter{ Prop::Appellation, constants::FILTER_APPELATION },
+         MultiMatchFilter{ Prop::Vintage,     constants::FILTER_VINTAGE    }
+      };
+
       /// @brief getTableName()
       /// @return the name of this CT table this traits class represents
-      /// 
       static constexpr auto getTableId() -> TableId
       { 
          return TableId::List; 
@@ -74,25 +99,16 @@ namespace ctb
 
       /// @brief getTableName()
       /// @return the name of this CT table this traits class represents
-      /// 
       static constexpr auto getTableName() -> std::string_view 
       { 
          return TableDescriptions.at(getTableId());
       }
 
-      using SchemaMap = decltype(s_schema);
-
-      /// @brief getCsvSchema()
-      /// @return the CSV schema for this CT table
-      /// 
-      static constexpr auto getSchema() -> const SchemaMap&
-      {
-         return s_schema;
-      }
-
+      /// @brief hasProperty()
+      /// @return true if the table supports the specified property, false otherwise
       static constexpr auto hasProperty(Prop prop_id) -> bool
       {
-         return s_schema.contains(prop_id);
+         return Schema.contains(prop_id);
       }
 
       /// @brief this gets called by TableRecord to set any missing property values
@@ -100,8 +116,7 @@ namespace ctb
       /// PropertyMap from the CSV file are already set, this impl just provides
       /// any calculated property values or does fixup for any parsed values that need it.
       /// 
-      /// @param rec span containing a TableProperty for each PropID enum value.
-      /// 
+      /// @param rec - map containing a TableProperty for each PropID enum value.
       static void onRecordParse(PropertyMap& rec)
       {
          using enum Prop;
@@ -131,12 +146,9 @@ namespace ctb
          if (drink_end.asUInt16() == constants::CT_NULL_YEAR)
             drink_end.setNull();
       }
-
    };
 
+   using WineListTable = CtDataTable<WineListTraits>;
 
-   /// @brief Type alias for a CtDataTable representing the WineList table.
-   ///
-   using WineListTable  = CtDataTable<WineListTraits>;
 
 } // namespace ctb

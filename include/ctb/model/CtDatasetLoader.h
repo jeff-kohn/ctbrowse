@@ -8,7 +8,6 @@
 #pragma once
 
 #include "ctb/table_data.h"
-#include "ctb/tables/CtProperty.h"
 #include "ctb/interfaces/IDataset.h"
 
 #include <filesystem>

@@ -34,13 +34,18 @@ namespace ctb::constants
    inline constexpr const char* DISPLAY_COL_MY_SCORE        = "My Score";
    inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
    inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
+   inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Ordered";
+   inline constexpr const char* DISPLAY_COL_STORE           = "Store";
+   inline constexpr const char* DISPLAY_COL_PRICE           = "Price";
+
 
    // filter names
-   inline constexpr const char* FILTER_APPELATION                 = "Appellation";
-   inline constexpr const char* FILTER_COUNTRY                    = "Country";
-   inline constexpr const char* FILTER_REGION                     = "Region";
-   inline constexpr const char* FILTER_VARIETAL                   = "Varietal";
-   inline constexpr const char* FILTER_VINTAGE                    = "Vintage";
+   inline constexpr const char* FILTER_APPELATION           = "Appellation";
+   inline constexpr const char* FILTER_COUNTRY              = "Country";
+   inline constexpr const char* FILTER_REGION               = "Region";
+   inline constexpr const char* FILTER_STORE                = "Store";
+   inline constexpr const char* FILTER_VARIETAL             = "Varietal";
+   inline constexpr const char* FILTER_VINTAGE              = "Vintage";
 
 
    inline constexpr const char* HTTP_PARAM_TABLE            = "Table";
@@ -59,6 +64,9 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_LOCALE_WINE           = "Country, Region, and Appellation";
    inline constexpr const char* SORT_OPTION_PRODUCER_WINE_NAME    = "Producer, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_REGION_WINE           = "Region, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_PURCHASE_DATE         = "Order Date, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_STORE_NAME            = "Store, Wine and Vintage";
+
    inline constexpr const char* SORT_OPTION_SCORE_MY              = "My Score";
    inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";
    inline constexpr const char* SORT_OPTION_MY_VALUE              = "My Value";
@@ -67,18 +75,18 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";
 
    // table names
-   inline constexpr const char* TABLE_NAME_LIST             = "Personal Wine List";
-   inline constexpr const char* TABLE_NAME_INVENTORY        = "Bottle Inventory";
-   inline constexpr const char* TABLE_NAME_NOTES            = "Tasting Notes";
-   inline constexpr const char* TABLE_NAME_PRIVATENOTES     = "Private Notes";
-   inline constexpr const char* TABLE_NAME_PURCHASE         = "Wine Purchases";
-   inline constexpr const char* TABLE_NAME_PENDING          = "Pending Wine Deliveries";
-   inline constexpr const char* TABLE_NAME_CONSUMED         = "Consumed Bottles";
-   inline constexpr const char* TABLE_NAME_AVAILABILITY     = "Ready to Drink List";
-   inline constexpr const char* TABLE_NAME_TAG              = "Wish List Tags";
-   inline constexpr const char* TABLE_NAME_PROREVIEW        = "Manually Entered Pro Reviews";
-   inline constexpr const char* TABLE_NAME_BOTTLES          = "Raw Bottle List";
-   inline constexpr const char* TABLE_NAME_FOODTAGS         = "Food Pairing Tag";
+   inline constexpr const char* TABLE_NAME_LIST                   = "Personal Wine List";
+   inline constexpr const char* TABLE_NAME_INVENTORY              = "Bottle Inventory";
+   inline constexpr const char* TABLE_NAME_NOTES                  = "Tasting Notes";
+   inline constexpr const char* TABLE_NAME_PRIVATENOTES           = "Private Notes";
+   inline constexpr const char* TABLE_NAME_PURCHASE               = "Wine Purchases";
+   inline constexpr const char* TABLE_NAME_PENDING                = "Pending Wine Deliveries";
+   inline constexpr const char* TABLE_NAME_CONSUMED               = "Consumed Bottles";
+   inline constexpr const char* TABLE_NAME_AVAILABILITY           = "Ready to Drink List";
+   inline constexpr const char* TABLE_NAME_TAG                    = "Wish List Tags";
+   inline constexpr const char* TABLE_NAME_PROREVIEW              = "Manually Entered Pro Reviews";
+   inline constexpr const char* TABLE_NAME_BOTTLES                = "Raw Bottle List";
+   inline constexpr const char* TABLE_NAME_FOODTAGS               = "Food Pairing Tag";
 
    // CT doesn't return an HTTP response code for invalid logon, it just returns this text instead of the requested file.
    inline constexpr const char* ERR_STR_INVALID_CELLARTRACKER_LOGON = "<html><body>You are currently not logged into CellarTracker.</body></html>";

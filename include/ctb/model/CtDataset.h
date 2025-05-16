@@ -12,27 +12,24 @@
 #include "ctb/tables/detail/MultiMatchPropertyFilterMgr.h"
 #include "ctb/tables/detail/PropertyFilter.h"
 #include "ctb/tables/detail/SubStringFilter.h"
-#include "ctb/tables/detail/TableSorter.h"
-
-#include "ctb/model/CtListColumn.h"
 
 
 namespace ctb
 {
    /// @brief This is the data model class for interacting with CellarTracker datasets.
    /// 
-   /// This class ipmlements a dataset representing one of the CT user tables (Wine List, Pending Wines, etc)
+   /// This class implements a dataset representing one of the CT user tables (Wine List, Pending Wines, etc)
    /// It provides access to all properties of the underlying dataset, but also has ListColumns, which are 
    /// the properties displayed in the main list-view. 
    /// 
-   template<typename DataTableT>
+   template<DataTableType DataTableT>
    class CtDataset final : public IDataset
    {
    public:
       using base                = IDataset;
       using DataTable           = DataTableT;
       using ListColumn          = base::ListColumn;
-      using ListColumns         = base::ListColumns;
+      using ListColumnSpan      = base::ListColumnSpan;
       using MultiMatchFilterMgr = detail::MultiMatchPropertyFilterMgr<Prop, PropertyMap>;
       using MultiMatchFilter    = MultiMatchFilterMgr::Filter;
       using Prop                = base::Prop;
@@ -60,7 +57,7 @@ namespace ctb
       /// property.
       auto availableSorts() const -> TableSortSpan override
       {
-         return Sorters;
+         return Traits::AvailableSorts;
       }
 
       /// @brief returns the currently active sort option
@@ -82,22 +79,21 @@ namespace ctb
       /// @brief Gets the collection of active display columns 
       /// 
       /// Note that some may be hidden and not visible.
-      auto listColumns() const -> const ListColumns& override
+      auto listColumns() const -> CtListColumnSpan override
       { 
-         return m_list_columns; 
+         return Traits::DefaultListColumns; 
       }
 
       /// @brief retrieves a list of available filters for this table.
       auto multiMatchFilters() const -> CtMultiMatchFilterSpan override
       {
-         return MultiMatchFilters;
+         return Traits::MultiMatchFilters;
       }
 
       /// @brief Get a list of all distinct values from the table for the specified property.
       /// 
       /// This can be used to get filter values for match-filters.
-      [[nodiscard]]
-      auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet override
+      [[nodiscard]] auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet override
       {
          PropertyValueSet values{};
          if (hasProperty(prop_id))
@@ -243,7 +239,7 @@ namespace ctb
       /// 
       /// This function returns a reference to null for not-found properties. Since
       /// found properties could also have null value, the only way to differentiate
-      /// is by calling hasProperty()
+      /// is by checking hasProperty()
       /// 
       /// The returned reference will remain valid until a modifying (non-const) method
       /// is called on this dataset, after which it may be invalid. You should copy-construct 
@@ -253,6 +249,8 @@ namespace ctb
       ///  will always be a valid CtProperty&.
       auto getProperty(int rec_idx, CtProp prop_id) const -> const Property& override
       {
+         static constexpr Property null_prop{}; // can't just return temporary due to reference return val
+
          if (rec_idx > filteredRecCount() or !hasProperty(prop_id))
             return null_prop;
 
@@ -294,42 +292,10 @@ namespace ctb
       CtDataset& operator=(CtDataset&&) = delete;
 
    private:
-      /// @brief list of display columns that will show in the list view
-      ///
-      static inline const std::array DefaultListColumns { 
-         CtListColumn{ Prop::WineAndVintage,                                constants::DISPLAY_COL_WINE     },
-         CtListColumn{ Prop::Locale,                                        constants::DISPLAY_COL_LOCALE   },
-         CtListColumn{ Prop::QtyTotal,   CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY      },
-         CtListColumn{ Prop::CtScore,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE },
-         CtListColumn{ Prop::MyScore,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE },
-      };
-
-      /// @brief the available sort orders for this table.
-      ///
-      static inline const std::array Sorters{ 
-         TableSort{ { Prop::WineName, Prop::Vintage                       }, constants::SORT_OPTION_WINE_VINTAGE   },
-         TableSort{ { Prop::Vintage,  Prop::WineName                      }, constants::SORT_OPTION_VINTAGE_WINE   },
-         TableSort{ { Prop::Locale,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_LOCALE_WINE    },
-         TableSort{ { Prop::Region,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_REGION_WINE    },
-         TableSort{ { Prop::MyScore,  Prop::CtScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_MY, true },
-         TableSort{ { Prop::CtScore,  Prop::MyScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_CT, true },
-         TableSort{ { Prop::MyPrice,  Prop::WineName,    Prop::Vintage ,  }, constants::SORT_OPTION_MY_VALUE       }
-      };
-
-      /// @brief string filters that can be used on this table.
-      ///
-      static inline const std::array MultiMatchFilters{
-         MultiMatchFilter{ Prop::Varietal,    constants::FILTER_VARIETAL   },
-         MultiMatchFilter{ Prop::Country,     constants::FILTER_COUNTRY    },
-         MultiMatchFilter{ Prop::Region,      constants::FILTER_REGION     },
-         MultiMatchFilter{ Prop::Appellation, constants::FILTER_APPELATION },
-         MultiMatchFilter{ Prop::Vintage,     constants::FILTER_VINTAGE    }
-      };
-
       DataTable                        m_data{};                 // the underlying data records for this table.
       DataTable                        m_filtered_data{};        // we need a copy for the filtered data, so we can bind our views to it
       DataTable*                       m_current_view{};         // may point to m_data or m_filtered_data depending if filter is active
-      ListColumns                      m_list_columns{};
+      std::vector<ListColumn>         m_list_columns{};
       PropertyFilter                   m_instock_filter{};
       PropertyFilter                   m_score_filter{};
       MultiMatchFilterMgr              m_mm_filters{};
@@ -340,7 +306,7 @@ namespace ctb
       explicit CtDataset(DataTable&& data) : 
          m_data{ std::move(data) },
          m_current_view{ &m_data },
-         m_list_columns{ std::from_range, DefaultListColumns },
+         m_list_columns{ std::from_range, Traits::DefaultListColumns },
          m_instock_filter{ Prop::QtyOnHand, std::greater<CtProperty>{}, uint16_t{0} },
          m_score_filter{ {Prop::CtScore, Prop::MyScore}, std::greater_equal<CtProperty>{}, constants::FILTER_SCORE_DEFAULT },
          m_current_sort{ availableSorts()[0] }

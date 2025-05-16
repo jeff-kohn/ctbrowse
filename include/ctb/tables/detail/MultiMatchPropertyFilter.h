@@ -22,10 +22,10 @@ namespace ctb::detail
    template<EnumType PropT, PropertyMapType PropMapT>
    struct MultiMatchPropertyFilter
    {
-      using Prop          = PropT;
-      using PropertyMap    = PropMapT;
-      using Property = PropertyMap::mapped_type;
-      using MatchValues   = std::set<Property>;
+      using Prop         = PropT;
+      using PropertyMap  = PropMapT;
+      using Property     = PropertyMap::mapped_type;
+      using MatchValues  = std::set<Property>;
 
       /// @brief Property that we're filtering against
       Prop prop_id{};

@@ -6,8 +6,8 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
-#include "ctb/tables/PendingWineTable.h"
-#include "ctb/tables/WineListTable.h"
+#include "ctb/tables/PendingWineTraits.h"
+#include "ctb/tables/WineListTraits.h"
 
 #include "ctb/model/CtDatasetLoader.h"
 #include "ctb/model/CtDataset.h"

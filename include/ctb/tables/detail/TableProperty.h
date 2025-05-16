@@ -10,6 +10,7 @@
 #include "ctb/ctb.h"
 #include "ctb/utility_templates.h"
 
+#include <chrono>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -74,15 +75,17 @@ namespace ctb::detail
       /// 
       template<ArithmeticType T> 
       constexpr auto as() const -> std::optional<T>
-      {  
+      { 
+         using std::chrono::year_month_day;
+         using MaybeT = std::optional<T>; 
+
          // try to convert
-         using MaybeT = std::optional<T>;
          auto asT = Overloaded
          {
-            [](const std::monostate)          -> MaybeT { return std::nullopt;                            },
-            [](const std::string& str)        -> MaybeT { return from_str<T>(str);                        },
-            [](const chrono::year_month_day&) -> MaybeT { return {}; /* no conversion that makes sense */ },
-            [](const auto& val)               -> MaybeT { return std::optional<T>(static_cast<T>(val));   }
+            [](const std::monostate)    -> MaybeT { return std::nullopt;                            },
+            [](const std::string& str)  -> MaybeT { return from_str<T>(str);                        },
+            [](const year_month_day&)   -> MaybeT { return {}; /* no conversion that makes sense */ },
+            [](const auto& val)         -> MaybeT { return std::optional<T>(static_cast<T>(val));   }
          };
          return std::visit(asT, m_val);
       }

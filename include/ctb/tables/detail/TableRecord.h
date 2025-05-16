@@ -10,7 +10,7 @@
 
 #include "ctb/ctb.h"
 #include "ctb/utility_chrono.h"
-#include "ctb/tables/CtProperty.h"
+#include "ctb/tables/detail/FieldSchema.h"
 
 #include <external/csv.hpp>
 #include <magic_enum/magic_enum.hpp>
@@ -18,33 +18,8 @@
 #include <cassert>
 
 
-namespace ctb
+namespace ctb::detail
 {
-   /// @brief enum to specify the data formats a property value can contain.
-   /// 
-   /// these enums indicate how to attempt to parse/interpret the CSV field for a given property.
-   ///
-   enum class PropType
-   {
-      String,
-      UInt16,
-      UInt64,
-      Double,
-      Date
-   };
-
-
-   /// @brief  contains the property type and CSV column index for a given Prop
-   ///
-   struct FieldSchema
-   {
-      using Prop = CtProp;
-
-      Prop           prop_id{};
-      PropType       prop_type{};
-      NullableShort  csv_col{};   // will be std::nullopt for custom fields not in the CSV
-   };
-
 
 
    /// @brief base class providing common functionality for our table record objects
@@ -62,6 +37,7 @@ namespace ctb
    public:
       using Traits        = RecordTraitsT;
       using Prop          = Traits::Prop;
+      using PropType      = detail::PropType;
       using PropertyMap   = PropertyMapT;
       using Property      = PropertyMap::mapped_type; 
       using RowType       = csv::CSVRow;
@@ -88,7 +64,7 @@ namespace ctb
          using namespace magic_enum;
 
          // parse all the CSV properties
-         auto csv_cols = vws::values(Traits::getSchema())
+         auto csv_cols = vws::values(Traits::Schema)
                        | vws::filter([](auto& field) { return field.csv_col.has_value(); });
 
          for (auto& fld_schema : csv_cols)
@@ -129,6 +105,8 @@ namespace ctb
       ///
       auto getProperty(Prop prop_id) const -> const Property& 
       {
+         static constexpr auto null_prop = Property{};
+
          auto it = m_props.find(prop_id);
          return it == m_props.end() ? null_prop : it->second;
       }
@@ -155,7 +133,7 @@ namespace ctb
       TableRecord& operator=(const TableRecord&) = delete;
 
    private:
-      PropertyMap m_props{ Traits::getSchema().size()};
+      PropertyMap m_props{ Traits::Schema.size()};
 
       // @brief converts a CSVField into a TableProperty
       Property fieldToProperty(csv::CSVField& fld, PropType prop_type)
