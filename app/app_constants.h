@@ -8,13 +8,16 @@ namespace ctb::constants
    inline constexpr const char* APP_DEFAULT_LOG_FOLDER            = "%LOCALAPPDATA%"; // safe default, but not used for windows app.
 
 
+   inline constexpr const char* LBL_MENU_DATA                     = "&Datasets";
+   inline constexpr const char* LBL_MENU_WINE                     = "&Online";
+   inline constexpr const char* LBL_MENU_VIEW                     = "&View";
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_LBL        = "&Download Data...";
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP        = "Download data from CellarTracker";
    inline constexpr const char* CMD_FILE_SETTINGS_LBL             = "&Settings...";
    inline constexpr const char* CMD_FILE_SETTINGS_TIP             = "Configure app settings";
-   inline constexpr const char* CMD_DATA_WINE_LIST_LBL            = "&My Cellar\tCtrl+W";
-   inline constexpr const char* CMD_DATA_WINE_LIST_TIP            = "View Personal Wine List";
-   inline constexpr const char* CMD_DATA_PENDING_WINE_LBL         = "&Pending Wines\tCtrl+P";
+   inline constexpr const char* CMD_DATA_WINE_LIST_LBL            = "&My Wine Collection\tCtrl+M";
+   inline constexpr const char* CMD_DATA_WINE_LIST_TIP            = "View Personal Wine Collection";
+   inline constexpr const char* CMD_DATA_PENDING_WINE_LBL         = "&Pending Wine Orders\tCtrl+P";
    inline constexpr const char* CMD_DATA_PENDING_WINE_TIP         = "View Pending Wine Deliveries";
    inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_LBL      = "&Resize List Columns";
    inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_TIP      = "Resize the list columns to fit the data";
@@ -68,9 +71,6 @@ namespace ctb::constants
    inline constexpr const char* LBL_CT_SCORE                      = "CT Score:";
    inline constexpr const char* LBL_DRINK_WINDOW                  = "Drink Window:";
    inline constexpr const char* LBL_FILTER_OPTIONS                = "Filter Options";
-   inline constexpr const char* LBL_MENU_DATA                     = "&Data";
-   inline constexpr const char* LBL_MENU_WINE                     = "&Wine";
-   inline constexpr const char* LBL_MENU_VIEW                     = "&View";
    inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
    inline constexpr const char* LBL_MY_PRICE                      = "My Price:";
    inline constexpr const char* LBL_REGION                        = "Region:";

@@ -78,6 +78,10 @@ namespace ctb::detail
             case Format::String:
                col_align    = Align::Left;
                header_align = Align::Left;
+               break;
+
+            default:
+               assert("Missing enum value, this is a bug" and false);
          }
       }
 
