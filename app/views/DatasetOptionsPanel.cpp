@@ -327,8 +327,11 @@ namespace ctb::app
 
    void DatasetOptionsPanel::enableInStockFilter(bool enable)
    {
-      constexpr size_t index = 0;
+      constexpr size_t index = 2;
       m_filter_options_box->Show(index, enable);
+      m_filter_options_box->Layout();
+      SendSizeEvent();
+      Update();
    }
 
 

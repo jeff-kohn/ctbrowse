@@ -36,10 +36,11 @@ namespace ctb::detail
       /// @brief enum to specify the format the value will be displayed in
       enum Format
       {
-         String,
-         Number,
+         Currency,
+         Date,
          Decimal,
-         Currency
+         Number,
+         String,
       };
 
       /// @brief The property identifer for this ListColumn
@@ -64,10 +65,19 @@ namespace ctb::detail
       /// @brief construct a column to display the specified property in the requested format
       ListColumn(Prop prop_id, Format fmt, std::string_view col_name) :  prop_id{ prop_id },  display_name{ col_name }, format{ fmt }
       {
-         if (fmt != Format::String)
+         switch (format)
          {
-            col_align = Align::Right;
-            header_align = Align::Center;
+            case Format::Currency:  [[fallthrough]];
+            case Format::Decimal:   [[fallthrough]];
+            case Format::Number:    [[fallthrough]];
+            case Format::Date:
+               col_align    = Align::Right;
+               header_align = Align::Center;
+               break;
+
+            case Format::String:
+               col_align    = Align::Left;
+               header_align = Align::Left;
          }
       }
 
@@ -87,7 +97,11 @@ namespace ctb::detail
             case Format::Currency:  
                return value.asString(constants::FMT_NUMBER_CURRENCY);
 
-            case Format::Number: // regular numbers don't have special formatting except for being right-aligned.   
+            case Format::Date:
+               return value.asString(constants::FMT_DATE_SHORT);
+
+            // regular numbers don't have special formatting except for being right-aligned.   
+            case Format::Number: 
             default:                
                return value.asString();
          }

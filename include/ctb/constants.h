@@ -122,7 +122,12 @@ namespace ctb::constants
 
    inline constexpr const char* FMT_NUMBER_CURRENCY               = "${:.2f}";
    inline constexpr const char* FMT_NUMBER_DECIMAL                = "{:.1f}";
+   inline constexpr const char* FMT_DATE_SHORT                    = "{:%m/%d/%Y}";
    inline constexpr const char* FMT_NUMBER_INTEGRAL               = "{:.0f}";
+   inline constexpr const char* FMT_PARSE_DATE_SHORT              = "%m/%d/%Y";
+   inline constexpr const char* FMT_PARSE_ISO_DATETIME_LOCAL      = "%FT%T%Ez"; //. These 3 don't have {}'s because they're meant to be used with std::chrono::parse
+   inline constexpr const char* FMT_PARSE_ISO_DATETIME_UTC        = "%FT%T%Z";
+   inline constexpr const char* FMT_PARSE_ISO_DATE_ONLY           = "%F";
 
    inline constexpr auto     ONE_MB                               = 1024 * 1024;
    inline constexpr uint16_t CT_NULL_YEAR                         =        9999;
@@ -132,9 +137,6 @@ namespace ctb::constants
    inline constexpr double   FILTER_SCORE_MAX                     =       100.0;
    inline constexpr int      FILTER_SCORE_DIGITS                  =           1;
 
-   inline constexpr const char* PARSE_FMT_STR_ISO_DATETIME_LOCAL  = "%FT%T%Ez";
-   inline constexpr const char* PARSE_FMT_STR_ISO_DATETIME_UTC    = "%FT%T%Z";
-   inline constexpr const char* PARSE_FMT_STR_ISO_DATE_ONLY       = "%F";
 
 
 } // namespace ctb::constants

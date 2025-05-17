@@ -8,6 +8,7 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include "ctb/utility_chrono.h"
 #include "ctb/utility_templates.h"
 
 #include <chrono>
@@ -99,6 +100,8 @@ namespace ctb::detail
          {
             return std::get<std::string>(m_val);
          }
+
+         // For other types we use format() to get a string
          return asString("{}");
       }
 
@@ -171,11 +174,14 @@ namespace ctb::detail
       /// 
       auto asString(std::string_view fmt_str) const -> std::string 
       {
+         using std::chrono::year_month_day;
+
          auto asStr = Overloaded
          {
-            [](const std::string& val) {  return val;                                                 },
-            [](std::monostate)         {  return std::string{};                                       },
-            [&fmt_str](auto val)       {  return ctb::vformat(fmt_str,  ctb::make_format_args(val));  }
+            [](const std::string& val)    {  return val;                                                 },
+            [](std::monostate)            {  return std::string{};                                       },
+            [](const year_month_day& val) {  return ctb::format(constants::FMT_DATE_SHORT, val);      },
+            [&fmt_str](auto val)          {  return ctb::vformat(fmt_str,  ctb::make_format_args(val));  }
          };
          return std::visit(asStr, m_val);
       }

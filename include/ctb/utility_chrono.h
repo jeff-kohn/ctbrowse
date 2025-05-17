@@ -35,11 +35,11 @@ namespace ctb
       std::ispanstream dt_strm{ dt_str };
       chrono::sys_seconds ts{};
 
-      dt_strm >> parse(constants::PARSE_FMT_STR_ISO_DATETIME_LOCAL, ts);
+      dt_strm >> parse(constants::FMT_PARSE_ISO_DATETIME_LOCAL, ts);
       if (dt_strm.fail())
       {
          dt_strm = std::ispanstream{ dt_str };
-         dt_strm >> parse(constants::PARSE_FMT_STR_ISO_DATETIME_UTC, ts);
+         dt_strm >> parse(constants::FMT_PARSE_ISO_DATETIME_UTC, ts);
       }
       if (dt_strm.fail())
          return std::unexpected{ Error{ Error::Category::ParseError, "The intput string '{}' could not be parsed as a valid date/time", dt_str } };
@@ -49,10 +49,8 @@ namespace ctb
 
    /// @brief Parse an ISO date string into a year_month_day
    /// 
-   [[nodiscard]] inline auto parseIsoDate(std::string_view dt_str) -> std::expected<chrono::year_month_day, Error> 
+   [[nodiscard]] inline auto parseDate(std::string_view dt_str, const char* format_str = constants::FMT_PARSE_ISO_DATE_ONLY) -> std::expected<chrono::year_month_day, Error> 
    {
-      constexpr auto format_str{ constants::PARSE_FMT_STR_ISO_DATE_ONLY };
-
       std::ispanstream dt_strm{ dt_str, };
       chrono::sys_days days{};
       if ((dt_strm >> parse(format_str, days)))

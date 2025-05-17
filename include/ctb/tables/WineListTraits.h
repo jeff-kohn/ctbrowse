@@ -133,6 +133,10 @@ namespace ctb
          {
             rec[QtyTotal] = qty;
          }
+         else if (qty == 0)
+         {
+            rec[QtyTotal] = ctb::format("({})", pending);
+         }
          else{
             rec[QtyTotal] = ctb::format("{}+{}", qty, pending);
          }

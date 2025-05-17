@@ -156,18 +156,25 @@ namespace ctb::detail
             {
                long double val{};
                if (fld.try_parse_decimal(val))
+               {
                   return Property{ static_cast<double>(val) };
-               else
+               }
+               else {
+                  SPDLOG_DEBUG("TableProperty::fieldToProperty - Unable to parse value '{}' as a double", fld.get<std::string_view>());
                   return {};
+               }
             }
             case PropType::Date:
             {
-               auto result = parseIsoDate(fld.get<std::string_view>());
+               auto result = parseDate(fld.get<std::string_view>(), constants::FMT_PARSE_DATE_SHORT);
                if (result) 
                {
                   return Property{ *result };
                }
-               return Property{};
+               else {
+                  SPDLOG_DEBUG("TableProperty::fieldToProperty - Unable to parse value '{}' as a date", fld.get<std::string_view>());
+                  return Property{};
+               }
             }
             default:
                assert(false and "PropType enum contains unexpected value, this is a bug!");

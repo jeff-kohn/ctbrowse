@@ -56,16 +56,16 @@ namespace ctb
          { Prop::PendingQtyOrdered,      FieldSchema { Prop::PendingQtyOrdered,     PropType::UInt16,     10 }},
          { Prop::PendingPurchaseDate,    FieldSchema { Prop::PendingPurchaseDate,   PropType::Date,        2 }}, 
          { Prop::PendingDeliveryDate,    FieldSchema { Prop::PendingDeliveryDate,   PropType::Date,        3 }},
-         { Prop::WineAndVintage,         FieldSchema { Prop::WineAndVintage,        PropType::Double,     {} }},
+         { Prop::WineAndVintage,         FieldSchema { Prop::WineAndVintage,        PropType::Double,     {} }}
       });
 
       /// @brief list of display columns that will show in the list view
       static inline const std::array DefaultListColumns { 
          CtListColumn{ Prop::WineAndVintage,                                      constants::DISPLAY_COL_WINE       },
+         CtListColumn{ Prop::PendingStoreName,    CtListColumn::Format::String,   constants::DISPLAY_COL_STORE      },
+         CtListColumn{ Prop::PendingPurchaseDate, CtListColumn::Format::Date,     constants::DISPLAY_COL_PURCH_DATE },
          CtListColumn{ Prop::PendingQtyOrdered,   CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY        },
-         CtListColumn{ Prop::PendingPurchaseDate, CtListColumn::Format::String,   constants::DISPLAY_COL_PURCH_DATE },
-         CtListColumn{ Prop::PendingStoreName,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_STORE      },
-         CtListColumn{ Prop::PendingPrice,        CtListColumn::Format::Currency, constants::DISPLAY_COL_PRICE      },
+         CtListColumn{ Prop::PendingPrice,        CtListColumn::Format::Currency, constants::DISPLAY_COL_PRICE      }
       };
 
       /// @brief the available sort orders for this table.
