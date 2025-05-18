@@ -75,7 +75,7 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";
 
    // table names
-   inline constexpr const char* TABLE_NAME_LIST                   = "Personal Wine List";
+   inline constexpr const char* TABLE_NAME_LIST                   = "My Wine Cellar";
    inline constexpr const char* TABLE_NAME_INVENTORY              = "Bottle Inventory";
    inline constexpr const char* TABLE_NAME_NOTES                  = "Tasting Notes";
    inline constexpr const char* TABLE_NAME_PRIVATENOTES           = "Private Notes";

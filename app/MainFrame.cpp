@@ -307,7 +307,6 @@ namespace ctb::app
          CtCredentialManager cred_mgr{};
          auto cred_name = constants::CELLARTRACKER_DOT_COM;
          auto prompt_msg = ctb::format(constants::FMT_CREDENTIALDLG_PROMPT_MSG, cred_name);
-
          auto cred_result = cred_mgr.loadCredential(cred_name, prompt_msg, true);
 
          if (!cred_result)
@@ -414,6 +413,9 @@ namespace ctb::app
             tbl->setInStockFilter(true);
          }
          m_event_source->setDataset(tbl, true);
+
+         // Update title bar
+         SetTitle(wxString::FromUTF8(ctb::format("{} - {}", getTableDescription(table_id), constants::APP_NAME_LONG)));
 
          // Force a complete redraw of everything
          Layout();
