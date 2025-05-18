@@ -10,6 +10,7 @@
 #include "wx_helpers.h"
 #include "views/DatasetOptionsPanel.h"
 
+#include <ctb/utility_chrono.h>
 #include <wx/checkbox.h>
 #include <wx/choice.h>
 #include <wx/radiobut.h>
@@ -30,15 +31,43 @@ namespace ctb::app
       constexpr int IMG_UNCHECKED = 1;
       constexpr int IMG_CHECKED = 2;
 
+
+      auto getPropertyForFieldType(const CtFieldSchema& fld, std::string_view text_val) -> CtProperty
+      {
+         switch (fld.prop_type)
+         {
+            case PropType::String:
+               return CtProperty{ std::string{ text_val } };
+
+            case PropType::UInt16:
+               return CtProperty::create<uint16_t>(text_val);
+
+            case PropType::UInt64:
+               return CtProperty::create<uint64_t>(text_val);
+
+            case PropType::Double:
+               return CtProperty::create<double>(text_val);
+
+            case PropType::Date:
+            {
+               auto ymd = parseDate(constants::FMT_PARSE_DATE_SHORT);
+               return ymd ? CtProperty{ *ymd } : CtProperty{};
+            }
+            default:
+               log::info("getPropertyForFieldType() encountered unexpected property type with value {}", std::to_underlying(fld.prop_type));
+               assert("Unexpected property type, this is a bug" and false);
+               return {};
+         }
+      }
+
    } // namespace
    
+
    DatasetOptionsPanel::DatasetOptionsPanel(DatasetEventSourcePtr source) : m_sink{ this, source }
-   {
-
-   }
+   {}
 
 
-   [[nodiscard]] DatasetOptionsPanel* DatasetOptionsPanel::create(wxWindow* parent, DatasetEventSourcePtr source)
+   [[nodiscard]] auto DatasetOptionsPanel::create(wxWindow* parent, DatasetEventSourcePtr source) -> DatasetOptionsPanel*
    {
       if (!source)
       {
@@ -170,10 +199,23 @@ namespace ctb::app
    {
       if (m_sink.hasDataset())
       {
+         CtProperty filter_val{};
          auto filter = getPropFilterForItem(item);
          if (filter)
          {
-            m_sink.getDataset()->addMultiMatchFilter(filter->prop_id, m_filter_tree->GetItemText(item).wx_str());
+            /// We need to convert the string value from the filter tree to the correct type, which may not be string.
+            auto fld_schema = m_sink.getDataset()->getFieldSchema(filter->prop_id);
+            if (fld_schema)
+            {
+               auto wx_str_val = m_filter_tree->GetItemText(item);
+               std::string_view text_val{ wx_str_val.wx_str() };
+               filter_val = getPropertyForFieldType(*fld_schema, text_val);
+            }
+            else {
+               assert("Not getting a valid FieldSchema here is a bug." and false);
+            }
+
+            m_sink.getDataset()->addMultiMatchFilter(filter->prop_id, filter_val);
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
@@ -184,10 +226,22 @@ namespace ctb::app
    {
       if (m_sink.hasDataset())
       {
+         CtProperty filter_val{};
          auto filter = getPropFilterForItem(item);
          if (filter)
          {
-            m_sink.getDataset()->removeMultiMatchFilter(filter->prop_id, m_filter_tree->GetItemText(item).wx_str());
+            /// We need to convert the string value from the filter tree to the correct type, which may not be string.
+            auto fld_schema = m_sink.getDataset()->getFieldSchema(filter->prop_id);
+            if (fld_schema)
+            {
+               auto wx_str_val = m_filter_tree->GetItemText(item);
+               std::string_view text_val{ wx_str_val.wx_str() };
+               filter_val = getPropertyForFieldType(*fld_schema, text_val);
+            }
+            else {
+               assert("Not getting a valid FieldSchema here is a bug." and false);
+            }
+            m_sink.getDataset()->removeMultiMatchFilter(filter->prop_id, filter_val);
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
@@ -218,7 +272,7 @@ namespace ctb::app
    }
 
 
-   DatasetOptionsPanel::MaybeFilter DatasetOptionsPanel::getPropFilterForItem(wxTreeItemId item)
+   auto DatasetOptionsPanel::getPropFilterForItem(wxTreeItemId item) -> MaybeFilter
    {
       auto dataset = m_sink.getDataset();
       if (dataset)
@@ -236,7 +290,7 @@ namespace ctb::app
    }
 
 
-   wxArrayString DatasetOptionsPanel::getSortOptionList(IDataset* dataset)
+   auto DatasetOptionsPanel::getSortOptionList(IDataset* dataset) -> wxArrayString
    {
       return vws::all(dataset->availableSorts()) 
                | vws::transform([](const IDataset::TableSort& s) {  return wxFromSV(s.sort_name); })
@@ -244,19 +298,19 @@ namespace ctb::app
    }
 
 
-   bool DatasetOptionsPanel::isChecked(wxTreeItemId item)
+   auto DatasetOptionsPanel::isChecked(wxTreeItemId item) -> bool
    {
       return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CHECKED;
    }
 
 
-   bool DatasetOptionsPanel::isContainerNode(wxTreeItemId item)
+   auto DatasetOptionsPanel::isContainerNode(wxTreeItemId item) -> bool
    {
       return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CONTAINER;
    }
 
 
-   bool DatasetOptionsPanel::isMatchValueNode(wxTreeItemId item)
+   auto DatasetOptionsPanel::isMatchValueNode(wxTreeItemId item) -> bool
    {
       return item.IsOk() and m_filter_tree->GetItemImage(item) != IMG_CONTAINER;
    }
@@ -264,7 +318,7 @@ namespace ctb::app
    /// @brief updates the checked/unchecked status of a node.
    /// @return true if successful, false otherwise (ie invalid item)
    /// 
-   bool DatasetOptionsPanel::setMatchValueChecked(wxTreeItemId item, bool checked)
+   auto DatasetOptionsPanel::setMatchValueChecked(wxTreeItemId item, bool checked) -> bool
    {
       if ( isMatchValueNode(item) )
       {

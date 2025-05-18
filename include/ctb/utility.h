@@ -78,7 +78,7 @@ namespace ctb
    ///
    /// while this overload is convenient, it has the overhead of an unnecessary copy
    /// when the passed string has no vars to expand.
-   template<StringViewCompatibleType Str>
+   template<StringOrStringViewType Str>
    inline auto expandEnvironmentVars(Str&& text) -> std::string
    {
       std::string result{std::forward<Str>(text)};

@@ -28,7 +28,7 @@ namespace ctb::app
 
    /// @brief convert a range of strings/string_views to a wxArrayString
    ///
-   template <rng::input_range Rng> requires StringViewCompatibleType<rng::range_value_t<Rng> >
+   template <rng::input_range Rng> requires StringOrStringViewType<rng::range_value_t<Rng> >
    wxArrayString wxToArrayString(Rng&& strings)
    {
       Overloaded overloaded{
@@ -73,7 +73,7 @@ namespace ctb::app
       ScopedStatusText& operator=(const ScopedStatusText&) = default;
       ScopedStatusText& operator=(ScopedStatusText&&) = default;
    };
-
+   // deduction guide
    template<typename WndT> ScopedStatusText(std::string_view, WndT*) -> ScopedStatusText<WndT>;
 
 

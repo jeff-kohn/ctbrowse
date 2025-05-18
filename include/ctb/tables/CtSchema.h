@@ -68,6 +68,9 @@ namespace ctb
    /// @brief Type alias for a CtProp-based field schema object 
    using CtFieldSchema = detail::FieldSchema<CtProp>;
 
+   // promote non-template PropType to ctb namespace.
+   using detail::PropType;
+  
    
    /// @brief Type alias for the property type used in CellarTracker data tables
    using CtProperty = detail::TableProperty<std::string, uint16_t, uint64_t, double, std::chrono::year_month_day>;

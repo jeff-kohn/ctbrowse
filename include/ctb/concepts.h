@@ -18,8 +18,13 @@ namespace ctb
    namespace vws = rng::views;
 
    /// @brief Concept for a type that is convertible to std::string_view
+   ///
+   /// This is of limited use, but it can eliminate an overload if you need
+   /// to create a std::string from either a std::string&& or a std::string_view
+   /// using forwarding references
    template <typename T>
-   concept StringViewCompatibleType = std::convertible_to<T, std::string_view>;
+   concept StringOrStringViewType = std::same_as<std::remove_cvref_t<T>, std::string> 
+                                 or std::same_as<std::remove_cvref_t<T>, std::string_view>;
 
 
    /// @brief Concept for a type that can be used as a table property in a table record.

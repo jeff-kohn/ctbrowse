@@ -34,7 +34,7 @@ namespace ctb::app
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its lifetime). 
       /// 
-      [[nodiscard]] static DatasetOptionsPanel* create(wxWindow* parent, DatasetEventSourcePtr source);
+      [[nodiscard]] static auto create(wxWindow* parent, DatasetEventSourcePtr source) -> DatasetOptionsPanel*;
    
       // no copy/move/assign, this class is created on the heap.
       DatasetOptionsPanel(const DatasetOptionsPanel&) = delete;

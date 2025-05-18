@@ -12,6 +12,7 @@
 #include "ctb/tables/CtSchema.h"
 
 #include <memory>
+#include <optional>
 #include <string_view>
 
 
@@ -25,6 +26,7 @@ namespace ctb
    class IDataset
    {
    public:
+      using FieldSchema       = CtFieldSchema;
       using Prop              = CtProp;
       using Property          = CtProperty;
       using PropertyMap       = CtPropertyMap;
@@ -33,6 +35,7 @@ namespace ctb
       using ListColumnSpan    = CtListColumnSpan;
       using TableSort         = CtTableSort;
       using TableSortSpan     = CtTableSortSpan;
+
 
       /// @brief retrieves list of available sorters, in order of display
       /// 
@@ -129,6 +132,13 @@ namespace ctb
       /// @return const reference to the requested property. It may be a null value, but it 
       ///         will always be a valid CtProperty&.
       virtual auto getProperty(int rec_idx, CtProp prop_id) const -> const Property& = 0;
+
+      /// @brief Retrieves the schema information for a specified property.
+      /// 
+      /// @param prop_id - The identifier of the property whose schema is to be retrieved.
+      /// @return An optional FieldSchema containing the schema information for the specified property, 
+      ///  or std::nullopt if the property does not exist.
+      virtual auto getFieldSchema(Prop prop_id) const -> std::optional<FieldSchema> = 0;
 
       /// @brief returns the total number of records in the underlying dataset
       virtual auto totalRecCount() const -> int64_t = 0;

@@ -28,6 +28,7 @@ namespace ctb
    public:
       using base                = IDataset;
       using DataTable           = DataTableT;
+      using FieldSchama         = base::FieldSchema;
       using ListColumn          = base::ListColumn;
       using ListColumnSpan      = base::ListColumnSpan;
       using MultiMatchFilterMgr = detail::MultiMatchPropertyFilterMgr<Prop, PropertyMap>;
@@ -49,6 +50,21 @@ namespace ctb
       static auto create(DataTable data) -> DatasetPtr
       {
          return DatasetPtr{ static_cast<IDataset*>(new CtDataset{ std::move(data) }) };
+      }
+
+      /// @brief Retrieves the schema information for a specified property.
+      /// 
+      /// @param prop_id - The identifier of the property whose schema is to be retrieved.
+      /// @return An optional FieldSchema containing the schema information for the specified property, 
+      ///  or std::nullopt if the property does not exist.
+      auto getFieldSchema(Prop prop_id) const -> std::optional<FieldSchema> override
+      {
+         auto it = Traits::Schema.find(prop_id);
+         if (it == Traits::Schema.end())
+         {
+            return std::nullopt;
+         }
+         return it->second;
       }
 
       /// @brief retrieves list of available sorters, in order of display

@@ -42,6 +42,27 @@ namespace ctb::detail
    {
       using ValueType = std::variant<std::monostate, Args...>;
 
+      /// @brief Create a TableProperty from a string_view by converting it to the specified type.
+      /// 
+      /// This is a zero-copy alternative to creating a TableProperty<string> and then using as<> to convert it.
+      /// 
+      /// @param text_value - The string_view to be converted and used to construct the TableProperty.
+      /// @return An TableProperty containing the converted value if the conversion succeeds, or an empty 
+      ///  TableProperty otherwise.
+      template<std::convertible_to<ValueType> ValT>
+      [[nodiscard]] static auto create(std::string_view text_value) -> TableProperty
+      {
+         auto val = from_str<ValT>(text_value); 
+         if (val)
+         {
+            return TableProperty{ *val };
+         }
+         else {
+            return TableProperty{};
+         }
+      }
+
+
       /// @brief construct a TableProperty from any value convertible to ValueType
       ///
       /// this is intentionally non-explicit, because callers won't always have the exact

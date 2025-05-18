@@ -35,7 +35,6 @@ namespace ctb::app
       /// 
       /// @param cache_folder - path of folder to use for disk cache. env vars will be expanded
       /// @throws ctb::Error if cache folder doesn't exist and can't be created, or is a relative path. 
-      /// 
       explicit LabelImageCache(std::string cache_folder);
       ~LabelImageCache() noexcept;
 
@@ -44,7 +43,6 @@ namespace ctb::app
       ///
       /// This wrapper just adds a convenience method for returning the 
       /// future value as a wxImage instead of raw bytes. 
-      /// 
       class wxImageTask final : public tasks::FetchFileTask
       {
       public:
@@ -57,7 +55,6 @@ namespace ctb::app
          /// This is a potentially long, BLOCKING call if file is still being downloaded!
          ///
          /// @return expected - the requested wxImage; unexpected - ctb::Error describing the failure
-         /// 
          auto getImage() noexcept -> ResultWrapper;
 
          wxImageTask()                               = default;

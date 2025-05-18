@@ -29,8 +29,8 @@ namespace ctb
    /// @brief  user-friendly version of from_chars that works with string_view and string
    /// @return an optional containing the requested value if successful, or an empty optional otherwise.
    /// 
-   template<typename T, StringViewCompatibleType S>
-   std::optional<T> from_str(S str)
+   template<typename T>
+   std::optional<T> from_str(std::string_view str)
    {
       T val{};
       auto result = std::from_chars(str.data(), str.data() + str.size(), val);
