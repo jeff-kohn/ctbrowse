@@ -8,21 +8,17 @@
 #include "views/DetailsPanel.h"
 
 #include <ctb/utility_http.h>
-#include <cpr/cpr.h>
 
 #include <wx/commandlinkbutton.h>
 #include <wx/collpane.h>
 #include <wx/gdicmn.h>
 #include <wx/hyperlink.h>
-#include <wx/generic/hyperlink.h>
 #include <wx/generic/statbmpg.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/valgen.h>
 #include <wx/wupdlock.h>
 
-#include <chrono>
-#include <thread>
 
 namespace ctb::constants
 {
@@ -30,25 +26,27 @@ namespace ctb::constants
 
 } // namespace constants
 
+
 namespace ctb::app
 {
    namespace detail
    {
       auto getDrinkWindow(const CtProperty& drink_start, const CtProperty& drink_end) -> wxString
       {
-         if (drink_start.isNull() && drink_end.isNull() )
+         if (drink_start.isNull() && drink_end.isNull())
             return wxEmptyString;
 
          if (drink_start.isNull() && !drink_end.isNull())
             return drink_end.asString("By {}").c_str();
 
-         if (drink_end.isNull() )
+         if (drink_end.isNull())
             return drink_start.asString("{} +").c_str();
 
-         return wxString::FromUTF8(ctb::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str()); 
+         return wxString::FromUTF8(ctb::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str());
       }
 
    } // namespace detail
+
 
 
    DetailsPanel::DetailsPanel(DatasetEventSourcePtr source, LabelCachePtr cache) : 
@@ -88,6 +86,8 @@ namespace ctb::app
 
    void DetailsPanel::initControls()
    {
+      using enum CategorizedControls::Category;
+
       wxWindowUpdateLocker freeze_win(this);
 
       SetMaxSize(ConvertDialogToPixels( wxSize{220, -1} ));
@@ -115,103 +115,117 @@ namespace ctb::app
       auto* details_sizer = new wxFlexGridSizer(2, 0, 0);
 
       // vintage
-      auto* lbl_vintage = new wxStaticText(this, wxID_ANY, constants::LBL_VINTAGE);
-      details_sizer->Add(lbl_vintage, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
+      auto* vintage_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_VINTAGE);
+      details_sizer->Add(vintage_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* vintage_val = new wxStaticText(this, wxID_ANY, "");
       vintage_val->SetValidator(wxGenericValidator{ &m_details.vintage });
       details_sizer->Add(vintage_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // varietal
-      auto* lbl_varietal = new wxStaticText(this, wxID_ANY, constants::LBL_VARIETAL);
-      details_sizer->Add(lbl_varietal, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
+      auto* varietal_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_VARIETAL);
+      details_sizer->Add(varietal_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* varietal_val = new wxStaticText(this, wxID_ANY, "");
       varietal_val->SetValidator(wxGenericValidator{ &m_details.varietal });
       details_sizer->Add(varietal_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
 
       // country
-      auto* lbl_country = new wxStaticText(this, wxID_ANY, constants::LBL_COUNTRY);
-      details_sizer->Add(lbl_country, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
+      auto* country_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_COUNTRY);
+      details_sizer->Add(country_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* country_region_val = new wxStaticText(this, wxID_ANY, "");
       country_region_val->SetValidator(wxGenericValidator{ &m_details.country });
       details_sizer->Add(country_region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // region
-      auto* lbl_region = new wxStaticText(this, wxID_ANY, constants::LBL_REGION);
-      details_sizer->Add(lbl_region, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
+      auto* region_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_REGION);
+      details_sizer->Add(region_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* region_val = new wxStaticText(this, wxID_ANY, "");
       region_val->SetValidator(wxGenericValidator{ &m_details.region });
       details_sizer->Add(region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // subregion
-      auto* lbl_sub_region = new wxStaticText(this, wxID_ANY, constants::LBL_SUB_REGION);
-      details_sizer->Add(lbl_sub_region, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
+      auto* sub_region_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_SUB_REGION);
+      details_sizer->Add(sub_region_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* sub_region_val = new wxStaticText(this, wxID_ANY, "");
       sub_region_val->SetValidator(wxGenericValidator{ &m_details.sub_region });
       details_sizer->Add(sub_region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // appellation
-      auto* lbl_appellation = new wxStaticText(this, wxID_ANY, constants::LBL_APPELLATION);
-      details_sizer->Add(lbl_appellation, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
+      auto* appellation_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_APPELLATION);
+      details_sizer->Add(appellation_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* appellation_val = new wxStaticText(this, wxID_ANY, "");
       appellation_val->SetValidator(wxGenericValidator{ &m_details.appellation });
       details_sizer->Add(appellation_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // drink window
-      auto* lbl_drink_window = new wxStaticText(this, wxID_ANY, constants::LBL_DRINK_WINDOW);
-      details_sizer->Add(lbl_drink_window, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
+      auto* drink_window_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_DRINK_WINDOW);
+      details_sizer->Add(drink_window_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* drink_window_val = new wxStaticText(this, wxID_ANY, "");
       drink_window_val->SetValidator(wxGenericValidator{ &m_details.drink_window });
       details_sizer->Add(drink_window_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
+      m_control_categories.addControlDependency(DrinkBy, drink_window_lbl);
+      m_control_categories.addControlDependency(DrinkBy, drink_window_val);
 
       // Scores heading
-      auto* lbl_scores_header = new wxStaticText(this, wxID_ANY, constants::LBL_SCORES);
-      lbl_scores_header->SetFont(title_font);
-      lbl_scores_header->SetForegroundColour(heading_color);
-      details_sizer->Add(lbl_scores_header, wxSizerFlags{}.Border(wxALL));
+      auto* scores_header_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_SCORES);
+      scores_header_lbl->SetFont(title_font);
+      scores_header_lbl->SetForegroundColour(heading_color);
+      details_sizer->Add(scores_header_lbl, wxSizerFlags{}.Border(wxALL));
       details_sizer->AddSpacer(0);
+      m_control_categories.addControlDependency(Score, scores_header_lbl);
 
       // My Score
-      auto* lbl_my_score = new wxStaticText(this, wxID_ANY, constants::LBL_MY_SCORE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_my_score, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* my_score_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_MY_SCORE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(my_score_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* my_score_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       my_score_val->SetValidator(wxGenericValidator(&m_details.my_score));
       details_sizer->Add(my_score_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_control_categories.addControlDependency(Score, my_score_lbl);
+      m_control_categories.addControlDependency(Score, my_score_val);
 
       // CT Score
-      auto* lbl_ct_score = new wxStaticText(this, wxID_ANY, constants::LBL_CT_SCORE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_ct_score, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* ct_score_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_CT_SCORE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(ct_score_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* ct_score_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       ct_score_val->SetValidator(wxGenericValidator{ &m_details.ct_score });
       details_sizer->Add(ct_score_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_control_categories.addControlDependency(Score, ct_score_lbl);
+      m_control_categories.addControlDependency(Score, ct_score_val);
 
       // Valuation heading
-      auto* lbl_value_header = new wxStaticText(this, wxID_ANY, constants::LBL_VALUATION);
-      lbl_value_header->SetFont(title_font);
-      lbl_value_header->SetForegroundColour(heading_color);
-      details_sizer->Add(lbl_value_header, wxSizerFlags{}.Border(wxALL));
+      auto* value_header_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_VALUATION);
+      value_header_lbl->SetFont(title_font);
+      value_header_lbl->SetForegroundColour(heading_color);
+      details_sizer->Add(value_header_lbl, wxSizerFlags{}.Border(wxALL));
       details_sizer->AddSpacer(0);
+      m_control_categories.addControlDependency(Valuation, value_header_lbl);
 
       // My Price
-      auto* lbl_my_price = new wxStaticText(this, wxID_ANY, constants::LBL_MY_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_my_price, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* my_price_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_MY_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(my_price_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* my_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       my_price_val->SetValidator(wxGenericValidator{ &m_details.my_price });
       details_sizer->Add(my_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_control_categories.addControlDependency(Valuation, my_price_lbl);
+      m_control_categories.addControlDependency(Valuation, my_price_val);
 
       // Community Avg
-      auto* lbl_ct_price = new wxStaticText(this, wxID_ANY, constants::LBL_CT_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_ct_price, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* ct_price_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_CT_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(ct_price_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* ct_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       ct_price_val->SetValidator(wxGenericValidator{ &m_details.community_price });
       details_sizer->Add(ct_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_control_categories.addControlDependency(Valuation, ct_price_lbl);
+      m_control_categories.addControlDependency(Valuation, ct_price_val);
 
       // Auction value
-      auto* lbl_auction_value = new wxStaticText(this, wxID_ANY, constants::LBL_AUCTION_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_auction_value, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* auction_value_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_AUCTION_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(auction_value_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* auction_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       auction_price_val->SetValidator(wxGenericValidator{ &m_details.auction_value });
       details_sizer->Add(auction_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_control_categories.addControlDependency(Valuation, auction_value_lbl);
+      m_control_categories.addControlDependency(Valuation, auction_value_lbl);
 
       top_sizer->Add(details_sizer, wxSizerFlags{}.CenterHorizontal().FixedMinSize().Border(wxALL));
 
@@ -299,34 +313,39 @@ namespace ctb::app
 
       if (event.affected_row and event.affected_row.value() >= 0)
       {
-         auto* tbl = event.dataset.get();
-         assert(tbl != nullptr);
+         auto dataset = event.dataset;
+         assert(dataset and "This pointer should never be null here!!!");
+
          auto rec_idx = event.affected_row.value();
 
-         m_details.wine_id     = tbl->getProperty(rec_idx, CtProp::iWineId     ).asUInt64().value_or(0);
-         m_details.wine_name   = tbl->getProperty(rec_idx, CtProp::WineName    ).asString();
-         m_details.vintage     = tbl->getProperty(rec_idx, CtProp::Vintage     ).asString();
-         m_details.varietal    = tbl->getProperty(rec_idx, CtProp::Varietal    ).asString();
-         m_details.country     = tbl->getProperty(rec_idx, CtProp::Country     ).asString();
-         m_details.region      = tbl->getProperty(rec_idx, CtProp::Region      ).asString();
-         m_details.sub_region  = tbl->getProperty(rec_idx, CtProp::SubRegion   ).asString();
-         m_details.appellation = tbl->getProperty(rec_idx, CtProp::Appellation ).asString();
+         m_details.wine_id     = dataset->getProperty(rec_idx, CtProp::iWineId     ).asUInt64().value_or(0);
+         m_details.wine_name   = dataset->getProperty(rec_idx, CtProp::WineName    ).asString();
+         m_details.vintage     = dataset->getProperty(rec_idx, CtProp::Vintage     ).asString();
+         m_details.varietal    = dataset->getProperty(rec_idx, CtProp::Varietal    ).asString();
+         m_details.country     = dataset->getProperty(rec_idx, CtProp::Country     ).asString();
+         m_details.region      = dataset->getProperty(rec_idx, CtProp::Region      ).asString();
+         m_details.sub_region  = dataset->getProperty(rec_idx, CtProp::SubRegion   ).asString();
+         m_details.appellation = dataset->getProperty(rec_idx, CtProp::Appellation ).asString();
 
-         m_details.drink_window     = detail::getDrinkWindow(tbl->getProperty(rec_idx, CtProp::BeginConsume ),
-                                                             tbl->getProperty(rec_idx, CtProp::EndConsume   ));
+         m_details.drink_window     = detail::getDrinkWindow(dataset->getProperty(rec_idx, CtProp::BeginConsume ),
+                                                             dataset->getProperty(rec_idx, CtProp::EndConsume   ));
 
-         m_details.auction_value    = tbl->getProperty(rec_idx, CtProp::AuctionPrice ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
-         m_details.community_price  = tbl->getProperty(rec_idx, CtProp::CtPrice      ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
-         m_details.my_price         = tbl->getProperty(rec_idx, CtProp::MyPrice      ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
+         m_details.auction_value    = dataset->getProperty(rec_idx, CtProp::AuctionPrice ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
+         m_details.community_price  = dataset->getProperty(rec_idx, CtProp::CtPrice      ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
+         m_details.my_price         = dataset->getProperty(rec_idx, CtProp::MyPrice      ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
 
-         auto prop_val = tbl->getProperty(rec_idx, CtProp::CtScore);
+         auto prop_val = dataset->getProperty(rec_idx, CtProp::CtScore);
          m_details.ct_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
 
-         prop_val = tbl->getProperty(rec_idx, CtProp::MyScore);
+         prop_val = dataset->getProperty(rec_idx, CtProp::MyScore);
          m_details.my_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
-         GetSizer()->ShowItems(true);
 
-         m_label_image->Hide();
+         // show everything since detail panel may be blank if no record was selected previously
+         GetSizer()->ShowItems(true); 
+         // but show/hide control categories as appropriate.
+         configureControlsForDataset(dataset);
+
+         m_label_image->Hide(); // always starts hidden until we have an image
          m_details.image_result = m_label_cache->fetchLabelImage(m_details.wine_id);
          checkLabelResult();
       }
@@ -334,7 +353,6 @@ namespace ctb::app
          GetSizer()->ShowItems(false);
          m_details = WineDetails{};
       }
-      // TODO hide/unhide fields as necessary.
       TransferDataToWindow();
       Layout();
       SendSizeEvent();
@@ -365,6 +383,14 @@ namespace ctb::app
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
       }
+   }
+
+   void DetailsPanel::configureControlsForDataset(DatasetPtr dataset)
+   {
+      using enum CategorizedControls::Category;
+      m_control_categories.showCategory(Score,     dataset->hasProperty(CtProp::CtScore));
+      m_control_categories.showCategory(DrinkBy,   dataset->hasProperty(CtProp::BeginConsume));
+      m_control_categories.showCategory(Valuation, dataset->hasProperty(CtProp::MyPrice));
    }
 
 

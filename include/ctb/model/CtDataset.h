@@ -385,7 +385,7 @@ namespace ctb
          // the fact that our TableSorter class deals with PropertyMaps is a problem, because we actually need to 
          // sort a vector<TableRecordType>. But that would make a table-neutral CtTableSort impossible. So we have to use an 
          // adapter to allow us to use the sorter object.
-         static const auto sort_adapter = [this](const Record& rec1, const Record& rec2) -> bool
+         auto sort_adapter = [this](const Record& rec1, const Record& rec2) -> bool
             {
                return m_current_sort(rec1.getProperties(), rec2.getProperties());
             };

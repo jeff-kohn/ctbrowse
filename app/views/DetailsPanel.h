@@ -15,13 +15,13 @@
 #include <wx/panel.h>
 #include <wx/timer.h>
 
+#include <map>
 
 // forward declaration for member ptr
 class wxGenericStaticBitmap;
 
 namespace ctb::app
 {
-
    class DetailsPanel final : public wxPanel, public IDatasetEventSink
    {
    public:
@@ -50,6 +50,42 @@ namespace ctb::app
       using wxImageTask    = LabelImageCache::wxImageTask;
       using MaybeImageTask = std::optional<wxImageTask>;
 
+      /// @brief Class to allow showing/hiding sets of controls based on category.
+      class CategorizedControls
+      {
+      public:
+         enum class Category
+         {
+            WineDetails,
+            DrinkBy,
+            Score,
+            Valuation,
+            Pending,
+            ReadyToDrink,
+            TastingNotes
+         };
+
+         void showCategory(Category category, bool show)
+         {
+            auto [beg, end] = m_categorized_controls.equal_range(category);
+            for (auto* ctrl : rng::subrange{ beg, end } | vws::values) 
+            {
+               if (show)
+                  ctrl->Show();
+               else
+                  ctrl->Hide();
+            }
+         }
+
+         void addControlDependency(Category category, wxWindow* ctrl)
+         {
+            m_categorized_controls.emplace(category, ctrl);
+         }
+
+      private:
+         std::multimap<Category, wxWindow*> m_categorized_controls{};
+      };
+
       /// @brief struct that control validators will be bound to for displaying in the window
       ///
       struct WineDetails
@@ -71,6 +107,7 @@ namespace ctb::app
          MaybeImageTask image_result{};
       };
 
+      CategorizedControls      m_control_categories{};
       WineDetails            m_details{};
       ScopedEventSink        m_event_sink;   // no default init
       LabelCachePtr          m_label_cache{};
@@ -84,6 +121,7 @@ namespace ctb::app
 
       /// event source related handlers
       void notify(DatasetEvent event) override;
+      void configureControlsForDataset(DatasetPtr dataset);
       void updateDetails(DatasetEvent event);
 
       // windows event handlers
