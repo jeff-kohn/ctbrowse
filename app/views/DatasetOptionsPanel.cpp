@@ -11,15 +11,19 @@
 #include "views/DatasetOptionsPanel.h"
 
 #include <ctb/utility_chrono.h>
-#include <wx/checkbox.h>
+
 #include <wx/choice.h>
+#include <wx/checkbox.h>
+#include <wx/dataview.h>
+#include <wx/gdicmn.h>
+#include <wx/panel.h>
 #include <wx/radiobut.h>
-#include <wx/sizer.h>
-#include <wx/spinctrl.h>
 #include <wx/statbox.h>
 #include <wx/stattext.h>
-#include <wx/wupdlock.h>
+#include <wx/sizer.h>
 #include <wx/valgen.h>
+#include <wx/wupdlock.h>
+
 
 #include <memory>
 
@@ -92,15 +96,24 @@ namespace ctb::app
 
    void DatasetOptionsPanel::initControls()
    {
-      auto default_border = wxSizerFlags::GetDefaultBorder();
+      const auto default_border = wxSizerFlags::GetDefaultBorder();
 
       // panel shouldn't grow infinitely
       SetMaxSize(ConvertDialogToPixels(wxSize{ 150, constants::WX_UNSPECIFIED_VALUE }));
       SetMinSize(ConvertDialogToPixels(wxSize{ 100, constants::WX_UNSPECIFIED_VALUE }));
 
       // defines the rows of controls in our panel
-      auto top_sizer = new wxBoxSizer{ wxVERTICAL };
-      top_sizer->AddSpacer(default_border);
+      m_top_sizer = new wxBoxSizer{ wxVERTICAL };
+      m_top_sizer->AddSpacer(default_border);
+
+      // Dataset title
+      auto title_font{ GetFont().MakeLarger().MakeBold()};
+      const auto heading_color = wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT);
+      constexpr auto title_border_size = 10;
+      m_dataset_title = new wxStaticText{ this, wxID_ANY, "" };
+      m_dataset_title->SetFont(title_font);
+      m_dataset_title->SetForegroundColour(heading_color);
+      m_top_sizer->Add(m_dataset_title, wxSizerFlags{}.Expand().Border(wxALL, title_border_size));
 
       // sort options box
       auto* sort_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_SORT_OPTIONS);
@@ -129,8 +142,8 @@ namespace ctb::app
       auto opt_descending = new wxRadioButton{ sort_options_box->GetStaticBox(), wxID_ANY, constants::LBL_SORT_DESCENDING };
       opt_descending->SetValidator(wxGenericValidator{ &m_sort_descending });
       sort_options_box->Add(opt_descending, wxSizerFlags{1}.Expand().Border(wxALL));
-      top_sizer->Add(sort_options_box, wxSizerFlags().Expand().Border(wxALL));
-      top_sizer->AddSpacer(default_border);
+      m_top_sizer->Add(sort_options_box, wxSizerFlags().Expand().Border(wxALL));
+      m_top_sizer->AddSpacer(default_border);
 
       // filter options box
       m_filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_FILTER_OPTIONS);
@@ -179,9 +192,9 @@ namespace ctb::app
       m_filter_options_box->Add(min_score_sizer, wxSizerFlags());
 
       // finalize layout
-      top_sizer->Add(m_filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
-      top_sizer->AddStretchSpacer(2);
-      SetSizer(top_sizer);
+      m_top_sizer->Add(m_filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
+      m_top_sizer->AddStretchSpacer(2);
+      SetSizer(m_top_sizer);
 
       // event bindings.
       m_sort_combo->Bind(wxEVT_CHOICE, &DatasetOptionsPanel::onSortSelection, this);
@@ -192,6 +205,19 @@ namespace ctb::app
       opt_descending->Bind(wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
       instock_filter_ctrl->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onInStockChecked, this);
       score_filter_chk->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onMinScoreFilterChecked, this);     
+   }
+
+   auto DatasetOptionsPanel::setTitle() -> bool
+   {
+      auto dataset = m_sink.getDataset();
+      if (!dataset)
+         return false;
+
+      m_dataset_title->SetLabelText( wxFromSV(getTableDescription(dataset->getTableId())) );
+      GetSizer()->Layout();
+      SendSizeEvent();
+      Update();
+      return true;
    }
 
 
@@ -434,6 +460,7 @@ namespace ctb::app
       m_sort_combo->Append(getSortOptionList(dataset));
       onTableSorted(dataset);
       populateFilterTypes(dataset);
+      setTitle();
 
       m_instock_only = dataset->getInStockFilter();
       TransferDataToWindow();

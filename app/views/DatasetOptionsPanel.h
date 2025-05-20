@@ -10,19 +10,26 @@
 #include "App.h"
 #include <ctb/model/ScopedEventSink.h>
 
-#include <wx/choice.h>
-#include <wx/dataview.h>
-#include <wx/gdicmn.h>
 #include <wx/panel.h>
 #include <wx/spinctrl.h>
-#include <wx/sizer.h>
 #include <wx/treectrl.h>
 
 #include <map>
 #include <optional>
 
+
+// forward declare member pointers to avoid header pollution.
+class wxBoxSizer;
+class wxChoice;
+class wxSpinCtrlDouble;
+class wxStaticBoxSizer;
+class wxTreeCtrl;
+class wxStaticText;
+
+
 namespace ctb::app
 {
+
    /// @brief panel class that provides UI for setting sorting and filtering options
    ///
    class DatasetOptionsPanel final : public wxPanel, public IDatasetEventSink
@@ -58,14 +65,17 @@ namespace ctb::app
       IDataset::TableSort   m_sort_config{};                // the sort object that will be used to sort the dataset 
       FilterMap             m_filters{};
       ScopedEventSink       m_sink;           
+      wxBoxSizer*           m_top_sizer{};
       wxChoice*             m_sort_combo{};
       wxSpinCtrlDouble*     m_score_spin_ctrl{};
       wxStaticBoxSizer*     m_filter_options_box{};         
+      wxStaticText*         m_dataset_title{};
       wxTreeCtrl*           m_filter_tree{};
       wxWithImages::Images  m_filter_tree_images{};
 
       // window creation
       void initControls();
+      auto setTitle() -> bool;
 
       // implementation functions for the property filter tree-view
       void addPropFilter(wxTreeItemId item);
