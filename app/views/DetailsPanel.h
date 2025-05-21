@@ -11,13 +11,13 @@
 #include "LabelImageCache.h"
 #include <ctb/model/ScopedEventSink.h>
 
-#include <ctb/tasks/tasks.h>
 #include <wx/panel.h>
 #include <wx/timer.h>
 
 #include <map>
 
 // forward declaration for member ptr
+class wxBoxSizer;
 class wxGenericStaticBitmap;
 
 namespace ctb::app
@@ -57,7 +57,7 @@ namespace ctb::app
          enum class Category
          {
             WineDetails,
-            DrinkBy,
+            DrinkWindow,
             Score,
             Valuation,
             Pending,
@@ -87,10 +87,9 @@ namespace ctb::app
       };
 
       /// @brief struct that control validators will be bound to for displaying in the window
-      ///
       struct WineDetails
       {
-         uint64_t wine_id{};
+         uint64_t wine_id{};     // used for buliding CT url, not displayed
          wxString wine_name{};
          wxString vintage{};
          wxString varietal{};
@@ -104,10 +103,19 @@ namespace ctb::app
          wxString my_price{};
          wxString community_price{};
          wxString auction_value{};
+
+         uint16_t pending_purchase_id{}; // used for building CT url, not displayed
+         wxString pending_order_date{};
+         wxString pending_delivery_date{};
+         wxString pending_store_name{};
+         wxString pending_order_number{};
+         wxString pending_qty{};
+         wxString pending_price{};
+
          MaybeImageTask image_result{};
       };
 
-      CategorizedControls      m_control_categories{};
+      CategorizedControls    m_category_controls{};
       WineDetails            m_details{};
       ScopedEventSink        m_event_sink;   // no default init
       LabelCachePtr          m_label_cache{};

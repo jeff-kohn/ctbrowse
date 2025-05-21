@@ -8,6 +8,7 @@
 #include "views/DetailsPanel.h"
 
 #include <ctb/utility_http.h>
+#include <ctb/tasks/tasks.h>
 
 #include <wx/commandlinkbutton.h>
 #include <wx/collpane.h>
@@ -97,7 +98,7 @@ namespace ctb::app
       const auto heading_color = wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT);
 
       // configure font sizes/weights for property display
-      auto title_font{ GetFont().MakeBold() };
+      auto heading_font{ GetFont().MakeBold() };
       auto wine_font{ GetFont().MakeLarger().MakeBold()};
 
       auto* top_sizer = new wxBoxSizer(wxVERTICAL);
@@ -112,7 +113,8 @@ namespace ctb::app
       top_sizer->Add(wine_name_val, wxSizerFlags{2}.Expand().Border(wxRIGHT|wxTOP));
 
       // grid sizer gives us a property grid (eg a column of labels and values)
-      auto* details_sizer = new wxFlexGridSizer(2, 0, 0);
+      static constexpr int cols = 2;
+      auto* details_sizer = new wxFlexGridSizer(cols, 0, 0);
 
       // vintage
       auto* vintage_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_VINTAGE);
@@ -127,7 +129,6 @@ namespace ctb::app
       auto* varietal_val = new wxStaticText(this, wxID_ANY, "");
       varietal_val->SetValidator(wxGenericValidator{ &m_details.varietal });
       details_sizer->Add(varietal_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
-
 
       // country
       auto* country_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_COUNTRY);
@@ -163,16 +164,16 @@ namespace ctb::app
       auto* drink_window_val = new wxStaticText(this, wxID_ANY, "");
       drink_window_val->SetValidator(wxGenericValidator{ &m_details.drink_window });
       details_sizer->Add(drink_window_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
-      m_control_categories.addControlDependency(DrinkBy, drink_window_lbl);
-      m_control_categories.addControlDependency(DrinkBy, drink_window_val);
+      m_category_controls.addControlDependency(DrinkWindow, drink_window_lbl);
+      m_category_controls.addControlDependency(DrinkWindow, drink_window_val);
 
       // Scores heading
-      auto* scores_header_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_SCORES);
-      scores_header_lbl->SetFont(title_font);
+      auto* scores_header_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_SCORES, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      scores_header_lbl->SetFont(heading_font);
       scores_header_lbl->SetForegroundColour(heading_color);
-      details_sizer->Add(scores_header_lbl, wxSizerFlags{}.Border(wxALL));
+      details_sizer->Add(scores_header_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxTOP, border_size));
       details_sizer->AddSpacer(0);
-      m_control_categories.addControlDependency(Score, scores_header_lbl);
+      m_category_controls.addControlDependency(Score, scores_header_lbl);
 
       // My Score
       auto* my_score_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_MY_SCORE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -180,8 +181,8 @@ namespace ctb::app
       auto* my_score_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       my_score_val->SetValidator(wxGenericValidator(&m_details.my_score));
       details_sizer->Add(my_score_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
-      m_control_categories.addControlDependency(Score, my_score_lbl);
-      m_control_categories.addControlDependency(Score, my_score_val);
+      m_category_controls.addControlDependency(Score, my_score_lbl);
+      m_category_controls.addControlDependency(Score, my_score_val);
 
       // CT Score
       auto* ct_score_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_CT_SCORE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -189,16 +190,16 @@ namespace ctb::app
       auto* ct_score_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       ct_score_val->SetValidator(wxGenericValidator{ &m_details.ct_score });
       details_sizer->Add(ct_score_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
-      m_control_categories.addControlDependency(Score, ct_score_lbl);
-      m_control_categories.addControlDependency(Score, ct_score_val);
+      m_category_controls.addControlDependency(Score, ct_score_lbl);
+      m_category_controls.addControlDependency(Score, ct_score_val);
 
       // Valuation heading
-      auto* value_header_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_VALUATION);
-      value_header_lbl->SetFont(title_font);
+      auto* value_header_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_VALUATION, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      value_header_lbl->SetFont(heading_font);
       value_header_lbl->SetForegroundColour(heading_color);
-      details_sizer->Add(value_header_lbl, wxSizerFlags{}.Border(wxALL));
+      details_sizer->Add(value_header_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxTOP, border_size));
       details_sizer->AddSpacer(0);
-      m_control_categories.addControlDependency(Valuation, value_header_lbl);
+      m_category_controls.addControlDependency(Valuation, value_header_lbl);
 
       // My Price
       auto* my_price_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_MY_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -206,8 +207,8 @@ namespace ctb::app
       auto* my_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       my_price_val->SetValidator(wxGenericValidator{ &m_details.my_price });
       details_sizer->Add(my_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
-      m_control_categories.addControlDependency(Valuation, my_price_lbl);
-      m_control_categories.addControlDependency(Valuation, my_price_val);
+      m_category_controls.addControlDependency(Valuation, my_price_lbl);
+      m_category_controls.addControlDependency(Valuation, my_price_val);
 
       // Community Avg
       auto* ct_price_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_CT_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -215,8 +216,8 @@ namespace ctb::app
       auto* ct_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       ct_price_val->SetValidator(wxGenericValidator{ &m_details.community_price });
       details_sizer->Add(ct_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
-      m_control_categories.addControlDependency(Valuation, ct_price_lbl);
-      m_control_categories.addControlDependency(Valuation, ct_price_val);
+      m_category_controls.addControlDependency(Valuation, ct_price_lbl);
+      m_category_controls.addControlDependency(Valuation, ct_price_val);
 
       // Auction value
       auto* auction_value_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_AUCTION_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -224,8 +225,71 @@ namespace ctb::app
       auto* auction_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       auction_price_val->SetValidator(wxGenericValidator{ &m_details.auction_value });
       details_sizer->Add(auction_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
-      m_control_categories.addControlDependency(Valuation, auction_value_lbl);
-      m_control_categories.addControlDependency(Valuation, auction_value_lbl);
+      m_category_controls.addControlDependency(Valuation, auction_value_lbl);
+      m_category_controls.addControlDependency(Valuation, auction_value_lbl);
+
+      // Order details heading
+      auto* order_details_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_ORDER_DETAILS, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      order_details_lbl->SetFont(heading_font);
+      order_details_lbl->SetForegroundColour(heading_color);
+      details_sizer->Add(order_details_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxTOP, border_size));
+      details_sizer->AddSpacer(0);
+      m_category_controls.addControlDependency(Pending, order_details_lbl);
+
+
+      // pending store name
+      auto* pend_store_name_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_STORE_NAME, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(pend_store_name_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* pend_store_name_val = new wxStaticText(this, wxID_ANY, "");
+      pend_store_name_val->SetValidator(wxGenericValidator{ &m_details.pending_store_name });
+      details_sizer->Add(pend_store_name_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Pending, pend_store_name_lbl);
+      m_category_controls.addControlDependency(Pending, pend_store_name_val);
+
+      // pending quantity
+      auto* pend_order_qty_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_QTY_ORDERED, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(pend_order_qty_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* pend_order_qty_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      pend_order_qty_val->SetValidator(wxGenericValidator{ &m_details.pending_qty });
+      details_sizer->Add(pend_order_qty_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Pending, pend_order_qty_lbl);
+      m_category_controls.addControlDependency(Pending, pend_order_qty_val);  
+
+      // pending price
+      auto* pending_price_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_MY_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(pending_price_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* pending_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      pending_price_val->SetValidator(wxGenericValidator{ &m_details.pending_price });
+      details_sizer->Add(pending_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Pending, pending_price_lbl);
+      m_category_controls.addControlDependency(Pending, pending_price_val);  
+
+      // pending order date
+      auto* pend_order_date_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_ORDER_DATE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(pend_order_date_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* pend_order_date_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      pend_order_date_val->SetValidator(wxGenericValidator{ &m_details.pending_order_date });
+      details_sizer->Add(pend_order_date_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Pending, pend_order_date_lbl);
+      m_category_controls.addControlDependency(Pending, pend_order_date_val);
+
+      // pending delivery date
+      auto* pend_delivery_date_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_DELIVERY_DATE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(pend_delivery_date_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* pend_delivery_date_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      pend_delivery_date_val->SetValidator(wxGenericValidator{ &m_details.pending_delivery_date });
+      details_sizer->Add(pend_delivery_date_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Pending, pend_delivery_date_lbl);
+      m_category_controls.addControlDependency(Pending, pend_delivery_date_val);
+
+      // order #
+      auto* pend_order_num_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_ORDER_NUMBER, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(pend_order_num_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* pend_order_num_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      pend_order_num_val->SetValidator(wxGenericValidator{ &m_details.pending_order_number });
+      details_sizer->Add(pend_order_num_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Pending, pend_order_num_lbl);
+      m_category_controls.addControlDependency(Pending, pend_order_num_val);
 
       top_sizer->Add(details_sizer, wxSizerFlags{}.CenterHorizontal().FixedMinSize().Border(wxALL));
 
@@ -318,6 +382,9 @@ namespace ctb::app
 
          auto rec_idx = event.affected_row.value();
 
+         // note that we try to grab all properties even though some of them won't be available in this dataset,
+         // but that's fine because we'll just get a null value if it's not available, so no need to check hasProperty()
+
          m_details.wine_id     = dataset->getProperty(rec_idx, CtProp::iWineId     ).asUInt64().value_or(0);
          m_details.wine_name   = dataset->getProperty(rec_idx, CtProp::WineName    ).asString();
          m_details.vintage     = dataset->getProperty(rec_idx, CtProp::Vintage     ).asString();
@@ -340,12 +407,22 @@ namespace ctb::app
          prop_val = dataset->getProperty(rec_idx, CtProp::MyScore);
          m_details.my_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
 
-         // show everything since detail panel may be blank if no record was selected previously
+         m_details.pending_purchase_id   = dataset->getProperty(rec_idx, CtProp::PendingPurchaseId   ).asUInt16().value_or(0);
+         m_details.pending_order_number  = dataset->getProperty(rec_idx, CtProp::PendingOrderNumber  ).asString();
+         m_details.pending_order_date    = dataset->getProperty(rec_idx, CtProp::PendingOrderDate    ).asString();
+         m_details.pending_delivery_date = dataset->getProperty(rec_idx, CtProp::PendingDeliveryDate ).asString();
+         m_details.pending_store_name    = dataset->getProperty(rec_idx, CtProp::PendingStoreName    ).asString();
+         m_details.pending_qty           = dataset->getProperty(rec_idx, CtProp::PendingQtyOrdered   ).asString();
+         m_details.pending_price         = dataset->getProperty(rec_idx, CtProp::PendingPrice        ).asString(constants::FMT_NUMBER_CURRENCY);
+
+         // show everything since detail panel may be blank if no record was selected previously...
          GetSizer()->ShowItems(true); 
+
          // but show/hide control categories as appropriate.
          configureControlsForDataset(dataset);
 
-         m_label_image->Hide(); // always starts hidden until we have an image
+         // image ctrl always starts hidden until background image fetch completes
+         m_label_image->Hide(); 
          m_details.image_result = m_label_cache->fetchLabelImage(m_details.wine_id);
          checkLabelResult();
       }
@@ -364,6 +441,7 @@ namespace ctb::app
    {
       try
       {
+         // TODO: Re-org/clarify
          switch (event.event_id)
          {
          case DatasetEvent::Id::RowSelected:
@@ -385,12 +463,15 @@ namespace ctb::app
       }
    }
 
+
    void DetailsPanel::configureControlsForDataset(DatasetPtr dataset)
    {
       using enum CategorizedControls::Category;
-      m_control_categories.showCategory(Score,     dataset->hasProperty(CtProp::CtScore));
-      m_control_categories.showCategory(DrinkBy,   dataset->hasProperty(CtProp::BeginConsume));
-      m_control_categories.showCategory(Valuation, dataset->hasProperty(CtProp::MyPrice));
+
+      m_category_controls.showCategory(Score,       dataset->hasProperty(CtProp::CtScore           ));
+      m_category_controls.showCategory(DrinkWindow, dataset->hasProperty(CtProp::BeginConsume      ));
+      m_category_controls.showCategory(Pending,     dataset->hasProperty(CtProp::PendingPurchaseId ));
+      m_category_controls.showCategory(Valuation,   dataset->hasProperty(CtProp::MyPrice           ));
    }
 
 

@@ -54,7 +54,7 @@ namespace ctb
          { Prop::PendingStoreName,       FieldSchema { Prop::PendingStoreName,      PropType::String,      4 }},
          { Prop::PendingOrderNumber,     FieldSchema { Prop::PendingOrderNumber,    PropType::String,     12 }},
          { Prop::PendingQtyOrdered,      FieldSchema { Prop::PendingQtyOrdered,     PropType::UInt16,     10 }},
-         { Prop::PendingPurchaseDate,    FieldSchema { Prop::PendingPurchaseDate,   PropType::Date,        2 }}, 
+         { Prop::PendingOrderDate,    FieldSchema { Prop::PendingOrderDate,   PropType::Date,        2 }}, 
          { Prop::PendingDeliveryDate,    FieldSchema { Prop::PendingDeliveryDate,   PropType::Date,        3 }},
          { Prop::WineAndVintage,         FieldSchema { Prop::WineAndVintage,        PropType::Double,     {} }}
       });
@@ -63,7 +63,7 @@ namespace ctb
       static inline const std::array DefaultListColumns { 
          CtListColumn{ Prop::WineAndVintage,                                      constants::DISPLAY_COL_WINE       },
          CtListColumn{ Prop::PendingStoreName,    CtListColumn::Format::String,   constants::DISPLAY_COL_STORE      },
-         CtListColumn{ Prop::PendingPurchaseDate, CtListColumn::Format::Date,     constants::DISPLAY_COL_PURCH_DATE },
+         CtListColumn{ Prop::PendingOrderDate, CtListColumn::Format::Date,     constants::DISPLAY_COL_PURCH_DATE },
          CtListColumn{ Prop::PendingQtyOrdered,   CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY        },
          CtListColumn{ Prop::PendingPrice,        CtListColumn::Format::Currency, constants::DISPLAY_COL_PRICE      }
       };
@@ -72,7 +72,7 @@ namespace ctb
       static inline const std::array AvailableSorts{ 
          TableSort{ { Prop::WineName,            Prop::Vintage                  }, constants::SORT_OPTION_WINE_VINTAGE  },
          TableSort{ { Prop::Vintage,             Prop::WineName                 }, constants::SORT_OPTION_VINTAGE_WINE  },
-         TableSort{ { Prop::PendingPurchaseDate, Prop::WineName, Prop::Vintage  }, constants::SORT_OPTION_PURCHASE_DATE },
+         TableSort{ { Prop::PendingOrderDate, Prop::WineName, Prop::Vintage  }, constants::SORT_OPTION_PURCHASE_DATE },
          TableSort{ { Prop::PendingStoreName,    Prop::WineName, Prop::Vintage, }, constants::SORT_OPTION_STORE_NAME    }
       };
 
@@ -116,11 +116,17 @@ namespace ctb
       {
          using enum Prop;
 
-
          // set value for the WineAndVintage property
          auto vintage   = rec[Vintage ].asString();
          auto wine_name = rec[WineName].asStringView();
          rec[WineAndVintage] = ctb::format("{} {}", vintage, wine_name);
+
+         // CT defaults delivery date to order date if you don't fill it in, we don't want to display that
+         // (website doesn't either.
+         if (rec[PendingOrderDate] == rec[PendingDeliveryDate])
+         {
+            rec[PendingDeliveryDate] = ct_null_prop;
+         }
       }
       
    };
