@@ -7,6 +7,7 @@
  *********************************************************************/
 #include "views/DetailsPanel.h"
 
+#include <ctb/utility_chrono.h>
 #include <ctb/utility_http.h>
 #include <ctb/tasks/tasks.h>
 
@@ -228,14 +229,13 @@ namespace ctb::app
       m_category_controls.addControlDependency(Valuation, auction_value_lbl);
       m_category_controls.addControlDependency(Valuation, auction_value_lbl);
 
-      // Order details heading
+      // Pending Order details heading
       auto* order_details_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_ORDER_DETAILS, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       order_details_lbl->SetFont(heading_font);
       order_details_lbl->SetForegroundColour(heading_color);
       details_sizer->Add(order_details_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxTOP, border_size));
       details_sizer->AddSpacer(0);
       m_category_controls.addControlDependency(Pending, order_details_lbl);
-
 
       // pending store name
       auto* pend_store_name_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_STORE_NAME, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -291,11 +291,18 @@ namespace ctb::app
       m_category_controls.addControlDependency(Pending, pend_order_num_lbl);
       m_category_controls.addControlDependency(Pending, pend_order_num_val);
 
+      // end details_sizer layout
       top_sizer->Add(details_sizer, wxSizerFlags{}.CenterHorizontal().FixedMinSize().Border(wxALL));
 
-      // View Online button (also outside grid sizer, same as wine name)
-      auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_VIEW_ONLINE_TITLE, constants::DETAIL_VIEW_ONLINE_NOTE);
+      // View Online button
+      auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_VIEW_ONLINE_BTN_TITLE, constants::DETAIL_VIEW_ONLINE_BTN_NOTE);
       top_sizer->Add(view_online_btn, wxSizerFlags().CenterHorizontal().Border(wxALL));
+      m_category_controls.addControlDependency(OpenWinePage, view_online_btn);
+
+      // Accept Pending Order button
+      auto* accept_pending_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_ACCEPT_PENDING_BTN_TITLE, constants::DETAIL_ACCEPT_PENDING_BTN_NOTE);
+      top_sizer->Add(accept_pending_btn , wxSizerFlags().CenterHorizontal().Border(wxALL));
+      m_category_controls.addControlDependency(AcceptPendingPage, accept_pending_btn );
 
       // image won't correctly scale/redraw unless we use wxFULL_REPAINT_ON_RESIZE
       m_label_image = new wxGenericStaticBitmap(this, wxID_ANY, wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
@@ -308,6 +315,8 @@ namespace ctb::app
       // hook up event handlers
       m_label_timer.Bind(wxEVT_TIMER, &DetailsPanel::onLabelTimer, this);
       view_online_btn->Bind(wxEVT_BUTTON, &DetailsPanel::onViewWebPage, this);
+      accept_pending_btn->Bind(wxEVT_BUTTON, &DetailsPanel::onAcceptPending, this);
+
    }
 
 
@@ -385,7 +394,7 @@ namespace ctb::app
          // note that we try to grab all properties even though some of them won't be available in this dataset,
          // but that's fine because we'll just get a null value if it's not available, so no need to check hasProperty()
 
-         m_details.wine_id     = dataset->getProperty(rec_idx, CtProp::iWineId     ).asUInt64().value_or(0);
+         m_details.wine_id     = dataset->getProperty(rec_idx, CtProp::iWineId     ).asString();
          m_details.wine_name   = dataset->getProperty(rec_idx, CtProp::WineName    ).asString();
          m_details.vintage     = dataset->getProperty(rec_idx, CtProp::Vintage     ).asString();
          m_details.varietal    = dataset->getProperty(rec_idx, CtProp::Varietal    ).asString();
@@ -407,7 +416,7 @@ namespace ctb::app
          prop_val = dataset->getProperty(rec_idx, CtProp::MyScore);
          m_details.my_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
 
-         m_details.pending_purchase_id   = dataset->getProperty(rec_idx, CtProp::PendingPurchaseId   ).asUInt16().value_or(0);
+         m_details.pending_purchase_id   = dataset->getProperty(rec_idx, CtProp::PendingPurchaseId   ).asString();
          m_details.pending_order_number  = dataset->getProperty(rec_idx, CtProp::PendingOrderNumber  ).asString();
          m_details.pending_order_date    = dataset->getProperty(rec_idx, CtProp::PendingOrderDate    ).asString();
          m_details.pending_delivery_date = dataset->getProperty(rec_idx, CtProp::PendingDeliveryDate ).asString();
@@ -468,10 +477,23 @@ namespace ctb::app
    {
       using enum CategorizedControls::Category;
 
-      m_category_controls.showCategory(Score,       dataset->hasProperty(CtProp::CtScore           ));
-      m_category_controls.showCategory(DrinkWindow, dataset->hasProperty(CtProp::BeginConsume      ));
-      m_category_controls.showCategory(Pending,     dataset->hasProperty(CtProp::PendingPurchaseId ));
-      m_category_controls.showCategory(Valuation,   dataset->hasProperty(CtProp::MyPrice           ));
+      m_category_controls.showCategory(Score, dataset->hasProperty(CtProp::CtScore));
+      m_category_controls.showCategory(DrinkWindow, dataset->hasProperty(CtProp::BeginConsume));
+      m_category_controls.showCategory(Pending, dataset->hasProperty(CtProp::PendingPurchaseId));
+      m_category_controls.showCategory(Valuation, dataset->hasProperty(CtProp::MyPrice));
+
+      if (dataset->hasProperty(CtProp::PendingOrderDate))
+      {
+         m_category_controls.showCategory(AcceptPendingPage, true);
+         m_category_controls.showCategory(OpenWinePage,      false);
+      }
+      else {
+         m_category_controls.showCategory(AcceptPendingPage, false);
+         m_category_controls.showCategory(OpenWinePage, true);
+
+      }
+
+
    }
 
 
@@ -483,13 +505,13 @@ namespace ctb::app
 
    void DetailsPanel::onViewWebPage([[maybe_unused]] wxCommandEvent& event)
    {
-      if (!m_details.wine_id)
-      {
-         wxGetApp().displayInfoMessage("no wine id available.");
-      }
-      else{
-         wxLaunchDefaultBrowser(getWineDetailsUrl(m_details.wine_id).c_str());
-      }
+      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, CMD_WINE_ONLINE_DETAILS });
+   }
+
+
+   void DetailsPanel::onAcceptPending(wxCommandEvent& event)
+   {
+      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, CMD_WINE_ACCEPT_PENDING });
    }
 
 

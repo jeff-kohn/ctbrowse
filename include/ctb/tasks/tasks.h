@@ -100,6 +100,6 @@ namespace ctb::tasks
    /// @return a buffer containing the requested image's bytes
    /// @throws ctb::Error if file couldn't be downloaded.
    /// 
-   auto runLabelDownloadTask(uint64_t wine_id, std::stop_token token = {}) noexcept(false) -> FetchFileTask::ReturnType;
+   auto runLabelDownloadTask(std::string_view wine_id, std::stop_token token = {}) noexcept(false) -> FetchFileTask::ReturnType;
 
 } // namespace ctb::tasks

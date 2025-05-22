@@ -23,6 +23,21 @@ namespace ctb::app
    ///
    class MainFrame;
 
+   // we don't use enum class because then every time we need to pass an ID to wxObject,
+   // we'd have to cast or use std::to_underlying and that's just an ugly waste of time 
+   // with no benefit for this use-case.
+   enum CmdId : uint16_t
+   {
+      CMD_FILE_DOWNLOAD_DATA = wxID_HIGHEST,
+      CMD_FILE_SETTINGS,
+      CMD_COLLECTION_MY_CELLAR,
+      CMD_COLLECTION_PENDING_WINE,
+      CMD_WINE_ONLINE_DETAILS,
+      CMD_WINE_ONLINE_VINTAGES,
+      CMD_WINE_ONLINE_PRODUCER,
+      CMD_WINE_ACCEPT_PENDING,
+      CMD_VIEW_AUTOLAYOUT_COLS
+   };
 
    /// @brief app object for the application.
    ///

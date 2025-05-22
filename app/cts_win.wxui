@@ -98,16 +98,65 @@
       <node
         class="wxBoxSizer">
         <node
+          class="wxDataViewCtrl"
+          var_name="m_data_view_ctrl"
+          wxEVT_DATAVIEW_SELECTION_CHANGED="onSelectionChanged" />
+        <node
           class="wxPanel"
           maximum_size="150,-1d"
           window_style="wxBORDER_THEME|wxTAB_TRAVERSAL"
           borders=""
           flags="wxEXPAND"
           proportion="1" />
+      </node>
+      <node
+        class="wxMenuBar">
         <node
-          class="wxDataViewCtrl"
-          var_name="m_data_view_ctrl"
-          wxEVT_DATAVIEW_SELECTION_CHANGED="onSelectionChanged" />
+          class="wxMenu"
+          label="File" />
+        <node
+          class="wxMenu"
+          label="Edit"
+          var_name="m_menu2" />
+        <node
+          class="wxMenu"
+          label="Collection"
+          var_name="m_menu3">
+          <node
+            class="wxMenuItem"
+            label="My Wine Cellar" />
+          <node
+            class="wxMenuItem"
+            label="Pending Wines"
+            var_name="menu_item2" />
+          <node
+            class="wxMenuItem"
+            label="Ready To Drink"
+            var_name="menu_item3" />
+        </node>
+        <node
+          class="wxMenu"
+          label="Wine"
+          var_name="m_menu4">
+          <node
+            class="wxMenuItem"
+            label="View Wine on CT"
+            var_name="menu_item4" />
+          <node
+            class="wxMenuItem"
+            label="Search Vintages on CT"
+            var_name="menu_item5" />
+          <node
+            class="wxMenuItem"
+            label="View Producer on CT"
+            var_name="menu_item6" />
+          <node
+            class="separator" />
+          <node
+            class="wxMenuItem"
+            label="Accept Delivery on CT"
+            var_name="menu_item7" />
+        </node>
       </node>
     </node>
     <node

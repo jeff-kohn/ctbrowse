@@ -62,6 +62,8 @@ namespace ctb::app
             Valuation,
             Pending,
             ReadyToDrink,
+            OpenWinePage,
+            AcceptPendingPage,
             TastingNotes
          };
 
@@ -89,7 +91,7 @@ namespace ctb::app
       /// @brief struct that control validators will be bound to for displaying in the window
       struct WineDetails
       {
-         uint64_t wine_id{};     // used for buliding CT url, not displayed
+         std::string wine_id{};     // used for buliding CT url, not displayed
          wxString wine_name{};
          wxString vintage{};
          wxString varietal{};
@@ -104,7 +106,7 @@ namespace ctb::app
          wxString community_price{};
          wxString auction_value{};
 
-         uint16_t pending_purchase_id{}; // used for building CT url, not displayed
+         std::string pending_purchase_id{}; // used for building CT url, not displayed
          wxString pending_order_date{};
          wxString pending_delivery_date{};
          wxString pending_store_name{};
@@ -135,6 +137,7 @@ namespace ctb::app
       // windows event handlers
       void onLabelTimer(wxTimerEvent& event);
       void onViewWebPage(wxCommandEvent& event);
+      void onAcceptPending(wxCommandEvent& event);
 
       // private ctor used by create()
       explicit DetailsPanel(DatasetEventSourcePtr source, LabelCachePtr cache);

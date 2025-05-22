@@ -35,7 +35,7 @@ namespace ctb::tasks
 
 
 
-   auto runLabelDownloadTask(uint64_t wine_id, std::stop_token token) noexcept(false)-> FetchFileTask::ReturnType
+   auto runLabelDownloadTask(std::string_view wine_id, std::stop_token token) noexcept(false)-> FetchFileTask::ReturnType
    {
       checkStopToken(token);
 

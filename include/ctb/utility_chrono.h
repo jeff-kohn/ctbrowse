@@ -80,4 +80,14 @@ namespace ctb
    }
 
 
+   /// @brief For a given time_point, return a time_point that represents only the date portion of the original time_point
+   ///        (in other words, midnight).
+   /// @return a year_month_day representing the date portion of the provided time_point.
+   [[nodiscard]] inline constexpr chrono::year_month_day getCalendarDate(chrono::system_clock::time_point tp = chrono::system_clock::now())
+   {
+      return chrono::year_month_day{ chrono::floor<chrono::days>(tp) };
+   }
+
+   //template <typename ClockT, typename DurationT> getCalendarDate(chrono::time_point<ClockT, DurationT> tp) -> getCalendarDate<ClockT, DurationT>;
+
 } // namespace ctb

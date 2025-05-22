@@ -12,6 +12,8 @@
 
 #include <cpr/response.h>
 #include <cpr/cprtypes.h>
+#include <fmt/chrono.h>
+
 #include <expected>
 #include <string>
 #include <string_view>
@@ -190,9 +192,15 @@ namespace ctb
 
    /// @brief get the URL for a Wine given it's iWineID
    ///
-   inline auto getWineDetailsUrl(uint64_t wine_id) noexcept -> std::string
+   inline auto getWineDetailsUrl(std::string_view wine_id) noexcept -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_WINE_DETAILS, wine_id);
    }
 
+   /// @brief get the URL for accepting a pending delivery
+   ///
+   inline auto getAcceptPendingUrl(std::string_view wine_id, std::string_view purch_id, const std::chrono::year_month_day& delivery_date) noexcept -> std::string
+   {
+      return ctb::format(constants::FMT_URL_CT_ACCEPT_PENDING, wine_id, purch_id, delivery_date);
+   }
 }
