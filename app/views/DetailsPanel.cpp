@@ -394,14 +394,14 @@ namespace ctb::app
          // note that we try to grab all properties even though some of them won't be available in this dataset,
          // but that's fine because we'll just get a null value if it's not available, so no need to check hasProperty()
 
-         m_details.wine_id     = dataset->getProperty(rec_idx, CtProp::iWineId     ).asString();
-         m_details.wine_name   = dataset->getProperty(rec_idx, CtProp::WineName    ).asString();
-         m_details.vintage     = dataset->getProperty(rec_idx, CtProp::Vintage     ).asString();
-         m_details.varietal    = dataset->getProperty(rec_idx, CtProp::Varietal    ).asString();
-         m_details.country     = dataset->getProperty(rec_idx, CtProp::Country     ).asString();
-         m_details.region      = dataset->getProperty(rec_idx, CtProp::Region      ).asString();
-         m_details.sub_region  = dataset->getProperty(rec_idx, CtProp::SubRegion   ).asString();
-         m_details.appellation = dataset->getProperty(rec_idx, CtProp::Appellation ).asString();
+         m_details.wine_id     =                    dataset->getProperty(rec_idx, CtProp::iWineId     ).asString();
+         m_details.wine_name   = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::WineName    ).asString());
+         m_details.vintage     = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::Vintage     ).asString());
+         m_details.varietal    = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::Varietal    ).asString());
+         m_details.country     = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::Country     ).asString());
+         m_details.region      = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::Region      ).asString());
+         m_details.sub_region  = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::SubRegion   ).asString());
+         m_details.appellation = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::Appellation ).asString());
 
          m_details.drink_window     = detail::getDrinkWindow(dataset->getProperty(rec_idx, CtProp::BeginConsume ),
                                                              dataset->getProperty(rec_idx, CtProp::EndConsume   ));
