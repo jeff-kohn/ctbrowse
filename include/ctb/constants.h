@@ -15,10 +15,13 @@ namespace ctb::constants
    inline constexpr const char* URL_CT_DOT_COM              = "https://cellartracker.com";
    inline constexpr const char* URL_CT_LOGIN_FORM           = "https://www.cellartracker.com/password.asp";
    inline constexpr const char* URL_CT_TABLE_LIST           = "https://www.cellartracker.com/list.asp?Table=List";
-   inline constexpr const char* FMT_URL_CT_TABLE            = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
 
-   inline constexpr const char* FMT_URL_CT_WINE_DETAILS     = "https://www.cellartracker.com/wine.asp?iWine={}";
+   
    inline constexpr const char* FMT_URL_CT_ACCEPT_PENDING   = "https://www.cellartracker.com/purchase.asp?iWine={}&iPurchase={}&DeliveryState=delivered&DeliveryDate={:%F}";
+   inline constexpr const char* FMT_URL_CT_EDIT_ORDER       = "https://www.cellartracker.com/purchase.asp?iWine={}&iPurchase={}";
+   inline constexpr const char* FMT_URL_CT_TABLE            = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
+   inline constexpr const char* FMT_URL_CT_VINTAGES         = "https://www.cellartracker.com/list.asp?Table=List&fInStock=0&iUserOverride=0&Wine={}";
+   inline constexpr const char* FMT_URL_CT_WINE_DETAILS     = "https://www.cellartracker.com/wine.asp?iWine={}";
 
    inline constexpr const char* HTML_ELEM_LABEL_PHOTO       = "label_photo";
    inline constexpr const char* HTML_ATTR_SRC               = "src";

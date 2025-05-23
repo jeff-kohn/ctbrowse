@@ -60,7 +60,17 @@ namespace ctb
    /// 
    /// @return the converting string if successful, std::nullopt if not.
    /// 
-   [[nodiscard]] auto toUTF8(const std::string& text, unsigned int code_page = ISO_LATIN_1) -> MaybeString;
+   [[nodiscard]] auto toUTF8(const std::string& text, unsigned int from_code_page = ISO_LATIN_1) -> MaybeString;
+
+
+   /// @brief convert text to UTF8 from other narrow/multi-byte encoding.
+   ///
+   /// see https://learn.microsoft.com/en-us/windows/win32/Intl/code-page-identifiers
+   /// for a list of code page id's.
+   /// 
+   /// @return the converting string if successful, std::nullopt if not.
+   /// 
+   [[nodiscard]] auto fromUTF8(const std::string& utf8_text, unsigned int to_code_page = ISO_LATIN_1) -> MaybeString;
 
 
    /// @brief  Expand environment variables in place
@@ -87,6 +97,6 @@ namespace ctb
    }
 
 
-
+   auto shellExecuteUrl(const std::string& url) -> bool;
 
 } // namespace ctb

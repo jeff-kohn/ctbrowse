@@ -102,8 +102,8 @@ namespace ctb::app
 
       void onMenuWineOnlineDetails(wxCommandEvent&);
       void onMenuWineOnlineVintages(wxCommandEvent&);
-      void onMenuWineOnlineProducer(wxCommandEvent&);
       void onMenuWineAcceptDelivery(wxCommandEvent&);
+      void onMenuWineEditOrder(wxCommandEvent&);
 
       void onMenuWineOnlineUI(wxUpdateUIEvent&);
       void onMenuWineAcceptDeliveryUI(wxUpdateUIEvent&);  

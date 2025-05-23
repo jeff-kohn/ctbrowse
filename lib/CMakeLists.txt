@@ -83,6 +83,8 @@ target_link_libraries(ctBrowse_lib
       spdlog::spdlog
       "$<$<PLATFORM_ID:Windows>:Credui>"
       "$<$<PLATFORM_ID:Windows>:shlwapi>"
+      "$<$<PLATFORM_ID:Windows>:Shell32.lib>"
+      
 )
 
 

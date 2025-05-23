@@ -8,27 +8,27 @@ namespace ctb::constants
    inline constexpr const char* APP_DEFAULT_LOG_FOLDER            = "%LOCALAPPDATA%"; // safe default, but not used for windows app.
 
 
-   inline constexpr const char* LBL_MENU_DATA                     = "&Datasets";
-   inline constexpr const char* LBL_MENU_WINE                     = "&Online";
+   inline constexpr const char* LBL_MENU_COLLECTION               = "&Collection";
+   inline constexpr const char* LBL_MENU_WINE                     = "Cellar&Tracker";
    inline constexpr const char* LBL_MENU_VIEW                     = "&View";
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_LBL        = "&Download Data...";
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP        = "Download data from CellarTracker";
    inline constexpr const char* CMD_FILE_SETTINGS_LBL             = "&Settings...";
    inline constexpr const char* CMD_FILE_SETTINGS_TIP             = "Configure app settings";
-   inline constexpr const char* CMD_DATA_WINE_LIST_LBL            = "&My Wine Collection\tCtrl+M";
-   inline constexpr const char* CMD_DATA_WINE_LIST_TIP            = "View Personal Wine Collection";
-   inline constexpr const char* CMD_DATA_PENDING_WINE_LBL         = "&Pending Wine Orders\tCtrl+P";
-   inline constexpr const char* CMD_DATA_PENDING_WINE_TIP         = "View Pending Wine Deliveries";
+   inline constexpr const char* CMD_COLLECTION_MY_CELLAR_LBL      = "&My Cellar\tCtrl+M";
+   inline constexpr const char* CMD_COLLECTION_MY_CELLAR_TIP      = "View Personal Wine Collection";
+   inline constexpr const char* CMD_COLLECTION_PENDING_WINE_LBL   = "&Pending Wines\tCtrl+P";
+   inline constexpr const char* CMD_COLLECTION_PENDING_WINE_TIP   = "View Pending Wine Deliveries";
    inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_LBL      = "&Resize List Columns";
    inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_TIP      = "Resize the list columns to fit the data";
-   inline constexpr const char* CMD_WINE_ONLINE_DETAILS_LBL       = "View &Details Online";
-   inline constexpr const char* CMD_WINE_ONLINE_DETAILS_TIP       = "View the current wine's details on website";
-   inline constexpr const char* CMD_WINE_ONLINE_VINTAGES_LBL      = "View &Vintages Online";
-   inline constexpr const char* CMD_WINE_ONLINE_VINTAGES_TIP      = "View all vintages of the current wine on website";
-   inline constexpr const char* CMD_WINE_ONLINE_PRODUCER_LBL      = "View &Producer Online";
-   inline constexpr const char* CMD_WINE_ONLINE_PRODUCER_TIP      = "View Producer of the current wine on website";
+   inline constexpr const char* CMD_WINE_ONLINE_DETAILS_LBL       = "View &Wine Online";
+   inline constexpr const char* CMD_WINE_ONLINE_DETAILS_TIP       = "View the current wine's details on CellarTracker.com";
+   inline constexpr const char* CMD_WINE_ONLINE_VINTAGES_LBL      = "Search &Vintages Online";
+   inline constexpr const char* CMD_WINE_ONLINE_VINTAGES_TIP      = "View all vintages of the current wine on CellarTracker.com";
    inline constexpr const char* CMD_WINE_ONLINE_ACCEPT_WINE_LBL   = "&Accept Delivery Online";
-   inline constexpr const char* CMD_WINE_ONLINE_ACCEPT_WINE_TIP   = "Mark the selected wine as delivered on website";
+   inline constexpr const char* CMD_WINE_ONLINE_ACCEPT_WINE_TIP   = "Mark the selected wine as delivered on CellarTracker.com";
+   inline constexpr const char* CMD_WINE_ONLINE_EDIT_ORDER_LBL    = "&Edit Order Online";
+   inline constexpr const char* CMD_WINE_ONLINE_EDIT_ORDER_TIP    = "Edit the selected purchase order on CellarTracker.com";
 
    inline constexpr const char* CONFIG_PATH_PREFERENCES           = "/Preferences";
    inline constexpr const char* CONFIG_PATH_PREFERENCE_DATASYNC   = "/Preferences/DataSync";

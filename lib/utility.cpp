@@ -1,12 +1,11 @@
 #include "ctb/utility.h"
-
+#include "ctb/utility_http.h"
 #include <fstream>
 #include <limits>
 
 #if defined(_WIN32_WINNT)
    #include <Windows.h>
-   #include <Shlwapi.h>
-   #include <wininet.h>
+   #include <shellapi.h>
 #endif
 
 namespace ctb
@@ -113,6 +112,14 @@ namespace ctb
          return path.substr(sep + 1);
    }
 
+   
+   auto shellExecuteUrl(const std::string& url) -> bool
+   {
+      // Seriously MS, this is beyond absurd
+      const auto stupid_fucking_retval = reinterpret_cast<INT_PTR>(ShellExecute(nullptr, nullptr, url.c_str(), nullptr, nullptr, SW_SHOW));
+      constexpr auto success_val = 32; 
+      return stupid_fucking_retval > success_val;
+   }
 
 
 #if defined(_WIN32_WINNT)
@@ -139,12 +146,12 @@ namespace ctb
 
    [[nodiscard]] auto toUTF8(const std::string& text, unsigned int code_page) -> MaybeString
    {
-      int length = MultiByteToWideChar(code_page, MB_PRECOMPOSED, text.c_str(), -1, nullptr, 0);
+      int length = MultiByteToWideChar(code_page, MB_COMPOSITE, text.c_str(), -1, nullptr, 0);
       if (!length)
          return {};
 
       std::vector<wchar_t> wide_buf(static_cast<size_t>(length), '\0');
-      if (!MultiByteToWideChar(code_page, MB_PRECOMPOSED, text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
+      if (!MultiByteToWideChar(code_page, MB_COMPOSITE, text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
          return {};
 
       // Get needed buffer length since some UTF-16 chars may need multiple bytes in UTF-8. 
@@ -156,6 +163,30 @@ namespace ctb
       std::vector<char> utf8_buf(static_cast<size_t>(length), '\0');
       if (WideCharToMultiByte(CP_UTF8, 0, wide_buf.data(), -1, utf8_buf.data(), static_cast<int>(utf8_buf.size()), nullptr, nullptr))
          return std::string{ utf8_buf.data() };
+
+      return {};
+   }
+
+   auto fromUTF8(const std::string& utf8_text, unsigned int to_code_page) -> MaybeString
+   {
+      // First convert UTF-8 to wide (UTF-16) characters
+      int length = MultiByteToWideChar(CP_UTF8, 0, utf8_text.c_str(), -1, nullptr, 0);
+      if (!length)
+         return {};
+
+      std::vector<wchar_t> wide_buf(static_cast<size_t>(length), '\0');
+      if (!MultiByteToWideChar(CP_UTF8, 0, utf8_text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
+         return {};
+
+      // Get needed buffer length for the target code page
+      length = WideCharToMultiByte(to_code_page, 0, wide_buf.data(), -1, nullptr, 0, nullptr, nullptr);
+      if (!length)
+         return {};
+
+      // Now allocate buffer and make the final conversion to target code page
+      std::vector<char> mb_buf(static_cast<size_t>(length), '\0');
+      if (WideCharToMultiByte(to_code_page, 0, wide_buf.data(), -1, mb_buf.data(), static_cast<int>(mb_buf.size()), nullptr, nullptr))
+         return std::string{ mb_buf.data() };
 
       return {};
    }

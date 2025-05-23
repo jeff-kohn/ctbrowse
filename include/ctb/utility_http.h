@@ -26,6 +26,8 @@ namespace ctb
       inline constexpr const char* USERAGENT_VAL          = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36";
       inline constexpr const char* CONTENT_TYPE_KEY       = "Content-Type";
       inline constexpr const char* CONTENT_TYPE_JPEG      = "image/jpeg";
+      inline constexpr const char* CONTENT_TYPE_UTF8      = "text/plain;Charset=UTF-8";
+
 
       inline constexpr const char* ACCEPT_KEY             = "accept";
       inline constexpr const char* ACCEPT_HTML            = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7";
@@ -195,6 +197,13 @@ namespace ctb
    inline auto getWineDetailsUrl(std::string_view wine_id) noexcept -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_WINE_DETAILS, wine_id);
+   }
+
+   /// @brief get the URL for a Wine given it's iWineID
+   ///
+   inline auto getWineVintagesUrl(std::string_view wine) noexcept -> std::string
+   {
+      return ctb::format(constants::FMT_URL_CT_VINTAGES, wine);
    }
 
    /// @brief get the URL for accepting a pending delivery

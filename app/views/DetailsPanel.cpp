@@ -395,34 +395,34 @@ namespace ctb::app
          // but that's fine because we'll just get a null value if it's not available, so no need to check hasProperty()
 
          m_details.wine_id     =                    dataset->getProperty(rec_idx, CtProp::iWineId     ).asString();
-         m_details.wine_name   = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::WineName    ).asString());
-         m_details.vintage     = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::Vintage     ).asString());
-         m_details.varietal    = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::Varietal    ).asString());
-         m_details.country     = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::Country     ).asString());
-         m_details.region      = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::Region      ).asString());
-         m_details.sub_region  = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::SubRegion   ).asString());
-         m_details.appellation = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::Appellation ).asString());
+         m_details.wine_name   = dataset->getProperty(rec_idx, CtProp::WineName    ).asString();
+         m_details.vintage     = dataset->getProperty(rec_idx, CtProp::Vintage     ).asString();
+         m_details.varietal    = dataset->getProperty(rec_idx, CtProp::Varietal    ).asString();
+         m_details.country     = dataset->getProperty(rec_idx, CtProp::Country     ).asString();
+         m_details.region      = dataset->getProperty(rec_idx, CtProp::Region      ).asString();
+         m_details.sub_region  = dataset->getProperty(rec_idx, CtProp::SubRegion   ).asString();
+         m_details.appellation = dataset->getProperty(rec_idx, CtProp::Appellation ).asString();
 
          m_details.drink_window     = detail::getDrinkWindow(dataset->getProperty(rec_idx, CtProp::BeginConsume ),
                                                              dataset->getProperty(rec_idx, CtProp::EndConsume   ));
 
-         m_details.auction_value    = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::AuctionPrice ).asString(constants::FMT_NUMBER_CURRENCY));
-         m_details.community_price  = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::CtPrice      ).asString(constants::FMT_NUMBER_CURRENCY));
-         m_details.my_price         = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::MyPrice      ).asString(constants::FMT_NUMBER_CURRENCY));
+         m_details.auction_value    = dataset->getProperty(rec_idx, CtProp::AuctionPrice ).asString(constants::FMT_NUMBER_CURRENCY);
+         m_details.community_price  = dataset->getProperty(rec_idx, CtProp::CtPrice      ).asString(constants::FMT_NUMBER_CURRENCY);
+         m_details.my_price         = dataset->getProperty(rec_idx, CtProp::MyPrice      ).asString(constants::FMT_NUMBER_CURRENCY);
 
          auto prop_val = dataset->getProperty(rec_idx, CtProp::CtScore);
-         m_details.ct_score = prop_val ? wxString::FromUTF8(prop_val.asString(constants::FMT_NUMBER_DECIMAL)) : constants::NO_SCORE;
+         m_details.ct_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL) : constants::NO_SCORE;
 
          prop_val = dataset->getProperty(rec_idx, CtProp::MyScore);
-         m_details.my_score = prop_val ? wxString::FromUTF8(prop_val.asString(constants::FMT_NUMBER_DECIMAL)) : constants::NO_SCORE;
+         m_details.my_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL) : constants::NO_SCORE;
 
          m_details.pending_purchase_id   =                    dataset->getProperty(rec_idx, CtProp::PendingPurchaseId   ).asString();
-         m_details.pending_order_number  = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::PendingOrderNumber  ).asString());
-         m_details.pending_order_date    = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::PendingOrderDate    ).asString());
-         m_details.pending_delivery_date = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::PendingDeliveryDate ).asString());
-         m_details.pending_store_name    = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::PendingStoreName    ).asString());
-         m_details.pending_qty           = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::PendingQtyOrdered   ).asString());
-         m_details.pending_price         = wxString::FromUTF8(dataset->getProperty(rec_idx, CtProp::PendingPrice        ).asString(constants::FMT_NUMBER_CURRENCY));
+         m_details.pending_order_number  = dataset->getProperty(rec_idx, CtProp::PendingOrderNumber  ).asString();
+         m_details.pending_order_date    = dataset->getProperty(rec_idx, CtProp::PendingOrderDate    ).asString();
+         m_details.pending_delivery_date = dataset->getProperty(rec_idx, CtProp::PendingDeliveryDate ).asString();
+         m_details.pending_store_name    = dataset->getProperty(rec_idx, CtProp::PendingStoreName    ).asString();
+         m_details.pending_qty           = dataset->getProperty(rec_idx, CtProp::PendingQtyOrdered   ).asString();
+         m_details.pending_price         = dataset->getProperty(rec_idx, CtProp::PendingPrice        ).asString(constants::FMT_NUMBER_CURRENCY);
 
          // show everything since detail panel may be blank if no record was selected previously...
          GetSizer()->ShowItems(true); 

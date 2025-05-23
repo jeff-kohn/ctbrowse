@@ -36,7 +36,7 @@ namespace ctb::app
       CMD_WINE_ONLINE_VINTAGES,
       CMD_WINE_ONLINE_PRODUCER,
       CMD_WINE_ACCEPT_PENDING,
-      CMD_VIEW_AUTOLAYOUT_COLS
+      CMD_WINE_EDIT_ORDER
    };
 
    /// @brief app object for the application.

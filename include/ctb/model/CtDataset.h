@@ -265,11 +265,14 @@ namespace ctb
       ///  will always be a valid CtProperty&.
       auto getProperty(int rec_idx, CtProp prop_id) const -> const Property& override
       {
-         static constexpr Property null_prop{}; // can't just return temporary due to reference return val
+         //static constexpr Property null_prop{}; // can't just return temporary due to reference return val
 
-         if (rec_idx > filteredRecCount() or !hasProperty(prop_id))
-            return null_prop;
-
+#if !defined(NDBUG)
+         if (rec_idx > filteredRecCount())
+            assert(false and "This is a logic bug, invalid index should never happen here.");
+#endif
+         // invalid prop_id won't really hurt anything, just default-construct and then return an empty/null value.
+         // if index is invalid this will throw since we're using bounds-checked API.
          return m_current_view->at(static_cast<size_t>(rec_idx))[prop_id];
       }
 

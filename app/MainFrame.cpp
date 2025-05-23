@@ -17,6 +17,7 @@
 
 #include <ctb/utility.h>
 #include <ctb/utility_chrono.h>
+#include <ctb/utility_http.h>
 #include <ctb/table_download.h>
 #include <ctb/model/DatasetEventSource.h>
 #include <ctb/model/CtDatasetLoader.h>
@@ -121,13 +122,13 @@ namespace ctb::app
       // Bind wine online menu events
       Bind(wxEVT_MENU, &MainFrame::onMenuWineOnlineDetails, this, CMD_WINE_ONLINE_DETAILS);
       Bind(wxEVT_MENU, &MainFrame::onMenuWineOnlineVintages, this, CMD_WINE_ONLINE_VINTAGES);
-      Bind(wxEVT_MENU, &MainFrame::onMenuWineOnlineProducer, this, CMD_WINE_ONLINE_PRODUCER);
       Bind(wxEVT_MENU, &MainFrame::onMenuWineAcceptDelivery, this, CMD_WINE_ACCEPT_PENDING);
+      Bind(wxEVT_MENU, &MainFrame::onMenuWineEditOrder, this, CMD_WINE_EDIT_ORDER);
 
       // UI update handlers for wine online commands
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineOnlineUI, this, CMD_WINE_ONLINE_DETAILS);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineOnlineUI, this, CMD_WINE_ONLINE_VINTAGES);
-      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineOnlineUI, this, CMD_WINE_ONLINE_PRODUCER);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineAcceptDeliveryUI, this, CMD_WINE_EDIT_ORDER);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineAcceptDeliveryUI, this, CMD_WINE_ACCEPT_PENDING);
 
       if ( !wxPersistentRegisterAndRestore(this, constants::RES_NAME_MAINFRAME) )
@@ -179,23 +180,23 @@ namespace ctb::app
       m_menu_bar->Append(menu_edit, wxGetStockLabel(wxID_EDIT));
 
 
-      // Data Menu
+      // Collection Menu
       auto* menu_data = new wxMenu();
       menu_data->Append(new wxMenuItem{
          menu_data, 
          CmdId::CMD_COLLECTION_MY_CELLAR, 
-         constants::CMD_DATA_WINE_LIST_LBL, 
-         constants::CMD_DATA_WINE_LIST_TIP,
+         constants::CMD_COLLECTION_MY_CELLAR_LBL, 
+         constants::CMD_COLLECTION_MY_CELLAR_TIP,
          wxITEM_NORMAL
       });
       menu_data->Append(new wxMenuItem{
          menu_data, 
          CmdId::CMD_COLLECTION_PENDING_WINE, 
-         constants::CMD_DATA_PENDING_WINE_LBL, 
-         constants::CMD_DATA_PENDING_WINE_TIP,
+         constants::CMD_COLLECTION_PENDING_WINE_LBL, 
+         constants::CMD_COLLECTION_PENDING_WINE_TIP,
          wxITEM_NORMAL
          });
-      m_menu_bar->Append(menu_data, constants::LBL_MENU_DATA);
+      m_menu_bar->Append(menu_data, constants::LBL_MENU_COLLECTION);
 
 
       // Wine Menu
@@ -214,13 +215,6 @@ namespace ctb::app
          constants::CMD_WINE_ONLINE_VINTAGES_TIP,
          wxITEM_NORMAL
          });
-      menu_wine->Append(new wxMenuItem{
-         menu_data, 
-         CmdId::CMD_WINE_ONLINE_PRODUCER, 
-         constants::CMD_WINE_ONLINE_PRODUCER_LBL, 
-         constants::CMD_WINE_ONLINE_PRODUCER_TIP,
-         wxITEM_NORMAL
-      });
       menu_wine->AppendSeparator();
       menu_wine->Append(new wxMenuItem{
          menu_data, 
@@ -229,18 +223,25 @@ namespace ctb::app
          constants::CMD_WINE_ONLINE_ACCEPT_WINE_TIP,
          wxITEM_NORMAL
       });
+      menu_wine->Append(new wxMenuItem{
+         menu_data, 
+         CmdId::CMD_WINE_EDIT_ORDER, 
+         constants::CMD_WINE_ONLINE_EDIT_ORDER_LBL, 
+         constants::CMD_WINE_ONLINE_EDIT_ORDER_LBL,
+         wxITEM_NORMAL
+         });
       m_menu_bar->Append(menu_wine, constants::LBL_MENU_WINE);
 
       // View Menu
-      auto* menu_view = new wxMenu();
-      menu_view->Append(new wxMenuItem{
-         menu_view, 
-         CmdId::CMD_VIEW_AUTOLAYOUT_COLS, 
-         constants::CMD_VIEW_AUTOLAYOUT_COLS_LBL, 
-         constants::CMD_VIEW_AUTOLAYOUT_COLS_TIP,
-         wxITEM_NORMAL
-         });
-      m_menu_bar->Append(menu_view, constants::LBL_MENU_VIEW);
+      //auto* menu_view = new wxMenu();
+      //menu_view->Append(new wxMenuItem{
+      //   menu_view, 
+      //   CmdId::CMD_VIEW_AUTOLAYOUT_COLS, 
+      //   constants::CMD_VIEW_AUTOLAYOUT_COLS_LBL, 
+      //   constants::CMD_VIEW_AUTOLAYOUT_COLS_TIP,
+      //   wxITEM_NORMAL
+      //   });
+      //m_menu_bar->Append(menu_view, constants::LBL_MENU_VIEW);
 
 
       SetMenuBar(m_menu_bar);
@@ -513,7 +514,7 @@ namespace ctb::app
       {
          auto dataset = getDataset();
          auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
-         wxLaunchDefaultBrowser(getWineDetailsUrl(wine_id));
+         wxLaunchDefaultBrowser(wxString::FromUTF8(getWineDetailsUrl(wine_id)));
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -523,11 +524,16 @@ namespace ctb::app
 
    void MainFrame::onMenuWineOnlineVintages(wxCommandEvent&)
    {
-   }
-
-
-   void MainFrame::onMenuWineOnlineProducer(wxCommandEvent&)
-   {
+      try
+      {
+         auto dataset = getDataset();
+         auto wine = dataset->getProperty(m_selected_row, CtProp::WineName).asStringView();
+         auto url = fromUTF8(ctb::format(constants::FMT_URL_CT_VINTAGES, wine)).value_or({});
+         shellExecuteUrl(url);
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
    }
 
 
@@ -538,7 +544,24 @@ namespace ctb::app
          auto dataset = getDataset();
          auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
          auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asStringView();
-         wxLaunchDefaultBrowser(getAcceptPendingUrl(wine_id, purchase_id, getCalendarDate()));
+         auto date = getCalendarDate();
+         wxLaunchDefaultBrowser(wxString::FromUTF8(getAcceptPendingUrl(wine_id, purchase_id, date)));
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MainFrame::onMenuWineEditOrder(wxCommandEvent&)
+   {
+      try
+      {
+         auto dataset = getDataset();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asStringView();
+         auto url = ctb::format(constants::FMT_URL_CT_EDIT_ORDER, wine_id, purchase_id);
+         wxLaunchDefaultBrowser(wxString::FromUTF8(url));
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -582,6 +605,7 @@ namespace ctb::app
       }
       updateStatusBarCounts();
    }
+
 
    auto MainFrame::getDataset(bool throw_on_null) -> DatasetPtr
    {
