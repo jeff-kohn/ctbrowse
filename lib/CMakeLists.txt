@@ -50,6 +50,7 @@ target_sources(ctBrowse_lib
       "../include/ctb/tasks/tasks.h"
 
    PRIVATE
+      "CredentialManager.cpp"
       "CredentialWrapper.cpp"
       "CtDatasetLoader.cpp"
       "DatasetEventSource.cpp"

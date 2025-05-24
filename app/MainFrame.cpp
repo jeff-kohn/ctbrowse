@@ -527,9 +527,8 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine = dataset->getProperty(m_selected_row, CtProp::WineName).asStringView();
-         auto url = fromUTF8(ctb::format(constants::FMT_URL_CT_VINTAGES, wine)).value_or({});
-         shellExecuteUrl(url);
+         auto wine = dataset->getProperty(m_selected_row, CtProp::WineName).asString();
+         shellExecuteUrl(getWineVintagesUrl(wine));
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);

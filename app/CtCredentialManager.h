@@ -22,7 +22,7 @@ namespace ctb::app
    ///
    struct CtCredentialPromptFunc
    {
-      [[nodiscard]] auto operator()(std::string_view cred_name, std::string_view prompt_message, bool allow_save) -> CredentialResult;
+      [[nodiscard]] auto operator()(const std::string& cred_name, std::string_view prompt_message, bool allow_save) -> CredentialResult;
    };
 
 

@@ -59,7 +59,7 @@ namespace ctb::app
    }
 
 
-   [[nodiscard]] auto CtCredentialPromptFunc::operator()(std::string_view cred_name, std::string_view prompt_message, bool allow_save) -> CredentialResult
+   [[nodiscard]] auto CtCredentialPromptFunc::operator()(const std::string& cred_name, std::string_view prompt_message, bool allow_save) -> CredentialResult
    {
       try 
       {

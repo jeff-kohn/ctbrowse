@@ -26,12 +26,13 @@
 #include <thread>
 
 
-
 namespace ctb::app
 {
 
    App::App()
    {
+      setlocale(LC_ALL, ".UTF8");
+
       SetAppName(constants::APP_NAME_LONG);
       SetAppDisplayName(constants::APP_NAME_LONG);
       SetUseBestVisual(true);

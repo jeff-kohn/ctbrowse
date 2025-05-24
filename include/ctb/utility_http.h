@@ -8,7 +8,7 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/CredentialWrapper.h"
+#include "ctb/utility.h"
 
 #include <cpr/response.h>
 #include <cpr/cprtypes.h>
@@ -192,22 +192,22 @@ namespace ctb
    }
 
 
-   /// @brief get the URL for a Wine given it's iWineID
-   ///
+   /// @brief get the CT URL for a Wine given it's iWineID
    inline auto getWineDetailsUrl(std::string_view wine_id) noexcept -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_WINE_DETAILS, wine_id);
    }
 
-   /// @brief get the URL for a Wine given it's iWineID
-   ///
-   inline auto getWineVintagesUrl(std::string_view wine) noexcept -> std::string
+   /// @brief get the CT URL for a Wine given it's iWineID
+   inline auto getWineVintagesUrl(const std::string& wine) noexcept -> std::string
    {
-      return ctb::format(constants::FMT_URL_CT_VINTAGES, wine);
+      // CT can't handle UTF-8 strings, but browser assumes query parameters in URL's are UTF-8, 
+      // so convert to code page CT expects and then url-encode it so it doesn't get mangled
+      auto wine_param = fromUTF8(std::string{ wine }, CP_WINDOWS_1252).value_or(wine);
+      return ctb::format(constants::FMT_URL_CT_VINTAGES, percentEncode(wine_param));
    }
 
-   /// @brief get the URL for accepting a pending delivery
-   ///
+   /// @brief get the CT URL for accepting a pending delivery
    inline auto getAcceptPendingUrl(std::string_view wine_id, std::string_view purch_id, const std::chrono::year_month_day& delivery_date) noexcept -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_ACCEPT_PENDING, wine_id, purch_id, delivery_date);

@@ -42,7 +42,7 @@ namespace ctb
    concept CredentialPromptFunc = requires (T t, std::string_view s, CredentialResult cred)
    {
       t = T{};
-      cred = t(s, s, false);
+      cred = t(std::string{ s }, s, false);
    };
 
 
@@ -64,6 +64,13 @@ namespace ctb
       {
          return false;
       }
+   };
+
+   /// @brief wxWidgets-derived implementation of ctb::CredentialPromptFunc
+   ///
+   struct CredentialPromptFuncWinApi
+   {
+      [[nodiscard]] auto operator()(const std::string& cred_name, std::string_view prompt_message, bool allow_save) -> CredentialResult;
    };
 
 
@@ -101,7 +108,7 @@ namespace ctb
       /// @param prompt_msg - true if we should interactively prompt user if credential couldn't be loaded.
       /// @return The requested credential if successful, a ctb::Error if unsuccessful.
       /// 
-      auto loadCredential(std::string_view cred_name, std::string_view prompt_msg, bool allow_save = true) -> CredentialResult
+      auto loadCredential(const std::string& cred_name, std::string_view prompt_msg, bool allow_save = true) -> CredentialResult
       {
          return loadCredential(cred_name)
                 .or_else([&, this](Error) -> CredentialResult { return promptCredential(cred_name, prompt_msg, allow_save); });
@@ -123,7 +130,7 @@ namespace ctb
       /// @param allow_save - if true, user will be given the option to request that the credential be saved.
       /// @return - the requested credential if successful, a ctb::Error if unsuccessful.
       /// 
-      auto promptCredential(std::string_view cred_name, std::string_view prompt_message, bool allow_save) -> CredentialResult
+      auto promptCredential(const std::string& cred_name, std::string_view prompt_message, bool allow_save) -> CredentialResult
       {
          return m_prompt(cred_name, prompt_message, allow_save);
       }
@@ -160,6 +167,5 @@ namespace ctb
       CredPersistType m_persist{};
       CredPromptType  m_prompt{};
    };
-
 
 } // namespace ctb

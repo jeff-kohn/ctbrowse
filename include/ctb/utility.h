@@ -50,8 +50,9 @@ namespace ctb
    auto viewFilename(std::string& fq_path) noexcept -> std::string_view;
 
 
-   /// @brief ISO 8859-1 Latin 1; Western European (ISO)
-   constexpr unsigned int ISO_LATIN_1 = 28591;
+   /// @brief Currently-supported code pages.
+   constexpr unsigned int CP_ISO_LATIN_1  = 28591;
+   constexpr unsigned int CP_WINDOWS_1252 = 1252;
 
    /// @brief convert text to UTF8 from other narrow/multi-byte encoding.
    ///
@@ -60,7 +61,7 @@ namespace ctb
    /// 
    /// @return the converting string if successful, std::nullopt if not.
    /// 
-   [[nodiscard]] auto toUTF8(const std::string& text, unsigned int from_code_page = ISO_LATIN_1) -> MaybeString;
+   [[nodiscard]] auto toUTF8(const std::string& text, unsigned int from_code_page = CP_WINDOWS_1252) -> MaybeString;
 
 
    /// @brief convert text to UTF8 from other narrow/multi-byte encoding.
@@ -70,7 +71,17 @@ namespace ctb
    /// 
    /// @return the converting string if successful, std::nullopt if not.
    /// 
-   [[nodiscard]] auto fromUTF8(const std::string& utf8_text, unsigned int to_code_page = ISO_LATIN_1) -> MaybeString;
+   [[nodiscard]] auto fromUTF8(const std::string& utf8_text, unsigned int to_code_page = CP_WINDOWS_1252) -> MaybeString;
+
+
+   /// @brief convert UTF-8 text to UTF-16 wide string.
+   /// 
+   /// Converts UTF-8 encoded text to a UTF-16 (wide) string representation.
+   /// Primarily useful for Windows API interactions that require UTF-16.
+   /// 
+   /// @return the converted wide string if successful, std::nullopt if not.
+   /// 
+   [[nodiscard]] auto toUTF16(const std::string& utf8_text) -> std::optional<std::wstring>;
 
 
    /// @brief  Expand environment variables in place
