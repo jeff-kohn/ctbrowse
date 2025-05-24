@@ -61,7 +61,7 @@ namespace ctb
    /// 
    /// @return the converting string if successful, std::nullopt if not.
    /// 
-   [[nodiscard]] auto toUTF8(const std::string& text, unsigned int from_code_page = CP_WINDOWS_1252) -> MaybeString;
+   [[nodiscard]] auto toUTF8(std::string_view text, unsigned int from_code_page = CP_WINDOWS_1252) -> MaybeString;
 
 
    /// @brief convert text to UTF8 from other narrow/multi-byte encoding.
@@ -71,17 +71,7 @@ namespace ctb
    /// 
    /// @return the converting string if successful, std::nullopt if not.
    /// 
-   [[nodiscard]] auto fromUTF8(const std::string& utf8_text, unsigned int to_code_page = CP_WINDOWS_1252) -> MaybeString;
-
-
-   /// @brief convert UTF-8 text to UTF-16 wide string.
-   /// 
-   /// Converts UTF-8 encoded text to a UTF-16 (wide) string representation.
-   /// Primarily useful for Windows API interactions that require UTF-16.
-   /// 
-   /// @return the converted wide string if successful, std::nullopt if not.
-   /// 
-   [[nodiscard]] auto toUTF16(const std::string& utf8_text) -> std::optional<std::wstring>;
+   [[nodiscard]] auto fromUTF8(std::string_view utf8_text, unsigned int to_code_page = CP_WINDOWS_1252) -> MaybeString;
 
 
    /// @brief  Expand environment variables in place
@@ -106,8 +96,5 @@ namespace ctb
       tryExpandEnvironmentVars(result);
       return result;
    }
-
-
-   auto shellExecuteUrl(const std::string& url) -> bool;
 
 } // namespace ctb

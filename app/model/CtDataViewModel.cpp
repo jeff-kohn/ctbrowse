@@ -50,7 +50,7 @@ namespace ctb::app
 
       // format as string and return it to caller
       auto& val = m_dataset->getProperty(static_cast<int>(row), list_col.prop_id);
-      variant = wxString::FromUTF8(list_col.getDisplayValue(val));
+      variant = list_col.getDisplayValue(val);
    }
 
 

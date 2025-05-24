@@ -22,7 +22,7 @@ namespace ctb::app
    ///
    inline wxString wxFromSV(std::string_view sv)
    {
-      return wxString::FromUTF8(sv.data(), sv.size());
+      return wxString{ sv.data(), sv.size() };
    }
 
 
@@ -34,7 +34,7 @@ namespace ctb::app
       Overloaded overloaded{
          [](std::string&& str)
          {
-            return wxString::FromUTF8(str);
+            return wxString{ str };
          },
          [] (std::string_view sv)
          {

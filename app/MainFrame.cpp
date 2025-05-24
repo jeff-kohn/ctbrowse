@@ -435,7 +435,7 @@ namespace ctb::app
          m_event_source->setDataset(tbl, true);
 
          // Update title bar
-         SetTitle(wxString::FromUTF8(ctb::format("{} - {}", getTableDescription(table_id), constants::APP_NAME_LONG)));
+         SetTitle(ctb::format("{} - {}", getTableDescription(table_id), constants::APP_NAME_LONG));
 
          // Force a complete redraw of everything
          Layout();
@@ -514,7 +514,7 @@ namespace ctb::app
       {
          auto dataset = getDataset();
          auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
-         wxLaunchDefaultBrowser(wxString::FromUTF8(getWineDetailsUrl(wine_id)));
+         wxLaunchDefaultBrowser(getWineDetailsUrl(wine_id));
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -528,7 +528,7 @@ namespace ctb::app
       {
          auto dataset = getDataset();
          auto wine = dataset->getProperty(m_selected_row, CtProp::WineName).asString();
-         shellExecuteUrl(getWineVintagesUrl(wine));
+         wxLaunchDefaultBrowser(getWineVintagesUrl(wine));
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -543,8 +543,7 @@ namespace ctb::app
          auto dataset = getDataset();
          auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
          auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asStringView();
-         auto date = getCalendarDate();
-         wxLaunchDefaultBrowser(wxString::FromUTF8(getAcceptPendingUrl(wine_id, purchase_id, date)));
+         wxLaunchDefaultBrowser(getAcceptPendingUrl(wine_id, purchase_id, getCalendarDate()));
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -559,8 +558,7 @@ namespace ctb::app
          auto dataset = getDataset();
          auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
          auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asStringView();
-         auto url = ctb::format(constants::FMT_URL_CT_EDIT_ORDER, wine_id, purchase_id);
-         wxLaunchDefaultBrowser(wxString::FromUTF8(url));
+         wxLaunchDefaultBrowser(getEditPendingUrl(wine_id, purchase_id));
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);

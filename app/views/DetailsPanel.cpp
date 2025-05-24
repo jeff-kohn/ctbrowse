@@ -44,7 +44,7 @@ namespace ctb::app
          if (drink_end.isNull())
             return drink_start.asString("{} +").c_str();
 
-         return wxString::FromUTF8(ctb::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str());
+         return ctb::format("{} - {}", drink_start.asString(), drink_end.asString());
       }
 
    } // namespace detail

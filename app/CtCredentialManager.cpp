@@ -35,7 +35,7 @@ namespace ctb::app
          
       wxString username{};
       wxSecretValue password{};
-      if (secret_store.Load(wxString::FromUTF8(buildCredServiceName(cred_name)), username, password))
+      if (secret_store.Load(buildCredServiceName(cred_name), username, password))
       {
          auto pwd_str = password.GetAsString(wxConvUTF8);
          CredentialWrapper cred{ cred_name, username.utf8_string(), pwd_str.utf8_string() };
@@ -53,9 +53,7 @@ namespace ctb::app
       auto password = cred.password();
 
       return secret_store.IsOk() and 
-             secret_store.Save(wxString::FromUTF8(buildCredServiceName(cred.credentialName())), 
-                               wxString::FromUTF8(username.data(), username.size()),
-                               wxSecretValue{ password.size(), password.data() } );
+             secret_store.Save(buildCredServiceName(cred.credentialName()), wxFromSV(username), wxSecretValue{ wxFromSV(password) } );
    }
 
 

@@ -55,34 +55,35 @@ namespace ctb::app
       auto OnExit() -> int override;
 
       /// @brief  returns the path where the application stores data files.
-      ///
       auto userDataFolder() const noexcept  -> const fs::path& 
       {
          return m_user_data_folder; 
       }
 
+      /// @brief Retrieve a pointer to main window that doesn't need dynamic_cast (or wx-equivalent).
+      /// @return pointer to the main window. Will never be nullptr unless somehow called before OnInit().
+      auto getMainWindow() const noexcept -> MainFrame*
+      {
+         return m_main_frame;
+      }
 
       /// @brief labelCacheFolder()
       /// @return the fully qualified path to the folder where label images are cached
-      /// 
       auto labelCacheFolder() noexcept -> fs::path;
 
       /// @brief Get the current config object.
       ///
       /// Calling this will throw an exception if there's no default config. AFAIK the wxWidgets config store is 
       /// not thread-safe since multiple calls to SetPath() would be problematic. This should only be used from UI thread.
-      ///
       auto getConfig(std::string_view initial_path = ScopedConfigPath::CONFIG_ROOT) noexcept(false) -> ScopedConfigPath;
 
       /// @brief Display a message box with an error description.
       ///
       /// If log_error is true, the exception will also be logged. source_loc is only used for logging.
-      /// 
       void displayErrorMessage(const Error& err, bool log_error = true, std::source_location source_loc = std::source_location::current());
       void displayErrorMessage(const std::string& msg, bool log_error, const std::string& title = constants::ERROR_STR, std::source_location source_loc = std::source_location::current());
 
       /// @brief display a message box with informational text
-      ///
       void displayInfoMessage(const std::string& msg, const std::string& title = constants::APP_NAME_SHORT);
 
    private:

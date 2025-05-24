@@ -289,7 +289,7 @@ namespace ctb::app
       auto root = m_filter_tree->AddRoot(wxEmptyString);
       for (auto& filter : filters)
       {
-         wxString filter_name{ wxString::FromUTF8(filter.filter_name) };
+         wxString filter_name{ filter.filter_name };
          auto item = m_filter_tree->AppendItem(root, filter_name);
          m_filter_tree->SetItemHasChildren(item, true);
          m_filter_tree->SetItemImage(item, IMG_CONTAINER);
@@ -607,7 +607,7 @@ namespace ctb::app
          auto& filter = m_filters[filter_node.m_pItem]; 
          for (auto& match_val : data->getDistinctValues(filter->prop_id))
          {
-            auto item = m_filter_tree->AppendItem(filter_node, wxString::FromUTF8(match_val.asString()));
+            auto item = m_filter_tree->AppendItem(filter_node, match_val.asString());
             m_filter_tree->SetItemImage(item, 1);
          }
       }

@@ -111,7 +111,7 @@ namespace ctb::app
       try 
       {
          auto cfg = getConfig(constants::CONFIG_PATH_PREFERENCES);
-         auto val = cfg->Read(wxString::FromUTF8(constants::CONFIG_VALUE_LABEL_CACHE_DIR), wxEmptyString);
+         auto val = cfg->Read(constants::CONFIG_VALUE_LABEL_CACHE_DIR, wxEmptyString);
          if (!val.empty())
          {
             return fs::path{ val.wx_str() };

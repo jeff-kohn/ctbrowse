@@ -1,11 +1,9 @@
 #include "ctb/utility.h"
-#include "ctb/utility_http.h"
 #include <fstream>
 #include <limits>
 
 #if defined(_WIN32_WINNT)
    #include <Windows.h>
-   #include <shellapi.h>
 #endif
 
 namespace ctb
@@ -115,13 +113,6 @@ namespace ctb
 
 
 #if defined(_WIN32_WINNT)
-   
-   auto shellExecuteUrl(const std::string& url) -> bool
-   {
-      const auto stupid_fucking_retval = reinterpret_cast<INT_PTR>(ShellExecute(nullptr, nullptr, url.c_str(), nullptr, nullptr, SW_SHOW));
-      constexpr auto success_val = 32; 
-      return stupid_fucking_retval > success_val;
-   }
 
    auto tryExpandEnvironmentVars(std::string& text) -> bool
    {
@@ -143,14 +134,14 @@ namespace ctb
    }
 
 
-   [[nodiscard]] auto toUTF8(const std::string& text, unsigned int code_page) -> MaybeString
+   [[nodiscard]] auto toUTF8(std::string_view text, unsigned int code_page) -> MaybeString
    {
-      int length = MultiByteToWideChar(code_page, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, text.c_str(), -1, nullptr, 0);
+      int length = MultiByteToWideChar(code_page, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, text.data(), static_cast<int>(text.size()), nullptr, 0);
       if (!length)
          return {};
 
       std::vector<wchar_t> wide_buf(static_cast<size_t>(length), '\0');
-      if (!MultiByteToWideChar(code_page, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
+      if (!MultiByteToWideChar(code_page, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, text.data(), static_cast<int>(text.size()), wide_buf.data(), static_cast<int>(wide_buf.size())))
          return {};
 
       // Get needed buffer length since some UTF-16 chars may need multiple bytes in UTF-8. 
@@ -166,17 +157,17 @@ namespace ctb
       return {};
    }
 
-   auto fromUTF8(const std::string& utf8_text, unsigned int to_code_page) -> MaybeString
+   [[nodiscard]] auto fromUTF8(std::string_view utf8_text, unsigned int to_code_page) -> MaybeString
    {
       MaybeString result{};
 
       // First convert UTF-8 to UTF-16
-      int length = MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, utf8_text.c_str(), -1, nullptr, 0);
+      int length = MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, utf8_text.data(), static_cast<int>(utf8_text.size()), nullptr, 0);
       if (!length)
          return result;
 
       std::vector<wchar_t> wide_buf(static_cast<size_t>(length), '\0');
-      if (!MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, utf8_text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
+      if (!MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, utf8_text.data(), static_cast<int>(utf8_text.size()), wide_buf.data(), static_cast<int>(wide_buf.size())))
          return result;
 
       // Get needed buffer length for the target code page then do the conversion

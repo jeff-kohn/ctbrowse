@@ -123,10 +123,10 @@ namespace ctb::app
 
          // Save relevant settings to config
          auto cfg = wxGetApp().getConfig(constants::CONFIG_PATH_PREFERENCE_DATASYNC);
-         cfg->Write(wxString::FromUTF8(constants::CONFIG_VALUE_SYNC_ON_STARTUP), m_startup_sync_val);
+         cfg->Write(wxString{ constants::CONFIG_VALUE_SYNC_ON_STARTUP }, m_startup_sync_val);
          if (m_save_default_val)
          {
-            cfg->Write(wxString::FromUTF8(constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES), wxString::FromUTF8(serializeIntegrals(vws::all(m_table_selection_val))));
+            cfg->Write(wxString{ constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES }, wxString{ serializeIntegrals(vws::all(m_table_selection_val)) });
          }
          cfg->Flush();
 

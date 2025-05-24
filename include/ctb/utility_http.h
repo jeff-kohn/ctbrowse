@@ -203,7 +203,7 @@ namespace ctb
    {
       // CT can't handle UTF-8 strings, but browser assumes query parameters in URL's are UTF-8, 
       // so convert to code page CT expects and then url-encode it so it doesn't get mangled
-      auto wine_param = fromUTF8(std::string{ wine }, CP_WINDOWS_1252).value_or(wine);
+      auto wine_param = fromUTF8(wine, CP_WINDOWS_1252).value_or(wine);
       return ctb::format(constants::FMT_URL_CT_VINTAGES, percentEncode(wine_param));
    }
 
@@ -212,4 +212,12 @@ namespace ctb
    {
       return ctb::format(constants::FMT_URL_CT_ACCEPT_PENDING, wine_id, purch_id, delivery_date);
    }
+
+   /// @brief get the CT URL for editing a pending order
+   inline auto getEditPendingUrl(std::string_view wine_id, std::string_view purchase_id) noexcept -> std::string
+   {
+      return ctb::format(constants::FMT_URL_CT_EDIT_ORDER, wine_id, purchase_id);
+   }
+
+
 }
