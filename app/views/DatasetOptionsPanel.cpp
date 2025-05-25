@@ -54,7 +54,7 @@ namespace ctb::app
 
             case PropType::Date:
             {
-               auto ymd = parseDate(constants::FMT_PARSE_DATE_SHORT);
+               auto ymd = parseDate(text_val, constants::FMT_PARSE_DATE_SHORT);
                return ymd ? CtProperty{ *ymd } : CtProperty{};
             }
             default:

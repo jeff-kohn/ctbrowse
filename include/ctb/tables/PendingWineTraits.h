@@ -63,27 +63,28 @@ namespace ctb
       static inline const std::array DefaultListColumns { 
          CtListColumn{ Prop::WineAndVintage,                                      constants::DISPLAY_COL_WINE       },
          CtListColumn{ Prop::PendingStoreName,    CtListColumn::Format::String,   constants::DISPLAY_COL_STORE      },
-         CtListColumn{ Prop::PendingOrderDate, CtListColumn::Format::Date,     constants::DISPLAY_COL_PURCH_DATE },
+         CtListColumn{ Prop::PendingOrderDate,    CtListColumn::Format::Date,     constants::DISPLAY_COL_PURCH_DATE },
          CtListColumn{ Prop::PendingQtyOrdered,   CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY        },
          CtListColumn{ Prop::PendingPrice,        CtListColumn::Format::Currency, constants::DISPLAY_COL_PRICE      }
       };
 
       /// @brief the available sort orders for this table.
       static inline const std::array AvailableSorts{ 
+         TableSort{ { Prop::PendingOrderDate,    Prop::WineName, Prop::Vintage  }, constants::SORT_OPTION_PURCHASE_DATE },
          TableSort{ { Prop::WineName,            Prop::Vintage                  }, constants::SORT_OPTION_WINE_VINTAGE  },
          TableSort{ { Prop::Vintage,             Prop::WineName                 }, constants::SORT_OPTION_VINTAGE_WINE  },
-         TableSort{ { Prop::PendingOrderDate, Prop::WineName, Prop::Vintage  }, constants::SORT_OPTION_PURCHASE_DATE },
          TableSort{ { Prop::PendingStoreName,    Prop::WineName, Prop::Vintage, }, constants::SORT_OPTION_STORE_NAME    }
       };
 
       /// @brief multi-value filters that can be used on this table.
       static inline const std::array MultiMatchFilters{
-         MultiMatchFilter{ Prop::Varietal,    constants::FILTER_VARIETAL    },
-         MultiMatchFilter{ Prop::Country,     constants::FILTER_COUNTRY     },
-         MultiMatchFilter{ Prop::Region,      constants::FILTER_REGION      },
-         MultiMatchFilter{ Prop::Appellation, constants::FILTER_APPELATION  },
-         MultiMatchFilter{ Prop::Vintage,     constants::FILTER_VINTAGE     },
-         MultiMatchFilter{ Prop::PendingStoreName,  constants::FILTER_STORE }
+         MultiMatchFilter{ Prop::Varietal,          constants::FILTER_VARIETAL    },
+         MultiMatchFilter{ Prop::Country,           constants::FILTER_COUNTRY     },
+         MultiMatchFilter{ Prop::Region,            constants::FILTER_REGION      },
+         MultiMatchFilter{ Prop::Appellation,       constants::FILTER_APPELATION  },
+         MultiMatchFilter{ Prop::Vintage,           constants::FILTER_VINTAGE     },
+         MultiMatchFilter{ Prop::PendingStoreName,  constants::FILTER_STORE       },
+         MultiMatchFilter{ Prop::PendingOrderDate,  constants::FILTER_ORDER_DATE  }
       };
 
       /// @brief getTableName()

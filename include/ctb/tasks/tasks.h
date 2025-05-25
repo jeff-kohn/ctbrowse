@@ -34,20 +34,6 @@ namespace ctb::tasks
          throw Error{ constants::ERROR_STR_OPERATION_CANCELED, Error::Category::OperationCanceled };
    }
 
-
-   //using LoginResult = cpr::Cookies;
-   //using LoginTask   = PollingTask<LoginResult>;
-
-   /// @brief Runs a task to create a logon session for interacting with the CellarTracker website
-   /// 
-   /// Connects to the CT website using the supplied credential and retrieves user Cookies
-   /// for connecting to and interacting with CT website.
-   /// 
-   /// @return the requested cookies if successful, a ctb::Error if unsuccessful.
-   /// @throws ctb::Error if the operation fails
-   /// 
-   //auto runCellarTrackerLogin(CredentialWrapper&& cred, std::stop_token token) noexcept(false) -> LoginTask::ReturnType;
-
    
    /// @brief Task type use for LoadFile, SaveFile, LabelDownload tasks while all return file bytes.
    ///

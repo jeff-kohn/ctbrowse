@@ -27,7 +27,6 @@ namespace ctb::constants
    inline constexpr const char* HTML_ATTR_SRC               = "src";
 
    inline constexpr const char* CELLARTRACKER_LOGON_CAPTION = "Enter login information for CellarTracker.com:";
-   inline constexpr const char* CELLARTRACKER_LOGON_TITLE   = "CellarTracker Login";
    inline constexpr const char* CT_PASSWORD                 = "CT_PASSWORD";
    inline constexpr const char* CURRENT_DIRECTORY           = ".";
    inline constexpr const char* DATA_FILE_EXTENSION         = "csv";
@@ -51,6 +50,7 @@ namespace ctb::constants
    inline constexpr const char* FILTER_STORE                = "Store";
    inline constexpr const char* FILTER_VARIETAL             = "Varietal";
    inline constexpr const char* FILTER_VINTAGE              = "Vintage";
+   inline constexpr const char* FILTER_ORDER_DATE           = "Order Date";
 
 
    inline constexpr const char* HTTP_PARAM_TABLE            = "Table";

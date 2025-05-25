@@ -2,7 +2,7 @@
 #include "ctb/utility.h"
 #include "ctb/utility_http.h"
 
-#include <cpr/cpr.h>
+// #include <cpr/cpr.h>
 
 
 namespace ctb::tasks
@@ -25,14 +25,6 @@ namespace ctb::tasks
       checkStopToken(token);
       return readBinaryFile(file);
    }
-
-
-   //auto runHttpGetTask(std::string url, stop_token token) noexcept(false) -> HttpRequestTask::ReturnType
-   //{
-   //   checkStopToken(token);
-   //   return validateOrThrow(cpr::Get(Url{ url }));
-   //}
-
 
 
    auto runLabelDownloadTask(std::string_view wine_id, std::stop_token token) noexcept(false)-> FetchFileTask::ReturnType
@@ -66,43 +58,6 @@ namespace ctb::tasks
 
       return Buffer{ std::from_range, buf };
    }
-
-
-
-   //auto runCellarTrackerLogin(CredentialWrapper&& cred, std::stop_token token) noexcept(false) -> LoginTask::ReturnType
-   //{
-   //   using std::string;
-
-   //   checkStopToken(token);
-
-   //   cpr::Url url{ constants::URL_CT_LOGIN_FORM };
-   //   cpr::Payload form_data{
-   //      { string{ constants::HTTP_PARAM_KEY_REFERRER   }, string{ constants::HTTP_PARAM_VAL_REFERRER   } },
-   //      { string{ constants::HTTP_PARAM_KEY_USER       }, string{ cred.username()                      } },
-   //      { string{ constants::HTTP_PARAM_KEY_PASSWORD   }, string{ cred.password()                      } },
-   //      { string{ constants::HTTP_PARAM_KEY_USE_COOKIE }, string{ constants::HTTP_PARAM_VAL_USE_COOKIE } }
-   //   };
-
-   //   using namespace constants;
-   //   cpr::Header header{ 
-   //      { HTTP_ACCEPT_KEY,          HTTP_ACCEPT_HTML            },
-   //      { HTTP_ACCEPT_LANG_KEY,     HTTP_ACCEPT_LANG_VAL        },
-   //      { HTTP_PRIORITY_KEY,        HTTP_PRIORITY_VAL           },
-   //      { HTTP_REFERRER_KEY,        "https://www.cellartracker.com/password.asp?Referrer=%2Fdefault%2Easp%3F"},
-   //      { HTTP_SEC_UA_KEY,          HTTP_SEC_UA_VAL             },
-   //      { HTTP_SEC_UA_PLATFORM_KEY, HTTP_SEC_UA_PLATFORM_VAL    },
-   //      { HTTP_SEC_UA_MOBILE_KEY,   HTTP_SEC_UA_MOBILE_VAL      },
-   //      { HTTP_SEC_FETCH_DEST_KEY,  HTTP_SEC_FETCH_DEST_DOC     },
-   //      { HTTP_SEC_FETCH_MODE_KEY,  HTTP_SEC_FETCH_MODE_NAV     },
-   //      { HTTP_SEC_FETCH_SITE_KEY,  HTTP_SEC_FETCH_SITE_SAME    },
-   //      { HTTP_SEC_FETCH_USER_KEY,  HTTP_SEC_FETCH_USER_VAL     },
-   //      { "sec-fetch-storage-access",          "none"},
-   //      { HTTP_USERAGENT_KEY,       HTTP_USERAGENT_VAL          }
-   //   };
-
-   //   auto response = validateOrThrow(cpr::Post(url, form_data, header));
-   //   return response.cookies;     
-   //}
 
 } // namespace ctb::tasks
 

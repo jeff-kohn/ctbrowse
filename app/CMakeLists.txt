@@ -52,7 +52,6 @@ target_sources(${TARGET_NAME}
      "MainFrame.h"
      "CtCredentialManager.cpp"
      "CtCredentialManager.h"
-     "LoginEvent.h"
      "wx_helpers.h"
 
      "dialogs/CredentialDialog.cpp"
