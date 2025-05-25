@@ -1,3 +1,4 @@
+#include "MainFrame.h"
 #include "views/DatasetListView.h"
 #include "wx_helpers.h"
 
@@ -32,7 +33,49 @@ namespace ctb::app
 
    void DatasetListView::init()
    {
+      buildWinePopup(m_wine_menu, false);
+      buildWinePopup(m_pending_menu, true);
+
       Bind(wxEVT_DATAVIEW_SELECTION_CHANGED, &DatasetListView::onSelectionChanged, this);
+      Bind(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, &DatasetListView::onWineContextMenu, this);
+   }
+
+   void DatasetListView::buildWinePopup(wxMenu& menu, bool include_pending)
+   {
+      // build our popup menu.
+      menu.Append(new wxMenuItem{
+         &menu, 
+         CmdId::CMD_WINE_ONLINE_DETAILS, 
+         constants::CMD_WINE_ONLINE_DETAILS_LBL, 
+         constants::CMD_WINE_ONLINE_DETAILS_TIP,
+         wxITEM_NORMAL
+         });
+      menu.Append(new wxMenuItem{
+         &menu, 
+         CmdId::CMD_WINE_ONLINE_VINTAGES, 
+         constants::CMD_WINE_ONLINE_VINTAGES_LBL, 
+         constants::CMD_WINE_ONLINE_VINTAGES_TIP,
+         wxITEM_NORMAL
+         });
+
+      if (include_pending)
+      {
+         menu.AppendSeparator();
+         menu.Append(new wxMenuItem{
+            &menu,
+            CmdId::CMD_WINE_ACCEPT_PENDING,
+            constants::CMD_WINE_ONLINE_ACCEPT_WINE_LBL,
+            constants::CMD_WINE_ONLINE_ACCEPT_WINE_TIP,
+            wxITEM_NORMAL
+            });
+         menu.Append(new wxMenuItem{
+            &menu,
+            CmdId::CMD_WINE_EDIT_ORDER,
+            constants::CMD_WINE_ONLINE_EDIT_ORDER_LBL,
+            constants::CMD_WINE_ONLINE_EDIT_ORDER_LBL,
+            wxITEM_NORMAL
+            });
+      }
    }
 
 
@@ -132,6 +175,27 @@ namespace ctb::app
 
       auto row = m_model->GetRow(event.GetItem());
       m_sink.signal_source(DatasetEvent::Id::RowSelected, static_cast<int>(row));
+   }
+
+
+   void DatasetListView::onWineContextMenu(wxDataViewEvent& event)
+   {
+      try
+      {
+         if (!m_sink.hasDataset())
+            event.Skip();
+
+         if (m_sink.getDataset()->hasProperty(CtProp::PendingOrderNumber))
+         {
+            PopupMenu(&m_pending_menu);
+         }
+         else {
+            PopupMenu(&m_wine_menu);
+         }
+      }
+      catch (...) {
+         wxGetApp().displayErrorMessage(packageError());
+      }
    }
 
 

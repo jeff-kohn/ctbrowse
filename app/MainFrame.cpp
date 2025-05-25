@@ -202,14 +202,14 @@ namespace ctb::app
       // Wine Menu
       auto* menu_wine = new wxMenu();
       menu_wine->Append(new wxMenuItem{
-         menu_data, 
+         menu_wine, 
          CmdId::CMD_WINE_ONLINE_DETAILS, 
          constants::CMD_WINE_ONLINE_DETAILS_LBL, 
          constants::CMD_WINE_ONLINE_DETAILS_TIP,
          wxITEM_NORMAL
       });
       menu_wine->Append(new wxMenuItem{
-         menu_data, 
+         menu_wine, 
          CmdId::CMD_WINE_ONLINE_VINTAGES, 
          constants::CMD_WINE_ONLINE_VINTAGES_LBL, 
          constants::CMD_WINE_ONLINE_VINTAGES_TIP,
@@ -217,14 +217,14 @@ namespace ctb::app
          });
       menu_wine->AppendSeparator();
       menu_wine->Append(new wxMenuItem{
-         menu_data, 
+         menu_wine, 
          CmdId::CMD_WINE_ACCEPT_PENDING, 
          constants::CMD_WINE_ONLINE_ACCEPT_WINE_LBL, 
          constants::CMD_WINE_ONLINE_ACCEPT_WINE_TIP,
          wxITEM_NORMAL
       });
       menu_wine->Append(new wxMenuItem{
-         menu_data, 
+         menu_wine, 
          CmdId::CMD_WINE_EDIT_ORDER, 
          constants::CMD_WINE_ONLINE_EDIT_ORDER_LBL, 
          constants::CMD_WINE_ONLINE_EDIT_ORDER_LBL,

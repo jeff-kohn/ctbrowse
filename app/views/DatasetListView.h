@@ -3,6 +3,7 @@
 #include "model/CtDataViewModel.h"
 
 #include <ctb/model/ScopedEventSink.h>
+#include <wx/menu.h>
 
 namespace ctb::app
 {
@@ -21,6 +22,8 @@ namespace ctb::app
    private:
       ScopedEventSink  m_sink;
       DataViewModelPtr m_model{};
+      wxMenu           m_wine_menu{};
+      wxMenu           m_pending_menu{};
 
       /// @brief private ctor used by static create()
       explicit DatasetListView(wxWindow* parent, DatasetEventSourcePtr source) : 
@@ -30,12 +33,14 @@ namespace ctb::app
       {}
 
       void init();
+      void buildWinePopup(wxMenu& menu, bool include_pending);
       void configureColumns();
       void setDataset(DatasetPtr dataset);
       void selectFirstRow();
 
       void notify(DatasetEvent event) override;
       void onSelectionChanged(wxDataViewEvent& event);
+      void onWineContextMenu(wxDataViewEvent& event);
 
    };
 
