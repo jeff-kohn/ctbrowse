@@ -62,18 +62,16 @@ namespace ctb
 namespace ctb
 {
 
-   [[nodiscard]] DownloadResult downloadRawTableData(
-      const CredentialWrapper::Credential& cred,
-      TableId table,
-      DataFormatId format,
-      ProgressCallback* callback )
+
+   [[nodiscard]] auto downloadRawTableData(const CredentialWrapper& cred, TableId table,  DataFormatId format, ProgressCallback* callback, 
+                                           bool convert_to_utf, uint32_t table_code_page ) -> DownloadResult
    {
       auto table_name = magic_enum::enum_name(table);
       auto data_format = magic_enum::enum_name(format);
 
-      cpr::Url url{ ctb::format(constants::FMT_HTTP_CT_TABLE_URL,
-                                percentEncode(std::string(cred.username)),
-                                percentEncode(std::string(cred.password)),
+      cpr::Url url{ ctb::format(constants::FMT_URL_CT_TABLE,
+                                percentEncode(cred.username()),
+                                percentEncode(cred.password()),
                                 data_format, table_name)
       };
 
@@ -88,16 +86,17 @@ namespace ctb
       }
       RawTableData table_data{ std::move(response.text), table, format };
 
-      // The returned data is encoded as ISO 8859-1 Latin 1, we need to convert
-      // it to UTF-8 before returning it. If the conversion fails, just return the
-      // original encoding as fallback.
-      auto utf_text = toUTF8(table_data.data);
-      if (utf_text)
+      if (convert_to_utf)
       {
-         table_data.data.swap(*utf_text);
+         // The returned data is encoded as Window-1252, we need to convert
+         // it to UTF-8 before returning it. If the conversion fails, just return the
+         // original encoding as fallback.
+         if (auto utf_text = toUTF8(table_data.data, table_code_page))
+         {
+            table_data.data.swap(*utf_text);
+         }
       }
-
-      return table_data;
+      return table_data;   
    }
 
 

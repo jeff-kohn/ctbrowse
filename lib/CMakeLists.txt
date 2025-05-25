@@ -7,29 +7,56 @@ add_library(${PROJECT_NAME}::ctBrowse_lib ALIAS ctBrowse_lib)
 
 target_sources(ctBrowse_lib
    PUBLIC
+      "../include/ctb/ctb.h"
       "../include/ctb/common_types.h"
       "../include/ctb/concepts.h"
       "../include/ctb/constants.h"
+      "../include/ctb/CredentialManager.h"
       "../include/ctb/CredentialWrapper.h"
-      "../include/ctb/ctb.h"
-      "../include/ctb/CtRecordImpl.h"
       "../include/ctb/Error.h"
-      "../include/ctb/PropFilter.h"
-      "../include/ctb/PropStringFilter.h"
-      "../include/ctb/PropStringFilterMgr.h"
-      "../include/ctb/SubstringFilter.h"
-      "../include/ctb/TableProperty.h"
-      "../include/ctb/TableSorter.h"
+      "../include/ctb/log.h"
       "../include/ctb/table_data.h"
       "../include/ctb/table_download.h"
       "../include/ctb/utility.h"
+      "../include/ctb/utility_chrono.h"
       "../include/ctb/utility_http.h"
       "../include/ctb/utility_templates.h"
-      "../include/ctb/WineListTraits.h"
+      
+      "../include/ctb/interfaces/DatasetEvent.h"
+      "../include/ctb/interfaces/IDataset.h"
+      "../include/ctb/interfaces/IDatasetEventSink.h"
+      "../include/ctb/interfaces/IDatasetEventSource.h"
+            
+      "../include/ctb/model/CtDataset.h"
+      "../include/ctb/model/CtDatasetLoader.h"
+      "../include/ctb/model/DatasetEventSource.h"
+      "../include/ctb/model/ScopedEventSink.h"
+      
+      "../include/ctb/tables/CtSchema.h"
+      "../include/ctb/tables/PendingWineTraits.h"
+      "../include/ctb/tables/WineListTraits.h"
+
+      "../include/ctb/tables/detail/FieldSchema.h"
+      "../include/ctb/tables/detail/ListColumn.h"
+      "../include/ctb/tables/detail/MultiMatchPropertyFilter.h"
+      "../include/ctb/tables/detail/MultiMatchPropertyFilterMgr.h"
+      "../include/ctb/tables/detail/PropertyFilter.h"
+      "../include/ctb/tables/detail/SubstringFilter.h"
+      "../include/ctb/tables/detail/TableProperty.h"
+      "../include/ctb/tables/detail/TableRecord.h"
+      "../include/ctb/tables/detail/TableSorter.h"
+
+      "../include/ctb/tasks/PollingTask.h"
+      "../include/ctb/tasks/tasks.h"
 
    PRIVATE
+      "CredentialManager.cpp"
       "CredentialWrapper.cpp"
+      "CtDatasetLoader.cpp"
+      "DatasetEventSource.cpp"
+      "log.cpp"
       "table_download.cpp"
+      "tasks.cpp"
       "utility.cpp"
       "utility_http.cpp"
 )
@@ -54,8 +81,11 @@ target_link_libraries(ctBrowse_lib
       fmt::fmt
       HtmlParser
       magic_enum::magic_enum
+      spdlog::spdlog
       "$<$<PLATFORM_ID:Windows>:Credui>"
       "$<$<PLATFORM_ID:Windows>:shlwapi>"
+      "$<$<PLATFORM_ID:Windows>:Shell32.lib>"
+      
 )
 
 

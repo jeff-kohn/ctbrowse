@@ -32,10 +32,11 @@ namespace ctb
       // this just makes sure that curl's global init has been called, we don't actually need a handle
       cpr::CurlHolder holder;
 
-      char* output = curl_easy_escape(nullptr, text.data(), static_cast<int>(text.length()));
+      int outlength;
+      char* output = curl_easy_unescape(nullptr, text.data(), static_cast<int>(text.length()), &outlength);
       if (output)
       {
-         std::string result = output;
+         std::string result(output, static_cast<size_t>(outlength));
          curl_free(output);
          return result;
       }
@@ -114,8 +115,5 @@ namespace ctb
       }
       return {};
    }
-
-
-
 
 } // namespace ctb

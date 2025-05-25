@@ -7,30 +7,32 @@
  *********************************************************************/
 
 #include "App.h"
+#include "CtCredentialManager.h"
 #include "MainFrame.h"
 
+#include <ctb/utility_http.h>
+#include <ctb/tasks/tasks.h>
+
+#include <cpr/cpr.h>
 #include <wx/fileconf.h>
+#include <wx/msgdlg.h>
 #include <wx/stdpaths.h>
+#include <wx/secretstore.h>
 #include <wx/xrc/xmlres.h>
+
 
 #include <chrono>
 #include <filesystem>
-
+#include <thread>
 
 
 namespace ctb::app
 {
-   namespace fs = std::filesystem;
-
-   namespace
-   {
-      const wxSize g_default_frame_size{ 400, 600 }; // NOLINT(cert-err58-cpp) this ctor doesn't throw it's just not marked noexcept
-
-   } //namespace
-
 
    App::App()
    {
+      setlocale(LC_ALL, ".UTF8");
+
       SetAppName(constants::APP_NAME_LONG);
       SetAppDisplayName(constants::APP_NAME_LONG);
       SetUseBestVisual(true);
@@ -55,9 +57,9 @@ namespace ctb::app
       auto log_folder = fs::path{ std_paths.GetUserDir(wxStandardPaths::Dir::Dir_Cache).wx_str() } / constants::APP_NAME_LONG;
 
 #if defined(NDEBUG)
-      setupDefaultLogger({{ makeFileSink(log_folder) }});
+      setupDefaultLogger({{ makeFileSink(log_folder,  constants::APP_NAME_SHORT) }});
 #else
-      setupDefaultLogger({ {makeFileSink(log_folder)}, {makeDebuggerSink()} });
+      setupDefaultLogger({ { makeFileSink(log_folder,  constants::APP_NAME_SHORT) }, { makeDebuggerSink() } });
 #endif
 
       log::info("App startup.");
@@ -77,7 +79,7 @@ namespace ctb::app
          m_main_frame->Show();
          SetTopWindow(m_main_frame);
 
-         CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_VIEW_WINE_LIST }); });
+         CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_COLLECTION_MY_CELLAR }); });
 
          return true;
       }
@@ -87,18 +89,21 @@ namespace ctb::app
       return false;
    } 
 
-
+   
    int App::OnExit()
    {
+      log::warn("App shutting down.");
+      log::flush();
+      log::shutdown();
+      
 #ifdef _DEBUG
       // to prevent the tzdb allocations from being reported as memory leaks
       std::chrono::get_tzdb_list().~tzdb_list();
 #endif
-      log::warn("App shutting down.");
-      log::flush();
-      log::shutdown();
+
       return wxApp::OnExit();
    }
+
 
 
    auto App::labelCacheFolder() noexcept -> fs::path
@@ -106,7 +111,7 @@ namespace ctb::app
       try 
       {
          auto cfg = getConfig(constants::CONFIG_PATH_PREFERENCES);
-         auto val = cfg->Read(wxString{ constants::CONFIG_VALUE_LABEL_CACHE_DIR }, wxEmptyString);
+         auto val = cfg->Read(constants::CONFIG_VALUE_LABEL_CACHE_DIR, wxEmptyString);
          if (!val.empty())
          {
             return fs::path{ val.wx_str() };
@@ -153,6 +158,40 @@ namespace ctb::app
       wxMessageBox(msg, title, wxICON_INFORMATION | wxOK, m_main_frame);
    }
 
+
+
+   //void App::OnCellarTrackerLogin(LoginEvent& event)
+   //{
+   //   m_session = event.m_result ? std::optional{ std::move(event.m_result.value()) } : std::nullopt;
+   //}
+
+   //void App::loginThread()
+   //{
+   //   using namespace ctb::tasks;
+   //   using std::launch;
+   //   using std::unexpected;
+   //   
+   //   try
+   //   {
+   //      auto token = m_stop_source.get_token();
+   //      checkStopToken(token);
+
+   //      // we can only do the login if we have a saved credential, no prompting from background thread.
+   //      CtCredentialManager mgr{};
+   //      auto cred = mgr.loadCredential(constants::CELLARTRACKER_DOT_COM).or_else([](auto e) -> CredentialResult { throw e; }).value(); 
+
+   //      checkStopToken(token);
+   //      auto result = std::async(launch::deferred, runCellarTrackerLogin, std::move(cred), token).get();
+
+   //      // Need to update App object from main thread to avoid concurrency issues.
+   //      checkStopToken(token);
+   //      QueueEvent(new LoginEvent{ std::move(result) });
+   //   }
+   //   catch (...) {
+   //      auto err = packageError();
+   //      log::error("App::loginThread() exiting with error. {}", err.formattedMesage());
+   //   }
+   //}
 
 }  // namespace ctb::app
 

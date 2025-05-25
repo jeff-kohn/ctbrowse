@@ -10,10 +10,20 @@
 #include "wx_helpers.h"
 #include "views/DatasetOptionsPanel.h"
 
-#include <wx/sizer.h>
+#include <ctb/utility_chrono.h>
+
+#include <wx/choice.h>
+#include <wx/checkbox.h>
+#include <wx/dataview.h>
+#include <wx/gdicmn.h>
+#include <wx/panel.h>
+#include <wx/radiobut.h>
+#include <wx/statbox.h>
 #include <wx/stattext.h>
-#include <wx/wupdlock.h>
+#include <wx/sizer.h>
 #include <wx/valgen.h>
+#include <wx/wupdlock.h>
+
 
 #include <memory>
 
@@ -25,15 +35,43 @@ namespace ctb::app
       constexpr int IMG_UNCHECKED = 1;
       constexpr int IMG_CHECKED = 2;
 
+
+      auto getPropertyForFieldType(const CtFieldSchema& fld, std::string_view text_val) -> CtProperty
+      {
+         switch (fld.prop_type)
+         {
+            case PropType::String:
+               return CtProperty{ std::string{ text_val } };
+
+            case PropType::UInt16:
+               return CtProperty::create<uint16_t>(text_val);
+
+            case PropType::UInt64:
+               return CtProperty::create<uint64_t>(text_val);
+
+            case PropType::Double:
+               return CtProperty::create<double>(text_val);
+
+            case PropType::Date:
+            {
+               auto ymd = parseDate(constants::FMT_PARSE_DATE_SHORT);
+               return ymd ? CtProperty{ *ymd } : CtProperty{};
+            }
+            default:
+               log::info("getPropertyForFieldType() encountered unexpected property type with value {}", std::to_underlying(fld.prop_type));
+               assert("Unexpected property type, this is a bug" and false);
+               return {};
+         }
+      }
+
    } // namespace
    
+
    DatasetOptionsPanel::DatasetOptionsPanel(DatasetEventSourcePtr source) : m_sink{ this, source }
-   {
-
-   }
+   {}
 
 
-   [[nodiscard]] DatasetOptionsPanel* DatasetOptionsPanel::create(wxWindow* parent, DatasetEventSourcePtr source)
+   [[nodiscard]] auto DatasetOptionsPanel::create(wxWindow* parent, DatasetEventSourcePtr source) -> DatasetOptionsPanel*
    {
       if (!source)
       {
@@ -58,15 +96,24 @@ namespace ctb::app
 
    void DatasetOptionsPanel::initControls()
    {
-      auto default_border = wxSizerFlags::GetDefaultBorder();
+      const auto default_border = wxSizerFlags::GetDefaultBorder();
 
       // panel shouldn't grow infinitely
       SetMaxSize(ConvertDialogToPixels(wxSize{ 150, constants::WX_UNSPECIFIED_VALUE }));
       SetMinSize(ConvertDialogToPixels(wxSize{ 100, constants::WX_UNSPECIFIED_VALUE }));
 
       // defines the rows of controls in our panel
-      auto top_sizer = new wxBoxSizer{ wxVERTICAL };
-      top_sizer->AddSpacer(default_border);
+      m_top_sizer = new wxBoxSizer{ wxVERTICAL };
+      m_top_sizer->AddSpacer(default_border);
+
+      // Dataset title
+      auto title_font{ GetFont().MakeLarger().MakeBold()};
+      const auto heading_color = wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT);
+      constexpr auto title_border_size = 10;
+      m_dataset_title = new wxStaticText{ this, wxID_ANY, "" };
+      m_dataset_title->SetFont(title_font);
+      m_dataset_title->SetForegroundColour(heading_color);
+      m_top_sizer->Add(m_dataset_title, wxSizerFlags{}.Expand().Border(wxALL, title_border_size));
 
       // sort options box
       auto* sort_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_SORT_OPTIONS);
@@ -74,10 +121,10 @@ namespace ctb::app
       // sort fields combo
       m_sort_combo = new wxChoice(sort_options_box->GetStaticBox(), wxID_ANY);
       m_sort_combo->SetFocus();
-      m_sort_combo->SetValidator(wxGenericValidator(&m_sort_config.sorter_index));
+      m_sort_combo->SetValidator(wxGenericValidator(&m_sort_selection));
       sort_options_box->Add(m_sort_combo, wxSizerFlags{}.Expand().Border(wxALL));
 
-      // ascending sort order radio. validator tied to SortConfig.descending
+      // ascending sort order radio. 
       auto opt_ascending = new wxRadioButton{
          sort_options_box->GetStaticBox(),
          wxID_ANY, 
@@ -90,13 +137,13 @@ namespace ctb::app
       opt_ascending->SetValidator(wxGenericValidator{ &m_sort_ascending });
       sort_options_box->Add(opt_ascending, wxSizerFlags{}.Expand().Border(wxALL));
 
-      // descending sort order radio. Since radiobuttons aren't in a group box, the validator treats them as bool
-      // so we have a seperate flag for the descending radio that we have to manually keep in sync (see onTableSorted)
+      // descending sort order radio. Since the radio buttons aren't in a group box, the validator treats them as bool
+      // so we have a separate flag for the descending radio that we have to manually keep in sync (see onTableSorted)
       auto opt_descending = new wxRadioButton{ sort_options_box->GetStaticBox(), wxID_ANY, constants::LBL_SORT_DESCENDING };
-      opt_descending->SetValidator(wxGenericValidator{ &m_sort_config.descending });
+      opt_descending->SetValidator(wxGenericValidator{ &m_sort_descending });
       sort_options_box->Add(opt_descending, wxSizerFlags{1}.Expand().Border(wxALL));
-      top_sizer->Add(sort_options_box, wxSizerFlags().Expand().Border(wxALL));
-      top_sizer->AddSpacer(default_border);
+      m_top_sizer->Add(sort_options_box, wxSizerFlags().Expand().Border(wxALL));
+      m_top_sizer->AddSpacer(default_border);
 
       // filter options box
       m_filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_FILTER_OPTIONS);
@@ -145,9 +192,9 @@ namespace ctb::app
       m_filter_options_box->Add(min_score_sizer, wxSizerFlags());
 
       // finalize layout
-      top_sizer->Add(m_filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
-      top_sizer->AddStretchSpacer(2);
-      SetSizer(top_sizer);
+      m_top_sizer->Add(m_filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
+      m_top_sizer->AddStretchSpacer(2);
+      SetSizer(m_top_sizer);
 
       // event bindings.
       m_sort_combo->Bind(wxEVT_CHOICE, &DatasetOptionsPanel::onSortSelection, this);
@@ -156,19 +203,45 @@ namespace ctb::app
       m_score_spin_ctrl->Bind(wxEVT_SPINCTRLDOUBLE, &DatasetOptionsPanel::onMinScoreChanged, this);
       opt_ascending->Bind(wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
       opt_descending->Bind(wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
-      instock_filter_ctrl->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::OnInStockChecked, this);
+      instock_filter_ctrl->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onInStockChecked, this);
       score_filter_chk->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onMinScoreFilterChecked, this);     
+   }
+
+   auto DatasetOptionsPanel::setTitle() -> bool
+   {
+      auto dataset = m_sink.getDataset();
+      if (!dataset)
+         return false;
+
+      m_dataset_title->SetLabelText( wxFromSV(getTableDescription(dataset->getTableId())) );
+      GetSizer()->Layout();
+      SendSizeEvent();
+      Update();
+      return true;
    }
 
 
    void DatasetOptionsPanel::addPropFilter(wxTreeItemId item)
    {
-      if (m_sink.hasTable())
+      if (m_sink.hasDataset())
       {
+         CtProperty filter_val{};
          auto filter = getPropFilterForItem(item);
          if (filter)
          {
-            m_sink.getTable()->addPropFilterString(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
+            /// We need to convert the string value from the filter tree to the correct type, which may not be string.
+            auto fld_schema = m_sink.getDataset()->getFieldSchema(filter->prop_id);
+            if (fld_schema)
+            {
+               auto wx_str_val = m_filter_tree->GetItemText(item);
+               std::string_view text_val{ wx_str_val.wx_str() };
+               filter_val = getPropertyForFieldType(*fld_schema, text_val);
+            }
+            else {
+               assert("Not getting a valid FieldSchema here is a bug." and false);
+            }
+
+            m_sink.getDataset()->addMultiMatchFilter(filter->prop_id, filter_val);
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
@@ -177,19 +250,31 @@ namespace ctb::app
 
    void DatasetOptionsPanel::removePropFilter(wxTreeItemId item)
    {
-      if (m_sink.hasTable())
+      if (m_sink.hasDataset())
       {
+         CtProperty filter_val{};
          auto filter = getPropFilterForItem(item);
          if (filter)
          {
-            m_sink.getTable()->removePropFilterString(filter->propIndex(), m_filter_tree->GetItemText(item).wx_str());
+            /// We need to convert the string value from the filter tree to the correct type, which may not be string.
+            auto fld_schema = m_sink.getDataset()->getFieldSchema(filter->prop_id);
+            if (fld_schema)
+            {
+               auto wx_str_val = m_filter_tree->GetItemText(item);
+               std::string_view text_val{ wx_str_val.wx_str() };
+               filter_val = getPropertyForFieldType(*fld_schema, text_val);
+            }
+            else {
+               assert("Not getting a valid FieldSchema here is a bug." and false);
+            }
+            m_sink.getDataset()->removeMultiMatchFilter(filter->prop_id, filter_val);
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
    }
 
 
-   void DatasetOptionsPanel::populateFilterTypes(DatasetBase* table)
+   void DatasetOptionsPanel::populateFilterTypes(IDataset* dataset)
    {
       assert(m_filter_tree);
 
@@ -200,11 +285,11 @@ namespace ctb::app
       m_check_map.clear();
 
       // get the available filters for this dataset, and add them to the tree.
-      auto filters = table->availableStringFilters();
+      auto filters = dataset->multiMatchFilters();
       auto root = m_filter_tree->AddRoot(wxEmptyString);
       for (auto& filter : filters)
       {
-         wxString filter_name{ wxFromSV(filter.filterName()) };
+         wxString filter_name{ filter.filter_name };
          auto item = m_filter_tree->AppendItem(root, filter_name);
          m_filter_tree->SetItemHasChildren(item, true);
          m_filter_tree->SetItemImage(item, IMG_CONTAINER);
@@ -213,10 +298,10 @@ namespace ctb::app
    }
 
 
-   DatasetOptionsPanel::MaybeFilter DatasetOptionsPanel::getPropFilterForItem(wxTreeItemId item)
+   auto DatasetOptionsPanel::getPropFilterForItem(wxTreeItemId item) -> MaybeFilter
    {
-      auto table = m_sink.getTable();
-      if (table)
+      auto dataset = m_sink.getDataset();
+      if (dataset)
       {
          // we need to get the parent node's item, since that's what's in the map.
          auto parent = m_filter_tree->GetItemParent(item);
@@ -231,27 +316,27 @@ namespace ctb::app
    }
 
 
-   wxArrayString DatasetOptionsPanel::getSortOptionList(DatasetBase* table)
+   auto DatasetOptionsPanel::getSortOptionList(IDataset* dataset) -> wxArrayString
    {
-      return vws::all(table->availableSortConfigs()) 
-               | vws::transform([](const CtSortConfig& s) {  return wxString{s.sorter_name.data(), s.sorter_name.length() };  })
+      return vws::all(dataset->availableSorts()) 
+               | vws::transform([](const IDataset::TableSort& s) {  return wxFromSV(s.sort_name); })
                | rng::to<wxArrayString>();
    }
 
 
-   bool DatasetOptionsPanel::isChecked(wxTreeItemId item)
+   auto DatasetOptionsPanel::isChecked(wxTreeItemId item) -> bool
    {
       return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CHECKED;
    }
 
 
-   bool DatasetOptionsPanel::isContainerNode(wxTreeItemId item)
+   auto DatasetOptionsPanel::isContainerNode(wxTreeItemId item) -> bool
    {
       return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CONTAINER;
    }
 
 
-   bool DatasetOptionsPanel::isMatchValueNode(wxTreeItemId item)
+   auto DatasetOptionsPanel::isMatchValueNode(wxTreeItemId item) -> bool
    {
       return item.IsOk() and m_filter_tree->GetItemImage(item) != IMG_CONTAINER;
    }
@@ -259,7 +344,7 @@ namespace ctb::app
    /// @brief updates the checked/unchecked status of a node.
    /// @return true if successful, false otherwise (ie invalid item)
    /// 
-   bool DatasetOptionsPanel::setMatchValueChecked(wxTreeItemId item, bool checked)
+   auto DatasetOptionsPanel::setMatchValueChecked(wxTreeItemId item, bool checked) -> bool
    {
       if ( isMatchValueNode(item) )
       {
@@ -307,7 +392,7 @@ namespace ctb::app
          return;
 
       // if the filter node has selected children, update the label with the count
-      wxString filter_name{ wxFromSV(maybe_filter->filterName()) };
+      wxString filter_name{ wxFromSV(maybe_filter->filter_name) };
       auto count = m_check_map[item];
       if (count)
       {
@@ -322,8 +407,11 @@ namespace ctb::app
 
    void DatasetOptionsPanel::enableInStockFilter(bool enable)
    {
-      constexpr size_t index = 0;
+      constexpr size_t index = 2;
       m_filter_options_box->Show(index, enable);
+      m_filter_options_box->Layout();
+      SendSizeEvent();
+      Update();
    }
 
 
@@ -336,19 +424,19 @@ namespace ctb::app
 
    void DatasetOptionsPanel::notify(DatasetEvent event)
    {
-      assert(event.m_data);
+      assert(event.dataset);
 
       try
       {
-         switch (event.m_event_id)
+         switch (event.event_id)
          {
-         case DatasetEvent::Id::TableInitialize:
-            onTableInitialize(event.m_data.get());
-            enableInStockFilter(event.m_data->hasInStockFilter());
+         case DatasetEvent::Id::DatasetInitialize:
+            onTableInitialize(event.dataset.get());
+            enableInStockFilter(event.dataset->hasProperty(CtProp::QtyOnHand));
             break;
 
          case DatasetEvent::Id::Sort:
-            onTableSorted(event.m_data.get());
+            onTableSorted(event.dataset.get());
             break;
 
          case DatasetEvent::Id::Filter:              [[fallthrough]];
@@ -365,33 +453,35 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onTableInitialize(DatasetBase* table)
+   void DatasetOptionsPanel::onTableInitialize(IDataset* dataset)
    {
       // reload sort/filter options
       m_sort_combo->Clear();
-      m_sort_combo->Append(getSortOptionList(table));
-      onTableSorted(table);
-      populateFilterTypes(table);
+      m_sort_combo->Append(getSortOptionList(dataset));
+      onTableSorted(dataset);
+      populateFilterTypes(dataset);
+      setTitle();
 
-      m_instock_only = table->getInStockFilter();
+      m_instock_only = dataset->getInStockFilter();
       TransferDataToWindow();
    }
 
 
-   void DatasetOptionsPanel::onTableSorted(DatasetBase* table)
+   void DatasetOptionsPanel::onTableSorted(IDataset* dataset)
    {
-      m_sort_config = table->activeSortConfig();
-      m_sort_ascending = not m_sort_config.descending;
+      m_sort_config = dataset->activeSort();
+      m_sort_ascending = !m_sort_config.reverse;
+      m_sort_descending = m_sort_config.reverse;
       TransferDataToWindow();
    }
 
 
-   void DatasetOptionsPanel::OnInStockChecked([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsPanel::onInStockChecked([[maybe_unused]] wxCommandEvent& event)
    {
-      assert(m_sink.hasTable());
+      assert(m_sink.hasDataset());
 
       TransferDataFromWindow();
-      if (m_sink.hasTable() and m_sink.getTable()->setInStockFilter(m_instock_only))
+      if (m_sink.hasDataset() and m_sink.getDataset()->setInStockFilter(m_instock_only))
       {
          m_sink.signal_source(DatasetEvent::Id::Filter);
       }
@@ -405,9 +495,9 @@ namespace ctb::app
 
    void DatasetOptionsPanel::onMinScoreChanged([[maybe_unused]] wxSpinDoubleEvent& event)
    {
-      if (m_enable_score_filter and m_sink.hasTable())
+      if (m_enable_score_filter and m_sink.hasDataset())
       {
-         if ( m_sink.getTable()->setMinScoreFilter(event.GetValue()) )
+         if ( m_sink.getDataset()->setMinScoreFilter(event.GetValue()) )
          {
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
@@ -417,7 +507,7 @@ namespace ctb::app
 
    void DatasetOptionsPanel::onMinScoreFilterChecked([[maybe_unused]] wxCommandEvent& event)
    {
-      if (!m_sink.hasTable())
+      if (!m_sink.hasDataset())
       {
          assert(false);
          return;
@@ -427,14 +517,14 @@ namespace ctb::app
       m_score_spin_ctrl->Enable(m_enable_score_filter);
       if (m_enable_score_filter) 
       {
-         if (m_sink.getTable()->setMinScoreFilter(m_score_filter_val))
+         if (m_sink.getDataset()->setMinScoreFilter(m_score_filter_val))
          {
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
       else 
       {
-         if (m_sink.getTable()->setMinScoreFilter(std::nullopt))
+         if (m_sink.getDataset()->setMinScoreFilter(std::nullopt))
          {
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
@@ -448,10 +538,11 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         auto table = m_sink.getTable();
-         if (table)
+         auto dataset = m_sink.getDataset();
+         if (dataset)
          {
-            table->applySortConfig(m_sort_config);
+            m_sort_config.reverse = m_sort_descending;
+            dataset->applySort(m_sort_config);
             m_sink.signal_source(DatasetEvent::Id::Sort);
          }
       }
@@ -467,22 +558,22 @@ namespace ctb::app
       try
       {
          // event could get generated even if they didn't change the selection, don't waste our time.
-         auto old_index = m_sort_config.sorter_index;
+         auto old_index = m_sort_selection;
          TransferDataFromWindow();
-         if (old_index == m_sort_config.sorter_index)
+         if (old_index == m_sort_selection)
             return;
 
          // let the combo close its list before we reload the dataset
          CallAfter([this](){
-            auto table = m_sink.getTable();
-            if (table)
+            auto dataset = m_sink.getDataset();
+            if (dataset)
             {
                // we re-fetch sorter based on index, because when a sort is selected from the combo
                // we want to use the default order for that sort, not necessarily whatever the current
                // selection is (e.g. sort Scores descending by default).
-               auto configs = table->availableSortConfigs();
-               m_sort_config = configs.at(static_cast<size_t>(m_sort_config.sorter_index));
-               table->applySortConfig(m_sort_config);
+               auto sorts = dataset->availableSorts();
+               m_sort_config = sorts[static_cast<size_t>(m_sort_selection)];
+               dataset->applySort(m_sort_config);
                m_sink.signal_source(DatasetEvent::Id::Sort);
             }
          });
@@ -504,19 +595,19 @@ namespace ctb::app
 
          // if the node has a filter in our map and it doesn't already have a list of 
          // available filter values as children, we need to populate the child nodes.
-         // if not just return.
+         // otherwise just return.
          if( !m_filters.contains(filter_node.GetID()) || m_filter_tree->GetChildrenCount(filter_node) > 0 )
          {
             return;
          }
 
-         auto data = m_sink.getTable();
+         auto data = m_sink.getDataset();
          assert(data);
 
          auto& filter = m_filters[filter_node.m_pItem]; 
-         for (auto& match_val : filter->getMatchValues(data.get()) )
+         for (auto& match_val : data->getDistinctValues(filter->prop_id))
          {
-            auto item = m_filter_tree->AppendItem(filter_node, match_val.c_str());
+            auto item = m_filter_tree->AppendItem(filter_node, match_val.asString());
             m_filter_tree->SetItemImage(item, 1);
          }
       }

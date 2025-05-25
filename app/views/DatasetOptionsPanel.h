@@ -8,11 +8,8 @@
 #pragma once
 
 #include "App.h"
-#include "model/ScopedEventSink.h"
+#include <ctb/model/ScopedEventSink.h>
 
-#include <wx/choice.h>
-#include <wx/dataview.h>
-#include <wx/gdicmn.h>
 #include <wx/panel.h>
 #include <wx/spinctrl.h>
 #include <wx/treectrl.h>
@@ -20,8 +17,19 @@
 #include <map>
 #include <optional>
 
+
+// forward declare member pointers to avoid header pollution.
+class wxBoxSizer;
+class wxChoice;
+class wxSpinCtrlDouble;
+class wxStaticBoxSizer;
+class wxTreeCtrl;
+class wxStaticText;
+
+
 namespace ctb::app
 {
+
    /// @brief panel class that provides UI for setting sorting and filtering options
    ///
    class DatasetOptionsPanel final : public wxPanel, public IDatasetEventSink
@@ -33,7 +41,7 @@ namespace ctb::app
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its lifetime). 
       /// 
-      [[nodiscard]] static DatasetOptionsPanel* create(wxWindow* parent, DatasetEventSourcePtr source);
+      [[nodiscard]] static auto create(wxWindow* parent, DatasetEventSourcePtr source) -> DatasetOptionsPanel*;
    
       // no copy/move/assign, this class is created on the heap.
       DatasetOptionsPanel(const DatasetOptionsPanel&) = delete;
@@ -43,51 +51,56 @@ namespace ctb::app
       ~DatasetOptionsPanel() override = default;
       
    private:
-      using MaybeFilter = std::optional<CtStringFilter>;
-      using FilterMap = std::map<wxTreeItemId, MaybeFilter>; // map tree node to corresponding filter config
-      using CheckCountMap = std::map<wxTreeItemId, int>;     // for keeping track of number of filter items selected 
+      using MaybeFilter   = std::optional<CtMultiMatchFilter>;
+      using FilterMap     = std::map<wxTreeItemId, MaybeFilter>; // map tree node to corresponding MaybeFilter 
+      using CheckCountMap = std::map<wxTreeItemId, int>;     
 
-      CheckCountMap         m_check_map{};
-      bool                  m_enable_score_filter{ false };
-      bool                  m_sort_ascending{ true };
-      wxStaticBoxSizer*     m_filter_options_box{};
+      bool                  m_enable_score_filter{ false }; // whether score filter is active
       bool                  m_instock_only{ constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT };
+      bool                  m_sort_ascending{ true };       // whether ascending sort order is active
+      bool                  m_sort_descending{ false };     // whether descending sort ordes is active
+      CheckCountMap         m_check_map{};                  // for keeping track of number of filter items selected 
+      double                m_score_filter_val{};
+      int                   m_sort_selection{0};            // index of selected sort in combo, which matches a sort in availableSorts()
+      IDataset::TableSort   m_sort_config{};                // the sort object that will be used to sort the dataset 
+      FilterMap             m_filters{};
+      ScopedEventSink       m_sink;           
+      wxBoxSizer*           m_top_sizer{};
+      wxChoice*             m_sort_combo{};
+      wxSpinCtrlDouble*     m_score_spin_ctrl{};
+      wxStaticBoxSizer*     m_filter_options_box{};         
+      wxStaticText*         m_dataset_title{};
       wxTreeCtrl*           m_filter_tree{};
       wxWithImages::Images  m_filter_tree_images{};
-      FilterMap             m_filters{};
-      wxSpinCtrlDouble*     m_score_spin_ctrl{};
-      double                m_score_filter_val{};
-      ScopedEventSink       m_sink;           // no default init
-      wxChoice*             m_sort_combo{};
-      CtSortConfig          m_sort_config{};
 
       // window creation
       void initControls();
+      auto setTitle() -> bool;
 
-      // implementation functions for the property filter treeview
+      // implementation functions for the property filter tree-view
       void addPropFilter(wxTreeItemId item);
       void removePropFilter(wxTreeItemId item);
-      MaybeFilter getPropFilterForItem(wxTreeItemId item);
-      wxArrayString getSortOptionList(DatasetBase* dataset);
-      bool isChecked(wxTreeItemId item);
-      bool isContainerNode(wxTreeItemId item);
-      bool isMatchValueNode(wxTreeItemId item);
-      bool setMatchValueChecked(wxTreeItemId item, bool checked = true);
+      auto getPropFilterForItem(wxTreeItemId item) -> MaybeFilter;
+      auto getSortOptionList(IDataset* dataset) -> wxArrayString;
+      auto isChecked(wxTreeItemId item) -> bool;
+      auto isContainerNode(wxTreeItemId item) -> bool;
+      auto isMatchValueNode(wxTreeItemId item) -> bool;
+      auto setMatchValueChecked(wxTreeItemId item, bool checked = true) -> bool;
       void toggleFilterSelection(wxTreeItemId item);
       void updateFilterLabel(wxTreeItemId item);
 
-      // in-stock and score filters.
+      // in-stock filters.
       void enableInStockFilter(bool enable = true);
       void resetInStockCheckbox();
 
       /// event source related handlers
       void notify(DatasetEvent event) override;
-      void onTableInitialize(DatasetBase* dataset);
-      void onTableSorted(DatasetBase* dataset);
-      void populateFilterTypes(DatasetBase* dataset);
+      void onTableInitialize(IDataset* dataset);
+      void onTableSorted(IDataset* dataset);
+      void populateFilterTypes(IDataset* dataset);
 
       /// event handlers
-      void OnInStockChecked(wxCommandEvent& event);
+      void onInStockChecked(wxCommandEvent& event);
       void onMinScoreChanged(wxSpinDoubleEvent& event);
       void onMinScoreFilterChecked(wxCommandEvent& event);
       void onSortOrderClicked(wxCommandEvent& event);

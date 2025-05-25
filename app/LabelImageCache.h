@@ -8,8 +8,8 @@
 #pragma once
 
 #include "App.h"
-#include "tasks.h"
 
+#include <ctb/tasks/tasks.h>
 #include <wx/image.h>
 
 #include <expected>
@@ -33,11 +33,8 @@ namespace ctb::app
    public:
       /// @brief LabelImageCache constructor
       /// 
-      /// Any embedded environment variables contained in the folder path will be expanded.
-      /// 
       /// @param cache_folder - path of folder to use for disk cache. env vars will be expanded
       /// @throws ctb::Error if cache folder doesn't exist and can't be created, or is a relative path. 
-      /// 
       explicit LabelImageCache(std::string cache_folder);
       ~LabelImageCache() noexcept;
 
@@ -46,7 +43,6 @@ namespace ctb::app
       ///
       /// This wrapper just adds a convenience method for returning the 
       /// future value as a wxImage instead of raw bytes. 
-      /// 
       class wxImageTask final : public tasks::FetchFileTask
       {
       public:
@@ -58,8 +54,7 @@ namespace ctb::app
          /// 
          /// This is a potentially long, BLOCKING call if file is still being downloaded!
          ///
-         /// @return expected - the requested wxImage, unexpected - ctb::Error describing the failure
-         /// 
+         /// @return expected - the requested wxImage; unexpected - ctb::Error describing the failure
          auto getImage() noexcept -> ResultWrapper;
 
          wxImageTask()                               = default;
@@ -82,7 +77,7 @@ namespace ctb::app
       /// Caller can check if result is ready by polling the returned task and 
       /// then calling getImage() to retrieve the image when it's ready
       /// 
-      auto fetchLabelImage(uint64_t wine_id) -> wxImageTask;
+      auto fetchLabelImage(std::string_view wine_id) -> wxImageTask;
 
       /// @brief shuts down the thread pool, attempting to cancel any remaining tasks. 
       ///
@@ -106,18 +101,18 @@ namespace ctb::app
             throw Error{ constants::ERROR_STR_LABEL_CACHE_SHUT_DOWN }; 
       }
 
-      static auto buildLabelPath(fs::path folder, uint64_t wine_id) -> fs::path
+      static auto buildLabelPath(const fs::path& folder, std::string_view wine_id) -> fs::path
       {
          return folder / buildLabelFilename(wine_id);
       }
 
-      static auto buildLabelFilename(uint64_t wine_id) -> std::string
+      static auto buildLabelFilename(std::string_view wine_id) -> std::string
       {
          constexpr auto image_num = 1;
          return ctb::format(constants::FMT_LABEL_IMAGE_FILENAME, wine_id, image_num);
       }
 
-      static auto runFetchAndSaveLabelTask(fs::path folder, uint64_t wine_id, std::stop_token token) noexcept(false) -> tasks::FetchFileTask::ReturnType;
+      static auto runFetchAndSaveLabelTask(fs::path folder, std::string_view wine_id, std::stop_token token) noexcept(false) -> tasks::FetchFileTask::ReturnType;
    };
 
    using LabelCachePtr = std::shared_ptr<LabelImageCache>;

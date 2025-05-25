@@ -8,8 +8,8 @@
 #pragma once
 
 #include "App.h"
-#include "model/DatasetEventSource.h"
-#include "model/ScopedEventSink.h"
+#include <ctb/model/DatasetEventSource.h>
+#include <ctb/model/ScopedEventSink.h>
 
 #include <wx/event.h>
 #include <wx/frame.h>
@@ -29,17 +29,6 @@ namespace ctb::app
    class DatasetMultiView;
    class LabelImageCache;     // used for retrieving label images
 
-
-   // we don't use enum class because then every time we need to pass an ID to wxObject,
-   // we'd have to cast or use std::to_underlying and that's just an ugly waste of time 
-   // with no benefit for this use-case.
-   enum CmdId : uint16_t
-   {
-      CMD_FILE_DOWNLOAD_DATA = wxID_HIGHEST,
-      CMD_FILE_SETTINGS,
-      CMD_VIEW_WINE_LIST,
-      CMD_VIEW_RESIZE_GRID
-   };
 
    /// @brief class for the main window of the application
    ///
@@ -78,12 +67,13 @@ namespace ctb::app
 
    private:
       DatasetMultiView*       m_view{};
-      DatasetEventSourcePtr   m_event_source{}; // for synchronizing events between views and the underlying table
+      DatasetEventSourcePtr   m_event_source{}; // for synchronizing events between views and the underlying dataset
       wxMenuBar*              m_menu_bar{};
       wxSearchCtrl*           m_search_ctrl{};  // substring search box on the toolbar
       ScopedEventSink         m_sink;           // so we can also handle events from our source
       wxStatusBar*            m_status_bar{};
       wxToolBar*              m_tool_bar{};
+      int                     m_selected_row{ -1 }; // whether or not a row is selected in the dataset view, for update-UI handlers
 
       // we use a shared_ptr because we want to share the object with child window(s)
       std::shared_ptr<LabelImageCache> m_label_cache{};
@@ -98,20 +88,30 @@ namespace ctb::app
       void createToolBar();
 
       // message handlers
+      void onMenuFilePreferences(wxCommandEvent&);
+      void onMenuFileSyncData(wxCommandEvent&);
+      void onMenuFileQuit(wxCommandEvent&);
+
       void onMenuEditFind(wxCommandEvent& event);
-      void onMenuPreferences(wxCommandEvent&);
-      void onMenuSyncData(wxCommandEvent&);
-      void onMenuWineList(wxCommandEvent&);
-      void onSearchBtn(wxCommandEvent& event);
-      void onMenuViewResizeGrid(wxCommandEvent&);
-      void onSearchCancelBtn(wxCommandEvent& event);
-      void onSearchTextEnter(wxCommandEvent& event);
-      void onSearchKeyDown(wxKeyEvent& event);
-      void onQuit(wxCommandEvent&);
+      void onMenuCollection(wxCommandEvent&);
+
+      void onToolbarSearchBtn(wxCommandEvent& event);
+      void onToolbarSearchCancelBtn(wxCommandEvent& event);
+      void onToolbarSearchTextEnter(wxCommandEvent& event);
+      void onToolbarSearchKeyDown(wxKeyEvent& event);
+
+      void onMenuWineOnlineDetails(wxCommandEvent&);
+      void onMenuWineOnlineVintages(wxCommandEvent&);
+      void onMenuWineAcceptDelivery(wxCommandEvent&);
+      void onMenuWineEditOrder(wxCommandEvent&);
+
+      void onMenuWineOnlineUI(wxUpdateUIEvent&);
+      void onMenuWineAcceptDeliveryUI(wxUpdateUIEvent&);  
 
       // implementation details
-      void doSearchFilter();
       void clearSearchFilter();
+      void doSearchFilter();
+      auto getDataset(bool throw_on_null = true) -> DatasetPtr;
       void updateStatusBarCounts();
 
       // Inherited via IDatasetEventSink

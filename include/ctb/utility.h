@@ -50,8 +50,9 @@ namespace ctb
    auto viewFilename(std::string& fq_path) noexcept -> std::string_view;
 
 
-   /// @brief ISO 8859-1 Latin 1; Western European (ISO)
-   constexpr unsigned int ISO_LATIN_1 = 28591;
+   /// @brief Currently-supported code pages.
+   constexpr unsigned int CP_ISO_LATIN_1  = 28591;
+   constexpr unsigned int CP_WINDOWS_1252 = 1252;
 
    /// @brief convert text to UTF8 from other narrow/multi-byte encoding.
    ///
@@ -60,7 +61,17 @@ namespace ctb
    /// 
    /// @return the converting string if successful, std::nullopt if not.
    /// 
-   [[nodiscard]] auto toUTF8(const std::string& text, unsigned int code_page = ISO_LATIN_1) -> MaybeString;
+   [[nodiscard]] auto toUTF8(const std::string& text, unsigned int from_code_page = CP_WINDOWS_1252) -> MaybeString;
+
+
+   /// @brief convert text to UTF8 from other narrow/multi-byte encoding.
+   ///
+   /// see https://learn.microsoft.com/en-us/windows/win32/Intl/code-page-identifiers
+   /// for a list of code page id's.
+   /// 
+   /// @return the converting string if successful, std::nullopt if not.
+   /// 
+   [[nodiscard]] auto fromUTF8(const std::string& utf8_text, unsigned int to_code_page = CP_WINDOWS_1252) -> MaybeString;
 
 
    /// @brief  Expand environment variables in place
@@ -78,15 +89,12 @@ namespace ctb
    ///
    /// while this overload is convenient, it has the overhead of an unnecessary copy
    /// when the passed string has no vars to expand.
-   template<StringViewCompatible Str>
+   template<StringOrStringViewType Str>
    inline auto expandEnvironmentVars(Str&& text) -> std::string
    {
       std::string result{std::forward<Str>(text)};
       tryExpandEnvironmentVars(result);
       return result;
    }
-
-
-
 
 } // namespace ctb

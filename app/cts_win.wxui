@@ -98,16 +98,61 @@
       <node
         class="wxBoxSizer">
         <node
+          class="wxDataViewCtrl"
+          var_name="m_data_view_ctrl"
+          wxEVT_DATAVIEW_SELECTION_CHANGED="onSelectionChanged" />
+        <node
           class="wxPanel"
           maximum_size="150,-1d"
           window_style="wxBORDER_THEME|wxTAB_TRAVERSAL"
           borders=""
           flags="wxEXPAND"
           proportion="1" />
+      </node>
+      <node
+        class="wxMenuBar">
         <node
-          class="wxDataViewCtrl"
-          var_name="m_data_view_ctrl"
-          wxEVT_DATAVIEW_SELECTION_CHANGED="onSelectionChanged" />
+          class="wxMenu"
+          label="File" />
+        <node
+          class="wxMenu"
+          label="Edit"
+          var_name="m_menu2" />
+        <node
+          class="wxMenu"
+          label="Collection"
+          var_name="m_menu3">
+          <node
+            class="wxMenuItem"
+            label="My Wine Cellar" />
+          <node
+            class="wxMenuItem"
+            label="Pending Wines"
+            var_name="menu_item2" />
+          <node
+            class="wxMenuItem"
+            label="Ready To Drink"
+            var_name="menu_item3" />
+        </node>
+        <node
+          class="wxMenu"
+          label="Wine"
+          var_name="m_menu4">
+          <node
+            class="wxMenuItem"
+            label="View Wine on CT"
+            var_name="menu_item4" />
+          <node
+            class="wxMenuItem"
+            label="View Producer on CT"
+            var_name="menu_item6" />
+          <node
+            class="separator" />
+          <node
+            class="wxMenuItem"
+            label="Accept Delivery on CT"
+            var_name="menu_item7" />
+        </node>
       </node>
     </node>
     <node
@@ -163,6 +208,70 @@
       <node
         class="wxTimer"
         wxEVT_TIMER="onTimer" />
+    </node>
+    <node
+      class="wxDialog"
+      class_name="CredentialDialog"
+      title="Enter Credentials"
+      base_file="credentialdialog">
+      <node
+        class="wxBoxSizer"
+        orientation="wxVERTICAL"
+        var_name="dlg_sizer"
+        flags="wxEXPAND">
+        <node
+          class="spacer"
+          add_default_border="1" />
+        <node
+          class="wxStaticText"
+          class_access="none"
+          label="Enter username and password for CellarTracker.com:"
+          var_name="prompt_message" />
+        <node
+          class="wxGridSizer"
+          rows="2"
+          borders="">
+          <node
+            class="wxStaticText"
+            class_access="none"
+            label="Username:"
+            var_name="username_label"
+            maximum_size="30,-1d"
+            minimum_size="30,-1d"
+            size="20,-1d" />
+          <node
+            class="wxTextCtrl"
+            class_access="none"
+            var_name="username_text"
+            validator_variable="m_username_val"
+            flags="wxEXPAND" />
+          <node
+            class="wxStaticText"
+            class_access="none"
+            label="Password:"
+            var_name="password_lbl"
+            maximum_size="30,-1d"
+            minimum_size="30,-1d"
+            size="20,-1d" />
+          <node
+            class="wxTextCtrl"
+            class_access="none"
+            var_name="password_text"
+            validator_variable="m_password_val" />
+          <node
+            class="spacer" />
+          <node
+            class="wxCheckBox"
+            class_access="none"
+            label="Save Credential"
+            var_name="check_box"
+            validator_variable="m_save_requested"
+            alignment="wxALIGN_LEFT" />
+        </node>
+        <node
+          class="wxStdDialogButtonSizer"
+          flags="wxEXPAND" />
+      </node>
     </node>
   </node>
 </wxUiEditorData>

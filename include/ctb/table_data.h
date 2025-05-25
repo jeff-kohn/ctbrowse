@@ -92,9 +92,9 @@ namespace ctb
 
 
 
-   /// @brief  returns the descriptive name that corresponds tbl, or empty string if not found
+   /// @brief  Returns the user-facing descriptive name for a table, or empty string if not found
    ///
-   inline std::string_view getTableDescription(TableId tbl)
+   inline auto getTableDescription(TableId tbl) -> std::string_view
    {
       auto it = TableDescriptions.find(tbl);
       if (it != TableDescriptions.end())
@@ -106,7 +106,7 @@ namespace ctb
 
    /// @brief  combine enum values to generate a filename.
    ///
-   inline std::string getTableFileName(TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT)
+   inline auto getTableFileName(TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT) -> std::string
    {
       using magic_enum::enum_name;
       return ctb::format("{}.{}", enum_name(tbl), enum_name(fmt));
@@ -115,7 +115,7 @@ namespace ctb
 
    /// @brief  get the fully qualified path for a table 
    ///
-   inline fs::path getTablePath(fs::path data_folder, TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT)
+   inline auto getTablePath(fs::path data_folder, TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT) -> fs::path
    {
       return data_folder / getTableFileName(tbl, fmt);
    }
@@ -123,7 +123,7 @@ namespace ctb
 
    /// @brief checks whether the requested table is available at the specified location
    ///
-   inline bool isTableFileAvailable(fs::path file_path)
+   inline auto isTableFileAvailable(fs::path file_path) -> bool
    {
       return fs::exists(file_path);
    }
@@ -131,7 +131,7 @@ namespace ctb
 
    /// @brief checks whether the requested table is available at the specified location
    ///
-   inline bool isTableAvailable(fs::path data_folder, TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT)
+   inline auto isTableAvailable(fs::path data_folder, TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT) -> bool
    {
       return isTableFileAvailable(getTablePath(data_folder, tbl, fmt));
    }
@@ -139,7 +139,7 @@ namespace ctb
 
    /// @brief get a list of available tables in the specified folder
    ///
-   inline std::vector<TableId> getAvailableTables(fs::path data_folder, DataFormatId fmt = DataFormatId::csv)
+   inline auto getAvailableTables(fs::path data_folder, DataFormatId fmt = DataFormatId::csv) -> std::vector<TableId>
    {
       std::vector<TableId> ids{};
       rng::for_each(vws::keys(TableDescriptions), [&](TableId tbl)
@@ -157,7 +157,7 @@ namespace ctb
    /// Note the lack of a "format" parameter, we currently only support parsing CSV files.
    ///
    template <typename TableDataT>
-   std::expected<TableDataT, Error> loadTableData(fs::path data_folder, TableId tbl)
+   auto loadTableData(fs::path data_folder, TableId tbl) -> std::expected<TableDataT, Error>
    {
       auto table_path = getTablePath(data_folder, tbl, DataFormatId::csv);
       if (not isTableFileAvailable(table_path))
@@ -168,9 +168,7 @@ namespace ctb
       TableDataT data{};
       for (csv::CSVRow& row : reader)
       {
-         typename TableDataT::value_type record{};
-         record.parse(row);
-         data.emplace_back(std::move(record));
+         data.emplace_back(row);
       }
       return data;
    }

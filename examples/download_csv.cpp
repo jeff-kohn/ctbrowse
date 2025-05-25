@@ -6,13 +6,11 @@
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
-#include "ctb/constants.h"
-#include "ctb/table_download.h"
-#include "ctb/utility.h"
-#include "external/HttpStatusCodes.h"
 
-#include <cpr/cpr.h>
-#include <cpr/util.h>
+#include <ctb/CredentialManager.h>
+#include <ctb/table_download.h>
+#include <ctb/utility.h>
+#include <external/HttpStatusCodes.h>
 
 #include <string>
 #include <print>
@@ -25,41 +23,41 @@ int main()
    try {
       using namespace ctb;
 
-      CredentialWrapper cred_wrapper{
-         constants::CELLARTRACKER_DOT_COM, true,
-         constants::CELLARTRACKER_LOGON_CAPTION,
-         constants::CELLARTRACKER_LOGON_TITLE
-      };
+      CredentialManager<CredentialPromptFuncWinApi> cred_mgr{};
 
-      // if there's no saved credential, user will be prompted. use a loop since
-      // it may take more than one try before user enters the correct credentials
-      // (or gives up trying).
       DownloadResult result{};
       bool prompt_again = true;
       while (prompt_again)
       {
-         auto cred = cred_wrapper.promptForCredential();
+         auto cred = cred_mgr.promptCredential("CellarTracker.com", "Enter CellarTracker Credentials:", false);
          if (!cred)
-            throw Error{ "Authentication failed." };
+            return 0;
 
-         result = downloadRawTableData(cred.value(), TableId::Notes, DataFormatId::csv);
-         if (!result.has_value() && result.error().error_code == static_cast<int>(HttpStatus::Code::Unauthorized))
-            prompt_again = true; // wrong user/pass, try again
-         else 
-            prompt_again = false;
+         result = downloadRawTableData(cred.value(), TableId::List, DataFormatId::csv, nullptr, false);
+         prompt_again = !result and result.error().error_code == static_cast<int>(HttpStatus::Code::Unauthorized);
       }
 
-      if (result.has_value())
-      {
-         auto& data = result.value();
-         saveTextToFile(data.data, data.tableName());
-      }
+      if (!result.has_value())
+         throw result.error();
+      
+      // testing UTF-8/Win-1252 round-trip conversion
+      auto& table = result.value();
+      saveTextToFile("win-1265.txt", table.data, true);
+      auto utf_data = toUTF8(table.data, CP_WINDOWS_1252).value_or("conversion failed");
+      saveTextToFile("utf-8.txt", utf_data, true);
+      auto round_trip_data = fromUTF8(utf_data, CP_WINDOWS_1252).value_or("conversion failed");
+      saveTextToFile("round-trip.txt", round_trip_data, true);
+
+      if (round_trip_data == table.data)
+         std::println("Well that was unexpected, got a match!");
+      else
+         std::println("told you!");
 
       return 0;
    }
-    catch (std::exception& ex)
-    {
-       std::println("\r\nException occurred:{}\r\n", ex.what());
-    }
+   catch (std::exception& ex)
+   {
+      std::println("\r\nException occurred:{}\r\n", ex.what());
+   }
 }
 

@@ -7,8 +7,8 @@
  *********************************************************************/
 
 #include "LabelImageCache.h"
-#include "tasks.h"
 
+#include <ctb/tasks/tasks.h>
 #include <ctb/utility.h>  
 #include <wx/mstream.h>
 
@@ -40,7 +40,7 @@ namespace ctb::app
          return label_img;
       }
       catch (...) {
-         return unexpected{ packageError(std::current_exception()) };
+         return unexpected{ packageError() };
       }
 
    }
@@ -48,7 +48,7 @@ namespace ctb::app
 
    LabelImageCache::LabelImageCache(std::string cache_folder) : m_cache_folder{ expandEnvironmentVars(cache_folder) }
    {
-      if (m_cache_folder.is_relative() or (fs::exists(m_cache_folder) and !fs::is_directory(m_cache_folder)) )
+      if (m_cache_folder.is_relative() or ( (fs::exists(m_cache_folder) and !fs::is_directory(m_cache_folder)) ))
       {
          throw Error{ constants::ERROR_STR_RELATIVE_LABEL_CACHE };
       }
@@ -67,7 +67,7 @@ namespace ctb::app
    }
 
 
-   auto LabelImageCache::fetchLabelImage(uint64_t wine_id) -> wxImageTask
+   auto LabelImageCache::fetchLabelImage(std::string_view wine_id) -> wxImageTask
    {
       checkShutdown();
 
@@ -78,7 +78,7 @@ namespace ctb::app
          return wxImageTask{ async(launch::deferred, runLoadFileTask, file_path, m_cancel_source.get_token()) };
       }
       else {
-         return wxImageTask{ async(runFetchAndSaveLabelTask, m_cache_folder, wine_id, m_cancel_source.get_token()) };
+         return wxImageTask{ async(launch::async, runFetchAndSaveLabelTask, m_cache_folder, wine_id, m_cancel_source.get_token()) };
       }
    }
 
@@ -101,13 +101,11 @@ namespace ctb::app
    }
 
 
-   auto LabelImageCache::runFetchAndSaveLabelTask(
-      fs::path folder, uint64_t wine_id, 
-      std::stop_token token) noexcept(false) -> FetchFileTask::ReturnType
+   auto LabelImageCache::runFetchAndSaveLabelTask(fs::path folder, std::string_view wine_id, std::stop_token token) noexcept(false) -> FetchFileTask::ReturnType
    {
       try
       {
-         SPDLOG_DEBUG("runFetchAndSaveLabelTask({}, {}), starting execution", folder.generic_string(), wine_id);
+         SPDLOG_DEBUG("runFetchAndSaveLabelTask({}, {}) starting execution", folder.generic_string(), wine_id);
          checkStopToken(token);
          auto buffer = runLabelDownloadTask(wine_id, token);
 

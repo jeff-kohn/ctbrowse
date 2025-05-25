@@ -7,15 +7,13 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *
  *******************************************************************/
-#include "ctb/constants.h"
-#include "ctb/WineListTraits.h"
-#include "ctb/Error.h"
+#include <ctb/constants.h>
+#include <ctb/Error.h>
+#include <ctb/tables/WineListTraits.h>
 
 #include <cassert>
-#include <deque>
 #include <print>
 #include <string>
-#include <vector>
 
 #pragma warning(push)
 #pragma warning(disable: 4365 4464 4702)
@@ -31,11 +29,11 @@ int main()
    try
    {
       csv::CSVReader reader{ R"(C:\Users\jkohn\AppData\Roaming\cts_win\List.csv)" };
-      std::deque<WineListRecord> wines{};
-      WineListRecord rec{};
+      WineListTable wines{};
+      WineListTable::value_type rec{};
       for (csv::CSVRow& row : reader)
       {
-         rec.parse(row);
+         rec.parseRow(row);
          wines.emplace_back(std::move(rec));
       }
    }

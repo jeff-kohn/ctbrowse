@@ -8,7 +8,7 @@
 
 namespace ctb::app
 {
-   auto DatasetMultiView::create(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache) -> DatasetMultiView*
+   auto DatasetMultiView::create(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache) -> DatasetMultiView*
    {
       try
       {
@@ -21,8 +21,8 @@ namespace ctb::app
       }
    }
 
-
-   DatasetMultiView::DatasetMultiView(wxWindow* parent, EventSourcePtr source, LabelCachePtr cache) : wxSplitterWindow{ parent }
+   
+   DatasetMultiView::DatasetMultiView(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache) : wxSplitterWindow{ parent }
    {
       constexpr auto LEFT_SPLITTER_GRAVITY = 0.25;
       constexpr auto RIGHT_SPLITTER_GRAVITY = 0.75;
@@ -33,9 +33,9 @@ namespace ctb::app
 
       SetSashGravity(LEFT_SPLITTER_GRAVITY);
 
-      // top/left splitter contains options panel and right/nested splitter
-      m_right_splitter = new wxSplitterWindow{ this };
+      // this splitter window contains options panel and right/nested splitter
       m_options_panel = DatasetOptionsPanel::create(this, source);
+      m_right_splitter = new wxSplitterWindow{ this };
       SplitVertically(m_options_panel, m_right_splitter);
       wxPersistentRegisterAndRestore(this, "DatasetMultiView");
 
@@ -48,6 +48,12 @@ namespace ctb::app
       // For some reason the CalLAfter() is required, otherwise this call messes up the
       // next splitter layout. No idea why but this works.
       CallAfter([this] { m_right_splitter->SetSashGravity(RIGHT_SPLITTER_GRAVITY); });
+   }
+
+
+   auto DatasetMultiView::wineDetailsActive() const -> bool
+   {
+      return m_details_panel ? m_details_panel->wineDetailsActive() : false;
    }
 
 } // namespace ctb::app

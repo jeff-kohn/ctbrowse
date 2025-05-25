@@ -39,7 +39,6 @@ target_link_libraries(${TARGET_NAME}
    PRIVATE
       ctBrowse::ctBrowse_lib
       wxWidgets::wxWidgets
-      spdlog::spdlog
 )
 
 target_sources(${TARGET_NAME}
@@ -49,26 +48,21 @@ target_sources(${TARGET_NAME}
      "app_constants.h"
      "LabelImageCache.cpp"
      "LabelImageCache.h"
-     "log.cpp"
-     "log.h"
      "MainFrame.cpp"
      "MainFrame.h"
-     "PollingTask.h"
-     "tasks.cpp"
-     "tasks.h"
+     "CtCredentialManager.cpp"
+     "CtCredentialManager.h"
+     "LoginEvent.h"
      "wx_helpers.h"
+
+     "dialogs/CredentialDialog.cpp"
+     "dialogs/CredentialDialog.h"
      "dialogs/TableSyncDialog.cpp"
      "dialogs/TableSyncDialog.h"
-     "model/CtDataModel.h"
-     "model/CtStringFilter.h"
-     "model/DatasetBase.h"
-     "model/DatasetEvent.h"
-     "model/DatasetEventSource.cpp"
-     "model/DatasetEventSource.h"
-     "model/DatasetLoader.cpp"
-     "model/DatasetLoader.h"
-     "model/DisplayColumn.h"
-     "model/ScopedEventSink.h"
+
+     "model/CtDataViewModel.cpp"
+     "model/CtDataViewModel.h"
+
      "views/DatasetListView.cpp"
      "views/DatasetListView.h"
      "views/DatasetMultiView.cpp"
@@ -77,6 +71,7 @@ target_sources(${TARGET_NAME}
      "views/DatasetOptionsPanel.h"
      "views/DetailsPanel.cpp"
      "views/DetailsPanel.h"
+
      "resources/utf-8.manifest"
      "resources/resource.rc"
      ${${PROJECT_NAME}_VERSION_RESOURCE}

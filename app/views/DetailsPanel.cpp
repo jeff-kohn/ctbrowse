@@ -7,28 +7,27 @@
  *********************************************************************/
 #include "views/DetailsPanel.h"
 
+#include <ctb/utility_chrono.h>
 #include <ctb/utility_http.h>
-#include <cpr/cpr.h>
+#include <ctb/tasks/tasks.h>
 
 #include <wx/commandlinkbutton.h>
 #include <wx/collpane.h>
 #include <wx/gdicmn.h>
 #include <wx/hyperlink.h>
-#include <wx/generic/hyperlink.h>
 #include <wx/generic/statbmpg.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/valgen.h>
 #include <wx/wupdlock.h>
 
-#include <chrono>
-#include <thread>
 
 namespace ctb::constants
 {
-   constexpr auto LABEL_TIMER_RETRY_INTERVAL = 100; 
+   constexpr auto LABEL_TIMER_RETRY_INTERVAL = 33; 
 
 } // namespace constants
+
 
 namespace ctb::app
 {
@@ -36,19 +35,20 @@ namespace ctb::app
    {
       auto getDrinkWindow(const CtProperty& drink_start, const CtProperty& drink_end) -> wxString
       {
-         if (drink_start.isNull() && drink_end.isNull() )
+         if (drink_start.isNull() && drink_end.isNull())
             return wxEmptyString;
 
          if (drink_start.isNull() && !drink_end.isNull())
             return drink_end.asString("By {}").c_str();
 
-         if (drink_end.isNull() )
+         if (drink_end.isNull())
             return drink_start.asString("{} +").c_str();
 
-         return ctb::format("{} - {}", drink_start.asString(), drink_end.asString()).c_str(); 
+         return ctb::format("{} - {}", drink_start.asString(), drink_end.asString());
       }
 
    } // namespace detail
+
 
 
    DetailsPanel::DetailsPanel(DatasetEventSourcePtr source, LabelCachePtr cache) : 
@@ -80,8 +80,16 @@ namespace ctb::app
    }
 
 
+   auto DetailsPanel::wineDetailsActive() const -> bool
+   {
+      return GetSizer()->AreAnyItemsShown();
+   }
+
+
    void DetailsPanel::initControls()
    {
+      using enum CategorizedControls::Category;
+
       wxWindowUpdateLocker freeze_win(this);
 
       SetMaxSize(ConvertDialogToPixels( wxSize{220, -1} ));
@@ -91,7 +99,7 @@ namespace ctb::app
       const auto heading_color = wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT);
 
       // configure font sizes/weights for property display
-      auto title_font{ GetFont().MakeBold() };
+      auto heading_font{ GetFont().MakeBold() };
       auto wine_font{ GetFont().MakeLarger().MakeBold()};
 
       auto* top_sizer = new wxBoxSizer(wxVERTICAL);
@@ -103,115 +111,198 @@ namespace ctb::app
       wine_name_val->SetFont(wine_font);
       wine_name_val->SetForegroundColour(heading_color);
 
-      top_sizer->Add(wine_name_val, wxSizerFlags{1}.Expand().Border(wxLEFT|wxRIGHT|wxTOP));
+      top_sizer->Add(wine_name_val, wxSizerFlags{2}.Expand().Border(wxRIGHT|wxTOP));
 
       // grid sizer gives us a property grid (eg a column of labels and values)
-      auto* details_sizer = new wxFlexGridSizer(2, 0, 0);
+      static constexpr int cols = 2;
+      auto* details_sizer = new wxFlexGridSizer(cols, 0, 0);
 
       // vintage
-      auto* lbl_vintage = new wxStaticText(this, wxID_ANY, constants::LBL_VINTAGE);
-      details_sizer->Add(lbl_vintage, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      auto* vintage_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_VINTAGE);
+      details_sizer->Add(vintage_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* vintage_val = new wxStaticText(this, wxID_ANY, "");
       vintage_val->SetValidator(wxGenericValidator{ &m_details.vintage });
-      details_sizer->Add(vintage_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(vintage_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // varietal
-      auto* lbl_varietal = new wxStaticText(this, wxID_ANY, constants::LBL_VARIETAL);
-      details_sizer->Add(lbl_varietal, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      auto* varietal_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_VARIETAL);
+      details_sizer->Add(varietal_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* varietal_val = new wxStaticText(this, wxID_ANY, "");
       varietal_val->SetValidator(wxGenericValidator{ &m_details.varietal });
-      details_sizer->Add(varietal_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
-
+      details_sizer->Add(varietal_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // country
-      auto* lbl_country = new wxStaticText(this, wxID_ANY, constants::LBL_COUNTRY);
-      details_sizer->Add(lbl_country, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      auto* country_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_COUNTRY);
+      details_sizer->Add(country_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* country_region_val = new wxStaticText(this, wxID_ANY, "");
       country_region_val->SetValidator(wxGenericValidator{ &m_details.country });
-      details_sizer->Add(country_region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(country_region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // region
-      auto* lbl_region = new wxStaticText(this, wxID_ANY, constants::LBL_REGION);
-      details_sizer->Add(lbl_region, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      auto* region_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_REGION);
+      details_sizer->Add(region_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* region_val = new wxStaticText(this, wxID_ANY, "");
       region_val->SetValidator(wxGenericValidator{ &m_details.region });
-      details_sizer->Add(region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // subregion
-      auto* lbl_sub_region = new wxStaticText(this, wxID_ANY, constants::LBL_SUB_REGION);
-      details_sizer->Add(lbl_sub_region, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      auto* sub_region_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_SUB_REGION);
+      details_sizer->Add(sub_region_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* sub_region_val = new wxStaticText(this, wxID_ANY, "");
       sub_region_val->SetValidator(wxGenericValidator{ &m_details.sub_region });
-      details_sizer->Add(sub_region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(sub_region_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // appellation
-      auto* lbl_appellation = new wxStaticText(this, wxID_ANY, constants::LBL_APPELLATION);
-      details_sizer->Add(lbl_appellation, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      auto* appellation_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_APPELLATION);
+      details_sizer->Add(appellation_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* appellation_val = new wxStaticText(this, wxID_ANY, "");
       appellation_val->SetValidator(wxGenericValidator{ &m_details.appellation });
-      details_sizer->Add(appellation_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(appellation_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
 
       // drink window
-      auto* lbl_drink_window = new wxStaticText(this, wxID_ANY, constants::LBL_DRINK_WINDOW);
-      details_sizer->Add(lbl_drink_window, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      auto* drink_window_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_DRINK_WINDOW);
+      details_sizer->Add(drink_window_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* drink_window_val = new wxStaticText(this, wxID_ANY, "");
       drink_window_val->SetValidator(wxGenericValidator{ &m_details.drink_window });
-      details_sizer->Add(drink_window_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM));
+      details_sizer->Add(drink_window_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
+      m_category_controls.addControlDependency(DrinkWindow, drink_window_lbl);
+      m_category_controls.addControlDependency(DrinkWindow, drink_window_val);
 
       // Scores heading
-      auto* lbl_scores_header = new wxStaticText(this, wxID_ANY, constants::LBL_SCORES);
-      lbl_scores_header->SetFont(title_font);
-      lbl_scores_header->SetForegroundColour(heading_color);
-      details_sizer->Add(lbl_scores_header, wxSizerFlags{}.Border(wxALL));
+      auto* scores_header_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_SCORES, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      scores_header_lbl->SetFont(heading_font);
+      scores_header_lbl->SetForegroundColour(heading_color);
+      details_sizer->Add(scores_header_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxTOP, border_size));
       details_sizer->AddSpacer(0);
+      m_category_controls.addControlDependency(Score, scores_header_lbl);
 
       // My Score
-      auto* lbl_my_score = new wxStaticText(this, wxID_ANY, constants::LBL_MY_SCORE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_my_score, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      auto* my_score_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_MY_SCORE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(my_score_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* my_score_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       my_score_val->SetValidator(wxGenericValidator(&m_details.my_score));
-      details_sizer->Add(my_score_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(my_score_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Score, my_score_lbl);
+      m_category_controls.addControlDependency(Score, my_score_val);
 
       // CT Score
-      auto* lbl_ct_score = new wxStaticText(this, wxID_ANY, constants::LBL_CT_SCORE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_ct_score, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      auto* ct_score_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_CT_SCORE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(ct_score_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* ct_score_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       ct_score_val->SetValidator(wxGenericValidator{ &m_details.ct_score });
-      details_sizer->Add(ct_score_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(ct_score_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Score, ct_score_lbl);
+      m_category_controls.addControlDependency(Score, ct_score_val);
 
       // Valuation heading
-      auto* lbl_value_header = new wxStaticText(this, wxID_ANY, constants::LBL_VALUATION);
-      lbl_value_header->SetFont(title_font);
-      lbl_value_header->SetForegroundColour(heading_color);
-      details_sizer->Add(lbl_value_header, wxSizerFlags{}.Border(wxALL));
+      auto* value_header_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_VALUATION, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      value_header_lbl->SetFont(heading_font);
+      value_header_lbl->SetForegroundColour(heading_color);
+      details_sizer->Add(value_header_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxTOP, border_size));
       details_sizer->AddSpacer(0);
+      m_category_controls.addControlDependency(Valuation, value_header_lbl);
 
       // My Price
-      auto* lbl_my_price = new wxStaticText(this, wxID_ANY, constants::LBL_MY_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_my_price, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      auto* my_price_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_MY_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(my_price_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* my_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       my_price_val->SetValidator(wxGenericValidator{ &m_details.my_price });
-      details_sizer->Add(my_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(my_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Valuation, my_price_lbl);
+      m_category_controls.addControlDependency(Valuation, my_price_val);
 
       // Community Avg
-      auto* lbl_ct_price = new wxStaticText(this, wxID_ANY, constants::LBL_CT_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_ct_price, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      auto* ct_price_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_CT_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(ct_price_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* ct_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       ct_price_val->SetValidator(wxGenericValidator{ &m_details.community_price });
-      details_sizer->Add(ct_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(ct_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Valuation, ct_price_lbl);
+      m_category_controls.addControlDependency(Valuation, ct_price_val);
 
       // Auction value
-      auto* lbl_auction_value = new wxStaticText(this, wxID_ANY, constants::LBL_AUCTION_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-      details_sizer->Add(lbl_auction_value, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      auto* auction_value_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_AUCTION_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(auction_value_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
       auto* auction_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       auction_price_val->SetValidator(wxGenericValidator{ &m_details.auction_value });
-      details_sizer->Add(auction_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT|wxBOTTOM, border_size));
+      details_sizer->Add(auction_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Valuation, auction_value_lbl);
+      m_category_controls.addControlDependency(Valuation, auction_value_lbl);
 
+      // Pending Order details heading
+      auto* order_details_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_ORDER_DETAILS, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      order_details_lbl->SetFont(heading_font);
+      order_details_lbl->SetForegroundColour(heading_color);
+      details_sizer->Add(order_details_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT|wxTOP, border_size));
+      details_sizer->AddSpacer(0);
+      m_category_controls.addControlDependency(Pending, order_details_lbl);
+
+      // pending store name
+      auto* pend_store_name_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_STORE_NAME, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(pend_store_name_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* pend_store_name_val = new wxStaticText(this, wxID_ANY, "");
+      pend_store_name_val->SetValidator(wxGenericValidator{ &m_details.pending_store_name });
+      details_sizer->Add(pend_store_name_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Pending, pend_store_name_lbl);
+      m_category_controls.addControlDependency(Pending, pend_store_name_val);
+
+      // pending quantity
+      auto* pend_order_qty_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_QTY_ORDERED, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(pend_order_qty_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* pend_order_qty_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      pend_order_qty_val->SetValidator(wxGenericValidator{ &m_details.pending_qty });
+      details_sizer->Add(pend_order_qty_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Pending, pend_order_qty_lbl);
+      m_category_controls.addControlDependency(Pending, pend_order_qty_val);  
+
+      // pending price
+      auto* pending_price_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_MY_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(pending_price_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* pending_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      pending_price_val->SetValidator(wxGenericValidator{ &m_details.pending_price });
+      details_sizer->Add(pending_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Pending, pending_price_lbl);
+      m_category_controls.addControlDependency(Pending, pending_price_val);  
+
+      // pending order date
+      auto* pend_order_date_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_ORDER_DATE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(pend_order_date_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* pend_order_date_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      pend_order_date_val->SetValidator(wxGenericValidator{ &m_details.pending_order_date });
+      details_sizer->Add(pend_order_date_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Pending, pend_order_date_lbl);
+      m_category_controls.addControlDependency(Pending, pend_order_date_val);
+
+      // pending delivery date
+      auto* pend_delivery_date_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_DELIVERY_DATE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(pend_delivery_date_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* pend_delivery_date_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      pend_delivery_date_val->SetValidator(wxGenericValidator{ &m_details.pending_delivery_date });
+      details_sizer->Add(pend_delivery_date_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Pending, pend_delivery_date_lbl);
+      m_category_controls.addControlDependency(Pending, pend_delivery_date_val);
+
+      // order #
+      auto* pend_order_num_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_ORDER_NUMBER, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      details_sizer->Add(pend_order_num_lbl, wxSizerFlags{}.Expand().Border(wxLEFT|wxRIGHT, border_size));
+      auto* pend_order_num_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
+      pend_order_num_val->SetValidator(wxGenericValidator{ &m_details.pending_order_number });
+      details_sizer->Add(pend_order_num_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
+      m_category_controls.addControlDependency(Pending, pend_order_num_lbl);
+      m_category_controls.addControlDependency(Pending, pend_order_num_val);
+
+      // end details_sizer layout
       top_sizer->Add(details_sizer, wxSizerFlags{}.CenterHorizontal().FixedMinSize().Border(wxALL));
 
-      // View Online button (also outside grid sizer, same as wine name)
-      auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_VIEW_ONLINE_TITLE, constants::DETAIL_VIEW_ONLINE_NOTE);
+      // View Online button
+      auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_VIEW_ONLINE_BTN_TITLE, constants::DETAIL_VIEW_ONLINE_BTN_NOTE);
       top_sizer->Add(view_online_btn, wxSizerFlags().CenterHorizontal().Border(wxALL));
+      m_category_controls.addControlDependency(OpenWinePage, view_online_btn);
+
+      // Accept Pending Order button
+      auto* accept_pending_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_ACCEPT_PENDING_BTN_TITLE, constants::DETAIL_ACCEPT_PENDING_BTN_NOTE);
+      top_sizer->Add(accept_pending_btn , wxSizerFlags().CenterHorizontal().Border(wxALL));
+      m_category_controls.addControlDependency(AcceptPendingPage, accept_pending_btn );
 
       // image won't correctly scale/redraw unless we use wxFULL_REPAINT_ON_RESIZE
       m_label_image = new wxGenericStaticBitmap(this, wxID_ANY, wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
@@ -224,6 +315,8 @@ namespace ctb::app
       // hook up event handlers
       m_label_timer.Bind(wxEVT_TIMER, &DetailsPanel::onLabelTimer, this);
       view_online_btn->Bind(wxEVT_BUTTON, &DetailsPanel::onViewWebPage, this);
+      accept_pending_btn->Bind(wxEVT_BUTTON, &DetailsPanel::onAcceptPending, this);
+
    }
 
 
@@ -270,17 +363,17 @@ namespace ctb::app
             m_label_image->SetBitmap(bmp);    
             m_label_image->Show();
             Layout(); // required since the images vary in size
-            m_label_image->Refresh();
-            m_label_image->Update();
+            SendSizeEvent();
+            Update();
          }
       }
       catch (...)
       {
+         log::exception(packageError());
          m_label_image->SetBitmap(wxBitmap{});
          m_label_image->Hide();
          Refresh();
          Update();
-         log::exception(packageError());
       }
    }
 
@@ -291,36 +384,54 @@ namespace ctb::app
       
       wxWindowUpdateLocker freeze_win(this);
 
-      if (event.m_affected_row and event.m_affected_row.value() >= 0)
+      if (event.affected_row and event.affected_row.value() >= 0)
       {
-         auto* tbl = event.m_data.get();
-         assert(tbl != nullptr);
-         auto row_idx = event.m_affected_row.value();
+         auto dataset = event.dataset;
+         assert(dataset and "This pointer should never be null here!!!");
 
-         m_details.wine_id     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_WINE_ID    ).asUInt64().value_or(0);
-         m_details.wine_name   = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_WINE_NAME  ).asString();
-         m_details.vintage     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_VINTAGE    ).asString();
-         m_details.varietal    = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_VARIETAL   ).asString();
-         m_details.country     = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_COUNTRY    ).asString();
-         m_details.region      = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_REGION     ).asString();
-         m_details.sub_region  = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_SUB_REGION ).asString();
-         m_details.appellation = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_APPELLATION).asString();
+         auto rec_idx = event.affected_row.value();
 
-         m_details.drink_window     = detail::getDrinkWindow(tbl->getDetailProp(row_idx, constants::DETAIL_PROP_DRINK_START),
-                                                             tbl->getDetailProp(row_idx, constants::DETAIL_PROP_DRINK_END));
+         // note that we try to grab all properties even though some of them won't be available in this dataset,
+         // but that's fine because we'll just get a null value if it's not available, so no need to check hasProperty()
 
-         m_details.auction_value    = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_AUCTION_VALUE  ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
-         m_details.community_price  = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_COMMUNITY_PRICE).asString(constants::FMT_NUMBER_CURRENCY).c_str();
-         m_details.my_price         = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_MY_PRICE       ).asString(constants::FMT_NUMBER_CURRENCY).c_str();
+         m_details.wine_id     =                    dataset->getProperty(rec_idx, CtProp::iWineId     ).asString();
+         m_details.wine_name   = dataset->getProperty(rec_idx, CtProp::WineName    ).asString();
+         m_details.vintage     = dataset->getProperty(rec_idx, CtProp::Vintage     ).asString();
+         m_details.varietal    = dataset->getProperty(rec_idx, CtProp::Varietal    ).asString();
+         m_details.country     = dataset->getProperty(rec_idx, CtProp::Country     ).asString();
+         m_details.region      = dataset->getProperty(rec_idx, CtProp::Region      ).asString();
+         m_details.sub_region  = dataset->getProperty(rec_idx, CtProp::SubRegion   ).asString();
+         m_details.appellation = dataset->getProperty(rec_idx, CtProp::Appellation ).asString();
 
-         auto prop_val = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_CT_SCORE);
-         m_details.ct_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
+         m_details.drink_window     = detail::getDrinkWindow(dataset->getProperty(rec_idx, CtProp::BeginConsume ),
+                                                             dataset->getProperty(rec_idx, CtProp::EndConsume   ));
 
-         prop_val = tbl->getDetailProp(row_idx, constants::DETAIL_PROP_MY_SCORE);
-         m_details.my_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL).c_str() : constants::NO_SCORE;
-         GetSizer()->ShowItems(true);
+         m_details.auction_value    = dataset->getProperty(rec_idx, CtProp::AuctionPrice ).asString(constants::FMT_NUMBER_CURRENCY);
+         m_details.community_price  = dataset->getProperty(rec_idx, CtProp::CtPrice      ).asString(constants::FMT_NUMBER_CURRENCY);
+         m_details.my_price         = dataset->getProperty(rec_idx, CtProp::MyPrice      ).asString(constants::FMT_NUMBER_CURRENCY);
 
-         m_label_image->Hide();
+         auto prop_val = dataset->getProperty(rec_idx, CtProp::CtScore);
+         m_details.ct_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL) : constants::NO_SCORE;
+
+         prop_val = dataset->getProperty(rec_idx, CtProp::MyScore);
+         m_details.my_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL) : constants::NO_SCORE;
+
+         m_details.pending_purchase_id   =                    dataset->getProperty(rec_idx, CtProp::PendingPurchaseId   ).asString();
+         m_details.pending_order_number  = dataset->getProperty(rec_idx, CtProp::PendingOrderNumber  ).asString();
+         m_details.pending_order_date    = dataset->getProperty(rec_idx, CtProp::PendingOrderDate    ).asString();
+         m_details.pending_delivery_date = dataset->getProperty(rec_idx, CtProp::PendingDeliveryDate ).asString();
+         m_details.pending_store_name    = dataset->getProperty(rec_idx, CtProp::PendingStoreName    ).asString();
+         m_details.pending_qty           = dataset->getProperty(rec_idx, CtProp::PendingQtyOrdered   ).asString();
+         m_details.pending_price         = dataset->getProperty(rec_idx, CtProp::PendingPrice        ).asString(constants::FMT_NUMBER_CURRENCY);
+
+         // show everything since detail panel may be blank if no record was selected previously...
+         GetSizer()->ShowItems(true); 
+
+         // but show/hide control categories as appropriate.
+         configureControlsForDataset(dataset);
+
+         // image ctrl always starts hidden until background image fetch completes
+         m_label_image->Hide(); 
          m_details.image_result = m_label_cache->fetchLabelImage(m_details.wine_id);
          checkLabelResult();
       }
@@ -328,10 +439,10 @@ namespace ctb::app
          GetSizer()->ShowItems(false);
          m_details = WineDetails{};
       }
-
       TransferDataToWindow();
       Layout();
-      // TODO hide/unhide fields as necessary.
+      SendSizeEvent();
+      Update();
    }
 
 
@@ -339,18 +450,19 @@ namespace ctb::app
    {
       try
       {
-         switch (event.m_event_id)
+         // TODO: Re-org/clarify
+         switch (event.event_id)
          {
          case DatasetEvent::Id::RowSelected:
             updateDetails(event);
             break;
 
          case DatasetEvent::Id::ColLayoutRequested: [[fallthrough]];
-         case DatasetEvent::Id::TableInitialize:
+         case DatasetEvent::Id::DatasetInitialize:
             break;
 
          default:
-            event.m_affected_row = std::nullopt;
+            event.affected_row = std::nullopt;
             updateDetails(event);
             break;
          }
@@ -358,6 +470,30 @@ namespace ctb::app
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
       }
+   }
+
+
+   void DetailsPanel::configureControlsForDataset(DatasetPtr dataset)
+   {
+      using enum CategorizedControls::Category;
+
+      m_category_controls.showCategory(Score, dataset->hasProperty(CtProp::CtScore));
+      m_category_controls.showCategory(DrinkWindow, dataset->hasProperty(CtProp::BeginConsume));
+      m_category_controls.showCategory(Pending, dataset->hasProperty(CtProp::PendingPurchaseId));
+      m_category_controls.showCategory(Valuation, dataset->hasProperty(CtProp::MyPrice));
+
+      if (dataset->hasProperty(CtProp::PendingOrderDate))
+      {
+         m_category_controls.showCategory(AcceptPendingPage, true);
+         m_category_controls.showCategory(OpenWinePage,      false);
+      }
+      else {
+         m_category_controls.showCategory(AcceptPendingPage, false);
+         m_category_controls.showCategory(OpenWinePage, true);
+
+      }
+
+
    }
 
 
@@ -369,13 +505,13 @@ namespace ctb::app
 
    void DetailsPanel::onViewWebPage([[maybe_unused]] wxCommandEvent& event)
    {
-      if (!m_details.wine_id)
-      {
-         wxGetApp().displayInfoMessage("no wine id available.");
-      }
-      else{
-         wxLaunchDefaultBrowser(getWineDetailsUrl(m_details.wine_id).c_str());
-      }
+      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, CMD_WINE_ONLINE_DETAILS });
+   }
+
+
+   void DetailsPanel::onAcceptPending(wxCommandEvent& event)
+   {
+      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, CMD_WINE_ACCEPT_PENDING });
    }
 
 

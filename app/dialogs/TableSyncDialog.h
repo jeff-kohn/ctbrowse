@@ -10,6 +10,9 @@
 #include "App.h"
 #include <ctb/table_data.h>
 
+#include <wx/checkbox.h>
+#include <wx/checklst.h>
+#include <wx/dialog.h>
 #include <vector>
 
 

@@ -1,12 +1,9 @@
 #include "ctb/utility.h"
-
 #include <fstream>
 #include <limits>
 
 #if defined(_WIN32_WINNT)
    #include <Windows.h>
-   #include <Shlwapi.h>
-   #include <wininet.h>
 #endif
 
 namespace ctb
@@ -91,8 +88,8 @@ namespace ctb
 
       // use binary mode to keep ofstream from inserting extra carriage returns, since
       // we want to preserve whatever line feeds are already in the file
-      auto file_out = openFile<std::ofstream>(file_path, std::ios_base::out | std::ios_base::binary, _SH_DENYRW); 
-      file_out << text;
+      auto file_out = openFile<std::ofstream>(file_path, std::ios_base::out | std::ios_base::binary, _SH_DENYRW);
+      file_out.write(text.data(), std::ssize(text));
    }
 
 
@@ -139,27 +136,57 @@ namespace ctb
 
    [[nodiscard]] auto toUTF8(const std::string& text, unsigned int code_page) -> MaybeString
    {
-      int length = MultiByteToWideChar(code_page, MB_PRECOMPOSED, text.c_str(), -1, nullptr, 0);
+      int length = MultiByteToWideChar(code_page, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, text.c_str(), -1, nullptr, 0);
       if (!length)
          return {};
 
       std::vector<wchar_t> wide_buf(static_cast<size_t>(length), '\0');
-      if (!MultiByteToWideChar(code_page, MB_PRECOMPOSED, text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
+      if (!MultiByteToWideChar(code_page, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS,  text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
          return {};
 
       // Get needed buffer length since some UTF-16 chars may need multiple bytes in UTF-8. 
-      length = WideCharToMultiByte(CP_UTF8, 0, wide_buf.data(), -1, nullptr, 0, nullptr, nullptr);
+      length = WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK|WC_ERR_INVALID_CHARS|WC_NO_BEST_FIT_CHARS, wide_buf.data(), -1, nullptr, 0, nullptr, nullptr);
       if (!length)
          return {};
 
       // Now allocate buffer and make the final call to do the conversion.
       std::vector<char> utf8_buf(static_cast<size_t>(length), '\0');
-      if (WideCharToMultiByte(CP_UTF8, 0, wide_buf.data(), -1, utf8_buf.data(), static_cast<int>(utf8_buf.size()), nullptr, nullptr))
+      if (WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK|WC_ERR_INVALID_CHARS|WC_NO_BEST_FIT_CHARS, wide_buf.data(), -1, utf8_buf.data(), static_cast<int>(utf8_buf.size()), nullptr, nullptr))
          return std::string{ utf8_buf.data() };
 
       return {};
    }
 
+   [[nodiscard]] auto fromUTF8(const std::string& utf_text, unsigned int to_code_page) -> MaybeString
+   {
+      MaybeString result{};
+
+      // First convert UTF-8 to UTF-16
+      int length = MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, utf_text.c_str(), -1, nullptr, 0);
+      if (!length)
+         return result;
+
+      std::vector<wchar_t> wide_buf(static_cast<size_t>(length), '\0');
+      if (!MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, utf_text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
+         return result;
+
+      // Get needed buffer length for the target code page then do the conversion
+      length = WideCharToMultiByte(to_code_page, WC_COMPOSITECHECK|WC_NO_BEST_FIT_CHARS, wide_buf.data(), -1, nullptr, 0, nullptr, nullptr);
+      if (length)
+      {
+         std::vector<char> mb_buf(static_cast<size_t>(length), '\0');
+         length = WideCharToMultiByte(to_code_page, WC_COMPOSITECHECK|WC_NO_BEST_FIT_CHARS, wide_buf.data(), -1, mb_buf.data(), static_cast<int>(mb_buf.size()), nullptr, nullptr);
+         if (length)
+         {
+            // Since utf8_text.data() and utf8_text.size() to pass the string to MultiByteToWideChar, it gets treated as non-null-terminated and we have to terminate result string.
+            std::string retval{ mb_buf.data() };
+            retval.push_back('\0'); 
+            result = retval;
+         }
+      }
+ 
+      return result;
+   }
 
 #else
    // TODO: provide implementation for other platforms when needed.
