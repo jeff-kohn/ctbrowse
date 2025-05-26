@@ -1,7 +1,7 @@
 /**************************************************************************************************
-* @file  WineListTable.h
+* @file  WineListTraits.h
 *
-* @brief defines the WineListTable class, which is an instantiation of CtDataTable<> 
+* @brief defines the WineListTraits class, which is an instantiation of CtDataTable<> 
 *        implemented using the traits template WineListTraits 
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
@@ -57,17 +57,17 @@ namespace ctb
          { Prop::MyPrice,         FieldSchema { Prop::MyPrice,        PropType::Double,      5 }},
          { Prop::CtPrice,         FieldSchema { Prop::CtPrice,        PropType::Double,      9 }},
          { Prop::AuctionPrice,    FieldSchema { Prop::AuctionPrice,   PropType::Double,      8 }},
-         { Prop::WineAndVintage,  FieldSchema { Prop::WineAndVintage, PropType::Double,     {} }},
+         { Prop::WineAndVintage,  FieldSchema { Prop::WineAndVintage, PropType::String,     {} }},
          { Prop::QtyTotal,        FieldSchema { Prop::QtyTotal,       PropType::UInt16,     {} }}
       });
 
       /// @brief list of display columns that will show in the list view
       static inline const std::array DefaultListColumns { 
-         CtListColumn{ Prop::WineAndVintage,                             constants::DISPLAY_COL_WINE     },
-         CtListColumn{ Prop::Locale,                                     constants::DISPLAY_COL_LOCALE   },
-         CtListColumn{ Prop::QtyTotal,   CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY      },
-         CtListColumn{ Prop::CtScore,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE },
-         CtListColumn{ Prop::MyScore,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE },
+         CtListColumn{ Prop::WineAndVintage,                             constants::DISPLAY_COL_WINE        },
+         CtListColumn{ Prop::Locale,                                     constants::DISPLAY_COL_LOCALE      },
+         CtListColumn{ Prop::QtyTotal,   CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY         },
+         CtListColumn{ Prop::CtScore,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE, 1 },
+         CtListColumn{ Prop::MyScore,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE, 1 },
       };
 
       /// @brief the available sort orders for this table.

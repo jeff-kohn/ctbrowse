@@ -58,6 +58,7 @@ namespace ctb::app
          {
             case CMD_COLLECTION_MY_CELLAR:      return TableId::List;
             case CMD_COLLECTION_PENDING_WINE:   return TableId::Pending;
+            case CMD_COLLECTION_READY_TO_DRINK: return TableId::Availability;
             default:
                throw Error(Error::Category::ArgumentError, "Table corresponding to ID {} not found.", event_id);
          }
@@ -113,6 +114,7 @@ namespace ctb::app
       Bind(wxEVT_MENU, &MainFrame::onMenuEditFind, this, wxID_FIND);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_MY_CELLAR);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_PENDING_WINE);
+      Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_READY_TO_DRINK);
       Bind(wxEVT_MENU, &MainFrame::onMenuFileQuit, this, wxID_EXIT);
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_CANCEL_BTN, &MainFrame::onToolbarSearchCancelBtn, this);
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onToolbarSearchBtn, this);
@@ -194,6 +196,13 @@ namespace ctb::app
          CmdId::CMD_COLLECTION_PENDING_WINE, 
          constants::CMD_COLLECTION_PENDING_WINE_LBL, 
          constants::CMD_COLLECTION_PENDING_WINE_TIP,
+         wxITEM_NORMAL
+         });
+      menu_data->Append(new wxMenuItem{
+         menu_data, 
+         CmdId::CMD_COLLECTION_READY_TO_DRINK, 
+         constants::CMD_COLLECTION_READY_TO_DRINK_LBL, 
+         constants::CMD_COLLECTION_READY_TO_DRINK_TIP,
          wxITEM_NORMAL
          });
       m_menu_bar->Append(menu_data, constants::LBL_MENU_COLLECTION);

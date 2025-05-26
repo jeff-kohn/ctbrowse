@@ -41,11 +41,16 @@ namespace ctb
       AuctionPrice,
 
       BeginConsume,
+      CtBeginConsume,
       EndConsume,
+      CtEndConsume,
+
 
       QtyPending,
       QtyOnHand,
-      QtyTotal,         // calculated, not from CSV
+      QtyTotal,         // calculated as Pending + OnHand, not from CSV (except for ReadyToDrink)
+      QtyPurchased,     
+      QtyConsumed,      
 
       CtScore,
       MyScore,
@@ -54,10 +59,22 @@ namespace ctb
       PendingOrderNumber,
       PendingPrice,
       PendingOrderDate,
-      PendingQtyOrdered,
+      PendingOrderQty,
       PendingStoreName,
       PendingDeliveryDate,
-      PendingPurchaseId
+      PendingPurchaseId,
+
+      // Specific to Ready To Drink Report
+      RtdQtyDefault,
+      RtdQtyLinear,
+      RtdQtyBellCurve,
+      RtdQtyEarlyCurve,
+      RtdQtyLateCurve,
+      RtdQtyFastMaturing,
+      RtdQtyEarlyAndLate,
+      RtdQtyBottlesPerYear,
+      RtdMyWindow,
+      RtdCtWindow,
    };
 
    

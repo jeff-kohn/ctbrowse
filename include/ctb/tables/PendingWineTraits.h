@@ -1,7 +1,7 @@
 /**************************************************************************************************
-* @file  PendingWineTable.h
+* @file  PendingWineTraits.h
 *
-* @brief defines the PendingWineTable class, which is an instantiation
+* @brief defines the PendingWineTraits class, which is an instantiation
 *        of CtDataTable<> implemented using the traits template PendingWineTraits 
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
@@ -53,10 +53,10 @@ namespace ctb
          { Prop::PendingPurchaseId,      FieldSchema { Prop::PendingPurchaseId,     PropType::String,      1 }},
          { Prop::PendingStoreName,       FieldSchema { Prop::PendingStoreName,      PropType::String,      4 }},
          { Prop::PendingOrderNumber,     FieldSchema { Prop::PendingOrderNumber,    PropType::String,     12 }},
-         { Prop::PendingQtyOrdered,      FieldSchema { Prop::PendingQtyOrdered,     PropType::UInt16,     10 }},
-         { Prop::PendingOrderDate,    FieldSchema { Prop::PendingOrderDate,   PropType::Date,        2 }}, 
+         { Prop::PendingOrderQty,        FieldSchema { Prop::PendingOrderQty,       PropType::UInt16,     10 }},
+         { Prop::PendingOrderDate,       FieldSchema { Prop::PendingOrderDate,      PropType::Date,        2 }}, 
          { Prop::PendingDeliveryDate,    FieldSchema { Prop::PendingDeliveryDate,   PropType::Date,        3 }},
-         { Prop::WineAndVintage,         FieldSchema { Prop::WineAndVintage,        PropType::Double,     {} }}
+         { Prop::WineAndVintage,         FieldSchema { Prop::WineAndVintage,        PropType::String,     {} }}
       });
 
       /// @brief list of display columns that will show in the list view
@@ -64,7 +64,7 @@ namespace ctb
          CtListColumn{ Prop::WineAndVintage,                                      constants::DISPLAY_COL_WINE       },
          CtListColumn{ Prop::PendingStoreName,    CtListColumn::Format::String,   constants::DISPLAY_COL_STORE      },
          CtListColumn{ Prop::PendingOrderDate,    CtListColumn::Format::Date,     constants::DISPLAY_COL_PURCH_DATE },
-         CtListColumn{ Prop::PendingQtyOrdered,   CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY        },
+         CtListColumn{ Prop::PendingOrderQty,     CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY        },
          CtListColumn{ Prop::PendingPrice,        CtListColumn::Format::Currency, constants::DISPLAY_COL_PRICE      }
       };
 

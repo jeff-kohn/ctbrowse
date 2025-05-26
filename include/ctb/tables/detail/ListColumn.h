@@ -58,12 +58,15 @@ namespace ctb::detail
       /// @brief How the column header should be aligned
       Align header_align{ Align::Left }; 
 
+      /// @brief for numeric fields, how many decimal places
+      uint16_t decimal_places{ 1 };
+
       /// @brief construct a column to display the specified property as a string
       ListColumn(Prop prop_id, std::string_view col_name) : prop_id{ prop_id },  display_name{ col_name }
       {}
 
       /// @brief construct a column to display the specified property in the requested format
-      ListColumn(Prop prop_id, Format fmt, std::string_view col_name) :  prop_id{ prop_id },  display_name{ col_name }, format{ fmt }
+      ListColumn(Prop prop_id, Format fmt, std::string_view col_name, uint16_t decimal_places = 0) :  prop_id{ prop_id },  display_name{ col_name }, format{ fmt }, decimal_places{ decimal_places }
       {
          switch (format)
          {
@@ -95,9 +98,11 @@ namespace ctb::detail
       {       
          switch (format)
          {
-            case Format::Decimal:   
-               return value.asString(constants::FMT_NUMBER_DECIMAL);
-
+            case Format::Decimal:
+            {
+               auto fmt_str = ctb::format("{{:.{}f}}", decimal_places);
+               return value.asString(fmt_str);
+            }
             case Format::Currency:  
                return value.asString(constants::FMT_NUMBER_CURRENCY);
 

@@ -19,6 +19,8 @@ namespace ctb::constants
    inline constexpr const char* CMD_COLLECTION_MY_CELLAR_TIP      = "View Personal Wine Collection";
    inline constexpr const char* CMD_COLLECTION_PENDING_WINE_LBL   = "&Pending Wines\tCtrl+P";
    inline constexpr const char* CMD_COLLECTION_PENDING_WINE_TIP   = "View Pending Wine Deliveries";
+   inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_LBL = "&Ready to Drink\tCtrl+R";
+   inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_TIP = "View Drinking Availability for Wines";
    inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_LBL      = "&Resize List Columns";
    inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_TIP      = "Resize the list columns to fit the data";
    inline constexpr const char* CMD_WINE_ONLINE_DETAILS_LBL       = "View &Wine Online";
@@ -65,7 +67,7 @@ namespace ctb::constants
    // DetailsPanel labels
    inline constexpr const char* LBL_APPELLATION                   = "Appellation:";
    inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";
-   inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only Show In-Stock Inventory";
+   inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only Show In-Stock Wines";
    inline constexpr const char* LBL_COUNTRY                       = "Country:";
    inline constexpr const char* LBL_CT_PRICE                      = "Community Avg:";
    inline constexpr const char* LBL_CT_SCORE                      = "CT Score:";

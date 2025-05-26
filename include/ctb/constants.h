@@ -33,9 +33,12 @@ namespace ctb::constants
    inline constexpr int         MAX_ENV_VAR_LENGTH          = 128;
 
    // column labels
+   inline constexpr const char* DISPLAY_COL_AVAILABLE       = "Available";
    inline constexpr const char* DISPLAY_COL_CT_SCORE        = "CT Score";
+   inline constexpr const char* DISPLAY_COL_CT_WINDOW       = "CT Window";
    inline constexpr const char* DISPLAY_COL_LOCALE          = "Region and Appellation";
    inline constexpr const char* DISPLAY_COL_MY_SCORE        = "My Score";
+   inline constexpr const char* DISPLAY_COL_MY_WINDOW       = "My Window";
    inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
    inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
    inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Ordered";
@@ -71,6 +74,14 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_REGION_WINE           = "Region, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_PURCHASE_DATE         = "Order Date, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_STORE_NAME            = "Store, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_CURVE_DEFAULT         = "Default Formula, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_CURVE_LINEAR          = "Linear Formula, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_CURVE_BELL            = "Bell Curve Formula, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_CURVE_BELL_EARLY      = "Early Bell Curve Formula, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_CURVE_BELL_LATE       = "Late Bell Curve Formula, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_CURVE_FAST_MATURE     = "Fast Maturing Formula, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_CURVE_EARLY_LATE      = "Early/Late Formula, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_CURVE_BOTTLES_YEAR    = "Bottles per Year Formula, Wine and Vintage";
 
    inline constexpr const char* SORT_OPTION_SCORE_MY              = "My Score";
    inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";
