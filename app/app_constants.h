@@ -9,7 +9,7 @@ namespace ctb::constants
 
 
    inline constexpr const char* LBL_MENU_COLLECTION               = "&Collection";
-   inline constexpr const char* LBL_MENU_WINE                     = "Cellar&Tracker";
+   inline constexpr const char* LBL_MENU_WINE                     = "&Online";
    inline constexpr const char* LBL_MENU_VIEW                     = "&View";
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_LBL        = "&Download Data...";
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP        = "Download data from CellarTracker";
@@ -23,14 +23,18 @@ namespace ctb::constants
    inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_TIP = "View Drinking Availability for Wines";
    inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_LBL      = "&Resize List Columns";
    inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_TIP      = "Resize the list columns to fit the data";
-   inline constexpr const char* CMD_WINE_ONLINE_DETAILS_LBL       = "View &Wine Online";
-   inline constexpr const char* CMD_WINE_ONLINE_DETAILS_TIP       = "View the current wine's details on CellarTracker.com";
-   inline constexpr const char* CMD_WINE_ONLINE_VINTAGES_LBL      = "Search &Vintages Online";
-   inline constexpr const char* CMD_WINE_ONLINE_VINTAGES_TIP      = "View all vintages of the current wine on CellarTracker.com";
-   inline constexpr const char* CMD_WINE_ONLINE_ACCEPT_WINE_LBL   = "&Accept Delivery Online";
-   inline constexpr const char* CMD_WINE_ONLINE_ACCEPT_WINE_TIP   = "Mark the selected wine as delivered on CellarTracker.com";
-   inline constexpr const char* CMD_WINE_ONLINE_EDIT_ORDER_LBL    = "&Edit Order Online";
-   inline constexpr const char* CMD_WINE_ONLINE_EDIT_ORDER_TIP    = "Edit the selected purchase order on CellarTracker.com";
+   inline constexpr const char* CMD_WINE_ONLINE_DETAILS_LBL       = "View &Wine Details";
+   inline constexpr const char* CMD_WINE_ONLINE_DETAILS_TIP       = "View the current wine's details on CellarTracker";
+   inline constexpr const char* CMD_WINE_ONLINE_VINTAGES_LBL      = "Search All &Vintages";
+   inline constexpr const char* CMD_WINE_ONLINE_VINTAGES_TIP      = "View all vintages of the current wine on CellarTracker";
+   inline constexpr const char* CMD_WINE_ONLINE_ADD_TO_CELLAR_LBL = "&Add to My Cellar";
+   inline constexpr const char* CMD_WINE_ONLINE_ADD_TO_CELLAR_TIP = "Add more of current wine to inventory on CellarTracker";
+   inline constexpr const char* CMD_WINE_ONLINE_ACCEPT_WINE_LBL   = "Accept &Delivery";
+   inline constexpr const char* CMD_WINE_ONLINE_ACCEPT_WINE_TIP   = "Mark the selected wine as delivered on CellarTracker";
+   inline constexpr const char* CMD_WINE_ONLINE_EDIT_ORDER_LBL    = "&Edit Pending Order";
+   inline constexpr const char* CMD_WINE_ONLINE_EDIT_ORDER_TIP    = "Edit the selected purchase order on CellarTracker";
+   inline constexpr const char* CMD_WINE_ONLINE_DRINK_REMOVE_LBL  = "Drink/&Remove";
+   inline constexpr const char* CMD_WINE_ONLINE_DRINK_REMOVE_TIP  = "Mark a bottle as drunk/removed on CellarTracker";
 
    inline constexpr const char* CONFIG_PATH_PREFERENCES           = "/Preferences";
    inline constexpr const char* CONFIG_PATH_PREFERENCE_DATASYNC   = "/Preferences/DataSync";
@@ -95,11 +99,10 @@ namespace ctb::constants
    inline constexpr const char* LBL_VARIETAL                      = "Master Varietal:";
    inline constexpr const char* LBL_VINTAGE                       = "Vintage:";
 
-   inline constexpr const char* DETAIL_VIEW_ONLINE_BTN_TITLE      = "View Wine on CellarTracker.com";
-   inline constexpr const char* DETAIL_VIEW_ONLINE_BTN_NOTE       = "(Opens in default browser)";
-
-   inline constexpr const char* DETAIL_ACCEPT_PENDING_BTN_TITLE   = "Accept Delivery on CellarTracker.com";
-   inline constexpr const char* DETAIL_ACCEPT_PENDING_BTN_NOTE    = "(Opens in default browser)";
+   inline constexpr const char* DETAILS_CMD_LINK_NOTE             = "(Opens in default browser)";
+   inline constexpr const char* DETAILS_CMD_LINK_WINE_DETAILS     = "View Wine on CellarTracker";
+   inline constexpr const char* DETAILS_CMD_LINK_ACCEPT_PENDING   = "Accept Delivery on CellarTracker";
+   inline constexpr const char* DETAILS_CMD_LINK_DRINK_REMOVE     = "Drink/Remove on CellarTracker";
 
    inline constexpr const char* RES_NAME_ICON_PRODUCT             = "IDR_PRODUCT_ICON";
    inline constexpr const char* RES_NAME_MAINFRAME                = "MAINFRAME";

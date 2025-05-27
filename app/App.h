@@ -37,7 +37,9 @@ namespace ctb::app
       CMD_WINE_ONLINE_VINTAGES,
       CMD_WINE_ONLINE_PRODUCER,
       CMD_WINE_ACCEPT_PENDING,
-      CMD_WINE_EDIT_ORDER
+      CMD_WINE_ADD_TO_CELLAR,
+      CMD_WINE_EDIT_ORDER,
+      CMD_WINE_DRINK_REMOVE,
    };
 
    /// @brief app object for the application.

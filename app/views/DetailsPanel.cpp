@@ -303,15 +303,10 @@ namespace ctb::app
       // end details_sizer layout
       top_sizer->Add(details_sizer, wxSizerFlags{}.CenterHorizontal().FixedMinSize().Border(wxALL));
 
-      // View Online button
-      auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_VIEW_ONLINE_BTN_TITLE, constants::DETAIL_VIEW_ONLINE_BTN_NOTE);
-      top_sizer->Add(view_online_btn, wxSizerFlags().CenterHorizontal().Border(wxALL));
-      m_category_controls.addControlDependency(OpenWinePage, view_online_btn);
-
-      // Accept Pending Order button
-      auto* accept_pending_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_ACCEPT_PENDING_BTN_TITLE, constants::DETAIL_ACCEPT_PENDING_BTN_NOTE);
-      top_sizer->Add(accept_pending_btn , wxSizerFlags().CenterHorizontal().Border(wxALL));
-      m_category_controls.addControlDependency(AcceptPendingPage, accept_pending_btn );
+      // Command-Link buttons (Collection-Specific)
+      addCommandLinkButton(top_sizer, CmdId::CMD_WINE_ONLINE_DETAILS, LinkOpenWineDetails, constants::DETAILS_CMD_LINK_WINE_DETAILS);
+      addCommandLinkButton(top_sizer, CmdId::CMD_WINE_ACCEPT_PENDING, LinkAcceptPending,   constants::DETAILS_CMD_LINK_ACCEPT_PENDING);
+      addCommandLinkButton(top_sizer, CmdId::CMD_WINE_DRINK_REMOVE,   LinkReadyToDrink,    constants::DETAILS_CMD_LINK_DRINK_REMOVE);
 
       // image won't correctly scale/redraw unless we use wxFULL_REPAINT_ON_RESIZE
       m_label_image = new wxGenericStaticBitmap(this, wxID_ANY, wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
@@ -323,8 +318,15 @@ namespace ctb::app
 
       // hook up event handlers
       m_label_timer.Bind(wxEVT_TIMER, &DetailsPanel::onLabelTimer, this);
-      view_online_btn->Bind(wxEVT_BUTTON, &DetailsPanel::onViewWebPage, this);
-      accept_pending_btn->Bind(wxEVT_BUTTON, &DetailsPanel::onAcceptPending, this);
+   }
+
+   void DetailsPanel::addCommandLinkButton(wxBoxSizer* sizer, CmdId cmd, CategorizedControls::Category category, std::string_view command_text, std::string_view note)
+   {
+      auto* link_button = new wxCommandLinkButton{ this, cmd, wxFromSV(command_text), wxFromSV(note), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER };
+      sizer->Add(link_button, wxSizerFlags().CenterHorizontal().Border(wxALL));
+      link_button->Bind(wxEVT_BUTTON, &DetailsPanel::onCommand, this, cmd);
+
+      m_category_controls.addControlDependency(category, link_button);
 
    }
 
@@ -489,21 +491,12 @@ namespace ctb::app
    {
       using enum CategorizedControls::Category;
 
+      // Details display
       m_category_controls.showCategory(Score, dataset->hasProperty(CtProp::CtScore));
       m_category_controls.showCategory(DrinkWindow, dataset->hasProperty(CtProp::BeginConsume));
       m_category_controls.showCategory(CtDrinkWindow, dataset->hasProperty(CtProp::CtBeginConsume));
       m_category_controls.showCategory(Pending, dataset->hasProperty(CtProp::PendingPurchaseId));
       m_category_controls.showCategory(Valuation, dataset->hasProperty(CtProp::MyPrice));
-
-      if (dataset->hasProperty(CtProp::PendingOrderDate))
-      {
-         m_category_controls.showCategory(AcceptPendingPage, true);
-         m_category_controls.showCategory(OpenWinePage,      false);
-      }
-      else {
-         m_category_controls.showCategory(AcceptPendingPage, false);
-         m_category_controls.showCategory(OpenWinePage, true);
-      }
       if (dataset->hasProperty(CtProp::CtBeginConsume))
       {
          m_drink_window_label = constants::LBL_DRINK_WINDOW_MY;
@@ -512,6 +505,11 @@ namespace ctb::app
       else {
          m_drink_window_label = constants::LBL_DRINK_WINDOW;
       }
+
+      // Command-Link buttons
+      m_category_controls.showCategory(LinkAcceptPending,   dataset->getTableId() == TableId::Pending);
+      m_category_controls.showCategory(LinkOpenWineDetails, dataset->getTableId() == TableId::List);
+      m_category_controls.showCategory(LinkReadyToDrink,    dataset->getTableId() == TableId::Availability);
    }
 
 
@@ -521,16 +519,9 @@ namespace ctb::app
    }
 
 
-   void DetailsPanel::onViewWebPage([[maybe_unused]] wxCommandEvent& event)
+   void DetailsPanel::onCommand(wxCommandEvent& event)
    {
-      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, CMD_WINE_ONLINE_DETAILS });
+      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, event.GetId()});
    }
-
-
-   void DetailsPanel::onAcceptPending(wxCommandEvent& event)
-   {
-      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, CMD_WINE_ACCEPT_PENDING });
-   }
-
 
 } // namesapce ctb::app

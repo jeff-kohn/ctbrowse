@@ -108,30 +108,40 @@ namespace ctb::app
       createStatusBar();
       createToolBar();
 
-      // Event handlers
+      // File menu handlers
       Bind(wxEVT_MENU, &MainFrame::onMenuFilePreferences, this, CmdId::CMD_FILE_SETTINGS);
       Bind(wxEVT_MENU, &MainFrame::onMenuFileSyncData, this, CmdId::CMD_FILE_DOWNLOAD_DATA);
+      Bind(wxEVT_MENU, &MainFrame::onMenuFileQuit, this, wxID_EXIT);
+
+      // Edit menu handlers
       Bind(wxEVT_MENU, &MainFrame::onMenuEditFind, this, wxID_FIND);
+
+      // Collection menu handlers
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_MY_CELLAR);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_PENDING_WINE);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_READY_TO_DRINK);
-      Bind(wxEVT_MENU, &MainFrame::onMenuFileQuit, this, wxID_EXIT);
-      m_search_ctrl->Bind(wxEVT_SEARCHCTRL_CANCEL_BTN, &MainFrame::onToolbarSearchCancelBtn, this);
-      m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onToolbarSearchBtn, this);
-      m_search_ctrl->Bind(wxEVT_TEXT_ENTER, &MainFrame::onToolbarSearchTextEnter, this);
-      m_search_ctrl->Bind(wxEVT_KEY_DOWN, &MainFrame::onToolbarSearchKeyDown, this);
 
-      // Bind wine online menu events
+      // Online menu events
       Bind(wxEVT_MENU, &MainFrame::onMenuWineOnlineDetails, this, CMD_WINE_ONLINE_DETAILS);
       Bind(wxEVT_MENU, &MainFrame::onMenuWineOnlineVintages, this, CMD_WINE_ONLINE_VINTAGES);
       Bind(wxEVT_MENU, &MainFrame::onMenuWineAcceptDelivery, this, CMD_WINE_ACCEPT_PENDING);
+      Bind(wxEVT_MENU, &MainFrame::onMenuWineAddToCellar, this, CMD_WINE_ADD_TO_CELLAR);
       Bind(wxEVT_MENU, &MainFrame::onMenuWineEditOrder, this, CMD_WINE_EDIT_ORDER);
+      Bind(wxEVT_MENU, &MainFrame::onMenuWineDrinkRemove, this, CMD_WINE_DRINK_REMOVE);
 
       // UI update handlers for wine online commands
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineOnlineUI, this, CMD_WINE_ONLINE_DETAILS);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineOnlineUI, this, CMD_WINE_ONLINE_VINTAGES);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineAddToCellarUI, this, CMD_WINE_ADD_TO_CELLAR);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineAcceptDeliveryUI, this, CMD_WINE_EDIT_ORDER);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineAcceptDeliveryUI, this, CMD_WINE_ACCEPT_PENDING);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineDrinkRemoveUI, this, CMD_WINE_DRINK_REMOVE);
+
+      // Toolbar event handlers
+      m_search_ctrl->Bind(wxEVT_SEARCHCTRL_CANCEL_BTN, &MainFrame::onToolbarSearchCancelBtn, this);
+      m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onToolbarSearchBtn, this);
+      m_search_ctrl->Bind(wxEVT_TEXT_ENTER, &MainFrame::onToolbarSearchTextEnter, this);
+      m_search_ctrl->Bind(wxEVT_KEY_DOWN, &MainFrame::onToolbarSearchKeyDown, this);
 
       if ( !wxPersistentRegisterAndRestore(this, constants::RES_NAME_MAINFRAME) )
       {
@@ -227,6 +237,15 @@ namespace ctb::app
       menu_wine->AppendSeparator();
       menu_wine->Append(new wxMenuItem{
          menu_wine, 
+         CmdId::CMD_WINE_ADD_TO_CELLAR, 
+         constants::CMD_WINE_ONLINE_ADD_TO_CELLAR_LBL, 
+         constants::CMD_WINE_ONLINE_ADD_TO_CELLAR_TIP,
+         wxITEM_NORMAL
+         });
+
+      menu_wine->AppendSeparator();
+      menu_wine->Append(new wxMenuItem{
+         menu_wine, 
          CmdId::CMD_WINE_ACCEPT_PENDING, 
          constants::CMD_WINE_ONLINE_ACCEPT_WINE_LBL, 
          constants::CMD_WINE_ONLINE_ACCEPT_WINE_TIP,
@@ -238,7 +257,16 @@ namespace ctb::app
          constants::CMD_WINE_ONLINE_EDIT_ORDER_LBL, 
          constants::CMD_WINE_ONLINE_EDIT_ORDER_LBL,
          wxITEM_NORMAL
-         });
+      });
+      menu_wine->AppendSeparator();
+      menu_wine->Append(new wxMenuItem{
+         menu_wine, 
+         CmdId::CMD_WINE_DRINK_REMOVE, 
+         constants::CMD_WINE_ONLINE_DRINK_REMOVE_LBL, 
+         constants::CMD_WINE_ONLINE_DRINK_REMOVE_LBL,
+         wxITEM_NORMAL
+      });
+
       m_menu_bar->Append(menu_wine, constants::LBL_MENU_WINE);
 
       // View Menu
@@ -457,87 +485,13 @@ namespace ctb::app
    }
 
 
-   void MainFrame::onToolbarSearchBtn([[maybe_unused]] wxCommandEvent& event)
-   {
-      try
-      {
-         doSearchFilter();
-      }
-      catch(...){
-         wxGetApp().displayErrorMessage(packageError(), true);
-      }
-   }
-
-
-   void MainFrame::onToolbarSearchCancelBtn([[maybe_unused]] wxCommandEvent& event)
-   {
-      try
-      {
-         clearSearchFilter();
-      }
-      catch(...){
-         wxGetApp().displayErrorMessage(packageError(), true);
-      }
-   }
-
-
-   void MainFrame::onToolbarSearchTextEnter([[maybe_unused]] wxCommandEvent& event)
-   {
-      try
-      {
-         doSearchFilter();
-      }
-      catch(...){
-         wxGetApp().displayErrorMessage(packageError(), true);
-      }
-   }
-
-
-   void MainFrame::onToolbarSearchKeyDown(wxKeyEvent& event)
-   {
-      try
-      {
-         switch (event.GetKeyCode())
-         {
-            case WXK_TAB:
-               m_view->SetFocus();
-               break;
-
-            case WXK_ESCAPE:
-               clearSearchFilter();
-               break;
-
-            default:
-               event.Skip();
-         }
-      }
-      catch(...){
-         wxGetApp().displayErrorMessage(packageError(), true);
-      }
-   }
-
-
-   void MainFrame::onMenuWineOnlineDetails(wxCommandEvent&)
+   void MainFrame::onMenuWineAddToCellar(wxCommandEvent&)
    {
       try
       {
          auto dataset = getDataset();
          auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
-         wxLaunchDefaultBrowser(getWineDetailsUrl(wine_id));
-      }
-      catch(...){
-         wxGetApp().displayErrorMessage(packageError(), true);
-      }
-   }
-
-
-   void MainFrame::onMenuWineOnlineVintages(wxCommandEvent&)
-   {
-      try
-      {
-         auto dataset = getDataset();
-         auto wine = dataset->getProperty(m_selected_row, CtProp::WineName).asString();
-         wxLaunchDefaultBrowser(getWineVintagesUrl(wine));
+         wxLaunchDefaultBrowser(getAddToCellarUrl(wine_id));
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -575,10 +529,45 @@ namespace ctb::app
    }
 
 
-   void MainFrame::onMenuWineOnlineUI(wxUpdateUIEvent& event)
+   void MainFrame::onMenuWineDrinkRemove(wxCommandEvent&)
    {
-      // Enable only when a wine row is selected
-      event.Enable(m_selected_row >= 0);
+      try
+      {
+         auto dataset = getDataset();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         wxLaunchDefaultBrowser(getDrinkRemoveUrl(wine_id));
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MainFrame::onMenuWineOnlineDetails(wxCommandEvent&)
+   {
+      try
+      {
+         auto dataset = getDataset();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         wxLaunchDefaultBrowser(getWineDetailsUrl(wine_id));
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MainFrame::onMenuWineOnlineVintages(wxCommandEvent&)
+   {
+      try
+      {
+         auto dataset = getDataset();
+         auto wine = dataset->getProperty(m_selected_row, CtProp::WineName).asString();
+         wxLaunchDefaultBrowser(getWineVintagesUrl(wine));
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
    }
 
 
@@ -587,6 +576,105 @@ namespace ctb::app
       auto dataset = getDataset(false);
       bool enable = (m_selected_row >= 0) and dataset.get() and (dataset->getTableId() == TableId::Pending);
       event.Enable(enable);
+   }
+
+
+   void MainFrame::onMenuWineAddToCellarUI(wxUpdateUIEvent& event)
+   {
+      auto dataset = getDataset(false);
+      bool enable = (m_selected_row >= 0) and dataset.get() and (dataset->getTableId() != TableId::Pending);
+      event.Enable(enable);
+   }
+
+
+   void MainFrame::onMenuWineDrinkRemoveUI(wxUpdateUIEvent& event)
+   {
+      auto dataset = getDataset(false);
+      bool enable = (m_selected_row >= 0) and dataset.get() and (dataset->getTableId() == TableId::Availability);
+      event.Enable(enable);
+   }
+
+
+   void MainFrame::onMenuWineOnlineUI(wxUpdateUIEvent& event)
+   {
+      // Enable only when a wine row is selected
+      event.Enable(m_selected_row >= 0);
+   }
+
+
+   void MainFrame::onToolbarSearchBtn([[maybe_unused]] wxCommandEvent& event)
+   {
+      try
+      {
+         doSearchFilter();
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MainFrame::onToolbarSearchCancelBtn([[maybe_unused]] wxCommandEvent& event)
+   {
+      try
+      {
+         clearSearchFilter();
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MainFrame::onToolbarSearchKeyDown(wxKeyEvent& event)
+   {
+      try
+      {
+         switch (event.GetKeyCode())
+         {
+            case WXK_TAB:
+               m_view->SetFocus();
+               break;
+
+            case WXK_ESCAPE:
+               clearSearchFilter();
+               break;
+
+            default:
+               event.Skip();
+         }
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MainFrame::onToolbarSearchTextEnter([[maybe_unused]] wxCommandEvent& event)
+   {
+      try
+      {
+         doSearchFilter();
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MainFrame::clearSearchFilter()
+   {
+      if (!m_event_source->hasDataset()) return;
+      try
+      {
+         m_search_ctrl->ChangeValue("");
+         m_event_source->getDataset()->clearSubStringFilter();
+         m_event_source->signal(DatasetEvent::Id::Filter);
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+      updateStatusBarCounts();
    }
 
 
@@ -619,22 +707,6 @@ namespace ctb::app
       if (nullptr == dataset.get() and throw_on_null)
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       return dataset;
-   }
-
-
-   void MainFrame::clearSearchFilter()
-   {
-      if (!m_event_source->hasDataset()) return;
-      try
-      {
-         m_search_ctrl->ChangeValue("");
-         m_event_source->getDataset()->clearSubStringFilter();
-         m_event_source->signal(DatasetEvent::Id::Filter);
-      }
-      catch(...){
-         wxGetApp().displayErrorMessage(packageError());
-      }
-      updateStatusBarCounts();
    }
 
 

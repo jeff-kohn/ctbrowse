@@ -219,5 +219,15 @@ namespace ctb
       return ctb::format(constants::FMT_URL_CT_EDIT_ORDER, wine_id, purchase_id);
    }
 
+   inline auto getDrinkRemoveUrl(std::string_view wine_id) -> std::string
+   {
+      return ctb::format(constants::FMT_URL_CT_DRINK_REMOVE, wine_id);
+   }
+
+   inline auto getAddToCellarUrl(std::string_view wine_id) -> std::string
+   {
+      return ctb::format(constants::FMT_URL_CT_ADD_TO_CELLAR, wine_id);
+   }
+
 
 }

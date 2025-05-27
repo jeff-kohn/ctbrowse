@@ -16,8 +16,9 @@ namespace ctb::constants
    inline constexpr const char* URL_CT_LOGIN_FORM           = "https://www.cellartracker.com/password.asp";
    inline constexpr const char* URL_CT_TABLE_LIST           = "https://www.cellartracker.com/list.asp?Table=List";
 
-   
    inline constexpr const char* FMT_URL_CT_ACCEPT_PENDING   = "https://www.cellartracker.com/purchase.asp?iWine={}&iPurchase={}&DeliveryState=delivered&DeliveryDate={:%F}";
+   inline constexpr const char* FMT_URL_CT_ADD_TO_CELLAR    = "https://www.cellartracker.com/purchase.asp?iWine={}";
+   inline constexpr const char* FMT_URL_CT_DRINK_REMOVE     = "https://www.cellartracker.com/barcode.asp?iWine={}";
    inline constexpr const char* FMT_URL_CT_EDIT_ORDER       = "https://www.cellartracker.com/purchase.asp?iWine={}&iPurchase={}";
    inline constexpr const char* FMT_URL_CT_TABLE            = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
    inline constexpr const char* FMT_URL_CT_VINTAGES         = "https://www.cellartracker.com/list.asp?Table=List&fInStock=0&iUserOverride=0&Wine={}";
@@ -79,14 +80,14 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_REGION_WINE           = "Region, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_PURCHASE_DATE         = "Order Date, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_STORE_NAME            = "Store, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_CURVE_DEFAULT         = "Default Formula, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_CURVE_DEFAULT         = "Default Formula";
    inline constexpr const char* SORT_OPTION_CURVE_LINEAR          = "Linear Formula";
    inline constexpr const char* SORT_OPTION_CURVE_BELL            = "Bell Curve Formula";
    inline constexpr const char* SORT_OPTION_CURVE_BELL_EARLY      = "Early Bell Curve Formula";
    inline constexpr const char* SORT_OPTION_CURVE_BELL_LATE       = "Late Bell Curve Formula";
    inline constexpr const char* SORT_OPTION_CURVE_FAST_MATURE     = "Fast Maturing Formula";
-   inline constexpr const char* SORT_OPTION_CURVE_EARLY_LATE      = "Early/Late Formula";
-   inline constexpr const char* SORT_OPTION_CURVE_BOTTLES_YEAR    = "Bottles/Year Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_EARLY_LATE      = "Early & Late Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_BOTTLES_YEAR    = "Bottles per Year Formula";
 
    inline constexpr const char* SORT_OPTION_SCORE_MY              = "My Score";
    inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";

@@ -87,26 +87,36 @@ namespace ctb::app
       void createStatusBar();
       void createToolBar();
 
-      // message handlers
+      // File menu handlers
       void onMenuFilePreferences(wxCommandEvent&);
       void onMenuFileSyncData(wxCommandEvent&);
       void onMenuFileQuit(wxCommandEvent&);
 
+      // Edit menu handlers
       void onMenuEditFind(wxCommandEvent& event);
+      
+      // Collection menu handlers
       void onMenuCollection(wxCommandEvent&);
 
-      void onToolbarSearchBtn(wxCommandEvent& event);
-      void onToolbarSearchCancelBtn(wxCommandEvent& event);
-      void onToolbarSearchTextEnter(wxCommandEvent& event);
-      void onToolbarSearchKeyDown(wxKeyEvent& event);
-
-      void onMenuWineOnlineDetails(wxCommandEvent&);
-      void onMenuWineOnlineVintages(wxCommandEvent&);
+      // Online menu events
+      void onMenuWineAddToCellar(wxCommandEvent&);
       void onMenuWineAcceptDelivery(wxCommandEvent&);
       void onMenuWineEditOrder(wxCommandEvent&);
+      void onMenuWineDrinkRemove(wxCommandEvent&);
+      void onMenuWineOnlineDetails(wxCommandEvent&);
+      void onMenuWineOnlineVintages(wxCommandEvent&);
 
-      void onMenuWineOnlineUI(wxUpdateUIEvent&);
+      // UI update handlers for wine online commands
       void onMenuWineAcceptDeliveryUI(wxUpdateUIEvent&);  
+      void onMenuWineAddToCellarUI(wxUpdateUIEvent&);  
+      void onMenuWineDrinkRemoveUI(wxUpdateUIEvent&);
+      void onMenuWineOnlineUI(wxUpdateUIEvent&);
+
+      // Toolbar event handlers
+      void onToolbarSearchBtn(wxCommandEvent& event);
+      void onToolbarSearchCancelBtn(wxCommandEvent& event);
+      void onToolbarSearchKeyDown(wxKeyEvent& event);
+      void onToolbarSearchTextEnter(wxCommandEvent& event);
 
       // implementation details
       void clearSearchFilter();

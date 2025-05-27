@@ -62,9 +62,9 @@ namespace ctb::app
             Score,
             Valuation,
             Pending,
-            ReadyToDrink,
-            OpenWinePage,
-            AcceptPendingPage,
+            LinkReadyToDrink,
+            LinkOpenWineDetails,
+            LinkAcceptPending,
             TastingNotes
          };
 
@@ -127,20 +127,20 @@ namespace ctb::app
       wxTimer                m_label_timer{};
       wxString               m_drink_window_label{ constants::LBL_DRINK_WINDOW };
 
-      // window creation
+      // impl
       void initControls();
+      void addCommandLinkButton(wxBoxSizer* sizer, CmdId cmd, CategorizedControls::Category category, std::string_view command_text, std::string_view note = constants::DETAILS_CMD_LINK_NOTE);
       void checkLabelResult();
       void displayLabel();
 
-      /// event source related handlers
+      /// event source related 
       void notify(DatasetEvent event) override;
       void configureControlsForDataset(DatasetPtr dataset);
       void updateDetails(DatasetEvent event);
 
-      // windows event handlers
+      // event handlers
+      void onCommand(wxCommandEvent& event);
       void onLabelTimer(wxTimerEvent& event);
-      void onViewWebPage(wxCommandEvent& event);
-      void onAcceptPending(wxCommandEvent& event);
 
       // private ctor used by create()
       explicit DetailsPanel(DatasetEventSourcePtr source, LabelCachePtr cache);
