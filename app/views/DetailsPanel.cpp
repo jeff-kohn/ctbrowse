@@ -42,13 +42,12 @@ namespace ctb::app
             return drink_end.asString("By {}").c_str();
 
          if (drink_end.isNull())
-            return drink_start.asString("{} +").c_str();
+            return drink_start.asString("{}+").c_str();
 
          return ctb::format("{} - {}", drink_start.asString(), drink_end.asString());
       }
 
    } // namespace detail
-
 
 
    DetailsPanel::DetailsPanel(DatasetEventSourcePtr source, LabelCachePtr cache) : 
@@ -161,12 +160,22 @@ namespace ctb::app
 
       // drink window
       auto* drink_window_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_DRINK_WINDOW);
+      drink_window_lbl->SetValidator(wxGenericValidator{ &m_drink_window_label });
       details_sizer->Add(drink_window_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* drink_window_val = new wxStaticText(this, wxID_ANY, "");
       drink_window_val->SetValidator(wxGenericValidator{ &m_details.drink_window });
       details_sizer->Add(drink_window_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
       m_category_controls.addControlDependency(DrinkWindow, drink_window_lbl);
       m_category_controls.addControlDependency(DrinkWindow, drink_window_val);
+
+      // CT drink window (only for Availability view)
+      auto* ct_drink_window_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_DRINK_WINDOW_CT);
+      details_sizer->Add(ct_drink_window_lbl , wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
+      auto* ct_drink_window_val = new wxStaticText(this, wxID_ANY, "");
+      ct_drink_window_val->SetValidator(wxGenericValidator{ &m_details.ct_drink_window });
+      details_sizer->Add(ct_drink_window_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
+      m_category_controls.addControlDependency(CtDrinkWindow, ct_drink_window_lbl );
+      m_category_controls.addControlDependency(CtDrinkWindow, ct_drink_window_val);
 
       // Scores heading
       auto* scores_header_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_SCORES, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -394,7 +403,7 @@ namespace ctb::app
          // note that we try to grab all properties even though some of them won't be available in this dataset,
          // but that's fine because we'll just get a null value if it's not available, so no need to check hasProperty()
 
-         m_details.wine_id     =                    dataset->getProperty(rec_idx, CtProp::iWineId     ).asString();
+         m_details.wine_id     = dataset->getProperty(rec_idx, CtProp::iWineId     ).asString();
          m_details.wine_name   = dataset->getProperty(rec_idx, CtProp::WineName    ).asString();
          m_details.vintage     = dataset->getProperty(rec_idx, CtProp::Vintage     ).asString();
          m_details.varietal    = dataset->getProperty(rec_idx, CtProp::Varietal    ).asString();
@@ -405,6 +414,9 @@ namespace ctb::app
 
          m_details.drink_window     = detail::getDrinkWindow(dataset->getProperty(rec_idx, CtProp::BeginConsume ),
                                                              dataset->getProperty(rec_idx, CtProp::EndConsume   ));
+
+         m_details.ct_drink_window  = detail::getDrinkWindow(dataset->getProperty(rec_idx, CtProp::CtBeginConsume ),
+                                                             dataset->getProperty(rec_idx, CtProp::CtEndConsume   ));
 
          m_details.auction_value    = dataset->getProperty(rec_idx, CtProp::AuctionPrice ).asString(constants::FMT_NUMBER_CURRENCY);
          m_details.community_price  = dataset->getProperty(rec_idx, CtProp::CtPrice      ).asString(constants::FMT_NUMBER_CURRENCY);
@@ -479,6 +491,7 @@ namespace ctb::app
 
       m_category_controls.showCategory(Score, dataset->hasProperty(CtProp::CtScore));
       m_category_controls.showCategory(DrinkWindow, dataset->hasProperty(CtProp::BeginConsume));
+      m_category_controls.showCategory(CtDrinkWindow, dataset->hasProperty(CtProp::CtBeginConsume));
       m_category_controls.showCategory(Pending, dataset->hasProperty(CtProp::PendingPurchaseId));
       m_category_controls.showCategory(Valuation, dataset->hasProperty(CtProp::MyPrice));
 
@@ -490,10 +503,15 @@ namespace ctb::app
       else {
          m_category_controls.showCategory(AcceptPendingPage, false);
          m_category_controls.showCategory(OpenWinePage, true);
-
       }
-
-
+      if (dataset->hasProperty(CtProp::CtBeginConsume))
+      {
+         m_drink_window_label = constants::LBL_DRINK_WINDOW_MY;
+         TransferDataToWindow();
+      }
+      else {
+         m_drink_window_label = constants::LBL_DRINK_WINDOW;
+      }
    }
 
 

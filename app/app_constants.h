@@ -72,6 +72,8 @@ namespace ctb::constants
    inline constexpr const char* LBL_CT_PRICE                      = "Community Avg:";
    inline constexpr const char* LBL_CT_SCORE                      = "CT Score:";
    inline constexpr const char* LBL_DRINK_WINDOW                  = "Drink Window:";
+   inline constexpr const char* LBL_DRINK_WINDOW_MY               = "My Drink Window:";
+   inline constexpr const char* LBL_DRINK_WINDOW_CT               = "CT Drink Window:";
    inline constexpr const char* LBL_FILTER_OPTIONS                = "Filter Options";
    inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
    inline constexpr const char* LBL_MY_PRICE                      = "My Price:";

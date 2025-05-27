@@ -88,6 +88,14 @@ namespace ctb::detail
          }
       }
 
+      ListColumn(Prop prop_id, Format fmt, std::string_view col_name, Align col_align, Align head_align) : 
+         prop_id{ prop_id },  
+         display_name{ col_name }, 
+         format{ fmt }, 
+         col_align{ col_align },
+         header_align{ head_align }
+      {}
+
       /// @brief get the display text for a property value, which may include special formatting
       ///
       /// currency values will use a dollar sign and 2 decimal places, decimal values  will be 

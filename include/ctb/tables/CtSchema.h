@@ -73,8 +73,7 @@ namespace ctb
       RtdQtyFastMaturing,
       RtdQtyEarlyAndLate,
       RtdQtyBottlesPerYear,
-      RtdMyWindow,
-      RtdCtWindow,
+      RtdConsumed,
    };
 
    

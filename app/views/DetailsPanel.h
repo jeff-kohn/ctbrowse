@@ -58,6 +58,7 @@ namespace ctb::app
          {
             WineDetails,
             DrinkWindow,
+            CtDrinkWindow, // ReadyToDrink dataset has both 'My' and 'CT' windows
             Score,
             Valuation,
             Pending,
@@ -91,7 +92,7 @@ namespace ctb::app
       /// @brief struct that control validators will be bound to for displaying in the window
       struct WineDetails
       {
-         std::string wine_id{};     // used for buliding CT url, not displayed
+         std::string wine_id{};            // used for buliding CT url, not displayed
          wxString wine_name{};
          wxString vintage{};
          wxString varietal{};
@@ -100,6 +101,7 @@ namespace ctb::app
          wxString sub_region{};
          wxString appellation{};
          wxString drink_window{};
+         wxString ct_drink_window{};
          wxString my_score{};
          wxString ct_score{};
          wxString my_price{};
@@ -123,6 +125,7 @@ namespace ctb::app
       LabelCachePtr          m_label_cache{};
       wxGenericStaticBitmap* m_label_image{};
       wxTimer                m_label_timer{};
+      wxString               m_drink_window_label{ constants::LBL_DRINK_WINDOW };
 
       // window creation
       void initControls();

@@ -11,6 +11,7 @@
 #include "ctb/ctb.h"
 #include "ctb/table_data.h"
 #include "ctb/tables/CtSchema.h"
+#include "ctb/tables/detail/field_helpers.h"
 
 #include <frozen/map.h>
 #include <array>
@@ -54,8 +55,9 @@ namespace ctb
          { Prop::QtyPending,           FieldSchema { Prop::QtyPending,           PropType::UInt16,   15 }},
          { Prop::QtyTotal,             FieldSchema { Prop::QtyTotal,             PropType::UInt16,   21 }},
          { Prop::QtyConsumed,          FieldSchema { Prop::QtyConsumed,          PropType::UInt16,   19 }},
-         { Prop::BeginConsume,         FieldSchema { Prop::BeginConsume,         PropType::UInt16,   65 }},
-         { Prop::EndConsume,           FieldSchema { Prop::EndConsume,           PropType::UInt16,   66 }},
+         { Prop::QtyPurchased,         FieldSchema { Prop::QtyPurchased,         PropType::UInt16,   13 }},
+         { Prop::BeginConsume,         FieldSchema { Prop::BeginConsume,         PropType::UInt16,   35 }},
+         { Prop::EndConsume,           FieldSchema { Prop::EndConsume,           PropType::UInt16,   36 }},
          { Prop::CtBeginConsume,       FieldSchema { Prop::CtBeginConsume,       PropType::UInt16,   63 }},
          { Prop::CtEndConsume,         FieldSchema { Prop::CtEndConsume,         PropType::UInt16,   64 }},
          { Prop::RtdQtyDefault,        FieldSchema { Prop::RtdQtyDefault,        PropType::Double,    4 }},
@@ -66,16 +68,20 @@ namespace ctb
          { Prop::RtdQtyFastMaturing,   FieldSchema { Prop::RtdQtyFastMaturing,   PropType::Double,    9 }},
          { Prop::RtdQtyEarlyAndLate,   FieldSchema { Prop::RtdQtyEarlyAndLate,   PropType::Double,   10 }},
          { Prop::RtdQtyBottlesPerYear, FieldSchema { Prop::RtdQtyBottlesPerYear, PropType::Double,   11 }},
-         { Prop::RtdMyWindow,          FieldSchema { Prop::RtdMyWindow,          PropType::String,   {} }},
-         { Prop::RtdCtWindow,          FieldSchema { Prop::RtdCtWindow,          PropType::String,   {} }},
-         });
+         { Prop::RtdConsumed,          FieldSchema { Prop::RtdConsumed,          PropType::String,   {} }},
+      });
 
       /// @brief list of display columns that will show in the list view
       static inline const std::array DefaultListColumns { 
-         CtListColumn{ Prop::WineAndVintage,                                constants::DISPLAY_COL_WINE         },
-         CtListColumn{ Prop::RtdQtyDefault,  CtListColumn::Format::Decimal, constants::DISPLAY_COL_AVAILABLE, 2 },
-         CtListColumn{ Prop::RtdMyWindow,    CtListColumn::Format::String,  constants::DISPLAY_COL_MY_WINDOW    },
-         CtListColumn{ Prop::RtdCtWindow,    CtListColumn::Format::String,  constants::DISPLAY_COL_CT_WINDOW    },
+         CtListColumn{ Prop::WineAndVintage,     CtListColumn::Format::String,  constants::DISPLAY_COL_WINE             },
+         CtListColumn{ Prop::RtdConsumed,        CtListColumn::Format::String,  constants::DISPLAY_COL_PURCHASES, ListColumn::Align::Right, ListColumn::Align::Center },
+         CtListColumn{ Prop::RtdQtyDefault,      CtListColumn::Format::Decimal, constants::DISPLAY_COL_AVAILABLE,     2 },
+         CtListColumn{ Prop::RtdQtyLinear,       CtListColumn::Format::Decimal, constants::DISPLAY_COL_LINEAR,        2 },
+         CtListColumn{ Prop::RtdQtyBellCurve,    CtListColumn::Format::Decimal, constants::DISPLAY_COL_BELL_CURVE ,   2 },
+         CtListColumn{ Prop::RtdQtyEarlyCurve,   CtListColumn::Format::Decimal, constants::DISPLAY_COL_EARLY_CURVE,   2 },
+         CtListColumn{ Prop::RtdQtyLateCurve,    CtListColumn::Format::Decimal, constants::DISPLAY_COL_LATE_CURVE,    2 },
+         CtListColumn{ Prop::RtdQtyEarlyAndLate, CtListColumn::Format::Decimal, constants::DISPLAY_COL_EARLY_LATE,    2 },
+         CtListColumn{ Prop::RtdQtyFastMaturing, CtListColumn::Format::Decimal, constants::DISPLAY_COL_FAST_MATURING, 2 },
       };
 
       /// @brief the available sort orders for this table.
@@ -130,34 +136,13 @@ namespace ctb
       {
          using enum Prop;
 
-         // set value for the WineAndVintage property
-         auto vintage   = rec[Vintage ].asString();
-         auto wine_name = rec[WineName].asStringView();
-         rec[WineAndVintage] = ctb::format("{} {}", vintage, wine_name);
+         rec[WineAndVintage] = getWineAndVintage(rec);
+         rec[QtyTotal]       = calcQtyTotal(rec);
+         rec[RtdConsumed]    = getRtdConsumed(rec);
 
-         // QtyTotal is in-stock + pending, this combined field displays similar to CT.com
-         auto qty     = rec[QtyOnHand ].asUInt16().value_or(0u);
-         auto pending = rec[QtyPending].asUInt16().value_or(0u);
-         if (pending == 0)
-         {
-            rec[QtyTotal] = qty;
-         }
-         else if (qty == 0)
-         {
-            rec[QtyTotal] = ctb::format("({})", pending);
-         }
-         else{
-            rec[QtyTotal] = ctb::format("{}+{}", qty, pending);
-         }
-
-         // for drinking window, 9999 = null
-         auto& drink_start = rec[BeginConsume];
-         if (drink_start.asUInt16() == constants::CT_NULL_YEAR)
-            drink_start.setNull();
-
-         auto& drink_end = rec[EndConsume];
-         if (drink_end.asUInt16() == constants::CT_NULL_YEAR)
-            drink_end.setNull();
+         validateDrinkYear(rec[EndConsume]);
+         validateDrinkYear(rec[CtBeginConsume]);
+         validateDrinkYear(rec[CtEndConsume]);
       }
    };
 

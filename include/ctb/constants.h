@@ -33,18 +33,24 @@ namespace ctb::constants
    inline constexpr int         MAX_ENV_VAR_LENGTH          = 128;
 
    // column labels
-   inline constexpr const char* DISPLAY_COL_AVAILABLE       = "Available";
+   inline constexpr const char* DISPLAY_COL_AVAILABLE       = "Ready";
+   inline constexpr const char* DISPLAY_COL_LINEAR          = "Linear";
+   inline constexpr const char* DISPLAY_COL_BELL_CURVE      = "Bell";
+   inline constexpr const char* DISPLAY_COL_EARLY_CURVE     = "Early";
+   inline constexpr const char* DISPLAY_COL_LATE_CURVE      = "Late";
+   inline constexpr const char* DISPLAY_COL_EARLY_LATE      = "Both";
+   inline constexpr const char* DISPLAY_COL_FAST_MATURING   = "Fast";
    inline constexpr const char* DISPLAY_COL_CT_SCORE        = "CT Score";
    inline constexpr const char* DISPLAY_COL_CT_WINDOW       = "CT Window";
    inline constexpr const char* DISPLAY_COL_LOCALE          = "Region and Appellation";
    inline constexpr const char* DISPLAY_COL_MY_SCORE        = "My Score";
    inline constexpr const char* DISPLAY_COL_MY_WINDOW       = "My Window";
+   inline constexpr const char* DISPLAY_COL_PURCHASES       = "Purchases";
    inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
    inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
    inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Ordered";
    inline constexpr const char* DISPLAY_COL_STORE           = "Store";
    inline constexpr const char* DISPLAY_COL_PRICE           = "Price";
-
 
    // filter names
    inline constexpr const char* FILTER_APPELATION           = "Appellation";
@@ -54,7 +60,6 @@ namespace ctb::constants
    inline constexpr const char* FILTER_VARIETAL             = "Varietal";
    inline constexpr const char* FILTER_VINTAGE              = "Vintage";
    inline constexpr const char* FILTER_ORDER_DATE           = "Order Date";
-
 
    inline constexpr const char* HTTP_PARAM_TABLE            = "Table";
    inline constexpr const char* HTTP_PARAM_FORMAT           = "Format";
@@ -75,13 +80,13 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_PURCHASE_DATE         = "Order Date, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_STORE_NAME            = "Store, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_CURVE_DEFAULT         = "Default Formula, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_CURVE_LINEAR          = "Linear Formula, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_CURVE_BELL            = "Bell Curve Formula, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_CURVE_BELL_EARLY      = "Early Bell Curve Formula, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_CURVE_BELL_LATE       = "Late Bell Curve Formula, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_CURVE_FAST_MATURE     = "Fast Maturing Formula, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_CURVE_EARLY_LATE      = "Early/Late Formula, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_CURVE_BOTTLES_YEAR    = "Bottles per Year Formula, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_CURVE_LINEAR          = "Linear Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_BELL            = "Bell Curve Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_BELL_EARLY      = "Early Bell Curve Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_BELL_LATE       = "Late Bell Curve Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_FAST_MATURE     = "Fast Maturing Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_EARLY_LATE      = "Early/Late Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_BOTTLES_YEAR    = "Bottles/Year Formula";
 
    inline constexpr const char* SORT_OPTION_SCORE_MY              = "My Score";
    inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";
@@ -135,7 +140,6 @@ namespace ctb::constants
    inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND          = "Folder '{}' does not exist.";
    inline constexpr const char* FMT_ERROR_PROP_NOT_FOUND          = "Property '{}' was not found.";
 
-
    inline constexpr const char* FMT_NUMBER_CURRENCY               = "${:.2f}";
    inline constexpr const char* FMT_NUMBER_DECIMAL                = "{:.1f}";
    inline constexpr const char* FMT_DATE_SHORT                    = "{:%m/%d/%Y}";
@@ -153,7 +157,6 @@ namespace ctb::constants
    inline constexpr double   FILTER_SCORE_MIN                     =          50;
    inline constexpr double   FILTER_SCORE_MAX                     =       100.0;
    inline constexpr int      FILTER_SCORE_DIGITS                  =           1;
-
 
 
 } // namespace ctb::constants

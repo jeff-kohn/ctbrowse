@@ -272,7 +272,7 @@ namespace ctb
             assert(false and "This is a logic bug, invalid index should never happen here.");
 #endif
          // invalid prop_id won't really hurt anything, just default-construct and then return an empty/null value.
-         // if index is invalid this will throw since we're using bounds-checked API.
+         // if record index is invalid this will throw since we're using bounds-checked API.
          return m_current_view->at(static_cast<size_t>(rec_idx))[prop_id];
       }
 
