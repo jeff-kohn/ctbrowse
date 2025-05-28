@@ -304,9 +304,9 @@ namespace ctb::app
       top_sizer->Add(details_sizer, wxSizerFlags{}.CenterHorizontal().FixedMinSize().Border(wxALL));
 
       // Command-Link buttons (Collection-Specific)
-      addCommandLinkButton(top_sizer, CmdId::CMD_WINE_ONLINE_DETAILS, LinkOpenWineDetails, constants::DETAILS_CMD_LINK_WINE_DETAILS);
-      addCommandLinkButton(top_sizer, CmdId::CMD_WINE_ACCEPT_PENDING, LinkAcceptPending,   constants::DETAILS_CMD_LINK_ACCEPT_PENDING);
-      addCommandLinkButton(top_sizer, CmdId::CMD_WINE_DRINK_REMOVE,   LinkReadyToDrink,    constants::DETAILS_CMD_LINK_DRINK_REMOVE);
+      addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_WINE_DETAILS, LinkOpenWineDetails, constants::DETAILS_CMD_LINK_WINE_DETAILS);
+      addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_ACCEPT_PENDING, LinkAcceptPending,   constants::DETAILS_CMD_LINK_ACCEPT_PENDING);
+      addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_DRINK_REMOVE,   LinkReadyToDrink,    constants::DETAILS_CMD_LINK_DRINK_REMOVE);
 
       // image won't correctly scale/redraw unless we use wxFULL_REPAINT_ON_RESIZE
       m_label_image = new wxGenericStaticBitmap(this, wxID_ANY, wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);

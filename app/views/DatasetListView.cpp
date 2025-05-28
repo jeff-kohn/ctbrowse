@@ -49,16 +49,16 @@ namespace ctb::app
       m_popup_menu.reset(new wxMenu{});
       m_popup_menu->Append(new wxMenuItem{
          m_popup_menu.get(),
-         CmdId::CMD_WINE_ONLINE_DETAILS,
-         constants::CMD_WINE_ONLINE_DETAILS_LBL,
-         constants::CMD_WINE_ONLINE_DETAILS_TIP,
+         CmdId::CMD_ONLINE_WINE_DETAILS,
+         constants::CMD_ONLINE_WINE_DETAILS_LBL,
+         constants::CMD_ONLINE_WINE_DETAILS_TIP,
          wxITEM_NORMAL
       });
       m_popup_menu->Append(new wxMenuItem{
          m_popup_menu.get(),
-         CmdId::CMD_WINE_ONLINE_VINTAGES,
-         constants::CMD_WINE_ONLINE_VINTAGES_LBL,
-         constants::CMD_WINE_ONLINE_VINTAGES_TIP,
+         CmdId::CMD_ONLINE_SEARCH_VINTAGES,
+         constants::CMD_ONLINE_SEARCH_VINTAGES_LBL,
+         constants::CMD_ONLINE_SEARCH_VINTAGES_TIP,
          wxITEM_NORMAL
       });
 
@@ -67,33 +67,40 @@ namespace ctb::app
          m_popup_menu->AppendSeparator();
          m_popup_menu->Append(new wxMenuItem{
             m_popup_menu.get(),
-            CmdId::CMD_WINE_ACCEPT_PENDING,
-            constants::CMD_WINE_ONLINE_ACCEPT_WINE_LBL,
-            constants::CMD_WINE_ONLINE_ACCEPT_WINE_TIP,
+            CmdId::CMD_ONLINE_ACCEPT_PENDING,
+            constants::CMD_ONLINE_ACCEPT_PENDING_LBL,
+            constants::CMD_ONLINE_ACCEPT_PENDING_TIP,
             wxITEM_NORMAL
          });
          m_popup_menu->Append(new wxMenuItem{
             m_popup_menu.get(),
-            CmdId::CMD_WINE_EDIT_ORDER,
-            constants::CMD_WINE_ONLINE_EDIT_ORDER_LBL,
-            constants::CMD_WINE_ONLINE_EDIT_ORDER_LBL,
+            CmdId::CMD_ONLINE_EDIT_ORDER,
+            constants::CMD_ONLINE_EDIT_ORDER_LBL,
+            constants::CMD_ONLINE_EDIT_ORDER_LBL,
             wxITEM_NORMAL
          });
       }
       else {
          m_popup_menu->AppendSeparator();
          m_popup_menu->Append(new wxMenuItem{
-            m_popup_menu.get(),
-            CmdId::CMD_WINE_ADD_TO_CELLAR,
-            constants::CMD_WINE_ONLINE_ADD_TO_CELLAR_LBL,
-            constants::CMD_WINE_ONLINE_ADD_TO_CELLAR_TIP,
+            m_popup_menu.get(), 
+            CmdId::CMD_ONLINE_DRINK_WINDOW, 
+            constants::CMD_ONLINE_DRINK_WINDOW_LBL, 
+            constants::CMD_ONLINE_DRINK_WINDOW_TIP,
             wxITEM_NORMAL
             });
          m_popup_menu->Append(new wxMenuItem{
             m_popup_menu.get(),
-            CmdId::CMD_WINE_ADD_TASTING_NOTE,
-            constants::CMD_WINE_ONLINE_ADD_TASTE_NOTE_LBL,
-            constants::CMD_WINE_ONLINE_ADD_TASTE_NOTE_LBL,
+            CmdId::CMD_ONLINE_ADD_TO_CELLAR,
+            constants::CMD_ONLINE_ADD_TO_CELLAR_LBL,
+            constants::CMD_ONLINE_ADD_TO_CELLAR_TIP,
+            wxITEM_NORMAL
+            });
+         m_popup_menu->Append(new wxMenuItem{
+            m_popup_menu.get(),
+            CmdId::CMD_ONLINE_ADD_TASTING_NOTE,
+            constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
+            constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
             wxITEM_NORMAL
             });
       }
@@ -103,9 +110,9 @@ namespace ctb::app
          m_popup_menu->AppendSeparator();
          m_popup_menu->Append(new wxMenuItem{
             m_popup_menu.get(),
-            CmdId::CMD_WINE_DRINK_REMOVE, 
-            constants::CMD_WINE_ONLINE_DRINK_REMOVE_LBL, 
-            constants::CMD_WINE_ONLINE_DRINK_REMOVE_LBL,
+            CmdId::CMD_ONLINE_DRINK_REMOVE, 
+            constants::CMD_ONLINE_DRINK_REMOVE_LBL, 
+            constants::CMD_ONLINE_DRINK_REMOVE_LBL,
             wxITEM_NORMAL
          });
       }

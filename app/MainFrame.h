@@ -98,20 +98,21 @@ namespace ctb::app
       // Collection menu handlers
       void onMenuCollection(wxCommandEvent&);
 
-      // Online menu events
-      void onMenuWineAddTastingNote(wxCommandEvent&);
-      void onMenuWineAddToCellar(wxCommandEvent&);
-      void onMenuWineAcceptDelivery(wxCommandEvent&);
-      void onMenuWineEditOrder(wxCommandEvent&);
-      void onMenuWineDrinkRemove(wxCommandEvent&);
-      void onMenuWineOnlineDetails(wxCommandEvent&);
-      void onMenuWineOnlineVintages(wxCommandEvent&);
+      // Online menu events 
+      void onMenuOnlineWineDetails(wxCommandEvent&);
+      void onMenuOnlineSearchVintages(wxCommandEvent&);
+      void onMenuOnlineDrinkWindow(wxCommandEvent&);
+      void onMenuOnlineAddToCellar(wxCommandEvent&);
+      void onMenuOnlineAddTastingNote(wxCommandEvent&);
+      void onMenuOnlineAcceptDelivery(wxCommandEvent&);
+      void onMenuOnlineEditOrder(wxCommandEvent&);
+      void onMenuOnlineDrinkRemove(wxCommandEvent&);
 
       // UI update handlers for wine online commands
-      void onMenuWineAcceptDeliveryUI(wxUpdateUIEvent&);  
-      void onMenuWineAddToCellarUI(wxUpdateUIEvent&);  
-      void onMenuWineDrinkRemoveUI(wxUpdateUIEvent&);
-      void onMenuWineOnlineUI(wxUpdateUIEvent&);
+      void onMenuOnlineAcceptDeliveryUI(wxUpdateUIEvent&);  
+      void onMenuOnlineAddToCellarUI(wxUpdateUIEvent&);  
+      void onMenuOnlineDrinkRemoveUI(wxUpdateUIEvent&);
+      void onMenuOnlineWineSelectionUI(wxUpdateUIEvent&);
 
       // Toolbar event handlers
       void onToolbarSearchBtn(wxCommandEvent& event);
