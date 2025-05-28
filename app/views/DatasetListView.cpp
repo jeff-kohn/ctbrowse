@@ -1,11 +1,17 @@
-#include "MainFrame.h"
+/*********************************************************************
+* @file       DatasetListView.cpp
+*
+* @brief      Implementation for the class DatasetListView
+*
+* @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
+*********************************************************************/
 #include "views/DatasetListView.h"
+
+#include "MainFrame.h"
 #include "wx_helpers.h"
 
 #include <ctb/model/CtDataset.h>
-#include <ctb/model/CtDatasetLoader.h>
 
-#include <wx/itemattr.h>
 #include <wx/persist/dataview.h>
 #include <wx/wupdlock.h>
 
@@ -33,49 +39,87 @@ namespace ctb::app
 
    void DatasetListView::init()
    {
-      buildWinePopup(m_wine_menu, false);
-      buildWinePopup(m_pending_menu, true);
-
-      Bind(wxEVT_DATAVIEW_SELECTION_CHANGED, &DatasetListView::onSelectionChanged, this);
-      Bind(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, &DatasetListView::onWineContextMenu, this);
+      Bind(wxEVT_DATAVIEW_SELECTION_CHANGED,         &DatasetListView::onSelectionChanged, this);
+      Bind(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, &DatasetListView::onWineContextMenu,  this);
    }
 
-   void DatasetListView::buildWinePopup(wxMenu& menu, bool include_pending)
+   void DatasetListView::buildWinePopup(TableId table_id)
    {
-      // build our popup menu.
-      menu.Append(new wxMenuItem{
-         &menu, 
-         CmdId::CMD_WINE_ONLINE_DETAILS, 
-         constants::CMD_WINE_ONLINE_DETAILS_LBL, 
+      // build our popup menu based first the universal commands then the dataset-specific ones.
+      m_popup_menu.reset(new wxMenu{});
+      m_popup_menu->Append(new wxMenuItem{
+         m_popup_menu.get(),
+         CmdId::CMD_WINE_ONLINE_DETAILS,
+         constants::CMD_WINE_ONLINE_DETAILS_LBL,
          constants::CMD_WINE_ONLINE_DETAILS_TIP,
          wxITEM_NORMAL
-         });
-      menu.Append(new wxMenuItem{
-         &menu, 
-         CmdId::CMD_WINE_ONLINE_VINTAGES, 
-         constants::CMD_WINE_ONLINE_VINTAGES_LBL, 
+      });
+      m_popup_menu->Append(new wxMenuItem{
+         m_popup_menu.get(),
+         CmdId::CMD_WINE_ONLINE_VINTAGES,
+         constants::CMD_WINE_ONLINE_VINTAGES_LBL,
          constants::CMD_WINE_ONLINE_VINTAGES_TIP,
          wxITEM_NORMAL
-         });
+      });
 
-      if (include_pending)
+      if (table_id == TableId::Pending)
       {
-         menu.AppendSeparator();
-         menu.Append(new wxMenuItem{
-            &menu,
+         m_popup_menu->AppendSeparator();
+         m_popup_menu->Append(new wxMenuItem{
+            m_popup_menu.get(),
             CmdId::CMD_WINE_ACCEPT_PENDING,
             constants::CMD_WINE_ONLINE_ACCEPT_WINE_LBL,
             constants::CMD_WINE_ONLINE_ACCEPT_WINE_TIP,
             wxITEM_NORMAL
-            });
-         menu.Append(new wxMenuItem{
-            &menu,
+         });
+         m_popup_menu->Append(new wxMenuItem{
+            m_popup_menu.get(),
             CmdId::CMD_WINE_EDIT_ORDER,
             constants::CMD_WINE_ONLINE_EDIT_ORDER_LBL,
             constants::CMD_WINE_ONLINE_EDIT_ORDER_LBL,
             wxITEM_NORMAL
+         });
+      }
+      else {
+         m_popup_menu->AppendSeparator();
+         m_popup_menu->Append(new wxMenuItem{
+            m_popup_menu.get(),
+            CmdId::CMD_WINE_ADD_TO_CELLAR,
+            constants::CMD_WINE_ONLINE_ADD_TO_CELLAR_LBL,
+            constants::CMD_WINE_ONLINE_ADD_TO_CELLAR_TIP,
+            wxITEM_NORMAL
+            });
+         m_popup_menu->Append(new wxMenuItem{
+            m_popup_menu.get(),
+            CmdId::CMD_WINE_ADD_TASTING_NOTE,
+            constants::CMD_WINE_ONLINE_ADD_TASTE_NOTE_LBL,
+            constants::CMD_WINE_ONLINE_ADD_TASTE_NOTE_LBL,
+            wxITEM_NORMAL
             });
       }
+
+      if (table_id == TableId::Availability)
+      {
+         m_popup_menu->AppendSeparator();
+         m_popup_menu->Append(new wxMenuItem{
+            m_popup_menu.get(),
+            CmdId::CMD_WINE_DRINK_REMOVE, 
+            constants::CMD_WINE_ONLINE_DRINK_REMOVE_LBL, 
+            constants::CMD_WINE_ONLINE_DRINK_REMOVE_LBL,
+            wxITEM_NORMAL
+         });
+      }
+   }
+
+
+   // you should always call this when you need the ptr, don't cache/store the return value.
+   auto DatasetListView::getWinePopup() noexcept(false)-> wxMenu*
+   {
+      if (m_popup_menu)
+      {
+         return m_popup_menu.get();
+      }
+      throw ctb::Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
    }
 
 
@@ -119,6 +163,7 @@ namespace ctb::app
          configureColumns();
          m_model->reQuery();
          selectFirstRow();
+         buildWinePopup(dataset->getTableId());
       }
       else {
          m_model->reQuery();
@@ -185,13 +230,7 @@ namespace ctb::app
          if (!m_sink.hasDataset())
             event.Skip();
 
-         if (m_sink.getDataset()->hasProperty(CtProp::PendingOrderNumber))
-         {
-            PopupMenu(&m_pending_menu);
-         }
-         else {
-            PopupMenu(&m_wine_menu);
-         }
+         PopupMenu(getWinePopup());
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError());
