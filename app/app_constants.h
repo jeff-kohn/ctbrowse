@@ -100,9 +100,9 @@ namespace ctb::constants
    inline constexpr const char* LBL_VINTAGE                       = "Vintage:";
 
    inline constexpr const char* DETAILS_CMD_LINK_NOTE             = "(Opens in default browser)";
-   inline constexpr const char* DETAILS_CMD_LINK_WINE_DETAILS     = "View Wine on CellarTracker";
-   inline constexpr const char* DETAILS_CMD_LINK_ACCEPT_PENDING   = "Accept Delivery on CellarTracker";
-   inline constexpr const char* DETAILS_CMD_LINK_DRINK_REMOVE     = "Drink/Remove on CellarTracker";
+   inline constexpr const char* DETAILS_CMD_LINK_WINE_DETAILS     = "View Wine on CellarTracker.com";
+   inline constexpr const char* DETAILS_CMD_LINK_ACCEPT_PENDING   = "Accept Delivery on CellarTracker.com";
+   inline constexpr const char* DETAILS_CMD_LINK_DRINK_REMOVE     = "Drink/Remove on CellarTracker.com";
 
    inline constexpr const char* RES_NAME_ICON_PRODUCT             = "IDR_PRODUCT_ICON";
    inline constexpr const char* RES_NAME_MAINFRAME                = "MAINFRAME";

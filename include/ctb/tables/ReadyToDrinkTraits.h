@@ -99,10 +99,10 @@ namespace ctb
       /// @brief multi-value filters that can be used on this table.
       static inline const std::array MultiMatchFilters{
          MultiMatchFilter{ Prop::Varietal,    constants::FILTER_VARIETAL   },
+         MultiMatchFilter{ Prop::Vintage,     constants::FILTER_VINTAGE    },
          MultiMatchFilter{ Prop::Country,     constants::FILTER_COUNTRY    },
          MultiMatchFilter{ Prop::Region,      constants::FILTER_REGION     },
          MultiMatchFilter{ Prop::Appellation, constants::FILTER_APPELATION },
-         MultiMatchFilter{ Prop::Vintage,     constants::FILTER_VINTAGE    },
       };
 
       /// @brief getTableName()
