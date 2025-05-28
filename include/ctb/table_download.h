@@ -44,7 +44,7 @@ namespace ctb
    /// @param format   - the data format to return
    /// @param callback - optional callback to receive progress updates
    /// 
-   /// @oparam convert_to_utf - If true, the downloaded data is assumed will be converted from Windows-1252 to UTF-8.
+   /// @param convert_to_utf - If true, the downloaded data is assumed will be converted from Windows-1252 to UTF-8.
    ///                          If false, the downloaded data is returned to the caller un-modified and can be converted as needed (or not)
    /// 
    /// @return expected/successful value is the requested table data, unexpected/error value is HTTP status code

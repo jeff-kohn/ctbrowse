@@ -26,11 +26,12 @@ namespace ctb
          BOOL  save{ FALSE }; // ignore allow_save fn param, winapi won't save anyway without reg hack
          DWORD auth_error_code{ 0 };
          DWORD flags{ CREDUI_FLAGS_GENERIC_CREDENTIALS | CREDUI_FLAGS_ALWAYS_SHOW_UI | CREDUI_FLAGS_DO_NOT_PERSIST };
+         std::string msg{ prompt_message };
 
          CREDUI_INFOA cui{
             .cbSize = sizeof(CREDUI_INFO),
             .hwndParent = nullptr,
-            .pszMessageText = "Enter a credential for CellarTracker.com",
+            .pszMessageText = msg.c_str(),
             .pszCaptionText = "Enter Credential",
             .hbmBanner = nullptr
          };

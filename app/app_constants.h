@@ -8,44 +8,46 @@ namespace ctb::constants
    inline constexpr const char* APP_DEFAULT_LOG_FOLDER            = "%LOCALAPPDATA%"; // safe default, but not used for windows app.
 
 
-   inline constexpr const char* LBL_MENU_COLLECTION               = "&Collection";
-   inline constexpr const char* LBL_MENU_WINE                     = "&Online";
-   inline constexpr const char* LBL_MENU_VIEW                     = "&View";
-   inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_LBL        = "&Download Data...";
-   inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP        = "Download data from CellarTracker";
-   inline constexpr const char* CMD_FILE_SETTINGS_LBL             = "&Settings...";
-   inline constexpr const char* CMD_FILE_SETTINGS_TIP             = "Configure app settings";
-   inline constexpr const char* CMD_COLLECTION_MY_CELLAR_LBL      = "&My Cellar\tCtrl+M";
-   inline constexpr const char* CMD_COLLECTION_MY_CELLAR_TIP      = "View Personal Wine Collection";
-   inline constexpr const char* CMD_COLLECTION_PENDING_WINE_LBL   = "&Pending Wines\tCtrl+P";
-   inline constexpr const char* CMD_COLLECTION_PENDING_WINE_TIP   = "View Pending Wine Deliveries";
-   inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_LBL = "&Ready to Drink\tCtrl+R";
-   inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_TIP = "View Drinking Availability for Wines";
-   inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_LBL      = "&Resize List Columns";
-   inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_TIP      = "Resize the list columns to fit the data";
-   inline constexpr const char* CMD_WINE_ONLINE_DETAILS_LBL       = "View &Wine Details";
-   inline constexpr const char* CMD_WINE_ONLINE_DETAILS_TIP       = "View the current wine's details on CellarTracker";
-   inline constexpr const char* CMD_WINE_ONLINE_VINTAGES_LBL      = "Search All &Vintages";
-   inline constexpr const char* CMD_WINE_ONLINE_VINTAGES_TIP      = "View all vintages of the current wine on CellarTracker";
-   inline constexpr const char* CMD_WINE_ONLINE_ADD_TO_CELLAR_LBL = "&Add to My Cellar";
-   inline constexpr const char* CMD_WINE_ONLINE_ADD_TO_CELLAR_TIP = "Add more of current wine to inventory on CellarTracker";
-   inline constexpr const char* CMD_WINE_ONLINE_ACCEPT_WINE_LBL   = "Accept &Delivery";
-   inline constexpr const char* CMD_WINE_ONLINE_ACCEPT_WINE_TIP   = "Mark the selected wine as delivered on CellarTracker";
-   inline constexpr const char* CMD_WINE_ONLINE_EDIT_ORDER_LBL    = "&Edit Pending Order";
-   inline constexpr const char* CMD_WINE_ONLINE_EDIT_ORDER_TIP    = "Edit the selected purchase order on CellarTracker";
-   inline constexpr const char* CMD_WINE_ONLINE_DRINK_REMOVE_LBL  = "Drink/&Remove";
-   inline constexpr const char* CMD_WINE_ONLINE_DRINK_REMOVE_TIP  = "Mark a bottle as drunk/removed on CellarTracker";
-
-   inline constexpr const char* CONFIG_PATH_PREFERENCES           = "/Preferences";
-   inline constexpr const char* CONFIG_PATH_PREFERENCE_DATASYNC   = "/Preferences/DataSync";
-
-   inline constexpr const char* CONFIG_VALUE_DEFAULT_SYNC_TABLES  = "DefaultSyncTables";
-   inline constexpr const char* CONFIG_VALUE_SYNC_ON_STARTUP      = "SyncOnStartup";
-   inline constexpr const char* CONFIG_VALUE_LABEL_CACHE_DIR      = "LabelCacheDir";
-   inline constexpr const char* CONFIG_PATH_GRID_OPTIONS          = "/Preferences/GridOptions";
-   inline constexpr const char* CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY= "DefaultInStockOnly";
-
-   inline constexpr const char* ERROR_WINDOW_CREATION_FAILED      = "Window creation failed. You may need to restart the app.";
+   inline constexpr const char* LBL_MENU_COLLECTION                = "&Collection";
+   inline constexpr const char* LBL_MENU_WINE                      = "&Online";
+   inline constexpr const char* LBL_MENU_VIEW                      = "&View";
+   inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_LBL         = "&Download Data...";
+   inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP         = "Download data from CellarTracker";
+   inline constexpr const char* CMD_FILE_SETTINGS_LBL              = "&Settings...";
+   inline constexpr const char* CMD_FILE_SETTINGS_TIP              = "Configure app settings";
+   inline constexpr const char* CMD_COLLECTION_MY_CELLAR_LBL       = "&My Cellar\tCtrl+M";
+   inline constexpr const char* CMD_COLLECTION_MY_CELLAR_TIP       = "View Personal Wine Collection";
+   inline constexpr const char* CMD_COLLECTION_PENDING_WINE_LBL    = "&Pending Wines\tCtrl+P";
+   inline constexpr const char* CMD_COLLECTION_PENDING_WINE_TIP    = "View Pending Wine Deliveries";
+   inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_LBL  = "&Ready to Drink\tCtrl+R";
+   inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_TIP  = "View Drinking Availability for Wines";
+   inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_LBL       = "&Resize List Columns";
+   inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_TIP       = "Resize the list columns to fit the data";
+   inline constexpr const char* CMD_WINE_ONLINE_DETAILS_LBL        = "View &Wine Details";
+   inline constexpr const char* CMD_WINE_ONLINE_DETAILS_TIP        = "View the current wine's details on CellarTracker";
+   inline constexpr const char* CMD_WINE_ONLINE_VINTAGES_LBL       = "Search All &Vintages";
+   inline constexpr const char* CMD_WINE_ONLINE_VINTAGES_TIP       = "View all vintages of the current wine on CellarTracker";
+   inline constexpr const char* CMD_WINE_ONLINE_ADD_TASTE_NOTE_LBL = "Add &Tasting Note";
+   inline constexpr const char* CMD_WINE_ONLINE_ADD_TASTE_NOTE_TIP = "Add Tasting Note for current wine on CellarTracker";
+   inline constexpr const char* CMD_WINE_ONLINE_ADD_TO_CELLAR_LBL  = "&Add to My Cellar";
+   inline constexpr const char* CMD_WINE_ONLINE_ADD_TO_CELLAR_TIP  = "Add more of current wine to inventory on CellarTracker";
+   inline constexpr const char* CMD_WINE_ONLINE_ACCEPT_WINE_LBL    = "Accept &Delivery";
+   inline constexpr const char* CMD_WINE_ONLINE_ACCEPT_WINE_TIP    = "Mark the selected wine as delivered on CellarTracker";
+   inline constexpr const char* CMD_WINE_ONLINE_EDIT_ORDER_LBL     = "&Edit Pending Order";
+   inline constexpr const char* CMD_WINE_ONLINE_EDIT_ORDER_TIP     = "Edit the selected purchase order on CellarTracker";
+   inline constexpr const char* CMD_WINE_ONLINE_DRINK_REMOVE_LBL   = "Drink/&Remove";
+   inline constexpr const char* CMD_WINE_ONLINE_DRINK_REMOVE_TIP   = "Mark a bottle as drunk/removed on CellarTracker";
+ 
+   inline constexpr const char* CONFIG_PATH_PREFERENCES            = "/Preferences";
+   inline constexpr const char* CONFIG_PATH_PREFERENCE_DATASYNC    = "/Preferences/DataSync";
+ 
+   inline constexpr const char* CONFIG_VALUE_DEFAULT_SYNC_TABLES   = "DefaultSyncTables";
+   inline constexpr const char* CONFIG_VALUE_SYNC_ON_STARTUP       = "SyncOnStartup";
+   inline constexpr const char* CONFIG_VALUE_LABEL_CACHE_DIR       = "LabelCacheDir";
+   inline constexpr const char* CONFIG_PATH_GRID_OPTIONS           = "/Preferences/GridOptions";
+   inline constexpr const char* CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY = "DefaultInStockOnly";
+ 
+   inline constexpr const char* ERROR_WINDOW_CREATION_FAILED       = "Window creation failed. You may need to restart the app.";
 
    inline constexpr const char* FMT_CREDENTIALDLG_PROMPT_MSG      = "Enter the username and password for {}:";
    inline constexpr const char* FMT_CREDENTIALDLG_REPROMPT_MSG    = "Authentication failed. Re-enter username and password for {}:";
@@ -66,8 +68,6 @@ namespace ctb::constants
    inline constexpr const char* ERROR_USER_CANCELED               = "User canceled operation.";
    inline constexpr const char* NO_SCORE                          = " --";
    
-
-
    // DetailsPanel labels
    inline constexpr const char* LBL_APPELLATION                   = "Appellation:";
    inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";

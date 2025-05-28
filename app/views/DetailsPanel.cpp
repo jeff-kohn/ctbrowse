@@ -435,7 +435,7 @@ namespace ctb::app
          m_details.pending_order_date    = dataset->getProperty(rec_idx, CtProp::PendingOrderDate    ).asString();
          m_details.pending_delivery_date = dataset->getProperty(rec_idx, CtProp::PendingDeliveryDate ).asString();
          m_details.pending_store_name    = dataset->getProperty(rec_idx, CtProp::PendingStoreName    ).asString();
-         m_details.pending_qty           = dataset->getProperty(rec_idx, CtProp::PendingOrderQty   ).asString();
+         m_details.pending_qty           = dataset->getProperty(rec_idx, CtProp::PendingOrderQty     ).asString();
          m_details.pending_price         = dataset->getProperty(rec_idx, CtProp::PendingPrice        ).asString(constants::FMT_NUMBER_CURRENCY);
 
          // show everything since detail panel may be blank if no record was selected previously...

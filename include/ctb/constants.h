@@ -17,6 +17,7 @@ namespace ctb::constants
    inline constexpr const char* URL_CT_TABLE_LIST           = "https://www.cellartracker.com/list.asp?Table=List";
 
    inline constexpr const char* FMT_URL_CT_ACCEPT_PENDING   = "https://www.cellartracker.com/purchase.asp?iWine={}&iPurchase={}&DeliveryState=delivered&DeliveryDate={:%F}";
+   inline constexpr const char* FMT_URL_CT_ADD_TASTING_NOTE = "https://www.cellartracker.com/editnote.asp?iWine={}";
    inline constexpr const char* FMT_URL_CT_ADD_TO_CELLAR    = "https://www.cellartracker.com/purchase.asp?iWine={}";
    inline constexpr const char* FMT_URL_CT_DRINK_REMOVE     = "https://www.cellartracker.com/barcode.asp?iWine={}";
    inline constexpr const char* FMT_URL_CT_EDIT_ORDER       = "https://www.cellartracker.com/purchase.asp?iWine={}&iPurchase={}";

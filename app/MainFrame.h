@@ -99,6 +99,7 @@ namespace ctb::app
       void onMenuCollection(wxCommandEvent&);
 
       // Online menu events
+      void onMenuWineAddTastingNote(wxCommandEvent&);
       void onMenuWineAddToCellar(wxCommandEvent&);
       void onMenuWineAcceptDelivery(wxCommandEvent&);
       void onMenuWineEditOrder(wxCommandEvent&);

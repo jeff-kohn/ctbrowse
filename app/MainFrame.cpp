@@ -110,8 +110,8 @@ namespace ctb::app
 
       // File menu handlers
       Bind(wxEVT_MENU, &MainFrame::onMenuFilePreferences, this, CmdId::CMD_FILE_SETTINGS);
-      Bind(wxEVT_MENU, &MainFrame::onMenuFileSyncData, this, CmdId::CMD_FILE_DOWNLOAD_DATA);
-      Bind(wxEVT_MENU, &MainFrame::onMenuFileQuit, this, wxID_EXIT);
+      Bind(wxEVT_MENU, &MainFrame::onMenuFileSyncData,    this, CmdId::CMD_FILE_DOWNLOAD_DATA);
+      Bind(wxEVT_MENU, &MainFrame::onMenuFileQuit,        this, wxID_EXIT);
 
       // Edit menu handlers
       Bind(wxEVT_MENU, &MainFrame::onMenuEditFind, this, wxID_FIND);
@@ -122,26 +122,28 @@ namespace ctb::app
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_READY_TO_DRINK);
 
       // Online menu events
-      Bind(wxEVT_MENU, &MainFrame::onMenuWineOnlineDetails, this, CMD_WINE_ONLINE_DETAILS);
+      Bind(wxEVT_MENU, &MainFrame::onMenuWineOnlineDetails,  this, CMD_WINE_ONLINE_DETAILS);
       Bind(wxEVT_MENU, &MainFrame::onMenuWineOnlineVintages, this, CMD_WINE_ONLINE_VINTAGES);
       Bind(wxEVT_MENU, &MainFrame::onMenuWineAcceptDelivery, this, CMD_WINE_ACCEPT_PENDING);
-      Bind(wxEVT_MENU, &MainFrame::onMenuWineAddToCellar, this, CMD_WINE_ADD_TO_CELLAR);
-      Bind(wxEVT_MENU, &MainFrame::onMenuWineEditOrder, this, CMD_WINE_EDIT_ORDER);
-      Bind(wxEVT_MENU, &MainFrame::onMenuWineDrinkRemove, this, CMD_WINE_DRINK_REMOVE);
+      Bind(wxEVT_MENU, &MainFrame::onMenuWineAddToCellar,    this, CMD_WINE_ADD_TO_CELLAR);
+      Bind(wxEVT_MENU, &MainFrame::onMenuWineAddTastingNote, this, CMD_WINE_ADD_TASTING_NOTE);
+      Bind(wxEVT_MENU, &MainFrame::onMenuWineEditOrder,      this, CMD_WINE_EDIT_ORDER);
+      Bind(wxEVT_MENU, &MainFrame::onMenuWineDrinkRemove,    this, CMD_WINE_DRINK_REMOVE);
 
       // UI update handlers for wine online commands
-      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineOnlineUI, this, CMD_WINE_ONLINE_DETAILS);
-      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineOnlineUI, this, CMD_WINE_ONLINE_VINTAGES);
-      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineAddToCellarUI, this, CMD_WINE_ADD_TO_CELLAR);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineOnlineUI,         this, CMD_WINE_ONLINE_DETAILS);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineOnlineUI,         this, CMD_WINE_ONLINE_VINTAGES);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineAddToCellarUI,    this, CMD_WINE_ADD_TO_CELLAR);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineAddToCellarUI,    this, CMD_WINE_ADD_TASTING_NOTE);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineAcceptDeliveryUI, this, CMD_WINE_EDIT_ORDER);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineAcceptDeliveryUI, this, CMD_WINE_ACCEPT_PENDING);
-      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineDrinkRemoveUI, this, CMD_WINE_DRINK_REMOVE);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuWineDrinkRemoveUI,    this, CMD_WINE_DRINK_REMOVE);
 
       // Toolbar event handlers
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_CANCEL_BTN, &MainFrame::onToolbarSearchCancelBtn, this);
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onToolbarSearchBtn, this);
-      m_search_ctrl->Bind(wxEVT_TEXT_ENTER, &MainFrame::onToolbarSearchTextEnter, this);
-      m_search_ctrl->Bind(wxEVT_KEY_DOWN, &MainFrame::onToolbarSearchKeyDown, this);
+      m_search_ctrl->Bind(wxEVT_TEXT_ENTER,            &MainFrame::onToolbarSearchTextEnter, this);
+      m_search_ctrl->Bind(wxEVT_KEY_DOWN,              &MainFrame::onToolbarSearchKeyDown, this);
 
       if ( !wxPersistentRegisterAndRestore(this, constants::RES_NAME_MAINFRAME) )
       {
@@ -233,7 +235,7 @@ namespace ctb::app
          constants::CMD_WINE_ONLINE_VINTAGES_LBL, 
          constants::CMD_WINE_ONLINE_VINTAGES_TIP,
          wxITEM_NORMAL
-         });
+      });
       menu_wine->AppendSeparator();
       menu_wine->Append(new wxMenuItem{
          menu_wine, 
@@ -241,7 +243,14 @@ namespace ctb::app
          constants::CMD_WINE_ONLINE_ADD_TO_CELLAR_LBL, 
          constants::CMD_WINE_ONLINE_ADD_TO_CELLAR_TIP,
          wxITEM_NORMAL
-         });
+      });
+      menu_wine->Append(new wxMenuItem{
+         menu_wine, 
+         CmdId::CMD_WINE_ADD_TASTING_NOTE, 
+         constants::CMD_WINE_ONLINE_ADD_TASTE_NOTE_LBL, 
+         constants::CMD_WINE_ONLINE_ADD_TASTE_NOTE_LBL,
+         wxITEM_NORMAL
+      });
 
       menu_wine->AppendSeparator();
       menu_wine->Append(new wxMenuItem{
@@ -268,21 +277,7 @@ namespace ctb::app
       });
 
       m_menu_bar->Append(menu_wine, constants::LBL_MENU_WINE);
-
-      // View Menu
-      //auto* menu_view = new wxMenu();
-      //menu_view->Append(new wxMenuItem{
-      //   menu_view, 
-      //   CmdId::CMD_VIEW_AUTOLAYOUT_COLS, 
-      //   constants::CMD_VIEW_AUTOLAYOUT_COLS_LBL, 
-      //   constants::CMD_VIEW_AUTOLAYOUT_COLS_TIP,
-      //   wxITEM_NORMAL
-      //   });
-      //m_menu_bar->Append(menu_view, constants::LBL_MENU_VIEW);
-
-
       SetMenuBar(m_menu_bar);
-
    }
 
 
@@ -478,6 +473,20 @@ namespace ctb::app
          Layout();
          SendSizeEvent();
          Update();
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MainFrame::onMenuWineAddTastingNote(wxCommandEvent&)
+   {
+      try
+      {
+         auto dataset = getDataset();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         wxLaunchDefaultBrowser(getAddTastingNoteUrl(wine_id));
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);

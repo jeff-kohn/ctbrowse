@@ -229,5 +229,10 @@ namespace ctb
       return ctb::format(constants::FMT_URL_CT_ADD_TO_CELLAR, wine_id);
    }
 
+   inline auto getAddTastingNoteUrl(std::string_view wine_id) -> std::string
+   {
+      return ctb::format(constants::FMT_URL_CT_ADD_TASTING_NOTE, wine_id);
+   }
+
 
 }
