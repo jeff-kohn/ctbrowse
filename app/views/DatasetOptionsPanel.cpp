@@ -460,7 +460,8 @@ namespace ctb::app
       m_categorized.showCategory(ControlCategory::ReadyToDrinkFilter, dataset->hasProperty(CtProp::RtdQtyDefault));
       for (auto* check_box : vws::values(m_filter_checkboxes))
       {
-         check_box->filter().enabled = dataset->hasExactFilter(check_box->filter());
+         auto&& filter = dataset->getFilter(check_box->filter().filter_name);
+         check_box->filter().enabled = filter.has_value() ? filter->enabled : false;
       }
       
       TransferDataToWindow();
@@ -514,7 +515,7 @@ namespace ctb::app
       else {
          m_sink.getDataset()->removeFilter(filter.filter_name);
       }
-      m_sink.signal_source(DatasetEvent::Id::Sort);
+      m_sink.signal_source(DatasetEvent::Id::Filter);
    }
 
 
@@ -524,10 +525,11 @@ namespace ctb::app
       TransferDataFromWindow();
 
       auto& filter = m_filter_checkboxes[ControlCategory::MinScoreFilter]->filter();
+      filter.compare_val = event.GetValue();
       if (filter.enabled)
       {
          m_sink.getDataset()->replaceFilter(filter);
-         m_sink.signal_source(DatasetEvent::Id::Sort);
+         m_sink.signal_source(DatasetEvent::Id::Filter);
       }
    }
 
@@ -569,7 +571,7 @@ namespace ctb::app
       else {
          m_sink.getDataset()->removeFilter(filter.filter_name);
       }
-      m_sink.signal_source(DatasetEvent::Id::Sort);
+      m_sink.signal_source(DatasetEvent::Id::Filter);
    }
 
 

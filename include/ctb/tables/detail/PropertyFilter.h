@@ -102,7 +102,8 @@ namespace ctb::detail
 
       auto operator==(const PropertyFilter& other) const -> bool
       {
-         return match_props == other.match_props and 
+         return compare_val == other.compare_val and 
+                match_props == other.match_props and 
                 filter_name == other.filter_name and
                 enabled     == other.enabled     and
                 compare_pred(compare_val, other.compare_val) == other.compare_pred(compare_val, other.compare_val);

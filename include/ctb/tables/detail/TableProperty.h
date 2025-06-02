@@ -208,11 +208,11 @@ namespace ctb::detail
       }
 
       /// @brief allows for comparison of TableProperty objects, as well as putting them in ordered containers
-      /// 
       [[nodiscard]] auto operator<=>(const TableProperty& prop) const 
       {
          return m_val <=> prop.m_val;
       }
+      auto operator==(const TableProperty& prop) const -> bool = default;
             
       /// @brief allow assigning values, not just TableProperties
       ///
@@ -225,7 +225,7 @@ namespace ctb::detail
 
       /// @brief allow checking for null in a conditional statement
       /// @return true if this object contains a non-null value, false if its value is null
-      operator bool() const
+      explicit operator bool() const
       {
          return !isNull();
       }
