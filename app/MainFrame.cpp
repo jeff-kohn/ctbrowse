@@ -88,7 +88,92 @@ namespace ctb::app
    }
 
 
-   MainFrame::MainFrame() : 
+   auto MainFrame::getWinePopupMenu() const -> wxMenuPtr
+   {
+      if (!m_event_source->hasDataset())
+         return {};
+
+
+      // build our popup menu based first on the universal commands then the property/dataset-specific ones.
+      auto popup_menu = std::make_unique<wxMenu>();
+      popup_menu->Append(new wxMenuItem{ popup_menu.get(),
+         CmdId::CMD_ONLINE_WINE_DETAILS,
+         constants::CMD_ONLINE_VIEW_ON_CT_LBL,
+         constants::CMD_ONLINE_VIEW_ON_CT_TIP,
+         wxITEM_NORMAL
+         });
+
+      popup_menu->Append(new wxMenuItem{ popup_menu.get(),
+         CmdId::CMD_ONLINE_SEARCH_VINTAGES,
+         constants::CMD_ONLINE_SEARCH_VINTAGES_LBL,
+         constants::CMD_ONLINE_SEARCH_VINTAGES_TIP,
+         wxITEM_NORMAL
+         });
+
+      popup_menu->AppendSeparator();
+      popup_menu->Append(new wxMenuItem{ popup_menu.get(), 
+         CmdId::CMD_ONLINE_DRINK_WINDOW, 
+         constants::CMD_ONLINE_DRINK_WINDOW_LBL, 
+         constants::CMD_ONLINE_DRINK_WINDOW_TIP,
+         wxITEM_NORMAL
+         });
+
+      popup_menu->AppendSeparator();
+      popup_menu->Append(new wxMenuItem{ popup_menu.get(),
+         CmdId::CMD_ONLINE_ADD_TASTING_NOTE,
+         constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
+         constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
+         wxITEM_NORMAL
+         });
+
+      auto dataset = m_event_source->getDataset();
+      if (dataset->getTableId() != TableId::Pending) // could be confusing whether accepting pending or adding new order
+      {
+         popup_menu->Append(new wxMenuItem{ popup_menu.get(),
+            CmdId::CMD_ONLINE_ADD_TO_CELLAR,
+            constants::CMD_ONLINE_ADD_TO_CELLAR_LBL,
+            constants::CMD_ONLINE_ADD_TO_CELLAR_TIP,
+            wxITEM_NORMAL
+            });
+      }
+
+      if (dataset->hasProperty(CtProp::QtyOnHand))  // can only drink if have can check available inventory
+      {
+         popup_menu->AppendSeparator();
+         popup_menu->Append(new wxMenuItem{
+            popup_menu.get(),
+            CmdId::CMD_ONLINE_DRINK_REMOVE, 
+            constants::CMD_ONLINE_DRINK_REMOVE_LBL, 
+            constants::CMD_ONLINE_DRINK_REMOVE_LBL,
+            wxITEM_NORMAL
+            });
+      }
+      
+      // only show these in Pending view for now, might want to reconsider for other views that have pending qtry
+      if (dataset->getTableId() == TableId::Pending)  
+      {
+         popup_menu->AppendSeparator();
+         popup_menu->Append(new wxMenuItem{
+            popup_menu.get(),
+            CmdId::CMD_ONLINE_ACCEPT_PENDING,
+            constants::CMD_ONLINE_ACCEPT_PENDING_LBL,
+            constants::CMD_ONLINE_ACCEPT_PENDING_TIP,
+            wxITEM_NORMAL
+            });
+         popup_menu->Append(new wxMenuItem{
+            popup_menu.get(),
+            CmdId::CMD_ONLINE_EDIT_ORDER,
+            constants::CMD_ONLINE_EDIT_ORDER_LBL,
+            constants::CMD_ONLINE_EDIT_ORDER_LBL,
+            wxITEM_NORMAL
+            });
+      }
+
+      return popup_menu;
+   }
+
+   
+   MainFrame::MainFrame() :
       m_event_source{ DatasetEventSource::create() },
       m_sink{ this, m_event_source },
       m_label_cache{ std::make_shared<LabelImageCache>(wxGetApp().labelCacheFolder().generic_string()) }
@@ -135,8 +220,8 @@ namespace ctb::app
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineWineSelectionUI,  this, CMD_ONLINE_WINE_DETAILS);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineWineSelectionUI,  this, CMD_ONLINE_SEARCH_VINTAGES);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineWineSelectionUI,  this, CMD_ONLINE_DRINK_WINDOW);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineWineSelectionUI,  this, CMD_ONLINE_ADD_TASTING_NOTE);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineAddToCellarUI,    this, CMD_ONLINE_ADD_TO_CELLAR);
-      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineAddToCellarUI,    this, CMD_ONLINE_ADD_TASTING_NOTE);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineAcceptDeliveryUI, this, CMD_ONLINE_EDIT_ORDER);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineAcceptDeliveryUI, this, CMD_ONLINE_ACCEPT_PENDING);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineDrinkRemoveUI,    this, CMD_ONLINE_DRINK_REMOVE);
@@ -468,12 +553,12 @@ namespace ctb::app
          auto table_id = eventIdToTableId(event.GetId());
          auto tbl = loader.getDataset(table_id);
 
-         // Apply in-stock filter by default?
-         if (wxGetApp().getConfig(constants::CONFIG_PATH_PREFERENCES)->ReadBool(constants::CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY, constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT))
-         {
-            // TODO
-            // tbl->setInStockFilter(true);
-         }
+         //// Apply in-stock filter by default?
+         //if (wxGetApp().getConfig(constants::CONFIG_PATH_PREFERENCES)->ReadBool(constants::CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY, constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT))
+         //{
+         //   // TODO
+         //   // tbl->setInStockFilter(true);
+         //}
          m_event_source->setDataset(tbl, true);
 
          // Update title bar
@@ -630,7 +715,7 @@ namespace ctb::app
    void MainFrame::onMenuOnlineDrinkRemoveUI(wxUpdateUIEvent& event)
    {
       auto dataset = getDataset(false);
-      bool enable = (m_selected_row >= 0) and dataset.get() and (dataset->getTableId() == TableId::Availability);
+      bool enable = (m_selected_row >= 0) and dataset.get() and (dataset->getProperty(m_selected_row, CtProp::QtyOnHand).asInt32().value_or(0) > 0);
       event.Enable(enable);
    }
 

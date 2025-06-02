@@ -39,7 +39,9 @@ namespace ctb::constants
    inline constexpr const char* CMD_ONLINE_EDIT_ORDER_TIP          = "Edit the selected purchase order on CellarTracker";
    inline constexpr const char* CMD_ONLINE_DRINK_REMOVE_LBL        = "Drink/&Remove";
    inline constexpr const char* CMD_ONLINE_DRINK_REMOVE_TIP        = "Mark a bottle as drunk/removed on CellarTracker";
- 
+   inline constexpr const char* CMD_ONLINE_VIEW_ON_CT_LBL          = "View on CellarTracker";
+   inline constexpr const char* CMD_ONLINE_VIEW_ON_CT_TIP          = "View the Wine Details page for the selected wine on CellarTracker";
+
    inline constexpr const char* CONFIG_PATH_PREFERENCES            = "/Preferences";
    inline constexpr const char* CONFIG_PATH_PREFERENCE_DATASYNC    = "/Preferences/DataSync";
  

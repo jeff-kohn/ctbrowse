@@ -43,90 +43,16 @@ namespace ctb::app
       Bind(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, &DatasetListView::onWineContextMenu,  this);
    }
 
-   void DatasetListView::buildWinePopup(TableId table_id)
+
+   // you should always call this when you need the ptr, don't cache/store the returned ptr because
+   // it can become stale if new dataset colleciton is opened.
+   auto getWinePopup() noexcept(false)-> MainFrame::wxMenuPtr
    {
-      // build our popup menu based first the universal commands then the dataset-specific ones.
-      m_popup_menu.reset(new wxMenu{});
-      m_popup_menu->Append(new wxMenuItem{
-         m_popup_menu.get(),
-         CmdId::CMD_ONLINE_WINE_DETAILS,
-         constants::CMD_ONLINE_WINE_DETAILS_LBL,
-         constants::CMD_ONLINE_WINE_DETAILS_TIP,
-         wxITEM_NORMAL
-      });
-      m_popup_menu->Append(new wxMenuItem{
-         m_popup_menu.get(),
-         CmdId::CMD_ONLINE_SEARCH_VINTAGES,
-         constants::CMD_ONLINE_SEARCH_VINTAGES_LBL,
-         constants::CMD_ONLINE_SEARCH_VINTAGES_TIP,
-         wxITEM_NORMAL
-      });
+      auto menu = wxGetApp().getMainWindow()->getWinePopupMenu();
+      if (!menu)
+         throw ctb::Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
 
-      if (table_id == TableId::Pending)
-      {
-         m_popup_menu->AppendSeparator();
-         m_popup_menu->Append(new wxMenuItem{
-            m_popup_menu.get(),
-            CmdId::CMD_ONLINE_ACCEPT_PENDING,
-            constants::CMD_ONLINE_ACCEPT_PENDING_LBL,
-            constants::CMD_ONLINE_ACCEPT_PENDING_TIP,
-            wxITEM_NORMAL
-         });
-         m_popup_menu->Append(new wxMenuItem{
-            m_popup_menu.get(),
-            CmdId::CMD_ONLINE_EDIT_ORDER,
-            constants::CMD_ONLINE_EDIT_ORDER_LBL,
-            constants::CMD_ONLINE_EDIT_ORDER_LBL,
-            wxITEM_NORMAL
-         });
-      }
-      else {
-         m_popup_menu->AppendSeparator();
-         m_popup_menu->Append(new wxMenuItem{
-            m_popup_menu.get(), 
-            CmdId::CMD_ONLINE_DRINK_WINDOW, 
-            constants::CMD_ONLINE_DRINK_WINDOW_LBL, 
-            constants::CMD_ONLINE_DRINK_WINDOW_TIP,
-            wxITEM_NORMAL
-            });
-         m_popup_menu->Append(new wxMenuItem{
-            m_popup_menu.get(),
-            CmdId::CMD_ONLINE_ADD_TO_CELLAR,
-            constants::CMD_ONLINE_ADD_TO_CELLAR_LBL,
-            constants::CMD_ONLINE_ADD_TO_CELLAR_TIP,
-            wxITEM_NORMAL
-            });
-         m_popup_menu->Append(new wxMenuItem{
-            m_popup_menu.get(),
-            CmdId::CMD_ONLINE_ADD_TASTING_NOTE,
-            constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
-            constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
-            wxITEM_NORMAL
-            });
-      }
-
-      if (table_id == TableId::Availability)
-      {
-         m_popup_menu->AppendSeparator();
-         m_popup_menu->Append(new wxMenuItem{
-            m_popup_menu.get(),
-            CmdId::CMD_ONLINE_DRINK_REMOVE, 
-            constants::CMD_ONLINE_DRINK_REMOVE_LBL, 
-            constants::CMD_ONLINE_DRINK_REMOVE_LBL,
-            wxITEM_NORMAL
-         });
-      }
-   }
-
-
-   // you should always call this when you need the ptr, don't cache/store the return value.
-   auto DatasetListView::getWinePopup() noexcept(false)-> wxMenu*
-   {
-      if (m_popup_menu)
-      {
-         return m_popup_menu.get();
-      }
-      throw ctb::Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      return menu;
    }
 
 
@@ -170,7 +96,6 @@ namespace ctb::app
          configureColumns();
          m_model->reQuery();
          selectFirstRow();
-         buildWinePopup(dataset->getTableId());
       }
       else {
          m_model->reQuery();
@@ -223,10 +148,16 @@ namespace ctb::app
 
    void DatasetListView::onSelectionChanged(wxDataViewEvent& event)
    {
-      if (!m_sink.hasDataset()) return;
+      try 
+      {
+         if (!m_sink.hasDataset()) return;
 
-      auto row = m_model->GetRow(event.GetItem());
-      m_sink.signal_source(DatasetEvent::Id::RowSelected, static_cast<int>(row));
+         auto row = m_model->GetRow(event.GetItem());
+         m_sink.signal_source(DatasetEvent::Id::RowSelected, static_cast<int>(row));
+      }
+      catch (...) {
+         wxGetApp().displayErrorMessage(packageError());
+      }
    }
 
 
@@ -237,7 +168,8 @@ namespace ctb::app
          if (!m_sink.hasDataset())
             event.Skip();
 
-         PopupMenu(getWinePopup());
+         auto popup = getWinePopup();
+         PopupMenu(popup.get());
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError());

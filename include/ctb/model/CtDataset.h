@@ -294,6 +294,9 @@ namespace ctb
       /// If the filter == existing, this will be a no-op. Otherwise existing 
       /// filter will be replaced with new and the dataset refreshed. 
       /// 
+      /// If a filter by the same name doesn't already exist, this function is the
+      /// same as calling addFilter()
+      /// 
       /// This is more efficient than calling removeFilter/addFilter because the dataset
       /// will only be refreshed once.
       /// 

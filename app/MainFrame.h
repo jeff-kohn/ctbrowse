@@ -13,10 +13,12 @@
 
 #include <wx/event.h>
 #include <wx/frame.h>
-
+#include <wx/menu.h>
+#include <memory>
 
 /// forward declare wx classes to avoid header pollution.
 class wxBoxSizer;
+class wxMenu;
 class wxMenuBar;
 class wxSearchCtrl;
 class wxSplitterWindow;
@@ -26,7 +28,7 @@ class wxToolBar;
 
 namespace ctb::app
 {
-   class DatasetMultiView;
+   class DatasetMultiView;    // main child window, contains list view, options panel and details panel
    class LabelImageCache;     // used for retrieving label images
 
 
@@ -47,7 +49,6 @@ namespace ctb::app
       [[nodiscard]] static MainFrame* create();
 
       /// @brief set status bar text using format() syntax
-      ///
       template <typename... Args>
       constexpr void setStatusText(ctb::format_string<Args...> fmt_str, Args&&... args)
       {
@@ -57,7 +58,6 @@ namespace ctb::app
       /// @brief set status bar text for a specified pane using format() syntax
       ///
       /// pane-index is zero-based
-      ///
       template <typename... Args>
       constexpr void setStatusText(int pane_index, ctb::format_string<Args...> fmt_str, Args&&... args)
       {
@@ -65,15 +65,24 @@ namespace ctb::app
          SetStatusText(ctb::format(fmt_str, std::forward<Args>(args)...), pane_index);
       }
 
+      /// @brief Type alias for a wxMenu smart ptr 
+      using wxMenuPtr = std::unique_ptr<wxMenu>;
+
+      /// @brief Get 
+      /// @return ptr to a popup menu with commands relevant to the selected wine
+      auto getWinePopupMenu() const -> wxMenuPtr;
+
    private:
-      DatasetMultiView*       m_view{};
-      DatasetEventSourcePtr   m_event_source{}; // for synchronizing events between views and the underlying dataset
-      wxMenuBar*              m_menu_bar{};
-      wxSearchCtrl*           m_search_ctrl{};  // substring search box on the toolbar
-      ScopedEventSink         m_sink;           // so we can also handle events from our source
-      wxStatusBar*            m_status_bar{};
-      wxToolBar*              m_tool_bar{};
-      int                     m_selected_row{ -1 }; // whether or not a row is selected in the dataset view, for update-UI handlers
+      static inline constexpr int ROW_NONE = -1;
+
+      DatasetMultiView*     m_view{};         // non-owning ptr to main child window
+      DatasetEventSourcePtr m_event_source{}; // for synchronizing events between views and the underlying dataset
+      wxMenuBar*            m_menu_bar{};     // non-owning ptr to main menubar
+      wxSearchCtrl*         m_search_ctrl{};  // non-owning ptr to substring search box on the toolbar
+      ScopedEventSink       m_sink;           // so we can also handle events from our source
+      wxStatusBar*          m_status_bar{};   // non-owning ptr to statusbar ctrl
+      wxToolBar*            m_tool_bar{};     // non-owning ptr to toolbar ctrl
+      int                   m_selected_row{ ROW_NONE }; // whether or not a row is selected in the dataset view, for update-UI handlers. -1 means no selection
 
       // we use a shared_ptr because we want to share the object with child window(s)
       std::shared_ptr<LabelImageCache> m_label_cache{};

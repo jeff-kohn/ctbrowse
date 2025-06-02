@@ -454,10 +454,10 @@ namespace ctb::app
       populateFilterTypes(dataset);
       setTitle();
 
+      // show/hide/initialize filter checkboxes
       m_categorized.showCategory(ControlCategory::InStockFilter,      dataset->hasProperty(CtProp::QtyTotal     ));
       m_categorized.showCategory(ControlCategory::MinScoreFilter,     dataset->hasProperty(CtProp::CtScore      ));
       m_categorized.showCategory(ControlCategory::ReadyToDrinkFilter, dataset->hasProperty(CtProp::RtdQtyDefault));
-
       for (auto* check_box : vws::values(m_filter_checkboxes))
       {
          check_box->filter().enabled = dataset->hasExactFilter(check_box->filter());

@@ -11,9 +11,6 @@
 #include "model/CtDataViewModel.h"
 
 #include <ctb/model/ScopedEventSink.h>
-#include <wx/menu.h>
-
-#include <memory>
 
 namespace ctb::app
 {
@@ -30,11 +27,10 @@ namespace ctb::app
       [[nodiscard]] static DatasetListView* create(wxWindow* parent, DatasetEventSourcePtr source);
 
    private:
-      using wxMenuPtr = std::unique_ptr<wxMenu>;
+
 
       DataViewModelPtr m_model{};
       ScopedEventSink  m_sink;
-      wxMenuPtr        m_popup_menu{};
 
       /// @brief private ctor used by static create()
       explicit DatasetListView(wxWindow* parent, DatasetEventSourcePtr source) : 
@@ -44,8 +40,6 @@ namespace ctb::app
       {}
 
       void init();
-      void buildWinePopup(TableId table_id);
-      auto getWinePopup() noexcept(false) -> wxMenu*; // will throw if we don't have a non-nullptr wxMenu to return
       void configureColumns();
       void setDataset(DatasetPtr dataset);
       void selectFirstRow();
