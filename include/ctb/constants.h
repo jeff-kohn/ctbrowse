@@ -160,6 +160,7 @@ namespace ctb::constants
    inline constexpr double   FILTER_SCORE_MIN                     =          50;
    inline constexpr double   FILTER_SCORE_MAX                     =       100.0;
    inline constexpr int      FILTER_SCORE_DIGITS                  =           1;
+   inline constexpr double   FILTER_AVAILABLE_MIN_QTY             =       0.999;
 
 
 } // namespace ctb::constants

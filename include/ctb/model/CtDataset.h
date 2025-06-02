@@ -11,8 +11,11 @@
 
 #include "ctb/tables/detail/MultiMatchPropertyFilterMgr.h"
 #include "ctb/tables/detail/PropertyFilter.h"
+#include "ctb/tables/detail/PropertyFilterMgr.h"
 #include "ctb/tables/detail/SubStringFilter.h"
 
+#include <map>
+#include <optional>
 
 namespace ctb
 {
@@ -35,7 +38,9 @@ namespace ctb
       using MultiMatchFilter    = MultiMatchFilterMgr::Filter;
       using Prop                = base::Prop;
       using Property            = base::Property;
-      using PropertyFilter      = detail::PropertyFilter<Prop, PropertyMap>;
+      using PropertyFilter      = base::PropertyFilter;
+      using PropertyFilterMgr   = detail::PropertyFilterMgr<Prop, base::PropertyMap>;
+      using MaybePropFilter     = base::MaybePropFilter;
       using PropertyMap         = base::PropertyMap;
       using PropertyValueSet    = base::PropertyValueSet;
       using Record              = DataTable::value_type;
@@ -189,56 +194,6 @@ namespace ctb
          applyFilters();
       }
 
-      /// @brief Used to enable/disable "in-stock only" filter to the data set, if supported.
-      /// @return true if the filter was applied, false if it was not 
-      auto setInStockFilter(bool enable) -> bool override
-      {
-         if (!hasProperty(Prop::QtyOnHand)) 
-            return false;
-
-         if (enable == m_instock_filter.enabled)  
-            return true;
-
-         m_instock_filter.enabled = enable;
-         applyFilters();
-         return true;
-      }
-
-      /// @brief Returns whether "in-stock only" filter to the data set, if supported.
-      /// @return true if the filter is active, false if it was not 
-      auto getInStockFilter() const -> bool override
-      {
-         if (!hasProperty(Prop::QtyOnHand) or !m_instock_filter.enabled)
-            return false;
-
-         return true;
-      }
-
-      /// @brief retrieves the minimum score filter value if active.
-      auto getMinScoreFilter() const -> NullableDouble override
-      {
-         if (m_score_filter.enabled)
-         {
-            return m_score_filter.compare_val.asDouble();
-         }
-         return std::nullopt;
-      }
-
-      /// @brief set the minimum score filter
-      auto setMinScoreFilter(NullableDouble min_score) -> bool override
-      {
-         if (min_score)
-         {
-            m_score_filter.enabled = true;
-            m_score_filter.compare_val = *min_score;
-         }
-         else {
-            m_score_filter.enabled = false;
-         }
-         applyFilters();
-         return true;
-      }
-
       /// @brief Check whether the current dataset supports the given property
       /// 
       /// Since getProperty() will return a null value for missing properties, calling this function
@@ -263,17 +218,94 @@ namespace ctb
       /// 
       /// @return const reference to the requested property. It may be a null value, but it 
       ///  will always be a valid CtProperty&.
-      auto getProperty(int rec_idx, CtProp prop_id) const -> const Property& override
+      auto getProperty(int rec_idx, CtProp prop_id) const noexcept(false) -> const Property & override
       {
-         //static constexpr Property null_prop{}; // can't just return temporary due to reference return val
+         assert(filteredRecCount() > rec_idx and "This is a logic bug, invalid index should never happen here.");
 
-#if !defined(NDBUG)
-         if (rec_idx > filteredRecCount())
-            assert(false and "This is a logic bug, invalid index should never happen here.");
-#endif
-         // invalid prop_id won't really hurt anything, just default-construct and then return an empty/null value.
+         // invalid prop_id won't really hurt anything, it'll default-construct and return an empty/null value.
          // if record index is invalid this will throw since we're using bounds-checked API.
          return m_current_view->at(static_cast<size_t>(rec_idx))[prop_id];
+      }
+
+      /// @brief Check if a filter with the specified name is applied to the dataset.
+      /// 
+      /// filter_name is case-sensitive
+      /// 
+      /// @return - true if there is a filter by the specified name, false otherwise.
+      auto hasFilter(std::string_view filter_name) const -> bool override
+      {
+         return m_prop_filters.hasFilter(filter_name);
+      }
+
+
+      /// @brief Check if a filter with the specified name is applied to the dataset.
+      /// 
+      /// filter_name is case-sensitive
+      /// 
+      /// @return - true if there is a filter by the specified name, false otherwise.
+      auto hasExactFilter(const PropertyFilter& filter) const -> bool override
+      {
+         return hasFilter(filter.filter_name) and filter == m_prop_filters.getFilter(filter.filter_name).value();
+      }
+
+      /// @brief Get the filter with the specified name that is applied to the dataset.
+      /// 
+      /// filter_name is case-sensitive
+      /// 
+      /// @return - the requested filter, or std::nullopt if not found
+      auto getFilter(std::string_view filter_name) const  -> MaybePropFilter override
+      {
+         return m_prop_filters.getFilter(filter_name);
+      }
+
+      /// @brief Add a filter to the dataset. Existing filter with same name will NOT be replaced, use removeFilter() first.
+      /// 
+      /// @return true if the filter was added, false if not because a filter with that name already exists.
+      auto addFilter(PropertyFilter filter) -> bool override
+      {
+         if (m_prop_filters.addFilter(filter) )
+         {
+            if (filter.enabled)
+            {
+               applyFilters();
+            }
+            return true;
+         }
+         return false;
+      }
+
+      /// @brief Remove the filter with the specified name
+      /// 
+      /// filter_name is case-sensitive
+      /// 
+      /// @return true if filter was removed; false if it wasn't found.
+      auto removeFilter(std::string_view filter_name) -> bool override
+      {
+         if (m_prop_filters.removeFilter(filter_name))
+         {
+            applyFilters();
+            return true;
+         }
+         return false;
+      }
+
+      /// @brief Replace a named filter with an updated version
+      /// 
+      /// If the filter == existing, this will be a no-op. Otherwise existing 
+      /// filter will be replaced with new and the dataset refreshed. 
+      /// 
+      /// This is more efficient than calling removeFilter/addFilter because the dataset
+      /// will only be refreshed once.
+      /// 
+      /// @return true if filter was replaced or added, false if it no-op'd due to equality
+      auto replaceFilter(const PropertyFilter& filter) -> bool override
+      {
+         if (hasExactFilter(filter))
+            return false;
+
+         m_prop_filters[filter.filter_name] = filter;
+         applyFilters();
+         return true;
       }
 
       /// @brief returns the total number of records in the underlying dataset
@@ -288,19 +320,18 @@ namespace ctb
          return std::ssize(*m_current_view);
       }
 
-      /// @return the name of the CT table this dataset represents. Not meant to be 
-      ///         displayed to the user, this is for internal use. 
-      auto getTableName() const -> std::string_view override
-      {
-         return Traits::getTableName();
-      }
-
       /// @brief Returns the TableId enum for this dataset's underlying table.
       auto getTableId() const -> TableId override
       {
          return Traits::getTableId();
       }
 
+      /// @return the name of the CT table this dataset represents. Not meant to be 
+      ///         displayed to the user, this is for internal use. 
+      auto getTableName() const -> std::string_view override
+      {
+         return Traits::getTableName();
+      }
 
       // default dtor, others are deleted since this object is meant to be heap-only
       ~CtDataset() noexcept override = default;
@@ -311,27 +342,25 @@ namespace ctb
       CtDataset& operator=(CtDataset&&) = delete;
 
    private:
-      DataTable                        m_data{};                 // the underlying data records for this table.
-      DataTable                        m_filtered_data{};        // we need a copy for the filtered data, so we can bind our views to it
-      DataTable*                       m_current_view{};         // may point to m_data or m_filtered_data depending if filter is active
-      std::vector<ListColumn>         m_list_columns{};
-      PropertyFilter                   m_instock_filter{};
-      PropertyFilter                   m_score_filter{};
-      MultiMatchFilterMgr              m_mm_filters{};
-      TableSort                        m_current_sort{};
-      std::optional<SubStringFilter>   m_substring_filter{};
+      using ListColumns          = std::vector<ListColumn>;
+      using MaybeSubStringFilter = std::optional<SubStringFilter>;
+
+      DataTable            m_data{};                 // the underlying data records for this table.
+      DataTable            m_filtered_data{};        // we need a copy for the filtered data, so we can bind our views to it
+      DataTable*           m_current_view{};         // may point to m_data or m_filtered_data depending if filter is active or not
+      PropertyFilterMgr    m_prop_filters{};         // active property filters
+      ListColumns          m_list_columns{};         // columns that will be displayed in the dataset list-view
+      MultiMatchFilterMgr  m_mm_filters{};           // active multi-match filters
+      MaybeSubStringFilter m_substring_filter{};
+      TableSort            m_current_sort{};
       
       // private construction, use static factory method create();
       explicit CtDataset(DataTable&& data) : 
          m_data{ std::move(data) },
          m_current_view{ &m_data },
          m_list_columns{ std::from_range, Traits::DefaultListColumns },
-         m_instock_filter{ Prop::QtyOnHand, std::greater<CtProperty>{}, uint16_t{0} },
-         m_score_filter{ {Prop::CtScore, Prop::MyScore}, std::greater_equal<CtProperty>{}, constants::FILTER_SCORE_DEFAULT },
          m_current_sort{ availableSorts()[0] }
       {
-         m_score_filter.enabled = false;
-         m_instock_filter.enabled = false;
          sortData();
       }
 
@@ -342,12 +371,11 @@ namespace ctb
 
       void applyFilters()
       {
-         if (m_mm_filters.activeFilters() or m_instock_filter.enabled or m_score_filter.enabled)
+         if (m_mm_filters.activeFilters() or m_prop_filters.activeFilters())
          {
             m_filtered_data = vws::all(m_data) | vws::transform([](auto&& rec) { return rec.getProperties(); }) // filters work with property maps, not records
                                                | vws::filter(m_mm_filters)
-                                               | vws::filter(m_instock_filter)
-                                               | vws::filter(m_score_filter)
+                                               | vws::filter(m_prop_filters)
                                                | vws::transform([](auto&& map) { return Record{ map }; })       // back to record
                                                | rng::to<std::vector>();
             m_current_view = &m_filtered_data;

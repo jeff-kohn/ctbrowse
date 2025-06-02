@@ -471,7 +471,8 @@ namespace ctb::app
          // Apply in-stock filter by default?
          if (wxGetApp().getConfig(constants::CONFIG_PATH_PREFERENCES)->ReadBool(constants::CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY, constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT))
          {
-            tbl->setInStockFilter(true);
+            // TODO
+            // tbl->setInStockFilter(true);
          }
          m_event_source->setDataset(tbl, true);
 

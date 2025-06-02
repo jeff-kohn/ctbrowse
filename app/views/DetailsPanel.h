@@ -8,6 +8,7 @@
 #pragma once
 
 #include "App.h"
+#include "CategorizedControls.h"
 #include "LabelImageCache.h"
 #include <ctb/model/ScopedEventSink.h>
 
@@ -50,44 +51,22 @@ namespace ctb::app
       using wxImageTask    = LabelImageCache::wxImageTask;
       using MaybeImageTask = std::optional<wxImageTask>;
 
-      /// @brief Class to allow showing/hiding sets of controls based on category.
-      class CategorizedControls
+      // these control categories allow us to show/hide different controls based on context of current dataset
+      enum class ControlCategory
       {
-      public:
-         enum class Category
-         {
-            WineDetails,
-            DrinkWindow,
-            CtDrinkWindow, // ReadyToDrink dataset has both 'My' and 'CT' windows
-            Score,
-            Valuation,
-            Pending,
-            LinkReadyToDrink,
-            LinkOpenWineDetails,
-            LinkAcceptPending,
-            TastingNotes
-         };
-
-         void showCategory(Category category, bool show)
-         {
-            auto [beg, end] = m_categorized_controls.equal_range(category);
-            for (auto* ctrl : rng::subrange{ beg, end } | vws::values) 
-            {
-               if (show)
-                  ctrl->Show();
-               else
-                  ctrl->Hide();
-            }
-         }
-
-         void addControlDependency(Category category, wxWindow* ctrl)
-         {
-            m_categorized_controls.emplace(category, ctrl);
-         }
-
-      private:
-         std::multimap<Category, wxWindow*> m_categorized_controls{};
+         WineDetails,
+         DrinkWindow,
+         CtDrinkWindow, // ReadyToDrink dataset has both 'My' and 'CT' windows
+         Score,
+         Valuation,
+         Pending,
+         LinkReadyToDrink,
+         LinkOpenWineDetails,
+         LinkAcceptPending,
+         TastingNotes
       };
+      using CategorizedControls = CategorizedControls<ControlCategory>;
+
 
       /// @brief struct that control validators will be bound to for displaying in the window
       struct WineDetails

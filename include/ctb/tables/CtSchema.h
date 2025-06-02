@@ -4,6 +4,7 @@
 #include "ctb/tables/detail/FieldSchema.h"
 #include "ctb/tables/detail/ListColumn.h"
 #include "ctb/tables/detail/MultiMatchPropertyFilter.h"
+#include "ctb/tables/detail/PropertyFilter.h"
 #include "ctb/tables/detail/TableProperty.h"
 #include "ctb/tables/detail/TableRecord.h"
 #include "ctb/tables/detail/TableSorter.h"
@@ -129,6 +130,10 @@ namespace ctb
    /// @brief Type alias for CtProp-based multi-match filter
    using CtMultiMatchFilterSpan = std::span<const CtMultiMatchFilter>;
    
+
+   /// @brief Type alias for a CtProp-based table property filter
+   using CtPropertyFilter = detail::PropertyFilter<CtProp, CtPropertyMap>;
+
 
    /// @brief Type alias for CtProp-based table sorter
    using CtTableSort = detail::TableSorter<CtProp, CtPropertyMap>;

@@ -46,12 +46,13 @@ target_sources(${TARGET_NAME}
      "App.cpp"
      "App.h"
      "app_constants.h"
+     "CategorizedControls.h"
+     "CtCredentialManager.cpp"
+     "CtCredentialManager.h"
      "LabelImageCache.cpp"
      "LabelImageCache.h"
      "MainFrame.cpp"
      "MainFrame.h"
-     "CtCredentialManager.cpp"
-     "CtCredentialManager.h"
      "wx_helpers.h"
 
      "dialogs/CredentialDialog.cpp"
@@ -70,6 +71,7 @@ target_sources(${TARGET_NAME}
      "views/DatasetOptionsPanel.h"
      "views/DetailsPanel.cpp"
      "views/DetailsPanel.h"
+     "views/FilterCheckBox.h"
 
      "resources/utf-8.manifest"
      "resources/resource.rc"

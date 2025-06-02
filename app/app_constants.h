@@ -74,6 +74,8 @@ namespace ctb::constants
    inline constexpr const char* LBL_APPELLATION                   = "Appellation:";
    inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";
    inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only Show In-Stock Wines";
+   inline constexpr const char* LBL_CHECK_MIN_SCORE               = "Minimum Score:";
+   inline constexpr const char* LBL_CHECK_READY_TO_DRINK          = "Only Show 'Ready' Wines";
    inline constexpr const char* LBL_COUNTRY                       = "Country:";
    inline constexpr const char* LBL_CT_PRICE                      = "Community Avg:";
    inline constexpr const char* LBL_CT_SCORE                      = "CT Score:";
@@ -89,7 +91,6 @@ namespace ctb::constants
    inline constexpr const char* LBL_ORDER_NUMBER                  = "Order Number:";
    inline constexpr const char* LBL_QTY_ORDERED                   = "Qty Ordered:";
    inline constexpr const char* LBL_REGION                        = "Region:";
-   inline constexpr const char* LBL_REQUIRE_MIN_SCORE             = "Only Show Scores Above:";
    inline constexpr const char* LBL_SCORES                        = "Scores";
    inline constexpr const char* LBL_SEARCH                        = "&Search";
    inline constexpr const char* LBL_SORT_ASCENDING                = "Ascending";
@@ -118,7 +119,7 @@ namespace ctb::constants
    inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
 
    inline constexpr int WX_UNSPECIFIED_VALUE    =    -1;
-   inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = false;
+   inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = true;
 
    // app-specific error messages.
    inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN = "Label cache object is shutting down.";
