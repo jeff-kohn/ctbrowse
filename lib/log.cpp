@@ -84,7 +84,7 @@ namespace ctb::log
    log_ptr_t setupDefaultLogger(sinks_init_list sinks)
    {
       constexpr auto QUEUE_SIZE = 8192;
-      constexpr auto THREAD_POOL_SIZE = 1;
+      constexpr auto THREAD_POOL_SIZE = 2;
       spdlog::init_thread_pool(QUEUE_SIZE, THREAD_POOL_SIZE);
       auto logger = std::make_shared<spdlog::async_logger>(constants::LOG_NAME, sinks, spdlog::thread_pool());
       logger->set_level(constants::LOGLEVEL_GLOBAL);

@@ -160,13 +160,6 @@ namespace ctb
       /// @return true if the filter was added, false if not because a filter with that name already exists.
       virtual auto addFilter(PropertyFilter filter) -> bool = 0;
 
-      /// @brief Remove the filter with the specified name
-      /// 
-      /// filter_name is case-sensitive
-      /// 
-      /// @return 
-      virtual auto removeFilter(std::string_view filter_name) -> bool = 0;
-
       /// @brief Replace a named filter with an updated version
       /// 
       /// If the filter == existing, this will be a no-op. Otherwise existing 
@@ -174,6 +167,20 @@ namespace ctb
       /// 
       /// @return true if filter was replaced or added, false if it no-op'd due to equality
       virtual auto replaceFilter(const PropertyFilter& filter) -> bool = 0;
+
+      /// @brief Remove the filter with the specified name
+      /// 
+      /// filter_name is case-sensitive
+      /// 
+      /// @return true if filters was removed, false if it doens't exist.
+      virtual auto removeFilter(std::string_view filter_name) -> bool = 0;
+
+      /// @brief Remove all filters from the dataset
+      /// 
+      /// This removes property and multi-value filters.
+      /// 
+      /// @return true if at least one filter was removed, false if there were no filters
+      virtual auto removeAllFilters() -> bool = 0;
 
       /// @brief returns the total number of records in the underlying dataset
       virtual auto totalRecCount() const -> int64_t = 0;

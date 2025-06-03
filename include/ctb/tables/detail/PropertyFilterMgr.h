@@ -40,6 +40,15 @@ namespace ctb::detail
          return m_filters.erase(filter_name) > 0;
       }
 
+      /// @brief Remove all filters from this object
+      /// @return true if at least one filter was removed, false if there were no filters
+      auto removeAllFilters() -> bool
+      {
+         bool removed = !m_filters.empty();
+         m_filters.clear();
+         return removed;
+      }
+
       /// @brief Checks if a filter with the specified name exists.
       auto hasFilter(std::string_view filter_name) const -> bool
       {

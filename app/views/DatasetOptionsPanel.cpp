@@ -189,9 +189,9 @@ namespace ctb::app
       opt_ascending->Bind( wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
       opt_descending->Bind(wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
 
-      m_filter_checkboxes[ControlCategory::InStockFilter     ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onInStockChecked,        this);
-      m_filter_checkboxes[ControlCategory::MinScoreFilter    ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onMinScoreFilterChecked, this);     
-      m_filter_checkboxes[ControlCategory::ReadyToDrinkFilter]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onReadyToDrinkChecked,   this);     
+      m_filter_checkboxes[ControlCategory::InStockFilter     ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterInStockChecked,        this);
+      m_filter_checkboxes[ControlCategory::MinScoreFilter    ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterMinScoreChecked, this);     
+      m_filter_checkboxes[ControlCategory::ReadyToDrinkFilter]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterReadyToDrinkChecked,   this);     
    }
 
 
@@ -502,34 +502,63 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onInStockChecked([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsPanel::onFilterChecked(ControlCategory control_cat)
    {
-      assert(m_sink.hasDataset());
-      TransferDataFromWindow();
-
-      auto& filter = m_filter_checkboxes[ControlCategory::InStockFilter]->filter();
-      if (filter.enabled)
+      try
       {
-         m_sink.getDataset()->replaceFilter(filter);
+         assert(m_sink.hasDataset());
+         TransferDataFromWindow();
+
+         auto& filter = m_filter_checkboxes[control_cat]->filter();
+         if (filter.enabled)
+         {
+            m_sink.getDataset()->replaceFilter(filter);
+         }
+         else {
+            m_sink.getDataset()->removeFilter(filter.filter_name);
+         }
+         m_sink.signal_source(DatasetEvent::Id::Filter);
       }
-      else {
-         m_sink.getDataset()->removeFilter(filter.filter_name);
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
-      m_sink.signal_source(DatasetEvent::Id::Filter);
+   }
+
+   void DatasetOptionsPanel::onFilterInStockChecked([[maybe_unused]] wxCommandEvent& event)
+   {
+      onFilterChecked(ControlCategory::InStockFilter);
+   }
+
+
+   void DatasetOptionsPanel::onFilterMinScoreChecked([[maybe_unused]] wxCommandEvent& event)
+   {
+      onFilterChecked(ControlCategory::MinScoreFilter);
+   }
+
+
+   void DatasetOptionsPanel::onFilterReadyToDrinkChecked(wxCommandEvent& event)
+   {
+      onFilterChecked(ControlCategory::ReadyToDrinkFilter);
    }
 
 
    void DatasetOptionsPanel::onMinScoreChanged([[maybe_unused]] wxSpinDoubleEvent& event)
    {
-      assert(m_sink.hasDataset());
-      TransferDataFromWindow();
-
-      auto& filter = m_filter_checkboxes[ControlCategory::MinScoreFilter]->filter();
-      filter.compare_val = event.GetValue();
-      if (filter.enabled)
+      try
       {
-         m_sink.getDataset()->replaceFilter(filter);
-         m_sink.signal_source(DatasetEvent::Id::Filter);
+         assert(m_sink.hasDataset());
+         TransferDataFromWindow();
+
+         auto& filter = m_filter_checkboxes[ControlCategory::MinScoreFilter]->filter();
+         filter.compare_val = event.GetValue();
+         if (filter.enabled)
+         {
+            m_sink.getDataset()->replaceFilter(filter);
+            m_sink.signal_source(DatasetEvent::Id::Filter);
+         }
+      }
+      catch (...) {
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
@@ -538,40 +567,6 @@ namespace ctb::app
    {
       TransferDataFromWindow();
       event.Enable(m_filter_checkboxes[ControlCategory::MinScoreFilter]->filter().enabled);
-   }
-
-
-   void DatasetOptionsPanel::onMinScoreFilterChecked([[maybe_unused]] wxCommandEvent& event)
-   {
-      assert(m_sink.hasDataset());
-      TransferDataFromWindow();
-
-      auto& filter = m_filter_checkboxes[ControlCategory::MinScoreFilter]->filter();
-      if (filter.enabled)
-      {
-         m_sink.getDataset()->replaceFilter(filter);
-      }
-      else {
-         m_sink.getDataset()->removeFilter(filter.filter_name);
-      }
-      m_sink.signal_source(DatasetEvent::Id::Sort);
-   }
-
-
-   void DatasetOptionsPanel::onReadyToDrinkChecked(wxCommandEvent& event)
-   {
-      assert(m_sink.hasDataset());
-      TransferDataFromWindow();
-
-      auto& filter = m_filter_checkboxes[ControlCategory::ReadyToDrinkFilter]->filter();
-      if (filter.enabled)
-      {
-         m_sink.getDataset()->replaceFilter(filter);
-      }
-      else {
-         m_sink.getDataset()->removeFilter(filter.filter_name);
-      }
-      m_sink.signal_source(DatasetEvent::Id::Filter);
    }
 
 

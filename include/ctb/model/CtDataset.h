@@ -25,6 +25,11 @@ namespace ctb
    /// It provides access to all properties of the underlying dataset, but also has ListColumns, which are 
    /// the properties displayed in the main list-view. 
    /// 
+   /// THIS CLASS IS NOT THREADSAFE. UI code and UI-owned objects are inherently tied to the main thread
+   /// in wxWidgets. Any background threads should work on their own data and send messages to the main thread.
+   /// Access to the dataset should always be from main thread since multiple UI windows are holding reference 
+   /// to it.
+   /// 
    template<DataTableType DataTableT>
    class CtDataset final : public IDataset
    {
@@ -227,6 +232,8 @@ namespace ctb
          return m_current_view->at(static_cast<size_t>(rec_idx))[prop_id];
       }
 
+
+
       /// @brief Check if a filter with the specified name is applied to the dataset.
       /// 
       /// filter_name is case-sensitive
@@ -274,21 +281,6 @@ namespace ctb
          return false;
       }
 
-      /// @brief Remove the filter with the specified name
-      /// 
-      /// filter_name is case-sensitive
-      /// 
-      /// @return true if filter was removed; false if it wasn't found.
-      auto removeFilter(std::string_view filter_name) -> bool override
-      {
-         if (m_prop_filters.removeFilter(filter_name))
-         {
-            applyFilters();
-            return true;
-         }
-         return false;
-      }
-
       /// @brief Replace a named filter with an updated version
       /// 
       /// If the filter == existing, this will be a no-op. Otherwise existing 
@@ -309,6 +301,42 @@ namespace ctb
          m_prop_filters[filter.filter_name] = filter;
          applyFilters();
          return true;
+      }
+
+      /// @brief Remove the filter with the specified name
+      /// 
+      /// filter_name is case-sensitive
+      /// 
+      /// @return true if filter was removed; false if it wasn't found.
+      auto removeFilter(std::string_view filter_name) -> bool override
+      {
+         if (m_prop_filters.removeFilter(filter_name))
+         {
+            applyFilters();
+            return true;
+         }
+         return false;
+      }
+
+      /// @brief Remove all filters from the dataset
+      /// 
+      /// This removes property and multi-value filters.
+      /// 
+      /// @return true if at least one filter was removed, false if there were no filters
+      auto removeAllFilters() -> bool
+      {
+         bool got_one = false;
+         if (m_mm_filters.activeFilters())
+         {
+            m_mm_filters.removeAllFilters();
+            got_one = true;
+         }
+         if (m_prop_filters.activeFilters())
+         {
+            m_prop_filters.removeAllFilters();
+            got_one = true;
+         }
+         return got_one;
       }
 
       /// @brief returns the total number of records in the underlying dataset

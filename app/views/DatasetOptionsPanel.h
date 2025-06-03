@@ -110,11 +110,12 @@ namespace ctb::app
       void populateFilterTypes(IDataset* dataset);
 
       // event handlers
-      void onInStockChecked(wxCommandEvent& event);
+      void onFilterChecked(ControlCategory cat);
+      void onFilterInStockChecked(wxCommandEvent& event);
+      void onFilterMinScoreChecked(wxCommandEvent& event);
+      void onFilterReadyToDrinkChecked(wxCommandEvent& event);
       void onMinScoreChanged(wxSpinDoubleEvent& event);
       void onMinScoreUpdateUI(wxUpdateUIEvent& event);
-      void onMinScoreFilterChecked(wxCommandEvent& event);
-      void onReadyToDrinkChecked(wxCommandEvent& event);
       void onSortOrderClicked(wxCommandEvent& event);
       void onSortSelection(wxCommandEvent& event);
       void onTreeFilterExpanding(wxTreeEvent& event);

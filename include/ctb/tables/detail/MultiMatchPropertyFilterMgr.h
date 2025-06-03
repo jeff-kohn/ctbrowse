@@ -62,6 +62,15 @@ namespace ctb::detail
          return ret_val;
       }
 
+      /// @brief Remove all match values, resetting filter to default state
+      /// @return - true if at least one filter was removed, false if it was a no-op.
+      auto removeAllFilters() -> bool
+      {
+         bool removed = activeFilters() > 0;
+         m_filters.clear();
+         return removed;
+      }
+
       /// @brief check if a record matches all of our filters
       /// @return true if each filter matched the record, false  
       ///  if the record failed to match one or more filters. Will

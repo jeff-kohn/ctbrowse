@@ -85,6 +85,7 @@ namespace ctb
          MultiMatchFilter{ Prop::Country,           constants::FILTER_COUNTRY     },
          MultiMatchFilter{ Prop::Region,            constants::FILTER_REGION      },
          MultiMatchFilter{ Prop::Appellation,       constants::FILTER_APPELATION  },
+         MultiMatchFilter{ Prop::Producer,          constants::FILTER_PRODUCER   },
       };
 
       /// @brief getTableName()

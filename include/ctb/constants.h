@@ -58,11 +58,12 @@ namespace ctb::constants
    // filter names
    inline constexpr const char* FILTER_APPELATION           = "Appellation";
    inline constexpr const char* FILTER_COUNTRY              = "Country";
+   inline constexpr const char* FILTER_ORDER_DATE           = "Order Date";
+   inline constexpr const char* FILTER_PRODUCER             = "Producer";
    inline constexpr const char* FILTER_REGION               = "Region";
    inline constexpr const char* FILTER_STORE                = "Store";
    inline constexpr const char* FILTER_VARIETAL             = "Varietal";
    inline constexpr const char* FILTER_VINTAGE              = "Vintage";
-   inline constexpr const char* FILTER_ORDER_DATE           = "Order Date";
 
    inline constexpr const char* HTTP_PARAM_TABLE            = "Table";
    inline constexpr const char* HTTP_PARAM_FORMAT           = "Format";
