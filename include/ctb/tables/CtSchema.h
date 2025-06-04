@@ -75,6 +75,17 @@ namespace ctb
       RtdQtyEarlyAndLate,
       RtdQtyBottlesPerYear,
       RtdConsumed,
+
+      // consumed bottles table
+      iConsumeId,
+      iTastingNoteId,
+      ConsumeDate,
+      ConsumeReason,
+      ConsumeNote,
+      PurchaseNote,
+      BottleNote,
+      Location,
+      Bin,
    };
 
    

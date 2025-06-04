@@ -6,6 +6,7 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
+#include "ctb/tables/ConsumedBottlesTraits.h"
 #include "ctb/tables/PendingWineTraits.h"
 #include "ctb/tables/ReadyToDrinkTraits.h"
 #include "ctb/tables/WineListTraits.h"
@@ -44,6 +45,15 @@ namespace ctb
                }
                return CtDataset<PendingWineTable>::create(std::move(table_data.value()));
             }, 
+         [this](enum_constant<TableId::Consumed>) -> DatasetPtr
+         { 
+            auto table_data = loadTableData<ConsumedBottlesTable>(m_data_folder, TableId::Consumed);
+            if (!table_data)
+            {
+               throw table_data.error();
+            }
+            return CtDataset<ConsumedBottlesTable>::create(std::move(table_data.value()));
+         }, 
          [this](enum_constant<TableId::Availability>) -> DatasetPtr
          { 
             auto table_data = loadTableData<ReadyToDrinkTable>(m_data_folder, TableId::Availability);

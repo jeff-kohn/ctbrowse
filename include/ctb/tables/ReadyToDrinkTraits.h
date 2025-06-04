@@ -141,6 +141,7 @@ namespace ctb
          rec[QtyTotal]       = calcQtyTotal(rec);
          rec[RtdConsumed]    = getRtdConsumed(rec);
 
+         validateDrinkYear(rec[BeginConsume]);
          validateDrinkYear(rec[EndConsume]);
          validateDrinkYear(rec[CtBeginConsume]);
          validateDrinkYear(rec[CtEndConsume]);

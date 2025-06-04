@@ -11,6 +11,7 @@
 #include "ctb/ctb.h"
 #include "ctb/table_data.h"
 #include "ctb/tables/CtSchema.h"
+#include "ctb/tables/detail/field_helpers.h"
 
 #include <frozen/map.h>
 
@@ -118,17 +119,13 @@ namespace ctb
       {
          using enum Prop;
 
-         // set value for the WineAndVintage property
-         auto vintage   = rec[Vintage ].asString();
-         auto wine_name = rec[WineName].asStringView();
-         rec[WineAndVintage] = ctb::format("{} {}", vintage, wine_name);
-
          // CT defaults delivery date to order date if you don't fill it in, we don't want to display that
-         // (website doesn't either.
+         // (website doesn't either).
          if (rec[PendingOrderDate] == rec[PendingDeliveryDate])
          {
             rec[PendingDeliveryDate] = ct_null_prop;
          }
+         rec[WineAndVintage] =getWineAndVintage(rec);
       }
       
    };

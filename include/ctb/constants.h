@@ -36,6 +36,21 @@ namespace ctb::constants
    inline constexpr int         MAX_ENV_VAR_LENGTH          = 128;
 
    // column labels
+   inline constexpr const char* DISPLAY_COL_CONSUME_DATE    = "Consumed On";
+   inline constexpr const char* DISPLAY_COL_CONSUME_REASON  = "Reason";
+   inline constexpr const char* DISPLAY_COL_CONSUME_FROM    = "Consumed From";
+   inline constexpr const char* DISPLAY_COL_CT_SCORE        = "CT Score";
+   inline constexpr const char* DISPLAY_COL_CT_WINDOW       = "CT Window";
+   inline constexpr const char* DISPLAY_COL_LOCALE          = "Region and Appellation";
+   inline constexpr const char* DISPLAY_COL_MY_SCORE        = "My Score";
+   inline constexpr const char* DISPLAY_COL_MY_WINDOW       = "My Window";
+   inline constexpr const char* DISPLAY_COL_PRICE           = "Price";
+   inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Ordered";
+   inline constexpr const char* DISPLAY_COL_PURCHASES       = "Purchases";
+   inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
+   inline constexpr const char* DISPLAY_COL_STORE           = "Store";
+   inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
+
    inline constexpr const char* DISPLAY_COL_AVAILABLE       = "Ready";
    inline constexpr const char* DISPLAY_COL_LINEAR          = "Linear";
    inline constexpr const char* DISPLAY_COL_BELL_CURVE      = "Bell";
@@ -43,17 +58,6 @@ namespace ctb::constants
    inline constexpr const char* DISPLAY_COL_LATE_CURVE      = "Late";
    inline constexpr const char* DISPLAY_COL_EARLY_LATE      = "Both";
    inline constexpr const char* DISPLAY_COL_FAST_MATURING   = "Fast";
-   inline constexpr const char* DISPLAY_COL_CT_SCORE        = "CT Score";
-   inline constexpr const char* DISPLAY_COL_CT_WINDOW       = "CT Window";
-   inline constexpr const char* DISPLAY_COL_LOCALE          = "Region and Appellation";
-   inline constexpr const char* DISPLAY_COL_MY_SCORE        = "My Score";
-   inline constexpr const char* DISPLAY_COL_MY_WINDOW       = "My Window";
-   inline constexpr const char* DISPLAY_COL_PURCHASES       = "Purchases";
-   inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
-   inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
-   inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Ordered";
-   inline constexpr const char* DISPLAY_COL_STORE           = "Store";
-   inline constexpr const char* DISPLAY_COL_PRICE           = "Price";
 
    // filter names
    inline constexpr const char* FILTER_APPELATION           = "Appellation";
@@ -77,6 +81,7 @@ namespace ctb::constants
 
    // sort option names
    inline constexpr const char* SORT_OPTION_APPELATION_WINE       = "Appellation, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_CONSUME_DATE          = "Date Consumed";
    inline constexpr const char* SORT_OPTION_COUNTRY_APPELATION    = "Country, Appellation and Wine";
    inline constexpr const char* SORT_OPTION_LOCALE_WINE           = "Country, Region, and Appellation";
    inline constexpr const char* SORT_OPTION_PRODUCER_WINE_NAME    = "Producer, Wine and Vintage";
