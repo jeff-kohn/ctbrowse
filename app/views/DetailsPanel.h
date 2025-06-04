@@ -8,6 +8,7 @@
 #pragma once
 
 #include "App.h"
+#include "CategorizedControls.h"
 #include "LabelImageCache.h"
 #include <ctb/model/ScopedEventSink.h>
 
@@ -50,48 +51,27 @@ namespace ctb::app
       using wxImageTask    = LabelImageCache::wxImageTask;
       using MaybeImageTask = std::optional<wxImageTask>;
 
-      /// @brief Class to allow showing/hiding sets of controls based on category.
-      class CategorizedControls
+      // these control categories allow us to show/hide different controls based on context of current dataset
+      enum class ControlCategory
       {
-      public:
-         enum class Category
-         {
-            WineDetails,
-            DrinkWindow,
-            Score,
-            Valuation,
-            Pending,
-            ReadyToDrink,
-            OpenWinePage,
-            AcceptPendingPage,
-            TastingNotes
-         };
-
-         void showCategory(Category category, bool show)
-         {
-            auto [beg, end] = m_categorized_controls.equal_range(category);
-            for (auto* ctrl : rng::subrange{ beg, end } | vws::values) 
-            {
-               if (show)
-                  ctrl->Show();
-               else
-                  ctrl->Hide();
-            }
-         }
-
-         void addControlDependency(Category category, wxWindow* ctrl)
-         {
-            m_categorized_controls.emplace(category, ctrl);
-         }
-
-      private:
-         std::multimap<Category, wxWindow*> m_categorized_controls{};
+         WineDetails,
+         DrinkWindow,
+         CtDrinkWindow, // ReadyToDrink dataset has both 'My' and 'CT' windows
+         Score,
+         Valuation,
+         Pending,
+         LinkReadyToDrink,
+         LinkOpenWineDetails,
+         LinkAcceptPending,
+         TastingNotes
       };
+      using CategorizedControls = CategorizedControls<ControlCategory>;
+
 
       /// @brief struct that control validators will be bound to for displaying in the window
       struct WineDetails
       {
-         std::string wine_id{};     // used for buliding CT url, not displayed
+         std::string wine_id{};            // used for buliding CT url, not displayed
          wxString wine_name{};
          wxString vintage{};
          wxString varietal{};
@@ -100,6 +80,7 @@ namespace ctb::app
          wxString sub_region{};
          wxString appellation{};
          wxString drink_window{};
+         wxString ct_drink_window{};
          wxString my_score{};
          wxString ct_score{};
          wxString my_price{};
@@ -123,21 +104,22 @@ namespace ctb::app
       LabelCachePtr          m_label_cache{};
       wxGenericStaticBitmap* m_label_image{};
       wxTimer                m_label_timer{};
+      wxString               m_drink_window_label{ constants::LBL_DRINK_WINDOW };
 
-      // window creation
+      // impl
       void initControls();
+      void addCommandLinkButton(wxBoxSizer* sizer, CmdId cmd, CategorizedControls::Category category, std::string_view command_text, std::string_view note = constants::DETAILS_CMD_LINK_NOTE);
       void checkLabelResult();
       void displayLabel();
 
-      /// event source related handlers
+      /// event source related 
       void notify(DatasetEvent event) override;
       void configureControlsForDataset(DatasetPtr dataset);
       void updateDetails(DatasetEvent event);
 
-      // windows event handlers
+      // event handlers
+      void onCommand(wxCommandEvent& event);
       void onLabelTimer(wxTimerEvent& event);
-      void onViewWebPage(wxCommandEvent& event);
-      void onAcceptPending(wxCommandEvent& event);
 
       // private ctor used by create()
       explicit DetailsPanel(DatasetEventSourcePtr source, LabelCachePtr cache);

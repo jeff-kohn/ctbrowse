@@ -32,8 +32,8 @@ namespace ctb
    namespace fs = std::filesystem;
 
 
-   /// @brief enum for the data tables available from CT website
-   ///
+   /// @brief enum for the data tables available from CT website. The enum names are important because
+   ///        they map to the filenames used by CellarTracker.
    enum class TableId
    {
       List,			   /// Wine Summary (does not include location or bin unless optional parameter Location=1)
@@ -53,7 +53,6 @@ namespace ctb
 
 
    /// @brief enum for available data formats
-   ///
    enum class DataFormatId
    {
       html,	// default if not specified
@@ -63,17 +62,14 @@ namespace ctb
    };
 
    /// @brief default table format (and currently the only format we support parsing)
-   ///
    inline constexpr auto DEFAULT_TABLE_FORMAT =  DataFormatId::csv;
 
 
 
    /// @brief type alias for a static map of TableId's to display name
-   ///
    using TableDescriptionMap = frozen::map<TableId, std::string_view, magic_enum::enum_count<TableId>()>;
 
    /// @brief maps TableId to descriptive name.
-   ///
    inline constexpr TableDescriptionMap TableDescriptions
    {
       { TableId::List,           constants::TABLE_NAME_LIST          },

@@ -34,9 +34,11 @@ target_sources(ctBrowse_lib
       
       "../include/ctb/tables/CtSchema.h"
       "../include/ctb/tables/PendingWineTraits.h"
+      "../include/ctb/tables/ReadyToDrinkTraits.h"
       "../include/ctb/tables/WineListTraits.h"
 
       "../include/ctb/tables/detail/FieldSchema.h"
+      "../include/ctb/tables/detail/field_helpers.h"
       "../include/ctb/tables/detail/ListColumn.h"
       "../include/ctb/tables/detail/MultiMatchPropertyFilter.h"
       "../include/ctb/tables/detail/MultiMatchPropertyFilterMgr.h"

@@ -1,7 +1,7 @@
 /**************************************************************************************************
-* @file  WineListTable.h
+* @file  WineListTraits.h
 *
-* @brief defines the WineListTable class, which is an instantiation of CtDataTable<> 
+* @brief defines the WineListTraits class, which is an instantiation of CtDataTable<> 
 *        implemented using the traits template WineListTraits 
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
@@ -11,6 +11,7 @@
 #include "ctb/ctb.h"
 #include "ctb/table_data.h"
 #include "ctb/tables/CtSchema.h"
+#include "ctb/tables/detail/field_helpers.h"
 
 #include <frozen/map.h>
 #include <array>
@@ -51,23 +52,26 @@ namespace ctb
          { Prop::MyScore,         FieldSchema { Prop::MyScore,        PropType::Double,     61 }},
          { Prop::QtyOnHand,       FieldSchema { Prop::QtyOnHand,      PropType::UInt16,      2 }},
          { Prop::QtyPending,      FieldSchema { Prop::QtyPending,     PropType::UInt16,      3 }},
+         { Prop::QtyPurchased,    FieldSchema { Prop::QtyPurchased,   PropType::UInt16,     13 }},
+         { Prop::QtyConsumed,     FieldSchema { Prop::QtyConsumed,    PropType::UInt16,     19 }},
          { Prop::Size,            FieldSchema { Prop::Size,           PropType::String,      4 }},
          { Prop::BeginConsume,    FieldSchema { Prop::BeginConsume,   PropType::UInt16,     63 }},
          { Prop::EndConsume,      FieldSchema { Prop::EndConsume,     PropType::UInt16,     64 }},
          { Prop::MyPrice,         FieldSchema { Prop::MyPrice,        PropType::Double,      5 }},
          { Prop::CtPrice,         FieldSchema { Prop::CtPrice,        PropType::Double,      9 }},
          { Prop::AuctionPrice,    FieldSchema { Prop::AuctionPrice,   PropType::Double,      8 }},
-         { Prop::WineAndVintage,  FieldSchema { Prop::WineAndVintage, PropType::Double,     {} }},
-         { Prop::QtyTotal,        FieldSchema { Prop::QtyTotal,       PropType::UInt16,     {} }}
-      });
+         { Prop::WineAndVintage,  FieldSchema { Prop::WineAndVintage, PropType::String,     {} }},
+         { Prop::QtyTotal,        FieldSchema { Prop::QtyTotal,       PropType::UInt16,     {} }},
+         { Prop::RtdConsumed,     FieldSchema { Prop::RtdConsumed,    PropType::String,     {} }},
+         });
 
       /// @brief list of display columns that will show in the list view
       static inline const std::array DefaultListColumns { 
-         CtListColumn{ Prop::WineAndVintage,                             constants::DISPLAY_COL_WINE     },
-         CtListColumn{ Prop::Locale,                                     constants::DISPLAY_COL_LOCALE   },
-         CtListColumn{ Prop::QtyTotal,   CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY      },
-         CtListColumn{ Prop::CtScore,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE },
-         CtListColumn{ Prop::MyScore,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE },
+         CtListColumn{ Prop::WineAndVintage,                             constants::DISPLAY_COL_WINE        },
+         CtListColumn{ Prop::Locale,                                     constants::DISPLAY_COL_LOCALE      },
+         CtListColumn{ Prop::QtyTotal,   CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY         },
+         CtListColumn{ Prop::CtScore,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE, 1 },
+         CtListColumn{ Prop::MyScore,    CtListColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE, 1 },
       };
 
       /// @brief the available sort orders for this table.
@@ -76,18 +80,19 @@ namespace ctb
          TableSort{ { Prop::Vintage,  Prop::WineName                      }, constants::SORT_OPTION_VINTAGE_WINE   },
          TableSort{ { Prop::Locale,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_LOCALE_WINE    },
          TableSort{ { Prop::Region,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_REGION_WINE    },
-         TableSort{ { Prop::MyScore,  Prop::CtScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_MY, true },
          TableSort{ { Prop::CtScore,  Prop::MyScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_CT, true },
+         TableSort{ { Prop::MyScore,  Prop::CtScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_MY, true },
          TableSort{ { Prop::MyPrice,  Prop::WineName,    Prop::Vintage ,  }, constants::SORT_OPTION_MY_VALUE       }
       };
 
       /// @brief multi-value filters that can be used on this table.
       static inline const std::array MultiMatchFilters{
          MultiMatchFilter{ Prop::Varietal,    constants::FILTER_VARIETAL   },
+         MultiMatchFilter{ Prop::Vintage,     constants::FILTER_VINTAGE    },
          MultiMatchFilter{ Prop::Country,     constants::FILTER_COUNTRY    },
          MultiMatchFilter{ Prop::Region,      constants::FILTER_REGION     },
          MultiMatchFilter{ Prop::Appellation, constants::FILTER_APPELATION },
-         MultiMatchFilter{ Prop::Vintage,     constants::FILTER_VINTAGE    }
+         MultiMatchFilter{ Prop::Producer,    constants::FILTER_PRODUCER   },
       };
 
       /// @brief getTableName()
@@ -121,34 +126,12 @@ namespace ctb
       {
          using enum Prop;
 
-         // set value for the WineAndVintage property
-         auto vintage   = rec[Vintage ].asString();
-         auto wine_name = rec[WineName].asStringView();
-         rec[WineAndVintage] = ctb::format("{} {}", vintage, wine_name);
+         rec[WineAndVintage] = getWineAndVintage(rec);
+         rec[QtyTotal]       = calcQtyTotal(rec);
+         rec[RtdConsumed]    = getRtdConsumed(rec);
 
-         // QtyTotal is in-stock + pending, this combined field displays similar to CT.com
-         auto qty     = rec[QtyOnHand ].asUInt16().value_or(0u);
-         auto pending = rec[QtyPending].asUInt16().value_or(0u);
-         if (pending == 0)
-         {
-            rec[QtyTotal] = qty;
-         }
-         else if (qty == 0)
-         {
-            rec[QtyTotal] = ctb::format("({})", pending);
-         }
-         else{
-            rec[QtyTotal] = ctb::format("{}+{}", qty, pending);
-         }
-
-         // for drinking window, 9999 = null
-         auto& drink_start = rec[BeginConsume];
-         if (drink_start.asUInt16() == constants::CT_NULL_YEAR)
-            drink_start.setNull();
-
-         auto& drink_end = rec[EndConsume];
-         if (drink_end.asUInt16() == constants::CT_NULL_YEAR)
-            drink_end.setNull();
+         validateDrinkYear(rec[BeginConsume]);
+         validateDrinkYear(rec[EndConsume]);
       }
    };
 

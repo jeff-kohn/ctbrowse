@@ -77,10 +77,7 @@ namespace ctb::detail
             catch (...)
             {
                m_props[fld_schema.prop_id].setNull();
-
-               SPDLOG_DEBUG("TableRecord::Parse() encountered error parsing field {}. {}",
-                  enum_name(fld_schema.prop_id),
-                  packageError().formattedMesage());
+               SPDLOG_DEBUG("TableRecord::Parse() encountered error parsing field {}. {}", enum_name(fld_schema.prop_id), packageError().formattedMesage());
             }
          }
 

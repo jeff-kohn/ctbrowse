@@ -7,6 +7,7 @@
  *******************************************************************/
 
 #include "ctb/tables/PendingWineTraits.h"
+#include "ctb/tables/ReadyToDrinkTraits.h"
 #include "ctb/tables/WineListTraits.h"
 
 #include "ctb/model/CtDatasetLoader.h"
@@ -42,7 +43,16 @@ namespace ctb
                   throw table_data.error();
                }
                return CtDataset<PendingWineTable>::create(std::move(table_data.value()));
-            } 
+            }, 
+         [this](enum_constant<TableId::Availability>) -> DatasetPtr
+         { 
+            auto table_data = loadTableData<ReadyToDrinkTable>(m_data_folder, TableId::Availability);
+            if (!table_data)
+            {
+               throw table_data.error();
+            }
+            return CtDataset<ReadyToDrinkTable>::create(std::move(table_data.value()));
+         } 
       };
       return enum_switch(TableFactory, tbl);
    }

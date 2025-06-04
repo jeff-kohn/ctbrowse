@@ -16,9 +16,12 @@ namespace ctb::constants
    inline constexpr const char* URL_CT_LOGIN_FORM           = "https://www.cellartracker.com/password.asp";
    inline constexpr const char* URL_CT_TABLE_LIST           = "https://www.cellartracker.com/list.asp?Table=List";
 
-   
    inline constexpr const char* FMT_URL_CT_ACCEPT_PENDING   = "https://www.cellartracker.com/purchase.asp?iWine={}&iPurchase={}&DeliveryState=delivered&DeliveryDate={:%F}";
+   inline constexpr const char* FMT_URL_CT_ADD_TASTING_NOTE = "https://www.cellartracker.com/editnote.asp?iWine={}";
+   inline constexpr const char* FMT_URL_CT_ADD_TO_CELLAR    = "https://www.cellartracker.com/purchase.asp?iWine={}";
+   inline constexpr const char* FMT_URL_CT_DRINK_REMOVE     = "https://www.cellartracker.com/barcode.asp?iWine={}";
    inline constexpr const char* FMT_URL_CT_EDIT_ORDER       = "https://www.cellartracker.com/purchase.asp?iWine={}&iPurchase={}";
+   inline constexpr const char* FMT_URL_CT_DRINK_WINDOW     = "https://www.cellartracker.com/editpersonal.asp?iWine={}";
    inline constexpr const char* FMT_URL_CT_TABLE            = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
    inline constexpr const char* FMT_URL_CT_VINTAGES         = "https://www.cellartracker.com/list.asp?Table=List&fInStock=0&iUserOverride=0&Wine={}";
    inline constexpr const char* FMT_URL_CT_WINE_DETAILS     = "https://www.cellartracker.com/wine.asp?iWine={}";
@@ -33,25 +36,34 @@ namespace ctb::constants
    inline constexpr int         MAX_ENV_VAR_LENGTH          = 128;
 
    // column labels
+   inline constexpr const char* DISPLAY_COL_AVAILABLE       = "Ready";
+   inline constexpr const char* DISPLAY_COL_LINEAR          = "Linear";
+   inline constexpr const char* DISPLAY_COL_BELL_CURVE      = "Bell";
+   inline constexpr const char* DISPLAY_COL_EARLY_CURVE     = "Early";
+   inline constexpr const char* DISPLAY_COL_LATE_CURVE      = "Late";
+   inline constexpr const char* DISPLAY_COL_EARLY_LATE      = "Both";
+   inline constexpr const char* DISPLAY_COL_FAST_MATURING   = "Fast";
    inline constexpr const char* DISPLAY_COL_CT_SCORE        = "CT Score";
+   inline constexpr const char* DISPLAY_COL_CT_WINDOW       = "CT Window";
    inline constexpr const char* DISPLAY_COL_LOCALE          = "Region and Appellation";
    inline constexpr const char* DISPLAY_COL_MY_SCORE        = "My Score";
+   inline constexpr const char* DISPLAY_COL_MY_WINDOW       = "My Window";
+   inline constexpr const char* DISPLAY_COL_PURCHASES       = "Purchases";
    inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
    inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
    inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Ordered";
    inline constexpr const char* DISPLAY_COL_STORE           = "Store";
    inline constexpr const char* DISPLAY_COL_PRICE           = "Price";
 
-
    // filter names
    inline constexpr const char* FILTER_APPELATION           = "Appellation";
    inline constexpr const char* FILTER_COUNTRY              = "Country";
+   inline constexpr const char* FILTER_ORDER_DATE           = "Order Date";
+   inline constexpr const char* FILTER_PRODUCER             = "Producer";
    inline constexpr const char* FILTER_REGION               = "Region";
    inline constexpr const char* FILTER_STORE                = "Store";
    inline constexpr const char* FILTER_VARIETAL             = "Varietal";
    inline constexpr const char* FILTER_VINTAGE              = "Vintage";
-   inline constexpr const char* FILTER_ORDER_DATE           = "Order Date";
-
 
    inline constexpr const char* HTTP_PARAM_TABLE            = "Table";
    inline constexpr const char* HTTP_PARAM_FORMAT           = "Format";
@@ -71,6 +83,14 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_REGION_WINE           = "Region, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_PURCHASE_DATE         = "Order Date, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_STORE_NAME            = "Store, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_CURVE_DEFAULT         = "Default Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_LINEAR          = "Linear Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_BELL            = "Bell Curve Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_BELL_EARLY      = "Early Bell Curve Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_BELL_LATE       = "Late Bell Curve Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_FAST_MATURE     = "Fast Maturing Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_EARLY_LATE      = "Early & Late Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_BOTTLES_YEAR    = "Bottles per Year Formula";
 
    inline constexpr const char* SORT_OPTION_SCORE_MY              = "My Score";
    inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";
@@ -124,7 +144,6 @@ namespace ctb::constants
    inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND          = "Folder '{}' does not exist.";
    inline constexpr const char* FMT_ERROR_PROP_NOT_FOUND          = "Property '{}' was not found.";
 
-
    inline constexpr const char* FMT_NUMBER_CURRENCY               = "${:.2f}";
    inline constexpr const char* FMT_NUMBER_DECIMAL                = "{:.1f}";
    inline constexpr const char* FMT_DATE_SHORT                    = "{:%m/%d/%Y}";
@@ -142,7 +161,7 @@ namespace ctb::constants
    inline constexpr double   FILTER_SCORE_MIN                     =          50;
    inline constexpr double   FILTER_SCORE_MAX                     =       100.0;
    inline constexpr int      FILTER_SCORE_DIGITS                  =           1;
-
+   inline constexpr double   FILTER_AVAILABLE_MIN_QTY             =       0.999;
 
 
 } // namespace ctb::constants

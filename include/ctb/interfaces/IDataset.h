@@ -29,6 +29,8 @@ namespace ctb
       using FieldSchema       = CtFieldSchema;
       using Prop              = CtProp;
       using Property          = CtProperty;
+      using PropertyFilter    = CtPropertyFilter;
+      using MaybePropFilter   = std::optional<PropertyFilter>;
       using PropertyMap       = CtPropertyMap;
       using PropertyValueSet  = CtPropertyValueSet;
       using ListColumn        = CtListColumn;
@@ -96,19 +98,12 @@ namespace ctb
       /// @brief clear the substring filter
       virtual void clearSubStringFilter() = 0;
 
-      /// @brief Used to enable/disable "in-stock only" filter to the data set, if supported.
-      /// @return true if the filter was applied, false if it was not 
-      virtual auto setInStockFilter(bool enable) -> bool = 0;
-
-      /// @brief Returns whether "in-stock only" filter to the data set, if supported.
-      /// @return true if the filter is active, false if it was not 
-      virtual auto getInStockFilter() const -> bool = 0;
-
-      /// @brief retrieves the minimum score filter value if active.
-      virtual auto getMinScoreFilter() const->NullableDouble = 0;
-
-      /// @brief set the minimum score filter
-      virtual auto setMinScoreFilter(NullableDouble min_score) -> bool = 0;
+      /// @brief Retrieves the schema information for a specified property.
+      /// 
+      /// @param prop_id - The identifier of the property whose schema is to be retrieved.
+      /// @return An optional FieldSchema containing the schema information for the specified property, 
+      ///  or std::nullopt if the property does not exist.
+      virtual auto getFieldSchema(Prop prop_id) const -> std::optional<FieldSchema> = 0;
 
       /// @brief Check whether the current dataset supports the given property
       /// 
@@ -133,12 +128,59 @@ namespace ctb
       ///         will always be a valid CtProperty&.
       virtual auto getProperty(int rec_idx, CtProp prop_id) const -> const Property& = 0;
 
-      /// @brief Retrieves the schema information for a specified property.
+      /// @brief Check if a filter with the specified name is applied to the dataset.
       /// 
-      /// @param prop_id - The identifier of the property whose schema is to be retrieved.
-      /// @return An optional FieldSchema containing the schema information for the specified property, 
-      ///  or std::nullopt if the property does not exist.
-      virtual auto getFieldSchema(Prop prop_id) const -> std::optional<FieldSchema> = 0;
+      /// filter_name is case-sensitive
+      /// 
+      /// @return - true if there is a filter by the specified name, false otherwise.
+      virtual auto hasFilter(std::string_view filter_name) const -> bool = 0;
+
+      /// @brief Check if there is a filter that matches the one specified currently
+      ///  applied to the dataset.
+      /// 
+      /// This method not only checks the name for a match but also the other properties.
+      /// It may return false even if there's a name match with different properties.
+      /// 
+      /// filter_name is case-sensitive
+      /// 
+      /// @return - true if there is a filter exactly matching the spec, false otherwise.
+      virtual auto hasExactFilter(const PropertyFilter& filter) const -> bool = 0;
+
+      /// @brief Get the filter with the specified name that is applied to the dataset.
+      /// 
+      /// filter_name is case-sensitive
+      /// 
+      /// @return - the requested filter, or std::nullopt if not found
+      virtual auto getFilter(std::string_view filter_name) const -> std::optional<PropertyFilter> = 0;
+
+      /// @brief Assign a filter to the dataset using the specific name
+      /// 
+      /// filter_name must be unique (case-sensitive)
+      /// 
+      /// @return true if the filter was added, false if not because a filter with that name already exists.
+      virtual auto addFilter(PropertyFilter filter) -> bool = 0;
+
+      /// @brief Replace a named filter with an updated version
+      /// 
+      /// If the filter == existing, this will be a no-op. Otherwise existing 
+      /// filter will be replace with new and the dataset refreshed.
+      /// 
+      /// @return true if filter was replaced or added, false if it no-op'd due to equality
+      virtual auto replaceFilter(const PropertyFilter& filter) -> bool = 0;
+
+      /// @brief Remove the filter with the specified name
+      /// 
+      /// filter_name is case-sensitive
+      /// 
+      /// @return true if filters was removed, false if it doens't exist.
+      virtual auto removeFilter(std::string_view filter_name) -> bool = 0;
+
+      /// @brief Remove all filters from the dataset
+      /// 
+      /// This removes property and multi-value filters.
+      /// 
+      /// @return true if at least one filter was removed, false if there were no filters
+      virtual auto removeAllFilters() -> bool = 0;
 
       /// @brief returns the total number of records in the underlying dataset
       virtual auto totalRecCount() const -> int64_t = 0;

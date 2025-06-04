@@ -207,6 +207,12 @@ namespace ctb
       return ctb::format(constants::FMT_URL_CT_VINTAGES, percentEncode(wine_param));
    }
 
+   inline auto getDrinkWindowUrl(std::string_view wine_id) -> std::string
+   {
+      return ctb::format(constants::FMT_URL_CT_DRINK_WINDOW, wine_id);
+   }
+
+
    /// @brief get the CT URL for accepting a pending delivery
    inline auto getAcceptPendingUrl(std::string_view wine_id, std::string_view purch_id, const std::chrono::year_month_day& delivery_date) noexcept -> std::string
    {
@@ -217,6 +223,21 @@ namespace ctb
    inline auto getEditPendingUrl(std::string_view wine_id, std::string_view purchase_id) noexcept -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_EDIT_ORDER, wine_id, purchase_id);
+   }
+
+   inline auto getDrinkRemoveUrl(std::string_view wine_id) -> std::string
+   {
+      return ctb::format(constants::FMT_URL_CT_DRINK_REMOVE, wine_id);
+   }
+
+   inline auto getAddToCellarUrl(std::string_view wine_id) -> std::string
+   {
+      return ctb::format(constants::FMT_URL_CT_ADD_TO_CELLAR, wine_id);
+   }
+
+   inline auto getAddTastingNoteUrl(std::string_view wine_id) -> std::string
+   {
+      return ctb::format(constants::FMT_URL_CT_ADD_TASTING_NOTE, wine_id);
    }
 
 

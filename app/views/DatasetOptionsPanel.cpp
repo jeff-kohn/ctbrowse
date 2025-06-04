@@ -9,6 +9,7 @@
 #include "App.h"
 #include "wx_helpers.h"
 #include "views/DatasetOptionsPanel.h"
+#include "views/FilterCheckBox.h"
 
 #include <ctb/utility_chrono.h>
 
@@ -24,7 +25,6 @@
 #include <wx/valgen.h>
 #include <wx/wupdlock.h>
 
-
 #include <memory>
 
 namespace ctb::app
@@ -34,7 +34,6 @@ namespace ctb::app
       constexpr int IMG_CONTAINER = 0;
       constexpr int IMG_UNCHECKED = 1;
       constexpr int IMG_CHECKED = 2;
-
 
       auto getPropertyForFieldType(const CtFieldSchema& fld, std::string_view text_val) -> CtProperty
       {
@@ -64,12 +63,14 @@ namespace ctb::app
          }
       }
 
+      void forceLayoutUpdate(wxWindow* window)
+      {
+         window->GetSizer()->Layout();
+         window->SendSizeEvent();
+         window->Update();
+      }
    } // namespace
    
-
-   DatasetOptionsPanel::DatasetOptionsPanel(DatasetEventSourcePtr source) : m_sink{ this, source }
-   {}
-
 
    [[nodiscard]] auto DatasetOptionsPanel::create(wxWindow* parent, DatasetEventSourcePtr source) -> DatasetOptionsPanel*
    {
@@ -94,17 +95,23 @@ namespace ctb::app
    }
 
 
+   DatasetOptionsPanel::DatasetOptionsPanel(DatasetEventSourcePtr source) : m_sink{ this, source }
+   {}
+
+
    void DatasetOptionsPanel::initControls()
    {
+      using namespace ctb::constants;
+
       const auto default_border = wxSizerFlags::GetDefaultBorder();
 
       // panel shouldn't grow infinitely
-      SetMaxSize(ConvertDialogToPixels(wxSize{ 150, constants::WX_UNSPECIFIED_VALUE }));
-      SetMinSize(ConvertDialogToPixels(wxSize{ 100, constants::WX_UNSPECIFIED_VALUE }));
+      SetMaxSize(ConvertDialogToPixels(wxSize{ 150, WX_UNSPECIFIED_VALUE }));
+      SetMinSize(ConvertDialogToPixels(wxSize{ 100, WX_UNSPECIFIED_VALUE }));
 
       // defines the rows of controls in our panel
-      m_top_sizer = new wxBoxSizer{ wxVERTICAL };
-      m_top_sizer->AddSpacer(default_border);
+      auto* top_sizer = new wxBoxSizer{ wxVERTICAL };
+      top_sizer->AddSpacer(default_border);
 
       // Dataset title
       auto title_font{ GetFont().MakeLarger().MakeBold()};
@@ -113,10 +120,10 @@ namespace ctb::app
       m_dataset_title = new wxStaticText{ this, wxID_ANY, "" };
       m_dataset_title->SetFont(title_font);
       m_dataset_title->SetForegroundColour(heading_color);
-      m_top_sizer->Add(m_dataset_title, wxSizerFlags{}.Expand().Border(wxALL, title_border_size));
+      top_sizer->Add(m_dataset_title, wxSizerFlags{}.Expand().Border(wxALL, title_border_size));
 
       // sort options box
-      auto* sort_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_SORT_OPTIONS);
+      auto* sort_options_box = new wxStaticBoxSizer(wxVERTICAL, this, LBL_SORT_OPTIONS);
 
       // sort fields combo
       m_sort_combo = new wxChoice(sort_options_box->GetStaticBox(), wxID_ANY);
@@ -128,7 +135,7 @@ namespace ctb::app
       auto opt_ascending = new wxRadioButton{
          sort_options_box->GetStaticBox(),
          wxID_ANY, 
-         constants::LBL_SORT_ASCENDING,
+         LBL_SORT_ASCENDING,
          wxDefaultPosition, 
          wxDefaultSize, 
          wxRB_GROUP
@@ -137,75 +144,103 @@ namespace ctb::app
       opt_ascending->SetValidator(wxGenericValidator{ &m_sort_ascending });
       sort_options_box->Add(opt_ascending, wxSizerFlags{}.Expand().Border(wxALL));
 
-      // descending sort order radio. Since the radio buttons aren't in a group box, the validator treats them as bool
+      // descending sort order radio. Since the radio buttons aren't in a group box, the validator treats them as individual bools
       // so we have a separate flag for the descending radio that we have to manually keep in sync (see onTableSorted)
-      auto opt_descending = new wxRadioButton{ sort_options_box->GetStaticBox(), wxID_ANY, constants::LBL_SORT_DESCENDING };
+      auto opt_descending = new wxRadioButton{ sort_options_box->GetStaticBox(), wxID_ANY, LBL_SORT_DESCENDING };
       opt_descending->SetValidator(wxGenericValidator{ &m_sort_descending });
       sort_options_box->Add(opt_descending, wxSizerFlags{1}.Expand().Border(wxALL));
-      m_top_sizer->Add(sort_options_box, wxSizerFlags().Expand().Border(wxALL));
-      m_top_sizer->AddSpacer(default_border);
+      top_sizer->Add(sort_options_box, wxSizerFlags().Expand().Border(wxALL));
+      top_sizer->AddSpacer(default_border);
 
-      // filter options box
-      m_filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, constants::LBL_FILTER_OPTIONS);
+      // filter options box, contains filter tree and checkboxes
+      auto* filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, LBL_FILTER_OPTIONS);
 
       // load images for the checkboxes in our filter tree.
       const auto tr_img_size = wxSize{ 16, 16 };
-      m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_FILTER_IMG, tr_img_size));
-      m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_UNCHECKED_IMG, tr_img_size));
-      m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(constants::RES_NAME_TREE_CHECKED_IMG, tr_img_size));
+      m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(RES_NAME_TREE_FILTER_IMG, tr_img_size));
+      m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(RES_NAME_TREE_UNCHECKED_IMG, tr_img_size));
+      m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(RES_NAME_TREE_CHECKED_IMG, tr_img_size));
 
       // filter tree control
       auto style = wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_TWIST_BUTTONS | wxTR_NO_LINES | wxTR_HIDE_ROOT;
-      m_filter_tree = new wxTreeCtrl{ m_filter_options_box->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, style };
+      m_filter_tree = new wxTreeCtrl{ filter_options_box->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, style };
       m_filter_tree->SetMaxSize(ConvertDialogToPixels(wxSize(-1, 500)));
       m_filter_tree->SetMinSize(ConvertDialogToPixels(wxSize(-1, 100)));
       m_filter_tree->SetImages(m_filter_tree_images);
-      m_filter_options_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
-      m_filter_options_box->AddSpacer(default_border);
+      filter_options_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
+      filter_options_box->AddSpacer(default_border);
 
-      // in-stock filter
-      auto instock_filter_ctrl = new wxCheckBox(m_filter_options_box->GetStaticBox(), wxID_ANY, constants::LBL_CHECK_IN_STOCK_ONLY);
-      instock_filter_ctrl->SetValidator(wxGenericValidator{ &m_instock_only });
-      m_filter_options_box->Add(instock_filter_ctrl, wxSizerFlags().Border(wxALL));
-
-      // min-score filter sizer
-      auto* min_score_sizer = new wxBoxSizer(wxHORIZONTAL);
-
-      // enable score filter checkbox
-      auto* score_filter_chk = new wxCheckBox{ m_filter_options_box->GetStaticBox(), wxID_ANY, constants::LBL_REQUIRE_MIN_SCORE };
-      score_filter_chk->SetValidator(wxGenericValidator{ &m_enable_score_filter });
-      min_score_sizer->Add(score_filter_chk, wxSizerFlags{}.Center().Border(wxLEFT|wxTOP|wxBOTTOM));
-
-      // score filter value spinbox
-      m_score_spin_ctrl = new wxSpinCtrlDouble
-         {
-            m_filter_options_box->GetStaticBox(), 
-            wxID_ANY,
-            wxEmptyString, wxDefaultPosition, wxDefaultSize, 
-            wxSP_ARROW_KEYS|wxALIGN_RIGHT, 
-            constants::FILTER_SCORE_MIN, constants::FILTER_SCORE_MAX, 
-            constants::FILTER_SCORE_DEFAULT, constants::FILTER_SCORE_INCR
-         };
-      m_score_spin_ctrl->SetDigits(constants::FILTER_SCORE_DIGITS);
-      m_score_spin_ctrl->Enable(false);
-      min_score_sizer->Add(m_score_spin_ctrl, wxSizerFlags{}.Border(wxRIGHT|wxTOP|wxBOTTOM));
-      m_filter_options_box->Add(min_score_sizer, wxSizerFlags());
+      // checkbox filters
+      createOptionFilters(filter_options_box);
 
       // finalize layout
-      m_top_sizer->Add(m_filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
-      m_top_sizer->AddStretchSpacer(2);
-      SetSizer(m_top_sizer);
+      top_sizer->Add(filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
+      top_sizer->AddStretchSpacer(2);
+      SetSizer(top_sizer);
 
       // event bindings.
       m_sort_combo->Bind(wxEVT_CHOICE, &DatasetOptionsPanel::onSortSelection, this);
       m_filter_tree->Bind(wxEVT_TREE_ITEM_EXPANDING, &DatasetOptionsPanel::onTreeFilterExpanding, this);
-      m_filter_tree->Bind(wxEVT_LEFT_DOWN, &DatasetOptionsPanel::onTreeFilterLeftClick, this);
-      m_score_spin_ctrl->Bind(wxEVT_SPINCTRLDOUBLE, &DatasetOptionsPanel::onMinScoreChanged, this);
-      opt_ascending->Bind(wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
+      m_filter_tree->Bind(wxEVT_LEFT_DOWN,           &DatasetOptionsPanel::onTreeFilterLeftClick, this);
+
+      m_score_spin_ctrl->Bind(wxEVT_SPINCTRLDOUBLE, &DatasetOptionsPanel::onMinScoreChanged,  this);
+      m_score_spin_ctrl->Bind(wxEVT_UPDATE_UI,      &DatasetOptionsPanel::onMinScoreUpdateUI, this);    
+
+      opt_ascending->Bind( wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
       opt_descending->Bind(wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
-      instock_filter_ctrl->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onInStockChecked, this);
-      score_filter_chk->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onMinScoreFilterChecked, this);     
+
+      m_filter_checkboxes[ControlCategory::InStockFilter     ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterInStockChecked,        this);
+      m_filter_checkboxes[ControlCategory::MinScoreFilter    ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterMinScoreChecked, this);     
+      m_filter_checkboxes[ControlCategory::ReadyToDrinkFilter]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterReadyToDrinkChecked,   this);     
    }
+
+
+   void DatasetOptionsPanel::createOptionFilters(wxStaticBoxSizer* parent)
+   {
+      using enum CtProp;
+      using enum ControlCategory;
+      using namespace ctb::constants;
+
+      // in-stock filter
+      m_filter_checkboxes[InStockFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_IN_STOCK_ONLY, QtyOnHand,  std::greater<CtProperty>{}, uint16_t{0}, false}};
+      parent->Add(m_filter_checkboxes[InStockFilter], wxSizerFlags().Border(wxALL));
+
+      // embedded sizer to place score spin-ctrl next to checkbox
+      auto* min_score_sizer = new wxBoxSizer(wxHORIZONTAL);
+
+      // min-score filter checkbox
+      m_filter_checkboxes[MinScoreFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_MIN_SCORE, { CtScore, MyScore }, std::greater_equal<CtProperty>{}, FILTER_SCORE_DEFAULT, false } };
+      min_score_sizer->Add(m_filter_checkboxes[MinScoreFilter], wxSizerFlags{}.Center().Border(wxLEFT|wxTOP|wxBOTTOM));
+
+      //  min-score filter spin-ctrl
+      m_score_spin_ctrl = new wxSpinCtrlDouble
+      {
+         parent->GetStaticBox(),
+         wxID_ANY,
+         wxEmptyString, wxDefaultPosition, wxDefaultSize, 
+         wxSP_ARROW_KEYS | wxALIGN_RIGHT, 
+         FILTER_SCORE_MIN,     FILTER_SCORE_MAX, 
+         FILTER_SCORE_DEFAULT, FILTER_SCORE_INCR
+      };
+      m_score_spin_ctrl->SetDigits(FILTER_SCORE_DIGITS);
+      m_score_spin_ctrl->Enable(false);
+      min_score_sizer->Add(m_score_spin_ctrl, wxSizerFlags{}.Border(wxRIGHT|wxTOP|wxBOTTOM));
+
+      // add embedded sizer to parent
+      parent->Add(min_score_sizer, wxSizerFlags{});
+
+      // ready-to-drink filter
+      auto props = { RtdQtyDefault, RtdQtyLinear, RtdQtyBellCurve, RtdQtyEarlyCurve, RtdQtyLateCurve, RtdQtyFastMaturing, RtdQtyEarlyAndLate, RtdQtyBottlesPerYear, };
+      m_filter_checkboxes[ReadyToDrinkFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_READY_TO_DRINK, props, std::greater<CtProperty>{}, FILTER_AVAILABLE_MIN_QTY, false } };
+      parent->Add(m_filter_checkboxes[ReadyToDrinkFilter], wxSizerFlags().Border(wxALL));
+
+      // categorize controls so we can show/hide as appropriate.
+      m_categorized.addControlDependency(ControlCategory::InStockFilter,      m_filter_checkboxes[InStockFilter ]    );
+      m_categorized.addControlDependency(ControlCategory::MinScoreFilter,     m_filter_checkboxes[MinScoreFilter]    );
+      m_categorized.addControlDependency(ControlCategory::MinScoreFilter,     m_score_spin_ctrl                      );
+      m_categorized.addControlDependency(ControlCategory::ReadyToDrinkFilter, m_filter_checkboxes[ReadyToDrinkFilter]);
+   }
+
 
    auto DatasetOptionsPanel::setTitle() -> bool
    {
@@ -214,19 +249,17 @@ namespace ctb::app
          return false;
 
       m_dataset_title->SetLabelText( wxFromSV(getTableDescription(dataset->getTableId())) );
-      GetSizer()->Layout();
-      SendSizeEvent();
-      Update();
+      forceLayoutUpdate(this);
       return true;
    }
 
 
-   void DatasetOptionsPanel::addPropFilter(wxTreeItemId item)
+   void DatasetOptionsPanel::addMultiValFilter(wxTreeItemId item)
    {
       if (m_sink.hasDataset())
       {
          CtProperty filter_val{};
-         auto filter = getPropFilterForItem(item);
+         auto filter = getMultiValFilterForItem(item);
          if (filter)
          {
             /// We need to convert the string value from the filter tree to the correct type, which may not be string.
@@ -248,12 +281,48 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::removePropFilter(wxTreeItemId item)
+   auto DatasetOptionsPanel::getMultiValFilterForItem(wxTreeItemId item) -> MaybeMultiValFilter
+   {
+      auto dataset = m_sink.getDataset();
+      if (dataset)
+      {
+         // we need to get the parent node's item, since that's what's in the map.
+         auto parent = m_filter_tree->GetItemParent(item);
+         if (parent.IsOk())
+         {
+            auto it = m_multival_filters.find(parent);
+            if (it != m_multival_filters.end())
+               return it->second;
+         }
+      }
+      return {};
+   }
+
+
+   auto DatasetOptionsPanel::isItemChecked(wxTreeItemId item) -> bool
+   {
+      return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CHECKED;
+   }
+
+
+   auto DatasetOptionsPanel::isItemContainerNode(wxTreeItemId item) -> bool
+   {
+      return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CONTAINER;
+   }
+
+
+   auto DatasetOptionsPanel::isItemMatchValueNode(wxTreeItemId item) -> bool
+   {
+      return item.IsOk() and m_filter_tree->GetItemImage(item) != IMG_CONTAINER;
+   }
+
+
+   void DatasetOptionsPanel::removeMultiValFilter(wxTreeItemId item)
    {
       if (m_sink.hasDataset())
       {
          CtProperty filter_val{};
-         auto filter = getPropFilterForItem(item);
+         auto filter = getMultiValFilterForItem(item);
          if (filter)
          {
             /// We need to convert the string value from the filter tree to the correct type, which may not be string.
@@ -274,79 +343,12 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::populateFilterTypes(IDataset* dataset)
-   {
-      assert(m_filter_tree);
-
-      // disable window updates till we're done and reset the tree
-      wxWindowUpdateLocker freeze_updates{m_filter_tree};
-      m_filter_tree->DeleteAllItems();
-      m_filters.clear();
-      m_check_map.clear();
-
-      // get the available filters for this dataset, and add them to the tree.
-      auto filters = dataset->multiMatchFilters();
-      auto root = m_filter_tree->AddRoot(wxEmptyString);
-      for (auto& filter : filters)
-      {
-         wxString filter_name{ filter.filter_name };
-         auto item = m_filter_tree->AppendItem(root, filter_name);
-         m_filter_tree->SetItemHasChildren(item, true);
-         m_filter_tree->SetItemImage(item, IMG_CONTAINER);
-         m_filters[item] = filter;
-      }
-   }
-
-
-   auto DatasetOptionsPanel::getPropFilterForItem(wxTreeItemId item) -> MaybeFilter
-   {
-      auto dataset = m_sink.getDataset();
-      if (dataset)
-      {
-         // we need to get the parent node's item, since that's what's in the map.
-         auto parent = m_filter_tree->GetItemParent(item);
-         if (parent.IsOk())
-         {
-            auto it = m_filters.find(parent);
-            if (it != m_filters.end())
-               return it->second;
-         }
-      }
-      return {};
-   }
-
-
-   auto DatasetOptionsPanel::getSortOptionList(IDataset* dataset) -> wxArrayString
-   {
-      return vws::all(dataset->availableSorts()) 
-               | vws::transform([](const IDataset::TableSort& s) {  return wxFromSV(s.sort_name); })
-               | rng::to<wxArrayString>();
-   }
-
-
-   auto DatasetOptionsPanel::isChecked(wxTreeItemId item) -> bool
-   {
-      return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CHECKED;
-   }
-
-
-   auto DatasetOptionsPanel::isContainerNode(wxTreeItemId item) -> bool
-   {
-      return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CONTAINER;
-   }
-
-
-   auto DatasetOptionsPanel::isMatchValueNode(wxTreeItemId item) -> bool
-   {
-      return item.IsOk() and m_filter_tree->GetItemImage(item) != IMG_CONTAINER;
-   }
-
    /// @brief updates the checked/unchecked status of a node.
    /// @return true if successful, false otherwise (ie invalid item)
    /// 
-   auto DatasetOptionsPanel::setMatchValueChecked(wxTreeItemId item, bool checked) -> bool
+   auto DatasetOptionsPanel::setMultiValChecked(wxTreeItemId item, bool checked) -> bool
    {
-      if ( isMatchValueNode(item) )
+      if ( isItemMatchValueNode(item) )
       {
          if (checked)
          {
@@ -368,17 +370,17 @@ namespace ctb::app
    /// 
    void DatasetOptionsPanel::toggleFilterSelection(wxTreeItemId item)
    {
-      bool checked = !isChecked(item);
-      if (!setMatchValueChecked(item, checked))
+      bool checked = !isItemChecked(item);
+      if (!setMultiValChecked(item, checked))
          return;
 
       if (checked)
       {
-         addPropFilter(item);
+         addMultiValFilter(item);
          m_check_map[item]++;
       }
       else{
-         removePropFilter(item);
+         removeMultiValFilter(item);
          m_check_map[item]--;
       }
       updateFilterLabel(m_filter_tree->GetItemParent(item));
@@ -387,7 +389,7 @@ namespace ctb::app
 
    void DatasetOptionsPanel::updateFilterLabel(wxTreeItemId item)
    {
-      auto maybe_filter = m_filters[item];
+      auto maybe_filter = m_multival_filters[item];
       if ( !maybe_filter or !item.IsOk() )
          return;
 
@@ -405,23 +407,14 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::enableInStockFilter(bool enable)
+   auto DatasetOptionsPanel::getSortOptionList(IDataset* dataset) -> wxArrayString
    {
-      constexpr size_t index = 2;
-      m_filter_options_box->Show(index, enable);
-      m_filter_options_box->Layout();
-      SendSizeEvent();
-      Update();
+      return vws::all(dataset->availableSorts()) 
+         | vws::transform([](const IDataset::TableSort& s) {  return wxFromSV(s.sort_name); })
+         | rng::to<wxArrayString>();
    }
 
-
-   void DatasetOptionsPanel::resetInStockCheckbox()
-   {
-      m_instock_only = false;
-      TransferDataToWindow();
-   }
-
-
+   
    void DatasetOptionsPanel::notify(DatasetEvent event)
    {
       assert(event.dataset);
@@ -432,7 +425,6 @@ namespace ctb::app
          {
          case DatasetEvent::Id::DatasetInitialize:
             onTableInitialize(event.dataset.get());
-            enableInStockFilter(event.dataset->hasProperty(CtProp::QtyOnHand));
             break;
 
          case DatasetEvent::Id::Sort:
@@ -462,8 +454,18 @@ namespace ctb::app
       populateFilterTypes(dataset);
       setTitle();
 
-      m_instock_only = dataset->getInStockFilter();
+      // show/hide/initialize filter checkboxes
+      m_categorized.showCategory(ControlCategory::InStockFilter,      dataset->hasProperty(CtProp::QtyTotal     ));
+      m_categorized.showCategory(ControlCategory::MinScoreFilter,     dataset->hasProperty(CtProp::CtScore      ));
+      m_categorized.showCategory(ControlCategory::ReadyToDrinkFilter, dataset->hasProperty(CtProp::RtdQtyDefault));
+      for (auto* check_box : vws::values(m_filter_checkboxes))
+      {
+         auto&& filter = dataset->getFilter(check_box->filter().filter_name);
+         check_box->filter().enabled = filter.has_value() ? filter->enabled : false;
+      }
+      
       TransferDataToWindow();
+      forceLayoutUpdate(this);
    }
 
 
@@ -476,59 +478,95 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onInStockChecked([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsPanel::populateFilterTypes(IDataset* dataset)
    {
-      assert(m_sink.hasDataset());
+      assert(m_filter_tree);
 
-      TransferDataFromWindow();
-      if (m_sink.hasDataset() and m_sink.getDataset()->setInStockFilter(m_instock_only))
+      // disable window updates till we're done and reset the tree
+      wxWindowUpdateLocker freeze_updates{m_filter_tree};
+      m_filter_tree->DeleteAllItems();
+      m_multival_filters.clear();
+      m_check_map.clear();
+
+      // get the available filters for this dataset, and add them to the tree.
+      auto filters = dataset->multiMatchFilters();
+      auto root = m_filter_tree->AddRoot(wxEmptyString);
+      for (auto& filter : filters)
       {
+         wxString filter_name{ filter.filter_name };
+         auto item = m_filter_tree->AppendItem(root, filter_name);
+         m_filter_tree->SetItemHasChildren(item, true);
+         m_filter_tree->SetItemImage(item, IMG_CONTAINER);
+         m_multival_filters[item] = filter;
+      }
+   }
+
+
+   void DatasetOptionsPanel::onFilterChecked(ControlCategory control_cat)
+   {
+      try
+      {
+         assert(m_sink.hasDataset());
+         TransferDataFromWindow();
+
+         auto& filter = m_filter_checkboxes[control_cat]->filter();
+         if (filter.enabled)
+         {
+            m_sink.getDataset()->replaceFilter(filter);
+         }
+         else {
+            m_sink.getDataset()->removeFilter(filter.filter_name);
+         }
          m_sink.signal_source(DatasetEvent::Id::Filter);
       }
-      else{
-         // something went wrong, so clear checkbox.
-         m_instock_only = false;
-         TransferDataToWindow();
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
+   }
+
+   void DatasetOptionsPanel::onFilterInStockChecked([[maybe_unused]] wxCommandEvent& event)
+   {
+      onFilterChecked(ControlCategory::InStockFilter);
+   }
+
+
+   void DatasetOptionsPanel::onFilterMinScoreChecked([[maybe_unused]] wxCommandEvent& event)
+   {
+      onFilterChecked(ControlCategory::MinScoreFilter);
+   }
+
+
+   void DatasetOptionsPanel::onFilterReadyToDrinkChecked(wxCommandEvent& event)
+   {
+      onFilterChecked(ControlCategory::ReadyToDrinkFilter);
    }
 
 
    void DatasetOptionsPanel::onMinScoreChanged([[maybe_unused]] wxSpinDoubleEvent& event)
    {
-      if (m_enable_score_filter and m_sink.hasDataset())
+      try
       {
-         if ( m_sink.getDataset()->setMinScoreFilter(event.GetValue()) )
+         assert(m_sink.hasDataset());
+         TransferDataFromWindow();
+
+         auto& filter = m_filter_checkboxes[ControlCategory::MinScoreFilter]->filter();
+         filter.compare_val = event.GetValue();
+         if (filter.enabled)
          {
+            m_sink.getDataset()->replaceFilter(filter);
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
+      }
+      catch (...) {
+         wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
 
-   void DatasetOptionsPanel::onMinScoreFilterChecked([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsPanel::onMinScoreUpdateUI(wxUpdateUIEvent& event)
    {
-      if (!m_sink.hasDataset())
-      {
-         assert(false);
-         return;
-      }
-
       TransferDataFromWindow();
-      m_score_spin_ctrl->Enable(m_enable_score_filter);
-      if (m_enable_score_filter) 
-      {
-         if (m_sink.getDataset()->setMinScoreFilter(m_score_filter_val))
-         {
-            m_sink.signal_source(DatasetEvent::Id::Filter);
-         }
-      }
-      else 
-      {
-         if (m_sink.getDataset()->setMinScoreFilter(std::nullopt))
-         {
-            m_sink.signal_source(DatasetEvent::Id::Filter);
-         }
-      }
+      event.Enable(m_filter_checkboxes[ControlCategory::MinScoreFilter]->filter().enabled);
    }
 
 
@@ -568,11 +606,12 @@ namespace ctb::app
             auto dataset = m_sink.getDataset();
             if (dataset)
             {
+               assert(m_sort_selection <= std::ssize(dataset->availableSorts()));
+
                // we re-fetch sorter based on index, because when a sort is selected from the combo
-               // we want to use the default order for that sort, not necessarily whatever the current
+               // we want to use the default order for that sort, not whatever the current
                // selection is (e.g. sort Scores descending by default).
-               auto sorts = dataset->availableSorts();
-               m_sort_config = sorts[static_cast<size_t>(m_sort_selection)];
+               m_sort_config = dataset->availableSorts()[static_cast<size_t>(m_sort_selection)];
                dataset->applySort(m_sort_config);
                m_sink.signal_source(DatasetEvent::Id::Sort);
             }
@@ -596,7 +635,7 @@ namespace ctb::app
          // if the node has a filter in our map and it doesn't already have a list of 
          // available filter values as children, we need to populate the child nodes.
          // otherwise just return.
-         if( !m_filters.contains(filter_node.GetID()) || m_filter_tree->GetChildrenCount(filter_node) > 0 )
+         if( !m_multival_filters.contains(filter_node.GetID()) || m_filter_tree->GetChildrenCount(filter_node) > 0 )
          {
             return;
          }
@@ -604,7 +643,7 @@ namespace ctb::app
          auto data = m_sink.getDataset();
          assert(data);
 
-         auto& filter = m_filters[filter_node.m_pItem]; 
+         auto& filter = m_multival_filters[filter_node.m_pItem]; 
          for (auto& match_val : data->getDistinctValues(filter->prop_id))
          {
             auto item = m_filter_tree->AppendItem(filter_node, match_val.asString());

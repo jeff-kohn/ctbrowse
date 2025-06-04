@@ -42,13 +42,12 @@ namespace ctb::app
             return drink_end.asString("By {}").c_str();
 
          if (drink_end.isNull())
-            return drink_start.asString("{} +").c_str();
+            return drink_start.asString("{}+").c_str();
 
          return ctb::format("{} - {}", drink_start.asString(), drink_end.asString());
       }
 
    } // namespace detail
-
 
 
    DetailsPanel::DetailsPanel(DatasetEventSourcePtr source, LabelCachePtr cache) : 
@@ -161,12 +160,22 @@ namespace ctb::app
 
       // drink window
       auto* drink_window_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_DRINK_WINDOW);
+      drink_window_lbl->SetValidator(wxGenericValidator{ &m_drink_window_label });
       details_sizer->Add(drink_window_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
       auto* drink_window_val = new wxStaticText(this, wxID_ANY, "");
       drink_window_val->SetValidator(wxGenericValidator{ &m_details.drink_window });
       details_sizer->Add(drink_window_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
       m_category_controls.addControlDependency(DrinkWindow, drink_window_lbl);
       m_category_controls.addControlDependency(DrinkWindow, drink_window_val);
+
+      // CT drink window (only for Availability view)
+      auto* ct_drink_window_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_DRINK_WINDOW_CT);
+      details_sizer->Add(ct_drink_window_lbl , wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
+      auto* ct_drink_window_val = new wxStaticText(this, wxID_ANY, "");
+      ct_drink_window_val->SetValidator(wxGenericValidator{ &m_details.ct_drink_window });
+      details_sizer->Add(ct_drink_window_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
+      m_category_controls.addControlDependency(CtDrinkWindow, ct_drink_window_lbl );
+      m_category_controls.addControlDependency(CtDrinkWindow, ct_drink_window_val);
 
       // Scores heading
       auto* scores_header_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_SCORES, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -294,15 +303,10 @@ namespace ctb::app
       // end details_sizer layout
       top_sizer->Add(details_sizer, wxSizerFlags{}.CenterHorizontal().FixedMinSize().Border(wxALL));
 
-      // View Online button
-      auto* view_online_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_VIEW_ONLINE_BTN_TITLE, constants::DETAIL_VIEW_ONLINE_BTN_NOTE);
-      top_sizer->Add(view_online_btn, wxSizerFlags().CenterHorizontal().Border(wxALL));
-      m_category_controls.addControlDependency(OpenWinePage, view_online_btn);
-
-      // Accept Pending Order button
-      auto* accept_pending_btn = new wxCommandLinkButton(this, wxID_ANY, constants::DETAIL_ACCEPT_PENDING_BTN_TITLE, constants::DETAIL_ACCEPT_PENDING_BTN_NOTE);
-      top_sizer->Add(accept_pending_btn , wxSizerFlags().CenterHorizontal().Border(wxALL));
-      m_category_controls.addControlDependency(AcceptPendingPage, accept_pending_btn );
+      // Command-Link buttons (Collection-Specific)
+      addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_WINE_DETAILS, LinkOpenWineDetails, constants::DETAILS_CMD_LINK_WINE_DETAILS);
+      addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_ACCEPT_PENDING, LinkAcceptPending,   constants::DETAILS_CMD_LINK_ACCEPT_PENDING);
+      addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_DRINK_REMOVE,   LinkReadyToDrink,    constants::DETAILS_CMD_LINK_DRINK_REMOVE);
 
       // image won't correctly scale/redraw unless we use wxFULL_REPAINT_ON_RESIZE
       m_label_image = new wxGenericStaticBitmap(this, wxID_ANY, wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
@@ -314,8 +318,15 @@ namespace ctb::app
 
       // hook up event handlers
       m_label_timer.Bind(wxEVT_TIMER, &DetailsPanel::onLabelTimer, this);
-      view_online_btn->Bind(wxEVT_BUTTON, &DetailsPanel::onViewWebPage, this);
-      accept_pending_btn->Bind(wxEVT_BUTTON, &DetailsPanel::onAcceptPending, this);
+   }
+
+   void DetailsPanel::addCommandLinkButton(wxBoxSizer* sizer, CmdId cmd, CategorizedControls::Category category, std::string_view command_text, std::string_view note)
+   {
+      auto* link_button = new wxCommandLinkButton{ this, cmd, wxFromSV(command_text), wxFromSV(note), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER };
+      sizer->Add(link_button, wxSizerFlags().CenterHorizontal().Border(wxALL));
+      link_button->Bind(wxEVT_BUTTON, &DetailsPanel::onCommand, this, cmd);
+
+      m_category_controls.addControlDependency(category, link_button);
 
    }
 
@@ -394,7 +405,7 @@ namespace ctb::app
          // note that we try to grab all properties even though some of them won't be available in this dataset,
          // but that's fine because we'll just get a null value if it's not available, so no need to check hasProperty()
 
-         m_details.wine_id     =                    dataset->getProperty(rec_idx, CtProp::iWineId     ).asString();
+         m_details.wine_id     = dataset->getProperty(rec_idx, CtProp::iWineId     ).asString();
          m_details.wine_name   = dataset->getProperty(rec_idx, CtProp::WineName    ).asString();
          m_details.vintage     = dataset->getProperty(rec_idx, CtProp::Vintage     ).asString();
          m_details.varietal    = dataset->getProperty(rec_idx, CtProp::Varietal    ).asString();
@@ -405,6 +416,9 @@ namespace ctb::app
 
          m_details.drink_window     = detail::getDrinkWindow(dataset->getProperty(rec_idx, CtProp::BeginConsume ),
                                                              dataset->getProperty(rec_idx, CtProp::EndConsume   ));
+
+         m_details.ct_drink_window  = detail::getDrinkWindow(dataset->getProperty(rec_idx, CtProp::CtBeginConsume ),
+                                                             dataset->getProperty(rec_idx, CtProp::CtEndConsume   ));
 
          m_details.auction_value    = dataset->getProperty(rec_idx, CtProp::AuctionPrice ).asString(constants::FMT_NUMBER_CURRENCY);
          m_details.community_price  = dataset->getProperty(rec_idx, CtProp::CtPrice      ).asString(constants::FMT_NUMBER_CURRENCY);
@@ -421,7 +435,7 @@ namespace ctb::app
          m_details.pending_order_date    = dataset->getProperty(rec_idx, CtProp::PendingOrderDate    ).asString();
          m_details.pending_delivery_date = dataset->getProperty(rec_idx, CtProp::PendingDeliveryDate ).asString();
          m_details.pending_store_name    = dataset->getProperty(rec_idx, CtProp::PendingStoreName    ).asString();
-         m_details.pending_qty           = dataset->getProperty(rec_idx, CtProp::PendingQtyOrdered   ).asString();
+         m_details.pending_qty           = dataset->getProperty(rec_idx, CtProp::PendingOrderQty     ).asString();
          m_details.pending_price         = dataset->getProperty(rec_idx, CtProp::PendingPrice        ).asString(constants::FMT_NUMBER_CURRENCY);
 
          // show everything since detail panel may be blank if no record was selected previously...
@@ -477,23 +491,25 @@ namespace ctb::app
    {
       using enum CategorizedControls::Category;
 
+      // Details display
       m_category_controls.showCategory(Score, dataset->hasProperty(CtProp::CtScore));
       m_category_controls.showCategory(DrinkWindow, dataset->hasProperty(CtProp::BeginConsume));
+      m_category_controls.showCategory(CtDrinkWindow, dataset->hasProperty(CtProp::CtBeginConsume));
       m_category_controls.showCategory(Pending, dataset->hasProperty(CtProp::PendingPurchaseId));
       m_category_controls.showCategory(Valuation, dataset->hasProperty(CtProp::MyPrice));
-
-      if (dataset->hasProperty(CtProp::PendingOrderDate))
+      if (dataset->hasProperty(CtProp::CtBeginConsume))
       {
-         m_category_controls.showCategory(AcceptPendingPage, true);
-         m_category_controls.showCategory(OpenWinePage,      false);
+         m_drink_window_label = constants::LBL_DRINK_WINDOW_MY;
+         TransferDataToWindow();
       }
       else {
-         m_category_controls.showCategory(AcceptPendingPage, false);
-         m_category_controls.showCategory(OpenWinePage, true);
-
+         m_drink_window_label = constants::LBL_DRINK_WINDOW;
       }
 
-
+      // Command-Link buttons
+      m_category_controls.showCategory(LinkAcceptPending,   dataset->getTableId() == TableId::Pending);
+      m_category_controls.showCategory(LinkOpenWineDetails, dataset->getTableId() == TableId::List);
+      m_category_controls.showCategory(LinkReadyToDrink,    dataset->getTableId() == TableId::Availability);
    }
 
 
@@ -503,16 +519,9 @@ namespace ctb::app
    }
 
 
-   void DetailsPanel::onViewWebPage([[maybe_unused]] wxCommandEvent& event)
+   void DetailsPanel::onCommand(wxCommandEvent& event)
    {
-      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, CMD_WINE_ONLINE_DETAILS });
+      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, event.GetId()});
    }
-
-
-   void DetailsPanel::onAcceptPending(wxCommandEvent& event)
-   {
-      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, CMD_WINE_ACCEPT_PENDING });
-   }
-
 
 } // namesapce ctb::app
