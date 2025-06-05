@@ -39,7 +39,7 @@ namespace ctb::app
    {
 
 #if !defined(NDEBUG)
-      if ( row >= m_dataset->filteredRecCount() or col >= std::ssize(m_dataset->listColumns()) )
+      if ( row >= m_dataset->rowCount() or col >= std::ssize(m_dataset->listColumns()) )
       {
          SPDLOG_DEBUG("CtDataViewModel::GetValueByRow() called with invalid coordinates.");
          assert(false);
@@ -62,7 +62,7 @@ namespace ctb::app
 
    unsigned int CtDataViewModel::GetCount()	const 
    {
-      return static_cast<uint32_t>(m_dataset->filteredRecCount());
+      return static_cast<uint32_t>(m_dataset->rowCount());
    }
 
 

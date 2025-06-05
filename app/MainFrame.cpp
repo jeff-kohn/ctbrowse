@@ -828,33 +828,47 @@ namespace ctb::app
    }
 
 
+   auto sumSeries(const ctb::IDataset::PropertyRefs& series) -> int64_t
+   {
+      // always use int64_t, even for doubles in RTD table it will give us what we want.
+      auto vals = series | vws::transform([](auto&& prop) -> int64_t 
+         { 
+            return prop.get().as<int64_t>().value_or(0); 
+         });
+
+      return rng::fold_left_first(vals, std::plus{}).value_or(0);
+   }
+
+
    void MainFrame::updateStatusBarCounts()
    {     
-      int total{0};
-      int filtered{0};
-      
+      std::string total_summary{};
+      std::string filtered_summar{};
+
       if (m_event_source->hasDataset())
       {
-         auto tbl = m_event_source->getDataset();
-         total = tbl->totalRecCount();
-         filtered = tbl->filteredRecCount();
+         auto ds = m_event_source->getDataset();
+         auto on_hand  = sumSeries(ds->viewPropertySeries(CtProp::QtyOnHand));
+         auto on_order = sumSeries(ds->viewPropertySeries(CtProp::QtyPending));
+         auto wines    = ds->rowCount();
+
       }
 
-      if (total)
-      {
-         SetStatusText(ctb::format(constants::FMT_LBL_TOTAL_ROWS, total), STATUS_BAR_PANE_TOTAL_ROWS);
-      }
-      else{
-         SetStatusText("", STATUS_BAR_PANE_TOTAL_ROWS);
-      }
+      //if (total)
+      //{
+      //   SetStatusText(ctb::format(constants::FMT_LBL_TOTAL_ROWS, total), STATUS_BAR_PANE_TOTAL_ROWS);
+      //}
+      //else{
+      //   SetStatusText("", STATUS_BAR_PANE_TOTAL_ROWS);
+      //}
 
-      if (filtered < total)
-      {
-         SetStatusText(ctb::format(constants::FMT_LBL_FILTERED_ROWS, filtered), STATUS_BAR_PANE_FILTERED_ROWS);
-      }
-      else{
-         SetStatusText("", STATUS_BAR_PANE_FILTERED_ROWS);
-      }
+      //if (filtered < total)
+      //{
+      //   SetStatusText(ctb::format(constants::FMT_LBL_FILTERED_ROWS, filtered), STATUS_BAR_PANE_FILTERED_ROWS);
+      //}
+      //else{
+      //   SetStatusText("", STATUS_BAR_PANE_FILTERED_ROWS);
+      //}
    }
 
 

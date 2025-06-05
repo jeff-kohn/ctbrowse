@@ -62,6 +62,19 @@ namespace ctb
          return DatasetPtr{ static_cast<IDataset*>(new CtDataset{ std::move(data) }) };
       }
 
+      /// @brief Returns the name of the CT table this dataset represents. Not meant to be 
+      ///         displayed to the user, this is for internal use. 
+      auto getTableName() const -> std::string_view override
+      {
+         return Traits::getTableName();
+      }
+
+      /// @brief Returns the TableId enum for this dataset's underlying table.
+      auto getTableId() const -> TableId override
+      {
+         return Traits::getTableId();
+      }
+
       /// @brief Retrieves the schema information for a specified property.
       /// 
       /// @param prop_id - The identifier of the property whose schema is to be retrieved.
@@ -75,6 +88,14 @@ namespace ctb
             return std::nullopt;
          }
          return it->second;
+      }
+
+      /// @brief Gets the collection of active display columns 
+      /// 
+      /// Note that some may be hidden and not visible.
+      auto listColumns() const -> CtListColumnSpan override
+      { 
+         return Traits::DefaultListColumns; 
       }
 
       /// @brief retrieves list of available sorters, in order of display
@@ -102,34 +123,10 @@ namespace ctb
          }
       }
 
-      /// @brief Gets the collection of active display columns 
-      /// 
-      /// Note that some may be hidden and not visible.
-      auto listColumns() const -> CtListColumnSpan override
-      { 
-         return Traits::DefaultListColumns; 
-      }
-
       /// @brief retrieves a list of available filters for this table.
       auto multiMatchFilters() const -> CtMultiMatchFilterSpan override
       {
          return Traits::MultiMatchFilters;
-      }
-
-      /// @brief Get a list of all distinct values from the table for the specified property.
-      /// 
-      /// This can be used to get filter values for match-filters.
-      [[nodiscard]] auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet override
-      {
-         PropertyValueSet values{};
-         if (hasProperty(prop_id))
-         {
-            for (const Record& rec : m_data)
-            {
-               values.emplace(rec[prop_id]);
-            }
-         }
-         return values;
       }
 
       /// @brief Adds a match value filter for the specified column.
@@ -199,41 +196,6 @@ namespace ctb
          applyFilters();
       }
 
-      /// @brief Check whether the current dataset supports the given property
-      /// 
-      /// Since getProperty() will return a null value for missing properties, calling this function
-      /// is the only way to distinguish between a null property value and a property that is missing
-      /// altogether.
-      /// 
-      /// @return True if the property is available, false if not.
-      auto hasProperty(CtProp prop_id) const -> bool override
-      {
-         return Traits::hasProperty(prop_id);
-      }
-
-      /// @brief Retrieve a property for a specified record/row in the dataset
-      /// 
-      /// This function returns a reference to null for not-found properties. Since
-      /// found properties could also have null value, the only way to differentiate
-      /// is by checking hasProperty()
-      /// 
-      /// The returned reference will remain valid until a modifying (non-const) method
-      /// is called on this dataset, after which it may be invalid. You should copy-construct 
-      /// a new object if you need to hold onto it for a while rather than holding the reference.
-      /// 
-      /// @return const reference to the requested property. It may be a null value, but it 
-      ///  will always be a valid CtProperty&.
-      auto getProperty(int rec_idx, CtProp prop_id) const noexcept(false) -> const Property & override
-      {
-         assert(filteredRecCount() > rec_idx and "This is a logic bug, invalid index should never happen here.");
-
-         // invalid prop_id won't really hurt anything, it'll default-construct and return an empty/null value.
-         // if record index is invalid this will throw since we're using bounds-checked API.
-         return m_current_view->at(static_cast<size_t>(rec_idx))[prop_id];
-      }
-
-
-
       /// @brief Check if a filter with the specified name is applied to the dataset.
       /// 
       /// filter_name is case-sensitive
@@ -243,7 +205,6 @@ namespace ctb
       {
          return m_prop_filters.hasFilter(filter_name);
       }
-
 
       /// @brief Check if a filter with the specified name is applied to the dataset.
       /// 
@@ -323,7 +284,7 @@ namespace ctb
       /// This removes property and multi-value filters.
       /// 
       /// @return true if at least one filter was removed, false if there were no filters
-      auto removeAllFilters() -> bool
+      auto removeAllFilters() -> bool override
       {
          bool got_one = false;
          if (m_mm_filters.activeFilters())
@@ -339,29 +300,73 @@ namespace ctb
          return got_one;
       }
 
+      /// @brief Check whether the current dataset supports the given property
+      /// 
+      /// Since getProperty() will return a null value for missing properties, calling this function
+      /// is the only way to distinguish between a null property value and a property that is missing
+      /// altogether.
+      /// 
+      /// @return True if the property is available, false if not.
+      auto hasProperty(CtProp prop_id) const -> bool override
+      {
+         return Traits::hasProperty(prop_id);
+      }
+
+      /// @brief Retrieve a property for a specified record/row in the dataset
+      /// 
+      /// This function returns a reference to null for not-found properties. Since
+      /// found properties could also have null value, the only way to differentiate
+      /// is by checking hasProperty()
+      /// 
+      /// The returned reference will remain valid until a modifying (non-const) method
+      /// is called on this dataset, after which it may be invalid. You should copy-construct 
+      /// a new object if you need to hold onto it for a while rather than holding the reference.
+      /// 
+      /// @return const reference to the requested property. It may be a null value, but it 
+      ///  will always be a valid CtProperty&.
+      auto getProperty(int rec_idx, CtProp prop_id) const noexcept(false) -> const Property & override
+      {
+         assert(rowCount(true) > rec_idx and "This is a logic bug, invalid index should never happen here.");
+
+         // invalid prop_id won't really hurt anything, it'll default-construct and return an empty/null value.
+         // if record index is invalid this will throw since we're using bounds-checked API.
+         return m_current_view->at(static_cast<size_t>(rec_idx))[prop_id];
+      }
+
+      /// @brief Get a list of all distinct values from the table for the specified property.
+      /// 
+      /// This can be used to get filter values for match-filters.
+      [[nodiscard]] auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet override
+      {
+         PropertyValueSet values{};
+         if (hasProperty(prop_id))
+         {
+            for (const Record& rec : m_data)
+            {
+               values.emplace(rec[prop_id]);
+            }
+         }
+         return values;
+      }
+
+      /// @brief Get a temporary ref-view of all the values of a property 
+      ///
+      /// IMPORTANT: The returned series is meant for temporary use. It contains references to objects in the underlying dataset
+      /// that could be invalidated by dataset changes. Calling any non-const method on this dataset invalidates the result
+      /// of any previous call to viewPropertySeries()
+      /// 
+      /// This is the only way we can efficiently expose a data-series that can be used with range/view adapters.
+      [[nodiscard]] auto viewPropertySeries(CtProp prop_id, bool filtered_only) const -> PropertyRefs override
+      {
+         auto& table = filtered_only ? m_data : *m_current_view;
+         return vws::all(table) | vws::transform([prop_id](const auto& row) -> PropertyRef { return std::cref(row[prop_id]); })
+                                | rng::to<std::vector>();
+      }
+
       /// @brief returns the total number of records in the underlying dataset
-      auto totalRecCount() const -> int64_t override
+      auto rowCount(bool filtered_only) const -> int64_t override
       {
-         return std::ssize(m_data);
-      }
-
-      /// @brief returns the number of records with filters applied.
-      auto filteredRecCount() const -> int64_t override
-      {
-         return std::ssize(*m_current_view);
-      }
-
-      /// @brief Returns the TableId enum for this dataset's underlying table.
-      auto getTableId() const -> TableId override
-      {
-         return Traits::getTableId();
-      }
-
-      /// @return the name of the CT table this dataset represents. Not meant to be 
-      ///         displayed to the user, this is for internal use. 
-      auto getTableName() const -> std::string_view override
-      {
-         return Traits::getTableName();
+         return filtered_only ? std::ssize(*m_current_view) : std::ssize(m_data);
       }
 
       // default dtor, others are deleted since this object is meant to be heap-only

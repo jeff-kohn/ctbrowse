@@ -49,7 +49,7 @@ namespace ctb
 
       QtyPending,
       QtyOnHand,
-      QtyTotal,         // calculated as Pending + OnHand, not from CSV (except for ReadyToDrink)
+      QtyTotal,         // string value, calculated as Pending + OnHand, not from CSV (except for ReadyToDrink)
       QtyPurchased,     
       QtyConsumed,      
 

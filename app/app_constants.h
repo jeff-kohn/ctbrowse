@@ -59,10 +59,12 @@ namespace ctb::constants
    inline constexpr const char* CREDENTIALDLG_LBL_PASSWORD        = "&Password:";
    inline constexpr const char* CREDENTIALDLG_LBL_SAVE            = "&Save Credential";
    inline constexpr const char* FMT_CREDENTIALDLG_LBL_TITLE       = "{} Login";
-   
-   inline constexpr const char* FMT_LBL_FILTERED_ROWS             = "Filtered Rows: {}";
+
+   inline constexpr const char* FMT_LBL_WINE_SUMMARY              = "{} bottles and {} Pending in {} wines";
+   inline constexpr const char* FMT_LBL_WINE_SUMMARY_TOTAL        = "Total: {} bottles and {} Pending in {} wines";
+   inline constexpr const char* FMT_LBL_WINE_SUMMARY_FILTERED     = "Filtered: {} bottles and {} Pending in {} wines";
+
    inline constexpr const char* FMT_LBL_FILTERS_SELECTED          = "{}  ({} selected)";
-   inline constexpr const char* FMT_LBL_TOTAL_ROWS                = "Total Rows: {}";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADED        = "Successfully downloaded file '{}'.";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADING       = "Downloading file '{}'...";
    inline constexpr const char* FMT_TITLE_TYPED_ERROR             = "{} Error";

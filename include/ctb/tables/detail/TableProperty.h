@@ -215,7 +215,6 @@ namespace ctb::detail
       auto operator==(const TableProperty& prop) const -> bool = default;
             
       /// @brief allow assigning values, not just TableProperties
-      ///
       template<typename Self, std::convertible_to<ValueType> T>
       auto&& operator=(this Self&& self, T&& t) 
       {

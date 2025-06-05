@@ -37,8 +37,33 @@ namespace ctb
       using ListColumnSpan    = CtListColumnSpan;
       using TableSort         = CtTableSort;
       using TableSortSpan     = CtTableSortSpan;
+      using PropertyRef       = std::reference_wrapper<const Property>;
+      using PropertyRefs      = std::vector<PropertyRef>;
 
+      /// @return the name of the CT table this dataset represents. Not meant to be 
+      ///         displayed to the user, this is for internal use. 
+      [[nodiscard]] virtual auto getTableName() const -> std::string_view = 0;
 
+      /// @brief Returns the TableId enum for this dataset's underlying table.
+      virtual auto getTableId() const -> TableId = 0;
+
+      /// @brief Retrieves the schema information for a specified property.
+      /// 
+      /// @param prop_id - The identifier of the property whose schema is to be retrieved.
+      /// @return An optional FieldSchema containing the schema information for the specified property, 
+      ///  or std::nullopt if the property does not exist.
+      [[nodiscard]] virtual auto getFieldSchema(Prop prop_id) const -> std::optional<FieldSchema> = 0;
+
+      /// @brief Gets the collection of columns for the list display
+      /// 
+      /// Note that some may be hidden and not visible.
+      virtual auto listColumns() const -> ListColumnSpan = 0;
+
+      /// @brief Check whether the current dataset supports the given property
+      /// 
+      /// Since getProperty() will return a null value for missing properties, calling this function
+      /// is the only way to distinguish between a null property value and a property that is missing
+      /// altogether.
       /// @brief retrieves list of available sorters, in order of display
       /// 
       /// the index in this vector corresponds to the index in the sort_index
@@ -51,18 +76,8 @@ namespace ctb
       /// @brief specifies a new sort option
       virtual void applySort(const TableSort& sort) = 0;
 
-      /// @brief Gets the collection of columns for the list display
-      /// 
-      /// Note that some may be hidden and not visible.
-      virtual auto listColumns() const -> ListColumnSpan = 0;
-
       /// @brief retrieves a list of available filters for this dataset.
       virtual auto multiMatchFilters() const -> CtMultiMatchFilterSpan = 0;
-
-      /// @brief Get a list of all distinct values from the dataset for the specified property.
-      /// 
-      /// This can be used to get filter values for match-filters.
-      [[nodiscard]] virtual auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet = 0;
 
       /// @brief Adds a match value filter for the specified column.
       ///
@@ -98,36 +113,6 @@ namespace ctb
       /// @brief clear the substring filter
       virtual void clearSubStringFilter() = 0;
 
-      /// @brief Retrieves the schema information for a specified property.
-      /// 
-      /// @param prop_id - The identifier of the property whose schema is to be retrieved.
-      /// @return An optional FieldSchema containing the schema information for the specified property, 
-      ///  or std::nullopt if the property does not exist.
-      virtual auto getFieldSchema(Prop prop_id) const -> std::optional<FieldSchema> = 0;
-
-      /// @brief Check whether the current dataset supports the given property
-      /// 
-      /// Since getProperty() will return a null value for missing properties, calling this function
-      /// is the only way to distinguish between a null property value and a property that is missing
-      /// altogether.
-      /// 
-      /// @return True if the property is available, false if not.
-      virtual auto hasProperty(CtProp prop_id) const -> bool = 0;
-
-      /// @brief Retrieve a property for a specified record/row in the dataset
-      /// 
-      /// This function returns a reference to null for not-found properties. Since
-      /// found properties could also have null value, the only way to differentiate
-      /// is by calling hasProperty()
-      /// 
-      /// The returned reference will remain valid until a modifying (non-const) method
-      /// is called on this dataset, after which it may be invalid. You should copy-construct 
-      /// a new object if you need to hold onto it for a while rather than holding the reference.
-      /// 
-      /// @return const reference to the requested property. It may be a null value, but it 
-      ///         will always be a valid CtProperty&.
-      virtual auto getProperty(int rec_idx, CtProp prop_id) const -> const Property& = 0;
-
       /// @brief Check if a filter with the specified name is applied to the dataset.
       /// 
       /// filter_name is case-sensitive
@@ -151,7 +136,7 @@ namespace ctb
       /// filter_name is case-sensitive
       /// 
       /// @return - the requested filter, or std::nullopt if not found
-      virtual auto getFilter(std::string_view filter_name) const -> std::optional<PropertyFilter> = 0;
+      [[nodiscard]] virtual auto getFilter(std::string_view filter_name) const -> std::optional<PropertyFilter> = 0;
 
       /// @brief Assign a filter to the dataset using the specific name
       /// 
@@ -182,18 +167,42 @@ namespace ctb
       /// @return true if at least one filter was removed, false if there were no filters
       virtual auto removeAllFilters() -> bool = 0;
 
-      /// @brief returns the total number of records in the underlying dataset
-      virtual auto totalRecCount() const -> int64_t = 0;
+      /// 
+      /// @return True if the property is available, false if not.
+      virtual auto hasProperty(CtProp prop_id) const -> bool = 0;
 
-      /// @brief returns the number of records with filters applied.
-      virtual auto filteredRecCount() const -> int64_t = 0;
+      /// @brief Retrieve a property for a specified record/row in the dataset
+      /// 
+      /// This function returns a reference to null for not-found properties. Since
+      /// found properties could also have null value, the only way to differentiate
+      /// is by calling hasProperty()
+      /// 
+      /// The returned reference will remain valid until a modifying (non-const) method
+      /// is called on this dataset, after which it may be invalid. You should copy-construct 
+      /// a new object if you need to hold onto it for a while rather than holding the reference.
+      /// 
+      /// @return const reference to the requested property. It may be a null value, but it 
+      ///         will always be a valid CtProperty&.
+      [[nodiscard]] virtual auto getProperty(int rec_idx, CtProp prop_id) const -> const Property& = 0;
 
-      /// @return the name of the CT table this dataset represents. Not meant to be 
-      ///         displayed to the user, this is for internal use. 
-      virtual auto getTableName() const -> std::string_view = 0;
+      /// @brief Get a list of all distinct values from the dataset for the specified property.
+      /// 
+      /// This can be used to get filter values for match-filters.
+      [[nodiscard]] virtual auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet = 0;
 
-      /// @brief Returns the TableId enum for this dataset's underlying table.
-      virtual auto getTableId() const -> TableId = 0;
+      /// @brief Get a temporary ref-view of all the values of a property 
+      ///
+      /// IMPORTANT: The returned series is mean for temporary use, it contains references to elements in the underlying table
+      /// that could be invalidated by data changes. You should not use the returned series after calling any non-const method
+      /// on this dataset object.
+      /// 
+      /// This is the only way we can efficiently expose a data-series that can be used with range/view adapters.
+      [[nodiscard]] virtual auto viewPropertySeries(CtProp prop_id, bool filtered_only = true) const -> PropertyRefs = 0;
+
+      [[nodiscard]]
+      /// @brief returns the number of records in the underlying dataset
+      /// @param filtered_only - if true, only records matching currently active filters will be counted. If false, 
+      virtual auto rowCount(bool filtered_only = true) const -> int64_t = 0;
 
       /// @brief destructor
       virtual ~IDataset() noexcept = default;
