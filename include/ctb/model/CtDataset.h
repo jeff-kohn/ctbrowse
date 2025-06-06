@@ -42,7 +42,7 @@ namespace ctb
       using MultiMatchFilterMgr = detail::MultiMatchPropertyFilterMgr<Prop, PropertyMap>;
       using MultiMatchFilter    = MultiMatchFilterMgr::Filter;
       using Prop                = base::Prop;
-      using Property            = base::Property;
+      using PropertyVal         = base::PropertyVal;
       using PropertyFilter      = base::PropertyFilter;
       using PropertyFilterMgr   = detail::PropertyFilterMgr<Prop, base::PropertyMap>;
       using MaybePropFilter     = base::MaybePropFilter;
@@ -168,7 +168,7 @@ namespace ctb
       /// to be considered a match.
       /// 
       /// @return true if the filter was applied, false it it wasn't because there were no matches
-      auto addMultiMatchFilter(CtProp prop_id, const Property& match_value) -> bool override
+      auto addMultiMatchFilter(CtProp prop_id, const PropertyVal& match_value) -> bool override
       {
          // if we somehow get passed a filter we already have, don't waste our time.
          if ( m_mm_filters.addFilter(prop_id, match_value) )
@@ -182,7 +182,7 @@ namespace ctb
       /// @brief removes a match value filter for the specified column.
       ///
       /// @return true if the filter was removed, false if it wasn't found
-      auto removeMultiMatchFilter(CtProp prop_id, const Property& match_value) -> bool override
+      auto removeMultiMatchFilter(CtProp prop_id, const PropertyVal& match_value) -> bool override
       {
          // if we somehow get passed filter that we aren't using, don't waste our time.
          if ( m_mm_filters.removeFilter(prop_id, match_value) )
@@ -356,8 +356,8 @@ namespace ctb
       /// a new object if you need to hold onto it for a while rather than holding the reference.
       /// 
       /// @return const reference to the requested property. It may be a null value, but it 
-      ///  will always be a valid CtProperty&.
-      auto getProperty(int rec_idx, CtProp prop_id) const noexcept(false) -> const Property & override
+      ///  will always be a valid CtPropertyVal&.
+      auto getProperty(int rec_idx, CtProp prop_id) const noexcept(false) -> const PropertyVal & override
       {
          assert(rowCount(true) > rec_idx and "This is a logic bug, invalid index should never happen here.");
 
@@ -379,18 +379,6 @@ namespace ctb
             }
          }
          return values;
-      }
-
-      /// @brief Get a temporary ref-view of all the values of a property 
-      ///
-      /// IMPORTANT: The returned series is meant for temporary use. It contains references to objects in the underlying dataset
-      /// that could be invalidated by dataset changes. Calling any non-const method on this dataset invalidates the result
-      /// of any previous call to viewPropertySeries()
-      /// 
-      /// This is the only way we can efficiently expose a data-series that can be used with range/view adapters.
-      [[nodiscard]] auto viewPropertySeries(CtProp prop_id) const -> PropertyRefs override
-      {
-         return getSeriesFiltered(prop_id) | rng::to<PropertyRefs>();
       }
 
       /// @brief returns the number of rows in the underlying dataset
@@ -500,7 +488,7 @@ namespace ctb
 
       /// @brief Apply a left-fold to the values for the specified prop_id
       /// 
-      /// Note that ValT should be a type that can be used to call CtProperty::as<ValT>()
+      /// Note that ValT should be a type that can be used to call CtPropertyVal::as<ValT>()
       /// 
       /// @param prop_id - dataset property to get values for
       /// @param initial_val - starting value for the fold, also determins return type
@@ -525,7 +513,7 @@ namespace ctb
 
       [[nodiscard]] auto getSeriesFiltered(CtProp prop_id) const
       {
-         return vws::transform(*m_current_view, [prop_id](const Record& row) -> const CtProperty&
+         return vws::transform(*m_current_view, [prop_id](const Record& row) -> const CtPropertyVal&
                                                 { 
                                                    return row[prop_id]; 
                                                 });
@@ -533,7 +521,7 @@ namespace ctb
 
       [[nodiscard]] auto getSeriesRaw(CtProp prop_id) const 
       {
-         return vws::transform(m_data, [prop_id](const Record& row) -> const CtProperty&
+         return vws::transform(m_data, [prop_id](const Record& row) -> const CtPropertyVal&
                                        { 
                                           return row[prop_id]; 
                                        });

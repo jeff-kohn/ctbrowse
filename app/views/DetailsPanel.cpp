@@ -33,7 +33,7 @@ namespace ctb::app
 {
    namespace detail
    {
-      auto getDrinkWindow(const CtProperty& drink_start, const CtProperty& drink_end) -> wxString
+      auto getDrinkWindow(const CtPropertyVal& drink_start, const CtPropertyVal& drink_end) -> wxString
       {
          if (drink_start.isNull() && drink_end.isNull())
             return wxEmptyString;
@@ -432,8 +432,8 @@ namespace ctb::app
 
          m_details.pending_purchase_id   =                    dataset->getProperty(rec_idx, CtProp::PendingPurchaseId   ).asString();
          m_details.pending_order_number  = dataset->getProperty(rec_idx, CtProp::PendingOrderNumber  ).asString();
-         m_details.pending_order_date    = dataset->getProperty(rec_idx, CtProp::PendingOrderDate    ).asString();
-         m_details.pending_delivery_date = dataset->getProperty(rec_idx, CtProp::PendingDeliveryDate ).asString();
+         m_details.pending_order_date    = dataset->getProperty(rec_idx, CtProp::PendingOrderDate    ).asString(constants::FMT_DATE_SHORT);
+         m_details.pending_delivery_date = dataset->getProperty(rec_idx, CtProp::PendingDeliveryDate ).asString(constants::FMT_DATE_SHORT);
          m_details.pending_store_name    = dataset->getProperty(rec_idx, CtProp::PendingStoreName    ).asString();
          m_details.pending_qty           = dataset->getProperty(rec_idx, CtProp::PendingOrderQty     ).asString();
          m_details.pending_price         = dataset->getProperty(rec_idx, CtProp::PendingPrice        ).asString(constants::FMT_NUMBER_CURRENCY);

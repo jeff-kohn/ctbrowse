@@ -87,7 +87,7 @@ namespace ctb
    template <typename T> 
    concept TableRecordType = requires (T t, 
       typename T::Prop pid, 
-      typename T::Property prop, 
+      typename T::PropertyVal prop, 
       typename T::RowType row, 
       std::string_view sv)
    {
@@ -104,7 +104,7 @@ namespace ctb
    {
       { t.size()   } -> std::same_as<size_t>;
       { t[0]       } -> std::same_as<typename T::value_type&>;
-      { t[0][pid]  } -> std::same_as<const typename T::value_type::Property&>; 
+      { t[0][pid]  } -> std::same_as<const typename T::value_type::PropertyVal&>; 
    };
 
 

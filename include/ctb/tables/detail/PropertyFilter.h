@@ -27,11 +27,11 @@ namespace ctb::detail
    {
       using Prop         = PropT;
       using PropertyMap  = PropMapT;
-      using Property     = PropertyMap::mapped_type;
-      using ComparePred  = std::function<bool(const Property&, const Property&)>;
+      using PropertyVal  = PropertyMap::mapped_type;
+      using ComparePred  = std::function<bool(const PropertyVal&, const PropertyVal&)>;
 
       /// @brief construct a PropertyFilter from any value convertible to ValueT for the specified property
-      template<std::convertible_to<Property> T>
+      template<std::convertible_to<PropertyVal> T>
       constexpr PropertyFilter(Prop prop, ComparePred pred, T&& val) noexcept :
          match_props{ prop }, 
          compare_val{ std::forward<T>(val) },
@@ -40,7 +40,7 @@ namespace ctb::detail
       {}
 
       /// @brief construct a PropertyFilter for matching the given value and predicate to one of multiple properties       
-      template<std::convertible_to<Property> T> 
+      template<std::convertible_to<PropertyVal> T> 
       constexpr PropertyFilter(std::initializer_list<Prop> props, ComparePred pred, T&& val) noexcept : 
          match_props{ props.begin(), props.end() },
          compare_val{ std::forward<T>(val) },
@@ -49,7 +49,7 @@ namespace ctb::detail
       {}
 
 
-      template<std::convertible_to<Property> T> 
+      template<std::convertible_to<PropertyVal> T> 
       constexpr PropertyFilter(std::string_view name, Prop prop, ComparePred pred, T&& val, bool enabled = true) noexcept : 
          match_props{ prop },
          compare_val{ std::forward<T>(val) },
@@ -58,7 +58,7 @@ namespace ctb::detail
          enabled{ enabled }
       {}
 
-      template<std::convertible_to<Property> T> 
+      template<std::convertible_to<PropertyVal> T> 
       constexpr PropertyFilter(std::string_view name, std::initializer_list<Prop> props, ComparePred pred, T&& val, bool enabled = true) noexcept : 
          match_props{ props.begin(), props.end() },
          compare_val{ std::forward<T>(val) },
@@ -71,10 +71,10 @@ namespace ctb::detail
       std::vector<Prop> match_props{};
 
       /// @brief the value the record property will be compared to using compare_pred
-      Property compare_val{};
+      PropertyVal compare_val{};
 
       /// @brief predicate that will be used to compare record properties to compare_val
-      ComparePred compare_pred{ std::greater<Property>{} };
+      ComparePred compare_pred{ std::greater<PropertyVal>{} };
       
       /// @brief name of the filter
       std::string filter_name{};

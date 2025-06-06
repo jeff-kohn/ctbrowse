@@ -101,19 +101,19 @@ namespace ctb
   
    
    /// @brief Type alias for the property type used in CellarTracker data tables
-   using CtProperty = detail::TableProperty<std::string, uint16_t, uint64_t, double, std::chrono::year_month_day>;
+   using CtPropertyVal = detail::TableProperty<std::string, uint16_t, uint64_t, double, std::chrono::year_month_day>;
 
    
    /// @brief Type alias for a sorted collection of property values
-   using CtPropertyValueSet = std::set<CtProperty>;
+   using CtPropertyValueSet = std::set<CtPropertyVal>;
 
 
    /// @brief 'Null' property value. Can be used when returning reference that doesn't have lifetime issues.
-   static inline constexpr CtProperty ct_null_prop{};
+   static inline constexpr CtPropertyVal ct_null_prop{};
 
 
    /// @brief Type alias for a table record indexed on a property enum instead of zero-based index
-   using CtPropertyMap = boost::unordered_flat_map<CtProp, CtProperty>; 
+   using CtPropertyMap = boost::unordered_flat_map<CtProp, CtPropertyVal>; 
 
 
    /// @brief Type alias for a CtProp-based record in a CellarTracker data table

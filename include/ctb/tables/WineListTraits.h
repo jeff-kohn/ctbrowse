@@ -25,7 +25,7 @@ namespace ctb
    {
    public:
       using Prop                 = CtProp;
-      using Property             = CtProperty;
+      using PropertyVal          = CtPropertyVal;
       using PropType             = detail::PropType;
       using PropertyMap          = CtPropertyMap;
       using FieldSchema          = detail::FieldSchema<Prop>;

@@ -28,7 +28,7 @@ namespace ctb
    public:
       using FieldSchema       = CtFieldSchema;
       using Prop              = CtProp;
-      using Property          = CtProperty;
+      using PropertyVal          = CtPropertyVal;
       using PropertyFilter    = CtPropertyFilter;
       using MaybePropFilter   = std::optional<PropertyFilter>;
       using PropertyMap       = CtPropertyMap;
@@ -37,7 +37,7 @@ namespace ctb
       using ListColumnSpan    = CtListColumnSpan;
       using TableSort         = CtTableSort;
       using TableSortSpan     = CtTableSortSpan;
-      using PropertyRef       = std::reference_wrapper<const Property>;
+      using PropertyRef       = std::reference_wrapper<const PropertyVal>;
       using PropertyRefs      = std::vector<PropertyRef>;
 
       /// @return the name of the CT table this dataset represents. Not meant to be 
@@ -88,12 +88,12 @@ namespace ctb
       /// to be considered a match.
       /// 
       /// @return true if the filter was applied, false it it wasn't because there were no matches
-      virtual auto addMultiMatchFilter(CtProp prop_id, const Property& match_value) -> bool = 0;
+      virtual auto addMultiMatchFilter(CtProp prop_id, const PropertyVal& match_value) -> bool = 0;
 
       /// @brief removes a match value filter for the specified column.
       ///
       /// @return true if the filter was removed, false if it wasn't found
-      virtual auto removeMultiMatchFilter(CtProp prop_id, const Property& match_value) -> bool = 0;
+      virtual auto removeMultiMatchFilter(CtProp prop_id, const PropertyVal& match_value) -> bool = 0;
 
       /// @brief Apply a search filter that does substring matching on ANY column in the dataset view
       /// 
@@ -185,22 +185,13 @@ namespace ctb
       /// a new object if you need to hold onto it for a while rather than holding the reference.
       /// 
       /// @return const reference to the requested property. It may be a null value, but it 
-      ///         will always be a valid CtProperty&.
-      [[nodiscard]] virtual auto getProperty(int rec_idx, CtProp prop_id) const -> const Property& = 0;
+      ///         will always be a valid CtPropertyVal&.
+      [[nodiscard]] virtual auto getProperty(int rec_idx, CtProp prop_id) const -> const PropertyVal& = 0;
 
       /// @brief Get a list of all distinct values from the dataset for the specified property.
       /// 
       /// This can be used to get filter values for match-filters.
       [[nodiscard]] virtual auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet = 0;
-
-      /// @brief Get a temporary ref-view of all the values of a property 
-      ///
-      /// IMPORTANT: The returned series is mean for temporary use, it contains references to elements in the underlying table
-      /// that could be invalidated by data changes. You should not use the returned series after calling any non-const method
-      /// on this dataset object.
-      /// 
-      /// This is the only way we can efficiently expose a data-series that can be used with range/view adapters.
-      [[nodiscard]] virtual auto viewPropertySeries(CtProp prop_id) const -> PropertyRefs = 0;
 
       [[nodiscard]]
       /// @brief returns the number of records in the underlying dataset

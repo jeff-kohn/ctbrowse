@@ -35,26 +35,26 @@ namespace ctb::app
       constexpr int IMG_UNCHECKED = 1;
       constexpr int IMG_CHECKED = 2;
 
-      auto getPropertyForFieldType(const CtFieldSchema& fld, std::string_view text_val) -> CtProperty
+      auto getPropertyForFieldType(const CtFieldSchema& fld, std::string_view text_val) -> CtPropertyVal
       {
          switch (fld.prop_type)
          {
             case PropType::String:
-               return CtProperty{ std::string{ text_val } };
+               return CtPropertyVal{ std::string{ text_val } };
 
             case PropType::UInt16:
-               return CtProperty::create<uint16_t>(text_val);
+               return CtPropertyVal::create<uint16_t>(text_val);
 
             case PropType::UInt64:
-               return CtProperty::create<uint64_t>(text_val);
+               return CtPropertyVal::create<uint64_t>(text_val);
 
             case PropType::Double:
-               return CtProperty::create<double>(text_val);
+               return CtPropertyVal::create<double>(text_val);
 
             case PropType::Date:
             {
                auto ymd = parseDate(text_val, constants::FMT_PARSE_DATE_SHORT);
-               return ymd ? CtProperty{ *ymd } : CtProperty{};
+               return ymd ? CtPropertyVal{ *ymd } : CtPropertyVal{};
             }
             default:
                log::info("getPropertyForFieldType() encountered unexpected property type with value {}", std::to_underlying(fld.prop_type));
@@ -202,14 +202,14 @@ namespace ctb::app
       using namespace ctb::constants;
 
       // in-stock filter
-      m_filter_checkboxes[InStockFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_IN_STOCK_ONLY, QtyOnHand,  std::greater<CtProperty>{}, uint16_t{0}, false}};
+      m_filter_checkboxes[InStockFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_IN_STOCK_ONLY, QtyOnHand,  std::greater<CtPropertyVal>{}, uint16_t{0}, false}};
       parent->Add(m_filter_checkboxes[InStockFilter], wxSizerFlags().Border(wxALL));
 
       // embedded sizer to place score spin-ctrl next to checkbox
       auto* min_score_sizer = new wxBoxSizer(wxHORIZONTAL);
 
       // min-score filter checkbox
-      m_filter_checkboxes[MinScoreFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_MIN_SCORE, { CtScore, MyScore }, std::greater_equal<CtProperty>{}, FILTER_SCORE_DEFAULT, false } };
+      m_filter_checkboxes[MinScoreFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_MIN_SCORE, { CtScore, MyScore }, std::greater_equal<CtPropertyVal>{}, FILTER_SCORE_DEFAULT, false } };
       min_score_sizer->Add(m_filter_checkboxes[MinScoreFilter], wxSizerFlags{}.Center().Border(wxLEFT|wxTOP|wxBOTTOM));
 
       //  min-score filter spin-ctrl
@@ -231,7 +231,7 @@ namespace ctb::app
 
       // ready-to-drink filter
       auto props = { RtdQtyDefault, RtdQtyLinear, RtdQtyBellCurve, RtdQtyEarlyCurve, RtdQtyLateCurve, RtdQtyFastMaturing, RtdQtyEarlyAndLate, RtdQtyBottlesPerYear, };
-      m_filter_checkboxes[ReadyToDrinkFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_READY_TO_DRINK, props, std::greater<CtProperty>{}, FILTER_AVAILABLE_MIN_QTY, false } };
+      m_filter_checkboxes[ReadyToDrinkFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_READY_TO_DRINK, props, std::greater<CtPropertyVal>{}, FILTER_AVAILABLE_MIN_QTY, false } };
       parent->Add(m_filter_checkboxes[ReadyToDrinkFilter], wxSizerFlags().Border(wxALL));
 
       // categorize controls so we can show/hide as appropriate.
@@ -258,7 +258,7 @@ namespace ctb::app
    {
       if (m_sink.hasDataset())
       {
-         CtProperty filter_val{};
+         CtPropertyVal filter_val{};
          auto filter = getMultiValFilterForItem(item);
          if (filter)
          {
@@ -321,7 +321,7 @@ namespace ctb::app
    {
       if (m_sink.hasDataset())
       {
-         CtProperty filter_val{};
+         CtPropertyVal filter_val{};
          auto filter = getMultiValFilterForItem(item);
          if (filter)
          {

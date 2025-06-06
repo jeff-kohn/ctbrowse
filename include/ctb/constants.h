@@ -149,6 +149,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND          = "Folder '{}' does not exist.";
    inline constexpr const char* FMT_ERROR_PROP_NOT_FOUND          = "Property '{}' was not found.";
 
+   inline constexpr const char* FMT_DEFAULT_FORMAT                = "{}";
    inline constexpr const char* FMT_NUMBER_CURRENCY               = "${:.2f}";
    inline constexpr const char* FMT_NUMBER_DECIMAL                = "{:.1f}";
    inline constexpr const char* FMT_DATE_SHORT                    = "{:%m/%d/%Y}";
@@ -160,7 +161,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_PARSE_ISO_DATE_ONLY           = "%F";
 
    inline constexpr const char* FMT_SUMMARY_AVAILABILITY          = "{} Wines with {} Bottles Ready to Drink.";
-   inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, {} Bottles in Collection and {} Ordered.";
+   inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, {} Bottles in Collection and {} Pending.";
    inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles.";
 
 

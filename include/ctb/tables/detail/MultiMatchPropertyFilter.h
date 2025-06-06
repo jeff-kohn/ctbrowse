@@ -24,8 +24,8 @@ namespace ctb::detail
    {
       using Prop         = PropT;
       using PropertyMap  = PropMapT;
-      using Property     = PropertyMap::mapped_type;
-      using MatchValues  = std::set<Property>;
+      using PropertyVal  = PropertyMap::mapped_type;
+      using MatchValues  = std::set<PropertyVal>;
 
       /// @brief Property that we're filtering against
       Prop prop_id{};

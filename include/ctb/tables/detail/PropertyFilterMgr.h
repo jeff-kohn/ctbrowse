@@ -17,7 +17,7 @@ namespace ctb::detail
    public:
       using Prop             = PropT;
       using PropertyMap      = PropMapT;
-      using Property         = PropertyMap::mapped_type;
+      using PropertyVal      = PropertyMap::mapped_type;
       using Filter           = PropertyFilter<Prop, PropertyMap>;
       using MaybePropFilter  = std::optional<Filter>;
 

@@ -25,13 +25,13 @@ namespace ctb::detail
    public:
       using Prop          = PropT;
       using PropertyMap   = PropMapT;
-      using Property      = PropertyMap::mapped_type;
+      using PropertyVal   = PropertyMap::mapped_type;
       using Filter        = MultiMatchPropertyFilter<Prop, PropertyMap>;
       using MatchValues   = Filter::MatchValues;
 
       /// @brief add a match value for the specified column filter.
       /// @return true if successful, false if filter value already existed or could not be added.
-      auto addFilter(Prop prop_id, const Property& match_value) -> bool
+      auto addFilter(Prop prop_id, const PropertyVal& match_value) -> bool
       {
          auto& filter = m_filters[prop_id];
 
@@ -43,7 +43,7 @@ namespace ctb::detail
 
       /// @brief remove a match value for the specified filter
       /// @return true if removed, false if not found.
-      auto removeFilter(Prop prop_id, const Property& match_value) -> bool
+      auto removeFilter(Prop prop_id, const PropertyVal& match_value) -> bool
       {
          bool ret_val{ false };
 

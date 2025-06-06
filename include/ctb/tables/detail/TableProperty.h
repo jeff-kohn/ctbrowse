@@ -94,7 +94,6 @@ namespace ctb::detail
       /// 
       /// Note: compile error in this function means the type you're casting to isn't compatible with any
       /// of the overloads, either use a different type or add a new overload to asT for the needed type.
-      /// 
       template<ArithmeticType T> 
       constexpr auto as() const -> std::optional<T>
       { 
@@ -124,6 +123,27 @@ namespace ctb::detail
 
          // For other types we use format() to get a string
          return asString("{}");
+      }
+
+      /// @brief get a formatted string value out of the property.
+      /// @param fmt_str format string to use for formatting the value. Must contain exactly 1 {} placeholder
+      /// @return the requested value, or an empty string if isNull(). 
+      /// 
+      /// Note that if the property isNull(), the fmt_str will not be used - you will always get an empty string
+      /// 
+      auto asString(std::string_view fmt_str) const -> std::string 
+      {
+         using std::chrono::year_month_day;
+         using namespace constants;
+
+         auto asStr = Overloaded
+         {
+            [](const std::string& val)            {  return val;           },
+            [](std::monostate)                    {  return std::string{}; },
+            [&fmt_str](const year_month_day& val) {  return ctb::vformat(fmt_str == FMT_DEFAULT_FORMAT ? FMT_DATE_SHORT : fmt_str, make_format_args(val)); },
+            [&fmt_str](auto val)                  {  return ctb::vformat(fmt_str,  ctb::make_format_args(val)); }
+         };
+         return std::visit(asStr, m_val);
       }
 
       /// @brief return string_view to the internal string property
@@ -185,26 +205,6 @@ namespace ctb::detail
       auto asDouble() const -> NullableDouble
       {
          return as<double>();
-      }
-
-      /// @brief get a formatted string value out of the property.
-      /// @param fmt_str format string to use for formatting the value. must contain exactly 1 {} placeholder
-      /// @return the requested value, or an empty string if isNull(). 
-      /// 
-      /// Note that if the property isNull(), the fmt_str will not be used - you will always get an empty string
-      /// 
-      auto asString(std::string_view fmt_str) const -> std::string 
-      {
-         using std::chrono::year_month_day;
-
-         auto asStr = Overloaded
-         {
-            [](const std::string& val)    {  return val;                                                 },
-            [](std::monostate)            {  return std::string{};                                       },
-            [](const year_month_day& val) {  return ctb::format(constants::FMT_DATE_SHORT, val);      },
-            [&fmt_str](auto val)          {  return ctb::vformat(fmt_str,  ctb::make_format_args(val));  }
-         };
-         return std::visit(asStr, m_val);
       }
 
       /// @brief allows for comparison of TableProperty objects, as well as putting them in ordered containers
