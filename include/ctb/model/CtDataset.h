@@ -75,6 +75,39 @@ namespace ctb
          return Traits::getTableId();
       }
 
+      /// @brief Retrieves a short text summary of the data in the table
+      auto getDataSummary() const -> std::string override
+      {
+         if (m_current_view->empty())
+            return {};
+
+         switch (getTableId())
+         {
+            case TableId::Availability:
+            {
+               auto wines   = rowCount(true);
+               auto bottles = foldValues(CtProp::RtdQtyDefault, int32_t{}, std::plus{});
+               return ctb::format(constants::FMT_SUMMARY_AVAILABILITY, wines, bottles);
+            }
+            case TableId::Pending:
+            {
+               auto wines   = rowCount(true);
+               auto stores  = getDistinctValues(CtProp::PendingStoreName).size();
+               auto bottles = foldValues(CtProp::QtyPending, int32_t{}, std::plus{});
+               return ctb::format(constants::FMT_SUMMARY_PENDING, wines, stores, bottles);
+            }
+            case TableId::List:
+            {
+               auto wines    = rowCount(true);
+               auto on_hand  = foldValues(CtProp::QtyOnHand,  int32_t{}, std::plus{});
+               auto on_order = foldValues(CtProp::QtyPending, int32_t{}, std::plus{});
+               return ctb::format(constants::FMT_SUMMARY_MY_CELLAR, wines, on_hand, on_order);
+            }
+            default:
+               return {};
+         };
+      }
+
       /// @brief Retrieves the schema information for a specified property.
       /// 
       /// @param prop_id - The identifier of the property whose schema is to be retrieved.
@@ -328,9 +361,8 @@ namespace ctb
       {
          assert(rowCount(true) > rec_idx and "This is a logic bug, invalid index should never happen here.");
 
-         // invalid prop_id won't really hurt anything, it'll default-construct and return an empty/null value.
-         // if record index is invalid this will throw since we're using bounds-checked API.
-         return m_current_view->at(static_cast<size_t>(rec_idx))[prop_id];
+         const auto& record = m_current_view->at(static_cast<size_t>(rec_idx));
+         return record[prop_id];
       }
 
       /// @brief Get a list of all distinct values from the table for the specified property.
@@ -356,14 +388,14 @@ namespace ctb
       /// of any previous call to viewPropertySeries()
       /// 
       /// This is the only way we can efficiently expose a data-series that can be used with range/view adapters.
-      [[nodiscard]] auto viewPropertySeries(CtProp prop_id, bool filtered_only) const -> PropertyRefs override
+      [[nodiscard]] auto viewPropertySeries(CtProp prop_id) const -> PropertyRefs override
       {
-         auto& table = filtered_only ? m_data : *m_current_view;
-         return vws::all(table) | vws::transform([prop_id](const auto& row) -> PropertyRef { return std::cref(row[prop_id]); })
-                                | rng::to<std::vector>();
+         return getSeriesFiltered(prop_id) | rng::to<PropertyRefs>();
       }
 
-      /// @brief returns the total number of records in the underlying dataset
+      /// @brief returns the number of rows in the underlying dataset
+      /// @param filtered_only - if true, the count will only include rows matching any active filters.
+      ///                        if false, the count will always be the raw/total number of rows
       auto rowCount(bool filtered_only) const -> int64_t override
       {
          return filtered_only ? std::ssize(*m_current_view) : std::ssize(m_data);
@@ -466,6 +498,46 @@ namespace ctb
          }
       }
 
-};
+      /// @brief Apply a left-fold to the values for the specified prop_id
+      /// 
+      /// Note that ValT should be a type that can be used to call CtProperty::as<ValT>()
+      /// 
+      /// @param prop_id - dataset property to get values for
+      /// @param initial_val - starting value for the fold, also determins return type
+      /// @param fn - the function to apply for the fold operation
+      /// @param filtered_only - if true, only rows matching active filters are included, if false ALL rows are included
+      /// @return - the result of the fold 
+      template<ArithmeticType ValT, typename FoldFunctionT>
+      auto foldValues(Prop prop_id, ValT initial_val, FoldFunctionT fn, bool filtered_only = true) const -> ValT
+      {
+         constexpr auto getVal = [](auto&& prop) -> ValT
+                                 { 
+                                    return prop.as<ValT>().value_or(0); 
+                                 };
+         if (filtered_only)
+         {
+            return rng::fold_left(getSeriesFiltered(prop_id) | vws::transform(getVal), initial_val, fn);
+         }
+         else {
+            return rng::fold_left(getSeriesRaw(prop_id)      | vws::transform(getVal), initial_val, fn);
+         }
+      }
+
+      [[nodiscard]] auto getSeriesFiltered(CtProp prop_id) const
+      {
+         return vws::transform(*m_current_view, [prop_id](const Record& row) -> const CtProperty&
+                                                { 
+                                                   return row[prop_id]; 
+                                                });
+      }
+
+      [[nodiscard]] auto getSeriesRaw(CtProp prop_id) const 
+      {
+         return vws::transform(m_data, [prop_id](const Record& row) -> const CtProperty&
+                                       { 
+                                          return row[prop_id]; 
+                                       });
+      }
+   };
 
 } // namespace ctb

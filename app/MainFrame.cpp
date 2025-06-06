@@ -190,8 +190,8 @@ namespace ctb::app
 
       // We don't actually create the child view until a dataset is opened.
       createMenuBar();
-      createStatusBar();
       createToolBar();
+      m_status_bar = CreateStatusBar();
 
       // File menu handlers
       Bind(wxEVT_MENU, &MainFrame::onMenuFilePreferences, this, CmdId::CMD_FILE_SETTINGS);
@@ -372,18 +372,6 @@ namespace ctb::app
 
       m_menu_bar->Append(menu_wine, constants::LBL_MENU_WINE);
       SetMenuBar(m_menu_bar);
-   }
-
-
-   void MainFrame::createStatusBar()
-   {
-      constexpr int pane_count{3};
-
-      m_status_bar = CreateStatusBar(pane_count);
-      const int sb_field_widths[pane_count] = {-4, -1, -1};
-      m_status_bar->SetStatusWidths(pane_count, sb_field_widths);
-      const int sb_field_styles[pane_count] = {wxSB_NORMAL, wxSB_NORMAL, wxSB_NORMAL};
-      m_status_bar->SetStatusStyles(pane_count, sb_field_styles);
    }
 
 
@@ -828,47 +816,14 @@ namespace ctb::app
    }
 
 
-   auto sumSeries(const ctb::IDataset::PropertyRefs& series) -> int64_t
-   {
-      // always use int64_t, even for doubles in RTD table it will give us what we want.
-      auto vals = series | vws::transform([](auto&& prop) -> int64_t 
-         { 
-            return prop.get().as<int64_t>().value_or(0); 
-         });
-
-      return rng::fold_left_first(vals, std::plus{}).value_or(0);
-   }
-
-
    void MainFrame::updateStatusBarCounts()
    {     
-      std::string total_summary{};
-      std::string filtered_summar{};
-
+      std::string summary{};
       if (m_event_source->hasDataset())
       {
-         auto ds = m_event_source->getDataset();
-         auto on_hand  = sumSeries(ds->viewPropertySeries(CtProp::QtyOnHand));
-         auto on_order = sumSeries(ds->viewPropertySeries(CtProp::QtyPending));
-         auto wines    = ds->rowCount();
-
+         summary = m_event_source->getDataset()->getDataSummary();
       }
-
-      //if (total)
-      //{
-      //   SetStatusText(ctb::format(constants::FMT_LBL_TOTAL_ROWS, total), STATUS_BAR_PANE_TOTAL_ROWS);
-      //}
-      //else{
-      //   SetStatusText("", STATUS_BAR_PANE_TOTAL_ROWS);
-      //}
-
-      //if (filtered < total)
-      //{
-      //   SetStatusText(ctb::format(constants::FMT_LBL_FILTERED_ROWS, filtered), STATUS_BAR_PANE_FILTERED_ROWS);
-      //}
-      //else{
-      //   SetStatusText("", STATUS_BAR_PANE_FILTERED_ROWS);
-      //}
+      SetStatusText(summary);
    }
 
 

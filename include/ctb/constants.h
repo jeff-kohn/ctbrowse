@@ -159,6 +159,11 @@ namespace ctb::constants
    inline constexpr const char* FMT_PARSE_ISO_DATETIME_UTC        = "%FT%T%Z";
    inline constexpr const char* FMT_PARSE_ISO_DATE_ONLY           = "%F";
 
+   inline constexpr const char* FMT_SUMMARY_AVAILABILITY          = "{} Wines with {} Bottles Ready to Drink.";
+   inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, {} Bottles in Collection and {} Ordered.";
+   inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles.";
+
+
    inline constexpr auto     ONE_MB                               = 1024 * 1024;
    inline constexpr uint16_t CT_NULL_YEAR                         =        9999;
    inline constexpr double   FILTER_SCORE_DEFAULT                 =        90.0;

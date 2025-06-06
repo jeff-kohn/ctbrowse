@@ -47,6 +47,9 @@ namespace ctb
       /// @brief Returns the TableId enum for this dataset's underlying table.
       virtual auto getTableId() const -> TableId = 0;
 
+      /// @brief Retrieves a short text summary of the data in the table
+      virtual auto getDataSummary() const -> std::string = 0;
+
       /// @brief Retrieves the schema information for a specified property.
       /// 
       /// @param prop_id - The identifier of the property whose schema is to be retrieved.
@@ -197,7 +200,7 @@ namespace ctb
       /// on this dataset object.
       /// 
       /// This is the only way we can efficiently expose a data-series that can be used with range/view adapters.
-      [[nodiscard]] virtual auto viewPropertySeries(CtProp prop_id, bool filtered_only = true) const -> PropertyRefs = 0;
+      [[nodiscard]] virtual auto viewPropertySeries(CtProp prop_id) const -> PropertyRefs = 0;
 
       [[nodiscard]]
       /// @brief returns the number of records in the underlying dataset
