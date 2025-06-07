@@ -2,7 +2,6 @@
 
 #include "ctb/ctb.h"
 #include "ctb/tables/detail/PropertyFilter.h"
-
 #include <map>
 
 namespace ctb::detail
@@ -21,16 +20,15 @@ namespace ctb::detail
       using Filter           = PropertyFilter<Prop, PropertyMap>;
       using MaybePropFilter  = std::optional<Filter>;
 
-      // use a string identifier, we can't use PropT as key because some filters apply to more than
-      // one property. The key will be the filter_name property from the filter, and callers can also
-      // use it for a user-facing name/label for filter.
+      // use filter name as key, we can't use Prop id because some filters apply to more than
+      // one property. Callers can also use it for a user-facing name/label for filter.
       using FilterMap = std::map<std::string, Filter, std::less<>>;
 
       /// @brief Adds a filter to the collection if it does not already exist.
       /// @return true if the filter was successfully added; false if a filter with the same name already exists.
       auto addFilter(Filter filter) -> bool
       {
-         return m_filters.try_emplace(std::string{ filter.filter_name }, std::move(filter)).second;
+         return m_filters.try_emplace(std::string{ filter.name() }, std::move(filter)).second;
       }
 
       /// @brief Remove filter matching the specified name
@@ -69,8 +67,7 @@ namespace ctb::detail
          return static_cast<int>(m_filters.size());
       }
 
-      /// @brief [] operator for add-or-insert
-      /// @return reference to the requested object
+      /// @brief [] operator for getting a filter if it exists or adding a new one if it doesn't
       template <typename Self>
       auto&& operator[](this Self&& self, std::string_view filter_name)
       {
@@ -78,7 +75,9 @@ namespace ctb::detail
          auto it = std::forward<Self>(self).m_filters.find(filter_name);
          if (it == std::forward<Self>(self).m_filters.end())
          {
-            return std::forward<Self>(self).m_filters[std::string{filter_name}];
+            auto result = std::forward<Self>(self).m_filters.try_emplace(std::string{ filter_name }, Filter{});
+            assert(result.second);
+            return result.first->second;
          }
          return it->second;
       }

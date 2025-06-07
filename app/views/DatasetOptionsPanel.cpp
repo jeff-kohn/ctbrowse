@@ -202,14 +202,14 @@ namespace ctb::app
       using namespace ctb::constants;
 
       // in-stock filter
-      m_filter_checkboxes[InStockFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_IN_STOCK_ONLY, QtyOnHand,  std::greater<CtPropertyVal>{}, uint16_t{0}, false}};
+      m_filter_checkboxes[InStockFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_IN_STOCK_ONLY, { QtyOnHand }, uint16_t{0}, std::greater<CtPropertyVal>{} } };
       parent->Add(m_filter_checkboxes[InStockFilter], wxSizerFlags().Border(wxALL));
 
       // embedded sizer to place score spin-ctrl next to checkbox
       auto* min_score_sizer = new wxBoxSizer(wxHORIZONTAL);
 
       // min-score filter checkbox
-      m_filter_checkboxes[MinScoreFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_MIN_SCORE, { CtScore, MyScore }, std::greater_equal<CtPropertyVal>{}, FILTER_SCORE_DEFAULT, false } };
+      m_filter_checkboxes[MinScoreFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_MIN_SCORE, { CtScore, MyScore }, FILTER_SCORE_DEFAULT, std::greater_equal<CtPropertyVal>{} } };
       min_score_sizer->Add(m_filter_checkboxes[MinScoreFilter], wxSizerFlags{}.Center().Border(wxLEFT|wxTOP|wxBOTTOM));
 
       //  min-score filter spin-ctrl
@@ -229,9 +229,9 @@ namespace ctb::app
       // add embedded sizer to parent
       parent->Add(min_score_sizer, wxSizerFlags{});
 
-      // ready-to-drink filter
+      // ready-to-drink filter, matches if any formula calculates RTD >= 0;
       auto props = { RtdQtyDefault, RtdQtyLinear, RtdQtyBellCurve, RtdQtyEarlyCurve, RtdQtyLateCurve, RtdQtyFastMaturing, RtdQtyEarlyAndLate, RtdQtyBottlesPerYear, };
-      m_filter_checkboxes[ReadyToDrinkFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_READY_TO_DRINK, props, std::greater<CtPropertyVal>{}, FILTER_AVAILABLE_MIN_QTY, false } };
+      m_filter_checkboxes[ReadyToDrinkFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_READY_TO_DRINK, props, FILTER_AVAILABLE_MIN_QTY, std::greater<CtPropertyVal>{} }};
       parent->Add(m_filter_checkboxes[ReadyToDrinkFilter], wxSizerFlags().Border(wxALL));
 
       // categorize controls so we can show/hide as appropriate.
@@ -460,8 +460,8 @@ namespace ctb::app
       m_categorized.showCategory(ControlCategory::ReadyToDrinkFilter, dataset->hasProperty(CtProp::RtdQtyDefault));
       for (auto* check_box : vws::values(m_filter_checkboxes))
       {
-         auto&& filter = dataset->getFilter(check_box->filter().filter_name);
-         check_box->filter().enabled = filter.has_value() ? filter->enabled : false;
+         auto&& filter = dataset->getFilter(check_box->filter().name());
+         check_box->enable(filter.has_value() ? true : false);
       }
       
       TransferDataToWindow();
@@ -509,13 +509,14 @@ namespace ctb::app
          assert(m_sink.hasDataset());
          TransferDataFromWindow();
 
-         auto& filter = m_filter_checkboxes[control_cat]->filter();
-         if (filter.enabled)
+         auto* checkbox = m_filter_checkboxes[control_cat];
+         auto& filter = checkbox->filter();
+         if (checkbox->enabled())
          {
             m_sink.getDataset()->replaceFilter(filter);
          }
          else {
-            m_sink.getDataset()->removeFilter(filter.filter_name);
+            m_sink.getDataset()->removeFilter(filter.name());
          }
          m_sink.signal_source(DatasetEvent::Id::Filter);
       }
@@ -549,9 +550,10 @@ namespace ctb::app
          assert(m_sink.hasDataset());
          TransferDataFromWindow();
 
-         auto& filter = m_filter_checkboxes[ControlCategory::MinScoreFilter]->filter();
-         filter.compare_val = event.GetValue();
-         if (filter.enabled)
+         auto* checkbox = m_filter_checkboxes[ControlCategory::MinScoreFilter];
+         auto& filter = checkbox->filter();
+         filter.matchValue() = event.GetValue();
+         if (checkbox->enabled())
          {
             m_sink.getDataset()->replaceFilter(filter);
             m_sink.signal_source(DatasetEvent::Id::Filter);
@@ -566,7 +568,7 @@ namespace ctb::app
    void DatasetOptionsPanel::onMinScoreUpdateUI(wxUpdateUIEvent& event)
    {
       TransferDataFromWindow();
-      event.Enable(m_filter_checkboxes[ControlCategory::MinScoreFilter]->filter().enabled);
+      event.Enable(m_filter_checkboxes[ControlCategory::MinScoreFilter]->enabled());
    }
 
 

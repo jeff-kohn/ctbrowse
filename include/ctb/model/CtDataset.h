@@ -246,7 +246,7 @@ namespace ctb
       /// @return - true if there is a filter by the specified name, false otherwise.
       auto hasExactFilter(const PropertyFilter& filter) const -> bool override
       {
-         return hasFilter(filter.filter_name) and filter == m_prop_filters.getFilter(filter.filter_name).value();
+         return hasFilter(filter.name()) and filter == m_prop_filters.getFilter(filter.name()).value();
       }
 
       /// @brief Get the filter with the specified name that is applied to the dataset.
@@ -266,10 +266,7 @@ namespace ctb
       {
          if (m_prop_filters.addFilter(filter) )
          {
-            if (filter.enabled)
-            {
-               applyFilters();
-            }
+            applyFilters();
             return true;
          }
          return false;
@@ -292,7 +289,7 @@ namespace ctb
          if (hasExactFilter(filter))
             return false;
 
-         m_prop_filters[filter.filter_name] = filter;
+         m_prop_filters[filter.name()] = filter;
          applyFilters();
          return true;
       }
