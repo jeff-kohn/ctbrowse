@@ -80,7 +80,7 @@ namespace ctb
       virtual void applySort(const TableSort& sort) = 0;
 
       /// @brief retrieves a list of available filters for this dataset.
-      virtual auto multiMatchFilters() const -> CtMultiValueFilterSpan = 0;
+      virtual auto availableMultiValueFilters() const -> CtMultiValueFilterSpan = 0;
 
       /// @brief Adds a match value filter for the specified column.
       ///
@@ -123,52 +123,23 @@ namespace ctb
       /// @return - true if there is a filter by the specified name, false otherwise.
       virtual auto hasFilter(std::string_view filter_name) const -> bool = 0;
 
-      /// @brief Check if there is a filter that matches the one specified currently
-      ///  applied to the dataset.
-      /// 
-      /// This method not only checks the name for a match but also the other properties.
-      /// It may return false even if there's a name match with different properties.
-      /// 
-      /// filter_name is case-sensitive
-      /// 
-      /// @return - true if there is a filter exactly matching the spec, false otherwise.
-      virtual auto hasExactFilter(const PropertyFilter& filter) const -> bool = 0;
-
       /// @brief Get the filter with the specified name that is applied to the dataset.
       /// 
       /// filter_name is case-sensitive
       /// 
       /// @return - the requested filter, or std::nullopt if not found
-      [[nodiscard]] virtual auto getFilter(std::string_view filter_name) const -> std::optional<PropertyFilter> = 0;
+      [[nodiscard]] virtual auto getPropFilter(std::string_view filter_name) const -> std::optional<PropertyFilter> = 0;
 
-      /// @brief Assign a filter to the dataset using the specific name
-      /// 
-      /// filter_name must be unique (case-sensitive)
-      /// 
-      /// @return true if the filter was added, false if not because a filter with that name already exists.
-      virtual auto addFilter(PropertyFilter filter) -> bool = 0;
-
-      /// @brief Replace a named filter with an updated version
-      /// 
-      /// If the filter == existing, this will be a no-op. Otherwise existing 
-      /// filter will be replace with new and the dataset refreshed.
-      /// 
-      /// @return true if filter was replaced or added, false if it no-op'd due to equality
-      virtual auto replaceFilter(const PropertyFilter& filter) -> bool = 0;
+      /// @brief Add the supplied filter to the dataset, replacing any existing filter with the same name
+      /// @return true if resulting record count is > 0, false if resulting record count is == 0
+      virtual auto applyPropFilter(const PropertyFilter& filter) -> bool = 0;
 
       /// @brief Remove the filter with the specified name
       /// 
       /// filter_name is case-sensitive
       /// 
       /// @return true if filters was removed, false if it doens't exist.
-      virtual auto removeFilter(const std::string& filter_name) -> bool = 0;
-
-      /// @brief Remove all filters from the dataset
-      /// 
-      /// This removes property and multi-value filters.
-      /// 
-      /// @return true if at least one filter was removed, false if there were no filters
-      virtual auto removeAllFilters() -> bool = 0;
+      virtual auto removePropFilter(const std::string& filter_name) -> bool = 0;
 
       /// 
       /// @return True if the property is available, false if not.

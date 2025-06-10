@@ -148,7 +148,7 @@ namespace ctb
 
 
    /// @brief Type alias for a filter manager for working with CtPropertyFilter
-   using CtPropFilterManager = detail::FilterManager<CtPropertyFilter, std::string, CtProp, CtPropertyMap>;
+   using CtPropertyFilterMgr = detail::FilterManager<CtPropertyFilter, std::string, CtProp, CtPropertyMap>;
 
 
    /// @brief Type alias for a filter manager for working with CtMultiValueFilters

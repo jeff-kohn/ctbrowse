@@ -24,10 +24,9 @@ namespace ctb
    /// It provides access to all properties of the underlying dataset, but also has ListColumns, which are 
    /// the properties displayed in the main list-view. 
    /// 
-   /// THIS CLASS IS NOT THREADSAFE. UI code and UI-owned objects are inherently tied to the main thread
-   /// in wxWidgets. Any background threads should work on their own data and send messages to the main thread.
-   /// Access to the dataset should always be from main thread since multiple UI windows are holding reference 
-   /// to it.
+   /// THIS CLASS IS NOT THREADSAFE. It doens't need to be since UI code in GUI frameworks like wxWidgets is tied to main message thread. 
+   /// Any background threads should work on their own data and send messages to the main thread/window. Access to the dataset should 
+   /// always be from main thread since multiple UI windows are holding references to it.
    /// 
    template<DataTableType DataTableT>
    class CtDataset final : public IDataset
@@ -43,7 +42,7 @@ namespace ctb
       using Prop                = base::Prop;
       using PropertyVal         = base::PropertyVal;
       using PropertyFilter      = base::PropertyFilter;
-      using PropertyFilterMgr   = CtPropFilterManager;
+      using PropertyFilterMgr   = CtPropertyFilterMgr;
       using MaybePropFilter     = base::MaybeFilter;
       using PropertyMap         = base::PropertyMap;
       using PropertyValueSet    = base::PropertyValueSet;
@@ -156,20 +155,17 @@ namespace ctb
       }
 
       /// @brief retrieves a list of available filters for this table.
-      auto multiMatchFilters() const -> CtMultiValueFilterSpan override
+      auto availableMultiValueFilters() const -> CtMultiValueFilterSpan override
       {
          return Traits::MultiValueFilters;
       }
 
-      /// @brief Adds a match value filter for the specified column.
+      /// @brief Adds a filter match value for the specified column.
       ///
-      /// a record must match at least one match_value for each property that has a filter 
-      /// to be considered a match.
-      /// 
       /// @return true if the filter was applied, false it it wasn't because there were no matches
       auto addMultiValueFilter(CtProp prop_id, const PropertyVal& match_value) -> bool override
       {
-         // Since we may be creating new default filter, we need to set all properties.
+         // Since we may be creating new/uninitialized filter, we need to set all properties.
          auto& filter = m_mval_filters[prop_id];
          filter.prop_id = prop_id;
          filter.filter_name = magic_enum::enum_name(prop_id);
@@ -249,59 +245,23 @@ namespace ctb
          return m_prop_filters.hasFilter(filter_name);
       }
 
-      /// @brief Check if a filter with the specified name is applied to the dataset.
-      /// 
-      /// filter_name is case-sensitive
-      /// 
-      /// @return - true if there is a filter by the specified name, false otherwise.
-      auto hasExactFilter(const PropertyFilter& filter) const -> bool override
-      {
-         return hasFilter(filter.name()) and filter == m_prop_filters.getFilter(filter.name()).value();
-      }
-
       /// @brief Get the filter with the specified name that is applied to the dataset.
       /// 
       /// filter_name is case-sensitive
       /// 
       /// @return - the requested filter, or std::nullopt if not found
-      auto getFilter(std::string_view filter_name) const  -> MaybePropFilter override
+      auto getPropFilter(std::string_view filter_name) const  -> MaybePropFilter override
       {
          return m_prop_filters.getFilter(filter_name);
       }
 
-      /// @brief Add a filter to the dataset. Existing filter with same name will NOT be replaced, use removeFilter() first.
-      /// 
-      /// @return true if the filter was added, false if not because a filter with that name already exists.
-      auto addFilter(PropertyFilter filter) -> bool override
+      /// @brief Add the supplied filter to the dataset, replacing any existing filter with the same name
+      /// @return true if resulting record count is > 0, false if resulting record count is == 0
+      auto applyPropFilter(const PropertyFilter& filter) -> bool override
       {
-         if (m_prop_filters.addFilter(filter.name(), filter))
-         {
-            applyFilters();
-            return true;
-         }
-         return false;
-      }
-
-      /// @brief Replace a named filter with an updated version
-      /// 
-      /// If the filter == existing, this will be a no-op. Otherwise existing 
-      /// filter will be replaced with new and the dataset refreshed. 
-      /// 
-      /// If a filter by the same name doesn't already exist, this function is the
-      /// same as calling addFilter()
-      /// 
-      /// This is more efficient than calling removeFilter/addFilter because the dataset
-      /// will only be refreshed once.
-      /// 
-      /// @return true if filter was replaced or added, false if it no-op'd due to equality
-      auto replaceFilter(const PropertyFilter& filter) -> bool override
-      {
-         if (hasExactFilter(filter))
-            return false;
-
-         m_prop_filters[filter.name()] = filter;
+         m_prop_filters[filter.name] = filter;
          applyFilters();
-         return true;
+         return m_current_view->size() > 0;
       }
 
       /// @brief Remove the filter with the specified name
@@ -309,7 +269,7 @@ namespace ctb
       /// filter_name is case-sensitive
       /// 
       /// @return true if filter was removed; false if it wasn't found.
-      auto removeFilter(const std::string& filter_name) -> bool override
+      auto removePropFilter(const std::string& filter_name) -> bool override
       {
          if (m_prop_filters.removeFilter(filter_name))
          {
@@ -324,21 +284,21 @@ namespace ctb
       /// This removes property and multi-value filters.
       /// 
       /// @return true if at least one filter was removed, false if there were no filters
-      auto removeAllFilters() -> bool override
-      {
-         bool got_one = false;
-         if (m_mval_filters.activeFilters())
-         {
-            m_mval_filters.clear();
-            got_one = true;
-         }
-         if (m_prop_filters.activeFilters())
-         {
-            m_prop_filters.clear();
-            got_one = true;
-         }
-         return got_one;
-      }
+      //auto removeAllFilters() -> bool override
+      //{
+      //   bool got_one = false;
+      //   if (m_mval_filters.activeFilters())
+      //   {
+      //      m_mval_filters.clear();
+      //      got_one = true;
+      //   }
+      //   if (m_prop_filters.activeFilters())
+      //   {
+      //      m_prop_filters.clear();
+      //      got_one = true;
+      //   }
+      //   return got_one;
+      //}
 
       /// @brief Check whether the current dataset supports the given property
       /// 

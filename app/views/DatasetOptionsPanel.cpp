@@ -460,7 +460,7 @@ namespace ctb::app
       m_categorized.showCategory(ControlCategory::ReadyToDrinkFilter, dataset->hasProperty(CtProp::RtdQtyDefault));
       for (auto* check_box : vws::values(m_filter_checkboxes))
       {
-         auto&& filter = dataset->getFilter(check_box->filter().name());
+         auto&& filter = dataset->getPropFilter(check_box->filter().name);
          check_box->enable(filter.has_value() ? true : false);
       }
       
@@ -489,7 +489,7 @@ namespace ctb::app
       m_check_map.clear();
 
       // get the available filters for this dataset, and add them to the tree.
-      auto filters = dataset->multiMatchFilters();
+      auto filters = dataset->availableMultiValueFilters();
       auto root = m_filter_tree->AddRoot(wxEmptyString);
       for (auto& filter : filters)
       {
@@ -513,10 +513,10 @@ namespace ctb::app
          auto& filter = checkbox->filter();
          if (checkbox->enabled())
          {
-            m_sink.getDataset()->replaceFilter(filter);
+            m_sink.getDataset()->applyPropFilter(filter);
          }
          else {
-            m_sink.getDataset()->removeFilter(filter.name());
+            m_sink.getDataset()->removePropFilter(filter.name);
          }
          m_sink.signal_source(DatasetEvent::Id::Filter);
       }
@@ -552,10 +552,10 @@ namespace ctb::app
 
          auto* checkbox = m_filter_checkboxes[ControlCategory::MinScoreFilter];
          auto& filter = checkbox->filter();
-         filter.matchValue() = event.GetValue();
+         filter.compare_val = event.GetValue();
          if (checkbox->enabled())
          {
-            m_sink.getDataset()->replaceFilter(filter);
+            m_sink.getDataset()->applyPropFilter(filter);
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
@@ -589,7 +589,6 @@ namespace ctb::app
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
       }
-
    }
 
 
@@ -629,7 +628,6 @@ namespace ctb::app
    {
       try
       {
-
          auto filter_node = event.GetItem();
          if (!filter_node.IsOk())
             return;

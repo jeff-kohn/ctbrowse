@@ -26,9 +26,8 @@ namespace ctb::detail
    ///  same type will always evaluate to false.
    /// 
    template<EnumType PropT, PropertyMapType PropMapT>
-   class PropertyFilter
+   struct PropertyFilter
    {
-   public:
       using Prop         = PropT;
       using PropertyMap  = PropMapT;
       using PropertyVal  = PropertyMap::mapped_type;
@@ -39,59 +38,32 @@ namespace ctb::detail
       /// @brief simplified constructor for a filter with a single property and match value, using the prop_id for filter name and default equality predicate.
       template<std::convertible_to<PropertyVal> T> 
       constexpr PropertyFilter(Prop prop_id, T&& val, ComparePred compare = std::equal_to<PropertyVal>{}) :
-         m_filter_name{ magic_enum::enum_name(prop_id) },
-         m_prop_ids{ { prop_id } }, 
-         m_compare_val{ std::forward<T>(val) },
-         m_compare_pred{ std::move(compare) }
+         name{ magic_enum::enum_name(prop_id) },
+         prop_ids{ { prop_id } }, 
+         compare_val{ std::forward<T>(val) },
+         compare_pred{ std::move(compare) }
       {}
 
-      /// @brief Full constructor, accepts name, propd id's, compare value, and predicate
+      /// @brief Full constructor, accepts name, prop id's, compare value, and predicate
       template<std::convertible_to<PropertyVal> ValT>  requires std::convertible_to<ValT, PropertyVal>
       constexpr PropertyFilter(std::string_view name, std::initializer_list<Prop> prop_ids, ValT&& val, ComparePred compare = std::equal_to<PropertyVal>{}) noexcept : 
-         m_filter_name{ name },
-         m_prop_ids{ prop_ids },
-         m_compare_val{ std::forward<ValT>(val) },
-         m_compare_pred{ std::move(compare) }
+         name{ name },
+         prop_ids{ prop_ids },
+         compare_val{ std::forward<ValT>(val) },
+         compare_pred{ std::move(compare) }
       {}
       
-
-      /// @brief Get the name of this filter
-      ///
-      /// May be a specified name or auto-generated from prop_id depending on initialization
-      auto name() const -> const std::string&
-      {
-         return m_filter_name;
-      }
-
-      /// @brief Set the name of this filter
-      /// @return self-ref for builder-style interface
-      auto setName(std::string name) -> PropertyFilter&
-      {
-         m_filter_name.swap(name);
-         return *this;
-      }
+      /// @brief The name of this filter
+      std::string name{};
 
       /// @brief The match properties the filter checks against
-      template<typename Self>
-      auto&& matchProps(this Self&& self)  
-      {
-         return std::forward<Self>(self).m_prop_ids;
-      }
+      MatchProps  prop_ids{};
 
       /// @brief The value that properties will be compared to.
-      template<typename Self>
-      auto&& matchValue(this Self&& self) 
-      {
-         return std::forward<Self>(self).m_compare_val;
-      }
+      PropertyVal compare_val{};
 
-      /// @brief comparePred
-      /// @return - reference to the predicate used for matching
-      template<typename Self>
-      auto&& comparePred(this Self&& self)
-      {
-         return std::forward<Self>(self).m_compare_pred;
-      }
+      /// @brief The predicate used for matching
+      ComparePred compare_pred{};
 
       /// @brief Check if the table record contains one of our match falues.
       auto operator()(const PropertyMap& rec) const -> bool
@@ -100,20 +72,20 @@ namespace ctb::detail
                         {
                            if (auto it = rec.find(prop_id); it != rec.end())
                            {
-                              return m_compare_pred(it->second, m_compare_val);
+                              return compare_pred(it->second, compare_val);
                            }
                            return false;
                         };
 
-         return rng::find_if(m_prop_ids, matcher) != m_prop_ids.end();
+         return rng::find_if(prop_ids, matcher) != prop_ids.end();
       }
 
       /// @brief Equality comparison operator
       auto operator==(const PropertyFilter& other) const -> bool
       {
-         return m_filter_name == other.m_filter_name and 
-                m_prop_ids    == other.m_prop_ids    and 
-                m_compare_pred(m_compare_val, other.m_compare_val) == other.m_compare_pred(m_compare_val, other.m_compare_val);
+         return name == other.name and 
+                prop_ids    == other.prop_ids    and 
+                compare_pred(compare_val, other.compare_val) == other.compare_pred(compare_val, other.compare_val);
       }
 
       PropertyFilter() = default;
@@ -122,12 +94,6 @@ namespace ctb::detail
       PropertyFilter(PropertyFilter&&) = default;
       PropertyFilter& operator=(const PropertyFilter&) = default;
       PropertyFilter& operator=(PropertyFilter&&) = default;
-
-   private:
-      std::string m_filter_name{};
-      MatchProps  m_prop_ids{};
-      PropertyVal m_compare_val{};
-      ComparePred m_compare_pred{};
    };
 
 } // namespace ctb::detail

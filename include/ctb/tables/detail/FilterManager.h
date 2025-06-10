@@ -108,10 +108,10 @@ namespace ctb::detail
          return static_cast<int>(m_filters.size());
       }
 
-      /// @brief operator[] for getting a filter if it exists or adding a new default intialized one otherweise
+      /// @brief operator[] for getting a filter if it exists or adding a new default initialized one otherwise
       /// @return a reference to the requested (or new) Filter.
       template <typename Self>
-      auto&& operator[](this Self&& self, const Key& key)
+      auto&& operator[](this Self&& self, const Key& key) 
       {
          // can't use operator[] or .at() with heterogenous lookup. This approach saves a string copy when value already exists
          auto it = std::forward<Self>(self).m_filters.find(key);

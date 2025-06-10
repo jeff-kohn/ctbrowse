@@ -15,7 +15,7 @@ namespace ctb::app
       using PropertyFilter = CtPropertyFilter;
 
       FilterCheckBox(wxWindow& parent, PropertyFilter filter) : 
-         wxCheckBox{ &parent, wxID_ANY, wxFromSV(filter.name()) },
+         wxCheckBox{ &parent, wxID_ANY, wxFromSV(filter.name) },
          m_filter{ std::move(filter) }
       {
          SetValidator(wxGenericValidator{ &m_enabled });
