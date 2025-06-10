@@ -66,7 +66,7 @@ namespace ctb
       }
    };
 
-   /// @brief wxWidgets-derived implementation of ctb::CredentialPromptFunc
+   /// @brief Implementation of ctb::CredentialPromptFunc using Windows Credential Manager API
    ///
    struct CredentialPromptFuncWinApi
    {

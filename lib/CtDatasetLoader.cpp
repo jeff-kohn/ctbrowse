@@ -6,7 +6,7 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
-#include "ctb/tables/ConsumedBottlesTraits.h"
+#include "ctb/tables/ConsumedWineTraits.h"
 #include "ctb/tables/PendingWineTraits.h"
 #include "ctb/tables/ReadyToDrinkTraits.h"
 #include "ctb/tables/WineListTraits.h"
@@ -47,12 +47,12 @@ namespace ctb
             }, 
          [this](enum_constant<TableId::Consumed>) -> DatasetPtr
          { 
-            auto table_data = loadTableData<ConsumedBottlesTable>(m_data_folder, TableId::Consumed);
+            auto table_data = loadTableData<ConsumedWineTable>(m_data_folder, TableId::Consumed);
             if (!table_data)
             {
                throw table_data.error();
             }
-            return CtDataset<ConsumedBottlesTable>::create(std::move(table_data.value()));
+            return CtDataset<ConsumedWineTable>::create(std::move(table_data.value()));
          }, 
          [this](enum_constant<TableId::Availability>) -> DatasetPtr
          { 
@@ -62,7 +62,7 @@ namespace ctb
                throw table_data.error();
             }
             return CtDataset<ReadyToDrinkTable>::create(std::move(table_data.value()));
-         } 
+         }
       };
       return enum_switch(TableFactory, tbl);
    }

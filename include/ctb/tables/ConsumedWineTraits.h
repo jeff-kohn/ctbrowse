@@ -1,7 +1,7 @@
 /**************************************************************************************************
-* @file  ConsumedBottlesTraits.h
+* @file  ConsumedWineTraits.h
 *
-* @brief defines the ConsumedBottlesTraits class
+* @brief defines the ConsumedWineTraits class
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
 **************************************************************************************************/
@@ -18,7 +18,7 @@ namespace ctb
 {
    /// @brief Traits class for a table record from the 'Pending Wine' CellarTracker CSV table.
    /// 
-   class ConsumedBottlesTraits
+   class ConsumedWineTraits
    {
    public:
       using Prop             = CtProp;
@@ -60,8 +60,8 @@ namespace ctb
 
       /// @brief list of display columns that will show in the list view
       static inline const std::array DefaultListColumns{
-         CtListColumn{ Prop::ConsumeDate,    CtListColumn::Format::Date, constants::DISPLAY_COL_CONSUME_DATE   },
          CtListColumn{ Prop::WineAndVintage,                             constants::DISPLAY_COL_WINE           },
+         CtListColumn{ Prop::ConsumeDate,    CtListColumn::Format::Date, constants::DISPLAY_COL_CONSUME_DATE   },
          CtListColumn{ Prop::ConsumeReason,                              constants::DISPLAY_COL_CONSUME_REASON },
          CtListColumn{ Prop::Location,                                   constants::DISPLAY_COL_CONSUME_FROM   },
       };
@@ -117,6 +117,6 @@ namespace ctb
 
    };
 
-   using ConsumedBottlesTable = CtDataTable<ConsumedBottlesTraits>;
+   using ConsumedWineTable = CtDataTable<ConsumedWineTraits>;
 
 } // namespace ctb

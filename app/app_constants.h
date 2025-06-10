@@ -15,11 +15,13 @@ namespace ctb::constants
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP         = "Download data from CellarTracker";
    inline constexpr const char* CMD_FILE_SETTINGS_LBL              = "&Settings...";
    inline constexpr const char* CMD_FILE_SETTINGS_TIP              = "Configure app settings";
-   inline constexpr const char* CMD_COLLECTION_MY_CELLAR_LBL       = "&My Cellar\tCtrl+M";
+   inline constexpr const char* CMD_COLLECTION_CONSUMED_LBL        = "Wine &Consumed";
+   inline constexpr const char* CMD_COLLECTION_CONSUMED_TIP        = "View Wine Consumption History";
+   inline constexpr const char* CMD_COLLECTION_MY_CELLAR_LBL       = "Wine in &My Cellar\tCtrl+M";
    inline constexpr const char* CMD_COLLECTION_MY_CELLAR_TIP       = "View Personal Wine Collection";
-   inline constexpr const char* CMD_COLLECTION_PENDING_WINE_LBL    = "&Pending Wines\tCtrl+P";
+   inline constexpr const char* CMD_COLLECTION_PENDING_WINE_LBL    = "Wine &Pending Delivery\tCtrl+P";
    inline constexpr const char* CMD_COLLECTION_PENDING_WINE_TIP    = "View Pending Wine Deliveries";
-   inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_LBL  = "&Ready to Drink\tCtrl+R";
+   inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_LBL  = "Wine &Ready to Drink\tCtrl+R";
    inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_TIP  = "View Drinking Availability for Wines";
    inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_LBL       = "&Resize List Columns";
    inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_TIP       = "Resize the list columns to fit the data";

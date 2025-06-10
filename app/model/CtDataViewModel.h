@@ -12,8 +12,8 @@ namespace ctb::app
       using base     = wxDataViewVirtualListModel;
       using ModelPtr = wxObjectDataPtr<CtDataViewModel>;
 
-      /// @brief Returns a pointer to the active dataset (if any)
-      /// @return the current dataset, may be nullptr/empty
+      /// @brief Create a new model for the supplied DatasetPtr
+      /// @return smart ptr to the newly created model object
       [[nodiscard]] static auto create(DatasetPtr dataset = {}) -> ModelPtr;
 
       /// @brief Returns the active dataset for this model (may be empty/null)
