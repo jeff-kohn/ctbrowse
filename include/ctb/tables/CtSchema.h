@@ -2,8 +2,9 @@
 
 #include "ctb/ctb.h"
 #include "ctb/tables/detail/FieldSchema.h"
+#include "ctb/tables/detail/FilterManager.h"
 #include "ctb/tables/detail/ListColumn.h"
-#include "ctb/tables/detail/MultiMatchPropertyFilter.h"
+#include "ctb/tables/detail/MultiValueFilter.h"
 #include "ctb/tables/detail/PropertyFilter.h"
 #include "ctb/tables/detail/TableProperty.h"
 #include "ctb/tables/detail/TableRecord.h"
@@ -135,15 +136,23 @@ namespace ctb
 
 
    /// @brief Type alias for CtProp-based multi-match filter
-   using CtMultiMatchFilter = detail::MultiMatchPropertyFilter<CtProp, CtPropertyMap>;
+   using CtMultiValueFilter = detail::MultiValueFilter<CtProp, CtPropertyMap>;
 
 
    /// @brief Type alias for CtProp-based multi-match filter
-   using CtMultiMatchFilterSpan = std::span<const CtMultiMatchFilter>;
+   using CtMultiValueFilterSpan = std::span<const CtMultiValueFilter>;
    
 
    /// @brief Type alias for a CtProp-based table property filter
    using CtPropertyFilter = detail::PropertyFilter<CtProp, CtPropertyMap>;
+
+
+   /// @brief Type alias for a filter manager for working with CtPropertyFilter
+   using CtPropFilterManager = detail::FilterManager<CtPropertyFilter, std::string, CtProp, CtPropertyMap>;
+
+
+   /// @brief Type alias for a filter manager for working with CtMultiValueFilters
+   using CtMultiValueFilterMgr = detail::FilterManager<CtMultiValueFilter, CtProp, CtProp, CtPropertyMap>;
 
 
    /// @brief Type alias for CtProp-based table sorter

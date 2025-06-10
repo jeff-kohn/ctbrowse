@@ -274,7 +274,7 @@ namespace ctb::app
                assert("Not getting a valid FieldSchema here is a bug." and false);
             }
 
-            m_sink.getDataset()->addMultiMatchFilter(filter->prop_id, filter_val);
+            m_sink.getDataset()->addMultiValueFilter(filter->prop_id, filter_val);
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }
@@ -336,7 +336,7 @@ namespace ctb::app
             else {
                assert("Not getting a valid FieldSchema here is a bug." and false);
             }
-            m_sink.getDataset()->removeMultiMatchFilter(filter->prop_id, filter_val);
+            m_sink.getDataset()->removeMultiValueFilter(filter->prop_id, filter_val);
             m_sink.signal_source(DatasetEvent::Id::Filter);
          }
       }

@@ -1,7 +1,7 @@
 /*******************************************************************
- * @file MultiMatchPropertyFilter.h
+ * @file MultiValueFilter.h
  *
- * @brief defines the template class MultiMatchPropertyFilter
+ * @brief defines the template class MultiValueFilter
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
@@ -20,7 +20,7 @@ namespace ctb::detail
    /// same variant type as the table property that is being filtered.
    /// 
    template<EnumType PropT, PropertyMapType PropMapT>
-   struct MultiMatchPropertyFilter
+   struct MultiValueFilter
    {
       using Prop         = PropT;
       using PropertyMap  = PropMapT;

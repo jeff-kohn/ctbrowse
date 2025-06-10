@@ -8,7 +8,6 @@
 #pragma once
 
 #include "ctb/ctb.h"
-
 #include <magic_enum/magic_enum.hpp>
 
 #include <algorithm>
@@ -20,11 +19,12 @@
 namespace ctb::detail
 {
 
-   /// @brief Template class that implements filter logic that selects records if one or more specified
-   ///  properties match a given value using the provided predicate (which could be std:less<>, etc)
+   /// @brief Template class that implements filter logic based on checking one or more properties against a predicate and value
+   ///  
    ///
    ///  Note that there is no type coercion if Property type is a variant. Comparing variants that aren't holding the
    ///  same type will always evaluate to false.
+   /// 
    template<EnumType PropT, PropertyMapType PropMapT>
    class PropertyFilter
    {
@@ -71,27 +71,14 @@ namespace ctb::detail
          return *this;
       }
 
-      /// @brief matchProps
-      ///
-      /// We only allow const access to prevent accidental duplicate insertion, use addMatchProp/removeMatchProp to modify
-      /// 
-      /// @return the match properties the filter checks against
+      /// @brief The match properties the filter checks against
       template<typename Self>
       auto&& matchProps(this Self&& self)  
       {
          return std::forward<Self>(self).m_prop_ids;
       }
 
-      ///// @brief Set the id's of the properties this filter will match against.
-      ///// @return 
-      //template<rng::input_range PropsT> requires std::same_as<rng::range_value_t<PropsT>, Prop>
-      //auto setMatchProps(PropT props) -> PropertyFilter&
-      //{
-      //   m_prop_ids.swap(MatchProps{ std::from_range, props });
-      //}
-
-      /// @brief matchValue
-      /// @return the value that properties will be compared to.
+      /// @brief The value that properties will be compared to.
       template<typename Self>
       auto&& matchValue(this Self&& self) 
       {

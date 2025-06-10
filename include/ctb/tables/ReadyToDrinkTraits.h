@@ -31,7 +31,7 @@ namespace ctb
       using FieldSchema          = detail::FieldSchema<Prop>;
       using ListColumn           = CtListColumn;
       using ListColumnSpan       = CtListColumnSpan;
-      using MultiMatchFilter     = detail::MultiMatchPropertyFilter<Prop, PropertyMap>;
+      using MultiValueFilter     = detail::MultiValueFilter<Prop, PropertyMap>;
       using TableSort            = detail::TableSorter<CtProp, CtPropertyMap>;
 
       static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
@@ -97,13 +97,13 @@ namespace ctb
       };
 
       /// @brief multi-value filters that can be used on this table.
-      static inline const std::array MultiMatchFilters{
-         MultiMatchFilter{ Prop::Varietal,    constants::FILTER_VARIETAL   },
-         MultiMatchFilter{ Prop::Vintage,     constants::FILTER_VINTAGE    },
-         MultiMatchFilter{ Prop::Country,     constants::FILTER_COUNTRY    },
-         MultiMatchFilter{ Prop::Region,      constants::FILTER_REGION     },
-         MultiMatchFilter{ Prop::Appellation, constants::FILTER_APPELATION },
-         MultiMatchFilter{ Prop::Producer,    constants::FILTER_PRODUCER   },
+      static inline const std::array MultiValueFilters{
+         MultiValueFilter{ Prop::Varietal,    constants::FILTER_VARIETAL   },
+         MultiValueFilter{ Prop::Vintage,     constants::FILTER_VINTAGE    },
+         MultiValueFilter{ Prop::Country,     constants::FILTER_COUNTRY    },
+         MultiValueFilter{ Prop::Region,      constants::FILTER_REGION     },
+         MultiValueFilter{ Prop::Appellation, constants::FILTER_APPELATION },
+         MultiValueFilter{ Prop::Producer,    constants::FILTER_PRODUCER   },
       };
 
       /// @brief getTableName()

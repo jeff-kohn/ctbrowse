@@ -9,9 +9,8 @@
 
 #include "ctb/interfaces/IDataset.h"
 
-#include "ctb/tables/detail/MultiMatchPropertyFilterMgr.h"
 #include "ctb/tables/detail/PropertyFilter.h"
-#include "ctb/tables/detail/PropertyFilterMgr.h"
+#include "ctb/tables/detail/FilterManager.h"
 #include "ctb/tables/detail/SubStringFilter.h"
 
 #include <map>
@@ -39,13 +38,13 @@ namespace ctb
       using FieldSchama         = base::FieldSchema;
       using ListColumn          = base::ListColumn;
       using ListColumnSpan      = base::ListColumnSpan;
-      using MultiMatchFilterMgr = detail::MultiMatchPropertyFilterMgr<Prop, PropertyMap>;
-      using MultiMatchFilter    = MultiMatchFilterMgr::Filter;
+      using MultiValueFilter    = CtMultiValueFilterMgr::Filter;
+      using MultiValueFilterMgr = CtMultiValueFilterMgr;
       using Prop                = base::Prop;
       using PropertyVal         = base::PropertyVal;
       using PropertyFilter      = base::PropertyFilter;
-      using PropertyFilterMgr   = detail::PropertyFilterMgr<Prop, base::PropertyMap>;
-      using MaybePropFilter     = base::MaybePropFilter;
+      using PropertyFilterMgr   = CtPropFilterManager;
+      using MaybePropFilter     = base::MaybeFilter;
       using PropertyMap         = base::PropertyMap;
       using PropertyValueSet    = base::PropertyValueSet;
       using Record              = DataTable::value_type;
@@ -157,9 +156,9 @@ namespace ctb
       }
 
       /// @brief retrieves a list of available filters for this table.
-      auto multiMatchFilters() const -> CtMultiMatchFilterSpan override
+      auto multiMatchFilters() const -> CtMultiValueFilterSpan override
       {
-         return Traits::MultiMatchFilters;
+         return Traits::MultiValueFilters;
       }
 
       /// @brief Adds a match value filter for the specified column.
@@ -168,10 +167,13 @@ namespace ctb
       /// to be considered a match.
       /// 
       /// @return true if the filter was applied, false it it wasn't because there were no matches
-      auto addMultiMatchFilter(CtProp prop_id, const PropertyVal& match_value) -> bool override
+      auto addMultiValueFilter(CtProp prop_id, const PropertyVal& match_value) -> bool override
       {
-         // if we somehow get passed a filter we already have, don't waste our time.
-         if ( m_mm_filters.addFilter(prop_id, match_value) )
+         // Since we may be creating new default filter, we need to set all properties.
+         auto& filter = m_mval_filters[prop_id];
+         filter.prop_id = prop_id;
+         filter.filter_name = magic_enum::enum_name(prop_id);
+         if (filter.match_values.insert(match_value).second)
          {
             applyFilters();
             return true;
@@ -179,16 +181,24 @@ namespace ctb
          return false;
       }
 
-      /// @brief removes a match value filter for the specified column.
+      /// @brief removes a filter match value for the specified property
       ///
-      /// @return true if the filter was removed, false if it wasn't found
-      auto removeMultiMatchFilter(CtProp prop_id, const PropertyVal& match_value) -> bool override
+      /// @return true if the filter value was removed, false if it wasn't found
+      auto removeMultiValueFilter(CtProp prop_id, const PropertyVal& match_value) -> bool override
       {
-         // if we somehow get passed filter that we aren't using, don't waste our time.
-         if ( m_mm_filters.removeFilter(prop_id, match_value) )
+         if (m_mval_filters.hasFilter(prop_id))
          {
-            applyFilters();
-            return true;
+            auto& filter = m_mval_filters[prop_id];
+            if (filter.match_values.erase(match_value) > 0)
+            {
+               // if we're removing the last match value, remove the filter too.
+               if (filter.match_values.empty())
+               {
+                  m_mval_filters.removeFilter(prop_id);
+               }
+               applyFilters();
+               return true;
+            }
          }
          return false;
       }
@@ -199,7 +209,7 @@ namespace ctb
       /// one at a time.
       /// 
       /// @return true if filter was applied, false if there were no matches in which
-      /// case the filter was not applied. 
+      ///  case the filter was not applied. 
       auto filterBySubstring(std::string_view substr) -> bool override
       {
          // this overload searches all columns in the current list view, so get the prop_id's 
@@ -215,7 +225,7 @@ namespace ctb
       /// one at a time.
       /// 
       /// @return true if filter was applied, false if there were no matches in which
-      /// case the filter was not applied. 
+      ///  case the filter was not applied. 
       auto filterBySubstring(std::string_view substr, CtProp prop_id) -> bool override
       {
          auto cols = std::vector{ prop_id };
@@ -264,7 +274,7 @@ namespace ctb
       /// @return true if the filter was added, false if not because a filter with that name already exists.
       auto addFilter(PropertyFilter filter) -> bool override
       {
-         if (m_prop_filters.addFilter(filter) )
+         if (m_prop_filters.addFilter(filter.name(), filter))
          {
             applyFilters();
             return true;
@@ -299,7 +309,7 @@ namespace ctb
       /// filter_name is case-sensitive
       /// 
       /// @return true if filter was removed; false if it wasn't found.
-      auto removeFilter(std::string_view filter_name) -> bool override
+      auto removeFilter(const std::string& filter_name) -> bool override
       {
          if (m_prop_filters.removeFilter(filter_name))
          {
@@ -317,14 +327,14 @@ namespace ctb
       auto removeAllFilters() -> bool override
       {
          bool got_one = false;
-         if (m_mm_filters.activeFilters())
+         if (m_mval_filters.activeFilters())
          {
-            m_mm_filters.removeAllFilters();
+            m_mval_filters.clear();
             got_one = true;
          }
          if (m_prop_filters.activeFilters())
          {
-            m_prop_filters.removeAllFilters();
+            m_prop_filters.clear();
             got_one = true;
          }
          return got_one;
@@ -401,9 +411,9 @@ namespace ctb
       DataTable            m_data{};                 // the underlying data records for this table.
       DataTable            m_filtered_data{};        // we need a copy for the filtered data, so we can bind our views to it
       DataTable*           m_current_view{};         // may point to m_data or m_filtered_data depending if filter is active or not
-      PropertyFilterMgr    m_prop_filters{};         // active property filters
       ListColumns          m_list_columns{};         // columns that will be displayed in the dataset list-view
-      MultiMatchFilterMgr  m_mm_filters{};           // active multi-match filters
+      MultiValueFilterMgr  m_mval_filters{};         // active multi-match filters
+      PropertyFilterMgr    m_prop_filters{};         // active property filters
       MaybeSubStringFilter m_substring_filter{};
       TableSort            m_current_sort{};
       
@@ -424,10 +434,10 @@ namespace ctb
 
       void applyFilters()
       {
-         if (m_mm_filters.activeFilters() or m_prop_filters.activeFilters())
+         if (m_mval_filters.activeFilters() or m_prop_filters.activeFilters())
          {
             m_filtered_data = vws::all(m_data) | vws::transform([](auto&& rec) { return rec.getProperties(); }) // filters work with property maps, not records
-                                               | vws::filter(m_mm_filters)
+                                               | vws::filter(m_mval_filters)
                                                | vws::filter(m_prop_filters)
                                                | vws::transform([](auto&& map) { return Record{ map }; })       // back to record
                                                | rng::to<std::vector>();

@@ -73,7 +73,7 @@ namespace ctb
       { T::Schema.find(pid)->second } -> std::same_as<const typename T::FieldSchema&>;
       { T::DefaultListColumns[0]    } -> std::same_as<const typename T::ListColumn&>;
       { T::AvailableSorts[0]        } -> std::same_as<const typename T::TableSort&>;
-      { T::MultiMatchFilters[0]     } -> std::same_as<const typename T::MultiMatchFilter&>;
+      { T::MultiValueFilters[0]     } -> std::same_as<const typename T::MultiValueFilter&>;
       { T::getTableName()           } -> std::same_as<std::string_view>;
       { T::hasProperty(pid)         } -> std::same_as<bool>;
 

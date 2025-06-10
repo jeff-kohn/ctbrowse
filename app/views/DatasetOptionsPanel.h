@@ -63,7 +63,7 @@ namespace ctb::app
          ReadyToDrinkFilter,
       };
       using CategorizedControls = CategorizedControls<ControlCategory>;        // show/hide controls based on dataset context
-      using MaybeMultiValFilter = std::optional<CtMultiMatchFilter>;           // associated with mm-filter node, will contain filter if node checked
+      using MaybeMultiValFilter = std::optional<CtMultiValueFilter>;           // associated with mm-filter node, will contain filter if node checked
       using TreeFilterMap       = std::map<wxTreeItemId, MaybeMultiValFilter>; // maps tree node to corresponding MaybeFilter 
       using CheckCountMap       = std::map<wxTreeItemId, int>;                 // used to track number of checked value nodes a given parent/filter node has 
 

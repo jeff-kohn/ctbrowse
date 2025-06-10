@@ -28,9 +28,9 @@ namespace ctb
    public:
       using FieldSchema       = CtFieldSchema;
       using Prop              = CtProp;
-      using PropertyVal          = CtPropertyVal;
+      using PropertyVal       = CtPropertyVal;
       using PropertyFilter    = CtPropertyFilter;
-      using MaybePropFilter   = std::optional<PropertyFilter>;
+      using MaybeFilter       = std::optional<PropertyFilter>;
       using PropertyMap       = CtPropertyMap;
       using PropertyValueSet  = CtPropertyValueSet;
       using ListColumn        = CtListColumn;
@@ -80,7 +80,7 @@ namespace ctb
       virtual void applySort(const TableSort& sort) = 0;
 
       /// @brief retrieves a list of available filters for this dataset.
-      virtual auto multiMatchFilters() const -> CtMultiMatchFilterSpan = 0;
+      virtual auto multiMatchFilters() const -> CtMultiValueFilterSpan = 0;
 
       /// @brief Adds a match value filter for the specified column.
       ///
@@ -88,12 +88,12 @@ namespace ctb
       /// to be considered a match.
       /// 
       /// @return true if the filter was applied, false it it wasn't because there were no matches
-      virtual auto addMultiMatchFilter(CtProp prop_id, const PropertyVal& match_value) -> bool = 0;
+      virtual auto addMultiValueFilter(CtProp prop_id, const PropertyVal& match_value) -> bool = 0;
 
       /// @brief removes a match value filter for the specified column.
       ///
       /// @return true if the filter was removed, false if it wasn't found
-      virtual auto removeMultiMatchFilter(CtProp prop_id, const PropertyVal& match_value) -> bool = 0;
+      virtual auto removeMultiValueFilter(CtProp prop_id, const PropertyVal& match_value) -> bool = 0;
 
       /// @brief Apply a search filter that does substring matching on ANY column in the dataset view
       /// 
@@ -161,7 +161,7 @@ namespace ctb
       /// filter_name is case-sensitive
       /// 
       /// @return true if filters was removed, false if it doens't exist.
-      virtual auto removeFilter(std::string_view filter_name) -> bool = 0;
+      virtual auto removeFilter(const std::string& filter_name) -> bool = 0;
 
       /// @brief Remove all filters from the dataset
       /// 
