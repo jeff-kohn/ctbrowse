@@ -49,6 +49,8 @@ namespace ctb
          { Prop::iTastingNoteId,  FieldSchema { Prop::iTastingNoteId, PropType::String,   20 }},
          { Prop::iConsumeId,      FieldSchema { Prop::iConsumeId,     PropType::String,    0 }},
          { Prop::ConsumeDate,     FieldSchema { Prop::ConsumeDate,    PropType::Date,      3 }},
+         { Prop::ConsumeYear,     FieldSchema { Prop::ConsumeYear,    PropType::UInt16,   {} }},
+         { Prop::ConsumeMonth,    FieldSchema { Prop::ConsumeMonth,   PropType::String,   {} }},
          { Prop::ConsumeReason,   FieldSchema { Prop::ConsumeReason,  PropType::String,   11 }},
          { Prop::ConsumeNote,     FieldSchema { Prop::ConsumeNote,    PropType::String,   27 }},
          { Prop::PurchaseNote,    FieldSchema { Prop::PurchaseNote,   PropType::String,   28 }},
@@ -61,9 +63,9 @@ namespace ctb
       /// @brief list of display columns that will show in the list view
       static inline const std::array DefaultListColumns{
          CtListColumn{ Prop::WineAndVintage,                             constants::DISPLAY_COL_WINE           },
-         CtListColumn{ Prop::ConsumeDate,    CtListColumn::Format::Date, constants::DISPLAY_COL_CONSUME_DATE   },
          CtListColumn{ Prop::ConsumeReason,                              constants::DISPLAY_COL_CONSUME_REASON },
          CtListColumn{ Prop::Location,                                   constants::DISPLAY_COL_CONSUME_FROM   },
+         CtListColumn{ Prop::ConsumeDate,    CtListColumn::Format::Date, constants::DISPLAY_COL_CONSUME_DATE   },
       };
 
       /// @brief the available sort orders for this table.
@@ -75,11 +77,14 @@ namespace ctb
 
       /// @brief multi-value filters that can be used on this table.
       static inline const std::array MultiValueFilters{
-         MultiValueFilter{ Prop::Vintage,     constants::FILTER_VINTAGE     },
-         MultiValueFilter{ Prop::Varietal,    constants::FILTER_VARIETAL    },
-         MultiValueFilter{ Prop::Country,     constants::FILTER_COUNTRY     },
-         MultiValueFilter{ Prop::Region,      constants::FILTER_REGION      },
-         MultiValueFilter{ Prop::Appellation, constants::FILTER_APPELATION  },
+         MultiValueFilter{ Prop::Vintage,       constants::FILTER_VINTAGE        },
+         MultiValueFilter{ Prop::Varietal,      constants::FILTER_VARIETAL       },
+         MultiValueFilter{ Prop::Country,       constants::FILTER_COUNTRY        },
+         MultiValueFilter{ Prop::Region,        constants::FILTER_REGION         },
+         MultiValueFilter{ Prop::Appellation,   constants::FILTER_APPELATION     },
+         MultiValueFilter{ Prop::ConsumeYear,   constants::FILTER_CONSUME_YEAR   },
+         MultiValueFilter{ Prop::ConsumeMonth,  constants::FILTER_CONSUME_MONTH  },
+         MultiValueFilter{ Prop::ConsumeReason, constants::FILTER_CONSUME_REASON },
       };
 
       /// @brief getTableName()
@@ -113,6 +118,11 @@ namespace ctb
          using enum Prop;
 
          rec[WineAndVintage] = getWineAndVintage(rec);
+         if (auto consume_date = rec[ConsumeDate].asDate(); consume_date)
+         {
+            rec[ConsumeYear] = static_cast<uint16_t>(static_cast<int>(consume_date->year())); // this is lame
+            rec[ConsumeMonth] = ctb::format("{:%B}", *consume_date);
+         }
       }
 
    };

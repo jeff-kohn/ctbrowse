@@ -43,8 +43,8 @@ namespace ctb
       AuctionPrice,
 
       BeginConsume,
-      CtBeginConsume,
       EndConsume,
+      CtBeginConsume, 
       CtEndConsume,
 
 
@@ -81,6 +81,8 @@ namespace ctb
       iConsumeId,
       iTastingNoteId,
       ConsumeDate,
+      ConsumeYear,
+      ConsumeMonth,
       ConsumeReason,
       ConsumeNote,
       PurchaseNote,

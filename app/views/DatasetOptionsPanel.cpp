@@ -525,6 +525,7 @@ namespace ctb::app
       }
    }
 
+
    void DatasetOptionsPanel::onFilterInStockChecked([[maybe_unused]] wxCommandEvent& event)
    {
       onFilterChecked(ControlCategory::InStockFilter);
@@ -644,7 +645,7 @@ namespace ctb::app
          assert(data);
 
          auto& filter = m_multival_filters[filter_node.m_pItem]; 
-         for (auto& match_val : data->getDistinctValues(filter->prop_id))
+         for (auto& match_val : data->getDistinctValues(filter->prop_id, false))
          {
             auto item = m_filter_tree->AppendItem(filter_node, match_val.asString());
             m_filter_tree->SetItemImage(item, 1);

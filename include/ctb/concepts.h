@@ -128,7 +128,7 @@ namespace ctb
    /// @brief Concept for an enum type. 
    ///
    template <typename T>
-   concept EnumType = std::is_enum_v<T>;
+   concept EnumType = std::is_scoped_enum_v<T>;
 
 
 } // namespace ctb

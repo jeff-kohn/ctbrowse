@@ -111,6 +111,32 @@ namespace ctb::detail
          return std::visit(asT, m_val);
       }
 
+      /// @brief Extract date value from the property object, if possible
+      /// 
+      /// The object must contain a year_month_date, or a string that can be parsed as a date. 
+      /// All other data types will result in empty return value.
+      /// 
+      /// @return A valid year_month_date, or std::nullopt if the value is not compatible
+      auto asDate() const -> NullableDate
+      {
+         NullableDate result{};
+         if (std::holds_alternative<chrono::year_month_day>(m_val))
+         {
+            // bypass visit()'s virtual-fn overhead and just directly return.
+            result = std::get<chrono::year_month_day>(m_val);
+         }
+         else if (std::holds_alternative<std::string>(m_val))
+         {
+            // try to parse
+            if (auto parse_result = parseDate(std::get<std::string>(m_val), constants::FMT_PARSE_DATE_SHORT); parse_result.has_value())
+            {
+               result = *parse_result;
+            }
+         }
+         // for other types nothing makes sense except empty/null
+         return result;
+      }
+
       /// @brief get a string value out of the property
       /// 
       /// @return the requested value, or an empty string if no value is available (e.g. null) 
@@ -136,9 +162,15 @@ namespace ctb::detail
          using std::chrono::year_month_day;
          using namespace constants;
 
+         if (std::holds_alternative<std::string>(m_val))
+         {
+            // bypass visit()'s virtual-fn overhead and just directly return.
+            auto& str = std::get<std::string>(m_val);
+            return ctb::vformat(fmt_str, ctb::make_format_args(str));
+         }
+
          auto asStr = Overloaded
          {
-            [](const std::string& val)            {  return val;           },
             [](std::monostate)                    {  return std::string{}; },
             [&fmt_str](const year_month_day& val) {  return ctb::vformat(fmt_str == FMT_DEFAULT_FORMAT ? FMT_DATE_SHORT : fmt_str, make_format_args(val)); },
             [&fmt_str](auto val)                  {  return ctb::vformat(fmt_str,  ctb::make_format_args(val)); }

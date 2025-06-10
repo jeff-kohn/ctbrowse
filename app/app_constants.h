@@ -15,7 +15,7 @@ namespace ctb::constants
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP         = "Download data from CellarTracker";
    inline constexpr const char* CMD_FILE_SETTINGS_LBL              = "&Settings...";
    inline constexpr const char* CMD_FILE_SETTINGS_TIP              = "Configure app settings";
-   inline constexpr const char* CMD_COLLECTION_CONSUMED_LBL        = "Wine &Consumed";
+   inline constexpr const char* CMD_COLLECTION_CONSUMED_LBL        = "Wine &Consumed\tCtrl+D";
    inline constexpr const char* CMD_COLLECTION_CONSUMED_TIP        = "View Wine Consumption History";
    inline constexpr const char* CMD_COLLECTION_MY_CELLAR_LBL       = "Wine in &My Cellar\tCtrl+M";
    inline constexpr const char* CMD_COLLECTION_MY_CELLAR_TIP       = "View Personal Wine Collection";
@@ -61,10 +61,6 @@ namespace ctb::constants
    inline constexpr const char* CREDENTIALDLG_LBL_PASSWORD        = "&Password:";
    inline constexpr const char* CREDENTIALDLG_LBL_SAVE            = "&Save Credential";
    inline constexpr const char* FMT_CREDENTIALDLG_LBL_TITLE       = "{} Login";
-
-   inline constexpr const char* FMT_LBL_WINE_SUMMARY              = "{} bottles and {} Pending in {} wines";
-   inline constexpr const char* FMT_LBL_WINE_SUMMARY_TOTAL        = "Total: {} bottles and {} Pending in {} wines";
-   inline constexpr const char* FMT_LBL_WINE_SUMMARY_FILTERED     = "Filtered: {} bottles and {} Pending in {} wines";
 
    inline constexpr const char* FMT_LBL_FILTERS_SELECTED          = "{}  ({} selected)";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADED        = "Successfully downloaded file '{}'.";

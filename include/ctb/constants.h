@@ -62,9 +62,12 @@ namespace ctb::constants
    // filter names
    inline constexpr const char* FILTER_APPELATION           = "Appellation";
    inline constexpr const char* FILTER_COUNTRY              = "Country";
+   inline constexpr const char* FILTER_CONSUME_YEAR         = "Year Consumed";
+   inline constexpr const char* FILTER_CONSUME_MONTH        = "Month Consumed";
    inline constexpr const char* FILTER_ORDER_DATE           = "Order Date";
    inline constexpr const char* FILTER_PRODUCER             = "Producer";
    inline constexpr const char* FILTER_REGION               = "Region";
+   inline constexpr const char* FILTER_CONSUME_REASON       = "Reason";
    inline constexpr const char* FILTER_STORE                = "Store";
    inline constexpr const char* FILTER_VARIETAL             = "Varietal";
    inline constexpr const char* FILTER_VINTAGE              = "Vintage";
@@ -161,7 +164,9 @@ namespace ctb::constants
    inline constexpr const char* FMT_PARSE_ISO_DATE_ONLY           = "%F";
 
    inline constexpr const char* FMT_SUMMARY_AVAILABILITY          = "{} Wines with {} Bottles Ready to Drink";
-   inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, with {} Bottles in Collection and {} Pending";
+   inline constexpr const char* FMT_SUMMARY_CONSUMED              = "{} Wines Consumed Since {}";
+   inline constexpr const char* SUMMARY_EMPTY                     = "No data. Check filter options or download latest CellarTracker data.";
+   inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, with {} Bottles Cellared and {} Pending Delivery";
    inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles";
 
 

@@ -161,8 +161,9 @@ namespace ctb
 
       /// @brief Get a list of all distinct values from the dataset for the specified property.
       /// 
-      /// This can be used to get filter values for match-filters.
-      [[nodiscard]] virtual auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet = 0;
+      /// This can be used to get filter values for match-filters. If filtered_only is true, only records matching
+      /// the active filters will be included. If filtered_only is false, all records will be included.
+      [[nodiscard]] virtual auto getDistinctValues(CtProp prop_id, bool filtered_only) const -> PropertyValueSet = 0;
 
       [[nodiscard]]
       /// @brief returns the number of records in the underlying dataset

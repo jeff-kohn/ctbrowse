@@ -90,7 +90,7 @@ namespace ctb
             case TableId::Pending:
             {
                auto wines   = rowCount(true);
-               auto stores  = getDistinctValues(CtProp::PendingStoreName).size();
+               auto stores  = getDistinctValues(CtProp::PendingStoreName, true).size();
                auto bottles = foldValues(CtProp::QtyPending, int32_t{}, std::plus{});
                return ctb::format(constants::FMT_SUMMARY_PENDING, wines, stores, bottles);
             }
@@ -100,6 +100,18 @@ namespace ctb
                auto on_hand  = foldValues(CtProp::QtyOnHand,  int32_t{}, std::plus{});
                auto on_order = foldValues(CtProp::QtyPending, int32_t{}, std::plus{});
                return ctb::format(constants::FMT_SUMMARY_MY_CELLAR, wines, on_hand, on_order);
+            }
+            case TableId::Consumed:
+            {
+               std::string result{ constants::SUMMARY_EMPTY };
+               auto wine_count = rowCount(true);
+               if (wine_count)
+               {
+                  // get earliest year (return values are sorted).
+                  auto first_year = getDistinctValues(CtProp::ConsumeYear, true).begin()->asUInt16().value_or(0);
+                  result = ctb::format(constants::FMT_SUMMARY_CONSUMED, wine_count, first_year);
+               }
+               return result;
             }
             default:
                return {};
@@ -335,12 +347,12 @@ namespace ctb
       /// @brief Get a list of all distinct values from the table for the specified property.
       /// 
       /// This can be used to get filter values for match-filters.
-      [[nodiscard]] auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet override
+      [[nodiscard]] auto getDistinctValues(CtProp prop_id, bool filtered_only) const -> PropertyValueSet override
       {
          PropertyValueSet values{};
          if (hasProperty(prop_id))
          {
-            for (const Record& rec : m_data)
+            for (const Record& rec : filtered_only? *m_current_view : m_data)
             {
                values.emplace(rec[prop_id]);
             }

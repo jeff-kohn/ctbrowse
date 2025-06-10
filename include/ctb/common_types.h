@@ -7,10 +7,11 @@
  *******************************************************************/
 #pragma once
 
-#include <string>
+#include <chrono>
 #include <optional>
 #include <set>
 #include <span>
+#include <string>
 #include <vector>
 
 // these are just some type aliases used throughout the application, that I don't want to
@@ -23,6 +24,7 @@ namespace ctb
    using NullableLong   = std::optional<int64_t>;
    using NullableSize_t = std::optional<size_t>;
    using NullableDouble = std::optional<double>;
+   using NullableDate   = std::optional<std::chrono::year_month_day>;
 
    using MaybeString    = std::optional<std::string>;
    using StringSet      = std::set<std::string, std::less<>>;
