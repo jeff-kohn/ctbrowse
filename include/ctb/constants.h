@@ -108,13 +108,13 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";
 
    // table names
-   inline constexpr const char* TABLE_NAME_LIST                   = "My Wine Cellar";
+   inline constexpr const char* TABLE_NAME_LIST                   = "Wines in My Cellar";
    inline constexpr const char* TABLE_NAME_INVENTORY              = "Bottle Inventory";
    inline constexpr const char* TABLE_NAME_NOTES                  = "Tasting Notes";
    inline constexpr const char* TABLE_NAME_PRIVATENOTES           = "Private Notes";
    inline constexpr const char* TABLE_NAME_PURCHASE               = "Wine Purchases";
-   inline constexpr const char* TABLE_NAME_PENDING                = "Pending Wine Deliveries";
-   inline constexpr const char* TABLE_NAME_CONSUMED               = "Consumed Bottles";
+   inline constexpr const char* TABLE_NAME_PENDING                = "Wine Pending Delivery";
+   inline constexpr const char* TABLE_NAME_CONSUMED               = "Wine Consumed";
    inline constexpr const char* TABLE_NAME_AVAILABILITY           = "Ready to Drink List";
    inline constexpr const char* TABLE_NAME_TAG                    = "Wish List Tags";
    inline constexpr const char* TABLE_NAME_PROREVIEW              = "Manually Entered Pro Reviews";

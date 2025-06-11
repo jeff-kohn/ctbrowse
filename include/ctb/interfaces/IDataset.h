@@ -66,7 +66,11 @@ namespace ctb
       /// 
       /// Since getProperty() will return a null value for missing properties, calling this function
       /// is the only way to distinguish between a null property value and a property that is missing
-      /// altogether.
+      /// altogether from the dataset.
+      /// 
+      /// @return True if the property is available, false if not.
+      virtual auto hasProperty(CtProp prop_id) const -> bool = 0;
+
       /// @brief retrieves list of available sorters, in order of display
       /// 
       /// the index in this vector corresponds to the index in the sort_index
@@ -140,10 +144,6 @@ namespace ctb
       /// 
       /// @return true if filters was removed, false if it doens't exist.
       virtual auto removePropFilter(const std::string& filter_name) -> bool = 0;
-
-      /// 
-      /// @return True if the property is available, false if not.
-      virtual auto hasProperty(CtProp prop_id) const -> bool = 0;
 
       /// @brief Retrieve a property for a specified record/row in the dataset
       /// 

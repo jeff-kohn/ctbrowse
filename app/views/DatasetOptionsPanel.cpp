@@ -538,7 +538,7 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onFilterReadyToDrinkChecked(wxCommandEvent& event)
+   void DatasetOptionsPanel::onFilterReadyToDrinkChecked([[maybe_unused]] wxCommandEvent& event)
    {
       onFilterChecked(ControlCategory::ReadyToDrinkFilter);
    }

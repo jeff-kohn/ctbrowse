@@ -18,7 +18,7 @@ namespace ctb::app
          wxCheckBox{ &parent, wxID_ANY, wxFromSV(filter.name) },
          m_filter{ std::move(filter) }
       {
-         SetValidator(wxGenericValidator{ &m_enabled });
+         SetValidator(wxGenericValidator{ &m_filter_enabled });
       }
 
       /// @brief Get a reference to the filter associated with this control
@@ -31,12 +31,12 @@ namespace ctb::app
 
       auto enabled() const -> bool
       {
-         return m_enabled;
+         return m_filter_enabled;
       }
 
       void enable(bool enable)
       {
-         m_enabled = enable;
+         m_filter_enabled = enable;
          TransferDataToWindow();
       }
 
@@ -49,7 +49,7 @@ namespace ctb::app
 
    private:
       PropertyFilter  m_filter{};
-      bool            m_enabled{false};
+      bool            m_filter_enabled{false};
    };
 
 };

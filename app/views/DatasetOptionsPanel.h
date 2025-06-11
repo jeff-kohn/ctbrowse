@@ -73,7 +73,6 @@ namespace ctb::app
       bool                  m_sort_descending    { false }; // whether descending sort ordes is active (yes we need both)
       CategorizedControls   m_categorized{};
       CheckCountMap         m_check_map{};                  // for keeping track of number of filter items selected 
-      double                m_score_filter_val{};           // bound to min-score filter's spin-control value
       int                   m_sort_selection{ 0 };          // index of selected sort in combo, which matches a sort in availableSorts()
       FilterCheckboxes      m_filter_checkboxes{};          // checkbox controls for enabling/disabling different property filters
       IDataset::TableSort   m_sort_config{};                // the sort object that will be used to sort the dataset 

@@ -115,7 +115,7 @@ namespace ctb
             }
             default:
                return {};
-         };
+         }
       }
 
       /// @brief Retrieves the schema information for a specified property.
@@ -334,7 +334,7 @@ namespace ctb
       /// is called on this dataset, after which it may be invalid. You should copy-construct 
       /// a new object if you need to hold onto it for a while rather than holding the reference.
       /// 
-      /// @return const reference to the requested property. It may be a null value, but it 
+      /// @return const reference to the requested property. It may contain a null value, but it 
       ///  will always be a valid CtPropertyVal&.
       auto getProperty(int rec_idx, CtProp prop_id) const noexcept(false) -> const PropertyVal & override
       {
@@ -479,7 +479,7 @@ namespace ctb
       {
          constexpr auto getVal = [](auto&& prop) -> ValT
                                  { 
-                                    return prop.as<ValT>().value_or(0); 
+                                    return prop.template as<ValT>().value_or(ValT{});
                                  };
          if (filtered_only)
          {
