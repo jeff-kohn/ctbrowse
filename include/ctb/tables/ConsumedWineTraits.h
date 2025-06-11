@@ -83,7 +83,6 @@ namespace ctb
          MultiValueFilter{ Prop::Region,        constants::FILTER_REGION         },
          MultiValueFilter{ Prop::Appellation,   constants::FILTER_APPELATION     },
          MultiValueFilter{ Prop::ConsumeYear,   constants::FILTER_CONSUME_YEAR   },
-         MultiValueFilter{ Prop::ConsumeMonth,  constants::FILTER_CONSUME_MONTH  },
          MultiValueFilter{ Prop::ConsumeReason, constants::FILTER_CONSUME_REASON },
       };
 
