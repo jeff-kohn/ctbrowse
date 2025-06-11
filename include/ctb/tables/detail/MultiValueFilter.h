@@ -33,7 +33,11 @@ namespace ctb::detail
       /// @brief User-facing name
       std::string filter_name{};
 
-      /// @brief Possible values to match against
+      /// @brief If true, match_values should be displayed to user in descending order. This is a suggestion,
+      /// but it doesn't affect the actual sort order of match_values, caller will have to reverse it.
+      bool reverse_match_values{ false };
+
+      /// @brief Possible values to match against. This is a default-sorted set
       MatchValues match_values{};
 
       /// @brief returns true if the specified record is a match or we have no match values to check.

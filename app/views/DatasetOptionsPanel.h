@@ -11,13 +11,11 @@
 #include "CategorizedControls.h"
 
 #include <ctb/model/ScopedEventSink.h>
-#include <magic_enum/magic_enum.hpp>
+
 #include <wx/panel.h>
 #include <wx/spinctrl.h>
 #include <wx/treectrl.h>
 
-#include <map>
-#include <optional>
 #include <map>
 
 
@@ -46,7 +44,7 @@ namespace ctb::app
       /// throws a ctb::Error if parent or source = nullptr, or if the window can't be created;
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its lifetime). 
-      [[nodiscard]] static auto create(wxWindow* parent, DatasetEventSourcePtr source) -> DatasetOptionsPanel*;
+      [[nodiscard]] static auto create(wxWindow* parent, DatasetEventSourcePtr source) noexcept(false) -> DatasetOptionsPanel* ;
    
       // no copy/move/assign, this class is created on the heap.
       DatasetOptionsPanel(const DatasetOptionsPanel&) = delete;
@@ -63,11 +61,10 @@ namespace ctb::app
          ReadyToDrinkFilter,
       };
       using CategorizedControls = CategorizedControls<ControlCategory>;        // show/hide controls based on dataset context
-      using MaybeMultiValFilter = std::optional<CtMultiValueFilter>;           // associated with mm-filter node, will contain filter if node checked
-      using TreeFilterMap       = std::map<wxTreeItemId, MaybeMultiValFilter>; // maps tree node to corresponding MaybeFilter 
+      using TreeFilterMap       = std::map<wxTreeItemId, CtMultiValueFilter>;  // maps tree node to corresponding filter 
       using CheckCountMap       = std::map<wxTreeItemId, int>;                 // used to track number of checked value nodes a given parent/filter node has 
 
-      using FilterCheckboxes = std::map<ControlCategory, FilterCheckBox* >;
+      using FilterCheckboxes = std::map<ControlCategory, FilterCheckBox* >;    // checkbox controls for each of the check filters (see ControlCategory enum)
 
       bool                  m_sort_ascending     { true  }; // whether ascending sort order is active
       bool                  m_sort_descending    { false }; // whether descending sort ordes is active (yes we need both)
@@ -90,12 +87,12 @@ namespace ctb::app
       auto setTitle() -> bool;
 
       // multi-match filter impl
-      void addMultiValFilter(wxTreeItemId item);
-      auto getMultiValFilterForItem(wxTreeItemId item) -> MaybeMultiValFilter;
+      void addMultiValFilter(wxTreeItemId item) noexcept(false) ;
+      auto getMultiValFilterForItem(wxTreeItemId item) noexcept(false) -> CtMultiValueFilter&;
       auto isItemChecked(wxTreeItemId item) -> bool;
       auto isItemContainerNode(wxTreeItemId item) -> bool;
       auto isItemMatchValueNode(wxTreeItemId item) -> bool;
-      void removeMultiValFilter(wxTreeItemId item);
+      void removeMultiValFilter(wxTreeItemId item) noexcept(false);
       auto setMultiValChecked(wxTreeItemId item, bool checked = true) -> bool;
       void toggleFilterSelection(wxTreeItemId item);
       void updateFilterLabel(wxTreeItemId item);

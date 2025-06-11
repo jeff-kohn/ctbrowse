@@ -130,6 +130,7 @@ namespace ctb::constants
    inline constexpr const char* ERROR_STR_OPERATION_CANCELED      = "Operation Canceled.";
    inline constexpr const char* ERROR_STR_DIALOG_TRANSFER_FAILED  = "Unexpected error transferring data to/from dialog.";
    inline constexpr const char* ERROR_STR_DOWNLOAD_AUTH_FAILURE   = "File download canceled, no valid login was provided.";
+   inline constexpr const char* ERROR_STR_FILTER_NOT_FOUND        = "Filter object not found, this is a bug!";
    inline constexpr const char* ERROR_STR_INVALID_INDEX           = "Invalid index";
    inline constexpr const char* ERROR_STR_INVALID_ROW_INDEX       = "Invalid row index";
    inline constexpr const char* ERROR_STR_EDITING_NOT_SUPPORTED   = "Editing data is not supported.";

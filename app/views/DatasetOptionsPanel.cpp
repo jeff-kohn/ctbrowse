@@ -25,7 +25,8 @@
 #include <wx/valgen.h>
 #include <wx/wupdlock.h>
 
-#include <memory>
+#include <string>
+#include <string_view>
 
 namespace ctb::app
 {
@@ -72,7 +73,7 @@ namespace ctb::app
    } // namespace
    
 
-   [[nodiscard]] auto DatasetOptionsPanel::create(wxWindow* parent, DatasetEventSourcePtr source) -> DatasetOptionsPanel*
+   [[nodiscard]] auto DatasetOptionsPanel::create(wxWindow* parent, DatasetEventSourcePtr source) noexcept(false) -> DatasetOptionsPanel*
    {
       if (!source)
       {
@@ -254,34 +255,34 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::addMultiValFilter(wxTreeItemId item)
+   void DatasetOptionsPanel::addMultiValFilter(wxTreeItemId item) noexcept(false) 
    {
       if (m_sink.hasDataset())
       {
-         CtPropertyVal filter_val{};
-         auto filter = getMultiValFilterForItem(item);
-         if (filter)
+         auto& filter = getMultiValFilterForItem(item);
+
+         if (auto fld_schema = m_sink.getDataset()->getFieldSchema(filter.prop_id); fld_schema.has_value() )
          {
             /// We need to convert the string value from the filter tree to the correct type, which may not be string.
-            auto fld_schema = m_sink.getDataset()->getFieldSchema(filter->prop_id);
-            if (fld_schema)
-            {
-               auto wx_str_val = m_filter_tree->GetItemText(item);
-               std::string_view text_val{ wx_str_val.wx_str() };
-               filter_val = getPropertyForFieldType(*fld_schema, text_val);
-            }
-            else {
-               assert("Not getting a valid FieldSchema here is a bug." and false);
-            }
-
-            m_sink.getDataset()->addMultiValueFilter(filter->prop_id, filter_val);
-            m_sink.signal_source(DatasetEvent::Id::Filter);
+            auto wx_str_val = m_filter_tree->GetItemText(item);
+            std::string_view text_val{ wx_str_val.wx_str() };
+            auto filter_val = getPropertyForFieldType(*fld_schema, text_val);
+            m_sink.getDataset()->addMultiValueFilter(filter.prop_id, filter_val);
          }
+         else {
+            assert("Not getting a valid FieldSchema here is a bug." and false);
+         }
+
+         m_sink.signal_source(DatasetEvent::Id::Filter);
+      }
+      else {
+         throw Error{ constants::ERROR_STR_NO_DATASET, Error::Category::DataError };
       }
    }
+  
 
 
-   auto DatasetOptionsPanel::getMultiValFilterForItem(wxTreeItemId item) -> MaybeMultiValFilter
+   auto DatasetOptionsPanel::getMultiValFilterForItem(wxTreeItemId item)  noexcept(false) -> CtMultiValueFilter&
    {
       auto dataset = m_sink.getDataset();
       if (dataset)
@@ -295,7 +296,7 @@ namespace ctb::app
                return it->second;
          }
       }
-      return {};
+      throw Error{ constants::ERROR_STR_FILTER_NOT_FOUND, Error::Category::DataError };
    }
 
 
@@ -317,39 +318,40 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::removeMultiValFilter(wxTreeItemId item)
+   void DatasetOptionsPanel::removeMultiValFilter(wxTreeItemId item)  noexcept(false) 
    {
-      if (m_sink.hasDataset())
+      if (!m_sink.hasDataset())
       {
-         CtPropertyVal filter_val{};
-         auto filter = getMultiValFilterForItem(item);
-         if (filter)
-         {
-            /// We need to convert the string value from the filter tree to the correct type, which may not be string.
-            auto fld_schema = m_sink.getDataset()->getFieldSchema(filter->prop_id);
-            if (fld_schema)
-            {
-               auto wx_str_val = m_filter_tree->GetItemText(item);
-               std::string_view text_val{ wx_str_val.wx_str() };
-               filter_val = getPropertyForFieldType(*fld_schema, text_val);
-            }
-            else {
-               assert("Not getting a valid FieldSchema here is a bug." and false);
-            }
-            m_sink.getDataset()->removeMultiValueFilter(filter->prop_id, filter_val);
-            m_sink.signal_source(DatasetEvent::Id::Filter);
-         }
+         throw Error{ constants::ERROR_STR_NO_DATASET, Error::Category::DataError };
       }
+
+      CtPropertyVal filter_val{};
+      auto& filter = getMultiValFilterForItem(item);
+
+      /// We need to convert the string value from the filter tree to the correct type, which may not be string.
+      auto fld_schema = m_sink.getDataset()->getFieldSchema(filter.prop_id);
+      if (fld_schema)
+      {
+         auto wx_str_val = m_filter_tree->GetItemText(item);
+         std::string_view text_val{ wx_str_val.wx_str() };
+         filter_val = getPropertyForFieldType(*fld_schema, text_val);
+      }
+      else {
+         assert("Not getting a valid FieldSchema here is a bug." and false);
+      }
+      m_sink.getDataset()->removeMultiValueFilter(filter.prop_id, filter_val);
+      m_sink.signal_source(DatasetEvent::Id::Filter);
    }
 
 
    /// @brief updates the checked/unchecked status of a node.
    /// @return true if successful, false otherwise (ie invalid item)
-   /// 
    auto DatasetOptionsPanel::setMultiValChecked(wxTreeItemId item, bool checked) -> bool
    {
       if ( isItemMatchValueNode(item) )
       {
+         // update the image to reflect that it's checked, also update parent's
+         // check count so we can display it in Filter Title.
          if (checked)
          {
             m_check_map[m_filter_tree->GetItemParent(item)]++;
@@ -361,7 +363,6 @@ namespace ctb::app
          }
          return true;
       }
-
       return false;
    }
 
@@ -370,18 +371,16 @@ namespace ctb::app
    /// 
    void DatasetOptionsPanel::toggleFilterSelection(wxTreeItemId item)
    {
-      bool checked = !isItemChecked(item);
+      bool checked = isItemChecked(item) ? false : true; // toggle
       if (!setMultiValChecked(item, checked))
          return;
 
       if (checked)
       {
          addMultiValFilter(item);
-         m_check_map[item]++;
       }
       else{
          removeMultiValFilter(item);
-         m_check_map[item]--;
       }
       updateFilterLabel(m_filter_tree->GetItemParent(item));
    }
@@ -389,12 +388,13 @@ namespace ctb::app
 
    void DatasetOptionsPanel::updateFilterLabel(wxTreeItemId item)
    {
-      auto maybe_filter = m_multival_filters[item];
-      if ( !maybe_filter or !item.IsOk() )
+      if ( !m_multival_filters.contains(item) or !item.IsOk() )
          return;
 
+      auto& filter = m_multival_filters[item];
+
       // if the filter node has selected children, update the label with the count
-      wxString filter_name{ wxFromSV(maybe_filter->filter_name) };
+      wxString filter_name{ filter.filter_name };
       auto count = m_check_map[item];
       if (count)
       {
@@ -625,30 +625,37 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onTreeFilterExpanding(wxTreeEvent& event)
+   void DatasetOptionsPanel::onTreeFilterExpanding(wxTreeEvent& event) 
    {
       try
       {
          auto filter_node = event.GetItem();
-         if (!filter_node.IsOk())
-            return;
-
-         // if the node has a filter in our map and it doesn't already have a list of 
-         // available filter values as children, we need to populate the child nodes.
-         // otherwise just return.
-         if( !m_multival_filters.contains(filter_node.GetID()) || m_filter_tree->GetChildrenCount(filter_node) > 0 )
+         auto dataset = m_sink.getDataset();
+         if (!filter_node.IsOk() or !dataset)
          {
-            return;
+            assert("Something got corrupted, should never get invalid objects here" and false);
+            throw Error{ constants::ERROR_STR_NO_DATASET, Error::Category::DataError };
          }
 
-         auto data = m_sink.getDataset();
-         assert(data);
+         // if the node has a filter in our map and it already has a list of 
+         // available filter values as children, we don't need to do anything.
+         if( !m_multival_filters.contains(filter_node.GetID()) || m_filter_tree->GetChildrenCount(filter_node) > 0 )
+            return;
 
+         auto createFilterNode = [&filter_node, this](const CtPropertyVal& match_value)
+            {
+               auto item = m_filter_tree->AppendItem(filter_node, match_value.asString());
+               m_filter_tree->SetItemImage(item, IMG_UNCHECKED);
+            };
+
+         // depending on filter we may need to show the match values in descending order
          auto& filter = m_multival_filters[filter_node.m_pItem]; 
-         for (auto& match_val : data->getDistinctValues(filter->prop_id, false))
+         if (filter.reverse_match_values)
          {
-            auto item = m_filter_tree->AppendItem(filter_node, match_val.asString());
-            m_filter_tree->SetItemImage(item, 1);
+            rng::for_each(vws::reverse(dataset->getDistinctValues(filter.prop_id, false)), createFilterNode);
+         }
+         else {
+            rng::for_each(dataset->getDistinctValues(filter.prop_id, false), createFilterNode);
          }
       }
       catch(...){
