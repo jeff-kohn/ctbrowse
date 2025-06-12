@@ -116,7 +116,7 @@ namespace ctb::app
       // Dataset title
       auto title_font{ GetFont().MakeLarger().MakeBold()};
       const auto heading_color = wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT);
-      constexpr auto title_border_size = 10;
+      constexpr auto title_border_size = 20;
       m_dataset_title = new wxStaticText{ this, wxID_ANY, "" };
       m_dataset_title->SetFont(title_font);
       m_dataset_title->SetForegroundColour(heading_color);
