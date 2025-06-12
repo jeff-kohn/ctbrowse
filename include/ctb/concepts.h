@@ -29,11 +29,11 @@ namespace ctb
 
    /// @brief Concept for a type that can be used as a table property in a table record.
    ///
-   /// concept is modeled after interface of ctb::TableProperty template, but any type 
+   /// concept is modeled after interface of ctb::PropertyValue template, but any type 
    /// with compatible interface could be used.
    /// 
    template <typename T>
-   concept TablePropertyType = std::is_default_constructible_v<T> 
+   concept PropertyValueType = std::is_default_constructible_v<T> 
                                and std::is_move_constructible_v<T>
                                and requires (T t, typename T::ValueType v)
    {
@@ -54,7 +54,7 @@ namespace ctb
 
    template <typename T>
    concept PropertyMapType = std::is_enum_v<typename T::key_type> 
-                             and TablePropertyType<typename T::mapped_type>
+                             and PropertyValueType<typename T::mapped_type>
                              and requires (T t, typename T::key_type key)
    {
       { t.begin()       } -> std::same_as<typename T::iterator>;

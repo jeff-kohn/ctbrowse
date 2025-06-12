@@ -1,7 +1,7 @@
 /*******************************************************************
-* @file  TableProperty.h
+* @file  PropertyValue.h
 *
-* @brief defines the template class TableProperty
+* @brief defines the template class PropertyValue
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
 *******************************************************************/
@@ -38,37 +38,37 @@ namespace ctb::detail
    /// Default-constructed instances of this object will always have a 'null' value.
    /// 
    template<typename... Args>
-   struct TableProperty
+   struct PropertyValue
    {
       using ValueType = std::variant<std::monostate, Args...>;
 
-      /// @brief Create a TableProperty from a string_view by converting it to the specified type.
+      /// @brief Create a PropertyValue from a string_view by converting it to the specified type.
       /// 
-      /// This is a zero-copy alternative to creating a TableProperty<string> and then using as<> to convert it.
+      /// This is a zero-copy alternative to creating a PropertyValue<string> and then using as<> to convert it.
       /// 
-      /// @param text_value - The string_view to be converted and used to construct the TableProperty.
-      /// @return An TableProperty containing the converted value if the conversion succeeds, or an empty 
-      ///  TableProperty otherwise.
+      /// @param text_value - The string_view to be converted and used to construct the PropertyValue.
+      /// @return An PropertyValue containing the converted value if the conversion succeeds, or an empty 
+      ///  PropertyValue otherwise.
       template<std::convertible_to<ValueType> ValT>
-      [[nodiscard]] static auto create(std::string_view text_value) -> TableProperty
+      [[nodiscard]] static auto create(std::string_view text_value) -> PropertyValue
       {
          auto val = from_str<ValT>(text_value); 
          if (val)
          {
-            return TableProperty{ *val };
+            return PropertyValue{ *val };
          }
          else {
-            return TableProperty{};
+            return PropertyValue{};
          }
       }
 
 
-      /// @brief construct a TableProperty from any value convertible to ValueType
+      /// @brief construct a PropertyValue from any value convertible to ValueType
       ///
       /// this is intentionally non-explicit, because callers won't always have the exact
       /// typename easily available.
       template<std::convertible_to<ValueType> T>
-      constexpr TableProperty(T&& val) : m_val{ std::forward<T>(val) }
+      constexpr PropertyValue(T&& val) : m_val{ std::forward<T>(val) }
       {}
 
       /// @brief returns whether or not this object contains a 'null' value.
@@ -239,12 +239,12 @@ namespace ctb::detail
          return as<double>();
       }
 
-      /// @brief allows for comparison of TableProperty objects, as well as putting them in ordered containers
-      [[nodiscard]] auto operator<=>(const TableProperty& prop) const 
+      /// @brief allows for comparison of PropertyValue objects, as well as putting them in ordered containers
+      [[nodiscard]] auto operator<=>(const PropertyValue& prop) const 
       {
          return m_val <=> prop.m_val;
       }
-      auto operator==(const TableProperty& prop) const -> bool = default;
+      auto operator==(const PropertyValue& prop) const -> bool = default;
             
       /// @brief allow assigning values, not just TableProperties
       template<typename Self, std::convertible_to<ValueType> T>
@@ -261,12 +261,12 @@ namespace ctb::detail
          return !isNull();
       }
 
-      constexpr TableProperty() noexcept = default;
-      ~TableProperty() noexcept = default;
-      constexpr TableProperty(const TableProperty&) = default;
-      constexpr TableProperty(TableProperty&&) = default;
-      constexpr TableProperty& operator=(const TableProperty&) = default;
-      constexpr TableProperty& operator=(TableProperty&&) = default;
+      constexpr PropertyValue() noexcept = default;
+      ~PropertyValue() noexcept = default;
+      constexpr PropertyValue(const PropertyValue&) = default;
+      constexpr PropertyValue(PropertyValue&&) = default;
+      constexpr PropertyValue& operator=(const PropertyValue&) = default;
+      constexpr PropertyValue& operator=(PropertyValue&&) = default;
    
    private:
       ValueType m_val{};

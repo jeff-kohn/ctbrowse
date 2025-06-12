@@ -122,7 +122,7 @@ namespace ctb
       /// PropertyMap from the CSV file are already set, this impl just provides
       /// any calculated property values or does fixup for any parsed values that need it.
       /// 
-      /// @param rec - map containing a TableProperty for each PropID enum value.
+      /// @param rec - map containing a PropertyValue for each PropID enum value.
       static void onRecordParse(PropertyMap& rec)
       {
          using enum Prop;

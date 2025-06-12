@@ -5,8 +5,6 @@ namespace ctb::constants
    inline constexpr const char* APP_NAME_LONG                     = "ctBrowse for Windows";
    inline constexpr const char* APP_NAME_SHORT                    = "ctBrowse";
    inline constexpr const char* APP_LABELS_SUBFOLDER              = "labels";
-   inline constexpr const char* APP_DEFAULT_LOG_FOLDER            = "%LOCALAPPDATA%"; // safe default, but not used for windows app.
-
 
    inline constexpr const char* LBL_MENU_COLLECTION                = "&Collection";
    inline constexpr const char* LBL_MENU_WINE                      = "&Online";
@@ -120,12 +118,12 @@ namespace ctb::constants
    inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
    inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
 
-   inline constexpr int WX_UNSPECIFIED_VALUE    =    -1;
+   inline constexpr int  WX_UNSPECIFIED_VALUE                     = -1;
    inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = true;
 
    // app-specific error messages.
    inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN = "Label cache object is shutting down.";
-   inline constexpr const char* ERROR_STR_NULL_POINTER          = "NULL pointer argument not allowed.";
+   //inline constexpr const char* ERROR_STR_NULL_POINTER          = "NULL pointer argument not allowed.";
    inline constexpr const char* ERROR_STR_NO_CONFIG_STORE       = "No configuration store available.";
    inline constexpr const char* ERROR_STR_NO_DATASET            = "No Dataset Available!";
    inline constexpr const char* CT_COOKIE_SECRET_NAME           = "CTSession";

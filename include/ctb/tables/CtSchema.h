@@ -6,7 +6,7 @@
 #include "ctb/tables/detail/ListColumn.h"
 #include "ctb/tables/detail/MultiValueFilter.h"
 #include "ctb/tables/detail/PropertyFilter.h"
-#include "ctb/tables/detail/TableProperty.h"
+#include "ctb/tables/detail/PropertyValue.h"
 #include "ctb/tables/detail/TableRecord.h"
 #include "ctb/tables/detail/TableSorter.h"
 
@@ -104,7 +104,7 @@ namespace ctb
   
    
    /// @brief Type alias for the property type used in CellarTracker data tables
-   using CtPropertyVal = detail::TableProperty<std::string, uint16_t, uint64_t, double, std::chrono::year_month_day>;
+   using CtPropertyVal = detail::PropertyValue<std::string, uint16_t, uint64_t, double, std::chrono::year_month_day>;
 
    
    /// @brief Type alias for a sorted collection of property values

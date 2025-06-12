@@ -132,7 +132,7 @@ namespace ctb::detail
    private:
       PropertyMap m_props{ Traits::Schema.size()};
 
-      // @brief converts a CSVField into a TableProperty
+      // @brief converts a CSVField into a PropertyValue
       PropertyVal fieldToProperty(csv::CSVField& fld, PropType prop_type)
       {
          if (fld.is_null())
@@ -157,7 +157,7 @@ namespace ctb::detail
                   return PropertyVal{ static_cast<double>(val) };
                }
                else {
-                  SPDLOG_DEBUG("TableProperty::fieldToProperty - Unable to parse value '{}' as a double", fld.get<std::string_view>());
+                  SPDLOG_DEBUG("PropertyValue::fieldToProperty - Unable to parse value '{}' as a double", fld.get<std::string_view>());
                   return {};
                }
             }
@@ -169,7 +169,7 @@ namespace ctb::detail
                   return PropertyVal{ *result };
                }
                else {
-                  SPDLOG_DEBUG("TableProperty::fieldToProperty - Unable to parse value '{}' as a date", fld.get<std::string_view>());
+                  SPDLOG_DEBUG("PropertyValue::fieldToProperty - Unable to parse value '{}' as a date", fld.get<std::string_view>());
                   return PropertyVal{};
                }
             }
