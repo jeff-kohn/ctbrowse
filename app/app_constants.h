@@ -76,6 +76,8 @@ namespace ctb::constants
    inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only Show In-Stock Wines";
    inline constexpr const char* LBL_CHECK_MIN_SCORE               = "Minimum Score:";
    inline constexpr const char* LBL_CHECK_READY_TO_DRINK          = "Only Show 'Ready' Wines";
+   inline constexpr const char* LBL_CONSUME_DATE                  = "Consumed On:";
+   inline constexpr const char* LBL_CONSUME_REASON                = "Reason:";
    inline constexpr const char* LBL_COUNTRY                       = "Country:";
    inline constexpr const char* LBL_CT_PRICE                      = "Community Avg:";
    inline constexpr const char* LBL_CT_SCORE                      = "CT Score:";
@@ -83,6 +85,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_DRINK_WINDOW_MY               = "My Drink Window:";
    inline constexpr const char* LBL_DRINK_WINDOW_CT               = "CT Drink Window:";
    inline constexpr const char* LBL_FILTER_OPTIONS                = "Filter Options";
+   inline constexpr const char* LBL_LOCATION                      = "Location:";
    inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
    inline constexpr const char* LBL_MY_PRICE                      = "My Price:";
    inline constexpr const char* LBL_DELIVERY_DATE                 = "Delivery Date:";
@@ -93,6 +96,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_REGION                        = "Region:";
    inline constexpr const char* LBL_SCORES                        = "Scores";
    inline constexpr const char* LBL_SEARCH                        = "&Search";
+   inline constexpr const char* LBL_SIZE                          = "&Size";
    inline constexpr const char* LBL_SORT_ASCENDING                = "Ascending";
    inline constexpr const char* LBL_SORT_DESCENDING               = "Descending";
    inline constexpr const char* LBL_SORT_OPTIONS                  = "Sort Options";
@@ -123,7 +127,6 @@ namespace ctb::constants
 
    // app-specific error messages.
    inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN = "Label cache object is shutting down.";
-   //inline constexpr const char* ERROR_STR_NULL_POINTER          = "NULL pointer argument not allowed.";
    inline constexpr const char* ERROR_STR_NO_CONFIG_STORE       = "No configuration store available.";
    inline constexpr const char* ERROR_STR_NO_DATASET            = "No Dataset Available!";
    inline constexpr const char* CT_COOKIE_SECRET_NAME           = "CTSession";

@@ -177,6 +177,42 @@ namespace ctb::app
       m_category_controls.addControlDependency(CtDrinkWindow, ct_drink_window_lbl );
       m_category_controls.addControlDependency(CtDrinkWindow, ct_drink_window_val);
 
+      // Bottle Size
+      auto* size_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_SIZE);
+      details_sizer->Add(size_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
+      auto* size_val = new wxStaticText(this, wxID_ANY, "");
+      size_val->SetValidator(wxGenericValidator{ &m_details.size });
+      details_sizer->Add(size_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
+      m_category_controls.addControlDependency(Size, size_lbl);
+      m_category_controls.addControlDependency(Size, size_val);
+
+      // Location
+      auto* location_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_LOCATION);
+      details_sizer->Add(location_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
+      auto* location_val = new wxStaticText(this, wxID_ANY, "");
+      location_val->SetValidator(wxGenericValidator{ &m_details.location });
+      details_sizer->Add(location_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
+      m_category_controls.addControlDependency(Location, location_lbl);
+      m_category_controls.addControlDependency(Location, location_val);
+
+      // Consumed Date
+      auto* consume_date_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_CONSUME_DATE);
+      details_sizer->Add(consume_date_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
+      auto* consume_date_val = new wxStaticText(this, wxID_ANY, "");
+      consume_date_val->SetValidator(wxGenericValidator{ &m_details.consume_date });
+      details_sizer->Add(consume_date_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
+      m_category_controls.addControlDependency(Consumed, consume_date_lbl);
+      m_category_controls.addControlDependency(Consumed, consume_date_val);
+
+      // Consume Reason
+      auto* consume_reason_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_CONSUME_REASON);
+      details_sizer->Add(consume_reason_lbl, wxSizerFlags{}.Right().Border(wxLEFT|wxRIGHT));
+      auto* consume_reason_val = new wxStaticText(this, wxID_ANY, "");
+      consume_reason_val->SetValidator(wxGenericValidator{ &m_details.consume_reason });
+      details_sizer->Add(consume_reason_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT));
+      m_category_controls.addControlDependency(Consumed, consume_reason_lbl);
+      m_category_controls.addControlDependency(Consumed, consume_reason_val);
+
       // Scores heading
       auto* scores_header_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_SCORES, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       scores_header_lbl->SetFont(heading_font);
@@ -405,14 +441,18 @@ namespace ctb::app
          // note that we try to grab all properties even though some of them won't be available in this dataset,
          // but that's fine because we'll just get a null value if it's not available, so no need to check hasProperty()
 
-         m_details.wine_id     = dataset->getProperty(rec_idx, CtProp::iWineId     ).asString();
-         m_details.wine_name   = dataset->getProperty(rec_idx, CtProp::WineName    ).asString();
-         m_details.vintage     = dataset->getProperty(rec_idx, CtProp::Vintage     ).asString();
-         m_details.varietal    = dataset->getProperty(rec_idx, CtProp::Varietal    ).asString();
-         m_details.country     = dataset->getProperty(rec_idx, CtProp::Country     ).asString();
-         m_details.region      = dataset->getProperty(rec_idx, CtProp::Region      ).asString();
-         m_details.sub_region  = dataset->getProperty(rec_idx, CtProp::SubRegion   ).asString();
-         m_details.appellation = dataset->getProperty(rec_idx, CtProp::Appellation ).asString();
+         m_details.wine_id        = dataset->getProperty(rec_idx, CtProp::iWineId       ).asString();
+         m_details.wine_name      = dataset->getProperty(rec_idx, CtProp::WineName      ).asString();
+         m_details.vintage        = dataset->getProperty(rec_idx, CtProp::Vintage       ).asString();
+         m_details.varietal       = dataset->getProperty(rec_idx, CtProp::Varietal      ).asString();
+         m_details.country        = dataset->getProperty(rec_idx, CtProp::Country       ).asString();
+         m_details.region         = dataset->getProperty(rec_idx, CtProp::Region        ).asString();
+         m_details.sub_region     = dataset->getProperty(rec_idx, CtProp::SubRegion     ).asString();
+         m_details.appellation    = dataset->getProperty(rec_idx, CtProp::Appellation   ).asString();
+         m_details.location       = dataset->getProperty(rec_idx, CtProp::Location      ).asString();
+         m_details.size           = dataset->getProperty(rec_idx, CtProp::Size          ).asString();
+         m_details.consume_date   = dataset->getProperty(rec_idx, CtProp::ConsumeDate   ).asString();
+         m_details.consume_reason = dataset->getProperty(rec_idx, CtProp::ConsumeReason ).asString();
 
          m_details.drink_window     = detail::getDrinkWindow(dataset->getProperty(rec_idx, CtProp::BeginConsume ),
                                                              dataset->getProperty(rec_idx, CtProp::EndConsume   ));
@@ -492,24 +532,29 @@ namespace ctb::app
       using enum CategorizedControls::Category;
 
       // Details display
-      m_category_controls.showCategory(Score, dataset->hasProperty(CtProp::CtScore));
-      m_category_controls.showCategory(DrinkWindow, dataset->hasProperty(CtProp::BeginConsume));
+      m_category_controls.showCategory(Consumed,      dataset->hasProperty(CtProp::ConsumeDate));
       m_category_controls.showCategory(CtDrinkWindow, dataset->hasProperty(CtProp::CtBeginConsume));
-      m_category_controls.showCategory(Pending, dataset->hasProperty(CtProp::PendingPurchaseId));
-      m_category_controls.showCategory(Valuation, dataset->hasProperty(CtProp::MyPrice));
+      m_category_controls.showCategory(DrinkWindow,   dataset->hasProperty(CtProp::BeginConsume));
+      m_category_controls.showCategory(Location,      dataset->hasProperty(CtProp::Location));
+      m_category_controls.showCategory(Pending,       dataset->hasProperty(CtProp::PendingPurchaseId));
+      m_category_controls.showCategory(Score,         dataset->hasProperty(CtProp::CtScore));
+      m_category_controls.showCategory(Size,          dataset->hasProperty(CtProp::Size));
+      m_category_controls.showCategory(Valuation,     dataset->hasProperty(CtProp::CtPrice));
+
       if (dataset->hasProperty(CtProp::CtBeginConsume))
       {
          m_drink_window_label = constants::LBL_DRINK_WINDOW_MY;
-         TransferDataToWindow();
       }
       else {
          m_drink_window_label = constants::LBL_DRINK_WINDOW;
       }
+      TransferDataToWindow();
 
       // Command-Link buttons
-      m_category_controls.showCategory(LinkAcceptPending,   dataset->getTableId() == TableId::Pending);
-      m_category_controls.showCategory(LinkOpenWineDetails, dataset->getTableId() == TableId::List);
-      m_category_controls.showCategory(LinkReadyToDrink,    dataset->getTableId() == TableId::Availability);
+      auto table_id = dataset->getTableId();
+      m_category_controls.showCategory(LinkAcceptPending,   table_id == TableId::Pending);
+      m_category_controls.showCategory(LinkOpenWineDetails, table_id == TableId::List or table_id == TableId::Consumed);
+      m_category_controls.showCategory(LinkReadyToDrink,    table_id == TableId::Availability);
    }
 
 

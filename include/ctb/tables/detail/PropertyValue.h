@@ -71,8 +71,7 @@ namespace ctb::detail
       constexpr PropertyValue(T&& val) : m_val{ std::forward<T>(val) }
       {}
 
-      /// @brief returns whether or not this object contains a 'null' value.
-      ///
+      /// @return whether or not this object contains a 'null' value.
       auto isNull() const -> bool
       {
          return m_val.index() == 0;
@@ -125,10 +124,10 @@ namespace ctb::detail
             // bypass visit()'s virtual-fn overhead and just directly return.
             result = std::get<chrono::year_month_day>(m_val);
          }
-         else if (std::holds_alternative<std::string>(m_val))
+         else if (hasString())
          {
             // try to parse
-            if (auto parse_result = parseDate(std::get<std::string>(m_val), constants::FMT_PARSE_DATE_SHORT); parse_result.has_value())
+            if (auto parse_result = parseDate(asStringView(), constants::FMT_PARSE_DATE_SHORT); parse_result.has_value())
             {
                result = *parse_result;
             }
@@ -142,7 +141,7 @@ namespace ctb::detail
       /// @return the requested value, or an empty string if no value is available (e.g. null) 
       auto asString() const -> std::string
       {
-         if (std::holds_alternative<std::string>(m_val))
+         if (hasString())
          {
             return std::get<std::string>(m_val);
          }
@@ -185,7 +184,7 @@ namespace ctb::detail
       /// if the contained property is not a valid string, you'll get an empty string_view back.
       auto asStringView() const -> std::string_view
       {
-         if (std::holds_alternative<std::string>(m_val))
+         if (hasString())
          {
             return std::get<std::string>(m_val);
          }

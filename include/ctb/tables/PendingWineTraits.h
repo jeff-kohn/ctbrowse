@@ -57,7 +57,7 @@ namespace ctb
          { Prop::PendingOrderQty,        FieldSchema { Prop::PendingOrderQty,       PropType::UInt16,     10 }},
          { Prop::PendingOrderDate,       FieldSchema { Prop::PendingOrderDate,      PropType::Date,        2 }}, 
          { Prop::PendingDeliveryDate,    FieldSchema { Prop::PendingDeliveryDate,   PropType::Date,        3 }},
-         { Prop::WineAndVintage,         FieldSchema { Prop::WineAndVintage,        PropType::String,     {} }}
+         { Prop::WineAndVintage,         FieldSchema { Prop::WineAndVintage,        PropType::String,     {} }},
       });
 
       /// @brief list of display columns that will show in the list view
@@ -65,8 +65,9 @@ namespace ctb
          CtListColumn{ Prop::WineAndVintage,                                      constants::DISPLAY_COL_WINE       },
          CtListColumn{ Prop::PendingStoreName,    CtListColumn::Format::String,   constants::DISPLAY_COL_STORE      },
          CtListColumn{ Prop::PendingOrderDate,    CtListColumn::Format::Date,     constants::DISPLAY_COL_PURCH_DATE },
+         CtListColumn{ Prop::Size,                CtListColumn::Format::String,   constants::FILTER_BOTTLE_SIZE, ListColumn::Align::Right, ListColumn::Align::Center },
          CtListColumn{ Prop::PendingOrderQty,     CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY        },
-         CtListColumn{ Prop::PendingPrice,        CtListColumn::Format::Currency, constants::DISPLAY_COL_PRICE      }
+         CtListColumn{ Prop::PendingPrice,        CtListColumn::Format::Currency, constants::DISPLAY_COL_PRICE      },
       };
 
       /// @brief the available sort orders for this table.
@@ -74,7 +75,7 @@ namespace ctb
          TableSort{ { Prop::PendingOrderDate,    Prop::WineName, Prop::Vintage  }, constants::SORT_OPTION_PURCHASE_DATE },
          TableSort{ { Prop::WineName,            Prop::Vintage                  }, constants::SORT_OPTION_WINE_VINTAGE  },
          TableSort{ { Prop::Vintage,             Prop::WineName                 }, constants::SORT_OPTION_VINTAGE_WINE  },
-         TableSort{ { Prop::PendingStoreName,    Prop::WineName, Prop::Vintage, }, constants::SORT_OPTION_STORE_NAME    }
+         TableSort{ { Prop::PendingStoreName,    Prop::WineName, Prop::Vintage, }, constants::SORT_OPTION_STORE_NAME    },
       };
 
       /// @brief multi-value filters that can be used on this table.
