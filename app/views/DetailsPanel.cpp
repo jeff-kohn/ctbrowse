@@ -430,7 +430,7 @@ namespace ctb::app
          prop_val = dataset->getProperty(rec_idx, CtProp::MyScore);
          m_details.my_score = prop_val ? prop_val.asString(constants::FMT_NUMBER_DECIMAL) : constants::NO_SCORE;
 
-         m_details.pending_purchase_id   =                    dataset->getProperty(rec_idx, CtProp::PendingPurchaseId   ).asString();
+         m_details.pending_purchase_id   = dataset->getProperty(rec_idx, CtProp::PendingPurchaseId   ).asString();
          m_details.pending_order_number  = dataset->getProperty(rec_idx, CtProp::PendingOrderNumber  ).asString();
          m_details.pending_order_date    = dataset->getProperty(rec_idx, CtProp::PendingOrderDate    ).asString(constants::FMT_DATE_SHORT);
          m_details.pending_delivery_date = dataset->getProperty(rec_idx, CtProp::PendingDeliveryDate ).asString(constants::FMT_DATE_SHORT);

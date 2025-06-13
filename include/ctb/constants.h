@@ -61,6 +61,7 @@ namespace ctb::constants
 
    // filter names
    inline constexpr const char* FILTER_APPELATION           = "Appellation";
+   inline constexpr const char* FILTER_BOTTLE_SIZE          = "Size";
    inline constexpr const char* FILTER_COUNTRY              = "Country";
    inline constexpr const char* FILTER_CONSUME_YEAR         = "Year Consumed";
    inline constexpr const char* FILTER_CONSUME_MONTH        = "Month Consumed";

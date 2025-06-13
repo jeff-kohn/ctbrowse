@@ -65,6 +65,7 @@ namespace ctb
          CtListColumn{ Prop::WineAndVintage,                             constants::DISPLAY_COL_WINE           },
          CtListColumn{ Prop::ConsumeReason,                              constants::DISPLAY_COL_CONSUME_REASON },
          CtListColumn{ Prop::Location,                                   constants::DISPLAY_COL_CONSUME_FROM   },
+         CtListColumn{ Prop::Size,                                       constants::FILTER_BOTTLE_SIZE         },
          CtListColumn{ Prop::ConsumeDate,    CtListColumn::Format::Date, constants::DISPLAY_COL_CONSUME_DATE   },
       };
 
@@ -77,13 +78,13 @@ namespace ctb
 
       /// @brief multi-value filters that can be used on this table.
       static inline const std::array MultiValueFilters{
-         MultiValueFilter{ Prop::Vintage,       constants::FILTER_VINTAGE        },
-         MultiValueFilter{ Prop::Varietal,      constants::FILTER_VARIETAL       },
-         MultiValueFilter{ Prop::Country,       constants::FILTER_COUNTRY        },
-         MultiValueFilter{ Prop::Region,        constants::FILTER_REGION         },
-         MultiValueFilter{ Prop::Appellation,   constants::FILTER_APPELATION     },
-         MultiValueFilter{ Prop::ConsumeYear,   constants::FILTER_CONSUME_YEAR, true  },
-         MultiValueFilter{ Prop::ConsumeReason, constants::FILTER_CONSUME_REASON },
+         MultiValueFilter{ Prop::Vintage,       constants::FILTER_VINTAGE            },
+         MultiValueFilter{ Prop::Varietal,      constants::FILTER_VARIETAL           },
+         MultiValueFilter{ Prop::Country,       constants::FILTER_COUNTRY            },
+         MultiValueFilter{ Prop::Region,        constants::FILTER_REGION             },
+         MultiValueFilter{ Prop::Appellation,   constants::FILTER_APPELATION         },
+         MultiValueFilter{ Prop::Size,          constants::FILTER_BOTTLE_SIZE        },
+         MultiValueFilter{ Prop::ConsumeYear,   constants::FILTER_CONSUME_YEAR, true },
       };
 
       /// @brief getTableName()
