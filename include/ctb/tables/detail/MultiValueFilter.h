@@ -1,7 +1,7 @@
 /*******************************************************************
- * @file MultiMatchPropertyFilter.h
+ * @file MultiValueFilter.h
  *
- * @brief defines the template class MultiMatchPropertyFilter
+ * @brief defines the template class MultiValueFilter
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
@@ -20,12 +20,12 @@ namespace ctb::detail
    /// same variant type as the table property that is being filtered.
    /// 
    template<EnumType PropT, PropertyMapType PropMapT>
-   struct MultiMatchPropertyFilter
+   struct MultiValueFilter
    {
       using Prop         = PropT;
       using PropertyMap  = PropMapT;
-      using Property     = PropertyMap::mapped_type;
-      using MatchValues  = std::set<Property>;
+      using PropertyVal  = PropertyMap::mapped_type;
+      using MatchValues  = std::set<PropertyVal>;
 
       /// @brief Property that we're filtering against
       Prop prop_id{};
@@ -33,7 +33,11 @@ namespace ctb::detail
       /// @brief User-facing name
       std::string filter_name{};
 
-      /// @brief Possible values to match against
+      /// @brief If true, match_values should be displayed to user in descending order. This is a suggestion,
+      /// but it doesn't affect the actual sort order of match_values, caller will have to reverse it.
+      bool reverse_match_values{ false };
+
+      /// @brief Possible values to match against. This is a default-sorted set
       MatchValues match_values{};
 
       /// @brief returns true if the specified record is a match or we have no match values to check.

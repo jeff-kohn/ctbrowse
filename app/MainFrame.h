@@ -37,9 +37,9 @@ namespace ctb::app
    class MainFrame final : public wxFrame, public IDatasetEventSink
    {
    public:
-      static inline constexpr int STATUS_BAR_PANE_STATUS = 0;
-      static inline constexpr int STATUS_BAR_PANE_FILTERED_ROWS = 1;
-      static inline constexpr int STATUS_BAR_PANE_TOTAL_ROWS = 2;
+      static inline constexpr int STATUS_BAR_PANE_STATUS  = 0;
+      static inline constexpr int STATUS_BAR_PANE_CENTER  = 1;
+      static inline constexpr int STATUS_BAR_PANE_SUMMARY = 2;
 
       /// @brief static factor method to create an initialize an instance of the MainFrame class
       /// 
@@ -53,16 +53,6 @@ namespace ctb::app
       constexpr void setStatusText(ctb::format_string<Args...> fmt_str, Args&&... args)
       {
          SetStatusText(ctb::format(fmt_str, std::forward<Args>(args)...));
-      }
-
-      /// @brief set status bar text for a specified pane using format() syntax
-      ///
-      /// pane-index is zero-based
-      template <typename... Args>
-      constexpr void setStatusText(int pane_index, ctb::format_string<Args...> fmt_str, Args&&... args)
-      {
-         assert(pane_index <= STATUS_BAR_PANE_FILTERED_ROWS);
-         SetStatusText(ctb::format(fmt_str, std::forward<Args>(args)...), pane_index);
       }
 
       /// @brief Type alias for a wxMenu smart ptr 
@@ -93,7 +83,6 @@ namespace ctb::app
       // child window/control creation
       void initControls();
       void createMenuBar();
-      void createStatusBar();
       void createToolBar();
 
       // File menu handlers

@@ -8,81 +8,64 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include <magic_enum/magic_enum.hpp>
 
 #include <algorithm>
 #include <functional>
+#include <set>
 #include <vector>
 
 
 namespace ctb::detail
 {
 
-   /// @brief Template class that implements filter logic that selects records if one or more specified
-   ///  properties match a given value using the provided predicate (which could be std:less<>, etc)
+   /// @brief Template class that implements filter logic based on checking one or more properties against a predicate and value
+   ///  
    ///
    ///  Note that there is no type coercion if Property type is a variant. Comparing variants that aren't holding the
    ///  same type will always evaluate to false.
+   /// 
    template<EnumType PropT, PropertyMapType PropMapT>
    struct PropertyFilter
    {
       using Prop         = PropT;
       using PropertyMap  = PropMapT;
-      using Property     = PropertyMap::mapped_type;
-      using ComparePred  = std::function<bool(const Property&, const Property&)>;
+      using PropertyVal  = PropertyMap::mapped_type;
+      using ComparePred  = std::function<bool(const PropertyVal&, const PropertyVal&)>;
+      using MatchProps   = std::vector<Prop>;
+      using MatchValues  = std::set<PropertyVal>;
 
-      /// @brief construct a PropertyFilter from any value convertible to ValueT for the specified property
-      template<std::convertible_to<Property> T>
-      constexpr PropertyFilter(Prop prop, ComparePred pred, T&& val) noexcept :
-         match_props{ prop }, 
+      /// @brief simplified constructor for a filter with a single property and match value, using the prop_id for filter name and default equality predicate.
+      template<std::convertible_to<PropertyVal> T> 
+      constexpr PropertyFilter(Prop prop_id, T&& val, ComparePred compare = std::equal_to<PropertyVal>{}) :
+         name{ magic_enum::enum_name(prop_id) },
+         prop_ids{ { prop_id } }, 
          compare_val{ std::forward<T>(val) },
-         compare_pred{ std::move(pred) },
-         enabled{ true }
+         compare_pred{ std::move(compare) }
       {}
 
-      /// @brief construct a PropertyFilter for matching the given value and predicate to one of multiple properties       
-      template<std::convertible_to<Property> T> 
-      constexpr PropertyFilter(std::initializer_list<Prop> props, ComparePred pred, T&& val) noexcept : 
-         match_props{ props.begin(), props.end() },
-         compare_val{ std::forward<T>(val) },
-         compare_pred{ std::move(pred) },
-         enabled{ true }
+      /// @brief Full constructor, accepts name, prop id's, compare value, and predicate
+      template<std::convertible_to<PropertyVal> ValT>  requires std::convertible_to<ValT, PropertyVal>
+      constexpr PropertyFilter(std::string_view name, std::initializer_list<Prop> prop_ids, ValT&& val, ComparePred compare = std::equal_to<PropertyVal>{}) noexcept : 
+         name{ name },
+         prop_ids{ prop_ids },
+         compare_val{ std::forward<ValT>(val) },
+         compare_pred{ std::move(compare) }
       {}
-
-
-      template<std::convertible_to<Property> T> 
-      constexpr PropertyFilter(std::string_view name, Prop prop, ComparePred pred, T&& val, bool enabled = true) noexcept : 
-         match_props{ prop },
-         compare_val{ std::forward<T>(val) },
-         compare_pred{ std::move(pred) },
-         filter_name{ name },
-         enabled{ enabled }
-      {}
-
-      template<std::convertible_to<Property> T> 
-      constexpr PropertyFilter(std::string_view name, std::initializer_list<Prop> props, ComparePred pred, T&& val, bool enabled = true) noexcept : 
-         match_props{ props.begin(), props.end() },
-         compare_val{ std::forward<T>(val) },
-         compare_pred{ std::move(pred) },
-         filter_name{ name },
-         enabled{ enabled }
-      {}
-
-      /// @brief the properties that we're filtering against
-      std::vector<Prop> match_props{};
-
-      /// @brief the value the record property will be compared to using compare_pred
-      Property compare_val{};
-
-      /// @brief predicate that will be used to compare record properties to compare_val
-      ComparePred compare_pred{ std::greater<Property>{} };
       
-      /// @brief name of the filter
-      std::string filter_name{};
+      /// @brief The name of this filter
+      std::string name{};
 
-      /// @brief whether this filter is active. If set to false, the operator() will always return true
-      bool enabled{ false };
+      /// @brief The match properties the filter checks against
+      MatchProps  prop_ids{};
 
-      /// @brief returns true if the specified record is a match 
+      /// @brief The value that properties will be compared to.
+      PropertyVal compare_val{};
+
+      /// @brief The predicate used for matching
+      ComparePred compare_pred{};
+
+      /// @brief Check if the table record contains one of our match falues.
       auto operator()(const PropertyMap& rec) const -> bool
       {
          auto matcher = [&rec, this](Prop prop_id) -> bool
@@ -93,23 +76,19 @@ namespace ctb::detail
                            }
                            return false;
                         };
-         if (enabled)
-         {
-            return rng::find_if(match_props, matcher) != match_props.end();
-         }
-         return true;
+
+         return rng::find_if(prop_ids, matcher) != prop_ids.end();
       }
 
+      /// @brief Equality comparison operator
       auto operator==(const PropertyFilter& other) const -> bool
       {
-         return compare_val == other.compare_val and 
-                match_props == other.match_props and 
-                filter_name == other.filter_name and
-                enabled     == other.enabled     and
+         return name == other.name and 
+                prop_ids    == other.prop_ids    and 
                 compare_pred(compare_val, other.compare_val) == other.compare_pred(compare_val, other.compare_val);
       }
 
-      PropertyFilter() noexcept = default;
+      PropertyFilter() = default;
       ~PropertyFilter() noexcept = default;
       PropertyFilter(const PropertyFilter&) = default;
       PropertyFilter(PropertyFilter&&) = default;

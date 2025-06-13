@@ -1,7 +1,7 @@
 /*******************************************************************
-* @file  TableProperty.h
+* @file  PropertyValue.h
 *
-* @brief defines the template class TableProperty
+* @brief defines the template class PropertyValue
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
 *******************************************************************/
@@ -38,41 +38,40 @@ namespace ctb::detail
    /// Default-constructed instances of this object will always have a 'null' value.
    /// 
    template<typename... Args>
-   struct TableProperty
+   struct PropertyValue
    {
       using ValueType = std::variant<std::monostate, Args...>;
 
-      /// @brief Create a TableProperty from a string_view by converting it to the specified type.
+      /// @brief Create a PropertyValue from a string_view by converting it to the specified type.
       /// 
-      /// This is a zero-copy alternative to creating a TableProperty<string> and then using as<> to convert it.
+      /// This is a zero-copy alternative to creating a PropertyValue<string> and then using as<> to convert it.
       /// 
-      /// @param text_value - The string_view to be converted and used to construct the TableProperty.
-      /// @return An TableProperty containing the converted value if the conversion succeeds, or an empty 
-      ///  TableProperty otherwise.
+      /// @param text_value - The string_view to be converted and used to construct the PropertyValue.
+      /// @return An PropertyValue containing the converted value if the conversion succeeds, or an empty 
+      ///  PropertyValue otherwise.
       template<std::convertible_to<ValueType> ValT>
-      [[nodiscard]] static auto create(std::string_view text_value) -> TableProperty
+      [[nodiscard]] static auto create(std::string_view text_value) -> PropertyValue
       {
          auto val = from_str<ValT>(text_value); 
          if (val)
          {
-            return TableProperty{ *val };
+            return PropertyValue{ *val };
          }
          else {
-            return TableProperty{};
+            return PropertyValue{};
          }
       }
 
 
-      /// @brief construct a TableProperty from any value convertible to ValueType
+      /// @brief construct a PropertyValue from any value convertible to ValueType
       ///
       /// this is intentionally non-explicit, because callers won't always have the exact
       /// typename easily available.
       template<std::convertible_to<ValueType> T>
-      constexpr TableProperty(T&& val) : m_val{ std::forward<T>(val) }
+      constexpr PropertyValue(T&& val) : m_val{ std::forward<T>(val) }
       {}
 
-      /// @brief returns whether or not this object contains a 'null' value.
-      ///
+      /// @return whether or not this object contains a 'null' value.
       auto isNull() const -> bool
       {
          return m_val.index() == 0;
@@ -94,7 +93,6 @@ namespace ctb::detail
       /// 
       /// Note: compile error in this function means the type you're casting to isn't compatible with any
       /// of the overloads, either use a different type or add a new overload to asT for the needed type.
-      /// 
       template<ArithmeticType T> 
       constexpr auto as() const -> std::optional<T>
       { 
@@ -112,18 +110,71 @@ namespace ctb::detail
          return std::visit(asT, m_val);
       }
 
+      /// @brief Extract date value from the property object, if possible
+      /// 
+      /// The object must contain a year_month_date, or a string that can be parsed as a date. 
+      /// All other data types will result in empty return value.
+      /// 
+      /// @return A valid year_month_date, or std::nullopt if the value is not compatible
+      auto asDate() const -> NullableDate
+      {
+         NullableDate result{};
+         if (std::holds_alternative<chrono::year_month_day>(m_val))
+         {
+            // bypass visit()'s virtual-fn overhead and just directly return.
+            result = std::get<chrono::year_month_day>(m_val);
+         }
+         else if (hasString())
+         {
+            // try to parse
+            if (auto parse_result = parseDate(asStringView(), constants::FMT_PARSE_DATE_SHORT); parse_result.has_value())
+            {
+               result = *parse_result;
+            }
+         }
+         // for other types nothing makes sense except empty/null
+         return result;
+      }
+
       /// @brief get a string value out of the property
       /// 
       /// @return the requested value, or an empty string if no value is available (e.g. null) 
       auto asString() const -> std::string
       {
-         if (std::holds_alternative<std::string>(m_val))
+         if (hasString())
          {
             return std::get<std::string>(m_val);
          }
 
          // For other types we use format() to get a string
          return asString("{}");
+      }
+
+      /// @brief get a formatted string value out of the property.
+      /// @param fmt_str format string to use for formatting the value. Must contain exactly 1 {} placeholder
+      /// @return the requested value, or an empty string if isNull(). 
+      /// 
+      /// Note that if the property isNull(), the fmt_str will not be used - you will always get an empty string
+      /// 
+      auto asString(std::string_view fmt_str) const -> std::string 
+      {
+         using std::chrono::year_month_day;
+         using namespace constants;
+
+         if (std::holds_alternative<std::string>(m_val))
+         {
+            // bypass visit()'s virtual-fn overhead and just directly return.
+            auto& str = std::get<std::string>(m_val);
+            return ctb::vformat(fmt_str, ctb::make_format_args(str));
+         }
+
+         auto asStr = Overloaded
+         {
+            [](std::monostate)                    {  return std::string{}; },
+            [&fmt_str](const year_month_day& val) {  return ctb::vformat(fmt_str == FMT_DEFAULT_FORMAT ? FMT_DATE_SHORT : fmt_str, make_format_args(val)); },
+            [&fmt_str](auto val)                  {  return ctb::vformat(fmt_str,  ctb::make_format_args(val)); }
+         };
+         return std::visit(asStr, m_val);
       }
 
       /// @brief return string_view to the internal string property
@@ -133,7 +184,7 @@ namespace ctb::detail
       /// if the contained property is not a valid string, you'll get an empty string_view back.
       auto asStringView() const -> std::string_view
       {
-         if (std::holds_alternative<std::string>(m_val))
+         if (hasString())
          {
             return std::get<std::string>(m_val);
          }
@@ -187,35 +238,14 @@ namespace ctb::detail
          return as<double>();
       }
 
-      /// @brief get a formatted string value out of the property.
-      /// @param fmt_str format string to use for formatting the value. must contain exactly 1 {} placeholder
-      /// @return the requested value, or an empty string if isNull(). 
-      /// 
-      /// Note that if the property isNull(), the fmt_str will not be used - you will always get an empty string
-      /// 
-      auto asString(std::string_view fmt_str) const -> std::string 
-      {
-         using std::chrono::year_month_day;
-
-         auto asStr = Overloaded
-         {
-            [](const std::string& val)    {  return val;                                                 },
-            [](std::monostate)            {  return std::string{};                                       },
-            [](const year_month_day& val) {  return ctb::format(constants::FMT_DATE_SHORT, val);      },
-            [&fmt_str](auto val)          {  return ctb::vformat(fmt_str,  ctb::make_format_args(val));  }
-         };
-         return std::visit(asStr, m_val);
-      }
-
-      /// @brief allows for comparison of TableProperty objects, as well as putting them in ordered containers
-      [[nodiscard]] auto operator<=>(const TableProperty& prop) const 
+      /// @brief allows for comparison of PropertyValue objects, as well as putting them in ordered containers
+      [[nodiscard]] auto operator<=>(const PropertyValue& prop) const 
       {
          return m_val <=> prop.m_val;
       }
-      auto operator==(const TableProperty& prop) const -> bool = default;
+      auto operator==(const PropertyValue& prop) const -> bool = default;
             
       /// @brief allow assigning values, not just TableProperties
-      ///
       template<typename Self, std::convertible_to<ValueType> T>
       auto&& operator=(this Self&& self, T&& t) 
       {
@@ -230,12 +260,12 @@ namespace ctb::detail
          return !isNull();
       }
 
-      constexpr TableProperty() noexcept = default;
-      ~TableProperty() noexcept = default;
-      constexpr TableProperty(const TableProperty&) = default;
-      constexpr TableProperty(TableProperty&&) = default;
-      constexpr TableProperty& operator=(const TableProperty&) = default;
-      constexpr TableProperty& operator=(TableProperty&&) = default;
+      constexpr PropertyValue() noexcept = default;
+      ~PropertyValue() noexcept = default;
+      constexpr PropertyValue(const PropertyValue&) = default;
+      constexpr PropertyValue(PropertyValue&&) = default;
+      constexpr PropertyValue& operator=(const PropertyValue&) = default;
+      constexpr PropertyValue& operator=(PropertyValue&&) = default;
    
    private:
       ValueType m_val{};

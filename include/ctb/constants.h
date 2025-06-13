@@ -36,6 +36,21 @@ namespace ctb::constants
    inline constexpr int         MAX_ENV_VAR_LENGTH          = 128;
 
    // column labels
+   inline constexpr const char* DISPLAY_COL_CONSUME_DATE    = "Consumed On";
+   inline constexpr const char* DISPLAY_COL_CONSUME_REASON  = "Reason";
+   inline constexpr const char* DISPLAY_COL_CONSUME_FROM    = "Consumed From";
+   inline constexpr const char* DISPLAY_COL_CT_SCORE        = "CT Score";
+   inline constexpr const char* DISPLAY_COL_CT_WINDOW       = "CT Window";
+   inline constexpr const char* DISPLAY_COL_LOCALE          = "Region and Appellation";
+   inline constexpr const char* DISPLAY_COL_MY_SCORE        = "My Score";
+   inline constexpr const char* DISPLAY_COL_MY_WINDOW       = "My Window";
+   inline constexpr const char* DISPLAY_COL_PRICE           = "Price";
+   inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Ordered";
+   inline constexpr const char* DISPLAY_COL_PURCHASES       = "Purchases";
+   inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
+   inline constexpr const char* DISPLAY_COL_STORE           = "Store";
+   inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
+
    inline constexpr const char* DISPLAY_COL_AVAILABLE       = "Ready";
    inline constexpr const char* DISPLAY_COL_LINEAR          = "Linear";
    inline constexpr const char* DISPLAY_COL_BELL_CURVE      = "Bell";
@@ -43,24 +58,17 @@ namespace ctb::constants
    inline constexpr const char* DISPLAY_COL_LATE_CURVE      = "Late";
    inline constexpr const char* DISPLAY_COL_EARLY_LATE      = "Both";
    inline constexpr const char* DISPLAY_COL_FAST_MATURING   = "Fast";
-   inline constexpr const char* DISPLAY_COL_CT_SCORE        = "CT Score";
-   inline constexpr const char* DISPLAY_COL_CT_WINDOW       = "CT Window";
-   inline constexpr const char* DISPLAY_COL_LOCALE          = "Region and Appellation";
-   inline constexpr const char* DISPLAY_COL_MY_SCORE        = "My Score";
-   inline constexpr const char* DISPLAY_COL_MY_WINDOW       = "My Window";
-   inline constexpr const char* DISPLAY_COL_PURCHASES       = "Purchases";
-   inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
-   inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
-   inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Ordered";
-   inline constexpr const char* DISPLAY_COL_STORE           = "Store";
-   inline constexpr const char* DISPLAY_COL_PRICE           = "Price";
 
    // filter names
    inline constexpr const char* FILTER_APPELATION           = "Appellation";
+   inline constexpr const char* FILTER_BOTTLE_SIZE          = "Size";
    inline constexpr const char* FILTER_COUNTRY              = "Country";
+   inline constexpr const char* FILTER_CONSUME_YEAR         = "Year Consumed";
+   inline constexpr const char* FILTER_CONSUME_MONTH        = "Month Consumed";
    inline constexpr const char* FILTER_ORDER_DATE           = "Order Date";
    inline constexpr const char* FILTER_PRODUCER             = "Producer";
    inline constexpr const char* FILTER_REGION               = "Region";
+   inline constexpr const char* FILTER_CONSUME_REASON       = "Reason";
    inline constexpr const char* FILTER_STORE                = "Store";
    inline constexpr const char* FILTER_VARIETAL             = "Varietal";
    inline constexpr const char* FILTER_VINTAGE              = "Vintage";
@@ -77,6 +85,7 @@ namespace ctb::constants
 
    // sort option names
    inline constexpr const char* SORT_OPTION_APPELATION_WINE       = "Appellation, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_CONSUME_DATE          = "Date Consumed";
    inline constexpr const char* SORT_OPTION_COUNTRY_APPELATION    = "Country, Appellation and Wine";
    inline constexpr const char* SORT_OPTION_LOCALE_WINE           = "Country, Region, and Appellation";
    inline constexpr const char* SORT_OPTION_PRODUCER_WINE_NAME    = "Producer, Wine and Vintage";
@@ -100,13 +109,13 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";
 
    // table names
-   inline constexpr const char* TABLE_NAME_LIST                   = "My Wine Cellar";
+   inline constexpr const char* TABLE_NAME_LIST                   = "Wines in My Cellar";
    inline constexpr const char* TABLE_NAME_INVENTORY              = "Bottle Inventory";
    inline constexpr const char* TABLE_NAME_NOTES                  = "Tasting Notes";
    inline constexpr const char* TABLE_NAME_PRIVATENOTES           = "Private Notes";
    inline constexpr const char* TABLE_NAME_PURCHASE               = "Wine Purchases";
-   inline constexpr const char* TABLE_NAME_PENDING                = "Pending Wine Deliveries";
-   inline constexpr const char* TABLE_NAME_CONSUMED               = "Consumed Bottles";
+   inline constexpr const char* TABLE_NAME_PENDING                = "Wine Pending Delivery";
+   inline constexpr const char* TABLE_NAME_CONSUMED               = "Wine Consumed";
    inline constexpr const char* TABLE_NAME_AVAILABILITY           = "Ready to Drink List";
    inline constexpr const char* TABLE_NAME_TAG                    = "Wish List Tags";
    inline constexpr const char* TABLE_NAME_PROREVIEW              = "Manually Entered Pro Reviews";
@@ -122,6 +131,7 @@ namespace ctb::constants
    inline constexpr const char* ERROR_STR_OPERATION_CANCELED      = "Operation Canceled.";
    inline constexpr const char* ERROR_STR_DIALOG_TRANSFER_FAILED  = "Unexpected error transferring data to/from dialog.";
    inline constexpr const char* ERROR_STR_DOWNLOAD_AUTH_FAILURE   = "File download canceled, no valid login was provided.";
+   inline constexpr const char* ERROR_STR_FILTER_NOT_FOUND        = "Filter object not found, this is a bug!";
    inline constexpr const char* ERROR_STR_INVALID_INDEX           = "Invalid index";
    inline constexpr const char* ERROR_STR_INVALID_ROW_INDEX       = "Invalid row index";
    inline constexpr const char* ERROR_STR_EDITING_NOT_SUPPORTED   = "Editing data is not supported.";
@@ -144,6 +154,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND          = "Folder '{}' does not exist.";
    inline constexpr const char* FMT_ERROR_PROP_NOT_FOUND          = "Property '{}' was not found.";
 
+   inline constexpr const char* FMT_DEFAULT_FORMAT                = "{}";
    inline constexpr const char* FMT_NUMBER_CURRENCY               = "${:.2f}";
    inline constexpr const char* FMT_NUMBER_DECIMAL                = "{:.1f}";
    inline constexpr const char* FMT_DATE_SHORT                    = "{:%m/%d/%Y}";
@@ -153,6 +164,13 @@ namespace ctb::constants
    inline constexpr const char* FMT_PARSE_ISO_DATETIME_LOCAL      = "%FT%T%Ez"; //. These 3 don't have {}'s because they're meant to be used with std::chrono::parse
    inline constexpr const char* FMT_PARSE_ISO_DATETIME_UTC        = "%FT%T%Z";
    inline constexpr const char* FMT_PARSE_ISO_DATE_ONLY           = "%F";
+
+   inline constexpr const char* FMT_SUMMARY_AVAILABILITY          = "{} Wines with {} Bottles Ready to Drink (Default Formula)";
+   inline constexpr const char* FMT_SUMMARY_CONSUMED              = "{} Wines Consumed Since {}";
+   inline constexpr const char* SUMMARY_EMPTY                     = "No data. Check filter options or download latest CellarTracker data.";
+   inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, with {} Bottles Cellared and {} Pending Delivery";
+   inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles";
+
 
    inline constexpr auto     ONE_MB                               = 1024 * 1024;
    inline constexpr uint16_t CT_NULL_YEAR                         =        9999;

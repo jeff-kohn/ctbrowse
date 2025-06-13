@@ -39,7 +39,7 @@ namespace ctb::detail
       using Prop          = Traits::Prop;
       using PropType      = detail::PropType;
       using PropertyMap   = PropertyMapT;
-      using Property      = PropertyMap::mapped_type; 
+      using PropertyVal   = PropertyMap::mapped_type; 
       using RowType       = csv::CSVRow;
 
       /// @brief Construct a TableRecord from a RowType
@@ -100,9 +100,9 @@ namespace ctb::detail
       /// 
       /// @return the requested property value if found, or a null property value if not
       ///
-      auto getProperty(Prop prop_id) const -> const Property& 
+      auto getProperty(Prop prop_id) const -> const PropertyVal& 
       {
-         static constexpr auto null_prop = Property{};
+         static constexpr auto null_prop = PropertyVal{};
 
          auto it = m_props.find(prop_id);
          return it == m_props.end() ? null_prop : it->second;
@@ -115,7 +115,7 @@ namespace ctb::detail
       /// 
       /// @return the requested property value if found, or a null property value if not
       ///
-      auto operator[](Prop prop_id) const -> const Property& 
+      auto operator[](Prop prop_id) const -> const PropertyVal& 
       {
          return getProperty(prop_id);
       }
@@ -132,8 +132,8 @@ namespace ctb::detail
    private:
       PropertyMap m_props{ Traits::Schema.size()};
 
-      // @brief converts a CSVField into a TableProperty
-      Property fieldToProperty(csv::CSVField& fld, PropType prop_type)
+      // @brief converts a CSVField into a PropertyValue
+      PropertyVal fieldToProperty(csv::CSVField& fld, PropType prop_type)
       {
          if (fld.is_null())
             return {};
@@ -141,23 +141,23 @@ namespace ctb::detail
          switch (prop_type)
          {
             case PropType::String:
-               return Property{ fld.get<std::string>() };
+               return PropertyVal{ fld.get<std::string>() };
 
             case PropType::UInt16:
-               return fld.is_int() ? Property{ fld.get<uint16_t>() } : Property{};
+               return fld.is_int() ? PropertyVal{ fld.get<uint16_t>() } : PropertyVal{};
 
             case PropType::UInt64:
-               return fld.is_int() ? Property{ fld.get<uint16_t>() } : Property{};
+               return fld.is_int() ? PropertyVal{ fld.get<uint16_t>() } : PropertyVal{};
 
             case PropType::Double:
             {
                long double val{};
                if (fld.try_parse_decimal(val))
                {
-                  return Property{ static_cast<double>(val) };
+                  return PropertyVal{ static_cast<double>(val) };
                }
                else {
-                  SPDLOG_DEBUG("TableProperty::fieldToProperty - Unable to parse value '{}' as a double", fld.get<std::string_view>());
+                  SPDLOG_DEBUG("PropertyValue::fieldToProperty - Unable to parse value '{}' as a double", fld.get<std::string_view>());
                   return {};
                }
             }
@@ -166,11 +166,11 @@ namespace ctb::detail
                auto result = parseDate(fld.get<std::string_view>(), constants::FMT_PARSE_DATE_SHORT);
                if (result) 
                {
-                  return Property{ *result };
+                  return PropertyVal{ *result };
                }
                else {
-                  SPDLOG_DEBUG("TableProperty::fieldToProperty - Unable to parse value '{}' as a date", fld.get<std::string_view>());
-                  return Property{};
+                  SPDLOG_DEBUG("PropertyValue::fieldToProperty - Unable to parse value '{}' as a date", fld.get<std::string_view>());
+                  return PropertyVal{};
                }
             }
             default:

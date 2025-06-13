@@ -16,17 +16,14 @@
 namespace ctb::detail
 {
 
-   /// @brief Defines a functor that can be used to sort a container/range of table entries
-   ///
-   /// Default sort is less-than, if reverse=true it will be greater-than
-   /// 
+   /// @brief Defines a functor that can be used to sort a container/range of table entries.
    template<EnumType PropT, PropertyMapType PropMapT>
    struct TableSorter
    {
       using PropertyMap = PropMapT;
       using Prop        = PropT;
 
-      std::vector<Prop>   sort_props{};      // properties to use for sorting, in order
+      std::vector<Prop>   sort_props{};      // properties to use for sorting, in order they will be checked.
       std::string         sort_name{};       // for display purposes in selection lists etc
       bool                reverse{ false };  // set to true to sort in reverse order
 
@@ -35,6 +32,8 @@ namespace ctb::detail
       {
          static constexpr typename PropertyMap::mapped_type null_prop{};
 
+         // the 'reverse' only applies to first sort prop, not subsequent
+         bool first = true; 
          for (auto prop : sort_props)
          {
             auto it1 = r1.find(prop);
@@ -46,12 +45,13 @@ namespace ctb::detail
             auto cmp = p1 <=> p2;
             if (cmp < 0)
             {
-               return reverse ? false : true;
+               return reverse and first ? false : true;
             }
             else if (cmp > 0)
             {
-               return reverse ? true : false;
+               return reverse and first ? true : false;
             }
+            first = false;
          }
          return false; // all props equal
       }

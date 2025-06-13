@@ -59,6 +59,7 @@ namespace ctb::app
             case CMD_COLLECTION_MY_CELLAR:      return TableId::List;
             case CMD_COLLECTION_PENDING_WINE:   return TableId::Pending;
             case CMD_COLLECTION_READY_TO_DRINK: return TableId::Availability;
+            case CMD_COLLECTION_CONSUMED:       return TableId::Consumed;
             default:
                throw Error(Error::Category::ArgumentError, "Table corresponding to ID {} not found.", event_id);
          }
@@ -190,8 +191,8 @@ namespace ctb::app
 
       // We don't actually create the child view until a dataset is opened.
       createMenuBar();
-      createStatusBar();
       createToolBar();
+      m_status_bar = CreateStatusBar();
 
       // File menu handlers
       Bind(wxEVT_MENU, &MainFrame::onMenuFilePreferences, this, CmdId::CMD_FILE_SETTINGS);
@@ -205,6 +206,7 @@ namespace ctb::app
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_MY_CELLAR);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_PENDING_WINE);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_READY_TO_DRINK);
+      Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_CONSUMED);
 
       // Online menu events
       Bind(wxEVT_MENU, &MainFrame::onMenuOnlineWineDetails,    this, CMD_ONLINE_WINE_DETAILS);
@@ -299,6 +301,14 @@ namespace ctb::app
          });
       menu_data->Append(new wxMenuItem{
          menu_data, 
+         CmdId::CMD_COLLECTION_CONSUMED, 
+         constants::CMD_COLLECTION_CONSUMED_LBL, 
+         constants::CMD_COLLECTION_CONSUMED_TIP,
+         wxITEM_NORMAL
+         });
+      menu_data->AppendSeparator();
+      menu_data->Append(new wxMenuItem{
+         menu_data, 
          CmdId::CMD_COLLECTION_READY_TO_DRINK, 
          constants::CMD_COLLECTION_READY_TO_DRINK_LBL, 
          constants::CMD_COLLECTION_READY_TO_DRINK_TIP,
@@ -372,18 +382,6 @@ namespace ctb::app
 
       m_menu_bar->Append(menu_wine, constants::LBL_MENU_WINE);
       SetMenuBar(m_menu_bar);
-   }
-
-
-   void MainFrame::createStatusBar()
-   {
-      constexpr int pane_count{3};
-
-      m_status_bar = CreateStatusBar(pane_count);
-      const int sb_field_widths[pane_count] = {-4, -1, -1};
-      m_status_bar->SetStatusWidths(pane_count, sb_field_widths);
-      const int sb_field_styles[pane_count] = {wxSB_NORMAL, wxSB_NORMAL, wxSB_NORMAL};
-      m_status_bar->SetStatusStyles(pane_count, sb_field_styles);
    }
 
 
@@ -830,31 +828,12 @@ namespace ctb::app
 
    void MainFrame::updateStatusBarCounts()
    {     
-      int total{0};
-      int filtered{0};
-      
+      std::string summary{};
       if (m_event_source->hasDataset())
       {
-         auto tbl = m_event_source->getDataset();
-         total = tbl->totalRecCount();
-         filtered = tbl->filteredRecCount();
+         summary = m_event_source->getDataset()->getDataSummary();
       }
-
-      if (total)
-      {
-         SetStatusText(ctb::format(constants::FMT_LBL_TOTAL_ROWS, total), STATUS_BAR_PANE_TOTAL_ROWS);
-      }
-      else{
-         SetStatusText("", STATUS_BAR_PANE_TOTAL_ROWS);
-      }
-
-      if (filtered < total)
-      {
-         SetStatusText(ctb::format(constants::FMT_LBL_FILTERED_ROWS, filtered), STATUS_BAR_PANE_FILTERED_ROWS);
-      }
-      else{
-         SetStatusText("", STATUS_BAR_PANE_FILTERED_ROWS);
-      }
+      SetStatusText(summary);
    }
 
 

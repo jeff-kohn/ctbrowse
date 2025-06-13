@@ -54,16 +54,19 @@ namespace ctb::app
       // these control categories allow us to show/hide different controls based on context of current dataset
       enum class ControlCategory
       {
-         WineDetails,
+         Consumed,
+         CtDrinkWindow,        // ReadyToDrink dataset has both 'My' and 'CT' windows
          DrinkWindow,
-         CtDrinkWindow, // ReadyToDrink dataset has both 'My' and 'CT' windows
-         Score,
-         Valuation,
-         Pending,
-         LinkReadyToDrink,
-         LinkOpenWineDetails,
          LinkAcceptPending,
-         TastingNotes
+         LinkOpenWineDetails,
+         LinkReadyToDrink,
+         Location,
+         Pending,
+         Score,
+         Size,
+         TastingNotes,
+         Valuation,
+         WineDetails,
       };
       using CategorizedControls = CategorizedControls<ControlCategory>;
 
@@ -71,7 +74,7 @@ namespace ctb::app
       /// @brief struct that control validators will be bound to for displaying in the window
       struct WineDetails
       {
-         std::string wine_id{};            // used for buliding CT url, not displayed
+         std::string wine_id{};            // used for building CT url, not displayed
          wxString wine_name{};
          wxString vintage{};
          wxString varietal{};
@@ -81,6 +84,10 @@ namespace ctb::app
          wxString appellation{};
          wxString drink_window{};
          wxString ct_drink_window{};
+         wxString consume_date{};
+         wxString consume_reason{};
+         wxString location{};
+         wxString size{};
          wxString my_score{};
          wxString ct_score{};
          wxString my_price{};

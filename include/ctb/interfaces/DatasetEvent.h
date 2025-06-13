@@ -18,7 +18,7 @@ namespace ctb
    struct DatasetEvent
    {
       using Prop      = CtProp;
-      using Property  = CtProperty;
+      using PropertyVal  = CtPropertyVal;
 
       enum class Id
       {

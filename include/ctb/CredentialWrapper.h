@@ -43,7 +43,7 @@ namespace ctb
 
       /// @brief Checks whether the current credential should be saved.
       /// 
-      /// Note that this class doesn't directly support persistence, it's up to the user
+      /// Note that this class doesn't directly support persistence, it's up to the caller
       /// to decide if/how/where to save it, usually after verifying that it's a valid credential.
       /// 
       /// @return true if the credential should be saved, false if not.

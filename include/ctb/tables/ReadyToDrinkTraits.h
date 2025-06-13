@@ -25,13 +25,13 @@ namespace ctb
    {
    public:
       using Prop                 = CtProp;
-      using Property             = CtProperty;
+      using PropertyVal          = CtPropertyVal;
       using PropType             = detail::PropType;
       using PropertyMap          = CtPropertyMap;
       using FieldSchema          = detail::FieldSchema<Prop>;
       using ListColumn           = CtListColumn;
       using ListColumnSpan       = CtListColumnSpan;
-      using MultiMatchFilter     = detail::MultiMatchPropertyFilter<Prop, PropertyMap>;
+      using MultiValueFilter     = detail::MultiValueFilter<Prop, PropertyMap>;
       using TableSort            = detail::TableSorter<CtProp, CtPropertyMap>;
 
       static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
@@ -97,13 +97,13 @@ namespace ctb
       };
 
       /// @brief multi-value filters that can be used on this table.
-      static inline const std::array MultiMatchFilters{
-         MultiMatchFilter{ Prop::Varietal,    constants::FILTER_VARIETAL   },
-         MultiMatchFilter{ Prop::Vintage,     constants::FILTER_VINTAGE    },
-         MultiMatchFilter{ Prop::Country,     constants::FILTER_COUNTRY    },
-         MultiMatchFilter{ Prop::Region,      constants::FILTER_REGION     },
-         MultiMatchFilter{ Prop::Appellation, constants::FILTER_APPELATION },
-         MultiMatchFilter{ Prop::Producer,    constants::FILTER_PRODUCER   },
+      static inline const std::array MultiValueFilters{
+         MultiValueFilter{ Prop::Varietal,    constants::FILTER_VARIETAL   },
+         MultiValueFilter{ Prop::Vintage,     constants::FILTER_VINTAGE    },
+         MultiValueFilter{ Prop::Country,     constants::FILTER_COUNTRY    },
+         MultiValueFilter{ Prop::Region,      constants::FILTER_REGION     },
+         MultiValueFilter{ Prop::Appellation, constants::FILTER_APPELATION },
+         MultiValueFilter{ Prop::Producer,    constants::FILTER_PRODUCER   },
       };
 
       /// @brief getTableName()
@@ -132,7 +132,7 @@ namespace ctb
       /// PropertyMap from the CSV file are already set, this impl just provides
       /// any calculated property values or does fixup for any parsed values that need it.
       /// 
-      /// @param rec - map containing a TableProperty for each PropID enum value.
+      /// @param rec - map containing a PropertyValue for each PropID enum value.
       static void onRecordParse(PropertyMap& rec)
       {
          using enum Prop;
@@ -141,6 +141,7 @@ namespace ctb
          rec[QtyTotal]       = calcQtyTotal(rec);
          rec[RtdConsumed]    = getRtdConsumed(rec);
 
+         validateDrinkYear(rec[BeginConsume]);
          validateDrinkYear(rec[EndConsume]);
          validateDrinkYear(rec[CtBeginConsume]);
          validateDrinkYear(rec[CtEndConsume]);

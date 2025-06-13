@@ -9,9 +9,8 @@
 
 #include "ctb/interfaces/IDataset.h"
 
-#include "ctb/tables/detail/MultiMatchPropertyFilterMgr.h"
 #include "ctb/tables/detail/PropertyFilter.h"
-#include "ctb/tables/detail/PropertyFilterMgr.h"
+#include "ctb/tables/detail/FilterManager.h"
 #include "ctb/tables/detail/SubStringFilter.h"
 
 #include <map>
@@ -25,10 +24,9 @@ namespace ctb
    /// It provides access to all properties of the underlying dataset, but also has ListColumns, which are 
    /// the properties displayed in the main list-view. 
    /// 
-   /// THIS CLASS IS NOT THREADSAFE. UI code and UI-owned objects are inherently tied to the main thread
-   /// in wxWidgets. Any background threads should work on their own data and send messages to the main thread.
-   /// Access to the dataset should always be from main thread since multiple UI windows are holding reference 
-   /// to it.
+   /// THIS CLASS IS NOT THREADSAFE. It doens't need to be since UI code in GUI frameworks like wxWidgets is tied to main message thread. 
+   /// Any background threads should work on their own data and send messages to the main thread/window. Access to the dataset should 
+   /// always be from main thread since multiple UI windows are holding references to it.
    /// 
    template<DataTableType DataTableT>
    class CtDataset final : public IDataset
@@ -39,13 +37,13 @@ namespace ctb
       using FieldSchama         = base::FieldSchema;
       using ListColumn          = base::ListColumn;
       using ListColumnSpan      = base::ListColumnSpan;
-      using MultiMatchFilterMgr = detail::MultiMatchPropertyFilterMgr<Prop, PropertyMap>;
-      using MultiMatchFilter    = MultiMatchFilterMgr::Filter;
+      using MultiValueFilter    = CtMultiValueFilterMgr::Filter;
+      using MultiValueFilterMgr = CtMultiValueFilterMgr;
       using Prop                = base::Prop;
-      using Property            = base::Property;
+      using PropertyVal         = base::PropertyVal;
       using PropertyFilter      = base::PropertyFilter;
-      using PropertyFilterMgr   = detail::PropertyFilterMgr<Prop, base::PropertyMap>;
-      using MaybePropFilter     = base::MaybePropFilter;
+      using PropertyFilterMgr   = CtPropertyFilterMgr;
+      using MaybePropFilter     = base::MaybeFilter;
       using PropertyMap         = base::PropertyMap;
       using PropertyValueSet    = base::PropertyValueSet;
       using Record              = DataTable::value_type;
@@ -62,6 +60,64 @@ namespace ctb
          return DatasetPtr{ static_cast<IDataset*>(new CtDataset{ std::move(data) }) };
       }
 
+      /// @brief Returns the name of the CT table this dataset represents. Not meant to be 
+      ///         displayed to the user, this is for internal use. 
+      auto getTableName() const -> std::string_view override
+      {
+         return Traits::getTableName();
+      }
+
+      /// @brief Returns the TableId enum for this dataset's underlying table.
+      auto getTableId() const -> TableId override
+      {
+         return Traits::getTableId();
+      }
+
+      /// @brief Retrieves a short text summary of the data in the table
+      auto getDataSummary() const -> std::string override
+      {
+         if (m_current_view->empty())
+            return {};
+
+         switch (getTableId())
+         {
+            case TableId::Availability:
+            {
+               auto wines   = rowCount(true);
+               auto bottles = foldValues(CtProp::RtdQtyDefault, int32_t{}, std::plus{});
+               return ctb::format(constants::FMT_SUMMARY_AVAILABILITY, wines, bottles);
+            }
+            case TableId::Pending:
+            {
+               auto wines   = rowCount(true);
+               auto stores  = getDistinctValues(CtProp::PendingStoreName, true).size();
+               auto bottles = foldValues(CtProp::QtyPending, int32_t{}, std::plus{});
+               return ctb::format(constants::FMT_SUMMARY_PENDING, wines, stores, bottles);
+            }
+            case TableId::List:
+            {
+               auto wines    = rowCount(true);
+               auto on_hand  = foldValues(CtProp::QtyOnHand,  int32_t{}, std::plus{});
+               auto on_order = foldValues(CtProp::QtyPending, int32_t{}, std::plus{});
+               return ctb::format(constants::FMT_SUMMARY_MY_CELLAR, wines, on_hand, on_order);
+            }
+            case TableId::Consumed:
+            {
+               std::string result{ constants::SUMMARY_EMPTY };
+               auto wine_count = rowCount(true);
+               if (wine_count)
+               {
+                  // get earliest year (return values are sorted).
+                  auto first_year = getDistinctValues(CtProp::ConsumeYear, true).begin()->asUInt16().value_or(0);
+                  result = ctb::format(constants::FMT_SUMMARY_CONSUMED, wine_count, first_year);
+               }
+               return result;
+            }
+            default:
+               return {};
+         }
+      }
+
       /// @brief Retrieves the schema information for a specified property.
       /// 
       /// @param prop_id - The identifier of the property whose schema is to be retrieved.
@@ -75,6 +131,14 @@ namespace ctb
             return std::nullopt;
          }
          return it->second;
+      }
+
+      /// @brief Gets the collection of active display columns 
+      /// 
+      /// Note that some may be hidden and not visible.
+      auto listColumns() const -> CtListColumnSpan override
+      { 
+         return Traits::DefaultListColumns; 
       }
 
       /// @brief retrieves list of available sorters, in order of display
@@ -102,46 +166,22 @@ namespace ctb
          }
       }
 
-      /// @brief Gets the collection of active display columns 
-      /// 
-      /// Note that some may be hidden and not visible.
-      auto listColumns() const -> CtListColumnSpan override
-      { 
-         return Traits::DefaultListColumns; 
-      }
-
       /// @brief retrieves a list of available filters for this table.
-      auto multiMatchFilters() const -> CtMultiMatchFilterSpan override
+      auto availableMultiValueFilters() const -> CtMultiValueFilterSpan override
       {
-         return Traits::MultiMatchFilters;
+         return Traits::MultiValueFilters;
       }
 
-      /// @brief Get a list of all distinct values from the table for the specified property.
-      /// 
-      /// This can be used to get filter values for match-filters.
-      [[nodiscard]] auto getDistinctValues(CtProp prop_id) const -> PropertyValueSet override
-      {
-         PropertyValueSet values{};
-         if (hasProperty(prop_id))
-         {
-            for (const Record& rec : m_data)
-            {
-               values.emplace(rec[prop_id]);
-            }
-         }
-         return values;
-      }
-
-      /// @brief Adds a match value filter for the specified column.
+      /// @brief Adds a filter match value for the specified column.
       ///
-      /// a record must match at least one match_value for each property that has a filter 
-      /// to be considered a match.
-      /// 
       /// @return true if the filter was applied, false it it wasn't because there were no matches
-      auto addMultiMatchFilter(CtProp prop_id, const Property& match_value) -> bool override
+      auto addMultiValueFilter(CtProp prop_id, const PropertyVal& match_value) -> bool override
       {
-         // if we somehow get passed a filter we already have, don't waste our time.
-         if ( m_mm_filters.addFilter(prop_id, match_value) )
+         // Since we may be creating new/uninitialized filter, we need to set all properties.
+         auto& filter = m_mval_filters[prop_id];
+         filter.prop_id = prop_id;
+         filter.filter_name = magic_enum::enum_name(prop_id);
+         if (filter.match_values.insert(match_value).second)
          {
             applyFilters();
             return true;
@@ -149,16 +189,24 @@ namespace ctb
          return false;
       }
 
-      /// @brief removes a match value filter for the specified column.
+      /// @brief removes a filter match value for the specified property
       ///
-      /// @return true if the filter was removed, false if it wasn't found
-      auto removeMultiMatchFilter(CtProp prop_id, const Property& match_value) -> bool override
+      /// @return true if the filter value was removed, false if it wasn't found
+      auto removeMultiValueFilter(CtProp prop_id, const PropertyVal& match_value) -> bool override
       {
-         // if we somehow get passed filter that we aren't using, don't waste our time.
-         if ( m_mm_filters.removeFilter(prop_id, match_value) )
+         if (m_mval_filters.hasFilter(prop_id))
          {
-            applyFilters();
-            return true;
+            auto& filter = m_mval_filters[prop_id];
+            if (filter.match_values.erase(match_value) > 0)
+            {
+               // if we're removing the last match value, remove the filter too.
+               if (filter.match_values.empty())
+               {
+                  m_mval_filters.removeFilter(prop_id);
+               }
+               applyFilters();
+               return true;
+            }
          }
          return false;
       }
@@ -169,7 +217,7 @@ namespace ctb
       /// one at a time.
       /// 
       /// @return true if filter was applied, false if there were no matches in which
-      /// case the filter was not applied. 
+      ///  case the filter was not applied. 
       auto filterBySubstring(std::string_view substr) -> bool override
       {
          // this overload searches all columns in the current list view, so get the prop_id's 
@@ -185,7 +233,7 @@ namespace ctb
       /// one at a time.
       /// 
       /// @return true if filter was applied, false if there were no matches in which
-      /// case the filter was not applied. 
+      ///  case the filter was not applied. 
       auto filterBySubstring(std::string_view substr, CtProp prop_id) -> bool override
       {
          auto cols = std::vector{ prop_id };
@@ -198,6 +246,71 @@ namespace ctb
          m_substring_filter = std::nullopt;
          applyFilters();
       }
+
+      /// @brief Check if a filter with the specified name is applied to the dataset.
+      /// 
+      /// filter_name is case-sensitive
+      /// 
+      /// @return - true if there is a filter by the specified name, false otherwise.
+      auto hasFilter(std::string_view filter_name) const -> bool override
+      {
+         return m_prop_filters.hasFilter(filter_name);
+      }
+
+      /// @brief Get the filter with the specified name that is applied to the dataset.
+      /// 
+      /// filter_name is case-sensitive
+      /// 
+      /// @return - the requested filter, or std::nullopt if not found
+      auto getPropFilter(std::string_view filter_name) const  -> MaybePropFilter override
+      {
+         return m_prop_filters.getFilter(filter_name);
+      }
+
+      /// @brief Add the supplied filter to the dataset, replacing any existing filter with the same name
+      /// @return true if resulting record count is > 0, false if resulting record count is == 0
+      auto applyPropFilter(const PropertyFilter& filter) -> bool override
+      {
+         m_prop_filters[filter.name] = filter;
+         applyFilters();
+         return m_current_view->size() > 0;
+      }
+
+      /// @brief Remove the filter with the specified name
+      /// 
+      /// filter_name is case-sensitive
+      /// 
+      /// @return true if filter was removed; false if it wasn't found.
+      auto removePropFilter(const std::string& filter_name) -> bool override
+      {
+         if (m_prop_filters.removeFilter(filter_name))
+         {
+            applyFilters();
+            return true;
+         }
+         return false;
+      }
+
+      /// @brief Remove all filters from the dataset
+      /// 
+      /// This removes property and multi-value filters.
+      /// 
+      /// @return true if at least one filter was removed, false if there were no filters
+      //auto removeAllFilters() -> bool override
+      //{
+      //   bool got_one = false;
+      //   if (m_mval_filters.activeFilters())
+      //   {
+      //      m_mval_filters.clear();
+      //      got_one = true;
+      //   }
+      //   if (m_prop_filters.activeFilters())
+      //   {
+      //      m_prop_filters.clear();
+      //      got_one = true;
+      //   }
+      //   return got_one;
+      //}
 
       /// @brief Check whether the current dataset supports the given property
       /// 
@@ -221,147 +334,38 @@ namespace ctb
       /// is called on this dataset, after which it may be invalid. You should copy-construct 
       /// a new object if you need to hold onto it for a while rather than holding the reference.
       /// 
-      /// @return const reference to the requested property. It may be a null value, but it 
-      ///  will always be a valid CtProperty&.
-      auto getProperty(int rec_idx, CtProp prop_id) const noexcept(false) -> const Property & override
+      /// @return const reference to the requested property. It may contain a null value, but it 
+      ///  will always be a valid CtPropertyVal&.
+      auto getProperty(int rec_idx, CtProp prop_id) const noexcept(false) -> const PropertyVal & override
       {
-         assert(filteredRecCount() > rec_idx and "This is a logic bug, invalid index should never happen here.");
+         assert(rowCount(true) > rec_idx and "This is a logic bug, invalid index should never happen here.");
 
-         // invalid prop_id won't really hurt anything, it'll default-construct and return an empty/null value.
-         // if record index is invalid this will throw since we're using bounds-checked API.
-         return m_current_view->at(static_cast<size_t>(rec_idx))[prop_id];
+         const auto& record = m_current_view->at(static_cast<size_t>(rec_idx));
+         return record[prop_id];
       }
 
-
-
-      /// @brief Check if a filter with the specified name is applied to the dataset.
+      /// @brief Get a list of all distinct values from the table for the specified property.
       /// 
-      /// filter_name is case-sensitive
-      /// 
-      /// @return - true if there is a filter by the specified name, false otherwise.
-      auto hasFilter(std::string_view filter_name) const -> bool override
+      /// This can be used to get filter values for match-filters.
+      [[nodiscard]] auto getDistinctValues(CtProp prop_id, bool filtered_only) const -> PropertyValueSet override
       {
-         return m_prop_filters.hasFilter(filter_name);
-      }
-
-
-      /// @brief Check if a filter with the specified name is applied to the dataset.
-      /// 
-      /// filter_name is case-sensitive
-      /// 
-      /// @return - true if there is a filter by the specified name, false otherwise.
-      auto hasExactFilter(const PropertyFilter& filter) const -> bool override
-      {
-         return hasFilter(filter.filter_name) and filter == m_prop_filters.getFilter(filter.filter_name).value();
-      }
-
-      /// @brief Get the filter with the specified name that is applied to the dataset.
-      /// 
-      /// filter_name is case-sensitive
-      /// 
-      /// @return - the requested filter, or std::nullopt if not found
-      auto getFilter(std::string_view filter_name) const  -> MaybePropFilter override
-      {
-         return m_prop_filters.getFilter(filter_name);
-      }
-
-      /// @brief Add a filter to the dataset. Existing filter with same name will NOT be replaced, use removeFilter() first.
-      /// 
-      /// @return true if the filter was added, false if not because a filter with that name already exists.
-      auto addFilter(PropertyFilter filter) -> bool override
-      {
-         if (m_prop_filters.addFilter(filter) )
+         PropertyValueSet values{};
+         if (hasProperty(prop_id))
          {
-            if (filter.enabled)
+            for (const Record& rec : filtered_only? *m_current_view : m_data)
             {
-               applyFilters();
+               values.emplace(rec[prop_id]);
             }
-            return true;
          }
-         return false;
+         return values;
       }
 
-      /// @brief Replace a named filter with an updated version
-      /// 
-      /// If the filter == existing, this will be a no-op. Otherwise existing 
-      /// filter will be replaced with new and the dataset refreshed. 
-      /// 
-      /// If a filter by the same name doesn't already exist, this function is the
-      /// same as calling addFilter()
-      /// 
-      /// This is more efficient than calling removeFilter/addFilter because the dataset
-      /// will only be refreshed once.
-      /// 
-      /// @return true if filter was replaced or added, false if it no-op'd due to equality
-      auto replaceFilter(const PropertyFilter& filter) -> bool override
+      /// @brief returns the number of rows in the underlying dataset
+      /// @param filtered_only - if true, the count will only include rows matching any active filters.
+      ///                        if false, the count will always be the raw/total number of rows
+      auto rowCount(bool filtered_only) const -> int64_t override
       {
-         if (hasExactFilter(filter))
-            return false;
-
-         m_prop_filters[filter.filter_name] = filter;
-         applyFilters();
-         return true;
-      }
-
-      /// @brief Remove the filter with the specified name
-      /// 
-      /// filter_name is case-sensitive
-      /// 
-      /// @return true if filter was removed; false if it wasn't found.
-      auto removeFilter(std::string_view filter_name) -> bool override
-      {
-         if (m_prop_filters.removeFilter(filter_name))
-         {
-            applyFilters();
-            return true;
-         }
-         return false;
-      }
-
-      /// @brief Remove all filters from the dataset
-      /// 
-      /// This removes property and multi-value filters.
-      /// 
-      /// @return true if at least one filter was removed, false if there were no filters
-      auto removeAllFilters() -> bool
-      {
-         bool got_one = false;
-         if (m_mm_filters.activeFilters())
-         {
-            m_mm_filters.removeAllFilters();
-            got_one = true;
-         }
-         if (m_prop_filters.activeFilters())
-         {
-            m_prop_filters.removeAllFilters();
-            got_one = true;
-         }
-         return got_one;
-      }
-
-      /// @brief returns the total number of records in the underlying dataset
-      auto totalRecCount() const -> int64_t override
-      {
-         return std::ssize(m_data);
-      }
-
-      /// @brief returns the number of records with filters applied.
-      auto filteredRecCount() const -> int64_t override
-      {
-         return std::ssize(*m_current_view);
-      }
-
-      /// @brief Returns the TableId enum for this dataset's underlying table.
-      auto getTableId() const -> TableId override
-      {
-         return Traits::getTableId();
-      }
-
-      /// @return the name of the CT table this dataset represents. Not meant to be 
-      ///         displayed to the user, this is for internal use. 
-      auto getTableName() const -> std::string_view override
-      {
-         return Traits::getTableName();
+         return filtered_only ? std::ssize(*m_current_view) : std::ssize(m_data);
       }
 
       // default dtor, others are deleted since this object is meant to be heap-only
@@ -379,9 +383,9 @@ namespace ctb
       DataTable            m_data{};                 // the underlying data records for this table.
       DataTable            m_filtered_data{};        // we need a copy for the filtered data, so we can bind our views to it
       DataTable*           m_current_view{};         // may point to m_data or m_filtered_data depending if filter is active or not
-      PropertyFilterMgr    m_prop_filters{};         // active property filters
       ListColumns          m_list_columns{};         // columns that will be displayed in the dataset list-view
-      MultiMatchFilterMgr  m_mm_filters{};           // active multi-match filters
+      MultiValueFilterMgr  m_mval_filters{};         // active multi-match filters
+      PropertyFilterMgr    m_prop_filters{};         // active property filters
       MaybeSubStringFilter m_substring_filter{};
       TableSort            m_current_sort{};
       
@@ -402,10 +406,10 @@ namespace ctb
 
       void applyFilters()
       {
-         if (m_mm_filters.activeFilters() or m_prop_filters.activeFilters())
+         if (m_mval_filters.activeFilters() or m_prop_filters.activeFilters())
          {
             m_filtered_data = vws::all(m_data) | vws::transform([](auto&& rec) { return rec.getProperties(); }) // filters work with property maps, not records
-                                               | vws::filter(m_mm_filters)
+                                               | vws::filter(m_mval_filters)
                                                | vws::filter(m_prop_filters)
                                                | vws::transform([](auto&& map) { return Record{ map }; })       // back to record
                                                | rng::to<std::vector>();
@@ -461,6 +465,46 @@ namespace ctb
          }
       }
 
-};
+      /// @brief Apply a left-fold to the values for the specified prop_id
+      /// 
+      /// Note that ValT should be a type that can be used to call CtPropertyVal::as<ValT>()
+      /// 
+      /// @param prop_id - dataset property to get values for
+      /// @param initial_val - starting value for the fold, also determins return type
+      /// @param fn - the function to apply for the fold operation
+      /// @param filtered_only - if true, only rows matching active filters are included, if false ALL rows are included
+      /// @return - the result of the fold 
+      template<ArithmeticType ValT, typename FoldFunctionT>
+      auto foldValues(Prop prop_id, ValT initial_val, FoldFunctionT fn, bool filtered_only = true) const -> ValT
+      {
+         constexpr auto getVal = [](auto&& prop) -> ValT
+                                 { 
+                                    return prop.template as<ValT>().value_or(ValT{});
+                                 };
+         if (filtered_only)
+         {
+            return rng::fold_left(getSeriesFiltered(prop_id) | vws::transform(getVal), initial_val, fn);
+         }
+         else {
+            return rng::fold_left(getSeriesRaw(prop_id)      | vws::transform(getVal), initial_val, fn);
+         }
+      }
+
+      [[nodiscard]] auto getSeriesFiltered(CtProp prop_id) const
+      {
+         return vws::transform(*m_current_view, [prop_id](const Record& row) -> const CtPropertyVal&
+                                                { 
+                                                   return row[prop_id]; 
+                                                });
+      }
+
+      [[nodiscard]] auto getSeriesRaw(CtProp prop_id) const 
+      {
+         return vws::transform(m_data, [prop_id](const Record& row) -> const CtPropertyVal&
+                                       { 
+                                          return row[prop_id]; 
+                                       });
+      }
+   };
 
 } // namespace ctb

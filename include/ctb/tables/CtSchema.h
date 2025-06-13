@@ -2,10 +2,11 @@
 
 #include "ctb/ctb.h"
 #include "ctb/tables/detail/FieldSchema.h"
+#include "ctb/tables/detail/FilterManager.h"
 #include "ctb/tables/detail/ListColumn.h"
-#include "ctb/tables/detail/MultiMatchPropertyFilter.h"
+#include "ctb/tables/detail/MultiValueFilter.h"
 #include "ctb/tables/detail/PropertyFilter.h"
-#include "ctb/tables/detail/TableProperty.h"
+#include "ctb/tables/detail/PropertyValue.h"
 #include "ctb/tables/detail/TableRecord.h"
 #include "ctb/tables/detail/TableSorter.h"
 
@@ -42,14 +43,14 @@ namespace ctb
       AuctionPrice,
 
       BeginConsume,
-      CtBeginConsume,
       EndConsume,
+      CtBeginConsume, 
       CtEndConsume,
 
 
       QtyPending,
       QtyOnHand,
-      QtyTotal,         // calculated as Pending + OnHand, not from CSV (except for ReadyToDrink)
+      QtyTotal,         // string value, calculated as Pending + OnHand, not from CSV (except for ReadyToDrink)
       QtyPurchased,     
       QtyConsumed,      
 
@@ -75,6 +76,19 @@ namespace ctb
       RtdQtyEarlyAndLate,
       RtdQtyBottlesPerYear,
       RtdConsumed,
+
+      // consumed bottles table
+      iConsumeId,
+      iTastingNoteId,
+      ConsumeDate,
+      ConsumeYear,
+      ConsumeMonth,
+      ConsumeReason,
+      ConsumeNote,
+      PurchaseNote,
+      BottleNote,
+      Location,
+      Bin,
    };
 
    
@@ -90,19 +104,19 @@ namespace ctb
   
    
    /// @brief Type alias for the property type used in CellarTracker data tables
-   using CtProperty = detail::TableProperty<std::string, uint16_t, uint64_t, double, std::chrono::year_month_day>;
+   using CtPropertyVal = detail::PropertyValue<std::string, uint16_t, uint64_t, double, std::chrono::year_month_day>;
 
    
    /// @brief Type alias for a sorted collection of property values
-   using CtPropertyValueSet = std::set<CtProperty>;
+   using CtPropertyValueSet = std::set<CtPropertyVal>;
 
 
    /// @brief 'Null' property value. Can be used when returning reference that doesn't have lifetime issues.
-   static inline constexpr CtProperty ct_null_prop{};
+   static inline constexpr CtPropertyVal ct_null_prop{};
 
 
    /// @brief Type alias for a table record indexed on a property enum instead of zero-based index
-   using CtPropertyMap = boost::unordered_flat_map<CtProp, CtProperty>; 
+   using CtPropertyMap = boost::unordered_flat_map<CtProp, CtPropertyVal>; 
 
 
    /// @brief Type alias for a CtProp-based record in a CellarTracker data table
@@ -124,15 +138,23 @@ namespace ctb
 
 
    /// @brief Type alias for CtProp-based multi-match filter
-   using CtMultiMatchFilter = detail::MultiMatchPropertyFilter<CtProp, CtPropertyMap>;
+   using CtMultiValueFilter = detail::MultiValueFilter<CtProp, CtPropertyMap>;
 
 
    /// @brief Type alias for CtProp-based multi-match filter
-   using CtMultiMatchFilterSpan = std::span<const CtMultiMatchFilter>;
+   using CtMultiValueFilterSpan = std::span<const CtMultiValueFilter>;
    
 
    /// @brief Type alias for a CtProp-based table property filter
    using CtPropertyFilter = detail::PropertyFilter<CtProp, CtPropertyMap>;
+
+
+   /// @brief Type alias for a filter manager for working with CtPropertyFilter
+   using CtPropertyFilterMgr = detail::FilterManager<CtPropertyFilter, std::string, CtProp, CtPropertyMap>;
+
+
+   /// @brief Type alias for a filter manager for working with CtMultiValueFilters
+   using CtMultiValueFilterMgr = detail::FilterManager<CtMultiValueFilter, CtProp, CtProp, CtPropertyMap>;
 
 
    /// @brief Type alias for CtProp-based table sorter

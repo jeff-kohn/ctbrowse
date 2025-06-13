@@ -8,7 +8,7 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/tables/detail/TableProperty.h"
+#include "ctb/tables/detail/PropertyValue.h"
 
 #include <string>
 #include <string_view>
@@ -102,7 +102,7 @@ namespace ctb::detail
       /// displayed with 1 decimal place.
       ///
       template<typename... Args>
-      std::string getDisplayValue(const detail::TableProperty<Args...>& value) const
+      std::string getDisplayValue(const detail::PropertyValue<Args...>& value) const
       {       
          switch (format)
          {

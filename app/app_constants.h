@@ -5,8 +5,6 @@ namespace ctb::constants
    inline constexpr const char* APP_NAME_LONG                     = "ctBrowse for Windows";
    inline constexpr const char* APP_NAME_SHORT                    = "ctBrowse";
    inline constexpr const char* APP_LABELS_SUBFOLDER              = "labels";
-   inline constexpr const char* APP_DEFAULT_LOG_FOLDER            = "%LOCALAPPDATA%"; // safe default, but not used for windows app.
-
 
    inline constexpr const char* LBL_MENU_COLLECTION                = "&Collection";
    inline constexpr const char* LBL_MENU_WINE                      = "&Online";
@@ -15,11 +13,13 @@ namespace ctb::constants
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP         = "Download data from CellarTracker";
    inline constexpr const char* CMD_FILE_SETTINGS_LBL              = "&Settings...";
    inline constexpr const char* CMD_FILE_SETTINGS_TIP              = "Configure app settings";
-   inline constexpr const char* CMD_COLLECTION_MY_CELLAR_LBL       = "&My Cellar\tCtrl+M";
+   inline constexpr const char* CMD_COLLECTION_CONSUMED_LBL        = "Wine &Consumed\tCtrl+D";
+   inline constexpr const char* CMD_COLLECTION_CONSUMED_TIP        = "View Wine Consumption History";
+   inline constexpr const char* CMD_COLLECTION_MY_CELLAR_LBL       = "Wine in &My Cellar\tCtrl+M";
    inline constexpr const char* CMD_COLLECTION_MY_CELLAR_TIP       = "View Personal Wine Collection";
-   inline constexpr const char* CMD_COLLECTION_PENDING_WINE_LBL    = "&Pending Wines\tCtrl+P";
+   inline constexpr const char* CMD_COLLECTION_PENDING_WINE_LBL    = "Wine &Pending Delivery\tCtrl+P";
    inline constexpr const char* CMD_COLLECTION_PENDING_WINE_TIP    = "View Pending Wine Deliveries";
-   inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_LBL  = "&Ready to Drink\tCtrl+R";
+   inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_LBL  = "Wine &Ready to Drink\tCtrl+R";
    inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_TIP  = "View Drinking Availability for Wines";
    inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_LBL       = "&Resize List Columns";
    inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_TIP       = "Resize the list columns to fit the data";
@@ -59,10 +59,8 @@ namespace ctb::constants
    inline constexpr const char* CREDENTIALDLG_LBL_PASSWORD        = "&Password:";
    inline constexpr const char* CREDENTIALDLG_LBL_SAVE            = "&Save Credential";
    inline constexpr const char* FMT_CREDENTIALDLG_LBL_TITLE       = "{} Login";
-   
-   inline constexpr const char* FMT_LBL_FILTERED_ROWS             = "Filtered Rows: {}";
+
    inline constexpr const char* FMT_LBL_FILTERS_SELECTED          = "{}  ({} selected)";
-   inline constexpr const char* FMT_LBL_TOTAL_ROWS                = "Total Rows: {}";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADED        = "Successfully downloaded file '{}'.";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADING       = "Downloading file '{}'...";
    inline constexpr const char* FMT_TITLE_TYPED_ERROR             = "{} Error";
@@ -78,6 +76,8 @@ namespace ctb::constants
    inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only Show In-Stock Wines";
    inline constexpr const char* LBL_CHECK_MIN_SCORE               = "Minimum Score:";
    inline constexpr const char* LBL_CHECK_READY_TO_DRINK          = "Only Show 'Ready' Wines";
+   inline constexpr const char* LBL_CONSUME_DATE                  = "Consumed On:";
+   inline constexpr const char* LBL_CONSUME_REASON                = "Reason:";
    inline constexpr const char* LBL_COUNTRY                       = "Country:";
    inline constexpr const char* LBL_CT_PRICE                      = "Community Avg:";
    inline constexpr const char* LBL_CT_SCORE                      = "CT Score:";
@@ -85,6 +85,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_DRINK_WINDOW_MY               = "My Drink Window:";
    inline constexpr const char* LBL_DRINK_WINDOW_CT               = "CT Drink Window:";
    inline constexpr const char* LBL_FILTER_OPTIONS                = "Filter Options";
+   inline constexpr const char* LBL_LOCATION                      = "Location:";
    inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
    inline constexpr const char* LBL_MY_PRICE                      = "My Price:";
    inline constexpr const char* LBL_DELIVERY_DATE                 = "Delivery Date:";
@@ -95,6 +96,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_REGION                        = "Region:";
    inline constexpr const char* LBL_SCORES                        = "Scores";
    inline constexpr const char* LBL_SEARCH                        = "&Search";
+   inline constexpr const char* LBL_SIZE                          = "&Size";
    inline constexpr const char* LBL_SORT_ASCENDING                = "Ascending";
    inline constexpr const char* LBL_SORT_DESCENDING               = "Descending";
    inline constexpr const char* LBL_SORT_OPTIONS                  = "Sort Options";
@@ -120,13 +122,13 @@ namespace ctb::constants
    inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
    inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
 
-   inline constexpr int WX_UNSPECIFIED_VALUE    =    -1;
+   inline constexpr int  WX_UNSPECIFIED_VALUE                     = -1;
    inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = true;
 
    // app-specific error messages.
    inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN = "Label cache object is shutting down.";
-   inline constexpr const char* ERROR_STR_NULL_POINTER          = "NULL pointer argument not allowed.";
    inline constexpr const char* ERROR_STR_NO_CONFIG_STORE       = "No configuration store available.";
+   inline constexpr const char* ERROR_STR_NO_DATASET            = "No Dataset Available!";
    inline constexpr const char* CT_COOKIE_SECRET_NAME           = "CTSession";
 
 
