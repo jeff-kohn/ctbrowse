@@ -96,7 +96,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_REGION                        = "Region:";
    inline constexpr const char* LBL_SCORES                        = "Scores";
    inline constexpr const char* LBL_SEARCH                        = "&Search";
-   inline constexpr const char* LBL_SIZE                          = "&Size";
+   inline constexpr const char* LBL_SIZE                          = "Size:";
    inline constexpr const char* LBL_SORT_ASCENDING                = "Ascending";
    inline constexpr const char* LBL_SORT_DESCENDING               = "Descending";
    inline constexpr const char* LBL_SORT_OPTIONS                  = "Sort Options";

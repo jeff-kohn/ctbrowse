@@ -69,11 +69,12 @@ namespace ctb
       /// @brief returns the dataset currently associated with this source, if any
       /// 
       /// be sure to check the return value as it could be nullptr
-      [[nodiscard]] DatasetPtr getDataset()
+      template<typename Self>
+      [[nodiscard]] DatasetPtr getDataset(this Self&& self)
       {
-         if (m_source)
+         if (self.m_source)
          {
-            return m_source->getDataset();
+            return std::forward<Self>(self).m_source->getDataset();
          }
          return DatasetPtr{};
       }

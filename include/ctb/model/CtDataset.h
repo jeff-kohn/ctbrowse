@@ -37,13 +37,10 @@ namespace ctb
       using FieldSchama         = base::FieldSchema;
       using ListColumn          = base::ListColumn;
       using ListColumnSpan      = base::ListColumnSpan;
-      using MultiValueFilter    = CtMultiValueFilterMgr::Filter;
-      using MultiValueFilterMgr = CtMultiValueFilterMgr;
+      using MultiValueFilterMgr = base::MultiValueFilterMgr;
       using Prop                = base::Prop;
       using PropertyVal         = base::PropertyVal;
-      using PropertyFilter      = base::PropertyFilter;
-      using PropertyFilterMgr   = CtPropertyFilterMgr;
-      using MaybePropFilter     = base::MaybeFilter;
+      using PropertyFilterMgr   = base::PropertyFilterMgr;
       using PropertyMap         = base::PropertyMap;
       using PropertyValueSet    = base::PropertyValueSet;
       using Record              = DataTable::value_type;
@@ -60,7 +57,7 @@ namespace ctb
          return DatasetPtr{ static_cast<IDataset*>(new CtDataset{ std::move(data) }) };
       }
 
-      /// @brief Returns the name of the CT table this dataset represents. Not meant to be 
+      /// @brief Returns the filter_name of the CT table this dataset represents. Not meant to be 
       ///         displayed to the user, this is for internal use. 
       auto getTableName() const -> std::string_view override
       {
@@ -134,8 +131,6 @@ namespace ctb
       }
 
       /// @brief Gets the collection of active display columns 
-      /// 
-      /// Note that some may be hidden and not visible.
       auto listColumns() const -> CtListColumnSpan override
       { 
          return Traits::DefaultListColumns; 
@@ -172,43 +167,16 @@ namespace ctb
          return Traits::MultiValueFilters;
       }
 
-      /// @brief Adds a filter match value for the specified column.
-      ///
-      /// @return true if the filter was applied, false it it wasn't because there were no matches
-      auto addMultiValueFilter(CtProp prop_id, const PropertyVal& match_value) -> bool override
+      /// @brief Retrieve the filter manager for PropertyFilter's 
+      auto propFilters() -> PropertyFilterMgr& override
       {
-         // Since we may be creating new/uninitialized filter, we need to set all properties.
-         auto& filter = m_mval_filters[prop_id];
-         filter.prop_id = prop_id;
-         filter.filter_name = magic_enum::enum_name(prop_id);
-         if (filter.match_values.insert(match_value).second)
-         {
-            applyFilters();
-            return true;
-         }
-         return false;
+         return m_prop_filters;
       }
 
-      /// @brief removes a filter match value for the specified property
-      ///
-      /// @return true if the filter value was removed, false if it wasn't found
-      auto removeMultiValueFilter(CtProp prop_id, const PropertyVal& match_value) -> bool override
+      /// @brief Retrieve the filter manager for MultiValueFilter's
+      auto multivalFilters() -> MultiValueFilterMgr& override
       {
-         if (m_mval_filters.hasFilter(prop_id))
-         {
-            auto& filter = m_mval_filters[prop_id];
-            if (filter.match_values.erase(match_value) > 0)
-            {
-               // if we're removing the last match value, remove the filter too.
-               if (filter.match_values.empty())
-               {
-                  m_mval_filters.removeFilter(prop_id);
-               }
-               applyFilters();
-               return true;
-            }
-         }
-         return false;
+         return m_mval_filters;
       }
 
       /// @brief Apply a search filter that does substring matching on ANY column in the table view
@@ -246,71 +214,6 @@ namespace ctb
          m_substring_filter = std::nullopt;
          applyFilters();
       }
-
-      /// @brief Check if a filter with the specified name is applied to the dataset.
-      /// 
-      /// filter_name is case-sensitive
-      /// 
-      /// @return - true if there is a filter by the specified name, false otherwise.
-      auto hasFilter(std::string_view filter_name) const -> bool override
-      {
-         return m_prop_filters.hasFilter(filter_name);
-      }
-
-      /// @brief Get the filter with the specified name that is applied to the dataset.
-      /// 
-      /// filter_name is case-sensitive
-      /// 
-      /// @return - the requested filter, or std::nullopt if not found
-      auto getPropFilter(std::string_view filter_name) const  -> MaybePropFilter override
-      {
-         return m_prop_filters.getFilter(filter_name);
-      }
-
-      /// @brief Add the supplied filter to the dataset, replacing any existing filter with the same name
-      /// @return true if resulting record count is > 0, false if resulting record count is == 0
-      auto applyPropFilter(const PropertyFilter& filter) -> bool override
-      {
-         m_prop_filters[filter.name] = filter;
-         applyFilters();
-         return m_current_view->size() > 0;
-      }
-
-      /// @brief Remove the filter with the specified name
-      /// 
-      /// filter_name is case-sensitive
-      /// 
-      /// @return true if filter was removed; false if it wasn't found.
-      auto removePropFilter(const std::string& filter_name) -> bool override
-      {
-         if (m_prop_filters.removeFilter(filter_name))
-         {
-            applyFilters();
-            return true;
-         }
-         return false;
-      }
-
-      /// @brief Remove all filters from the dataset
-      /// 
-      /// This removes property and multi-value filters.
-      /// 
-      /// @return true if at least one filter was removed, false if there were no filters
-      //auto removeAllFilters() -> bool override
-      //{
-      //   bool got_one = false;
-      //   if (m_mval_filters.activeFilters())
-      //   {
-      //      m_mval_filters.clear();
-      //      got_one = true;
-      //   }
-      //   if (m_prop_filters.activeFilters())
-      //   {
-      //      m_prop_filters.clear();
-      //      got_one = true;
-      //   }
-      //   return got_one;
-      //}
 
       /// @brief Check whether the current dataset supports the given property
       /// 
@@ -369,7 +272,12 @@ namespace ctb
       }
 
       // default dtor, others are deleted since this object is meant to be heap-only
-      ~CtDataset() noexcept override = default;
+      ~CtDataset() noexcept override
+      {
+         m_mval_filters.unsubscribeChanges();
+         m_prop_filters.unsubscribeChanges();
+      }
+
       CtDataset() = delete;
       CtDataset(const CtDataset&) = delete;
       CtDataset(CtDataset&&) = delete;
@@ -397,6 +305,8 @@ namespace ctb
          m_current_sort{ availableSorts()[0] }
       {
          sortData();
+         m_mval_filters.subscribeChanges([this]{ applyFilters(); });
+         m_prop_filters.subscribeChanges([this]{ applyFilters(); });
       }
 
       auto isDataFiltered() const -> bool 
@@ -406,18 +316,21 @@ namespace ctb
 
       void applyFilters()
       {
-         if (m_mval_filters.activeFilters() or m_prop_filters.activeFilters())
+         if (m_mval_filters.empty() and m_prop_filters.empty())
          {
-            m_filtered_data = vws::all(m_data) | vws::transform([](auto&& rec) { return rec.getProperties(); }) // filters work with property maps, not records
-                                               | vws::filter(m_mval_filters)
-                                               | vws::filter(m_prop_filters)
+            m_current_view = &m_data;
+         }
+         else{
+            // filters work with property maps, not records (since tables themselves are type-erased), 
+            // so we have to transform back/forth to apply the filters, which is fortunately pretty inexpensive
+            // since we're copying records into m_filtered_data anyways. Since our filter mgrs can be fairly
+            // expensive to copy, use std::ref
+            m_filtered_data = vws::all(m_data) | vws::transform([](auto&& rec) { return rec.getProperties(); }) 
+                                               | vws::filter(std::ref(m_mval_filters))
+                                               | vws::filter(std::ref(m_prop_filters))
                                                | vws::transform([](auto&& map) { return Record{ map }; })       // back to record
                                                | rng::to<std::vector>();
             m_current_view = &m_filtered_data;
-         }
-         else
-         {
-            m_current_view = &m_data;
          }
 
          if (m_substring_filter)
@@ -431,7 +344,7 @@ namespace ctb
          // clear any existing substring filter first, since we can only have one at a time. The 
          // new filter will be applied if there are any matches. If no matches, substring filter 
          // will be cleared (we don't restore old one because previous search text is no longer 
-         // in the toolbar so it wouldn't make sense).
+         // in the toolbar, which would be confusing).
          m_substring_filter = {};
          applyFilters();
          auto filtered = vws::all(*m_current_view) | vws::filter(search_filter)
@@ -449,7 +362,7 @@ namespace ctb
       void sortData()
       {
          // the fact that our TableSorter class deals with PropertyMaps is a problem, because we actually need to 
-         // sort a vector<TableRecordType>. But that would make a table-neutral CtTableSort impossible. So we have to use an 
+         // sort a vector<Recordc>. But that would make a table-neutral CtTableSort impossible. So we have to use an 
          // adapter to allow us to use the sorter object.
          auto sort_adapter = [this](const Record& rec1, const Record& rec2) -> bool
             {
@@ -505,6 +418,7 @@ namespace ctb
                                           return row[prop_id]; 
                                        });
       }
-   };
+
+};
 
 } // namespace ctb

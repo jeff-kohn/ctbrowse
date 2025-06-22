@@ -8,11 +8,15 @@
 
 namespace ctb::app
 {
-   auto DatasetMultiView::create(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache) -> DatasetMultiView*
+   auto DatasetMultiView::create(wxWindow& parent, DatasetEventSourcePtr source, LabelCachePtr cache) -> DatasetMultiView*
    {
       try
       {
-         std::unique_ptr<DatasetMultiView> wnd{ new DatasetMultiView{ parent, source, cache } };
+         if (!source)
+         {
+            throw Error{ constants::ERROR_STR_NULLPTR_ARG, Error::Category::ArgumentError };
+         }
+         std::unique_ptr<DatasetMultiView> wnd{ new DatasetMultiView{ &parent, source, cache } };
          return wnd.release(); // top-level window manages its own lifetime, we return non-owning pointer
       }
       catch (...){
@@ -57,6 +61,24 @@ namespace ctb::app
    auto DatasetMultiView::wineDetailsActive() const -> bool
    {
       return m_details_panel ? m_details_panel->wineDetailsActive() : false;
+   }
+
+   auto DatasetMultiView::applyDatasetOptions(const CtDatasetOptions& options) -> bool
+   {
+      if (!m_options_panel)
+         return false;
+
+      return m_options_panel->applyDatasetOptions(options);
+   }
+
+   auto DatasetMultiView::getDatasetOptions() const -> CtDatasetOptions
+   {
+      if (m_options_panel)
+      {
+         return m_options_panel->getDatasetOptions();
+      }
+      assert("This should be impossible, weird bug here!" and false);
+      return {};
    }
 
 } // namespace ctb::app

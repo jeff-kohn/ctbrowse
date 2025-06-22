@@ -18,29 +18,24 @@
 
 namespace ctb
 {
-
-
-
    /// @brief Data model class that provides a base implementation for accessing CellarTracker data files
    /// 
    class IDataset
    {
    public:
-      using FieldSchema       = CtFieldSchema;
-      using Prop              = CtProp;
-      using PropertyVal       = CtPropertyVal;
-      using PropertyFilter    = CtPropertyFilter;
-      using MaybeFilter       = std::optional<PropertyFilter>;
-      using PropertyMap       = CtPropertyMap;
-      using PropertyValueSet  = CtPropertyValueSet;
-      using ListColumn        = CtListColumn;
-      using ListColumnSpan    = CtListColumnSpan;
-      using TableSort         = CtTableSort;
-      using TableSortSpan     = CtTableSortSpan;
-      using PropertyRef       = std::reference_wrapper<const PropertyVal>;
-      using PropertyRefs      = std::vector<PropertyRef>;
+      using FieldSchema         = CtFieldSchema;
+      using MultiValueFilterMgr = CtMultiValueFilterMgr;
+      using Prop                = CtProp;
+      using PropertyVal         = CtPropertyVal;
+      using PropertyFilterMgr   = CtPropertyFilterMgr;
+      using PropertyMap         = CtPropertyMap;
+      using PropertyValueSet    = CtPropertyValueSet;
+      using ListColumn          = CtListColumn;
+      using ListColumnSpan      = CtListColumnSpan;
+      using TableSort           = CtTableSort;
+      using TableSortSpan       = CtTableSortSpan;
 
-      /// @return the name of the CT table this dataset represents. Not meant to be 
+      /// @return the filter_name of the CT table this dataset represents. Not meant to be 
       ///         displayed to the user, this is for internal use. 
       [[nodiscard]] virtual auto getTableName() const -> std::string_view = 0;
 
@@ -69,7 +64,7 @@ namespace ctb
       /// altogether from the dataset.
       /// 
       /// @return True if the property is available, false if not.
-      virtual auto hasProperty(CtProp prop_id) const -> bool = 0;
+      virtual auto hasProperty(Prop prop_id) const -> bool = 0;
 
       /// @brief retrieves list of available sorters, in order of display
       /// 
@@ -77,27 +72,14 @@ namespace ctb
       /// property.
       virtual auto availableSorts() const -> TableSortSpan = 0;
 
+      /// @brief retrieves a list of available filters for this table.
+      virtual auto availableMultiValueFilters() const -> CtMultiValueFilterSpan = 0;
+
       /// @brief returns the currently active sort option
       virtual auto activeSort() const -> const TableSort& = 0;
 
       /// @brief specifies a new sort option
       virtual void applySort(const TableSort& sort) = 0;
-
-      /// @brief retrieves a list of available filters for this dataset.
-      virtual auto availableMultiValueFilters() const -> CtMultiValueFilterSpan = 0;
-
-      /// @brief Adds a match value filter for the specified column.
-      ///
-      /// a record must match at least one match_value for each property that has a filter 
-      /// to be considered a match.
-      /// 
-      /// @return true if the filter was applied, false it it wasn't because there were no matches
-      virtual auto addMultiValueFilter(CtProp prop_id, const PropertyVal& match_value) -> bool = 0;
-
-      /// @brief removes a match value filter for the specified column.
-      ///
-      /// @return true if the filter was removed, false if it wasn't found
-      virtual auto removeMultiValueFilter(CtProp prop_id, const PropertyVal& match_value) -> bool = 0;
 
       /// @brief Apply a search filter that does substring matching on ANY column in the dataset view
       /// 
@@ -120,30 +102,12 @@ namespace ctb
       /// @brief clear the substring filter
       virtual void clearSubStringFilter() = 0;
 
-      /// @brief Check if a filter with the specified name is applied to the dataset.
-      /// 
-      /// filter_name is case-sensitive
-      /// 
-      /// @return - true if there is a filter by the specified name, false otherwise.
-      virtual auto hasFilter(std::string_view filter_name) const -> bool = 0;
+      /// @brief retrieves the filter manager for PropertyFilter's 
+      virtual auto propFilters() -> PropertyFilterMgr& = 0;
 
-      /// @brief Get the filter with the specified name that is applied to the dataset.
-      /// 
-      /// filter_name is case-sensitive
-      /// 
-      /// @return - the requested filter, or std::nullopt if not found
-      [[nodiscard]] virtual auto getPropFilter(std::string_view filter_name) const -> std::optional<PropertyFilter> = 0;
-
-      /// @brief Add the supplied filter to the dataset, replacing any existing filter with the same name
-      /// @return true if resulting record count is > 0, false if resulting record count is == 0
-      virtual auto applyPropFilter(const PropertyFilter& filter) -> bool = 0;
-
-      /// @brief Remove the filter with the specified name
-      /// 
-      /// filter_name is case-sensitive
-      /// 
-      /// @return true if filters was removed, false if it doens't exist.
-      virtual auto removePropFilter(const std::string& filter_name) -> bool = 0;
+      /// @brief Retrieves the filter manager for MultiValueFilter's
+      /// @return 
+      virtual auto multivalFilters() -> MultiValueFilterMgr& = 0;
 
       /// @brief Retrieve a property for a specified record/row in the dataset
       /// 

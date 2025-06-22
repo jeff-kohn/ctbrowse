@@ -9,6 +9,7 @@
 
 #include "App.h"
 #include "CategorizedControls.h"
+#include "model/CtDatasetOptions.h"
 
 #include <ctb/model/ScopedEventSink.h>
 
@@ -44,8 +45,14 @@ namespace ctb::app
       /// throws a ctb::Error if parent or source = nullptr, or if the window can't be created;
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its lifetime). 
-      [[nodiscard]] static auto create(wxWindow* parent, DatasetEventSourcePtr source) noexcept(false) -> DatasetOptionsPanel* ;
-   
+      [[nodiscard]] static auto create(wxWindow* parent, DatasetEventSourcePtr source) noexcept(false) -> DatasetOptionsPanel* ;   
+
+      /// @brief Apply previously-saved view options to the collection
+      auto applyDatasetOptions(const CtDatasetOptions& options) -> bool;
+
+      /// @brief Get current view options for the collection so they can be persisted.
+      auto getDatasetOptions() -> CtDatasetOptions;
+
       // no copy/move/assign, this class is created on the heap.
       DatasetOptionsPanel(const DatasetOptionsPanel&) = delete;
       DatasetOptionsPanel(DatasetOptionsPanel&&) = delete;
@@ -86,8 +93,15 @@ namespace ctb::app
       void createOptionFilters(wxStaticBoxSizer* parent);
       auto setTitle() -> bool;
 
+      // settings persistence support
+      //auto getActiveMultiValueFilters(CtDatasetOptions& options) const -> bool;
+      //auto getActiveCheckFilters(CtDatasetOptions& options) const -> bool;
+      //void setActiveMultiValueFilters(const CtDatasetOptions& options) noexcept(false);
+      //void setActiveCheckFilters(const CtDatasetOptions& options) noexcept(false);
+
       // multi-match filter impl
       void addMultiValFilter(wxTreeItemId item) noexcept(false) ;
+      auto getFilterValueForItem(wxTreeItemId item) -> CtPropertyVal;
       auto getMultiValFilterForItem(wxTreeItemId item) noexcept(false) -> CtMultiValueFilter&;
       auto isItemChecked(wxTreeItemId item) -> bool;
       auto isItemContainerNode(wxTreeItemId item) -> bool;
@@ -99,11 +113,12 @@ namespace ctb::app
 
       auto getSortOptionList(IDataset* dataset) -> wxArrayString;
 
-      // Dataset-related evnet handlers
+      // Dataset-related event handlers
       void notify(DatasetEvent event) override;
       void onTableInitialize(IDataset* dataset);
       void onTableSorted(IDataset* dataset);
       void populateFilterTypes(IDataset* dataset);
+      auto getDataset() const noexcept(false) -> DatasetPtr ; // throws rather than return nullptr
 
       // event handlers
       void onFilterChecked(ControlCategory cat);
