@@ -93,6 +93,7 @@ namespace ctb
          MultiValueFilter{ Prop::Region,      constants::FILTER_REGION     },
          MultiValueFilter{ Prop::Appellation, constants::FILTER_APPELATION },
          MultiValueFilter{ Prop::Producer,    constants::FILTER_PRODUCER   },
+         MultiValueFilter{ Prop::Size,        constants::FILTER_BOTTLE_SIZE        },
       };
 
       /// @brief getTableName()

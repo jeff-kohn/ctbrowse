@@ -23,7 +23,7 @@ namespace ctb
       enum class Id
       {
          DatasetInitialize,  /// fired when a dataset is being loaded
-         DatasetRemove,        /// fired when a dataset is being removed/detached.
+         DatasetRemove,      /// fired when a dataset is being removed/detached.
          Sort,               /// fired when a dataset has been sorted
          Filter,             /// fired when a dataset has been filtered
          SubStringFilter,    /// fired when a substring filter has been applied to the dataset

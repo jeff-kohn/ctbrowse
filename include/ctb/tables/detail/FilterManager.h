@@ -65,6 +65,15 @@ namespace ctb::detail
          notifyChange();
       }
 
+      template<rng::input_range Rng> //requires std::same_as<rng::range_value_t<Rng>, FilterMap::value_type>
+      void assignFilters(Rng&& rng)
+      {
+         m_filters.clear();
+         m_filters.insert_range(std::forward<Rng>(rng));
+         notifyChange();
+      }
+
+
       /// @brief Remove the specified filter from the list
       /// @return true if removed, false if not found.
       auto removeFilter(const Key& key) -> bool
@@ -140,9 +149,15 @@ namespace ctb::detail
          return m_filters.empty();
       }
 
+      /// @return The number of filters in this manager
+      auto size() const -> size_t
+      {
+         return m_filters.size();
+      }
+
       /// @brief Retrieve a view on all active filters.
       /// @return A view representing all active filters (could be empty)
-      auto&& activeFilters() const
+      auto activeFilters() const
       {
          return vws::all(m_filters);
       } 

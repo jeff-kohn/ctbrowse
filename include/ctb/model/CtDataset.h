@@ -173,8 +173,20 @@ namespace ctb
          return m_prop_filters;
       }
 
+      /// @brief Retrieve the filter manager for PropertyFilter's 
+      auto propFilters() const -> const PropertyFilterMgr& override
+      {
+         return m_prop_filters;
+      }
+
       /// @brief Retrieve the filter manager for MultiValueFilter's
       auto multivalFilters() -> MultiValueFilterMgr& override
+      {
+         return m_mval_filters;
+      }
+
+      /// @brief Retrieve the filter manager for MultiValueFilter's
+      auto multivalFilters() const -> const MultiValueFilterMgr& override
       {
          return m_mval_filters;
       }

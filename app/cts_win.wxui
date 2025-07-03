@@ -182,6 +182,28 @@
           class="wxCommandLinkButton"
           main_label="Wine Name With a realll really long title"
           var_name="m_wine_name_btn" />
+        <node
+          class="wxBoxSizer"
+          flags="wxEXPAND"
+          proportion="1">
+          <node
+            class="wxButton"
+            class_access="none"
+            label="&amp;Save Default"
+            var_name="btn_save_default"
+            tooltip="Save the current filter options as the default for this collection."
+            flags="wxEXPAND|wxSHAPED"
+            proportion="1"
+            wxEVT_BUTTON="onSaveDefault" />
+          <node
+            class="wxButton"
+            class_access="none"
+            label="&amp;Reset"
+            var_name="btn_reset"
+            tooltip="Clear all filters."
+            flags="wxEXPAND|wxSHAPED"
+            proportion="1" />
+        </node>
       </node>
     </node>
     <node

@@ -18,7 +18,6 @@ namespace ctb::app
 {
    namespace fs = std::filesystem;
 
-
    /// @brief forward declare top-level window class so we don't have to add header dependency
    ///
    class MainFrame;
@@ -43,6 +42,17 @@ namespace ctb::app
       CMD_ONLINE_EDIT_ORDER,
       CMD_ONLINE_DRINK_REMOVE,
    };
+   
+   
+   enum class AppFolder
+   {
+      Root,
+      Defaults,
+      Favorites,
+      Labels,
+      Tables
+   };
+
 
    /// @brief app object for the application.
    ///
@@ -60,9 +70,12 @@ namespace ctb::app
       auto OnExit() -> int override;
 
       /// @brief  returns the path where the application stores data files.
-      auto userDataFolder() const noexcept  -> const fs::path& 
+      auto getDataFolder(AppFolder folder = AppFolder::Root) const noexcept -> fs::path
       {
-         return m_user_data_folder; 
+         if (folder == AppFolder::Root)
+            return m_user_data_folder; 
+
+         return ctb::format("{}/{}", m_user_data_folder.generic_string(), magic_enum::enum_name(folder));
       }
 
       /// @brief Retrieve a pointer to main window that doesn't need dynamic_cast (or wx-equivalent).

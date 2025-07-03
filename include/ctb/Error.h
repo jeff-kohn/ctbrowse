@@ -16,6 +16,10 @@
 #include <string_view>
 
 
+#ifdef __WIN32 
+   #undef Error
+#endif
+
 namespace ctb
 {
    /// @brief exception class used for runtime errors

@@ -6,13 +6,15 @@
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
-#include "App.h"
-#include "wx_helpers.h"
 #include "views/DatasetOptionsPanel.h"
-#include "views/FilterCheckBox.h"
+#include "views/FilterCheckBox.h" 
+#include "wx_helpers.h"
+
+#include "model/CtDatasetOptions.h"
 
 #include <ctb/utility_chrono.h>
 
+#include <wx/button.h>
 #include <wx/choice.h>
 #include <wx/checkbox.h>
 #include <wx/dataview.h>
@@ -44,13 +46,13 @@ namespace ctb::app
                return CtPropertyVal{ std::string{ text_val } };
 
             case PropType::UInt16:
-               return CtPropertyVal::create<uint16_t>(text_val);
+               return CtPropertyVal::parse<uint16_t>(text_val);
 
             case PropType::UInt64:
-               return CtPropertyVal::create<uint64_t>(text_val);
+               return CtPropertyVal::parse<uint64_t>(text_val);
 
             case PropType::Double:
-               return CtPropertyVal::create<double>(text_val);
+               return CtPropertyVal::parse<double>(text_val);
 
             case PropType::Date:
             {
@@ -94,30 +96,6 @@ namespace ctb::app
       }
       wnd->initControls();
       return wnd.release(); // parent owns child, so we don't need to delete
-   }
-
-
-   auto DatasetOptionsPanel::applyDatasetOptions(const CtDatasetOptions& options) -> bool
-   {
-      return false;
-   }
-
-
-   auto DatasetOptionsPanel::getDatasetOptions() -> CtDatasetOptions
-   {
-      TransferDataFromWindow();
-      CtDatasetOptions options{};
-
-      auto dataset        = getDataset();
-      options.table_id    = dataset->getTableId();
-      options.active_sort = dataset->activeSort();
-
-      // get list of MultiValue filters with at least one checked match-value.
-      //options.multi_val_filters = getActiveMultiValueFilters();
-      //options.m_prop_filters    = getActiveCheckFilters();
-
-      // get list of property filters that are enabled
-      return {};
    }
 
 
@@ -198,9 +176,21 @@ namespace ctb::app
 
       // checkbox filters
       createOptionFilters(filter_options_box);
+      top_sizer->Add(filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
+
+      // Save as Default button, will go side by side with...
+      auto* button_sizer = new wxBoxSizer(wxHORIZONTAL);
+      auto* btn_save_default = new wxButton{ this, wxID_ANY, LBL_BTN_SAVE_DEFAULT };
+      btn_save_default->SetToolTip(LBL_BTN_SAVE_DEFAULT_TIP);
+      button_sizer->Add(btn_save_default, wxSizerFlags(1).Expand().Border(wxALL));
+
+      // ...Clear Filters button
+      auto* btn_clear_filters = new wxButton(this, wxID_ANY, LBL_BTN_CLEAR_FILTERS);
+      btn_clear_filters->SetToolTip(LBL_BTN_CLEAR_FILTERS_TIP);
+      button_sizer->Add(btn_clear_filters, wxSizerFlags(1).Expand().Border(wxALL));
+      top_sizer->Add(button_sizer, wxSizerFlags().Expand().Border(wxALL));
 
       // finalize layout
-      top_sizer->Add(filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
       top_sizer->AddStretchSpacer(2);
       SetSizer(top_sizer);
 
@@ -215,9 +205,12 @@ namespace ctb::app
       opt_ascending->Bind( wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
       opt_descending->Bind(wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
 
-      m_filter_checkboxes[ControlCategory::InStockFilter     ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterInStockChecked,        this);
-      m_filter_checkboxes[ControlCategory::MinScoreFilter    ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterMinScoreChecked, this);     
-      m_filter_checkboxes[ControlCategory::ReadyToDrinkFilter]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterReadyToDrinkChecked,   this);     
+      m_filter_checkboxes[ControlCategory::InStockFilter     ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterInStockChecked,      this);
+      m_filter_checkboxes[ControlCategory::MinScoreFilter    ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterMinScoreChecked,     this);     
+      m_filter_checkboxes[ControlCategory::ReadyToDrinkFilter]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterReadyToDrinkChecked, this);     
+
+      btn_save_default->Bind(wxEVT_BUTTON, &DatasetOptionsPanel::onSaveDefault, this);
+      btn_clear_filters->Bind(wxEVT_BUTTON, &DatasetOptionsPanel::onClearFilters, this);
    }
 
 
@@ -228,14 +221,14 @@ namespace ctb::app
       using namespace ctb::constants;
 
       // in-stock filter
-      m_filter_checkboxes[InStockFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_IN_STOCK_ONLY, { QtyOnHand }, uint16_t{0}, std::greater<CtPropertyVal>{} } };
+      m_filter_checkboxes[InStockFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_IN_STOCK_ONLY, { QtyOnHand }, uint16_t{0}, CtPropFilterPredicate{ CtPredicateType::Greater } }};
       parent->Add(m_filter_checkboxes[InStockFilter], wxSizerFlags().Border(wxALL));
 
       // embedded sizer to place score spin-ctrl next to checkbox
       auto* min_score_sizer = new wxBoxSizer(wxHORIZONTAL);
 
       // min-score filter checkbox
-      m_filter_checkboxes[MinScoreFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_MIN_SCORE, { CtScore, MyScore }, FILTER_SCORE_DEFAULT, std::greater_equal<CtPropertyVal>{} } };
+      m_filter_checkboxes[MinScoreFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_MIN_SCORE, { CtScore, MyScore }, FILTER_SCORE_DEFAULT, CtPropFilterPredicate{ CtPredicateType::GreaterEqual } }};
       min_score_sizer->Add(m_filter_checkboxes[MinScoreFilter], wxSizerFlags{}.Center().Border(wxLEFT|wxTOP|wxBOTTOM));
 
       //  min-score filter spin-ctrl
@@ -257,7 +250,7 @@ namespace ctb::app
 
       // ready-to-drink filter, matches if any formula calculates RTD >= 0;
       auto props = { RtdQtyDefault, RtdQtyLinear, RtdQtyBellCurve, RtdQtyEarlyCurve, RtdQtyLateCurve, RtdQtyFastMaturing, RtdQtyEarlyAndLate, RtdQtyBottlesPerYear, };
-      m_filter_checkboxes[ReadyToDrinkFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_READY_TO_DRINK, props, FILTER_AVAILABLE_MIN_QTY, std::greater<CtPropertyVal>{} }};
+      m_filter_checkboxes[ReadyToDrinkFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_READY_TO_DRINK, props, FILTER_AVAILABLE_MIN_QTY, CtPropFilterPredicate{ CtPredicateType::GreaterEqual } }};
       parent->Add(m_filter_checkboxes[ReadyToDrinkFilter], wxSizerFlags().Border(wxALL));
 
       // categorize controls so we can show/hide as appropriate.
@@ -277,33 +270,13 @@ namespace ctb::app
    }
 
 
-   //void DatasetOptionsPanel::getActiveMultiValueFilters(CtDatasetOptions& options) const
-   //{
-   //}
-
-
-   //void DatasetOptionsPanel::getActiveCheckFilters(CtDatasetOptions& options) const
-   //{
-   //}
-
-
-   //void DatasetOptionsPanel::setActiveMultiValueFilters(const CtDatasetOptions& options) noexcept(false)
-   //{
-   //}
-
-
-   //void DatasetOptionsPanel::setActiveCheckFilters(const CtDatasetOptions& options)  noexcept(false)
-   //{
-   //}
-
-
    void DatasetOptionsPanel::addMultiValFilter(wxTreeItemId item) noexcept(false) 
    {
       auto dataset = getDataset();
-      auto& filter = getMultiValFilterForItem(item);
+      auto& filter = getMultiValueFilter(item);
       auto fld_schema = dataset->getFieldSchema(filter.prop_id);
 
-      auto&& result = filter.match_values.insert(getFilterValueForItem(item));
+      auto&& result = filter.match_values.insert(getFilterValue(item));
       if (result.second)
       {
          dataset->multivalFilters().replaceFilter(filter.prop_id, filter);
@@ -314,11 +287,11 @@ namespace ctb::app
 
    void DatasetOptionsPanel::removeMultiValFilter(wxTreeItemId item)  noexcept(false) 
    {
-      auto& filter = getMultiValFilterForItem(item);
+      auto& filter = getMultiValueFilter(item);
       auto dataset = getDataset(); // throws on nullptr
       auto fld_schema = dataset->getFieldSchema(filter.prop_id);
 
-      if (filter.match_values.erase(getFilterValueForItem(item)))
+      if (filter.match_values.erase(getFilterValue(item)))
       {
          dataset->multivalFilters().replaceFilter(filter.prop_id, filter);
          m_sink.signal_source(DatasetEvent::Id::Filter); 
@@ -326,10 +299,10 @@ namespace ctb::app
    }
 
 
-   auto DatasetOptionsPanel::getFilterValueForItem(wxTreeItemId item) -> CtPropertyVal
+   auto DatasetOptionsPanel::getFilterValue(wxTreeItemId item) -> CtPropertyVal
    {
       auto dataset    = getDataset(); // throws on nullptr
-      auto& filter    = getMultiValFilterForItem(item);
+      auto& filter    = getMultiValueFilter(item);
       auto fld_schema = dataset->getFieldSchema(filter.prop_id);
 
       if (fld_schema.has_value())
@@ -344,7 +317,7 @@ namespace ctb::app
    }
   
 
-   auto DatasetOptionsPanel::getMultiValFilterForItem(wxTreeItemId item)  noexcept(false) -> CtMultiValueFilter&
+   auto DatasetOptionsPanel::getMultiValueFilter(wxTreeItemId item)  noexcept(false) -> CtMultiValueFilter&
    {
       auto dataset = getDataset(); // throws on nullptr
 
@@ -539,9 +512,27 @@ namespace ctb::app
    auto DatasetOptionsPanel::getDataset() const noexcept(false) -> DatasetPtr
    {
       if (!m_sink.hasDataset())
-         throw Error( constants::ERROR_STR_NO_DATASET, Error::Category::DataError);
+         throw Error{ constants::ERROR_STR_NO_DATASET, Error::Category::DataError };
 
       return m_sink.getDataset();
+   }
+
+
+   void DatasetOptionsPanel::onClearFilters([[maybe_unused]] wxCommandEvent& event)
+   {
+      try
+      {
+         auto&& dataset = m_sink.getDataset();
+         if (nullptr == dataset)
+            throw Error{ constants::ERROR_STR_NO_DATASET, Error::Category::DataError };
+
+         dataset->multivalFilters().clear();
+         dataset->propFilters().clear();
+         m_sink.signal_source(DatasetEvent::Id::DatasetInitialize);
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
    }
 
 
@@ -614,6 +605,22 @@ namespace ctb::app
    {
       TransferDataFromWindow();
       event.Enable(m_filter_checkboxes[ControlCategory::MinScoreFilter]->enabled());
+   }
+
+
+   void DatasetOptionsPanel::onSaveDefault([[maybe_unused]] wxCommandEvent& event)
+   {
+      try
+      {
+         auto&& dataset = m_sink.getDataset();
+         if (nullptr == dataset)
+            throw Error{ constants::ERROR_STR_NO_DATASET, Error::Category::DataError };
+
+         CtDatasetOptions::saveDefaultOptions(CtDatasetOptions::retrieveOptions(dataset));
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
    }
 
 

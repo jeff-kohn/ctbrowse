@@ -2,8 +2,6 @@
 
 #include "App.h"
 
-#include "model/CtDatasetOptions.h"
-
 #include <wx/splitter.h>
 #include <memory>
 
@@ -41,12 +39,6 @@ namespace ctb::app
       /// @return true if a wine is displayed in details, false otherwise.
       /// 
       auto wineDetailsActive() const -> bool;
-
-      /// @brief Apply previously-saved view options to the collection
-      auto applyDatasetOptions(const CtDatasetOptions& options) -> bool;
-
-      /// @brief Get current view options for the collection so they can be persisted.
-      auto getDatasetOptions() const -> CtDatasetOptions;
 
       // no copy/move/assign, this class is created on the heap.
       DatasetMultiView() = delete;

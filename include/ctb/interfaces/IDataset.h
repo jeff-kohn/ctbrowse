@@ -105,9 +105,14 @@ namespace ctb
       /// @brief retrieves the filter manager for PropertyFilter's 
       virtual auto propFilters() -> PropertyFilterMgr& = 0;
 
+      /// @brief retrieves the filter manager for PropertyFilter's 
+      virtual auto propFilters() const -> const PropertyFilterMgr& = 0;
+
       /// @brief Retrieves the filter manager for MultiValueFilter's
-      /// @return 
       virtual auto multivalFilters() -> MultiValueFilterMgr& = 0;
+
+      /// @brief Retrieves the filter manager for MultiValueFilter's
+      virtual auto multivalFilters() const -> const MultiValueFilterMgr& = 0;
 
       /// @brief Retrieve a property for a specified record/row in the dataset
       /// 

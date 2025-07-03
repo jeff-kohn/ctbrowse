@@ -47,11 +47,7 @@ namespace ctb::app
       /// its lifetime). 
       [[nodiscard]] static auto create(wxWindow* parent, DatasetEventSourcePtr source) noexcept(false) -> DatasetOptionsPanel* ;   
 
-      /// @brief Apply previously-saved view options to the collection
-      auto applyDatasetOptions(const CtDatasetOptions& options) -> bool;
 
-      /// @brief Get current view options for the collection so they can be persisted.
-      auto getDatasetOptions() -> CtDatasetOptions;
 
       // no copy/move/assign, this class is created on the heap.
       DatasetOptionsPanel(const DatasetOptionsPanel&) = delete;
@@ -93,16 +89,11 @@ namespace ctb::app
       void createOptionFilters(wxStaticBoxSizer* parent);
       auto setTitle() -> bool;
 
-      // settings persistence support
-      //auto getActiveMultiValueFilters(CtDatasetOptions& options) const -> bool;
-      //auto getActiveCheckFilters(CtDatasetOptions& options) const -> bool;
-      //void setActiveMultiValueFilters(const CtDatasetOptions& options) noexcept(false);
-      //void setActiveCheckFilters(const CtDatasetOptions& options) noexcept(false);
 
       // multi-match filter impl
       void addMultiValFilter(wxTreeItemId item) noexcept(false) ;
-      auto getFilterValueForItem(wxTreeItemId item) -> CtPropertyVal;
-      auto getMultiValFilterForItem(wxTreeItemId item) noexcept(false) -> CtMultiValueFilter&;
+      auto getFilterValue(wxTreeItemId item) -> CtPropertyVal;
+      auto getMultiValueFilter(wxTreeItemId item) noexcept(false) -> CtMultiValueFilter&;
       auto isItemChecked(wxTreeItemId item) -> bool;
       auto isItemContainerNode(wxTreeItemId item) -> bool;
       auto isItemMatchValueNode(wxTreeItemId item) -> bool;
@@ -121,12 +112,14 @@ namespace ctb::app
       auto getDataset() const noexcept(false) -> DatasetPtr ; // throws rather than return nullptr
 
       // event handlers
+      void onClearFilters(wxCommandEvent& event);
       void onFilterChecked(ControlCategory cat);
       void onFilterInStockChecked(wxCommandEvent& event);
       void onFilterMinScoreChecked(wxCommandEvent& event);
       void onFilterReadyToDrinkChecked(wxCommandEvent& event);
       void onMinScoreChanged(wxSpinDoubleEvent& event);
       void onMinScoreUpdateUI(wxUpdateUIEvent& event);
+      void onSaveDefault(wxCommandEvent& event);
       void onSortOrderClicked(wxCommandEvent& event);
       void onSortSelection(wxCommandEvent& event);
       void onTreeFilterExpanding(wxTreeEvent& event);

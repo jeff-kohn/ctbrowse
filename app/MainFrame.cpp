@@ -502,7 +502,7 @@ namespace ctb::app
             }
 
             // if we get here we have the data, so save it to file.
-            auto folder = wxGetApp().userDataFolder();
+            auto folder = wxGetApp().getDataFolder();
             auto file_path{ folder / result->tableName() };
             file_path.replace_extension(constants::DATA_FILE_EXTENSION);
             saveTextToFile(file_path, result->data, true);
@@ -547,17 +547,13 @@ namespace ctb::app
          }
 
          // load table and connect it to the event source
-         CtDatasetLoader loader{ wxGetApp().userDataFolder() };
+         CtDatasetLoader loader{ wxGetApp().getDataFolder() };
          auto table_id = eventIdToTableId(event.GetId());
-         auto tbl = loader.getDataset(table_id);
+         auto dataset = loader.getDataset(table_id);
 
-         //// Apply in-stock filter by default?
-         //if (wxGetApp().getConfig(constants::CONFIG_PATH_PREFERENCES)->ReadBool(constants::CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY, constants::CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT))
-         //{
-         //   // TODO
-         //   // tbl->setInStockFilter(true);
-         //}
-         m_event_source->setDataset(tbl, true);
+         // apply any previously-saved default settings before attaching to source
+         CtDatasetOptions::applyDefaultOptions(dataset);
+         m_event_source->setDataset(dataset, true);
 
          // Update title bar
          SetTitle(ctb::format("{} - {}", getTableDescription(table_id), constants::APP_NAME_LONG));
@@ -845,6 +841,9 @@ namespace ctb::app
       {
          case DatasetEvent::Id::RowSelected:
             m_selected_row = event.affected_row.value_or(none);
+            break;
+
+         case DatasetEvent::Id::DatasetRemove:
             break;
 
          default:

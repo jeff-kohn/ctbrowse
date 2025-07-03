@@ -23,7 +23,7 @@ namespace ctb
    /// only be accessed from the main thread. If communication with background threads is
    /// needed, manual synchronization or a different implementation will be necessary.
    /// 
-   class DatasetEventSource final : public IDatasetEventSource
+   class DatasetEventSource : public IDatasetEventSource
    {
    public:
       using base                  = IDatasetEventSource;

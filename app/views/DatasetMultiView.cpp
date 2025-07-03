@@ -63,22 +63,5 @@ namespace ctb::app
       return m_details_panel ? m_details_panel->wineDetailsActive() : false;
    }
 
-   auto DatasetMultiView::applyDatasetOptions(const CtDatasetOptions& options) -> bool
-   {
-      if (!m_options_panel)
-         return false;
-
-      return m_options_panel->applyDatasetOptions(options);
-   }
-
-   auto DatasetMultiView::getDatasetOptions() const -> CtDatasetOptions
-   {
-      if (m_options_panel)
-      {
-         return m_options_panel->getDatasetOptions();
-      }
-      assert("This should be impossible, weird bug here!" and false);
-      return {};
-   }
 
 } // namespace ctb::app

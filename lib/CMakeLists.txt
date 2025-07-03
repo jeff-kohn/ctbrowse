@@ -44,6 +44,7 @@ target_sources(ctBrowse_lib
       "../include/ctb/tables/detail/ListColumn.h"
       "../include/ctb/tables/detail/MultiValueFilter.h"
       "../include/ctb/tables/detail/PropertyFilter.h"
+      "../include/ctb/tables/detail/PropertyFilterPredicate.h"
       "../include/ctb/tables/detail/PropertyValue.h"
       "../include/ctb/tables/detail/SubstringFilter.h"
       "../include/ctb/tables/detail/TableRecord.h"

@@ -9,6 +9,7 @@ namespace ctb::detail
    ///
    enum class PropType
    {
+      Null,    // special type used for serialization, not really a true PropertyType since any type can have null value.
       String,
       UInt16,
       UInt64,

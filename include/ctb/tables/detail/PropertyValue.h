@@ -24,7 +24,7 @@ namespace ctb::detail
 
    /// @brief class to contain a property value from a table record.
    ///
-   /// this class is a lightweight wrapper around std::variant that is easier use and provides a built-in
+   /// this class is a lightweight wrapper around std::variant that is easier to use and provides a built-in
    /// concept of 'null' so that we don't have to handle a mix of normal and std::optional<> types.
    /// 
    /// We use std::monostate to indicate null, but callers don't need to bother with that, just use
@@ -44,13 +44,11 @@ namespace ctb::detail
 
       /// @brief Create a PropertyValue from a string_view by converting it to the specified type.
       /// 
-      /// This is a zero-copy alternative to creating a PropertyValue<string> and then using as<> to convert it.
-      /// 
       /// @param text_value - The string_view to be converted and used to construct the PropertyValue.
       /// @return An PropertyValue containing the converted value if the conversion succeeds, or an empty 
       ///  PropertyValue otherwise.
       template<std::convertible_to<ValueType> ValT>
-      [[nodiscard]] static auto create(std::string_view text_value) -> PropertyValue
+      [[nodiscard]] static auto parse(std::string_view text_value) -> PropertyValue
       {
          auto val = from_str<ValT>(text_value); 
          if (val)
@@ -236,6 +234,13 @@ namespace ctb::detail
       auto asDouble() const -> NullableDouble
       {
          return as<double>();
+      }
+
+      /// @brief Provides access to the variant so that it can be visited.
+      template<typename Self>
+      auto& variant(this Self&& self)
+      {
+         return std::forward<Self>(self).m_val;
       }
 
       /// @brief allows for comparison of PropertyValue objects, as well as putting them in ordered containers

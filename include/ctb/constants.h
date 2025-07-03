@@ -135,7 +135,6 @@ namespace ctb::constants
    inline constexpr const char* ERROR_STR_INVALID_INDEX           = "Invalid index";
    inline constexpr const char* ERROR_STR_INVALID_ROW_INDEX       = "Invalid row index";
    inline constexpr const char* ERROR_STR_EDITING_NOT_SUPPORTED   = "Editing data is not supported.";
-   inline constexpr const char* ERROR_STR_NO_GRID_TABLE           = "No data is currently loaded. Open a data view before searching.";
    inline constexpr const char* ERROR_STR_NULLPTR_ARG             = "Invalid Parameter (nullptr).";
    inline constexpr const char* ERROR_STR_RELATIVE_LABEL_CACHE    = "The label image cache folder must be an absolute path, not relative.";
    inline constexpr const char* ERORR_STR_NO_SECRET_STORE         = "Secret Store not available.";

@@ -60,6 +60,8 @@ target_sources(${TARGET_NAME}
      "dialogs/TableSyncDialog.cpp"
      "dialogs/TableSyncDialog.h"
 
+     "model/CtDatasetOptions.cpp"
+     "model/CtDatasetOptions.h"
      "model/CtDataViewModel.cpp"
      "model/CtDataViewModel.h"
 
