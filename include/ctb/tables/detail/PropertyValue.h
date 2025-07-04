@@ -47,7 +47,7 @@ namespace ctb::detail
       /// @param text_value - The string_view to be converted and used to construct the PropertyValue.
       /// @return An PropertyValue containing the converted value if the conversion succeeds, or an empty 
       ///  PropertyValue otherwise.
-      template<std::convertible_to<ValueType> ValT>
+      template<ArithmeticType ValT> requires std::convertible_to<ValT, ValueType>
       [[nodiscard]] static auto parse(std::string_view text_value) -> PropertyValue
       {
          auto val = from_str<ValT>(text_value); 
@@ -60,6 +60,14 @@ namespace ctb::detail
          }
       }
 
+      /// @brief Create a PropertyValue from a string_view by parsing it as a year_month_day
+      /// @return a PropertyValue containing the parsed date, or a null PropertyValue if the string couldn't parsed
+      template<typename ValT> requires std::same_as<std::chrono::year_month_day, ValT>
+      [[nodiscard]] static auto parse(std::string_view date_str) -> PropertyValue
+      {
+         auto parse_result = parseDate(date_str, constants::FMT_PARSE_DATE_SHORT);
+         return parse_result.has_value() ? PropertyValue{ *parse_result } : PropertyValue{};
+      }
 
       /// @brief construct a PropertyValue from any value convertible to ValueType
       ///

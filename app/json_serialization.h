@@ -7,6 +7,8 @@
 
 #include <glaze/glaze.hpp>
 
+#include <optional>
+
 
 /// @brief json serialization support for CtPropFilterPredicate
 template <>
@@ -28,14 +30,14 @@ struct glz::meta<ctb::CtPropertyFilter>
                                         "compare_pred", &T::compare_pred );
 };
 
-
-/// @brief json serialization support for CtPropertyVal
-//template <>
-//struct glz::meta<ctb::CtPropertyVal> {
-//   static constexpr auto value = [](auto& self) -> auto& { return self.m_val; };
-//};
-
-
+namespace ctb::detail
+{
+   struct PropertyValJson
+   {
+      ctb::PropType prop_type{ PropType::String };
+      std::optional<std::string> value{};
+   };
+}
 namespace glz
 {
    /// @brief json serialization support for std::chrono::year_month_day
@@ -62,7 +64,7 @@ namespace glz
       template <auto Opts>
       static void op(const std::chrono::year_month_day& value, auto&&... args)
       {
-         serialize<JSON>::op<Opts>(ctb::toIsoDate(value), args...);
+         serialize<JSON>::template op<Opts>(ctb::toIsoDate(value), args...);
       }
    };
 
@@ -76,46 +78,44 @@ namespace glz
       {
          using namespace ctb;
 
-         PropType prop_type{ PropType::String }; // tells us how to parse the json value
-
-         parse<JSON>::op<Opts>(prop_type, ctx, args...);
-         if (prop_type == PropType::Date)
+         ctb::detail::PropertyValJson json_val{};
+         parse<JSON>::template op<Opts>(json_val, ctx, args...);
+         if (ctx.error != error_code::none)
          {
-            std::chrono::year_month_day ymd{};
-            parse<JSON>::op<Opts>(ymd, ctx, args...);
-            if (ctx.error == error_code::none)
-            {
-               value = ymd;
-            }
+            return value.setNull();
          }
-         else {
-            std::string value_str{};                
-            parse<JSON>::op<Opts>(value_str, ctx, args...);
-            switch (prop_type)
-            {
-               case PropType::Null:
-                  value.setNull();
-                  break;
 
-               case PropType::String:
-                  value = value_str;
-                  break;
+         if (not json_val.value.has_value())
+            json_val.prop_type = PropType::Null;
 
-               case PropType::UInt16:
-                  value = CtPropertyVal::parse<uint16_t>(value_str);
-                  break;
+         switch (json_val.prop_type)
+         {
+            case PropType::Null:
+               value.setNull();
+               break;
 
-               case PropType::UInt64:
-                  value = CtPropertyVal::parse<uint64_t>(value_str);
-                  break;
+            case PropType::String:
+               value = std::move(json_val.value.value());
+               break;
 
-               case PropType::Double:
-                  value = CtPropertyVal::parse<double>(value_str);
-                  break;
+            case PropType::UInt16:
+               value = CtPropertyVal::parse<uint16_t>(json_val.value.value());
+               break;
 
-               default:
-                  assert(false);
-            }
+            case PropType::UInt64:
+               value = CtPropertyVal::parse<uint64_t>(json_val.value.value());
+               break;
+
+            case PropType::Double:
+               value = CtPropertyVal::parse<double>(json_val.value.value());
+               break;
+
+            case PropType::Date:
+               value = CtPropertyVal::parse<chrono::year_month_day>(json_val.value.value());
+               break;
+
+            default:
+               assert(false);
          }
       }
    };
@@ -127,19 +127,23 @@ namespace glz
       template <auto Opts>
       static void op(const ctb::CtPropertyVal& value, auto&&... args)
       {
-         using namespace ctb;
+         using namespace ctb::detail;
          using std::chrono::year_month_day;
 
          auto serializeFunc = ctb::Overloaded
          {
-            [&](const std::string& val)     -> void { serialize<JSON>::op<Opts>(std::make_pair(PropType::String, val),          args...);  },
-            [&](uint16_t val)               -> void { serialize<JSON>::op<Opts>(std::make_pair(PropType::UInt16, val),          args...);  },
-            [&](uint64_t val)               -> void { serialize<JSON>::op<Opts>(std::make_pair(PropType::UInt64, val),          args...);  },
-            [&](double val)                 -> void { serialize<JSON>::op<Opts>(std::make_pair(PropType::Double, val),          args...);  },
-            [&](const year_month_day& val)  -> void { serialize<JSON>::op<Opts>(std::make_pair(PropType::Date,   val),          args...);  },
-            [&](const std::monostate)       -> void { serialize<JSON>::op<Opts>(std::make_pair(PropType::Null,   std::nullopt), args...);  }
+            [&](const std::string& val)    { return PropType::String; },
+            [&](uint16_t val)              { return PropType::UInt16; },
+            [&](uint64_t val)              { return PropType::UInt64; },
+            [&](double val)                { return PropType::Double; },
+            [&](const year_month_day& val) { return PropType::Date;   },
+            [&](const std::monostate)      { return PropType::Null;   }
          };
-         std::visit(serializeFunc, value.variant());
+         
+         
+         auto str_val = value.asString();
+         auto json_type = std::visit(serializeFunc, value.variant());
+         serialize<JSON>::template op<Opts>(PropertyValJson{ json_type, str_val }, args...);
       }
    };
 
