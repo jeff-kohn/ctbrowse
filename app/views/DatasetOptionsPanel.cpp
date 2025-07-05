@@ -506,6 +506,15 @@ namespace ctb::app
          m_filter_tree->SetItemImage(item, IMG_CONTAINER);
          m_multival_filters[item] = filter;
       }
+
+      // populate filter tree with current filtes from the dataset since they may have been prevously saved.
+      //for (auto& [key, filter] : dataset->multivalFilters().activeFilters())
+      //{
+      //   for (auto& val : filter.match_values)
+      //   {
+
+      //   }
+      //}
    }
    
 
@@ -617,6 +626,7 @@ namespace ctb::app
             throw Error{ constants::ERROR_STR_NO_DATASET, Error::Category::DataError };
 
          CtDatasetOptions::saveDefaultOptions(CtDatasetOptions::retrieveOptions(dataset));
+         wxGetApp().displayInfoMessage(constants::FMT_DEFAULT_OPTIONS_SAVED_MSG, getTableDescription(dataset->getTableId()));
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);

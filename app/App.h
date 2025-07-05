@@ -27,7 +27,9 @@ namespace ctb::app
    // with no benefit for this use-case.
    enum CmdId : uint16_t
    {
-      CMD_FILE_DOWNLOAD_DATA = wxID_HIGHEST,
+      CMD_FILE_OPEN = wxID_HIGHEST, 
+      CMD_FILE_SAVE,
+      CMD_FILE_DOWNLOAD_DATA,
       CMD_FILE_SETTINGS,
       CMD_COLLECTION_MY_CELLAR,
       CMD_COLLECTION_PENDING_WINE,
@@ -103,6 +105,13 @@ namespace ctb::app
 
       /// @brief display a message box with informational text
       void displayInfoMessage(const std::string& msg, const std::string& title = constants::APP_NAME_SHORT);
+
+      /// @brief display an info message to the user, using format()-style syntax for string building.
+      template <typename... Args>
+      void displayInfoMessage(ctb::format_string<Args...> fmt_str, Args&&... args)
+      {
+         displayInfoMessage(ctb::vformat(fmt_str, ctb::make_format_args(args...)));
+      }
 
    private:
       MainFrame*         m_main_frame{};

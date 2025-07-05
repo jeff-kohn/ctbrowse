@@ -12,8 +12,9 @@
 #include <ctb/model/ScopedEventSink.h>
 
 #include <wx/event.h>
-#include <wx/frame.h>
 #include <wx/menu.h>
+#include <wx/frame.h>
+
 #include <memory>
 
 /// forward declare wx classes to avoid header pollution.
@@ -87,6 +88,8 @@ namespace ctb::app
 
       // File menu handlers
       void onMenuFilePreferences(wxCommandEvent&);
+      void onMenuFileSave(wxCommandEvent&);
+      void onMenuFileOpen(wxCommandEvent&);
       void onMenuFileSyncData(wxCommandEvent&);
       void onMenuFileQuit(wxCommandEvent&);
 

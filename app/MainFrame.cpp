@@ -195,7 +195,10 @@ namespace ctb::app
       m_status_bar = CreateStatusBar();
 
       // File menu handlers
-      Bind(wxEVT_MENU, &MainFrame::onMenuFilePreferences, this, CmdId::CMD_FILE_SETTINGS);
+      //Bind(wxEVT_MENU, &MainFrame::onMenuFilePreferences, this, CmdId::CMD_FILE_SETTINGS);
+      Bind(wxEVT_MENU, &MainFrame::onMenuFileOpen,        this, CmdId::CMD_FILE_DOWNLOAD_DATA);
+      Bind(wxEVT_MENU, &MainFrame::onMenuFileSave,        this, CmdId::CMD_FILE_DOWNLOAD_DATA);
+      Bind(wxEVT_MENU, &MainFrame::onMenuFileSyncData,    this, CmdId::CMD_FILE_DOWNLOAD_DATA);
       Bind(wxEVT_MENU, &MainFrame::onMenuFileSyncData,    this, CmdId::CMD_FILE_DOWNLOAD_DATA);
       Bind(wxEVT_MENU, &MainFrame::onMenuFileQuit,        this, wxID_EXIT);
 
@@ -250,6 +253,25 @@ namespace ctb::app
       // File menu
       auto* menu_file = new wxMenu();
 
+      auto* menu_load_options = new wxMenuItem{
+         menu_file, 
+         CmdId::CMD_FILE_OPEN, 
+         constants::CMD_FILE_OPEN_LBL, 
+         constants::CMD_FILE_OPEN_TIP, 
+         wxITEM_NORMAL
+      };
+      menu_file->Append(menu_load_options);
+
+      auto* menu_save_options = new wxMenuItem{
+         menu_file, 
+         CmdId::CMD_FILE_SAVE, 
+         constants::CMD_FILE_SAVE_LBL, 
+         constants::CMD_FILE_SAVE_TIP, 
+         wxITEM_NORMAL
+      };
+      menu_file->Append(menu_save_options);
+      menu_file->AppendSeparator();
+
       auto* menu_sync_data = new wxMenuItem{
          menu_file, 
          CmdId::CMD_FILE_DOWNLOAD_DATA, 
@@ -260,15 +282,15 @@ namespace ctb::app
       menu_file->Append(menu_sync_data);
       menu_file->AppendSeparator();
 
-      auto* menu_file_preferences = new wxMenuItem{
-         menu_file, 
-         CmdId::CMD_FILE_SETTINGS, 
-         constants::CMD_FILE_SETTINGS_LBL,
-         constants::CMD_FILE_SETTINGS_TIP,
-         wxITEM_NORMAL
-      };
-      menu_file->Append(menu_file_preferences);
-      menu_file->AppendSeparator();
+      //auto* menu_file_preferences = new wxMenuItem{
+      //   menu_file, 
+      //   CmdId::CMD_FILE_SETTINGS, 
+      //   constants::CMD_FILE_SETTINGS_LBL,
+      //   constants::CMD_FILE_SETTINGS_TIP,
+      //   wxITEM_NORMAL
+      //};
+      //menu_file->Append(menu_file_preferences);
+      //menu_file->AppendSeparator();
 
       auto* menu_file_quit = new wxMenuItem(menu_file, wxID_EXIT);
       menu_file->Append(menu_file_quit);
@@ -414,6 +436,18 @@ namespace ctb::app
    void MainFrame::onMenuFilePreferences([[maybe_unused]] wxCommandEvent& event)
    {
 
+   }
+
+
+   void MainFrame::onMenuFileSave(wxCommandEvent&)
+   {
+      // todo
+   }
+
+
+   void MainFrame::onMenuFileOpen(wxCommandEvent&)
+   {
+      // todo
    }
 
 

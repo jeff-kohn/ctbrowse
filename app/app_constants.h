@@ -16,6 +16,10 @@ namespace ctb::constants
    inline constexpr const char* LBL_MENU_VIEW                      = "&View";
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_LBL         = "&Download Data...";
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP         = "Download data from CellarTracker";
+   inline constexpr const char* CMD_FILE_OPEN_LBL                  = "&Open Collection...";
+   inline constexpr const char* CMD_FILE_OPEN_TIP                  = "Open saved collection settings.";
+   inline constexpr const char* CMD_FILE_SAVE_LBL                  = "&Save Collection...";
+   inline constexpr const char* CMD_FILE_SAVE_TIP                  = "Save the current  collection settings to file.";
    inline constexpr const char* CMD_FILE_SETTINGS_LBL              = "&Settings...";
    inline constexpr const char* CMD_FILE_SETTINGS_TIP              = "Configure app settings";
    inline constexpr const char* CMD_COLLECTION_CONSUMED_LBL        = "Wine &Consumed\tCtrl+D";
@@ -65,6 +69,7 @@ namespace ctb::constants
    inline constexpr const char* CREDENTIALDLG_LBL_SAVE            = "&Save Credential";
    inline constexpr const char* FMT_CREDENTIALDLG_LBL_TITLE       = "{} Login";
 
+   inline constexpr const char* FMT_DEFAULT_OPTIONS_SAVED_MSG     = "New default options saved for collection '{}'";
    inline constexpr const char* FMT_LBL_FILTERS_SELECTED          = "{}  ({} selected)";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADED        = "Successfully downloaded file '{}'.";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADING       = "Downloading file '{}'...";
