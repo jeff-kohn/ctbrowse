@@ -47,26 +47,27 @@ namespace ctb::detail
       /// @brief Sets the comparison type for this filter predicate
       void setPredicateType(const PredicateType& predicate_type)
       {
-         using enum PredicateType;
          m_predicate_type = predicate_type;  // Store the new predicate type
 
          switch (predicate_type)  // Use the input parameter
          {
-            case Equal:
+            case PredicateType::Equal:
                m_compare_func = std::equal_to<PropertyVal>{};
                break;
-            case Greater:
+            case PredicateType::Greater:
                m_compare_func = std::greater<PropertyVal>{};
                break;
-            case GreaterEqual:
+            case PredicateType::GreaterEqual:
                m_compare_func = std::greater_equal<PropertyVal>{};
                break;
-            case Less:
+            case PredicateType::Less:
                m_compare_func = std::less<PropertyVal>{};
                break;
-            case LessEqual:
+            case PredicateType::LessEqual:
                m_compare_func = std::less_equal<PropertyVal>{};
                break;
+            default:
+               assert(false);
          }
       }
 

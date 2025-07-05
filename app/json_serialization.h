@@ -130,7 +130,7 @@ namespace glz
          using namespace ctb::detail;
          using std::chrono::year_month_day;
 
-         auto serializeFunc = ctb::Overloaded
+         auto getType = ctb::Overloaded
          {
             [&](const std::string& val)    { return PropType::String; },
             [&](uint16_t val)              { return PropType::UInt16; },
@@ -142,7 +142,7 @@ namespace glz
          
          
          auto str_val = value.asString();
-         auto json_type = std::visit(serializeFunc, value.variant());
+         auto json_type = std::visit(getType, value.variant());
          serialize<JSON>::template op<Opts>(PropertyValJson{ json_type, str_val }, args...);
       }
    };

@@ -44,21 +44,7 @@ namespace ctb::detail
          return false;
       }
 
-      ///// @brief Adds a filter to the collection if it does not already exist, with heterogeneous lookup
-      ///// @return true if the filter was successfully added; false if a filter with the same filter_name already exists.
-      //template<StringOrStringViewType KeyValT> requires StringOrStringViewType<Key>
-      //auto addFilter(KeyValT&& key, Filter filter) -> bool
-      //{
-      //   if ( m_filters.try_emplace(std::forward<KeyValT>(key), std::move(filter)).second)
-      //   {
-      //      notifyChange();
-      //      return true;
-      //   }
-      //   return false;
-      //}
-
       /// @brief Replace an existing filter, or add it if it does not already exist.
-      /// @return true if the filter was replaced or added, false if something went wrong
       void replaceFilter(Key key, Filter filter)
       {
          m_filters[key] = std::move(filter);
@@ -162,23 +148,6 @@ namespace ctb::detail
          return vws::all(m_filters);
       } 
 
-      /// @brief operator[] for getting a filter if it exists or adding a new default-initialized one otherwise
-      /// @return a reference to the requested (or new) Filter.
-      //template <typename Self>
-      //auto&& operator[](this Self&& self, const Key& key) 
-      //{
-      //   // Note that we don't 
-      //   // Don't use operator[] or .at(), if key is string it wouldn't allow heterogenous lookup with string_view
-      //   auto it = std::forward<Self>(self).m_filters.find(key);
-      //   if (it == std::forward<Self>(self).m_filters.end())
-      //   {
-      //      auto result = std::forward<Self>(self).m_filters.try_emplace(key, Filter{});
-      //      assert(result.second);
-      //      return result.first->second;
-      //   }
-      //   return it->second;
-      //} 
-     
       /// @brief returns true if the record is a match 
       auto operator()(const PropertyMap& rec) const -> bool
       {
