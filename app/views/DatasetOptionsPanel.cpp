@@ -478,7 +478,18 @@ namespace ctb::app
 
    void DatasetOptionsPanel::onTableSorted(IDataset* dataset)
    {
+      // need to update the index our combo is bound to in addition to the sort.
       m_sort_config = dataset->activeSort();
+      
+      auto sorts = dataset->availableSorts();
+      for (const auto&& [idx, sort] : vws::enumerate(sorts))
+      {
+         if (sort.sort_name == m_sort_config.sort_name)
+         {
+            m_sort_selection = idx;
+         }
+      }
+
       m_sort_ascending = !m_sort_config.reverse;
       m_sort_descending = m_sort_config.reverse;
       TransferDataToWindow();
@@ -507,7 +518,7 @@ namespace ctb::app
          m_multival_filters[item] = filter;
       }
 
-      // populate filter tree with current filtes from the dataset since they may have been prevously saved.
+      // populate filter tree with current filtes from the dataset since they may have been previously saved.
       //for (auto& [key, filter] : dataset->multivalFilters().activeFilters())
       //{
       //   for (auto& val : filter.match_values)
