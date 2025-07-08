@@ -10,6 +10,8 @@ namespace ctb::constants
    inline constexpr const char* APP_FOLDER_LABELS                 = "labels";
    inline constexpr const char* APP_FOLDER_TABLES                 = "tables";
 
+   inline constexpr const char* FILE_COLLECTION_CTBC_FILTER        = "ctBrowse Collection (*.ctbc)|*.ctbc";
+   inline constexpr const char* FILE_OPEN_COLLECTION_FILTER        = "Select Saved ctBrowse Collection:";
 
    inline constexpr const char* LBL_MENU_COLLECTION                = "&Collection";
    inline constexpr const char* LBL_MENU_WINE                      = "&Online";

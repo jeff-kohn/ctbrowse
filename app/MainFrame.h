@@ -125,6 +125,7 @@ namespace ctb::app
       void clearSearchFilter();
       void doSearchFilter();
       auto getDataset(bool throw_on_null = true) -> DatasetPtr;
+      void setDataset(DatasetPtr dataset);
       void updateStatusBarCounts();
 
       // Inherited via IDatasetEventSink

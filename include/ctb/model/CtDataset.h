@@ -57,6 +57,12 @@ namespace ctb
          return DatasetPtr{ static_cast<IDataset*>(new CtDataset{ std::move(data) }) };
       }
 
+      /// @brief Returns the TableId enum for this dataset's underlying table.
+      auto getTableId() const -> TableId override
+      {
+         return Traits::getTableId();
+      }
+
       /// @brief Returns the filter_name of the CT table this dataset represents. Not meant to be 
       ///         displayed to the user, this is for internal use. 
       auto getTableName() const -> std::string_view override
@@ -64,10 +70,21 @@ namespace ctb
          return Traits::getTableName();
       }
 
-      /// @brief Returns the TableId enum for this dataset's underlying table.
-      auto getTableId() const -> TableId override
+      /// @brief Returns the saved collection name.
+      ///
+      /// defaults to getTableDescription()
+      /// 
+      /// @return A reference to the collection name string.
+      auto getCollectionName() const -> const std::string & override
       {
-         return Traits::getTableId();
+         return m_collection_name;
+      }
+
+      /// @brief Sets the name of the collection.
+      /// @param name - The new name to assign to the collection.
+      void setCollectionName(std::string_view name) override
+      {
+         m_collection_name = name;
       }
 
       /// @brief Retrieves a short text summary of the data in the table
@@ -307,6 +324,7 @@ namespace ctb
       MultiValueFilterMgr  m_mval_filters{};         // active multi-match filters
       PropertyFilterMgr    m_prop_filters{};         // active property filters
       MaybeSubStringFilter m_substring_filter{};
+      std::string          m_collection_name{};
       TableSort            m_current_sort{};
       
       // private construction, use static factory method create();
@@ -314,6 +332,7 @@ namespace ctb
          m_data{ std::move(data) },
          m_current_view{ &m_data },
          m_list_columns{ std::from_range, Traits::DefaultListColumns },
+         m_collection_name{ getTableDescription(getTableId()) },
          m_current_sort{ availableSorts()[0] }
       {
          sortData();

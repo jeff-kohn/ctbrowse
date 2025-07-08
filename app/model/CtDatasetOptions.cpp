@@ -3,7 +3,6 @@
 #include "json_serialization.h"
 
 #include <ctb/model/CtDataset.h>
-#include <glaze/glaze_exceptions.hpp>
 
 
 namespace ctb::app
@@ -12,13 +11,15 @@ namespace ctb::app
    {
       auto getDefaultOptionsPath(TableId table_id)
       {
+         // At the moment this is the only depepency preventing this class from being moved to the lib in the future if we
+         // decide that's desirable.
          return ctb::format("{}/{}.{}", wxGetApp().getDataFolder(AppFolder::Defaults).generic_string(), magic_enum::enum_name(table_id), "ctbc");
       }
 
    }
 
 
-   auto CtDatasetOptions::applyOptionsToDataset(DatasetPtr dataset) const -> bool
+   auto CtDatasetOptions::applyToDataset(DatasetPtr dataset) const -> bool
    {
       using magic_enum::enum_name;
 
@@ -41,6 +42,8 @@ namespace ctb::app
          auto actual_id = enum_name(dataset->getTableId());
          failed(ctb::format("Dataset Options for '{}' being applied to dataset '{}', this is probably a bug or an invalid options file.", expected_id, actual_id));
       }
+
+      dataset->setCollectionName(collection_name);
 
       if (active_sort.sort_props.size() > 0 and dataset->hasProperty(active_sort.sort_props[0]))
       {
@@ -72,7 +75,7 @@ namespace ctb::app
    }
 
 
-   auto CtDatasetOptions::loadOptionsFromDataset(DatasetPtr dataset) -> bool
+   auto CtDatasetOptions::loadFromDataset(DatasetPtr dataset) -> bool
    {
       if (nullptr == dataset)
       {
@@ -81,6 +84,7 @@ namespace ctb::app
       }
 
       table_id         = dataset->getTableId();
+      collection_name  = dataset->getCollectionName();
       active_sort      = dataset->activeSort();
       multival_filters = dataset->multivalFilters().activeFilters() | vws::values | rng::to<std::vector>();
       prop_filters     = dataset->propFilters().activeFilters()     | vws::values | rng::to<std::vector>();
@@ -117,12 +121,13 @@ namespace ctb::app
                                .prop_filters{ std::from_range, vws::values(dataset->propFilters().activeFilters()) } };
    }
 
+
    /* static */ void CtDatasetOptions::applyDefaultOptions(DatasetPtr dataset)
    {
       auto result = retrieveDefaultOptions(dataset->getTableId());
       if (result)
       {
-         result->applyOptionsToDataset(dataset);
+         result->applyToDataset(dataset);
       }
    }
 
@@ -130,7 +135,7 @@ namespace ctb::app
    /* static */ auto CtDatasetOptions::retrieveOptions(const DatasetPtr dataset) noexcept(false) -> CtDatasetOptions
    {
       CtDatasetOptions result{};
-      result.loadOptionsFromDataset(dataset);
+      result.loadFromDataset(dataset);
       return result;
    }
 

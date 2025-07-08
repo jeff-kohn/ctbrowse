@@ -77,7 +77,9 @@ namespace ctb::app
          if (folder == AppFolder::Root)
             return m_user_data_folder; 
 
-         return ctb::format("{}/{}", m_user_data_folder.generic_string(), magic_enum::enum_name(folder));
+         auto path = ctb::format("{}/{}", m_user_data_folder.generic_string(), magic_enum::enum_name(folder));
+         fs::create_directories(path);
+         return path;
       }
 
       /// @brief Retrieve a pointer to main window that doesn't need dynamic_cast (or wx-equivalent).

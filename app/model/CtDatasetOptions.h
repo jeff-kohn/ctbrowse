@@ -18,6 +18,9 @@ namespace ctb::app
       ///        and it's conceivable that the json string isn't parseable to enum, use a safe default
       TableId table_id{ TableId::List };
 
+      /// @brief The saved name of the collection, used as the file name and displayed as the title bar caption.
+      std::string collection_name{};
+
       /// @brief Sort settings to apply to the dataset
       CtTableSort active_sort{};
 
@@ -29,11 +32,11 @@ namespace ctb::app
 
       /// @brief Apply options from this object to the provided Dataset
       /// @return true if all options were successfully applied, false if one or more could not be applied.
-      auto applyOptionsToDataset(DatasetPtr dataset) const -> bool;
+      auto applyToDataset(DatasetPtr dataset) const -> bool;
 
       /// @brief Load current options from the provided dataset to this object
       /// @return true if options were loaded, false if they weren't (because dataset == nullptr, you dummy)
-      auto loadOptionsFromDataset(const DatasetPtr dataset) -> bool;
+      auto loadFromDataset(const DatasetPtr dataset) -> bool;
 
       /// @brief Apply any saved default CtDatasetOptions to the supplied dataset.
       ///

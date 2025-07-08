@@ -35,12 +35,23 @@ namespace ctb
       using TableSort           = CtTableSort;
       using TableSortSpan       = CtTableSortSpan;
 
-      /// @return the filter_name of the CT table this dataset represents. Not meant to be 
+      /// @brief Returns the TableId enum for this dataset's underlying table.
+      virtual auto getTableId() const -> TableId = 0;
+
+      /// @return the name of the CT table this dataset represents. Not meant to be 
       ///         displayed to the user, this is for internal use. 
       [[nodiscard]] virtual auto getTableName() const -> std::string_view = 0;
 
-      /// @brief Returns the TableId enum for this dataset's underlying table.
-      virtual auto getTableId() const -> TableId = 0;
+      /// @brief Returns a reference to the collection name.
+      /// @return A reference to a std::string representing the collection name. 
+      [[nodiscard]] virtual auto getCollectionName() const -> const std::string& = 0;
+
+      /// @brief Sets the name of the collection.
+      /// 
+      /// This name should be used for file save/open operations. It defaults to the 
+      /// 
+      /// @param name - The new name to assign to the collection.
+      [[nodiscard]] virtual void setCollectionName(std::string_view name) = 0;
 
       /// @brief Retrieves a short text summary of the data in the table
       virtual auto getDataSummary() const -> std::string = 0;

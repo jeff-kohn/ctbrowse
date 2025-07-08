@@ -68,6 +68,7 @@ namespace ctb::constants
    inline constexpr const char* FILTER_ORDER_DATE           = "Order Date";
    inline constexpr const char* FILTER_PRODUCER             = "Producer";
    inline constexpr const char* FILTER_REGION               = "Region";
+   inline constexpr const char* FILTER_SUB_REGION           = "Sub-Region";
    inline constexpr const char* FILTER_CONSUME_REASON       = "Reason";
    inline constexpr const char* FILTER_STORE                = "Store";
    inline constexpr const char* FILTER_VARIETAL             = "Varietal";
