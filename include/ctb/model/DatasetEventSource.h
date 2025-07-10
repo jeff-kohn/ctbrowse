@@ -17,18 +17,18 @@
 namespace ctb
 {
 
-   /// @brief a single-threaded default implementation of IDatasetEventSource interface
+   /// @brief A single-threaded default implementation of IDatasetEventSource interface
    ///
-   /// this implementation is not thread-safe, since we're using it with UI classes that must
+   /// Sinks should handle their own exceptions if possible; any exceptions caught by this 
+   /// class while sending notifications will be logged in debug builds but otherwise lost.
+   ///
+   /// This implementation is not thread-safe, since we're using it with UI classes that must
    /// only be accessed from the main thread. If communication with background threads is
    /// needed, manual synchronization or a different implementation will be necessary.
    /// 
    class DatasetEventSource : public IDatasetEventSource
    {
    public:
-      using base                  = IDatasetEventSource;
-      using DatasetEventSourcePtr = std::shared_ptr<base>;
-
       /// @brief static method to create a class instance.
       ///
       /// note that while you can attach/detach from this object immediately, 
@@ -37,67 +37,79 @@ namespace ctb
       [[nodiscard]] static auto create() -> DatasetEventSourcePtr;
 
       /// @brief returns true if this source has a table attached, false otherwise
-      ///
-      auto hasDataset() const -> bool override;
+      auto hasDataset() const noexcept -> bool override;
 
-      /// @brief retrieves a pointer to the active table for this source, if any.
+      /// @brief Retrieves a (possibly nullptr) pointer to the active table for this source
       ///
-      /// the returned table ptr may be null if this source doesn't have an active table.
-      /// 
-      auto getDataset() const -> DatasetPtr override;
+      /// the returned table ptr may be null if this source doesn't have an active dataset.
+      auto getDataset() const noexcept -> DatasetPtr override;
 
       /// @brief assigns a table to this source.
       /// 
-      /// triggers the DatasetRemove event before disconnecting the current table (if it is non-null)
-      /// triggers the DatasetInitialize event for the new table-ptr (if it is non-null and signal_event
-      /// is true)
+      /// Always triggers DatasetEvent::Id::DatasetRemove unless existing dataset == nullptr.
+      /// Triggers DatasetEvent::Id::DatasetInitialize IF a non-null dataset ptr is passed 
       /// 
       /// If a null table ptr is passed, this source will no longer fire events 
       /// until a subsequent call to setDataset() passes a valid pointer.
       /// 
-      auto setDataset(DatasetPtr dataset, bool signal_event) -> bool override;
-      
-      /// @brief assigns a table to this source.
-      /// 
-      /// Triggers the DatasetRemove event before disconnecting the current table (if it is non-null)
-      /// Triggers the DatasetInitialize event for the new table-ptr (if it is non-null)
-      /// 
-      /// If a null table ptr is passed, this source will no longer fire events 
-      /// until a subsequent call to setDataset() passes a valid pointer.
-      /// 
-      void setDataset(DatasetPtr dataset) override
+      void setDataset(DatasetPtr dataset) noexcept override
       {
          setDataset(dataset, true);
       }
 
-      /// @brief attaches an event sink to this source to receive event notifications
+      /// @brief assigns a dataset to this source.
       ///
-      /// detach() must be called when notifications no longer can/should be sent to 
-      /// the subscriber, otherwise there is no way for the source to determine validity of 
-      /// attached subscribers.
-      /// 
-      void attach(IDatasetEventSink* observer) override;
-
-      /// @brief detach an event sink from this source to no longer receive event notifications
-      void detach(IDatasetEventSink* observer) override;
-
-      /// @brief this is called to signal that an event needs to be sent to all listeners
+      /// Always triggers DatasetEvent::Id::DatasetRemove unless existing dataset == nullptr.
+      /// Triggers DatasetEvent::Id::DatasetInitialize IF a non-null dataset ptr is passed 
+      /// and signal_event == true
       ///
-      /// sinks should try to handle their own exceptions if it's possible to do so gracefully;
-      /// exceptions caught in this function will be logged in debug builds but otherwise lost
+      /// If a null dataset ptr is passed, this view will no longer fire events 
+      /// until a subsequent call to setDataset() passes a valid pointer.
+      void setDataset(DatasetPtr dataset, bool signal_event) noexcept override;
+
+      /// @brief attaches an observer to this source to receive event notifications
+      ///
+      /// detach() must be called when notifications can/should no longer be sent to 
+      /// the observer, because there is no way for this source to determine validity
+      /// of the pointers-to-IDatasetEventSink it has.
+      void attach(IDatasetEventSink* observer) noexcept override;
+
+      /// @brief detach an observer from this source to no longer receive event notifications
+      ///
+      /// This must be called when notifications can/should no longer be sent to 
+      /// an observer, because there is no way for this source to determine validity
+      /// of the pointers-to-IDatasetEventSink it has.
+      void detach(IDatasetEventSink* observer) noexcept override;
+
+      /// @brief this is called to signal that an event needs to be sent to all observers
       /// 
-      /// @return true if every subscriber was notified without error, false if at least one
-      ///         subscriber threw an error.
+      /// @return true if every observer was notified without error, false if at least one
+      ///  observer threw an error.
+      auto signal(DatasetEvent::Id event_id) noexcept -> bool override;
+
+      /// @brief this is called to signal that an event needs to be sent to all observers EXCEPT 
+      ///  for event_source. 
+      ///
+      /// This allows a caller to avoid receiving self-generated events if necessary/preferable
+      /// 
+      /// @return true if every observer was notified without error, false if at least one
+      ///  observer threw an error.
+      auto signal(DatasetEvent::Id event, IDatasetEventSink* event_source) noexcept -> bool override;
+
+      /// @brief this is called to signal that an event needs to be sent to all observers
+      /// 
+      /// @return true if every observer was notified without error, false if at least one
+      ///  observer threw an error.
       auto signal(DatasetEvent::Id event, NullableInt rec_idx) noexcept -> bool override;
  
-      /// @brief this is called to signal that an event needs to be sent to all listeners
+      /// @brief this is called to signal that an event needs to be sent to all observers EXCEPT 
+      ///  for event_source. 
       ///
-      /// sinks should try to handle their own exceptions if it's possible to do so gracefully. Any 
-      /// exceptions propagated back to this function will be displayed to the user.
+      /// This allows a caller to avoid receiving self-generated events if necessary/preferable
       /// 
-      /// @return true if every subscriber was notified without error, false if at least one
-      ///         subscriber threw an error.
-      auto signal(DatasetEvent::Id event_id) noexcept -> bool override;
+      /// @return true if every observer was notified without error, false if at least one
+      ///  observer threw an error.
+      auto signal(DatasetEvent::Id event, NullableInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool override;
 
       /// @brief destructor
       ~DatasetEventSource() noexcept override;
@@ -114,8 +126,9 @@ namespace ctb
       DatasetEventSource(DatasetEventSource&&) = delete;
       DatasetEventSource& operator=(const DatasetEventSource&) = delete;
       DatasetEventSource& operator=(DatasetEventSource&&) = delete;   
+
    };
 
-   using DatasetEventSourcePtr = DatasetEventSource::DatasetEventSourcePtr;
+
 
 }  // namespace  ctb

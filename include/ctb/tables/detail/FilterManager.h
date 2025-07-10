@@ -62,7 +62,7 @@ namespace ctb::detail
 
       /// @brief Remove the specified filter from the list
       /// @return true if removed, false if not found.
-      auto removeFilter(const Key& key) -> bool
+      auto disableFilterMatchValue(const Key& key) -> bool
       {
          if ( m_filters.erase(key))
          {
@@ -75,7 +75,7 @@ namespace ctb::detail
       /// @brief Remove the specified filter from the list, with heterogeneous lookup
       /// @return true if removed, false if not found.
       template<StringOrStringViewType KeyValT> requires StringOrStringViewType<Key>
-      auto removeFilter(KeyValT&& key) -> bool
+      auto disableFilterMatchValue(KeyValT&& key) -> bool
       {
          if (m_filters.erase(std::forward<KeyValT>(key)))
          {

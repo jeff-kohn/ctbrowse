@@ -31,6 +31,8 @@ namespace ctb::app
       CMD_FILE_SAVE,
       CMD_FILE_DOWNLOAD_DATA,
       CMD_FILE_SETTINGS,
+      CMD_EDIT_REFRESH_DATA,
+      CMD_EDIT_CLEAR_FILTERS,
       CMD_COLLECTION_MY_CELLAR,
       CMD_COLLECTION_PENDING_WINE,
       CMD_COLLECTION_CONSUMED,
@@ -72,7 +74,7 @@ namespace ctb::app
       auto OnExit() -> int override;
 
       /// @brief  returns the path where the application stores data files.
-      auto getDataFolder(AppFolder folder = AppFolder::Root) const noexcept -> fs::path
+      auto getDataFolder(AppFolder folder) const noexcept -> fs::path
       {
          if (folder == AppFolder::Root)
             return m_user_data_folder; 

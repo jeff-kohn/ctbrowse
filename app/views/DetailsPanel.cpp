@@ -511,7 +511,6 @@ namespace ctb::app
             updateDetails(event);
             break;
 
-         case DatasetEvent::Id::ColLayoutRequested: [[fallthrough]];
          case DatasetEvent::Id::DatasetInitialize:
             break;
 

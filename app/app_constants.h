@@ -5,32 +5,32 @@ namespace ctb::constants
    inline constexpr const char* APP_NAME_LONG                     = "ctBrowse for Windows";
    inline constexpr const char* APP_NAME_SHORT                    = "ctBrowse";
    
-   inline constexpr const char* APP_FOLDER_DEFAULTS               = "defaults";
-   inline constexpr const char* APP_FOLDER_FAVORITES              = "favorites";
-   inline constexpr const char* APP_FOLDER_LABELS                 = "labels";
-   inline constexpr const char* APP_FOLDER_TABLES                 = "tables";
-
    inline constexpr const char* FILE_COLLECTION_CTBC_FILTER        = "ctBrowse Collection (*.ctbc)|*.ctbc";
    inline constexpr const char* FILE_OPEN_COLLECTION_FILTER        = "Select Saved ctBrowse Collection:";
 
    inline constexpr const char* LBL_MENU_COLLECTION                = "&Collection";
    inline constexpr const char* LBL_MENU_WINE                      = "&Online";
    inline constexpr const char* LBL_MENU_VIEW                      = "&View";
+
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_LBL         = "&Download Data...";
    inline constexpr const char* CMD_FILE_DOWNLOAD_DATA_TIP         = "Download data from CellarTracker";
    inline constexpr const char* CMD_FILE_OPEN_LBL                  = "&Open Collection...";
-   inline constexpr const char* CMD_FILE_OPEN_TIP                  = "Open saved collection settings.";
+   inline constexpr const char* CMD_FILE_OPEN_TIP                  = "Open saved collection settings";
+   inline constexpr const char* CMD_EDIT_REFRESH_DATA_LBL          = "&Refresh Collection Data\tCtrl+R";
+   inline constexpr const char* CMD_EDIT_REFRESH_DATA_TIP          = "Reload the current collection's data";
+   inline constexpr const char* CMD_EDIT_CLEAR_FILTERS_LBL         = "Clear Filters";
+   inline constexpr const char* CMD_EDIT_CLEAR_FILTERS_TIP         = "Remove all active data filters.";
    inline constexpr const char* CMD_FILE_SAVE_LBL                  = "&Save Collection...";
-   inline constexpr const char* CMD_FILE_SAVE_TIP                  = "Save the current  collection settings to file.";
+   inline constexpr const char* CMD_FILE_SAVE_TIP                  = "Save the current  collection settings to file";
    inline constexpr const char* CMD_FILE_SETTINGS_LBL              = "&Settings...";
    inline constexpr const char* CMD_FILE_SETTINGS_TIP              = "Configure app settings";
-   inline constexpr const char* CMD_COLLECTION_CONSUMED_LBL        = "Wine &Consumed\tCtrl+D";
+   inline constexpr const char* CMD_COLLECTION_CONSUMED_LBL        = "Wine &Consumed";
    inline constexpr const char* CMD_COLLECTION_CONSUMED_TIP        = "View Wine Consumption History";
    inline constexpr const char* CMD_COLLECTION_MY_CELLAR_LBL       = "Wine in &My Cellar\tCtrl+M";
    inline constexpr const char* CMD_COLLECTION_MY_CELLAR_TIP       = "View Personal Wine Collection";
    inline constexpr const char* CMD_COLLECTION_PENDING_WINE_LBL    = "Wine &Pending Delivery\tCtrl+P";
    inline constexpr const char* CMD_COLLECTION_PENDING_WINE_TIP    = "View Pending Wine Deliveries";
-   inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_LBL  = "Wine &Ready to Drink\tCtrl+R";
+   inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_LBL  = "Wine &Ready to Drink\tCtrl+D";
    inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_TIP  = "View Drinking Availability for Wines";
    inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_LBL       = "&Resize List Columns";
    inline constexpr const char* CMD_VIEW_AUTOLAYOUT_COLS_TIP       = "Resize the list columns to fit the data";
@@ -144,7 +144,6 @@ namespace ctb::constants
    // app-specific error messages.
    inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN = "Label cache object is shutting down.";
    inline constexpr const char* ERROR_STR_NO_CONFIG_STORE       = "No configuration store available.";
-   inline constexpr const char* ERROR_STR_NO_DATASET            = "No Dataset Available!";
    inline constexpr const char* CT_COOKIE_SECRET_NAME           = "CTSession";
 
 

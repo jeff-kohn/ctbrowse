@@ -17,8 +17,8 @@ namespace ctb
    ///
    struct DatasetEvent
    {
-      using Prop      = CtProp;
-      using PropertyVal  = CtPropertyVal;
+      using Prop        = CtProp;
+      using PropertyVal = CtPropertyVal;
 
       enum class Id
       {
@@ -28,7 +28,6 @@ namespace ctb
          Filter,             /// fired when a dataset has been filtered
          SubStringFilter,    /// fired when a substring filter has been applied to the dataset
          RowSelected,        /// fired when the user selects a row
-         ColLayoutRequested  /// fired when user has requested list-view column auto-layout
       };
 
       /// @brief Identifier for the type of event this object represents.
@@ -38,7 +37,7 @@ namespace ctb
       DatasetPtr dataset{};
 
       /// @brief The zero-based index of the dataset row that generated the event. Will be null/empty for 
-      ///        table-level events.
+      ///  dataset-level events.
       NullableInt affected_row{};
    };
 

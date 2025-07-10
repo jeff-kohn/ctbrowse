@@ -120,7 +120,7 @@ namespace ctb::app
       catch (...) {
          log::warn("Couldn't retrieve label cache folder from config. {}", packageError().formattedMesage());
       }
-      return getDataFolder() / constants::APP_FOLDER_LABELS;
+      return getDataFolder(AppFolder::Labels);
    }
    
 

@@ -59,8 +59,7 @@ namespace ctb::app
       /// @brief Type alias for a wxMenu smart ptr 
       using wxMenuPtr = std::unique_ptr<wxMenu>;
 
-      /// @brief Get 
-      /// @return ptr to a popup menu with commands relevant to the selected wine
+      /// @brief Get a popup menu with commands relevant to the selected wine
       auto getWinePopupMenu() const -> wxMenuPtr;
 
    private:
@@ -87,14 +86,18 @@ namespace ctb::app
       void createToolBar();
 
       // File menu handlers
-      void onMenuFilePreferences(wxCommandEvent&);
+      void onMenuFileOpen(wxCommandEvent&); 
       void onMenuFileSave(wxCommandEvent&);
-      void onMenuFileOpen(wxCommandEvent&);
+      void onMenuFilePreferences(wxCommandEvent&);
       void onMenuFileSyncData(wxCommandEvent&);
       void onMenuFileQuit(wxCommandEvent&);
 
       // Edit menu handlers
       void onMenuEditFind(wxCommandEvent& event);
+      void onMenuEditRefresh(wxCommandEvent& event);
+      void onMenuEditRefreshUpdateUI(wxUpdateUIEvent& event);
+      void onMenuEditClearFilters(wxCommandEvent& event);
+      void onMenuEditClearFiltersUpdateUI(wxUpdateUIEvent& event);
       
       // Collection menu handlers
       void onMenuCollection(wxCommandEvent&);

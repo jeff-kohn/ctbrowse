@@ -14,13 +14,15 @@
 
 // SVG files for various images
 //
-TOOLBAR_DOWNLOAD            RCDATA                  "art\\toolbar_download.svg"
-TOOLBAR_REFRESH             RCDATA                  "art\\toolbar_refresh.svg"
-TOOLBAR_SETTINGS            RCDATA                  "art\\toolbar_settings.svg"
-TOOLBAR_SYNCHRONIZE         RCDATA                  "art\\toolbar_synchronize.svg"
-TREE_CHECKED_IMG            RCDATA                  "art\\checked_box.svg"
-TREE_UNCHECKED_IMG          RCDATA                  "art\\unchecked_box.svg"
-TREE_FILTER_IMG             RCDATA                  "art\\filter.svg"
+TOOLBAR_CLEAR_FILTERS       RCDATA           "art\\toolbar_clear_filters.svg"
+TOOLBAR_DOWNLOAD            RCDATA           "art\\toolbar_download.svg"
+TOOLBAR_OPEN                RCDATA           "art\\toolbar_open.svg"
+TOOLBAR_REFRESH             RCDATA           "art\\toolbar_refresh.svg"
+TOOLBAR_SAVE                RCDATA           "art\\toolbar_save.svg"
+TOOLBAR_SETTINGS            RCDATA           "art\\toolbar_settings.svg"
+TREE_CHECKED_IMG            RCDATA           "art\\checked_box.svg"
+TREE_UNCHECKED_IMG          RCDATA           "art\\unchecked_box.svg"
+TREE_FILTER_IMG             RCDATA           "art\\filter.svg"
 
 
 

@@ -18,51 +18,81 @@ namespace ctb
    struct IDatasetEventSource
    {
       /// @brief returns true if this source has a dataset attached, false otherwise
-      virtual auto hasDataset() const -> bool = 0;
+      virtual auto hasDataset() const noexcept -> bool = 0;
 
-      /// @brief retrieves a pointer to the active dataset for this source, if any.
+      /// @brief Retrieves a (possibly nullptr) pointer to the active table for this source
       ///
       /// the returned dataset ptr may be null if this source doesn't have an active dataset.
-      virtual auto getDataset() const -> DatasetPtr = 0;
+      virtual auto getDataset() const noexcept -> DatasetPtr = 0;
 
       /// @brief assigns a dataset to this source.
       /// 
-      /// triggers the DatasetInitialize event IF a non-null dataset ptr is passed.
+      /// Always triggers DatasetEvent::Id::DatasetRemove unless existing dataset == nullptr.
+      /// Triggers DatasetEvent::Id::DatasetInitialize IF a non-null dataset ptr is passed 
       /// 
       /// If a null dataset ptr is passed, this view will no longer fire events 
       /// until a subsequent call to setDataset() passes a valid pointer.
-      virtual void setDataset(DatasetPtr dataset) = 0;
+      virtual void setDataset(DatasetPtr dataset) noexcept = 0;
 
       /// @brief assigns a dataset to this source.
-      /// 
-      /// triggers the DatasetInitialize event IF a non-null dataset ptr is passed.
-      /// 
-      /// If a null dataset ptr is passed, this view will no longer fire events 
-      /// until a subsequent call to setDataset() passes a valid pointer.
-      /// 
-      /// @return true if non-null dataset was passed and all sinks were successfully
-      ///         notified, false otherwise.
-      virtual auto setDataset(DatasetPtr dataset, bool signal_event) -> bool = 0;
-
-      /// @brief attaches an event sink to this source to receive event notifications
       ///
-      /// detach() must be called when notifications no longer can/should be sent to 
-      /// the subscriber, otherwise there is no way for the source to determine validity of 
-      /// attached subscribers.
-      virtual void attach(IDatasetEventSink* observer) = 0;
+      /// Always triggers DatasetEvent::Id::DatasetRemove unless existing dataset == nullptr.
+      /// Triggers the DatasetEvent::Id::DatasetInitialize IF a non-null dataset ptr is passed 
+      /// and signal_event == true
+      ///
+      /// If a null dataset ptr is passed, this view will no longer fire events 
+      /// until a subsequent call to setDataset() passes a valid pointer.
+      virtual void setDataset(DatasetPtr dataset, bool signal_event) noexcept = 0;
 
-      /// @brief detach an event sink from this source to no longer receive event notifications
-      virtual void detach(IDatasetEventSink* observer) = 0;
+      /// @brief attaches an observer to this source to receive event notifications
+      ///
+      /// detach() must be called when notifications can/should no longer be sent to 
+      /// the observer, because there is no way for this source to determine validity
+      /// of the pointers-to-IDatasetEventSink it has.
+      virtual void attach(IDatasetEventSink* observer) noexcept = 0;
 
-      /// @brief this is called to signal that an event needs to be sent to all listeners
-      virtual auto signal(DatasetEvent::Id event, NullableInt rec_idx) -> bool = 0;
+      /// @brief detach an observer from this source to no longer receive event notifications
+      ///
+      /// This must be called when notifications can/should no longer be sent to 
+      /// an observer, because there is no way for this source to determine validity
+      /// of the pointers-to-IDatasetEventSink it has.
+      virtual void detach(IDatasetEventSink* observer) noexcept = 0;
 
-      /// @brief this is called to signal that an event needs to be sent to all listeners
-      virtual bool signal(DatasetEvent::Id event) = 0;
+      /// @brief this is called to signal that an event needs to be sent to all observers
+      /// 
+      /// @return true if every observer was notified without error, false if at least one
+      ///  observer threw an error.
+      virtual bool signal(DatasetEvent::Id event) noexcept = 0;
+
+      /// @brief this is called to signal that an event needs to be sent to all observers EXCEPT 
+      ///  for event_source. 
+      ///
+      /// This allows a caller to avoid receiving self-generated events if necessary/preferable
+      /// 
+      /// @return true if every observer was notified without error, false if at least one
+      ///  observer threw an error.
+      virtual auto signal(DatasetEvent::Id event, IDatasetEventSink* event_source) noexcept -> bool = 0;
+
+      /// @brief this is called to signal that an event needs to be sent to all observers
+      /// 
+      /// @return true if every observer was notified without error, false if at least one
+      ///  observer threw an error.
+      virtual auto signal(DatasetEvent::Id event, NullableInt rec_idx) noexcept -> bool = 0;
+
+      /// @brief this is called to signal that an event needs to be sent to all observers EXCEPT 
+      ///  for event_source. 
+      ///
+      /// This allows a caller to avoid receiving self-generated events if necessary/preferable
+      /// 
+      /// @return true if every observer was notified without error, false if at least one
+      ///  observer threw an error.
+      virtual auto signal(DatasetEvent::Id event, NullableInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool = 0;
 
       /// @brief virtual destructor
       virtual ~IDatasetEventSource() noexcept
       {}
    };
+
+   using DatasetEventSourcePtr = std::shared_ptr<IDatasetEventSource>;
 
 } // namespace ctb

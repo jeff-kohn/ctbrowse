@@ -100,7 +100,7 @@ namespace ctb::app
          return retrieveOptions(getDefaultOptionsPath(table_id));
       }
       catch(...){ 
-         log::exception(packageError());
+         log::info("Saved default for Dataset '{}' could not be loaded ({}).", getTableDescription(table_id), packageError().formattedMesage());
          return {};
       }
    }
