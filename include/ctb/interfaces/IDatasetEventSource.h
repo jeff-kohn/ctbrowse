@@ -65,4 +65,6 @@ namespace ctb
       {}
    };
 
+   using DatasetEventSourcePtr = std::shared_ptr<IDatasetEventSource>;
+
 } // namespace ctb

@@ -1,0 +1,359 @@
+#include "MultiValueFilterTree.h"
+
+#include <wx/wupdlock.h>
+
+namespace ctb::app
+{
+   static constexpr auto WINDOW_STYLE  = wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_TWIST_BUTTONS | wxTR_NO_LINES | wxTR_HIDE_ROOT;
+   static constexpr int  IMG_CONTAINER = 0;
+   static constexpr int  IMG_UNCHECKED = 1;
+   static constexpr int  IMG_CHECKED   = 2;
+
+
+   static constexpr auto getPropertyForFieldType(const CtFieldSchema& fld, std::string_view text_val) -> CtPropertyVal
+   {
+      switch (fld.prop_type)
+      {
+      case PropType::String:
+         return CtPropertyVal{ std::string{ text_val } };
+
+      case PropType::UInt16:
+         return CtPropertyVal::parse<uint16_t>(text_val);
+
+      case PropType::UInt64:
+         return CtPropertyVal::parse<uint64_t>(text_val);
+
+      case PropType::Double:
+         return CtPropertyVal::parse<double>(text_val);
+
+      case PropType::Date:
+      {
+         auto ymd = parseDate(text_val, constants::FMT_PARSE_DATE_SHORT);
+         return ymd ? CtPropertyVal{ *ymd } : CtPropertyVal{};
+      }
+      default:
+         log::info("getPropertyForFieldType() encountered unexpected property type with value {}", std::to_underlying(fld.prop_type));
+         assert("Unexpected property type, this is a bug" and false);
+         return {};
+      }
+   }
+
+
+
+   auto MultiValueFilterTree::create(wxWindow& parent, std::shared_ptr<IDatasetEventSource> source) -> MultiValueFilterTree*
+   {
+      return new MultiValueFilterTree{ parent, source };
+   }
+
+
+   MultiValueFilterTree::MultiValueFilterTree(wxWindow& parent, std::shared_ptr<IDatasetEventSource> source) :
+      wxTreeCtrl{ &parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, WINDOW_STYLE },
+      m_sink{ this, source }
+   {
+      using namespace ctb::constants;
+
+      // load images for the items in our filter tree.
+      const auto tr_img_size = wxSize{ 16, 16 };
+      m_images.emplace_back(wxBitmapBundle::FromSVGResource(RES_NAME_TREE_FILTER_IMG, tr_img_size));
+      m_images.emplace_back(wxBitmapBundle::FromSVGResource(RES_NAME_TREE_UNCHECKED_IMG, tr_img_size));
+      m_images.emplace_back(wxBitmapBundle::FromSVGResource(RES_NAME_TREE_CHECKED_IMG, tr_img_size));
+      SetImages(m_images);
+
+      Bind(wxEVT_TREE_ITEM_EXPANDING, &MultiValueFilterTree::onNodeExpanding, this);
+      Bind(wxEVT_LEFT_DOWN,           &MultiValueFilterTree::onNodeLeftClick, this);
+   }
+
+
+   /// @brief Event dispatcher for IDatasetEventSink
+   void MultiValueFilterTree::notify(DatasetEvent event)
+   {
+      try
+      {
+         switch (event.event_id)
+         {
+            case DatasetEvent::Id::DatasetInitialize:
+               onDatasetInitialize(*event.dataset.get());
+               break;
+
+            case DatasetEvent::Id::Sort:                [[fallthrough]];
+            case DatasetEvent::Id::Filter:              [[fallthrough]];
+            case DatasetEvent::Id::SubStringFilter:     [[fallthrough]];
+            case DatasetEvent::Id::RowSelected:         [[fallthrough]];
+            case DatasetEvent::Id::ColLayoutRequested:  [[fallthrough]];
+            default:
+               break;
+            }
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   /// @brief Event handler called when a new dataset is associated with the event source
+   void MultiValueFilterTree::onDatasetInitialize(IDataset& dataset)
+   {
+      // disable window updates till we're done (re)populating the tree
+      wxWindowUpdateLocker freeze_updates{ this };
+
+      // use available filters to build the top-level tree structure which has a node for each available filter.
+      populateFilterNodes(dataset);
+
+      // for active filters, populate their match values, checking as appropriate. the rest will get populated when user expands them.
+      for (const auto& [key, filter] : dataset.multivalFilters().activeFilters())
+      {
+         if (m_name_nodes.contains(filter.filter_name))
+         {
+            auto& filter_node = m_name_nodes[filter.filter_name];
+            auto createFilterNode = [&filter, &filter_node, this](const CtPropertyVal& match_value)
+               {
+                  auto match_str = match_value.asString();
+                  auto item = AppendItem(filter_node, match_str);
+                  SetItemImage(item, IMG_UNCHECKED);
+                  if (filter.match_values.contains(match_str))
+                  {
+                     setChecked(item, true);
+                  }
+               };
+
+            // Check which order the filter values should be sorted, some are descending
+            if (filter.reverse_match_values)
+            {
+               rng::for_each(vws::reverse(dataset.getDistinctValues(filter.prop_id, false)), createFilterNode);
+            }
+            else {
+               rng::for_each(dataset.getDistinctValues(filter.prop_id, false), createFilterNode);
+            }
+         }
+         else {
+            assert(false and "filter_name should always be in m_name_nodes, this is a bug");
+         }
+      }
+   }
+
+
+   /// @brief Event handler fired when user is expanding a filter node to view its match values
+   void MultiValueFilterTree::onNodeExpanding(wxTreeEvent& event)
+   {
+      try
+      {
+         auto filter_node = event.GetItem();
+         if (!isItemFilterNode(filter_node))
+         {
+            assert("Something got corrupted, should never get invalid node item here" and false);
+            throw Error{ constants::ERROR_STR_UNKNOWN, Error::Category::GenericError };
+         }
+
+         // if the node already has a list of available filter values as children, we don't need to do anything.
+         if (GetChildrenCount(filter_node) > 0)
+            return;
+
+         auto createFilterNode = [&filter_node, this](const CtPropertyVal& match_value)
+            {
+               auto item = AppendItem(filter_node, match_value.asString());
+               SetItemImage(item, IMG_UNCHECKED);
+            };
+
+         // Check which order the filter values should be sorted, some are descending
+         auto& filter = m_node_filters[filter_node.GetID()];
+         auto dataset = m_sink.getDatasetOrThrow();
+         if (filter.reverse_match_values)
+         {
+            rng::for_each(vws::reverse(dataset->getDistinctValues(filter.prop_id, false)), createFilterNode);
+         }
+         else {
+            rng::for_each(dataset->getDistinctValues(filter.prop_id, false), createFilterNode);
+         }
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   /// @brief Event handler fired when user left-clicks on a tree item.
+   void MultiValueFilterTree::onNodeLeftClick(wxMouseEvent& event)
+   {
+      try
+      {
+         int flags{};
+         auto item = HitTest(event.GetPosition(), flags);
+
+         if ( item.IsOk() and (flags & wxTREE_HITTEST_ONITEMICON) )
+         {
+            toggleFilterSelection(item); // safe to call even if it's a filter/container node
+         }
+         else{
+            event.Skip(); // need default processing for parent node's +/- button
+         }
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   /// @return A reference to the filter object associated with the specified tree item.
+   auto MultiValueFilterTree::getFilter(wxTreeItemId item)  noexcept(false) -> CtMultiValueFilter&
+   {
+      auto parent_node = GetItemParent(item);
+      auto filter_node = parent_node == GetRootItem() ? item : parent_node;
+   
+      if (filter_node.IsOk())
+      {
+         auto it = m_node_filters.find(filter_node);
+         if (it != m_node_filters.end())
+         {
+            return it->second;
+         }
+      }
+      throw Error{ constants::ERROR_STR_FILTER_NOT_FOUND, Error::Category::DataError };
+   }
+
+
+   /// @return an appropriately-typed CtPropertyVal representing the specified tree item's value
+   auto MultiValueFilterTree::getFilterValue(wxTreeItemId item) -> CtPropertyVal
+   {
+      auto dataset    = m_sink.getDatasetOrThrow();
+      auto& filter    = getFilter(item);
+      auto fld_schema = dataset->getFieldSchema(filter.prop_id);
+
+      if (fld_schema.has_value())
+      {
+         /// We need to convert the string value from the filter node's label to the correct type, which may not be string.
+         return getPropertyForFieldType(*fld_schema, wxViewString(GetItemText(item)));
+      }
+      else {
+         assert("Not getting a valid FieldSchema here is a bug." and false);
+         return { GetItemText(item).utf8_string() };
+      }
+   }
+
+
+   /// @return true if the specified tree item is a checked match-value 
+   auto MultiValueFilterTree::isItemChecked(wxTreeItemId item) -> bool
+   {
+      return item.IsOk() and GetItemImage(item) == IMG_CHECKED;
+   }
+
+
+   /// @return true if item represents a filter node containing match values as children
+   auto MultiValueFilterTree::isItemFilterNode(wxTreeItemId item) -> bool
+   {
+      return item.IsOk() and m_node_filters.contains(item.GetID());
+   }
+
+
+   /// @return true if the item represents a match value for a filter, false otherwise
+   auto MultiValueFilterTree::isItemMatchValueNode(wxTreeItemId item) -> bool
+   {
+      return item.IsOk() and GetItemImage(item) != IMG_CONTAINER;
+   }
+
+
+   /// @brief Add the tree-item's value as a match value for it's parent filter.
+   /// 
+   /// This function does not update the UI to reflect the newly added filter value,
+   /// call SetCheck() for that.
+   void MultiValueFilterTree::enableFilterMatchValue(wxTreeItemId item) noexcept(false)
+   {
+      auto dataset = m_sink.getDatasetOrThrow();
+      auto& filter = getFilter(item);
+
+      auto&& [iter, was_inserted] = filter.match_values.insert(getFilterValue(item));
+      if (was_inserted)
+      {
+         dataset->multivalFilters().replaceFilter(filter.prop_id, filter);
+         m_sink.signal_source(DatasetEvent::Id::Filter); 
+      }
+   }
+
+
+   /// @brief Reinitializes the tree-view with a list of top-level nodes representing the available filters for the dataset.
+   /// 
+   /// Child nodes are not populated, that happens in onNodeExpanding()
+   /// 
+   void MultiValueFilterTree::populateFilterNodes(IDataset& dataset)
+   {
+      m_check_counts.clear();
+      m_name_nodes.clear();
+      m_node_filters.clear();
+      DeleteAllItems();
+
+      // get the available filters for this dataset, and add them to the tree.
+      auto filters = dataset.availableMultiValueFilters();
+      auto root = AddRoot(wxEmptyString);
+      for (const auto& filter : filters)
+      {
+         auto filter_node = AppendItem(root, filter.filter_name);
+         SetItemHasChildren(filter_node, true);
+         SetItemImage(filter_node, IMG_CONTAINER);
+         m_node_filters[filter_node] = filter;
+         m_name_nodes[filter.filter_name] = filter_node;
+      }
+   }
+
+
+   /// @brief Removes the match value represented by the item from the filter's active match values.
+   void MultiValueFilterTree::disableFilterMatchValue(wxTreeItemId item) noexcept(false)
+   {
+      auto& filter = getFilter(item);
+      auto dataset = m_sink.getDatasetOrThrow();
+
+      if (filter.match_values.erase(getFilterValue(item)))
+      {
+         dataset->multivalFilters().replaceFilter(filter.prop_id, filter);
+         m_sink.signal_source(DatasetEvent::Id::Filter); 
+      }
+   }
+
+
+   /// @brief updates the checked/unchecked status of a node.
+   void MultiValueFilterTree::setChecked(wxTreeItemId item, bool checked)
+   {
+      if (!isItemMatchValueNode(item))
+         return;
+
+      // update the image to checkmark and update info for filter count in tree label 
+      if (checked)
+      {
+         SetItemImage(item, IMG_CHECKED);
+         m_check_counts[GetItemParent(item)]++;
+      }
+      else{
+         SetItemImage(item, IMG_UNCHECKED);
+         m_check_counts[GetItemParent(item)]--;
+      }
+      updateFilterLabel(GetItemParent(item));
+   }
+
+
+   /// @brief toggles a filter value by updating its checked/unchecked image and 
+   ///  applying/deleting the corresponding filter.
+   void MultiValueFilterTree::toggleFilterSelection(wxTreeItemId item)
+   {
+      if (isItemChecked(item))
+      {
+         disableFilterMatchValue(item);
+         setChecked(item, false);
+      }
+      else{ 
+         enableFilterMatchValue(item);
+         setChecked(item, true);
+      }
+   }
+
+
+   /// @brief Updates the label for a filter node to show the number of enabled match value it contains
+   void MultiValueFilterTree::updateFilterLabel(wxTreeItemId item)
+   {
+      if (!isItemFilterNode(item))
+         return;
+
+      auto& filter = m_node_filters[item];
+      auto count   = m_check_counts[item];
+      auto lbl     = count ? ctb::format(constants::FMT_LBL_FILTERS_SELECTED, filter.filter_name, count) : filter.filter_name;
+      SetItemText(item, lbl);
+   }
+
+} // namespace ctb::app

@@ -8,6 +8,7 @@
 
 #include "views/DatasetOptionsPanel.h"
 #include "views/FilterCheckBox.h" 
+#include "views/MultiValueFilterTree.h"
 #include "wx_helpers.h"
 
 #include "model/CtDatasetOptions.h"
@@ -38,34 +39,6 @@ namespace ctb::app
       constexpr int IMG_UNCHECKED = 1;
       constexpr int IMG_CHECKED = 2;
 
-      auto getPropertyForFieldType(const CtFieldSchema& fld, std::string_view text_val) -> CtPropertyVal
-      {
-         switch (fld.prop_type)
-         {
-            case PropType::String:
-               return CtPropertyVal{ std::string{ text_val } };
-
-            case PropType::UInt16:
-               return CtPropertyVal::parse<uint16_t>(text_val);
-
-            case PropType::UInt64:
-               return CtPropertyVal::parse<uint64_t>(text_val);
-
-            case PropType::Double:
-               return CtPropertyVal::parse<double>(text_val);
-
-            case PropType::Date:
-            {
-               auto ymd = parseDate(text_val, constants::FMT_PARSE_DATE_SHORT);
-               return ymd ? CtPropertyVal{ *ymd } : CtPropertyVal{};
-            }
-            default:
-               log::info("getPropertyForFieldType() encountered unexpected property type with value {}", std::to_underlying(fld.prop_type));
-               assert("Unexpected property type, this is a bug" and false);
-               return {};
-         }
-      }
-
       void forceLayoutUpdate(wxWindow* window)
       {
          window->GetSizer()->Layout();
@@ -76,21 +49,16 @@ namespace ctb::app
    } // namespace
    
 
-   [[nodiscard]] auto DatasetOptionsPanel::create(wxWindow* parent, DatasetEventSourcePtr source) noexcept(false) -> DatasetOptionsPanel*
+   [[nodiscard]] auto DatasetOptionsPanel::create(wxWindow& parent, DatasetEventSourcePtr source) noexcept(false) -> DatasetOptionsPanel*
    {
       if (!source)
       {
          assert("source parameter cannot == nullptr");
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
-      if (!parent)
-      {
-         assert("parent parameter cannot == nullptr");
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
-      }
 
       std::unique_ptr<DatasetOptionsPanel> wnd{ new DatasetOptionsPanel{source} };
-      if (!wnd->Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
+      if (!wnd->Create(&parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
       }
@@ -159,18 +127,10 @@ namespace ctb::app
       // filter options box, contains filter tree and checkboxes
       auto* filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, LBL_FILTER_OPTIONS);
 
-      // load images for the checkboxes in our filter tree.
-      const auto tr_img_size = wxSize{ 16, 16 };
-      m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(RES_NAME_TREE_FILTER_IMG, tr_img_size));
-      m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(RES_NAME_TREE_UNCHECKED_IMG, tr_img_size));
-      m_filter_tree_images.emplace_back(wxBitmapBundle::FromSVGResource(RES_NAME_TREE_CHECKED_IMG, tr_img_size));
-
       // filter tree control
-      auto style = wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_TWIST_BUTTONS | wxTR_NO_LINES | wxTR_HIDE_ROOT;
-      m_filter_tree = new wxTreeCtrl{ filter_options_box->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, style };
+      m_filter_tree = MultiValueFilterTree::create(*filter_options_box->GetStaticBox(), m_sink.getSource());
       m_filter_tree->SetMaxSize(ConvertDialogToPixels(wxSize(-1, 500)));
       m_filter_tree->SetMinSize(ConvertDialogToPixels(wxSize(-1, 100)));
-      m_filter_tree->SetImages(m_filter_tree_images);
       filter_options_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
       filter_options_box->AddSpacer(default_border);
 
@@ -196,19 +156,13 @@ namespace ctb::app
 
       // event bindings.
       m_sort_combo->Bind(wxEVT_CHOICE, &DatasetOptionsPanel::onSortSelection, this);
-      m_filter_tree->Bind(wxEVT_TREE_ITEM_EXPANDING, &DatasetOptionsPanel::onTreeFilterExpanding, this);
-      m_filter_tree->Bind(wxEVT_LEFT_DOWN,           &DatasetOptionsPanel::onTreeFilterLeftClick, this);
-
       m_score_spin_ctrl->Bind(wxEVT_SPINCTRLDOUBLE, &DatasetOptionsPanel::onMinScoreChanged,  this);
       m_score_spin_ctrl->Bind(wxEVT_UPDATE_UI,      &DatasetOptionsPanel::onMinScoreUpdateUI, this);    
-
       opt_ascending->Bind( wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
       opt_descending->Bind(wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
-
       m_filter_checkboxes[ControlCategory::InStockFilter     ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterInStockChecked,      this);
       m_filter_checkboxes[ControlCategory::MinScoreFilter    ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterMinScoreChecked,     this);     
       m_filter_checkboxes[ControlCategory::ReadyToDrinkFilter]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterReadyToDrinkChecked, this);     
-
       btn_save_default->Bind(wxEVT_BUTTON, &DatasetOptionsPanel::onSaveDefault, this);
       btn_clear_filters->Bind(wxEVT_BUTTON, &DatasetOptionsPanel::onClearFilters, this);
    }
@@ -263,154 +217,10 @@ namespace ctb::app
 
    auto DatasetOptionsPanel::setTitle() -> bool
    {
-      auto dataset = getDataset();
-      m_dataset_title->SetLabelText( wxFromSV(getTableDescription(dataset->getTableId())) );
+      auto dataset = m_sink.getDatasetOrThrow();
+      m_dataset_title->SetLabelText( dataset->getCollectionName());
       forceLayoutUpdate(this);
       return true;
-   }
-
-
-   void DatasetOptionsPanel::addMultiValFilter(wxTreeItemId item) noexcept(false) 
-   {
-      auto dataset = getDataset();
-      auto& filter = getMultiValueFilter(item);
-      auto fld_schema = dataset->getFieldSchema(filter.prop_id);
-
-      auto&& result = filter.match_values.insert(getFilterValue(item));
-      if (result.second)
-      {
-         dataset->multivalFilters().replaceFilter(filter.prop_id, filter);
-         m_sink.signal_source(DatasetEvent::Id::Filter); 
-      }
-   }
-
-
-   void DatasetOptionsPanel::removeMultiValFilter(wxTreeItemId item)  noexcept(false) 
-   {
-      auto& filter = getMultiValueFilter(item);
-      auto dataset = getDataset(); // throws on nullptr
-      auto fld_schema = dataset->getFieldSchema(filter.prop_id);
-
-      if (filter.match_values.erase(getFilterValue(item)))
-      {
-         dataset->multivalFilters().replaceFilter(filter.prop_id, filter);
-         m_sink.signal_source(DatasetEvent::Id::Filter); 
-      }
-   }
-
-
-   auto DatasetOptionsPanel::getFilterValue(wxTreeItemId item) -> CtPropertyVal
-   {
-      auto dataset    = getDataset(); // throws on nullptr
-      auto& filter    = getMultiValueFilter(item);
-      auto fld_schema = dataset->getFieldSchema(filter.prop_id);
-
-      if (fld_schema.has_value())
-      {
-         /// We need to convert the string value from the filter node's label to the correct type, which may not be string.
-         return getPropertyForFieldType(*fld_schema, m_filter_tree->GetItemText(item).wx_str());
-      }
-      else {
-         assert("Not getting a valid FieldSchema here is a bug." and false);
-         return { m_filter_tree->GetItemText(item).wx_str() };
-      }
-   }
-  
-
-   auto DatasetOptionsPanel::getMultiValueFilter(wxTreeItemId item)  noexcept(false) -> CtMultiValueFilter&
-   {
-      auto dataset = getDataset(); // throws on nullptr
-
-      // we need to get the parent node's item, since that's what's in the map.
-      auto parent = m_filter_tree->GetItemParent(item);
-      if (parent.IsOk())
-      {
-         auto it = m_multival_filters.find(parent);
-         if (it != m_multival_filters.end())
-            return it->second;
-      }
-      throw Error{ constants::ERROR_STR_FILTER_NOT_FOUND, Error::Category::DataError };
-   }
-
-
-   auto DatasetOptionsPanel::isItemChecked(wxTreeItemId item) -> bool
-   {
-      return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CHECKED;
-   }
-
-
-   auto DatasetOptionsPanel::isItemContainerNode(wxTreeItemId item) -> bool
-   {
-      return item.IsOk() and m_filter_tree->GetItemImage(item) == IMG_CONTAINER;
-   }
-
-
-   auto DatasetOptionsPanel::isItemMatchValueNode(wxTreeItemId item) -> bool
-   {
-      return item.IsOk() and m_filter_tree->GetItemImage(item) != IMG_CONTAINER;
-   }
-
-
-   /// @brief updates the checked/unchecked status of a node.
-   /// @return true if successful, false otherwise (ie invalid item)
-   auto DatasetOptionsPanel::setMultiValChecked(wxTreeItemId item, bool checked) -> bool
-   {
-      if ( isItemMatchValueNode(item) )
-      {
-         // update the image to reflect that it's checked, also update parent's
-         // check count so we can display it in Filter Title.
-         if (checked)
-         {
-            m_check_map[m_filter_tree->GetItemParent(item)]++;
-            m_filter_tree->SetItemImage(item, IMG_CHECKED);
-         }
-         else{
-            m_check_map[m_filter_tree->GetItemParent(item)]--;
-            m_filter_tree->SetItemImage(item, IMG_UNCHECKED);
-         }
-         return true;
-      }
-      return false;
-   }
-
-
-   /// @brief toggles a filter value by updating its checked/unchecked image and applying/deleting the corresponding filter.
-   /// 
-   void DatasetOptionsPanel::toggleFilterSelection(wxTreeItemId item)
-   {
-      bool checked = isItemChecked(item) ? false : true; // toggle
-      if (!setMultiValChecked(item, checked))
-         return;
-
-      if (checked)
-      {
-         addMultiValFilter(item);
-      }
-      else{
-         removeMultiValFilter(item);
-      }
-      updateFilterLabel(m_filter_tree->GetItemParent(item));
-   }
-
-
-   void DatasetOptionsPanel::updateFilterLabel(wxTreeItemId item)
-   {
-      if ( !m_multival_filters.contains(item) or !item.IsOk() )
-         return;
-
-      auto& filter = m_multival_filters[item];
-
-      // if the filter node has selected children, update the label with the count
-      wxString filter_name{ filter.filter_name };
-      auto count = m_check_map[item];
-      if (count)
-      {
-         auto lbl = ctb::format(constants::FMT_LBL_FILTERS_SELECTED, filter_name.wx_str(), count);
-         m_filter_tree->SetItemText(item, lbl.c_str());
-      }
-      else{
-         m_filter_tree->SetItemText(item, filter_name);
-      }
    }
 
 
@@ -431,7 +241,7 @@ namespace ctb::app
          switch (event.event_id)
          {
          case DatasetEvent::Id::DatasetInitialize:
-            onTableInitialize(event.dataset.get());
+            onDatasetInitialize(event.dataset.get());
             break;
 
          case DatasetEvent::Id::Sort:
@@ -452,13 +262,12 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onTableInitialize(IDataset* dataset)
+   void DatasetOptionsPanel::onDatasetInitialize(IDataset* dataset)
    {
       // reload sort/filter options
       m_sort_combo->Clear();
       m_sort_combo->Append(getSortOptionList(dataset));
       onTableSorted(dataset);
-      populateFilterTypes(dataset);
       setTitle();
 
       // show/hide/initialize filter checkboxes
@@ -496,56 +305,11 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::populateFilterTypes(IDataset* dataset)
-   {
-      assert(m_filter_tree);
-
-      // disable window updates till we're done and reset the tree
-      wxWindowUpdateLocker freeze_updates{m_filter_tree};
-      m_filter_tree->DeleteAllItems();
-      m_multival_filters.clear();
-      m_check_map.clear();
-
-      // get the available filters for this dataset, and add them to the tree.
-      auto filters = dataset->availableMultiValueFilters();
-      auto root = m_filter_tree->AddRoot(wxEmptyString);
-      for (auto& filter : filters)
-      {
-         wxString filter_name{ filter.filter_name };
-         auto item = m_filter_tree->AppendItem(root, filter_name);
-         m_filter_tree->SetItemHasChildren(item, true);
-         m_filter_tree->SetItemImage(item, IMG_CONTAINER);
-         m_multival_filters[item] = filter;
-      }
-
-      // populate filter tree with current filtes from the dataset since they may have been previously saved.
-      //for (auto& [key, filter] : dataset->multivalFilters().activeFilters())
-      //{
-      //   for (auto& val : filter.match_values)
-      //   {
-
-      //   }
-      //}
-   }
-   
-
-   auto DatasetOptionsPanel::getDataset() const noexcept(false) -> DatasetPtr
-   {
-      if (!m_sink.hasDataset())
-         throw Error{ constants::ERROR_STR_NO_DATASET, Error::Category::DataError };
-
-      return m_sink.getDataset();
-   }
-
-
    void DatasetOptionsPanel::onClearFilters([[maybe_unused]] wxCommandEvent& event)
    {
       try
       {
-         auto&& dataset = m_sink.getDataset();
-         if (nullptr == dataset)
-            throw Error{ constants::ERROR_STR_NO_DATASET, Error::Category::DataError };
-
+         auto&& dataset = m_sink.getDatasetOrThrow();
          dataset->multivalFilters().clear();
          dataset->propFilters().clear();
          m_sink.signal_source(DatasetEvent::Id::DatasetInitialize);
@@ -560,18 +324,17 @@ namespace ctb::app
    {
       try
       {
-         assert(m_sink.hasDataset());
          TransferDataFromWindow();
 
          auto* checkbox = m_filter_checkboxes[control_cat];
          auto& filter = checkbox->filter();
-         auto dataset = getDataset();
+         auto&& dataset = m_sink.getDatasetOrThrow();
          if (checkbox->enabled())
          {
             dataset->propFilters().replaceFilter(filter.filter_name, filter);
          }
          else {
-            dataset->propFilters().removeFilter(filter.filter_name);
+            dataset->propFilters().disableFilterMatchValue(filter.filter_name);
          }
          m_sink.signal_source(DatasetEvent::Id::Filter);
       }
@@ -603,7 +366,7 @@ namespace ctb::app
    {
       try
       {
-         auto dataset = getDataset(); // throws on nullptr
+         auto dataset = m_sink.getDatasetOrThrow();
          TransferDataFromWindow();
 
          auto* checkbox = m_filter_checkboxes[ControlCategory::MinScoreFilter];
@@ -632,7 +395,7 @@ namespace ctb::app
    {
       try
       {
-         auto&& dataset = m_sink.getDataset();
+         auto dataset = m_sink.getDatasetOrThrow();
          if (nullptr == dataset)
             throw Error{ constants::ERROR_STR_NO_DATASET, Error::Category::DataError };
 
@@ -653,7 +416,7 @@ namespace ctb::app
 
          m_sort_config.reverse = m_sort_descending;
 
-         auto dataset = getDataset(); 
+         auto dataset = m_sink.getDatasetOrThrow();
          dataset->applySort(m_sort_config);
          m_sink.signal_source(DatasetEvent::Id::Sort);
       }
@@ -675,7 +438,7 @@ namespace ctb::app
 
          // let the combo close its list before we reload the dataset
          CallAfter([this](){
-            auto dataset = getDataset();
+            auto dataset = m_sink.getDatasetOrThrow();
             assert(m_sort_selection <= std::ssize(dataset->availableSorts()));
 
             // we re-fetch sorter based on index, because when a sort is selected from the combo
@@ -690,66 +453,5 @@ namespace ctb::app
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
-
-
-   void DatasetOptionsPanel::onTreeFilterExpanding(wxTreeEvent& event) 
-   {
-      try
-      {
-         auto filter_node = event.GetItem();
-         if (!filter_node.IsOk())
-         {
-            assert("Something got corrupted, should never get invalid node item here" and false);
-            throw Error{ constants::ERROR_STR_UNKNOWN, Error::Category::GenericError };
-         }
-         auto dataset = getDataset();
-
-         // if the node has a filter in our map and it already has a list of 
-         // available filter values as children, we don't need to do anything.
-         if( !m_multival_filters.contains(filter_node.GetID()) || m_filter_tree->GetChildrenCount(filter_node) > 0 )
-            return;
-
-         auto createFilterNode = [&filter_node, this](const CtPropertyVal& match_value)
-            {
-               auto item = m_filter_tree->AppendItem(filter_node, match_value.asString());
-               m_filter_tree->SetItemImage(item, IMG_UNCHECKED);
-            };
-
-         // depending on filter we may need to show the match values in descending order
-         auto& filter = m_multival_filters[filter_node.m_pItem]; 
-         if (filter.reverse_match_values)
-         {
-            rng::for_each(vws::reverse(dataset->getDistinctValues(filter.prop_id, false)), createFilterNode);
-         }
-         else {
-            rng::for_each(dataset->getDistinctValues(filter.prop_id, false), createFilterNode);
-         }
-      }
-      catch(...){
-         wxGetApp().displayErrorMessage(packageError(), true);
-      }
-   }
-
-
-   void DatasetOptionsPanel::onTreeFilterLeftClick(wxMouseEvent& event)
-   {
-      try
-      {
-         int flags{};
-         auto item = m_filter_tree->HitTest(event.GetPosition(), flags);
-
-         if ( item.IsOk() and (flags & wxTREE_HITTEST_ONITEMICON) )
-         {
-            toggleFilterSelection(item); // safe to call even if it's a filter/container node
-         }
-         else{
-            event.Skip(); // need default processing for parent node's +/- button
-         }
-      }
-      catch(...){
-         wxGetApp().displayErrorMessage(packageError(), true);
-      }
-   }
-
 
 } // namespace ctb::app

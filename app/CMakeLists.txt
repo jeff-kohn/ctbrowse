@@ -74,6 +74,8 @@ target_sources(${TARGET_NAME}
      "views/DetailsPanel.cpp"
      "views/DetailsPanel.h"
      "views/FilterCheckBox.h"
+     "views/MultiValueFilterTree.cpp"
+     "views/MultiValueFilterTree.h"
 
      "resources/utf-8.manifest"
      "resources/resource.rc"

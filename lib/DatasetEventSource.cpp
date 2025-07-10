@@ -14,7 +14,7 @@ namespace ctb
 
    /// @brief static method to create a class instance.
    [[nodiscard]] 
-   auto DatasetEventSource::create() -> DatasetEventSource::DatasetEventSourcePtr
+   auto DatasetEventSource::create() -> DatasetEventSourcePtr
    { 
       return DatasetEventSourcePtr{ new DatasetEventSource{} }; 
    }

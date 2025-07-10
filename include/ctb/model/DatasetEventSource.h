@@ -26,9 +26,6 @@ namespace ctb
    class DatasetEventSource : public IDatasetEventSource
    {
    public:
-      using base                  = IDatasetEventSource;
-      using DatasetEventSourcePtr = std::shared_ptr<base>;
-
       /// @brief static method to create a class instance.
       ///
       /// note that while you can attach/detach from this object immediately, 
@@ -116,6 +113,6 @@ namespace ctb
       DatasetEventSource& operator=(DatasetEventSource&&) = delete;   
    };
 
-   using DatasetEventSourcePtr = DatasetEventSource::DatasetEventSourcePtr;
+
 
 }  // namespace  ctb
