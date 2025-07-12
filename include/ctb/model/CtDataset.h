@@ -300,6 +300,20 @@ namespace ctb
          return filtered_only ? std::ssize(*m_current_view) : std::ssize(m_data);
       }
 
+      void freezeData() noexcept override
+      {
+         m_frozen = true;
+      }
+
+      void unfreezeData() override
+      {
+         if (!m_frozen)
+            return;
+
+         m_frozen = false;
+         sortData();       // also applies filters, so it's a full refresh
+      }
+
       // default dtor, others are deleted since this object is meant to be heap-only
       ~CtDataset() noexcept override
       {
@@ -317,6 +331,7 @@ namespace ctb
       using ListColumns          = std::vector<ListColumn>;
       using MaybeSubStringFilter = std::optional<SubStringFilter>;
 
+      bool                 m_frozen{ false };        // If true, data will not requery when filter/sort options are changed, until unfreezeData() is called.
       DataTable            m_data{};                 // the underlying data records for this table.
       DataTable            m_filtered_data{};        // we need a copy for the filtered data, so we can bind our views to it
       DataTable*           m_current_view{};         // may point to m_data or m_filtered_data depending if filter is active or not
@@ -403,10 +418,6 @@ namespace ctb
          // sort the data table, then re-apply any filters to the view. Otherwise we'd have to sort twice
          rng::sort(m_data, sort_adapter);
          applyFilters();
-         if (m_substring_filter)
-         {
-            applySubStringFilter(*m_substring_filter);
-         }
       }
 
       /// @brief Apply a left-fold to the values for the specified prop_id
@@ -449,6 +460,7 @@ namespace ctb
                                           return row[prop_id]; 
                                        });
       }
+
 
 };
 

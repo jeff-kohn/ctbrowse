@@ -30,6 +30,7 @@ target_sources(ctBrowse_lib
       "../include/ctb/model/CtDataset.h"
       "../include/ctb/model/CtDatasetLoader.h"
       "../include/ctb/model/DatasetEventSource.h"
+      "../include/ctb/model/ScopedDatasetFreeze.h"
       "../include/ctb/model/ScopedEventSink.h"
       
       "../include/ctb/tables/ConsumedWineTraits.h"

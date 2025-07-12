@@ -3,6 +3,7 @@
 #include "json_serialization.h"
 
 #include <ctb/model/CtDataset.h>
+#include <ctb/model/ScopedDatasetFreeze.h>
 
 
 namespace ctb::app
@@ -11,11 +12,10 @@ namespace ctb::app
    {
       auto getDefaultOptionsPath(TableId table_id)
       {
-         // At the moment this is the only depepency preventing this class from being moved to the lib in the future if we
-         // decide that's desirable.
+         // At the moment this is the only dependency preventing this class from being moved to the lib in 
+         // the future if we decide that's desirable.
          return ctb::format("{}/{}.{}", wxGetApp().getDataFolder(AppFolder::Defaults).generic_string(), magic_enum::enum_name(table_id), "ctbc");
       }
-
    }
 
 
@@ -25,6 +25,8 @@ namespace ctb::app
 
       if (nullptr == dataset)
          return false;
+
+      ScopedDatasetFreeze freeze{ dataset };
 
       bool all_good = true;
 
@@ -45,6 +47,7 @@ namespace ctb::app
 
       dataset->setCollectionName(collection_name);
 
+      // make sure the saved sort's primary property is one supported by the dataset 
       if (active_sort.sort_props.size() > 0 and dataset->hasProperty(active_sort.sort_props[0]))
       {
          dataset->applySort(active_sort);
@@ -53,6 +56,9 @@ namespace ctb::app
          failed(ctb::format("Dataset Options being applied to dataset '{}' contains invalid sort specification, this is probably a bug or an invalid options file.", enum_name(table_id)));
       }
 
+      /// filter manager class stores the filters in a map, so we have to extract the key
+      /// when applying the saved filters. For multi-val it's the CtPropId, for prop filters
+      /// it's the filter name.
       dataset->multivalFilters().assignFilters(multival_filters | 
          vws::transform([](auto&& filter)
             { 
@@ -68,7 +74,8 @@ namespace ctb::app
 
       if (dataset->multivalFilters().size() < multival_filters.size() or dataset->propFilters().size() < prop_filters.size())
       {
-         failed("One or more filters in the Dataset Options could not be applied to the Dataset");
+         // probably dupe key in hand-edited file, not really sure how else this could happen.
+         failed("One or more filters in the Dataset Options could not be applied to the Dataset"); 
       }
 
       return all_good;
@@ -97,12 +104,16 @@ namespace ctb::app
    {
       try 
       {
-         return retrieveOptions(getDefaultOptionsPath(table_id));
+         auto default_path = getDefaultOptionsPath(table_id);
+         if (fs::exists(default_path))
+         {
+            return retrieveOptions(default_path);
+         }
       }
       catch(...){ 
          log::info("Saved default for Dataset '{}' could not be loaded ({}).", getTableDescription(table_id), packageError().formattedMesage());
-         return {};
       }
+      return {};
    }
 
 

@@ -53,8 +53,8 @@ namespace ctb
       /// @param name - The new name to assign to the collection.
       [[nodiscard]] virtual void setCollectionName(std::string_view name) = 0;
 
-      /// @brief Retrieves a short text summary of the data in the table
-      virtual auto getDataSummary() const -> std::string = 0;
+      /// @brief Retrieves a one-line text summary of the data in the table
+      [[nodiscard]] virtual auto getDataSummary() const -> std::string = 0;
 
       /// @brief Retrieves the schema information for a specified property.
       /// 
@@ -135,8 +135,8 @@ namespace ctb
       /// is called on this dataset, after which it may be invalid. You should copy-construct 
       /// a new object if you need to hold onto it for a while rather than holding the reference.
       /// 
-      /// @return const reference to the requested property. It may be a null value, but it 
-      ///         will always be a valid CtPropertyVal&.
+      /// @return const reference to the requested property. It may contain a null value, but it 
+      ///  will always be a valid CtPropertyVal reference
       [[nodiscard]] virtual auto getProperty(int rec_idx, CtProp prop_id) const -> const PropertyVal& = 0;
 
       /// @brief Get a list of all distinct values from the dataset for the specified property.
@@ -145,10 +145,18 @@ namespace ctb
       /// the active filters will be included. If filtered_only is false, all records will be included.
       [[nodiscard]] virtual auto getDistinctValues(CtProp prop_id, bool filtered_only) const -> PropertyValueSet = 0;
 
-      [[nodiscard]]
       /// @brief returns the number of records in the underlying dataset
       /// @param filtered_only - if true, only records matching currently active filters will be counted. If false, 
       virtual auto rowCount(bool filtered_only = true) const -> int64_t = 0;
+
+      /// @brief Freezes the current dataset, so that subsequent changes to filter/sort options will not cause 
+      /// an automatic data refresh until unfreezeData() is called. Useful for applying multiple operations to the 
+      /// dataset without intermediate refreshes.
+      virtual void freezeData() = 0;
+
+      /// @brief Unfreeze the current dataset and refresh it, applying all current filter/sort options. If dataset
+      ///  is not currently frozen, this will be a no-op (in which case dataset will NOT be refreshed)
+      virtual void unfreezeData() = 0;
 
       /// @brief destructor
       virtual ~IDataset() noexcept = default;

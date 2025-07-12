@@ -363,17 +363,17 @@ namespace ctb::app
          });
       menu_data->Append(new wxMenuItem{
          menu_data, 
-         CmdId::CMD_COLLECTION_CONSUMED, 
-         constants::CMD_COLLECTION_CONSUMED_LBL, 
-         constants::CMD_COLLECTION_CONSUMED_TIP,
+         CmdId::CMD_COLLECTION_READY_TO_DRINK, 
+         constants::CMD_COLLECTION_READY_TO_DRINK_LBL, 
+         constants::CMD_COLLECTION_READY_TO_DRINK_TIP,
          wxITEM_NORMAL
          });
       menu_data->AppendSeparator();
       menu_data->Append(new wxMenuItem{
          menu_data, 
-         CmdId::CMD_COLLECTION_READY_TO_DRINK, 
-         constants::CMD_COLLECTION_READY_TO_DRINK_LBL, 
-         constants::CMD_COLLECTION_READY_TO_DRINK_TIP,
+         CmdId::CMD_COLLECTION_CONSUMED, 
+         constants::CMD_COLLECTION_CONSUMED_LBL, 
+         constants::CMD_COLLECTION_CONSUMED_TIP,
          wxITEM_NORMAL
          });
       m_menu_bar->Append(menu_data, constants::LBL_MENU_COLLECTION);
@@ -685,6 +685,7 @@ namespace ctb::app
       }
    }
 
+
    void MainFrame::onMenuEditClearFiltersUpdateUI(wxUpdateUIEvent& event)
    {
       bool enable = false;
@@ -711,6 +712,7 @@ namespace ctb::app
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
+
 
    void MainFrame::onMenuEditFind([[maybe_unused]] wxCommandEvent& event)
    {
