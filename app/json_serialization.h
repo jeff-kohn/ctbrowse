@@ -132,12 +132,12 @@ namespace glz
 
          auto getType = ctb::Overloaded
          {
-            [&](const std::string& val)    { return PropType::String; },
-            [&](uint16_t val)              { return PropType::UInt16; },
-            [&](uint64_t val)              { return PropType::UInt64; },
-            [&](double val)                { return PropType::Double; },
-            [&](const year_month_day& val) { return PropType::Date;   },
-            [&](const std::monostate)      { return PropType::Null;   }
+            [&](const std::string&)    { return PropType::String; },
+            [&](uint16_t)              { return PropType::UInt16; },
+            [&](uint64_t)              { return PropType::UInt64; },
+            [&](double)                { return PropType::Double; },
+            [&](const year_month_day&) { return PropType::Date;   },
+            [&](const std::monostate)  { return PropType::Null;   }
          };
          
          

@@ -51,7 +51,7 @@ namespace ctb
       /// This name should be used for file save/open operations. It defaults to the 
       /// 
       /// @param name - The new name to assign to the collection.
-      [[nodiscard]] virtual void setCollectionName(std::string_view name) = 0;
+      virtual void setCollectionName(std::string_view name) = 0;
 
       /// @brief Retrieves a one-line text summary of the data in the table
       [[nodiscard]] virtual auto getDataSummary() const -> std::string = 0;

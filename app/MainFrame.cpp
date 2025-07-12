@@ -670,7 +670,7 @@ namespace ctb::app
    }
 
 
-   void MainFrame::onMenuEditClearFilters(wxCommandEvent& event)
+   void MainFrame::onMenuEditClearFilters([[maybe_unused]] wxCommandEvent& event)
    {
       wxBusyCursor busy{};
       try

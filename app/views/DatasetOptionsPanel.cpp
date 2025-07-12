@@ -35,9 +35,6 @@ namespace ctb::app
 {
    namespace 
    {
-      constexpr int IMG_CONTAINER = 0;
-      constexpr int IMG_UNCHECKED = 1;
-      constexpr int IMG_CHECKED = 2;
 
       void forceLayoutUpdate(wxWindow* window)
       {

@@ -362,6 +362,9 @@ namespace ctb
 
       void applyFilters()
       {
+         if (m_frozen)
+            return;
+
          if (m_mval_filters.empty() and m_prop_filters.empty())
          {
             m_current_view = &m_data;
