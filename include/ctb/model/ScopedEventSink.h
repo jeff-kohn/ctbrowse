@@ -60,7 +60,7 @@ namespace ctb
       {
          if (m_source)
          {
-            return m_source->signal(event_id, rec_idx, notify_self ? m_sink : nullptr);
+            return m_source->signal(event_id, rec_idx, notify_self ? nullptr : m_sink);
          }
          return false;
       }
