@@ -435,6 +435,9 @@ namespace ctb::app
    ///  applying/deleting the corresponding filter.
    void MultiValueFilterTree::toggleFilterSelection(wxTreeItemId item)
    {
+      if (!isItemMatchValueNode(item))
+         return;
+
       if (isItemChecked(item))
       {
          disableFilterMatchValue(item);

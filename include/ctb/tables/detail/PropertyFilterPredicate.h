@@ -1,7 +1,7 @@
 /*********************************************************************
-* @file       PropertyFilter.h
+* @file       PropertyFilterPredicate.h
 *
-* @brief      declaration for the PropertyFilter class
+* @brief      Definition for the PropertyFilterPredicate template class
 *
 * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
 *********************************************************************/
