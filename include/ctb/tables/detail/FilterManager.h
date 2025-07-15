@@ -143,9 +143,10 @@ namespace ctb::detail
 
       /// @brief Retrieve a view on all active filters.
       /// @return A view representing all active filters (could be empty)
-      auto activeFilters() const
+      template <typename Self>
+      auto activeFilters(this Self&& self)
       {
-         return vws::all(m_filters);
+         return vws::all(std::forward<Self>(self).m_filters);
       } 
 
       /// @brief returns true if the record is a match 
@@ -179,13 +180,13 @@ namespace ctb::detail
       FilterManager(ChangeCallback callback) noexcept(false) : m_callback(callback)
       {}
 
-      FilterManager() noexcept                  = default;
-      FilterManager(FilterManager&&)            = default;
-      FilterManager& operator=(FilterManager&&) = default;
-      ~FilterManager() noexcept                 = default;
+      FilterManager() noexcept                        = default;
+      FilterManager(const FilterManager&)             = default;
+      FilterManager(FilterManager&&)                  = default;
+      FilterManager& operator=(const FilterManager&)  = default;
+      FilterManager& operator=(FilterManager&&)       = default;
+      ~FilterManager() noexcept                       = default;
 
-      FilterManager(const FilterManager&)            = delete;
-      FilterManager& operator=(const FilterManager&) = delete;
 
    private:
       FilterMap      m_filters{};

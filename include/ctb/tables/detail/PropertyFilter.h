@@ -66,9 +66,15 @@ namespace ctb::detail
       /// @brief The predicate used for matching
       ComparePred compare_pred{};
 
+      /// @brief When enabled==false, operator() will always return true
+      bool enabled{ true };
+
       /// @brief Check if the table record this filter
       auto operator()(const PropertyMap& rec) const -> bool
       {
+         if (!enabled)
+            return true;
+
          auto matcher = [&rec, this](Prop prop_id) -> bool
                         {
                            if (auto it = rec.find(prop_id); it != rec.end())

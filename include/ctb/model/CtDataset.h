@@ -219,7 +219,7 @@ namespace ctb
       {
          // this overload searches all columns in the current list view, so get the prop_id's 
          auto cols = listColumns() | vws::transform([](const CtListColumn& disp_col) -> auto { return disp_col.prop_id; })
-                                      | rng::to<std::vector>();
+                                   | rng::to<std::vector>();
 
          return applySubStringFilter(SubStringFilter{ std::string{substr}, cols });
       }
@@ -279,17 +279,41 @@ namespace ctb
       /// @brief Get a list of all distinct values from the table for the specified property.
       /// 
       /// This can be used to get filter values for match-filters.
-      [[nodiscard]] auto getDistinctValues(CtProp prop_id, bool filtered_only) const -> PropertyValueSet override
+      [[nodiscard]] auto getDistinctValues(CtProp prop_id, bool use_current_filters) const -> PropertyValueSet override
       {
          PropertyValueSet values{};
          if (hasProperty(prop_id))
          {
-            for (const Record& rec : filtered_only? *m_current_view : m_data)
+            for (const Record& rec : use_current_filters? *m_current_view : m_data)
             {
                values.emplace(rec[prop_id]);
             }
          }
          return values;
+      }
+
+      /// @brief Get a list of all distinct values from the dataset for the specified property.
+      /// 
+      /// This can be used to get filter values for match-filters. The supplied custom_filter will be used to limit 
+      /// values to only those from records that match the filter.
+      [[nodiscard]] auto getDistinctValues(CtProp prop_id, std::function<bool(const PropertyMap&)> custom_filter) const -> PropertyValueSet override
+      {
+         auto extractor = [prop_id](const PropertyMap& map)
+            {
+               std::string result{};
+
+               auto it = map.find(prop_id);
+               if (it != map.end())
+               {
+                  result = it->second.asString();
+               }
+               return result;
+            };
+
+         return vws::all(m_data) | vws::transform([](auto&& rec) { return rec.getProperties(); }) 
+                                 | vws::filter(custom_filter)
+                                 | vws::transform(extractor)
+                                 | rng::to<PropertyValueSet>();
       }
 
       /// @brief returns the number of rows in the underlying dataset
@@ -443,7 +467,8 @@ namespace ctb
          {
             return rng::fold_left(getSeriesFiltered(prop_id) | vws::transform(getVal), initial_val, fn);
          }
-         else {
+         else 
+         {
             return rng::fold_left(getSeriesRaw(prop_id)      | vws::transform(getVal), initial_val, fn);
          }
       }

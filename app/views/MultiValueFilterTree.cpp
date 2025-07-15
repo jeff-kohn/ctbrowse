@@ -1,5 +1,9 @@
 #include "MultiValueFilterTree.h"
 
+#include <ctb/interfaces/IDatasetEventSink.h>
+#include <ctb/interfaces/IDatasetEventSource.h>
+
+#include <wx/artprov.h>
 #include <wx/wupdlock.h>
 
 namespace ctb::app
@@ -39,14 +43,13 @@ namespace ctb::app
    }
 
 
-
-   auto MultiValueFilterTree::create(wxWindow& parent, std::shared_ptr<IDatasetEventSource> source) -> MultiValueFilterTree*
+   auto MultiValueFilterTree::create(wxWindow& parent, DatasetEventSourcePtr source) -> MultiValueFilterTree*
    {
       return new MultiValueFilterTree{ parent, source };
    }
 
 
-   MultiValueFilterTree::MultiValueFilterTree(wxWindow& parent, std::shared_ptr<IDatasetEventSource> source) :
+   MultiValueFilterTree::MultiValueFilterTree(wxWindow& parent, DatasetEventSourcePtr source) :
       wxTreeCtrl{ &parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, WINDOW_STYLE },
       m_sink{ this, source }
    {
@@ -61,6 +64,8 @@ namespace ctb::app
 
       Bind(wxEVT_TREE_ITEM_EXPANDING, &MultiValueFilterTree::onNodeExpanding, this);
       Bind(wxEVT_LEFT_DOWN,           &MultiValueFilterTree::onNodeLeftClick, this);
+      Bind(wxEVT_TREE_ITEM_MENU,      &MultiValueFilterTree::onNodePopupMenu, this);
+      Bind(wxEVT_CONTEXT_MENU,        &MultiValueFilterTree::onTreePopupMenu, this);
    }
 
 
@@ -92,7 +97,7 @@ namespace ctb::app
    /// @brief Event handler called when a new dataset is associated with the event source
    void MultiValueFilterTree::onDatasetInitialize(IDataset& dataset)
    {
-      // disable window updates till we're done (re)populating the tree
+      wxBusyCursor busy{};
       wxWindowUpdateLocker freeze_updates{ this };
 
       // use available filters to build the top-level tree structure which has a node for each available filter.
@@ -103,26 +108,10 @@ namespace ctb::app
       {
          if (m_name_nodes.contains(filter.filter_name))
          {
+            // assign the active filter to our map (so we pick up the selected match values) before populating node children
             auto& filter_node = m_name_nodes[filter.filter_name];
-            auto createFilterNode = [&filter, &filter_node, this](const CtPropertyVal& match_value)
-               {
-                  auto match_str = match_value.asString();
-                  auto item = AppendItem(filter_node, match_str);
-                  SetItemImage(item, IMG_UNCHECKED);
-                  if (filter.match_values.contains(match_str))
-                  {
-                     setChecked(item, true);
-                  }
-               };
-
-            // Check which order the filter values should be sorted, some are descending
-            if (filter.reverse_match_values)
-            {
-               rng::for_each(vws::reverse(dataset.getDistinctValues(filter.prop_id, false)), createFilterNode);
-            }
-            else {
-               rng::for_each(dataset.getDistinctValues(filter.prop_id, false), createFilterNode);
-            }
+            m_node_filters[filter_node] = filter;
+            populateFilterChildItems(filter_node);
          }
          else {
             assert(false and "filter_name should always be in m_name_nodes, this is a bug");
@@ -143,32 +132,40 @@ namespace ctb::app
             throw Error{ constants::ERROR_STR_UNKNOWN, Error::Category::GenericError };
          }
 
-         // if the node already has a list of available filter values as children, we don't need to do anything.
-         if (GetChildrenCount(filter_node) > 0)
-            return;
-
-         auto createFilterNode = [&filter_node, this](const CtPropertyVal& match_value)
-            {
-               auto item = AppendItem(filter_node, match_value.asString());
-               SetItemImage(item, IMG_UNCHECKED);
-            };
-
-         // Check which order the filter values should be sorted, some are descending
-         auto& filter = m_node_filters[filter_node.GetID()];
-         auto dataset = m_sink.getDatasetOrThrow();
-         if (filter.reverse_match_values)
-         {
-            rng::for_each(vws::reverse(dataset->getDistinctValues(filter.prop_id, false)), createFilterNode);
-         }
-         else {
-            rng::for_each(dataset->getDistinctValues(filter.prop_id, false), createFilterNode);
-         }
+         // if the node already has a list of available filter values as children, we need to clear and repopulate it 
+         // because the match values could have changed
+         populateFilterChildItems(filter_node);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
+
+   void MultiValueFilterTree::onNodePopupMenu(wxTreeEvent& event)
+   {
+      try 
+      {
+         auto menu = getPopupMenu(event.GetItem());
+         PopupMenu(menu.get());
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MultiValueFilterTree::onTreePopupMenu(wxContextMenuEvent& event)
+   {
+      try 
+      {
+         auto menu = getPopupMenu(nullptr);
+         PopupMenu(menu.get());
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
 
    /// @brief Event handler fired when user left-clicks on a tree item.
    void MultiValueFilterTree::onNodeLeftClick(wxMouseEvent& event)
@@ -192,7 +189,9 @@ namespace ctb::app
    }
 
 
-   /// @return A reference to the filter object associated with the specified tree item.
+   /// @return A reference to the filter object associated with the specified tree item. 
+   /// 
+   /// Note this filter is from our internal map, not dataset's activeMultivalFilters()
    auto MultiValueFilterTree::getFilter(wxTreeItemId item)  noexcept(false) -> CtMultiValueFilter&
    {
       auto parent_node = GetItemParent(item);
@@ -229,22 +228,73 @@ namespace ctb::app
    }
 
 
+   auto MultiValueFilterTree::getPopupMenu(wxTreeItemId item) const -> wxMenuPtr
+   {
+      using namespace constants;
+
+      auto popup_menu = std::make_unique<wxMenu>();
+
+      if (isItemMatchValueNode(item))
+      {
+         // Copy to clipboard
+         auto* menu_copy = new wxMenuItem{ popup_menu.get(), wxID_COPY};
+         menu_copy->SetBitmap(wxArtProvider::GetBitmapBundle(wxART_COPY, wxART_MENU));
+         popup_menu->Append(menu_copy);
+         popup_menu->AppendSeparator();
+
+         // Check/Uncheck filter
+         bool is_checked = isItemChecked(item);
+         auto lbl = is_checked ? CMD_FILTER_TREE_CHECK_FILTER_LBL : CMD_FILTER_TREE_UNCHECK_FILTER_LBL;
+         auto tip = is_checked ? CMD_FILTER_TREE_CHECK_FILTER_TIP : CMD_FILTER_TREE_UNCHECK_FILTER_TIP;
+         popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_FILTER_TREE_TOGGLE_CHECKED, lbl, tip, wxITEM_NORMAL });
+      }
+      else if (isItemFilterNode(item))
+      {
+         // Collapse/Expand
+         bool is_expanded = IsExpanded(item);
+         auto lbl = is_expanded ? CMD_FILTER_TREE_COLLAPSE_LBL : CMD_FILTER_TREE_EXPAND_LBL;
+         auto tip = is_expanded ? CMD_FILTER_TREE_COLLAPSE_TIP : CMD_FILTER_TREE_EXPAND_TIP;
+         popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_FILTER_TREE_COLLAPSE_EXPAND, lbl, tip, wxITEM_NORMAL });
+         popup_menu->AppendSeparator();
+
+         // Deselect all
+         lbl = CMD_FILTER_TREE_DESELECT_ALL_LBL;
+         tip = CMD_FILTER_TREE_DESELECT_ALL_TIP;
+         popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_FILTER_TREE_DESELECT_ALL, lbl, tip, wxITEM_NORMAL });
+      }
+      else {
+         // collapse all
+         auto lbl = CMD_FILTER_TREE_COLLAPSE_ALL_LBL;
+         auto tip = CMD_FILTER_TREE_COLLAPSE_ALL_TIP;
+         popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_FILTER_TREE_COLLAPSE_ALL, lbl, tip, wxITEM_NORMAL });
+         popup_menu->AppendSeparator();
+
+         // clear 
+         lbl = CMD_FILTER_TREE_CLEAR_ALL_LBL;
+         tip = CMD_FILTER_TREE_CLEAR_ALL_TIP;
+         popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_FILTER_TREE_CLEAR_ALL, lbl, tip, wxITEM_NORMAL });
+      }
+
+      return popup_menu;
+   }
+
+
    /// @return true if the specified tree item is a checked match-value 
-   auto MultiValueFilterTree::isItemChecked(wxTreeItemId item) -> bool
+   auto MultiValueFilterTree::isItemChecked(wxTreeItemId item) const -> bool
    {
       return item.IsOk() and GetItemImage(item) == IMG_CHECKED;
    }
 
 
    /// @return true if item represents a filter node containing match values as children
-   auto MultiValueFilterTree::isItemFilterNode(wxTreeItemId item) -> bool
+   auto MultiValueFilterTree::isItemFilterNode(wxTreeItemId item) const -> bool
    {
       return item.IsOk() and m_node_filters.contains(item.GetID());
    }
 
 
    /// @return true if the item represents a match value for a filter, false otherwise
-   auto MultiValueFilterTree::isItemMatchValueNode(wxTreeItemId item) -> bool
+   auto MultiValueFilterTree::isItemMatchValueNode(wxTreeItemId item) const -> bool
    {
       return item.IsOk() and GetItemImage(item) != IMG_CONTAINER;
    }
@@ -289,6 +339,60 @@ namespace ctb::app
          SetItemImage(filter_node, IMG_CONTAINER);
          m_node_filters[filter_node] = filter;
          m_name_nodes[filter.filter_name] = filter_node;
+      }
+   }
+
+
+   void MultiValueFilterTree::populateFilterChildItems(wxTreeItemId filter_node) noexcept(false)
+   {
+      auto current_filter = getFilter(filter_node);
+      auto dataset = m_sink.getDatasetOrThrow();
+
+      DeleteChildren(filter_node);
+      clearCheckCounts(filter_node);
+
+      /// build a copy of dataset's filter-mgr that has all multi-val filters enabled except for the one we're getting values for
+      /// (if it was enabled, we wouldn't get any match values besides those already selected).
+      auto custom_filters = dataset->multivalFilters();
+      rng::for_each(custom_filters.activeFilters() | vws::values, [&current_filter](CtMultiValueFilter& filter)
+         {
+            if (filter.prop_id == current_filter.prop_id)
+               filter.enabled = false;
+         });
+
+      auto createChildNode = [&current_filter, &filter_node, this](const CtPropertyVal& match_value)
+         {
+            auto match_str = match_value.asString();
+            auto item = AppendItem(filter_node, match_str);
+            SetItemImage(item, IMG_UNCHECKED);
+            if (current_filter.match_values.contains(match_str))
+            {
+               setChecked(item, true);
+            }
+         };
+
+      // Check which order the filter values should be sorted, some are descending
+      if (current_filter.reverse_match_values)
+      {
+         rng::for_each(vws::reverse(dataset->getDistinctValues(current_filter.prop_id, custom_filters)), createChildNode);
+      }
+      else {
+         rng::for_each(dataset->getDistinctValues(current_filter.prop_id, custom_filters), createChildNode);
+      }
+      
+      updateFilterLabel(filter_node);
+   }
+
+
+   void MultiValueFilterTree::clearCheckCounts(wxTreeItemId filter_node)
+   {
+      if (isItemFilterNode(filter_node))
+      {
+         for (auto& [id, count] : m_check_counts)
+         {
+            if (id == filter_node)
+               count = 0;
+         }
       }
    }
 

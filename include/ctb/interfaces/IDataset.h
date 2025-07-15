@@ -11,8 +11,10 @@
 #include "ctb/table_data.h"
 #include "ctb/tables/CtSchema.h"
 
+#include <functional>
 #include <memory>
 #include <optional>
+#include <string>
 #include <string_view>
 
 
@@ -141,9 +143,16 @@ namespace ctb
 
       /// @brief Get a list of all distinct values from the dataset for the specified property.
       /// 
-      /// This can be used to get filter values for match-filters. If filtered_only is true, only records matching
-      /// the active filters will be included. If filtered_only is false, all records will be included.
-      [[nodiscard]] virtual auto getDistinctValues(CtProp prop_id, bool filtered_only) const -> PropertyValueSet = 0;
+      /// This can be used to get filter values for match-filters. If use_current_filters is true, only records matching
+      /// the active filters will be included. If use_current_filters is false, all records will be included.
+      [[nodiscard]] virtual auto getDistinctValues(CtProp prop_id, bool use_current_filters) const -> PropertyValueSet = 0;
+
+
+      /// @brief Get a list of all distinct values from the dataset for the specified property.
+      /// 
+      /// This can be used to get filter values for match-filters. The supplied custom_filter will be used to limit 
+      /// values to only those from records that match the filter.
+      [[nodiscard]] virtual auto getDistinctValues(CtProp prop_id, std::function<bool(const PropertyMap&)> custom_filter) const -> PropertyValueSet = 0;
 
       /// @brief returns the number of records in the underlying dataset
       /// @param filtered_only - if true, only records matching currently active filters will be counted. If false, 

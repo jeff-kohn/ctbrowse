@@ -40,10 +40,13 @@ namespace ctb::detail
       /// @brief Possible values to match against. This is a default-sorted set
       MatchValues match_values{};
 
+      /// @brief When enabled==false, operator() will always return true
+      bool enabled{ true };
+
       /// @brief returns true if the specified record is a match or we have no match values to check.
       auto operator()(const PropertyMap& rec) const noexcept -> bool
       {
-         if (match_values.empty())
+         if (match_values.empty() or !enabled)
             return true;
 
          auto it = rec.find(prop_id);

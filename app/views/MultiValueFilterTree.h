@@ -2,10 +2,8 @@
 
 #include "App.h"
 
-#include <ctb/interfaces/IDatasetEventSink.h>
-#include <ctb/interfaces/IDatasetEventSource.h>
 #include <ctb/model/ScopedEventSink.h>
-
+#include <wx/menu.h>
 #include <wx/treectrl.h>
 
 #include <map>
@@ -13,7 +11,11 @@
 
 namespace ctb::app
 {
-
+   /// custom TreeView control that displays a list MultiValueFilters and their match values, so that filters
+   /// can be configured by checking/unchecking the relevant filter values.
+   /// 
+   /// This class is an event sink for IDatasetEventSource and automatically handles updates from other views
+   /// as well as notifying other views about changes made. 
    class MultiValueFilterTree final : public wxTreeCtrl, public IDatasetEventSink
    {
    public:
@@ -24,7 +26,7 @@ namespace ctb::app
       /// to the window (parent owns/manages lifetime).
       /// 
       [[nodiscard]] static 
-      auto create(wxWindow& parent, std::shared_ptr<IDatasetEventSource> source) -> MultiValueFilterTree*;
+      auto create(wxWindow& parent, DatasetEventSourcePtr source) -> MultiValueFilterTree*;
 
       // no copy/move/assign, this class is created on the heap.
       MultiValueFilterTree() = delete;
@@ -38,6 +40,7 @@ namespace ctb::app
       using NodeFilterMap = std::map<wxTreeItemId, CtMultiValueFilter>;  // maps tree node to corresponding filter 
       using NameNodeMap   = std::map<std::string,  wxTreeItemId>;        // map filter name (must be unique) to tree node
       using CheckCountMap = std::map<wxTreeItemId, int>;                 // used to track number of checked value nodes a given parent/filter node has 
+      using wxMenuPtr     = std::unique_ptr<wxMenu>;                     // type alias for a wxMenu smart ptr 
 
       CheckCountMap         m_check_counts{};   // for keeping track of number of values selected for a filter/node.
       NameNodeMap           m_name_nodes{};
@@ -45,23 +48,29 @@ namespace ctb::app
       ScopedEventSink       m_sink;    
       wxWithImages::Images  m_images{};
 
-      MultiValueFilterTree(wxWindow& parent, std::shared_ptr<IDatasetEventSource> source);
+      MultiValueFilterTree(wxWindow& parent, DatasetEventSourcePtr source);
 
       void notify(DatasetEvent event) override;
       void onDatasetInitialize(IDataset& dataset);
 
       void onNodeExpanding(wxTreeEvent& event);
+      void onNodePopupMenu(wxTreeEvent& event);
+      void onTreePopupMenu(wxContextMenuEvent& event); // when right-clicking in client area and not a node.
       void onNodeLeftClick(wxMouseEvent& event);
 
-      auto isItemChecked(wxTreeItemId item) -> bool;
-      auto isItemFilterNode(wxTreeItemId item) -> bool;
-      auto isItemMatchValueNode(wxTreeItemId item) -> bool;
+      auto isItemChecked(wxTreeItemId item) const -> bool;
+      auto isItemFilterNode(wxTreeItemId item) const -> bool;
+      auto isItemMatchValueNode(wxTreeItemId item) const -> bool;
 
+      void clearCheckCounts(wxTreeItemId filter_node);
       void disableFilterMatchValue(wxTreeItemId item) noexcept(false);
       void enableFilterMatchValue(wxTreeItemId item) noexcept(false) ;
+
       auto getFilter(wxTreeItemId item) noexcept(false) -> CtMultiValueFilter&;
       auto getFilterValue(wxTreeItemId item) -> CtPropertyVal;
+      auto getPopupMenu(wxTreeItemId item) const -> wxMenuPtr;
       void populateFilterNodes(IDataset& dataset);
+      void populateFilterChildItems(wxTreeItemId filter_node) noexcept(false);
       void setChecked(wxTreeItemId item, bool checked = true);
       void toggleFilterSelection(wxTreeItemId item);
       void updateFilterLabel(wxTreeItemId item);
