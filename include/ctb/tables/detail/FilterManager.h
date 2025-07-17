@@ -62,7 +62,7 @@ namespace ctb::detail
 
       /// @brief Remove the specified filter from the list
       /// @return true if removed, false if not found.
-      auto disableFilterMatchValue(const Key& key) -> bool
+      auto removeFilter(const Key& key) -> bool
       {
          if ( m_filters.erase(key))
          {
@@ -75,7 +75,7 @@ namespace ctb::detail
       /// @brief Remove the specified filter from the list, with heterogeneous lookup
       /// @return true if removed, false if not found.
       template<StringOrStringViewType KeyValT> requires StringOrStringViewType<Key>
-      auto disableFilterMatchValue(KeyValT&& key) -> bool
+      auto removeFilter(KeyValT&& key) -> bool
       {
          if (m_filters.erase(std::forward<KeyValT>(key)))
          {
@@ -142,11 +142,13 @@ namespace ctb::detail
       }
 
       /// @brief Retrieve a view on all active filters.
+      /// 
+      /// Note returned view contains map elements e.g. pair<key, val>
+      /// 
       /// @return A view representing all active filters (could be empty)
-      template <typename Self>
-      auto activeFilters(this Self&& self)
+      auto activeFilters() const
       {
-         return vws::all(std::forward<Self>(self).m_filters);
+         return vws::all(m_filters);
       } 
 
       /// @brief returns true if the record is a match 

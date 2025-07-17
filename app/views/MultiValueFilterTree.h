@@ -39,7 +39,7 @@ namespace ctb::app
    private:
       using NodeFilterMap = std::map<wxTreeItemId, CtMultiValueFilter>;  // maps tree node to corresponding filter 
       using NameNodeMap   = std::map<std::string,  wxTreeItemId>;        // map filter name (must be unique) to tree node
-      using CheckCountMap = std::map<wxTreeItemId, int>;                 // used to track number of checked value nodes a given parent/filter node has 
+      using CheckCountMap = std::map<wxTreeItemId, size_t>;              // used to track number of checked value nodes a given parent/filter node has 
       using wxMenuPtr     = std::unique_ptr<wxMenu>;                     // type alias for a wxMenu smart ptr 
 
       CheckCountMap         m_check_counts{};   // for keeping track of number of values selected for a filter/node.
@@ -53,17 +53,28 @@ namespace ctb::app
       void notify(DatasetEvent event) override;
       void onDatasetInitialize(IDataset& dataset);
 
+      void onCollapseExpandNode(wxCommandEvent& event);
+      void onCollapseAllNodes(wxCommandEvent& event);
+      void onCopyValue(wxCommandEvent& event);
+      void onClearAllFilters(wxCommandEvent& event);
+      void onDeselectAll(wxCommandEvent& event);
+      void onInvertSelection(wxCommandEvent& event);
+      void onToggleChecked(wxCommandEvent& event);
       void onNodeExpanding(wxTreeEvent& event);
       void onNodePopupMenu(wxTreeEvent& event);
       void onTreePopupMenu(wxContextMenuEvent& event); // when right-clicking in client area and not a node.
       void onNodeLeftClick(wxMouseEvent& event);
+
+      void onCollapseAllNodesUpdateUI(wxUpdateUIEvent& event);
+      void onClearAllFiltersUpdateUI(wxUpdateUIEvent& event);
+      void onDeselectAllUpdateUI(wxUpdateUIEvent& event);
 
       auto isItemChecked(wxTreeItemId item) const -> bool;
       auto isItemFilterNode(wxTreeItemId item) const -> bool;
       auto isItemMatchValueNode(wxTreeItemId item) const -> bool;
 
       void clearCheckCounts(wxTreeItemId filter_node);
-      void disableFilterMatchValue(wxTreeItemId item) noexcept(false);
+      void removeFilter(wxTreeItemId item) noexcept(false);
       void enableFilterMatchValue(wxTreeItemId item) noexcept(false) ;
 
       auto getFilter(wxTreeItemId item) noexcept(false) -> CtMultiValueFilter&;

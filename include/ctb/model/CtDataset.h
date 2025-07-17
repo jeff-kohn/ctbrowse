@@ -300,12 +300,12 @@ namespace ctb
       {
          auto extractor = [prop_id](const PropertyMap& map)
             {
-               std::string result{};
+               PropertyVal result{};
 
                auto it = map.find(prop_id);
                if (it != map.end())
                {
-                  result = it->second.asString();
+                  result = it->second;
                }
                return result;
             };

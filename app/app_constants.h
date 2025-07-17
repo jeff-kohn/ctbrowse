@@ -64,6 +64,8 @@ namespace ctb::constants
    inline constexpr const char* CMD_FILTER_TREE_DESELECT_ALL_TIP   = "Deselect all values for the current filter node.";
    inline constexpr const char* CMD_FILTER_TREE_EXPAND_LBL         = "&Expand";
    inline constexpr const char* CMD_FILTER_TREE_EXPAND_TIP         = "Expand the current filter node.";
+   inline constexpr const char* CMD_FILTER_TREE_INVERT_LBL         = "&Invert Selection";
+   inline constexpr const char* CMD_FILTER_TREE_INVERT_TIP         = "Invert the filter values selected for this filter.";
 
    inline constexpr const char* CONFIG_PATH_PREFERENCES            = "/Preferences";
    inline constexpr const char* CONFIG_PATH_PREFERENCE_DATASYNC    = "/Preferences/DataSync";
@@ -97,10 +99,6 @@ namespace ctb::constants
    // DetailsPanel labels
    inline constexpr const char* LBL_APPELLATION                   = "Appellation:";
    inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";
-   //inline constexpr const char* LBL_BTN_SAVE_DEFAULT              = "&Save as Default";
-   //inline constexpr const char* LBL_BTN_SAVE_DEFAULT_TIP          = "Save the current filter options as the default for this collection.";
-   //inline constexpr const char* LBL_BTN_CLEAR_FILTERS             = "&Clear Filters";
-   //inline constexpr const char* LBL_BTN_CLEAR_FILTERS_TIP         = "Clear all filters and show all records.";
    inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only Show In-Stock Wines";
    inline constexpr const char* LBL_CHECK_MIN_SCORE               = "Minimum Score:";
    inline constexpr const char* LBL_CHECK_READY_TO_DRINK          = "Only Show 'Ready' Wines";

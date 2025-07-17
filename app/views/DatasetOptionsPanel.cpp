@@ -301,7 +301,7 @@ namespace ctb::app
             dataset->propFilters().replaceFilter(filter.filter_name, filter);
          }
          else {
-            dataset->propFilters().disableFilterMatchValue(filter.filter_name);
+            dataset->propFilters().removeFilter(filter.filter_name);
          }
          m_sink.signal_source(DatasetEvent::Id::Filter, false);
       }

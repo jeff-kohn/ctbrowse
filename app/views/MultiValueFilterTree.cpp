@@ -4,11 +4,13 @@
 #include <ctb/interfaces/IDatasetEventSource.h>
 
 #include <wx/artprov.h>
+#include <wx/clipbrd.h>
 #include <wx/wupdlock.h>
+
 
 namespace ctb::app
 {
-   static constexpr auto WINDOW_STYLE  = wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_TWIST_BUTTONS | wxTR_NO_LINES | wxTR_HIDE_ROOT;
+   static constexpr auto WINDOW_STYLE  = wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_TWIST_BUTTONS | wxTR_NO_LINES | wxTR_HIDE_ROOT | wxTR_SINGLE;
    static constexpr int  IMG_CONTAINER = 0;
    static constexpr int  IMG_UNCHECKED = 1;
    static constexpr int  IMG_CHECKED   = 2;
@@ -66,6 +68,20 @@ namespace ctb::app
       Bind(wxEVT_LEFT_DOWN,           &MultiValueFilterTree::onNodeLeftClick, this);
       Bind(wxEVT_TREE_ITEM_MENU,      &MultiValueFilterTree::onNodePopupMenu, this);
       Bind(wxEVT_CONTEXT_MENU,        &MultiValueFilterTree::onTreePopupMenu, this);
+
+      Bind(wxEVT_MENU, &MultiValueFilterTree::onCollapseExpandNode, this, CMD_FILTER_TREE_COLLAPSE_EXPAND);
+      Bind(wxEVT_MENU, &MultiValueFilterTree::onCopyValue,          this, wxID_COPY);
+      Bind(wxEVT_MENU, &MultiValueFilterTree::onCollapseAllNodes,   this, CMD_FILTER_TREE_COLLAPSE_ALL);
+      Bind(wxEVT_MENU, &MultiValueFilterTree::onClearAllFilters,    this, CMD_FILTER_TREE_CLEAR_ALL);
+      Bind(wxEVT_MENU, &MultiValueFilterTree::onDeselectAll,        this, CMD_FILTER_TREE_DESELECT_ALL);
+      Bind(wxEVT_MENU, &MultiValueFilterTree::onInvertSelection,    this, CND_FILTER_TREE_INVERT_SELECTION);
+      Bind(wxEVT_MENU, &MultiValueFilterTree::onToggleChecked,      this, CMD_FILTER_TREE_TOGGLE_CHECKED);
+
+      Bind(wxEVT_UPDATE_UI, &MultiValueFilterTree::onCollapseAllNodesUpdateUI, this, CMD_FILTER_TREE_COLLAPSE_ALL);
+      Bind(wxEVT_UPDATE_UI, &MultiValueFilterTree::onClearAllFiltersUpdateUI,  this, CMD_FILTER_TREE_CLEAR_ALL);
+      Bind(wxEVT_UPDATE_UI, &MultiValueFilterTree::onDeselectAllUpdateUI,      this, CMD_FILTER_TREE_DESELECT_ALL);
+      Bind(wxEVT_UPDATE_UI, &MultiValueFilterTree::onDeselectAllUpdateUI,      this, CND_FILTER_TREE_INVERT_SELECTION); // Same logic as Deselect All
+
    }
 
 
@@ -120,6 +136,126 @@ namespace ctb::app
    }
 
 
+   void MultiValueFilterTree::onCollapseExpandNode(wxCommandEvent& event)
+   {
+      try 
+      {
+         auto item = GetSelection();
+         if (IsExpanded(item))
+         {
+            Collapse(item);
+         }
+         else
+         {
+            Expand(item);
+         }
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MultiValueFilterTree::onCollapseAllNodes(wxCommandEvent& event)
+   {
+      try 
+      {
+         CollapseAll();
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MultiValueFilterTree::onCopyValue(wxCommandEvent& event)
+   {
+      try 
+      {
+         if (wxTheClipboard->Open())
+         {
+            // ownership of data object is transferred to the clipboard
+            wxTheClipboard->SetData(new wxTextDataObject{ GetItemText(GetSelection()) });
+            wxTheClipboard->Close();
+         }
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MultiValueFilterTree::onClearAllFilters(wxCommandEvent& event)
+   {
+      try 
+      {
+         auto dataset = m_sink.getDatasetOrThrow();
+         dataset->multivalFilters().clear();
+         m_sink.signal_source(DatasetEvent::Id::Filter, true);
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MultiValueFilterTree::onDeselectAll(wxCommandEvent& event)
+   {
+      try 
+      {
+         auto item = GetSelection();
+         auto current_filter = getFilter(item);
+         auto dataset = m_sink.getDatasetOrThrow();
+         dataset->multivalFilters().removeFilter(current_filter.prop_id);
+         m_sink.signal_source(DatasetEvent::Id::Filter, true);
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MultiValueFilterTree::onInvertSelection(wxCommandEvent& event)
+   {
+      try 
+      {
+         auto item = GetSelection();
+         auto current_filter = getFilter(item);
+         auto dataset = m_sink.getDatasetOrThrow();
+
+         // we want all select all unselected values and vice-versa. so remove current selected values from
+         // full list of values. 
+         CtMultiValueFilter::MatchValues new_values{};
+         auto all_values = dataset->getDistinctValues(current_filter.prop_id, false);
+         std::ranges::set_difference(all_values, current_filter.match_values, std::inserter(new_values, new_values.begin()));
+         current_filter.match_values.swap(new_values);
+
+         dataset->multivalFilters().replaceFilter(current_filter.prop_id, current_filter);
+         m_sink.signal_source(DatasetEvent::Id::Filter, true);
+
+         // need to update state for filter's label
+         //m_check_counts[item] =  current_filter.match_values.size();
+         //updateFilterLabel(item);
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void MultiValueFilterTree::onToggleChecked(wxCommandEvent& event)
+   {
+      try 
+      {
+         auto item = GetSelection();
+         toggleFilterSelection(item);
+      }
+      catch(...){
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
    /// @brief Event handler fired when user is expanding a filter node to view its match values
    void MultiValueFilterTree::onNodeExpanding(wxTreeEvent& event)
    {
@@ -146,8 +282,13 @@ namespace ctb::app
    {
       try 
       {
-         auto menu = getPopupMenu(event.GetItem());
-         PopupMenu(menu.get());
+         auto item = event.GetItem();
+         if (!item.IsOk())
+            return;
+
+         auto menu = getPopupMenu(item);
+         SelectItem(item);    // behavior is unintuitive to use without this
+         PopupMenu(menu.get(), event.GetPoint());
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -166,6 +307,7 @@ namespace ctb::app
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
+
 
    /// @brief Event handler fired when user left-clicks on a tree item.
    void MultiValueFilterTree::onNodeLeftClick(wxMouseEvent& event)
@@ -188,6 +330,24 @@ namespace ctb::app
       }
    }
 
+
+   void MultiValueFilterTree::onCollapseAllNodesUpdateUI(wxUpdateUIEvent& event)
+   {
+      event.Enable(rng::find_if(m_node_filters, [this](const auto& map_elem) { return IsExpanded(map_elem.first); }) != m_node_filters.end());
+   }
+
+
+   void MultiValueFilterTree::onClearAllFiltersUpdateUI(wxUpdateUIEvent& event)
+   {
+      event.Enable(rng::find_if(m_check_counts, [](const auto& map_elem) { return map_elem.second > 0; }) != m_check_counts.end());
+   }
+
+
+   void MultiValueFilterTree::onDeselectAllUpdateUI(wxUpdateUIEvent& event)
+   {
+      // Does filter node have at least one value checked?
+      event.Enable(rng::find_if(m_node_filters, [this](const auto& map_elem) { return map_elem.second.match_values.size() > 0; }) != m_node_filters.end());
+   }
 
    /// @return A reference to the filter object associated with the specified tree item. 
    /// 
@@ -244,8 +404,8 @@ namespace ctb::app
 
          // Check/Uncheck filter
          bool is_checked = isItemChecked(item);
-         auto lbl = is_checked ? CMD_FILTER_TREE_CHECK_FILTER_LBL : CMD_FILTER_TREE_UNCHECK_FILTER_LBL;
-         auto tip = is_checked ? CMD_FILTER_TREE_CHECK_FILTER_TIP : CMD_FILTER_TREE_UNCHECK_FILTER_TIP;
+         auto lbl = is_checked ? CMD_FILTER_TREE_UNCHECK_FILTER_LBL : CMD_FILTER_TREE_CHECK_FILTER_LBL;
+         auto tip = is_checked ? CMD_FILTER_TREE_UNCHECK_FILTER_TIP : CMD_FILTER_TREE_CHECK_FILTER_TIP;
          popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_FILTER_TREE_TOGGLE_CHECKED, lbl, tip, wxITEM_NORMAL });
       }
       else if (isItemFilterNode(item))
@@ -261,6 +421,11 @@ namespace ctb::app
          lbl = CMD_FILTER_TREE_DESELECT_ALL_LBL;
          tip = CMD_FILTER_TREE_DESELECT_ALL_TIP;
          popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_FILTER_TREE_DESELECT_ALL, lbl, tip, wxITEM_NORMAL });
+
+         // Invert Selectioin
+         lbl = CMD_FILTER_TREE_INVERT_LBL;
+         tip = CMD_FILTER_TREE_INVERT_TIP;
+         popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CND_FILTER_TREE_INVERT_SELECTION, lbl, tip, wxITEM_NORMAL });
       }
       else {
          // collapse all
@@ -352,20 +517,22 @@ namespace ctb::app
       clearCheckCounts(filter_node);
 
       /// build a copy of dataset's filter-mgr that has all multi-val filters enabled except for the one we're getting values for
-      /// (if it was enabled, we wouldn't get any match values besides those already selected).
-      auto custom_filters = dataset->multivalFilters();
-      rng::for_each(custom_filters.activeFilters() | vws::values, [&current_filter](CtMultiValueFilter& filter)
+      /// (if it was enabled, we wouldn't get any match values besides those already selected)
+      CtMultiValueFilterMgr custom_filters{};
+      for (const auto& filter : vws::values(dataset->multivalFilters().activeFilters()))
+      {
+         if (filter.prop_id != current_filter.prop_id)
          {
-            if (filter.prop_id == current_filter.prop_id)
-               filter.enabled = false;
-         });
+            custom_filters.replaceFilter(filter.prop_id, filter);
+         }
+      }
 
       auto createChildNode = [&current_filter, &filter_node, this](const CtPropertyVal& match_value)
          {
             auto match_str = match_value.asString();
             auto item = AppendItem(filter_node, match_str);
             SetItemImage(item, IMG_UNCHECKED);
-            if (current_filter.match_values.contains(match_str))
+            if (current_filter.match_values.contains(match_value))
             {
                setChecked(item, true);
             }
@@ -398,7 +565,7 @@ namespace ctb::app
 
 
    /// @brief Removes the match value represented by the item from the filter's active match values.
-   void MultiValueFilterTree::disableFilterMatchValue(wxTreeItemId item) noexcept(false)
+   void MultiValueFilterTree::removeFilter(wxTreeItemId item) noexcept(false)
    {
       auto& filter = getFilter(item);
       auto dataset = m_sink.getDatasetOrThrow();
@@ -440,7 +607,7 @@ namespace ctb::app
 
       if (isItemChecked(item))
       {
-         disableFilterMatchValue(item);
+         removeFilter(item);
          setChecked(item, false);
       }
       else{ 
