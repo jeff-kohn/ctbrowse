@@ -8,11 +8,15 @@
 
 namespace ctb::app
 {
-   auto DatasetMultiView::create(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache) -> DatasetMultiView*
+   auto DatasetMultiView::create(wxWindow& parent, DatasetEventSourcePtr source, LabelCachePtr cache) -> DatasetMultiView*
    {
       try
       {
-         std::unique_ptr<DatasetMultiView> wnd{ new DatasetMultiView{ parent, source, cache } };
+         if (!source)
+         {
+            throw Error{ constants::ERROR_STR_NULLPTR_ARG, Error::Category::ArgumentError };
+         }
+         std::unique_ptr<DatasetMultiView> wnd{ new DatasetMultiView{ &parent, source, cache } };
          return wnd.release(); // top-level window manages its own lifetime, we return non-owning pointer
       }
       catch (...){
@@ -35,7 +39,7 @@ namespace ctb::app
       SetSashGravity(LEFT_SPLITTER_GRAVITY);
 
       // this splitter window contains options panel and right/nested splitter
-      m_options_panel = DatasetOptionsPanel::create(this, source);
+      m_options_panel = DatasetOptionsPanel::create(*this, source);
       m_right_splitter = new wxSplitterWindow{ this };
       SplitVertically(m_options_panel, m_right_splitter);
       //SetMinimumPaneSize(MIN_PANE_SIZE);
@@ -58,5 +62,6 @@ namespace ctb::app
    {
       return m_details_panel ? m_details_panel->wineDetailsActive() : false;
    }
+
 
 } // namespace ctb::app

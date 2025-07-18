@@ -16,6 +16,10 @@
 #include <string_view>
 
 
+#ifdef __WIN32 
+   #undef Error
+#endif
+
 namespace ctb
 {
    /// @brief exception class used for runtime errors
@@ -64,7 +68,7 @@ namespace ctb
       /// 
       std::string formattedMesage() const
       {
-         return ctb::format("Error Category '{}', code {}, {}", categoryName(), error_code, what());
+         return ctb::format("{} ({} {})", what(), categoryName(), error_code);
       }
 
       /// @brief base class override

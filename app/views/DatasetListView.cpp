@@ -62,7 +62,8 @@ namespace ctb::app
       try
       {
          ClearColumns();
-         const auto& cols = m_model->getDataset()->listColumns();
+     
+         auto cols = m_model->getDataset()->listColumns();
          for (const auto&& [idx, col] : vws::enumerate(cols))
          {
             AppendTextColumn(col.display_name.c_str(), 
@@ -136,7 +137,6 @@ namespace ctb::app
             selectFirstRow();
             break;
 
-         case DatasetEvent::Id::ColLayoutRequested: [[fallthrough]];
          case DatasetEvent::Id::RowSelected:
             break;
 
@@ -153,7 +153,7 @@ namespace ctb::app
          if (!m_sink.hasDataset()) return;
 
          auto row = m_model->GetRow(event.GetItem());
-         m_sink.signal_source(DatasetEvent::Id::RowSelected, static_cast<int>(row));
+         m_sink.signal_source(DatasetEvent::Id::RowSelected, false, static_cast<int>(row));
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError());

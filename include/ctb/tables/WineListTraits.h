@@ -87,12 +87,14 @@ namespace ctb
 
       /// @brief multi-value filters that can be used on this table.
       static inline const std::array MultiValueFilters{
-         MultiValueFilter{ Prop::Varietal,    constants::FILTER_VARIETAL   },
-         MultiValueFilter{ Prop::Vintage,     constants::FILTER_VINTAGE    },
-         MultiValueFilter{ Prop::Country,     constants::FILTER_COUNTRY    },
-         MultiValueFilter{ Prop::Region,      constants::FILTER_REGION     },
-         MultiValueFilter{ Prop::Appellation, constants::FILTER_APPELATION },
-         MultiValueFilter{ Prop::Producer,    constants::FILTER_PRODUCER   },
+         MultiValueFilter{ Prop::Varietal,    constants::FILTER_VARIETAL    },
+         MultiValueFilter{ Prop::Vintage,     constants::FILTER_VINTAGE     },
+         MultiValueFilter{ Prop::Country,     constants::FILTER_COUNTRY     },
+         MultiValueFilter{ Prop::Region,      constants::FILTER_REGION      },
+         MultiValueFilter{ Prop::SubRegion,   constants::FILTER_SUB_REGION  },
+         MultiValueFilter{ Prop::Appellation, constants::FILTER_APPELATION  },
+         MultiValueFilter{ Prop::Producer,    constants::FILTER_PRODUCER    },
+         MultiValueFilter{ Prop::Size,        constants::FILTER_BOTTLE_SIZE },
       };
 
       /// @brief getTableName()

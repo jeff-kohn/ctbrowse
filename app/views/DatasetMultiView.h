@@ -32,7 +32,7 @@ namespace ctb::app
       /// to the window (wx windows are self-deleting).
       /// 
       [[nodiscard]] static 
-      auto create(wxWindow* parent, std::shared_ptr<IDatasetEventSource> source, LabelCachePtr cache) -> DatasetMultiView*;
+      auto create(wxWindow& parent, std::shared_ptr<IDatasetEventSource> source, LabelCachePtr cache) -> DatasetMultiView*;
 
 
       /// @brief Indicates whether the details for a selected wine are currently displayed.
@@ -41,6 +41,7 @@ namespace ctb::app
       auto wineDetailsActive() const -> bool;
 
       // no copy/move/assign, this class is created on the heap.
+      DatasetMultiView() = delete;
       DatasetMultiView(const DatasetMultiView&) = delete;
       DatasetMultiView(DatasetMultiView&&) = delete;
       DatasetMultiView& operator=(const DatasetMultiView&) = delete;
@@ -59,4 +60,4 @@ namespace ctb::app
    };
 
 
-} // namespace ctb::app
+} // namespace ctb::app 

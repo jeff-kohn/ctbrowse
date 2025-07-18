@@ -18,7 +18,6 @@ namespace ctb::app
 {
    namespace fs = std::filesystem;
 
-
    /// @brief forward declare top-level window class so we don't have to add header dependency
    ///
    class MainFrame;
@@ -28,8 +27,18 @@ namespace ctb::app
    // with no benefit for this use-case.
    enum CmdId : uint16_t
    {
-      CMD_FILE_DOWNLOAD_DATA = wxID_HIGHEST,
+      CMD_FILE_OPEN = wxID_HIGHEST, 
+      CMD_FILE_SAVE,
+      CMD_FILE_DOWNLOAD_DATA,
       CMD_FILE_SETTINGS,
+      CMD_EDIT_REFRESH_DATA,
+      CMD_EDIT_CLEAR_FILTERS,
+      CMD_FILTER_TREE_COLLAPSE_EXPAND,
+      CMD_FILTER_TREE_DESELECT_ALL,
+      CMD_FILTER_TREE_TOGGLE_CHECKED,
+      CMD_FILTER_TREE_CLEAR_ALL,
+      CMD_FILTER_TREE_COLLAPSE_ALL, 
+      CND_FILTER_TREE_INVERT_SELECTION,
       CMD_COLLECTION_MY_CELLAR,
       CMD_COLLECTION_PENDING_WINE,
       CMD_COLLECTION_CONSUMED,
@@ -43,6 +52,17 @@ namespace ctb::app
       CMD_ONLINE_EDIT_ORDER,
       CMD_ONLINE_DRINK_REMOVE,
    };
+   
+   
+   enum class AppFolder
+   {
+      Root,
+      Defaults,
+      Favorites,
+      Labels,
+      Tables
+   };
+
 
    /// @brief app object for the application.
    ///
@@ -60,9 +80,14 @@ namespace ctb::app
       auto OnExit() -> int override;
 
       /// @brief  returns the path where the application stores data files.
-      auto userDataFolder() const noexcept  -> const fs::path& 
+      auto getDataFolder(AppFolder folder) const noexcept -> fs::path
       {
-         return m_user_data_folder; 
+         if (folder == AppFolder::Root)
+            return m_user_data_folder; 
+
+         auto path = ctb::format("{}/{}", m_user_data_folder.generic_string(), magic_enum::enum_name(folder));
+         fs::create_directories(path);
+         return path;
       }
 
       /// @brief Retrieve a pointer to main window that doesn't need dynamic_cast (or wx-equivalent).
@@ -90,6 +115,13 @@ namespace ctb::app
 
       /// @brief display a message box with informational text
       void displayInfoMessage(const std::string& msg, const std::string& title = constants::APP_NAME_SHORT);
+
+      /// @brief display an info message to the user, using format()-style syntax for string building.
+      template <typename... Args>
+      void displayInfoMessage(ctb::format_string<Args...> fmt_str, Args&&... args)
+      {
+         displayInfoMessage(ctb::vformat(fmt_str, ctb::make_format_args(args...)));
+      }
 
    private:
       MainFrame*         m_main_frame{};

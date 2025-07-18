@@ -149,6 +149,12 @@ namespace ctb
    using CtPropertyFilter = detail::PropertyFilter<CtProp, CtPropertyMap>;
 
 
+   /// @brief Type alias for a filter predicate used with CtPropertyFilter
+   using CtPropFilterPredicate = CtPropertyFilter::ComparePred;
+
+
+   using CtPredicateType = CtPropFilterPredicate::PredicateType;
+
    /// @brief Type alias for a filter manager for working with CtPropertyFilter
    using CtPropertyFilterMgr = detail::FilterManager<CtPropertyFilter, std::string, CtProp, CtPropertyMap>;
 

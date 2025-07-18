@@ -86,6 +86,7 @@ namespace ctb
          MultiValueFilter{ Prop::Vintage,           constants::FILTER_VINTAGE     },
          MultiValueFilter{ Prop::Country,           constants::FILTER_COUNTRY     },
          MultiValueFilter{ Prop::Region,            constants::FILTER_REGION      },
+         MultiValueFilter{ Prop::SubRegion,         constants::FILTER_SUB_REGION  },
          MultiValueFilter{ Prop::Appellation,       constants::FILTER_APPELATION  },
          MultiValueFilter{ Prop::Producer,          constants::FILTER_PRODUCER    },
          MultiValueFilter{ Prop::Size,              constants::FILTER_BOTTLE_SIZE },
