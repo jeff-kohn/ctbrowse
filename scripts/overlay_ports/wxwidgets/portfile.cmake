@@ -2,7 +2,7 @@ vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO wxWidgets/wxWidgets
     REF "v${VERSION}"
-    SHA512 0834cb1f4f2e294b721abeef659f696156b9a7474a6a770197f2295a598cce5547671634036a96739b063bb6482f5cb0092b5f704dc5ceb1c002c4e1782df197
+    SHA512 384178e3fa0ca35020c9ba0a86cd40f0a28c5b86417bffe22c21ec106689968272fc5b7f1e9361990baa2abe292dd48aedb603a04d200fc53a1bac10b9bcd369
     HEAD_REF master
     PATCHES
         install-layout.patch
@@ -14,7 +14,7 @@ vcpkg_from_github(
         sdl2.patch
 )
 
-set(CMAKE_POLICY_VERSION_MINIMUM=3.5) # temporary for wxWidget 3.2.6
+set(CMAKE_POLICY_VERSION_MINIMUM=3.5) # for CMake 4 compat
 
 vcpkg_check_features(
     OUT_FEATURE_OPTIONS FEATURE_OPTIONS
@@ -43,6 +43,14 @@ if(VCPKG_TARGET_IS_WINDOWS OR VCPKG_TARGET_IS_OSX)
     list(APPEND OPTIONS -DwxUSE_WEBREQUEST_CURL=OFF)
 else()
     list(APPEND OPTIONS -DwxUSE_WEBREQUEST_CURL=ON)
+endif()
+
+if(VCPKG_TARGET_IS_WINDOWS)
+    if(VCPKG_CRT_LINKAGE STREQUAL "dynamic")
+        list(APPEND OPTIONS -DwxBUILD_USE_STATIC_RUNTIME=OFF)
+    else()
+        list(APPEND OPTIONS -DwxBUILD_USE_STATIC_RUNTIME=ON)
+    endif()
 endif()
 
 vcpkg_find_acquire_program(PKGCONFIG)
@@ -77,13 +85,14 @@ vcpkg_cmake_configure(
         -DwxUSE_UIACTIONSIMULATOR=OFF
         -DCMAKE_DISABLE_FIND_PACKAGE_GSPELL=ON
         -DCMAKE_DISABLE_FIND_PACKAGE_MSPACK=ON
+        -DwxBUILD_INSTALL_RUNTIME_DIR:PATH=bin
         -DwxUSE_UNICODE_UTF8=ON
         -DwxUSE_UTF8_LOCALE_ONLY=ON
         -DwxUSE_CONFIG_NATIVE=OFF
         -DwxUSE_STL=ON
         -DwxUSE_STD_CONTAINERS=ON
-        -DwxUSE_UNSAFE_WXSTRING_CONV=OFF
-       ${OPTIONS}
+        -DwxUSE_UNSAFE_WXSTRING_CONV=OFF		
+        ${OPTIONS}
         "-DPKG_CONFIG_EXECUTABLE=${PKGCONFIG}"
         # The minimum cmake version requirement for Cotire is 2.8.12.
         # however, we need to declare that the minimum cmake version requirement is at least 3.1 to use CMAKE_PREFIX_PATH as the path to find .pc.
@@ -195,6 +204,12 @@ if("example" IN_LIST FEATURES)
 endif()
 
 configure_file("${CMAKE_CURRENT_LIST_DIR}/vcpkg-cmake-wrapper.cmake" "${CURRENT_PACKAGES_DIR}/share/${PORT}/vcpkg-cmake-wrapper.cmake" @ONLY)
+
+file(REMOVE "${CURRENT_PACKAGES_DIR}/wxwidgets.props")
+file(REMOVE "${CURRENT_PACKAGES_DIR}/debug/wxwidgets.props")
+file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/build")
+file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/build")
+file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
 file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")
 vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/docs/licence.txt")

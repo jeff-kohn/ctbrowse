@@ -25,7 +25,7 @@ namespace ctb
    /// @brief Parse an ISO date-time string and return it as a UTC timepoint. 
    /// 
    /// Values returned from this function will always be UTC, even if the string
-   /// contained a timezone offeset. 
+   /// contained a timezone offset. 
    /// 
    /// @return expected value parsed date, unexpected value is exception object containing error information
    /// 

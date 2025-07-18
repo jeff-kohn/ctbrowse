@@ -25,6 +25,15 @@ namespace ctb::app
       return wxString{ sv.data(), sv.size() };
    }
 
+   /// @brief returns a string_view on a wxString
+   /// 
+   /// the string_view is only valid for the lifetime of the wx_string it views
+   /// 
+   inline std::string_view wxViewString(const wxString& wx_string)
+   {
+      return std::string_view{ wx_string.wx_str(), wx_string.length() };
+   }
+
 
    /// @brief convert a range of strings/string_views to a wxArrayString
    ///
@@ -49,7 +58,6 @@ namespace ctb::app
       return std::forward<decltype(strings)>(strings) | vws::transform(overloaded)
                                                       | rng::to<wxArrayString>();
    }
-
 
 
    /// @brief small object that sets a frame window's status text on destruction

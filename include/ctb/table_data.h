@@ -157,7 +157,7 @@ namespace ctb
    {
       auto table_path = getTablePath(data_folder, tbl, DataFormatId::csv);
       if (not isTableFileAvailable(table_path))
-         return std::unexpected{ Error{ ERROR_FILE_NOT_FOUND, Error::Category::DataError, constants::FMT_ERROR_FILE_NOT_FOUND, table_path.generic_string() } };
+         return std::unexpected{ Error{ ERROR_FILE_NOT_FOUND, Error::Category::FileError, constants::FMT_ERROR_FILE_NOT_FOUND, table_path.generic_string() } };
 
       csv::CSVReader reader{ table_path.generic_string() };
 

@@ -24,7 +24,7 @@ namespace ctb::detail
 
    /// @brief class to contain a property value from a table record.
    ///
-   /// this class is a lightweight wrapper around std::variant that is easier use and provides a built-in
+   /// this class is a lightweight wrapper around std::variant that is easier to use and provides a built-in
    /// concept of 'null' so that we don't have to handle a mix of normal and std::optional<> types.
    /// 
    /// We use std::monostate to indicate null, but callers don't need to bother with that, just use
@@ -44,13 +44,11 @@ namespace ctb::detail
 
       /// @brief Create a PropertyValue from a string_view by converting it to the specified type.
       /// 
-      /// This is a zero-copy alternative to creating a PropertyValue<string> and then using as<> to convert it.
-      /// 
       /// @param text_value - The string_view to be converted and used to construct the PropertyValue.
       /// @return An PropertyValue containing the converted value if the conversion succeeds, or an empty 
       ///  PropertyValue otherwise.
-      template<std::convertible_to<ValueType> ValT>
-      [[nodiscard]] static auto create(std::string_view text_value) -> PropertyValue
+      template<ArithmeticType ValT> requires std::convertible_to<ValT, ValueType>
+      [[nodiscard]] static auto parse(std::string_view text_value) -> PropertyValue
       {
          auto val = from_str<ValT>(text_value); 
          if (val)
@@ -62,6 +60,14 @@ namespace ctb::detail
          }
       }
 
+      /// @brief Create a PropertyValue from a string_view by parsing it as a year_month_day
+      /// @return a PropertyValue containing the parsed date, or a null PropertyValue if the string couldn't parsed
+      template<typename ValT> requires std::same_as<std::chrono::year_month_day, ValT>
+      [[nodiscard]] static auto parse(std::string_view date_str) -> PropertyValue
+      {
+         auto parse_result = parseDate(date_str, constants::FMT_PARSE_DATE_SHORT);
+         return parse_result.has_value() ? PropertyValue{ *parse_result } : PropertyValue{};
+      }
 
       /// @brief construct a PropertyValue from any value convertible to ValueType
       ///
@@ -236,6 +242,13 @@ namespace ctb::detail
       auto asDouble() const -> NullableDouble
       {
          return as<double>();
+      }
+
+      /// @brief Provides access to the variant so that it can be visited.
+      template<typename Self>
+      auto& variant(this Self&& self)
+      {
+         return std::forward<Self>(self).m_val;
       }
 
       /// @brief allows for comparison of PropertyValue objects, as well as putting them in ordered containers

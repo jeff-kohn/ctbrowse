@@ -7,7 +7,7 @@ set (${PROJECT_NAME}_AUTHOR "Jeff Kohn")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set (${PROJECT_NAME}_COPYRIGHT "Copyright © ${CURRENT_YEAR} ${${PROJECT_NAME}_AUTHOR}")
 set(${PROJECT_NAME}_VERSION_RESOURCE "")
-set(MANIFEST_FILE "${CMAKE_CURRENT_SOURCE_DIR}/resources/utf-8.manifest" )
+set(MANIFEST_FILE "${CMAKE_CURRENT_SOURCE_DIR}/resources/ctBrowse.manifest" )
 
 
 generate_product_version(
@@ -60,6 +60,8 @@ target_sources(${TARGET_NAME}
      "dialogs/TableSyncDialog.cpp"
      "dialogs/TableSyncDialog.h"
 
+     "model/CtDatasetOptions.cpp"
+     "model/CtDatasetOptions.h"
      "model/CtDataViewModel.cpp"
      "model/CtDataViewModel.h"
 
@@ -72,8 +74,10 @@ target_sources(${TARGET_NAME}
      "views/DetailsPanel.cpp"
      "views/DetailsPanel.h"
      "views/FilterCheckBox.h"
+     "views/MultiValueFilterTree.cpp"
+     "views/MultiValueFilterTree.h"
 
-     "resources/utf-8.manifest"
+     "resources/ctBrowse.manifest"
      "resources/resource.rc"
      ${${PROJECT_NAME}_VERSION_RESOURCE}
 )

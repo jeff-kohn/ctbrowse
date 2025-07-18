@@ -12,8 +12,9 @@
 #include <ctb/model/ScopedEventSink.h>
 
 #include <wx/event.h>
-#include <wx/frame.h>
 #include <wx/menu.h>
+#include <wx/frame.h>
+
 #include <memory>
 
 /// forward declare wx classes to avoid header pollution.
@@ -58,8 +59,7 @@ namespace ctb::app
       /// @brief Type alias for a wxMenu smart ptr 
       using wxMenuPtr = std::unique_ptr<wxMenu>;
 
-      /// @brief Get 
-      /// @return ptr to a popup menu with commands relevant to the selected wine
+      /// @brief Get a popup menu with commands relevant to the selected wine
       auto getWinePopupMenu() const -> wxMenuPtr;
 
    private:
@@ -86,12 +86,18 @@ namespace ctb::app
       void createToolBar();
 
       // File menu handlers
+      void onMenuFileOpen(wxCommandEvent&); 
+      void onMenuFileSave(wxCommandEvent&);
       void onMenuFilePreferences(wxCommandEvent&);
       void onMenuFileSyncData(wxCommandEvent&);
       void onMenuFileQuit(wxCommandEvent&);
 
       // Edit menu handlers
       void onMenuEditFind(wxCommandEvent& event);
+      void onMenuEditRefresh(wxCommandEvent& event);
+      void onMenuEditRefreshUpdateUI(wxUpdateUIEvent& event);
+      void onMenuEditClearFilters(wxCommandEvent& event);
+      void onMenuEditClearFiltersUpdateUI(wxUpdateUIEvent& event);
       
       // Collection menu handlers
       void onMenuCollection(wxCommandEvent&);
@@ -122,6 +128,7 @@ namespace ctb::app
       void clearSearchFilter();
       void doSearchFilter();
       auto getDataset(bool throw_on_null = true) -> DatasetPtr;
+      void setDataset(DatasetPtr dataset);
       void updateStatusBarCounts();
 
       // Inherited via IDatasetEventSink

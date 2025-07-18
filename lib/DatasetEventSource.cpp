@@ -14,60 +14,55 @@ namespace ctb
 
    /// @brief static method to create a class instance.
    [[nodiscard]] 
-   auto DatasetEventSource::create() -> DatasetEventSource::DatasetEventSourcePtr
+   auto DatasetEventSource::create() -> DatasetEventSourcePtr
    { 
       return DatasetEventSourcePtr{ new DatasetEventSource{} }; 
    }
 
-   auto DatasetEventSource::hasDataset() const -> bool
+
+   auto DatasetEventSource::hasDataset() const  noexcept-> bool
    { 
       return m_data ? true : false; 
    }
 
 
-   /// @brief retrieves a pointer to the active table for this source, if any.
-   auto DatasetEventSource::getDataset() const -> DatasetPtr
+   auto DatasetEventSource::getDataset() const  noexcept-> DatasetPtr
    {
       return m_data;
    }
 
 
-   /// @brief assigns a table to this source.
-   auto DatasetEventSource::setDataset(DatasetPtr dataset, bool signal_event) -> bool
+   void DatasetEventSource::setDataset(DatasetPtr dataset, bool signal_event) noexcept
    {
       SPDLOG_DEBUG("DatasetEventSource::setDataset() called.");
 
-      // We need to signal that the current table is being replaced, because
-      // otherwise views that hold internal table pointers will be left with
-      // obsolete
-      if (!signal(DatasetEvent::Id::DatasetRemove))
-         return false;
+      // We need to signal that the current dataset is being replaced, because
+      // views may contain state that is invalidated by the change.
+      signal(DatasetEvent::Id::DatasetRemove);
 
       m_data = dataset;
-      return signal_event ? signal(DatasetEvent::Id::DatasetInitialize) : true;
+      if (signal_event)
+      {
+         signal(DatasetEvent::Id::DatasetInitialize);
+      }
    }
 
 
-   /// @brief  attaches an event sink to this source to receive event notifications
-   void DatasetEventSource::attach(IDatasetEventSink* observer) 
+   void DatasetEventSource::attach(IDatasetEventSink* observer)  noexcept
    {
       SPDLOG_DEBUG("DatasetEventSource::attach() called.");
       m_observers.insert(observer);
    }
 
 
-   /// @brief detach an event sink from this source to no longer receive event notifications
-   void DatasetEventSource::detach(IDatasetEventSink* observer)
+   void DatasetEventSource::detach(IDatasetEventSink* observer) noexcept
    {
       SPDLOG_DEBUG("DatasetEventSource::detach() called.");
-      auto it = m_observers.find(observer);
-      if (it != m_observers.end()) 
-         m_observers.erase(it);
+      m_observers.erase(observer);
    }
 
 
-   /// @brief this is called to signal that an event needs to be sent to all listeners
-   auto DatasetEventSource::signal(DatasetEvent::Id event_id, NullableInt rec_idx) noexcept -> bool
+   auto DatasetEventSource::signal(DatasetEvent::Id event_id, NullableInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool
    {
       [[maybe_unused]] auto event_name = magic_enum::enum_name(event_id);
       SPDLOG_DEBUG("DatasetEventSource::signal({},{}) called", event_name, rec_idx.value_or(-1));
@@ -79,7 +74,10 @@ namespace ctb
          { 
             try
             {
-               observer->notify({ event_id, m_data, rec_idx});
+               if (observer != event_source)
+               {
+                  observer->notify({ event_id, m_data, rec_idx });
+               }
             }
             catch(...){
                retval = false;
@@ -96,27 +94,28 @@ namespace ctb
    }
 
 
-   auto DatasetEventSource::signal(DatasetEvent::Id event_id) noexcept -> bool
+   auto DatasetEventSource::signal(DatasetEvent::Id event) noexcept -> bool
    {
-      return signal(event_id, std::nullopt);
+      return signal(event, std::nullopt, nullptr);
+   }
+
+
+   auto DatasetEventSource::signal(DatasetEvent::Id event, IDatasetEventSink* event_source) noexcept -> bool
+   {
+      return signal(event, std::nullopt, event_source);
+   }
+
+
+   auto DatasetEventSource::signal(DatasetEvent::Id event, NullableInt rec_idx) noexcept -> bool 
+   {
+      return signal(event, rec_idx, nullptr);
    }
 
 
    DatasetEventSource::~DatasetEventSource() noexcept
    {
-      // We can't guarantee that some event sink won't throw, so best to be safe.
-      try
-      {
-         signal(DatasetEvent::Id::DatasetRemove);
-      }
-      catch(...)
-      {
-         try {
-            auto e = packageError();
-            log::error("~DatasetEventSource caught exception from signal(DatasetRemove) event: {}", e.what()); 
-         }
-         catch (...) {}
-      } 
+      signal(DatasetEvent::Id::DatasetRemove);
    }
+
 
 } // namespace ctb

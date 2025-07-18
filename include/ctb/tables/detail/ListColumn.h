@@ -98,9 +98,7 @@ namespace ctb::detail
 
       /// @brief get the display text for a property value, which may include special formatting
       ///
-      /// currency values will use a dollar sign and 2 decimal places, decimal values  will be 
-      /// displayed with 1 decimal place.
-      ///
+      /// currency values will use a dollar sign and 2 decimal places, decimal values will use decimal_places
       template<typename... Args>
       std::string getDisplayValue(const detail::PropertyValue<Args...>& value) const
       {       
