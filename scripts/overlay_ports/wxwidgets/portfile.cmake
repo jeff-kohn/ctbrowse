@@ -2,7 +2,7 @@ vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO wxWidgets/wxWidgets
     REF "v${VERSION}"
-    SHA512 384178e3fa0ca35020c9ba0a86cd40f0a28c5b86417bffe22c21ec106689968272fc5b7f1e9361990baa2abe292dd48aedb603a04d200fc53a1bac10b9bcd369
+    SHA512 a6704b54b6535a3a66b036c2563753575fc01bf735ec7f9cae6600390554f95f28cb50041fc3570f149924f4a3d99771fecdfa2d1ccdf12496cf8a2cf763b96b
     HEAD_REF master
     PATCHES
         install-layout.patch
@@ -12,9 +12,26 @@ vcpkg_from_github(
         fix-pcre2.patch
         gtk3-link-libraries.patch
         sdl2.patch
+        fix-cmake-msvc-naming.patch # v3.3.0-only, can be replaced with conditional `-DwxBUILD_WIN32_MSVC_NAMING=ON` in v3.3.1
 )
 
-set(CMAKE_POLICY_VERSION_MINIMUM=3.5) # for CMake 4 compat
+# Submodule dependencies
+vcpkg_from_github(
+    OUT_SOURCE_PATH lexilla_SOURCE_PATH
+    REPO wxWidgets/lexilla
+    REF "27c20a6ae5eebf418debeac0166052ed6fb653bc"
+    SHA512 7e5de7f664509473b691af8261fca34c2687772faca7260eeba5f2984516e6f8edf88c27192e056c9dda996e2ad2c20f6d1dff1c4bd2f3c0d74852cb50ca424a
+    HEAD_REF wx
+)
+file(COPY "${lexilla_SOURCE_PATH}/" DESTINATION "${SOURCE_PATH}/src/stc/lexilla")
+vcpkg_from_github(
+    OUT_SOURCE_PATH scintilla_SOURCE_PATH
+    REPO wxWidgets/scintilla
+    REF "0b90f31ced23241054e8088abb50babe9a44ae67"
+    SHA512 db1f3007f4bd8860fad0817b6cf87980a4b713777025128cf5caea8d6d17b6fafe23fd22ff6886d7d5a420f241d85b7502b85d7e52b4ddb0774edc4b0a0203e7
+    HEAD_REF wx
+)
+file(COPY "${scintilla_SOURCE_PATH}/" DESTINATION "${SOURCE_PATH}/src/stc/scintilla")
 
 vcpkg_check_features(
     OUT_FEATURE_OPTIONS FEATURE_OPTIONS
@@ -53,18 +70,25 @@ if(VCPKG_TARGET_IS_WINDOWS)
     endif()
 endif()
 
+if("webview" IN_LIST FEATURES AND VCPKG_LIBRARY_LINKAGE STREQUAL "static")
+  list(APPEND OPTIONS -DwxUSE_WEBVIEW_EDGE_STATIC=ON)
+endif()
+
 vcpkg_find_acquire_program(PKGCONFIG)
 
 # This may be set to ON by users in a custom triplet.
-# The use of 'wxUSE_STL' and 'WXWIDGETS_USE_STD_CONTAINERS' (ON or OFF) are not API compatible
-# which is why they must be set in a custom triplet rather than a port feature.
-#if(NOT DEFINED WXWIDGETS_USE_STL)
-#    set(WXWIDGETS_USE_STL OFF)
-#endif()
-#
-#if(NOT DEFINED WXWIDGETS_USE_STD_CONTAINERS)
-#    set(WXWIDGETS_USE_STD_CONTAINERS OFF)
-#endif()
+# The use of 'WXWIDGETS_USE_STD_CONTAINERS' (ON or OFF) is not API compatible
+# which is why it must be set in a custom triplet rather than a port feature.
+# For backwards compatibility, we also replace 'wxUSE_STL' (which no longer
+# exists) with 'wxUSE_STD_STRING_CONV_IN_WXSTRING' which still exists and was
+# set by `wxUSE_STL` previously.
+if(NOT DEFINED WXWIDGETS_USE_STL)
+    set(WXWIDGETS_USE_STL OFF)
+endif()
+
+if(NOT DEFINED WXWIDGETS_USE_STD_CONTAINERS)
+    set(WXWIDGETS_USE_STD_CONTAINERS OFF)
+endif()
 
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
@@ -77,21 +101,20 @@ vcpkg_cmake_configure(
         -DwxUSE_LIBPNG=sys
         -DwxUSE_LIBTIFF=sys
         -DwxUSE_NANOSVG=sys
+        -DwxUSE_LIBWEBP=sys
         -DwxUSE_GLCANVAS=ON
         -DwxUSE_LIBGNOMEVFS=OFF
         -DwxUSE_LIBNOTIFY=OFF
-        -DwxUSE_STL=${WXWIDGETS_USE_STL}
-        -DwxUSE_STD_CONTAINERS=${WXWIDGETS_USE_STD_CONTAINERS}
+        -DwxUSE_STD_STRING_CONV_IN_WXSTRING=ON
+        -DwxUSE_STD_CONTAINERS=ON
         -DwxUSE_UIACTIONSIMULATOR=OFF
         -DCMAKE_DISABLE_FIND_PACKAGE_GSPELL=ON
         -DCMAKE_DISABLE_FIND_PACKAGE_MSPACK=ON
         -DwxBUILD_INSTALL_RUNTIME_DIR:PATH=bin
-        -DwxUSE_UNICODE_UTF8=ON
-        -DwxUSE_UTF8_LOCALE_ONLY=ON
-        -DwxUSE_CONFIG_NATIVE=OFF
-        -DwxUSE_STL=ON
-        -DwxUSE_STD_CONTAINERS=ON
-        -DwxUSE_UNSAFE_WXSTRING_CONV=OFF		
+        -DwxUSE_UNICODE_UTF8=ON          # utf8-everywhere
+        -DwxUSE_UTF8_LOCALE_ONLY=ON      # utf8-everywhere
+        -DwxUSE_CONFIG_NATIVE=OFF        # Use file instead of registry
+        -DwxUSE_UNSAFE_WXSTRING_CONV=OFF		        
         ${OPTIONS}
         "-DPKG_CONFIG_EXECUTABLE=${PKGCONFIG}"
         # The minimum cmake version requirement for Cotire is 2.8.12.
@@ -115,7 +138,7 @@ file(REMOVE_RECURSE
 
 set(tools wxrc)
 if(NOT VCPKG_TARGET_IS_WINDOWS)
-    list(APPEND tools wxrc-3.2)
+    list(APPEND tools wxrc-3.3)
     file(MAKE_DIRECTORY "${CURRENT_PACKAGES_DIR}/tools/${PORT}")
     file(RENAME "${CURRENT_PACKAGES_DIR}/bin/wx-config" "${CURRENT_PACKAGES_DIR}/tools/${PORT}/wx-config")
     if(NOT VCPKG_BUILD_TYPE)
@@ -130,6 +153,11 @@ vcpkg_copy_pdbs()
 
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/include/msvc")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
+file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/lib/mswu")
+if(VCPKG_BUILD_TYPE STREQUAL "release")
+    file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/lib/mswud")
+endif()
+
 file(GLOB_RECURSE INCLUDES "${CURRENT_PACKAGES_DIR}/include/*.h")
 if(EXISTS "${CURRENT_PACKAGES_DIR}/lib/mswu/wx/setup.h")
     list(APPEND INCLUDES "${CURRENT_PACKAGES_DIR}/lib/mswu/wx/setup.h")
@@ -189,7 +217,7 @@ if(NOT "debug-support" IN_LIST FEATURES)
     if(VCPKG_TARGET_IS_WINDOWS)
         vcpkg_replace_string("${CURRENT_PACKAGES_DIR}/include/wx/debug.h" "#define wxDEBUG_LEVEL 1" "#define wxDEBUG_LEVEL 0")
     else()
-        vcpkg_replace_string("${CURRENT_PACKAGES_DIR}/include/wx-3.2/wx/debug.h" "#define wxDEBUG_LEVEL 1" "#define wxDEBUG_LEVEL 0")
+        vcpkg_replace_string("${CURRENT_PACKAGES_DIR}/include/wx-3.3/wx/debug.h" "#define wxDEBUG_LEVEL 1" "#define wxDEBUG_LEVEL 0")
     endif()
 endif()
 
