@@ -104,7 +104,9 @@ vcpkg_cmake_configure(
         -DwxUSE_GLCANVAS=ON
         -DwxUSE_LIBGNOMEVFS=OFF
         -DwxUSE_LIBNOTIFY=OFF
-        -DwxUSE_STD_STRING_CONV_IN_WXSTRING=ON
+        -DwxUSE_STD_STRING_CONV_IN_WXSTRING=0
+        -DwxNO_IMPLICIT_WXSTRING_CONV_TO_PTR=1 
+        -DwxUSE_UNSAFE_WXSTRING_CONV=OFF
         -DwxUSE_STD_CONTAINERS=ON
         -DwxUSE_UIACTIONSIMULATOR=OFF
         -DCMAKE_DISABLE_FIND_PACKAGE_GSPELL=ON
@@ -113,7 +115,6 @@ vcpkg_cmake_configure(
         -DwxUSE_UNICODE_UTF8=ON          # utf8-everywhere
         -DwxUSE_UTF8_LOCALE_ONLY=ON      # utf8-everywhere
         -DwxUSE_CONFIG_NATIVE=OFF        # Use file instead of registry
-        -DwxUSE_UNSAFE_WXSTRING_CONV=OFF		        
         ${OPTIONS}
         "-DPKG_CONFIG_EXECUTABLE=${PKGCONFIG}"
         # The minimum cmake version requirement for Cotire is 2.8.12.

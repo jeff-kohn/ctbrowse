@@ -1,4 +1,4 @@
-﻿find_package(wxWidgets CONFIG REQUIRED)
+find_package(wxWidgets CONFIG REQUIRED)
 
 set(TARGET_NAME ctBrowse_app)
 
@@ -7,8 +7,6 @@ set (${PROJECT_NAME}_AUTHOR "Jeff Kohn")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set (${PROJECT_NAME}_COPYRIGHT "Copyright © ${CURRENT_YEAR} ${${PROJECT_NAME}_AUTHOR}")
 set(${PROJECT_NAME}_VERSION_RESOURCE "")
-set(MANIFEST_FILE "${CMAKE_CURRENT_SOURCE_DIR}/resources/ctBrowse.manifest" )
-
 
 generate_product_version(
    ${PROJECT_NAME}_VERSION_RESOURCE
@@ -25,9 +23,6 @@ generate_product_version(
 )
 
 create_windows_target(${TARGET_NAME} ALIAS ${TARGET_NAME})
-
-# disable cmake's generated manifest because we're using one from wxWidgets
-set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "/MANIFEST:NO")
 
 target_include_directories(${TARGET_NAME} 
    ${warning_guard}
@@ -76,13 +71,10 @@ target_sources(${TARGET_NAME}
      "views/FilterCheckBox.h"
      "views/MultiValueFilterTree.cpp"
      "views/MultiValueFilterTree.h"
-
      "resources/ctBrowse.manifest"
      "resources/resource.rc"
      ${${PROJECT_NAME}_VERSION_RESOURCE}
 )
-
-add_manifest(${TARGET_NAME} ${MANIFEST_FILE} )
 
 # ---- End-of-file commands ----
 add_folders(app)
