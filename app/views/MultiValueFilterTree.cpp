@@ -136,7 +136,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onCollapseExpandNode(wxCommandEvent& event)
+   void MultiValueFilterTree::onCollapseExpandNode([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -156,7 +156,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onCollapseAllNodes(wxCommandEvent& event)
+   void MultiValueFilterTree::onCollapseAllNodes([[maybe_unused]]wxCommandEvent& event)
    {
       try 
       {
@@ -168,7 +168,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onCopyValue(wxCommandEvent& event)
+   void MultiValueFilterTree::onCopyValue([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -185,7 +185,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onClearAllFilters(wxCommandEvent& event)
+   void MultiValueFilterTree::onClearAllFilters([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -199,7 +199,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onDeselectAll(wxCommandEvent& event)
+   void MultiValueFilterTree::onDeselectAll([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -215,7 +215,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onInvertSelection(wxCommandEvent& event)
+   void MultiValueFilterTree::onInvertSelection([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -243,7 +243,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onToggleChecked(wxCommandEvent& event)
+   void MultiValueFilterTree::onToggleChecked([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -296,7 +296,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onTreePopupMenu(wxContextMenuEvent& event)
+   void MultiValueFilterTree::onTreePopupMenu([[maybe_unused]] wxContextMenuEvent& event)
    {
       try 
       {
@@ -346,7 +346,7 @@ namespace ctb::app
    void MultiValueFilterTree::onDeselectAllUpdateUI(wxUpdateUIEvent& event)
    {
       // Does filter node have at least one value checked?
-      event.Enable(rng::find_if(m_node_filters, [this](const auto& map_elem) { return map_elem.second.match_values.size() > 0; }) != m_node_filters.end());
+      event.Enable(rng::find_if(m_node_filters, [](const auto& map_elem) { return map_elem.second.match_values.size() > 0; }) != m_node_filters.end());
    }
 
    /// @return A reference to the filter object associated with the specified tree item. 
@@ -379,7 +379,8 @@ namespace ctb::app
       if (fld_schema.has_value())
       {
          /// We need to convert the string value from the filter node's label to the correct type, which may not be string.
-         return getPropertyForFieldType(*fld_schema, wxViewString(GetItemText(item)));
+         auto value_str = GetItemText(item);
+         return getPropertyForFieldType(*fld_schema, wxViewString(value_str.ToStdString()));
       }
       else {
          assert("Not getting a valid FieldSchema here is a bug." and false);

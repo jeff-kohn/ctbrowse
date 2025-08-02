@@ -202,8 +202,6 @@ namespace ctb::app
 
    void MainFrame::initControls()
    {
-      static const auto default_window_size = wxSize{ 800, 600 };
-
       SetTitle(constants::APP_NAME_LONG);
       SetIcon(wxIcon{constants::RES_NAME_ICON_PRODUCT});
 
