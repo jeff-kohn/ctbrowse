@@ -24,7 +24,7 @@ namespace ctb::app
       /// throws a ctb::Error if parent or source = nullptr, or if the window can't be created;
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its lifetime). 
-      [[nodiscard]] static DatasetListView* create(wxWindow* parent, DatasetEventSourcePtr source);
+      [[nodiscard]] static DatasetListView* create(wxWindow* parent, const DatasetEventSourcePtr& source);
 
    private:
 
@@ -36,12 +36,12 @@ namespace ctb::app
       explicit DatasetListView(wxWindow* parent, DatasetEventSourcePtr source) : 
          wxDataViewCtrl{ parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME },
          m_model{ CtDataViewModel::create() },
-         m_sink { this, source }
+         m_sink { this, std::move(source) }
       {}
 
       void init();
       void configureColumns();
-      void setDataset(DatasetPtr dataset);
+      void setDataset(const DatasetPtr& dataset);
       void selectFirstRow();
 
       void notify(DatasetEvent event) override;

@@ -18,7 +18,7 @@
 namespace ctb::app
 {
 
-   [[nodiscard]] DatasetListView* DatasetListView::create(wxWindow* parent, DatasetEventSourcePtr source)
+   [[nodiscard]] DatasetListView* DatasetListView::create(wxWindow* parent, const DatasetEventSourcePtr& source)
    {
       if (!source)
       {
@@ -78,7 +78,7 @@ namespace ctb::app
    }
 
 
-   void DatasetListView::setDataset(DatasetPtr dataset)
+   void DatasetListView::setDataset(const DatasetPtr& dataset)
    {
       if (m_model->getDataset())
       {

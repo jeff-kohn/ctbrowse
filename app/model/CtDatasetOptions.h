@@ -32,20 +32,20 @@ namespace ctb::app
 
       /// @brief Apply options from this object to the provided Dataset
       /// @return true if all options were successfully applied, false if one or more could not be applied.
-      auto applyToDataset(DatasetPtr dataset) const -> bool;
+      auto applyToDataset(DatasetPtr& dataset) const -> bool;
 
       /// @brief Load current options from the provided dataset to this object
       /// @return true if options were loaded, false if they weren't (because dataset == nullptr, you dummy)
-      auto loadFromDataset(const DatasetPtr dataset) -> bool;
+      auto loadFromDataset(const DatasetPtr& dataset) -> bool;
 
       /// @brief Apply any saved default CtDatasetOptions to the supplied dataset.
       ///
       /// If no saved default is found, dataset will not be modified.
-      static void applyDefaultOptions(DatasetPtr dataset);
+      static void applyDefaultOptions(DatasetPtr& dataset);
 
       /// @brief Retrieve a CtDatasetOptions initialized from the supplied dataset.
       /// @throw ctb::Error if you pass a nullptr dataset
-      static auto retrieveOptions(const DatasetPtr dataset) noexcept(false) -> CtDatasetOptions;
+      static auto retrieveOptions(const DatasetPtr& dataset) noexcept(false) -> CtDatasetOptions;
 
       /// @brief Retrieve a CtDatasetOptions initialized from the specified json file
       /// @throw ctb::Error if file can't be read and loaded into object
@@ -59,7 +59,7 @@ namespace ctb::app
       ///
       /// If a saved CtDatasetOptions is found, it will be returned to the caller. If no saved default
       /// is found, the supplied dataset's current settings will be returned.
-      static auto retrieveDefaultOptions(DatasetPtr dataset) -> CtDatasetOptions;
+      static auto retrieveDefaultOptions(const DatasetPtr& dataset) -> CtDatasetOptions;
 
 
       /// @brief Saves the provided object as the new default for its TableId

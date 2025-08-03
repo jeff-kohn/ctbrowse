@@ -98,7 +98,7 @@
             "microsoft.com/VisualStudioSettings/CMake/1.0": {
                "intelliSenseMode": "windows-clang-x64",
                "enableMicrosoftCodeAnalysis": false,
-               "enableClangTidyCodeAnalysis": true,
+               "enableClangTidyCodeAnalysis": false,
                "enableUndefinedBehaviorSanitizer": true,
                "disableExternalAnalysis": true
             }

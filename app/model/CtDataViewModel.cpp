@@ -4,7 +4,7 @@
 namespace ctb::app
 {
 
-   [[nodiscard]] auto CtDataViewModel::create(DatasetPtr dataset) -> ModelPtr
+   [[nodiscard]] auto CtDataViewModel::create(const DatasetPtr& dataset) -> ModelPtr
    {
       return ModelPtr{ new CtDataViewModel{ dataset } };
    }
@@ -18,7 +18,7 @@ namespace ctb::app
 
    void CtDataViewModel::setDataset(DatasetPtr dataset)
    {
-      m_dataset = dataset;
+      m_dataset = std::move(dataset);
       reQuery();
    }
 

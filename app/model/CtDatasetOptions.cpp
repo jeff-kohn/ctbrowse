@@ -19,7 +19,7 @@ namespace ctb::app
    }
 
 
-   auto CtDatasetOptions::applyToDataset(DatasetPtr dataset) const -> bool
+   auto CtDatasetOptions::applyToDataset(DatasetPtr& dataset) const -> bool
    {
       using magic_enum::enum_name;
 
@@ -82,7 +82,7 @@ namespace ctb::app
    }
 
 
-   auto CtDatasetOptions::loadFromDataset(DatasetPtr dataset) -> bool
+   auto CtDatasetOptions::loadFromDataset(const DatasetPtr& dataset) -> bool
    {
       if (nullptr == dataset)
       {
@@ -117,7 +117,7 @@ namespace ctb::app
    }
 
 
-   /* static */ auto CtDatasetOptions::retrieveDefaultOptions(DatasetPtr dataset) -> CtDatasetOptions
+   /* static */ auto CtDatasetOptions::retrieveDefaultOptions(const DatasetPtr& dataset) -> CtDatasetOptions
    {
       auto table_id = dataset->getTableId();
 
@@ -133,7 +133,7 @@ namespace ctb::app
    }
 
 
-   /* static */ void CtDatasetOptions::applyDefaultOptions(DatasetPtr dataset)
+   /* static */ void CtDatasetOptions::applyDefaultOptions(DatasetPtr& dataset)
    {
       auto result = retrieveDefaultOptions(dataset->getTableId());
       if (result)
@@ -143,7 +143,7 @@ namespace ctb::app
    }
 
 
-   /* static */ auto CtDatasetOptions::retrieveOptions(const DatasetPtr dataset) noexcept(false) -> CtDatasetOptions
+   /* static */ auto CtDatasetOptions::retrieveOptions(const DatasetPtr& dataset) noexcept(false) -> CtDatasetOptions
    {
       CtDatasetOptions result{};
       result.loadFromDataset(dataset);

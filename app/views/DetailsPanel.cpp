@@ -26,7 +26,7 @@ namespace ctb::constants
 {
    constexpr auto LABEL_TIMER_RETRY_INTERVAL = 33; 
 
-} // namespace constants
+} // namespace ctb::constants
 
 
 namespace ctb::app
@@ -51,12 +51,12 @@ namespace ctb::app
 
 
    DetailsPanel::DetailsPanel(DatasetEventSourcePtr source, LabelCachePtr cache) : 
-      m_event_sink{ this, source },
-      m_label_cache{ cache }
+      m_event_sink{ this, std::move(source) },
+      m_label_cache{ std::move(cache) }
    {}
 
 
-   DetailsPanel* DetailsPanel::create(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache)
+   DetailsPanel* DetailsPanel::create(wxWindow* parent, const DatasetEventSourcePtr& source, LabelCachePtr cache)
    {
       if (!source)
       {
@@ -404,7 +404,7 @@ namespace ctb::app
          {
             auto result = m_details.image_result->getImage();
             if (!result)
-               throw result.error();
+               throw Error{ std::move(result.error()) };
 
             wxBitmap bmp{ *result };
             m_label_image->SetBitmap(bmp);    
@@ -526,7 +526,7 @@ namespace ctb::app
    }
 
 
-   void DetailsPanel::configureControlsForDataset(DatasetPtr dataset)
+   void DetailsPanel::configureControlsForDataset(const DatasetPtr& dataset)
    {
       using enum CategorizedControls::Category;
 
@@ -568,4 +568,4 @@ namespace ctb::app
       wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, event.GetId()});
    }
 
-} // namesapce ctb::app
+} // namespace ctb::app

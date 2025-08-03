@@ -32,7 +32,7 @@ namespace ctb::app
       /// to the window (wx windows are self-deleting).
       /// 
       [[nodiscard]] static 
-      auto create(wxWindow& parent, std::shared_ptr<IDatasetEventSource> source, LabelCachePtr cache) -> DatasetMultiView*;
+      auto create(wxWindow& parent, const DatasetEventSourcePtr& source, LabelCachePtr cache) -> DatasetMultiView*;
 
 
       /// @brief Indicates whether the details for a selected wine are currently displayed.
@@ -56,7 +56,7 @@ namespace ctb::app
       wxSplitterWindow*    m_right_splitter{};
 
       /// @brief Private constructor, used by DatasetMultiView::create()
-      DatasetMultiView(wxWindow* parent, std::shared_ptr<IDatasetEventSource> source, LabelCachePtr cache);
+      DatasetMultiView(wxWindow* parent, const DatasetEventSourcePtr&, const LabelCachePtr& cache);
    };
 
 

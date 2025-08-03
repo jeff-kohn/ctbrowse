@@ -82,7 +82,7 @@ namespace ctb::app
          return dataset;
       }
 
-   }
+   } // namespace
 
 
    [[nodiscard]] MainFrame* MainFrame::create()
@@ -564,23 +564,23 @@ namespace ctb::app
          ScopedStatusText end_status{ constants::STATUS_DOWNLOAD_COMPLETE, this };
 
          CtCredentialManager cred_mgr{};
-         auto cred_name = constants::CELLARTRACKER_DOT_COM;
+         const auto* cred_name = constants::CELLARTRACKER_DOT_COM;
          auto prompt_msg = ctb::format(constants::FMT_CREDENTIALDLG_PROMPT_MSG, cred_name);
          auto cred_result = cred_mgr.loadCredential(cred_name, prompt_msg, true);
 
          if (!cred_result)
          {
-            auto error = cred_result.error();
-            if (error.category == Error::Category::OperationCanceled)
+            if (cred_result.error().category == Error::Category::OperationCanceled)
                return;
 
-            throw error;
+            throw Error{ cred_result.error() };
          }
 
          // If cred doesn't work we need to reprompt so udpate prompt message.
          prompt_msg = ctb::format(constants::FMT_CREDENTIALDLG_REPROMPT_MSG, cred_name);
 
-         wxProgressDialog progress_dlg{"Download Progress", "Downloading Data Files", 100, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL };
+         constexpr auto max_percent = 100;
+         wxProgressDialog progress_dlg{"Download Progress", "Downloading Data Files", max_percent, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL };
 
          ProgressCallback progress_callback = [&progress_dlg] ([[maybe_unused]] int64_t downloadTotal, [[maybe_unused]] int64_t downloadNow,
                                                                      [[maybe_unused]] int64_t uploadTotal, [[maybe_unused]] int64_t uploadNow,
@@ -1005,7 +1005,7 @@ namespace ctb::app
    }
 
 
-   void MainFrame::setDataset(DatasetPtr dataset)
+   void MainFrame::setDataset(const DatasetPtr& dataset)
    {
       m_event_source->setDataset(dataset, true);
 

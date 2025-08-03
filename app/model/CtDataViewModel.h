@@ -14,7 +14,7 @@ namespace ctb::app
 
       /// @brief Create a new model for the supplied DatasetPtr
       /// @return smart ptr to the newly created model object
-      [[nodiscard]] static auto create(DatasetPtr dataset = {}) -> ModelPtr;
+      [[nodiscard]] static auto create(const DatasetPtr& dataset = {}) -> ModelPtr;
 
       /// @brief Returns the active dataset for this model (may be empty/null)
       auto getDataset() -> DatasetPtr;
@@ -35,7 +35,7 @@ namespace ctb::app
    private:
       DatasetPtr       m_dataset{};
 
-      explicit CtDataViewModel(DatasetPtr dataset = {}) : m_dataset{ dataset }
+      explicit CtDataViewModel(DatasetPtr dataset = {}) : m_dataset{ std::move(dataset) }
       {}
 
       // instrusive ref counting in wxWidgets means smart ptr need access to ref-counting methods.
