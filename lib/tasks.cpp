@@ -8,13 +8,9 @@
 namespace ctb::tasks
 {
    using namespace std::literals;
-   using cpr::Url;
-   using std::exception;
-   using std::expected;
    using std::stop_token;
    using std::string_view;
    using std::vector;
-   using std::unexpected;
 
 
    auto runLoadFileTask(fs::path file, stop_token token) noexcept(false) -> FetchFileTask::ReturnType

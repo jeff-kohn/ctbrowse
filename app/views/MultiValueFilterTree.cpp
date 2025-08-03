@@ -224,7 +224,7 @@ namespace ctb::app
          auto dataset = m_sink.getDatasetOrThrow();
 
          // we want all select all unselected values and vice-versa. so remove current selected values from
-         // full list of values. 
+         // full list of values to get the list we need to select. 
          CtMultiValueFilter::MatchValues new_values{};
          auto all_values = dataset->getDistinctValues(current_filter.prop_id, false);
          std::ranges::set_difference(all_values, current_filter.match_values, std::inserter(new_values, new_values.begin()));
@@ -232,10 +232,6 @@ namespace ctb::app
 
          dataset->multivalFilters().replaceFilter(current_filter.prop_id, current_filter);
          m_sink.signal_source(DatasetEvent::Id::Filter, true);
-
-         // need to update state for filter's label
-         //m_check_counts[item] =  current_filter.match_values.size();
-         //updateFilterLabel(item);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -379,8 +375,7 @@ namespace ctb::app
       if (fld_schema.has_value())
       {
          /// We need to convert the string value from the filter node's label to the correct type, which may not be string.
-         auto value_str = GetItemText(item);
-         return getPropertyForFieldType(*fld_schema, wxViewString(value_str.ToStdString()));
+         return getPropertyForFieldType(*fld_schema, GetItemText(item).utf8_string());
       }
       else {
          assert("Not getting a valid FieldSchema here is a bug." and false);
