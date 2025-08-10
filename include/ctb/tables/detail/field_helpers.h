@@ -26,25 +26,34 @@ namespace ctb::detail
       return ctb::format("{} {}", vintage, wine_name);
    }
 
-   /// @brief Get formatted display of available qty summary
+   /// @brief Get formatted display of drinkable inventory (purchased - consumed + pending)
    /// @return string in the form of "Total-Drunk=Remaining", "Total", or "(Pending)"
-   inline auto getRtdConsumed(const CtPropertyMap& rec) -> CtPropertyVal
+   inline auto getRtdInventory(const CtPropertyMap& rec) -> CtPropertyVal
    {
       auto purchased = getValueOrNull(rec, CtProp::QtyPurchased).asUInt16().value_or(0);
       auto consumed  = getValueOrNull(rec, CtProp::QtyConsumed ).asUInt16().value_or(0);
       auto pending   = getValueOrNull(rec, CtProp::QtyPending  ).asUInt16().value_or(0);
+      auto remaining = purchased + pending - consumed;
 
+      CtPropertyVal result{};
       if (consumed)
       {
-         return ctb::format("{}-{}={}", purchased, consumed, purchased - consumed);
+         if (pending)
+            result = ctb::format("{}-{}+({})={}", purchased, consumed, pending, remaining);
+         else
+            result = ctb::format("{}-{}={}", purchased, consumed, remaining);
       }
       else if (purchased) 
       {
-         return ctb::format("{}", purchased);
+         if (pending)
+            result = ctb::format("{}+({})={}", purchased, pending, remaining);
+         else
+            result = ctb::format("{}", purchased);
       }
       else {
-         return ctb::format("({})", pending);
+         result = ctb::format("({})", pending);
       }
+      return result;
    }
 
    /// @brief  Get total quantity as formatted string
@@ -55,13 +64,13 @@ namespace ctb::detail
       auto pending = getValueOrNull(rec, CtProp::QtyPending).asUInt16().value_or(0u);
 
       CtPropertyVal result{};
-      if (pending == 0)
-      {
-         result = qty;
-      }
-      else if (qty == 0)
+      if (qty == 0)
       {
          result = ctb::format("({})", pending);
+      }
+      else if (pending == 0)
+      {
+         result = qty;
       }
       else {
          result = ctb::format("{}+({})", qty, pending);

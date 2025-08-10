@@ -375,7 +375,7 @@ namespace ctb::app
       if (fld_schema.has_value())
       {
          /// We need to convert the string value from the filter node's label to the correct type, which may not be string.
-         return getPropertyForFieldType(*fld_schema, GetItemText(item).utf8_string());
+         return getPropertyForFieldType(*fld_schema, wxViewString(GetItemText(item)));
       }
       else {
          assert("Not getting a valid FieldSchema here is a bug." and false);

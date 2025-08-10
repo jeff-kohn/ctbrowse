@@ -29,11 +29,10 @@ namespace ctb::app
    /// 
    /// the string_view is only valid for the lifetime of the wx_string it views
    /// 
-   //inline std::string_view wxViewString(const wxString& wx_string)
-   //{
-   //   const auto buf = wx_string.utf8_str();
-   //   return std::string_view{ buf.data(), buf.length()};
-   //}
+   inline std::string_view wxViewString(const wxString& wx_string)
+   {
+      return std::string_view{ wx_string.wx_str(), wx_string.utf8_length() };
+   }
 
 
    /// @brief convert a range of strings/string_views to a wxArrayString

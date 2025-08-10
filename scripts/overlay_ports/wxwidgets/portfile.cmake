@@ -81,13 +81,13 @@ vcpkg_find_acquire_program(PKGCONFIG)
 # For backwards compatibility, we also replace 'wxUSE_STL' (which no longer
 # exists) with 'wxUSE_STD_STRING_CONV_IN_WXSTRING' which still exists and was
 # set by `wxUSE_STL` previously.
-if(NOT DEFINED WXWIDGETS_USE_STL)
-    set(WXWIDGETS_USE_STL OFF)
-endif()
-
-if(NOT DEFINED WXWIDGETS_USE_STD_CONTAINERS)
-    set(WXWIDGETS_USE_STD_CONTAINERS OFF)
-endif()
+#if(NOT DEFINED WXWIDGETS_USE_STL)
+#    set(WXWIDGETS_USE_STL OFF)
+#endif()
+#
+#if(NOT DEFINED WXWIDGETS_USE_STD_CONTAINERS)
+#    set(WXWIDGETS_USE_STD_CONTAINERS OFF)
+#endif()
 
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
@@ -105,16 +105,16 @@ vcpkg_cmake_configure(
         -DwxUSE_LIBGNOMEVFS=OFF
         -DwxUSE_LIBNOTIFY=OFF
         -DwxUSE_STD_STRING_CONV_IN_WXSTRING=0
-        -DwxNO_IMPLICIT_WXSTRING_CONV_TO_PTR=1 
-        -DwxUSE_UNSAFE_WXSTRING_CONV=OFF
-        -DwxUSE_STD_CONTAINERS=ON
+        -DwxNO_IMPLICIT_WXSTRING_CONV_TO_PTR=0
+        -DwxUSE_UNSAFE_WXSTRING_CONV=0
+        -DwxUSE_STD_CONTAINERS=1
         -DwxUSE_UIACTIONSIMULATOR=OFF
         -DCMAKE_DISABLE_FIND_PACKAGE_GSPELL=ON
         -DCMAKE_DISABLE_FIND_PACKAGE_MSPACK=ON
         -DwxBUILD_INSTALL_RUNTIME_DIR:PATH=bin
-        -DwxUSE_UNICODE_UTF8=ON          # utf8-everywhere
-        -DwxUSE_UTF8_LOCALE_ONLY=ON      # utf8-everywhere
-        -DwxUSE_CONFIG_NATIVE=OFF        # Use file instead of registry
+        -DwxUSE_UNICODE_UTF8=1          # utf8-everywhere
+        -DwxUSE_UTF8_LOCALE_ONLY=1      # utf8-everywhere
+        -DwxUSE_CONFIG_NATIVE=OFF       # Use file instead of registry
         ${OPTIONS}
         "-DPKG_CONFIG_EXECUTABLE=${PKGCONFIG}"
         # The minimum cmake version requirement for Cotire is 2.8.12.

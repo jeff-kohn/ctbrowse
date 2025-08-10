@@ -61,9 +61,8 @@ namespace ctb
          { Prop::CtPrice,         FieldSchema { Prop::CtPrice,        PropType::Double,      9 }},
          { Prop::AuctionPrice,    FieldSchema { Prop::AuctionPrice,   PropType::Double,      8 }},
          { Prop::WineAndVintage,  FieldSchema { Prop::WineAndVintage, PropType::String,     {} }},
-         { Prop::QtyTotal,        FieldSchema { Prop::QtyTotal,       PropType::UInt16,     {} }},
-         { Prop::RtdConsumed,     FieldSchema { Prop::RtdConsumed,    PropType::String,     {} }},
-         });
+         { Prop::QtyTotal,        FieldSchema { Prop::QtyTotal,       PropType::String,     {} }},
+      });
 
       /// @brief list of display columns that will show in the list view
       static inline const std::array DefaultListColumns { 
@@ -131,7 +130,6 @@ namespace ctb
 
          rec[WineAndVintage] = getWineAndVintage(rec);
          rec[QtyTotal]       = calcQtyTotal(rec);
-         rec[RtdConsumed]    = getRtdConsumed(rec);
 
          validateDrinkYear(rec[BeginConsume]);
          validateDrinkYear(rec[EndConsume]);

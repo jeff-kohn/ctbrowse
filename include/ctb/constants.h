@@ -46,7 +46,7 @@ namespace ctb::constants
    inline constexpr const char* DISPLAY_COL_MY_WINDOW       = "My Window";
    inline constexpr const char* DISPLAY_COL_PRICE           = "Price";
    inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Ordered";
-   inline constexpr const char* DISPLAY_COL_PURCHASES       = "Purchases";
+   inline constexpr const char* DISPLAY_COL_INVENTORY       = "Inventory";
    inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
    inline constexpr const char* DISPLAY_COL_STORE           = "Store";
    inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
@@ -172,6 +172,9 @@ namespace ctb::constants
    inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, with {} Bottles Cellared and {} Pending Delivery";
    inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles";
 
+   inline constexpr const char* LBL_SIZE_750ml                    = "750ml";
+   inline constexpr const char* LBL_SIZE_375ml                    = "375ml";
+   inline constexpr const char* LBL_SIZE_MAGNUM                   = "1.5L";
 
    inline constexpr auto     ONE_MB                               = 1024 * 1024;
    inline constexpr uint16_t CT_NULL_YEAR                         =        9999;

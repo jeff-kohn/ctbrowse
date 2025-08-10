@@ -75,7 +75,9 @@ namespace ctb
       RtdQtyFastMaturing,
       RtdQtyEarlyAndLate,
       RtdQtyBottlesPerYear,
-      RtdConsumed,
+      RtdInventorySummary,    // string summary of total bottles purchased/consumed/on-hand
+      RtdInventoryLogical,    // number of logical 750ml bottles in inventory
+      RtdInventoryPhysical,    // number of physical bottles in inventory (might be different than logical for 375's etc)
 
       // consumed bottles table
       iConsumeId,
