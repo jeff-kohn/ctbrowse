@@ -32,8 +32,6 @@ namespace ctb::detail
       {
          static constexpr typename PropertyMap::mapped_type null_prop{};
 
-         // the 'reverse' only applies to first sort prop, not subsequent
-         bool first = true; 
          for (auto prop : sort_props)
          {
             auto it1 = r1.find(prop);
@@ -45,13 +43,12 @@ namespace ctb::detail
             auto cmp = p1 <=> p2;
             if (cmp < 0)
             {
-               return reverse and first ? false : true;
+               return reverse ? false : true;
             }
             else if (cmp > 0)
             {
-               return reverse and first ? true : false;
+               return reverse ? true : false;
             }
-            first = false;
          }
          return false; // all props equal
       }

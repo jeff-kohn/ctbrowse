@@ -272,10 +272,10 @@ namespace ctb::app
 
       // show/hide/initialize filter checkboxes
       m_categorized.showCategory(ControlCategory::InStockFilter,      dataset->hasProperty(CtProp::QtyTotal     ));
+      m_categorized.showCategory(ControlCategory::MaxPriceFilter,     dataset->hasProperty(CtProp::MyPrice      ));
+      m_categorized.showCategory(ControlCategory::MinPriceFilter,     dataset->hasProperty(CtProp::MyPrice      ));
       m_categorized.showCategory(ControlCategory::MinScoreFilter,     dataset->hasProperty(CtProp::CtScore      ));
       m_categorized.showCategory(ControlCategory::ReadyToDrinkFilter, dataset->hasProperty(CtProp::RtdQtyDefault));
-      m_categorized.showCategory(ControlCategory::MinPriceFilter,     dataset->hasProperty(CtProp::MyPrice      ));
-      m_categorized.showCategory(ControlCategory::MaxPriceFilter,     dataset->hasProperty(CtProp::MyPrice      ));
       
       for (auto* check_box : vws::values(m_filter_checkboxes))
       {
@@ -290,20 +290,18 @@ namespace ctb::app
 
    void DatasetOptionsPanel::onTableSorted(IDataset* dataset)
    {
-      // need to update the index our combo is bound to in addition to the sort.
       m_sort_config = dataset->activeSort();
-      
-      auto sorts = dataset->availableSorts();
-      for (const auto&& [idx, sort] : vws::enumerate(sorts))
+      m_sort_ascending = (m_sort_config.reverse == false);
+      m_sort_descending = m_sort_config.reverse;
+
+      for (const auto&& [idx, sort] : vws::enumerate(dataset->availableSorts()))
       {
-         if (sort.sort_name == m_sort_config.sort_name)
+         if (m_sort_config.sort_name == sort.sort_name)
          {
             m_sort_selection = idx;
          }
       }
 
-      m_sort_ascending = !m_sort_config.reverse;
-      m_sort_descending = m_sort_config.reverse;
       TransferDataToWindow();
    }
 
@@ -350,9 +348,8 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         m_sort_config.reverse = m_sort_descending;
-
          auto dataset = m_sink.getDatasetOrThrow();
+         m_sort_config.reverse = m_sort_descending;
          dataset->applySort(m_sort_config);
          m_sink.signal_source(DatasetEvent::Id::Sort, false);
       }
@@ -373,17 +370,20 @@ namespace ctb::app
             return;
 
          // let the combo close its list before we reload the dataset
-         CallAfter([this](){
-            auto dataset = m_sink.getDatasetOrThrow();
-            assert(m_sort_selection <= std::ssize(dataset->availableSorts()));
-
-            // we re-fetch sorter based on index, because when a sort is selected from the combo
-            // we want to use the default order for that sort, not whatever the current
-            // selection is (e.g. Scores sort is descending by default).
-            m_sort_config = dataset->availableSorts()[static_cast<size_t>(m_sort_selection)];
-            dataset->applySort(m_sort_config);
-            m_sink.signal_source(DatasetEvent::Id::Sort, false);
-         });
+         CallAfter([this]()
+            {
+               auto dataset = m_sink.getDatasetOrThrow();
+               auto sorts = dataset->availableSorts();
+               if (m_sort_selection <= std::ssize(sorts))
+               {
+                  // re-fetch sorter based on index. UI and member state will get updated in the event handler.
+                  dataset->applySort(sorts[static_cast<size_t>(m_sort_selection)]);
+                  m_sink.signal_source(DatasetEvent::Id::Sort, true); 
+               }
+               else {
+						log::warn("DatasetOptionsPanel::onSortSelection: invalid sort index selected: {}", m_sort_selection);
+               }
+            });
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
