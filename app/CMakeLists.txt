@@ -71,6 +71,8 @@ target_sources(${TARGET_NAME}
      "views/FilterCheckBox.h"
      "views/MultiValueFilterTree.cpp"
      "views/MultiValueFilterTree.h"
+     "views/SpinDoubleFilterCtrl.cpp"
+     "views/SpinDoubleFilterCtrl.h"
      "resources/ctBrowse.manifest"
      "resources/resource.rc"
      ${${PROJECT_NAME}_VERSION_RESOURCE}

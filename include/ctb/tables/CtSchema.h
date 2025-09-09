@@ -59,7 +59,6 @@ namespace ctb
 
       // Specific to Pending Wines table
       PendingOrderNumber,
-      PendingPrice,
       PendingOrderDate,
       PendingOrderQty,
       PendingStoreName,

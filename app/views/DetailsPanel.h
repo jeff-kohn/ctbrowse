@@ -61,6 +61,7 @@ namespace ctb::app
          LinkOpenWineDetails,
          LinkReadyToDrink,
          Location,
+         MyPrice,
          Pending,
          Score,
          Size,

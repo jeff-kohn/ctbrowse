@@ -50,7 +50,7 @@ namespace ctb
          { Prop::QtyPending,             FieldSchema { Prop::QtyPending,            PropType::UInt16,     11 }},
          { Prop::Size,                   FieldSchema { Prop::Size,                  PropType::String,     14 }},
          { Prop::Currency,               FieldSchema { Prop::Currency,              PropType::String,      5 }},
-         { Prop::PendingPrice,           FieldSchema { Prop::PendingPrice,          PropType::Double,      7 }},
+         { Prop::MyPrice     ,           FieldSchema { Prop::MyPrice,               PropType::Double,      7 }},
          { Prop::PendingPurchaseId,      FieldSchema { Prop::PendingPurchaseId,     PropType::String,      1 }},
          { Prop::PendingStoreName,       FieldSchema { Prop::PendingStoreName,      PropType::String,      4 }},
          { Prop::PendingOrderNumber,     FieldSchema { Prop::PendingOrderNumber,    PropType::String,     12 }},
@@ -67,7 +67,7 @@ namespace ctb
          CtListColumn{ Prop::PendingOrderDate,    CtListColumn::Format::Date,     constants::DISPLAY_COL_PURCH_DATE },
          CtListColumn{ Prop::Size,                CtListColumn::Format::String,   constants::FILTER_BOTTLE_SIZE, ListColumn::Align::Right, ListColumn::Align::Center },
          CtListColumn{ Prop::PendingOrderQty,     CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY        },
-         CtListColumn{ Prop::PendingPrice,        CtListColumn::Format::Currency, constants::DISPLAY_COL_PRICE      },
+         CtListColumn{ Prop::MyPrice,             CtListColumn::Format::Currency, constants::DISPLAY_COL_PRICE      },
       };
 
       /// @brief the available sort orders for this table.

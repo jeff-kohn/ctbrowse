@@ -37,15 +37,13 @@ namespace ctb::app
 
    void CtDataViewModel::GetValueByRow(wxVariant& variant, unsigned row, unsigned col) const 
    {
-
-#if !defined(NDEBUG)
-      if ( row >= m_dataset->rowCount() or col >= std::ssize(m_dataset->listColumns()) )
+      auto row_count = m_dataset->rowCount();
+      auto col_count = std::ssize(m_dataset->listColumns());
+      if ( row >= row_count or col >= col_count)
       {
-         SPDLOG_DEBUG("CtDataViewModel::GetValueByRow() called with invalid coordinates.");
-         assert(false);
+         SPDLOG_DEBUG("CtDataViewModel::GetValueByRow() called with invalid coordinates {} (max {}), {} (max{}).", row, row_count, col, col_count);
          return;
       }
-#endif
       const auto& list_col = m_dataset->listColumns()[col];
 
       // format as string and return it to caller

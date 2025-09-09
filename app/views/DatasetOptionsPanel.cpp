@@ -9,9 +9,9 @@
 #include "views/DatasetOptionsPanel.h"
 #include "views/FilterCheckBox.h" 
 #include "views/MultiValueFilterTree.h"
-#include "wx_helpers.h"
-
+#include "views/SpinDoubleFilterCtrl.h"
 #include "model/CtDatasetOptions.h"
+#include "wx_helpers.h"
 
 #include <ctb/utility_chrono.h>
 
@@ -26,7 +26,7 @@
 #include <wx/stattext.h>
 #include <wx/sizer.h>
 #include <wx/valgen.h>
-#include <wx/wupdlock.h>
+#include <wx/slider.h>
 
 #include <string>
 #include <string_view>
@@ -141,12 +141,9 @@ namespace ctb::app
 
       // event bindings.
       m_sort_combo->Bind(wxEVT_CHOICE, &DatasetOptionsPanel::onSortSelection, this);
-      m_score_spin_ctrl->Bind(wxEVT_SPINCTRLDOUBLE, &DatasetOptionsPanel::onMinScoreChanged,  this);
-      m_score_spin_ctrl->Bind(wxEVT_UPDATE_UI,      &DatasetOptionsPanel::onMinScoreUpdateUI, this);    
-      opt_ascending->Bind( wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
-      opt_descending->Bind(wxEVT_RADIOBUTTON, &DatasetOptionsPanel::onSortOrderClicked, this);
+      opt_ascending->Bind( wxEVT_RADIOBUTTON,   &DatasetOptionsPanel::onSortOrderClicked, this);
+      opt_descending->Bind(wxEVT_RADIOBUTTON,   &DatasetOptionsPanel::onSortOrderClicked, this);
       m_filter_checkboxes[ControlCategory::InStockFilter     ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterInStockChecked,      this);
-      m_filter_checkboxes[ControlCategory::MinScoreFilter    ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterMinScoreChecked,     this);     
       m_filter_checkboxes[ControlCategory::ReadyToDrinkFilter]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterReadyToDrinkChecked, this);     
    }
 
@@ -157,44 +154,65 @@ namespace ctb::app
       using enum ControlCategory;
       using namespace ctb::constants;
 
-      // in-stock filter
-      m_filter_checkboxes[InStockFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_IN_STOCK_ONLY, { QtyOnHand }, uint16_t{0}, CtPropFilterPredicate{ CtPredicateType::Greater } }};
-      parent->Add(m_filter_checkboxes[InStockFilter], wxSizerFlags().Border(wxALL));
+      // ready-to-drink filter, matches if any formula  besides "fast" calculates RTD >= 0, only shows for RTD view
+      auto props = { RtdQtyDefault, RtdQtyLinear, RtdQtyBellCurve, RtdQtyEarlyCurve, RtdQtyLateCurve, RtdQtyFastMaturing, RtdQtyEarlyAndLate, RtdQtyBottlesPerYear, };
+      m_filter_checkboxes[ReadyToDrinkFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_READY_TO_DRINK, props, FILTER_AVAILABLE_MIN_QTY, CtPropFilterPredicate{ CtPredicateType::GreaterEqual } } };
+      parent->Add(m_filter_checkboxes[ReadyToDrinkFilter], wxSizerFlags().Border(wxALL));
+      parent->AddSpacer(4);
 
-      // embedded sizer to place score spin-ctrl next to checkbox
-      auto* min_score_sizer = new wxBoxSizer(wxHORIZONTAL);
+      // in-stock filter
+      m_filter_checkboxes[InStockFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_IN_STOCK_ONLY, { QtyOnHand }, uint16_t{0}, CtPropFilterPredicate{ CtPredicateType::Greater } } };
+      parent->Add(m_filter_checkboxes[InStockFilter], wxSizerFlags().Border(wxALL));
+      parent->AddSpacer(2);
 
       // min-score filter checkbox
-      m_filter_checkboxes[MinScoreFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_MIN_SCORE, { CtScore, MyScore }, FILTER_SCORE_DEFAULT, CtPropFilterPredicate{ CtPredicateType::GreaterEqual } }};
-      min_score_sizer->Add(m_filter_checkboxes[MinScoreFilter], wxSizerFlags{}.Center().Border(wxLEFT|wxTOP|wxBOTTOM));
-
-      //  min-score filter spin-ctrl
-      m_score_spin_ctrl = new wxSpinCtrlDouble
-      {
-         parent->GetStaticBox(),
-         wxID_ANY,
-         wxEmptyString, wxDefaultPosition, wxDefaultSize, 
-         wxSP_ARROW_KEYS | wxALIGN_RIGHT, 
-         FILTER_SCORE_MIN,     FILTER_SCORE_MAX, 
-         FILTER_SCORE_DEFAULT, FILTER_SCORE_INCR
+      auto score_params = SpinDoubleFilterCtrl::SpinParams{
+         .min_value = FILTER_SCORE_MIN, 
+         .max_value = FILTER_SCORE_MAX,
+         .increment = FILTER_SCORE_INCR,
+         .default_value = FILTER_SCORE_DEFAULT,
+         .decimal_places = FILTER_SCORE_DIGITS,
       };
-      m_score_spin_ctrl->SetDigits(FILTER_SCORE_DIGITS);
-      m_score_spin_ctrl->Enable(false);
-      min_score_sizer->Add(m_score_spin_ctrl, wxSizerFlags{}.Border(wxRIGHT|wxTOP|wxBOTTOM));
+      auto score_filter = CtPropertyFilter{
+         LBL_CHECK_MIN_SCORE,
+         { CtScore, MyScore },
+         score_params.default_value,
+         CtPropFilterPredicate{ CtPredicateType::GreaterEqual }
+      };
+      m_min_score_filter_ctrl = SpinDoubleFilterCtrl::create(*(parent->GetStaticBox()), m_sink.getSource(), score_filter, score_params);
+      parent->Add(m_min_score_filter_ctrl, wxSizerFlags{}.Expand().Border(wxALL));
 
-      // add embedded sizer to parent
-      parent->Add(min_score_sizer, wxSizerFlags{});
+      // min price filter checkbox
+      auto price_params = SpinDoubleFilterCtrl::SpinParams{
+         .min_value      = 0, 
+         .max_value      = FILTER_PRICE_MAX,
+         .increment      = FILTER_PRICE_INCREMENT,
+         .default_value  = FILTER_MIN_PRICE_DEFAULT,
+         .decimal_places = 0,
+      };
+      auto price_filter = CtPropertyFilter{
+         LBL_CHECK_MIN_PRICE,
+         { MyPrice },
+         price_params.default_value,
+         CtPropFilterPredicate{ CtPredicateType::GreaterEqual }
+      };
+      m_min_price_filter_ctrl = SpinDoubleFilterCtrl::create(*(parent->GetStaticBox()), m_sink.getSource(), price_filter, price_params);
+      parent->Add(m_min_price_filter_ctrl, wxSizerFlags{}.Expand().Border(wxALL));
 
-      // ready-to-drink filter, matches if any formula calculates RTD >= 0;
-      auto props = { RtdQtyDefault, RtdQtyLinear, RtdQtyBellCurve, RtdQtyEarlyCurve, RtdQtyLateCurve, RtdQtyFastMaturing, RtdQtyEarlyAndLate, RtdQtyBottlesPerYear, };
-      m_filter_checkboxes[ReadyToDrinkFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_READY_TO_DRINK, props, FILTER_AVAILABLE_MIN_QTY, CtPropFilterPredicate{ CtPredicateType::GreaterEqual } }};
-      parent->Add(m_filter_checkboxes[ReadyToDrinkFilter], wxSizerFlags().Border(wxALL));
+      // max price filter checkbox
+      price_params.default_value = FILTER_MAX_PRICE_DEFAULT;
+      price_filter.compare_pred  = CtPropFilterPredicate{ CtPredicateType::LessEqual };
+      price_filter.compare_val   = price_params.default_value;
+      price_filter.filter_name   = LBL_CHECK_MAX_PRICE;
+      m_max_price_filter_ctrl    = SpinDoubleFilterCtrl::create(*(parent->GetStaticBox()), m_sink.getSource(), price_filter, price_params);
+      parent->Add(m_max_price_filter_ctrl, wxSizerFlags{}.Expand().Border(wxALL));
 
       // categorize controls so we can show/hide as appropriate.
-      m_categorized.addControlDependency(ControlCategory::InStockFilter,      m_filter_checkboxes[InStockFilter ]    );
-      m_categorized.addControlDependency(ControlCategory::MinScoreFilter,     m_filter_checkboxes[MinScoreFilter]    );
-      m_categorized.addControlDependency(ControlCategory::MinScoreFilter,     m_score_spin_ctrl                      );
-      m_categorized.addControlDependency(ControlCategory::ReadyToDrinkFilter, m_filter_checkboxes[ReadyToDrinkFilter]);
+      m_categorized.addControlDependency(ControlCategory::InStockFilter,      m_filter_checkboxes[InStockFilter ]     );
+      m_categorized.addControlDependency(ControlCategory::MaxPriceFilter,     m_max_price_filter_ctrl                 );
+      m_categorized.addControlDependency(ControlCategory::MinPriceFilter,     m_min_price_filter_ctrl                 );
+      m_categorized.addControlDependency(ControlCategory::MinScoreFilter,     m_min_score_filter_ctrl                 );
+      m_categorized.addControlDependency(ControlCategory::ReadyToDrinkFilter, m_filter_checkboxes[ReadyToDrinkFilter] );
    }
 
 
@@ -256,6 +274,9 @@ namespace ctb::app
       m_categorized.showCategory(ControlCategory::InStockFilter,      dataset->hasProperty(CtProp::QtyTotal     ));
       m_categorized.showCategory(ControlCategory::MinScoreFilter,     dataset->hasProperty(CtProp::CtScore      ));
       m_categorized.showCategory(ControlCategory::ReadyToDrinkFilter, dataset->hasProperty(CtProp::RtdQtyDefault));
+      m_categorized.showCategory(ControlCategory::MinPriceFilter,     dataset->hasProperty(CtProp::MyPrice      ));
+      m_categorized.showCategory(ControlCategory::MaxPriceFilter,     dataset->hasProperty(CtProp::MyPrice      ));
+      
       for (auto* check_box : vws::values(m_filter_checkboxes))
       {
          auto&& filter = dataset->propFilters().getFilter(check_box->filter().filter_name);
@@ -317,47 +338,12 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onFilterMinScoreChecked([[maybe_unused]] wxCommandEvent& event)
-   {
-      onFilterChecked(ControlCategory::MinScoreFilter);
-   }
-
-
    void DatasetOptionsPanel::onFilterReadyToDrinkChecked([[maybe_unused]] wxCommandEvent& event)
    {
       onFilterChecked(ControlCategory::ReadyToDrinkFilter);
    }
 
-
-   void DatasetOptionsPanel::onMinScoreChanged([[maybe_unused]] wxSpinDoubleEvent& event)
-   {
-      try
-      {
-         auto dataset = m_sink.getDatasetOrThrow();
-         TransferDataFromWindow();
-
-         auto* checkbox = m_filter_checkboxes[ControlCategory::MinScoreFilter];
-         auto& filter = checkbox->filter();
-         filter.compare_val = event.GetValue();
-         if (checkbox->enabled())
-         {
-            dataset->propFilters().replaceFilter(filter.filter_name, filter);
-            m_sink.signal_source(DatasetEvent::Id::Filter, false);
-         }
-      }
-      catch (...) {
-         wxGetApp().displayErrorMessage(packageError(), true);
-      }
-   }
-
-
-   void DatasetOptionsPanel::onMinScoreUpdateUI(wxUpdateUIEvent& event)
-   {
-      TransferDataFromWindow();
-      event.Enable(m_filter_checkboxes[ControlCategory::MinScoreFilter]->enabled());
-   }
-
-
+   
    void DatasetOptionsPanel::onSortOrderClicked([[maybe_unused]] wxCommandEvent& event)
    {
       try

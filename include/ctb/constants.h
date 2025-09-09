@@ -178,12 +178,6 @@ namespace ctb::constants
 
    inline constexpr auto     ONE_MB                               = 1024 * 1024;
    inline constexpr uint16_t CT_NULL_YEAR                         =        9999;
-   inline constexpr double   FILTER_SCORE_DEFAULT                 =        90.0;
-   inline constexpr double   FILTER_SCORE_INCR                    =         0.1;
-   inline constexpr double   FILTER_SCORE_MIN                     =          50;
-   inline constexpr double   FILTER_SCORE_MAX                     =       100.0;
-   inline constexpr int      FILTER_SCORE_DIGITS                  =           1;
-   inline constexpr double   FILTER_AVAILABLE_MIN_QTY             =       0.999;
 
 
 } // namespace ctb::constants

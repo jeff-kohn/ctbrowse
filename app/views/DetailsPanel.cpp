@@ -253,8 +253,8 @@ namespace ctb::app
       auto* my_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       my_price_val->SetValidator(wxGenericValidator{ &m_details.my_price });
       details_sizer->Add(my_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
-      m_category_controls.addControlDependency(Valuation, my_price_lbl);
-      m_category_controls.addControlDependency(Valuation, my_price_val);
+      m_category_controls.addControlDependency(MyPrice, my_price_lbl);
+      m_category_controls.addControlDependency(MyPrice, my_price_val);
 
       // Community Avg
       auto* ct_price_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_CT_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -476,7 +476,7 @@ namespace ctb::app
          m_details.pending_delivery_date = dataset->getProperty(rec_idx, CtProp::PendingDeliveryDate ).asString(constants::FMT_DATE_SHORT);
          m_details.pending_store_name    = dataset->getProperty(rec_idx, CtProp::PendingStoreName    ).asString();
          m_details.pending_qty           = dataset->getProperty(rec_idx, CtProp::PendingOrderQty     ).asString();
-         m_details.pending_price         = dataset->getProperty(rec_idx, CtProp::PendingPrice        ).asString(constants::FMT_NUMBER_CURRENCY);
+         m_details.pending_price         = dataset->getProperty(rec_idx, CtProp::MyPrice             ).asString(constants::FMT_NUMBER_CURRENCY);
 
          // show everything since detail panel may be blank if no record was selected previously...
          GetSizer()->ShowItems(true); 
@@ -536,8 +536,8 @@ namespace ctb::app
       m_category_controls.showCategory(DrinkWindow,   dataset->hasProperty(CtProp::BeginConsume));
       m_category_controls.showCategory(Location,      dataset->hasProperty(CtProp::Location));
       m_category_controls.showCategory(Pending,       dataset->hasProperty(CtProp::PendingPurchaseId));
-      m_category_controls.showCategory(Score,         dataset->hasProperty(CtProp::CtScore));
-      m_category_controls.showCategory(Size,          dataset->hasProperty(CtProp::Size));
+      m_category_controls.showCategory(Score,         dataset->hasProperty(CtProp::MyScore));
+      m_category_controls.showCategory(MyPrice,       dataset->hasProperty(CtProp::MyPrice));
       m_category_controls.showCategory(Valuation,     dataset->hasProperty(CtProp::CtPrice));
 
       if (dataset->hasProperty(CtProp::CtBeginConsume))

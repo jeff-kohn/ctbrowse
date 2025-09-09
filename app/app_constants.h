@@ -96,11 +96,25 @@ namespace ctb::constants
    inline constexpr const char* ERROR_USER_CANCELED               = "User canceled operation.";
    inline constexpr const char* NO_SCORE                          = " --";
    
+   /// Checkbox filter-related labels and values
+   inline constexpr int      FILTER_MIN_PRICE_DEFAULT             =          10;
+   inline constexpr int      FILTER_MAX_PRICE_DEFAULT             =         100;
+   inline constexpr int      FILTER_PRICE_MAX                     =         500;
+   inline constexpr int      FILTER_PRICE_INCREMENT               =          10;
+   inline constexpr double   FILTER_SCORE_DEFAULT                 =        90.0;
+   inline constexpr double   FILTER_SCORE_INCR                    =         0.1;
+   inline constexpr double   FILTER_SCORE_MIN                     =          50;
+   inline constexpr double   FILTER_SCORE_MAX                     =       100.0;
+   inline constexpr int      FILTER_SCORE_DIGITS                  =           1;
+   inline constexpr double   FILTER_AVAILABLE_MIN_QTY             =       0.999;
+
    // DetailsPanel labels
    inline constexpr const char* LBL_APPELLATION                   = "Appellation:";
    inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";
-   inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only Show In-Stock Wines";
-   inline constexpr const char* LBL_CHECK_MIN_SCORE               = "Minimum Score:";
+   inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only In-Stock Wines";
+   inline constexpr const char* LBL_CHECK_MAX_PRICE               = "Only Priced Below:";
+   inline constexpr const char* LBL_CHECK_MIN_PRICE               = "Only Priced Above:";
+   inline constexpr const char* LBL_CHECK_MIN_SCORE               = "Only with Score Above:";
    inline constexpr const char* LBL_CHECK_READY_TO_DRINK          = "Only Show 'Ready' Wines";
    inline constexpr const char* LBL_CONSUME_DATE                  = "Consumed On:";
    inline constexpr const char* LBL_CONSUME_REASON                = "Reason:";

@@ -19,7 +19,7 @@ namespace ctb
 
    /// @brief A single-threaded default implementation of IDatasetEventSource interface
    ///
-   /// Sinks should handle their own exceptions if possible; any exceptions caught by this 
+   /// Sinks should handle their own exceptions in notify() if possible; any exceptions caught by this 
    /// class while sending notifications will be logged in debug builds but otherwise lost.
    ///
    /// This implementation is not thread-safe, since we're using it with UI classes that must
