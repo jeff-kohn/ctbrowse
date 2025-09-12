@@ -60,6 +60,7 @@ namespace ctb::app
          ReadyToDrinkFilter,
          MinPriceFilter,
          MaxPriceFilter,
+         WithRemainingFilter, // for purchase history, will only show wines with bottles still remaining.
       };
       using CategorizedControls = CategorizedControls<ControlCategory>;         // show/hide controls based on dataset context
       using FilterCheckboxes    = std::map<ControlCategory, FilterCheckBox* >;  // checkbox controls for each of the check filters (see ControlCategory enum)
@@ -97,6 +98,7 @@ namespace ctb::app
       void onFilterChecked(ControlCategory cat);
       void onFilterInStockChecked(wxCommandEvent& event);
       void onFilterReadyToDrinkChecked(wxCommandEvent& event);
+      void onFilterWithRemainingChecked(wxCommandEvent& event);
       void onSortOrderClicked(wxCommandEvent& event);
       void onSortSelection(wxCommandEvent& event);
 

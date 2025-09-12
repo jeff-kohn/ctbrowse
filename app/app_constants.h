@@ -114,6 +114,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_APPELLATION                   = "Appellation:";
    inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";
    inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only In-Stock Wines";
+   inline constexpr const char* LBL_CHECK_WITH_REMAINING          = "Only Show Remaining Bottles";
    inline constexpr const char* LBL_CHECK_MAX_PRICE               = "Only Priced Below:";
    inline constexpr const char* LBL_CHECK_MIN_PRICE               = "Only Priced Above:";
    inline constexpr const char* LBL_CHECK_MIN_SCORE               = "Only with Score Above:";

@@ -135,7 +135,7 @@ namespace ctb
             case TableId::Purchase:
             {
                auto wines         = getDistinctValues(CtProp::WineAndVintage, true).size();
-               auto bottles_total = foldValues(CtProp::PurchaseQtyOrdered, int32_t{}, std::plus{});
+               auto bottles_total = foldValues(CtProp::PurchaseQtyOrdered,   int32_t{}, std::plus{});
                auto bottles_left  = foldValues(CtProp::PurchaseQtyRemaining, int32_t{}, std::plus{});
                result = ctb::format(constants::FMT_SUMMARY_PURCHASED, wines, bottles_total, bottles_left);
                break;

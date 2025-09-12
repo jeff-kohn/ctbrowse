@@ -143,8 +143,9 @@ namespace ctb::app
       m_sort_combo->Bind(wxEVT_CHOICE, &DatasetOptionsPanel::onSortSelection, this);
       opt_ascending->Bind( wxEVT_RADIOBUTTON,   &DatasetOptionsPanel::onSortOrderClicked, this);
       opt_descending->Bind(wxEVT_RADIOBUTTON,   &DatasetOptionsPanel::onSortOrderClicked, this);
-      m_filter_checkboxes[ControlCategory::InStockFilter     ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterInStockChecked,      this);
-      m_filter_checkboxes[ControlCategory::ReadyToDrinkFilter]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterReadyToDrinkChecked, this);     
+      m_filter_checkboxes[ControlCategory::InStockFilter      ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterInStockChecked,       this);
+      m_filter_checkboxes[ControlCategory::ReadyToDrinkFilter ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterReadyToDrinkChecked,  this);     
+      m_filter_checkboxes[ControlCategory::WithRemainingFilter]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterWithRemainingChecked, this);
    }
 
 
@@ -163,6 +164,12 @@ namespace ctb::app
       // in-stock filter
       m_filter_checkboxes[InStockFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_IN_STOCK_ONLY, { QtyOnHand }, uint16_t{0}, CtPropFilterPredicate{ CtPredicateType::Greater } } };
       parent->Add(m_filter_checkboxes[InStockFilter], wxSizerFlags().Border(wxALL));
+      parent->AddSpacer(2);
+
+
+      // 'remaining bottles' filter
+      m_filter_checkboxes[WithRemainingFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_WITH_REMAINING, { PurchaseQtyRemaining }, uint16_t{0}, CtPropFilterPredicate{ CtPredicateType::Greater } } };
+      parent->Add(m_filter_checkboxes[WithRemainingFilter], wxSizerFlags().Border(wxALL));
       parent->AddSpacer(2);
 
       // min-score filter checkbox
@@ -208,11 +215,13 @@ namespace ctb::app
       parent->Add(m_max_price_filter_ctrl, wxSizerFlags{}.Expand().Border(wxALL));
 
       // categorize controls so we can show/hide as appropriate.
-      m_categorized.addControlDependency(ControlCategory::InStockFilter,      m_filter_checkboxes[InStockFilter ]     );
-      m_categorized.addControlDependency(ControlCategory::MaxPriceFilter,     m_max_price_filter_ctrl                 );
-      m_categorized.addControlDependency(ControlCategory::MinPriceFilter,     m_min_price_filter_ctrl                 );
-      m_categorized.addControlDependency(ControlCategory::MinScoreFilter,     m_min_score_filter_ctrl                 );
-      m_categorized.addControlDependency(ControlCategory::ReadyToDrinkFilter, m_filter_checkboxes[ReadyToDrinkFilter] );
+      m_categorized.addControlDependency(ControlCategory::InStockFilter,       m_filter_checkboxes[InStockFilter ]     );
+      m_categorized.addControlDependency(ControlCategory::MaxPriceFilter,      m_max_price_filter_ctrl                 );
+      m_categorized.addControlDependency(ControlCategory::MinPriceFilter,      m_min_price_filter_ctrl                 );
+      m_categorized.addControlDependency(ControlCategory::MinScoreFilter,      m_min_score_filter_ctrl                 );
+      m_categorized.addControlDependency(ControlCategory::ReadyToDrinkFilter,  m_filter_checkboxes[ReadyToDrinkFilter] );
+      m_categorized.addControlDependency(ControlCategory::WithRemainingFilter, m_filter_checkboxes[WithRemainingFilter]);
+
    }
 
 
@@ -271,11 +280,12 @@ namespace ctb::app
       setTitle();
 
       // show/hide/initialize filter checkboxes
-      m_categorized.showCategory(ControlCategory::InStockFilter,      dataset->hasProperty(CtProp::QtyTotal     ));
-      m_categorized.showCategory(ControlCategory::MaxPriceFilter,     dataset->hasProperty(CtProp::MyPrice      ));
-      m_categorized.showCategory(ControlCategory::MinPriceFilter,     dataset->hasProperty(CtProp::MyPrice      ));
-      m_categorized.showCategory(ControlCategory::MinScoreFilter,     dataset->hasProperty(CtProp::CtScore      ));
-      m_categorized.showCategory(ControlCategory::ReadyToDrinkFilter, dataset->hasProperty(CtProp::RtdQtyDefault));
+      m_categorized.showCategory(ControlCategory::InStockFilter,       dataset->hasProperty(CtProp::QtyTotal            ));
+      m_categorized.showCategory(ControlCategory::MaxPriceFilter,      dataset->hasProperty(CtProp::MyPrice             ));
+      m_categorized.showCategory(ControlCategory::MinPriceFilter,      dataset->hasProperty(CtProp::MyPrice             ));
+      m_categorized.showCategory(ControlCategory::MinScoreFilter,      dataset->hasProperty(CtProp::CtScore             ));
+      m_categorized.showCategory(ControlCategory::ReadyToDrinkFilter,  dataset->hasProperty(CtProp::RtdQtyDefault       ));
+      m_categorized.showCategory(ControlCategory::WithRemainingFilter, dataset->hasProperty(CtProp::PurchaseQtyRemaining));
       
       for (auto* check_box : vws::values(m_filter_checkboxes))
       {
@@ -341,7 +351,13 @@ namespace ctb::app
       onFilterChecked(ControlCategory::ReadyToDrinkFilter);
    }
 
-   
+
+   void DatasetOptionsPanel::onFilterWithRemainingChecked([[maybe_unused]] wxCommandEvent& event)
+   {
+      onFilterChecked(ControlCategory::WithRemainingFilter);
+   }
+
+
    void DatasetOptionsPanel::onSortOrderClicked([[maybe_unused]] wxCommandEvent& event)
    {
       try
