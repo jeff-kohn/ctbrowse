@@ -50,7 +50,7 @@ namespace ctb
          { Prop::QtyPending,             FieldSchema { Prop::QtyPending,            PropType::UInt16,     11 }},
          { Prop::Size,                   FieldSchema { Prop::Size,                  PropType::String,     14 }},
          { Prop::Currency,               FieldSchema { Prop::Currency,              PropType::String,      5 }},
-         { Prop::MyPrice     ,           FieldSchema { Prop::MyPrice,               PropType::Double,      7 }},
+         { Prop::MyPrice,                FieldSchema { Prop::MyPrice,               PropType::Double,      7 }},
          { Prop::PendingPurchaseId,      FieldSchema { Prop::PendingPurchaseId,     PropType::String,      1 }},
          { Prop::PendingStoreName,       FieldSchema { Prop::PendingStoreName,      PropType::String,      4 }},
          { Prop::PendingOrderNumber,     FieldSchema { Prop::PendingOrderNumber,    PropType::String,     12 }},

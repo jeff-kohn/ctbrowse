@@ -36,6 +36,7 @@ target_sources(ctBrowse_lib
       "../include/ctb/tables/ConsumedWineTraits.h"
       "../include/ctb/tables/CtSchema.h"
       "../include/ctb/tables/PendingWineTraits.h"
+      "../include/ctb/tables/PurchasedWineTraits.h"
       "../include/ctb/tables/ReadyToDrinkTraits.h"
       "../include/ctb/tables/WineListTraits.h"
 

@@ -439,7 +439,7 @@ namespace ctb::app
          auto rec_idx = event.affected_row.value();
 
          // note that we try to grab all properties even though some of them won't be available in this dataset,
-         // but that's fine because we'll just get a null value if it's not available, so no need to check hasProperty()
+         // but that's fine because we'll just get a null value if it's not available - no need to check hasProperty()
 
          m_details.wine_id        = dataset->getProperty(rec_idx, CtProp::iWineId       ).asString();
          m_details.wine_name      = dataset->getProperty(rec_idx, CtProp::WineName      ).asString();
@@ -552,7 +552,7 @@ namespace ctb::app
       // Command-Link buttons
       auto table_id = dataset->getTableId();
       m_category_controls.showCategory(LinkAcceptPending,   table_id == TableId::Pending);
-      m_category_controls.showCategory(LinkOpenWineDetails, table_id == TableId::List or table_id == TableId::Consumed);
+      m_category_controls.showCategory(LinkOpenWineDetails, table_id == TableId::List or table_id == TableId::Consumed or table_id == TableId::Purchase);
       m_category_controls.showCategory(LinkReadyToDrink,    table_id == TableId::Availability);
    }
 

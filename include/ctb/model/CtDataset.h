@@ -90,8 +90,11 @@ namespace ctb
       /// @brief Retrieves a short text summary of the data in the table
       auto getDataSummary() const -> std::string override
       {
+         std::string result{ constants::SUMMARY_EMPTY };
          if (m_current_view->empty())
-            return {};
+         {
+            return result;
+         }
 
          switch (getTableId())
          {
@@ -99,25 +102,27 @@ namespace ctb
             {
                auto wines   = rowCount(true);
                auto bottles = foldValues(CtProp::RtdQtyDefault, int32_t{}, std::plus{});
-               return ctb::format(constants::FMT_SUMMARY_AVAILABILITY, wines, bottles);
+               result = ctb::format(constants::FMT_SUMMARY_AVAILABILITY, wines, bottles);
+               break;
             }
             case TableId::Pending:
             {
                auto wines   = rowCount(true);
                auto stores  = getDistinctValues(CtProp::PendingStoreName, true).size();
                auto bottles = foldValues(CtProp::QtyPending, int32_t{}, std::plus{});
-               return ctb::format(constants::FMT_SUMMARY_PENDING, wines, stores, bottles);
+               result = ctb::format(constants::FMT_SUMMARY_PENDING, wines, stores, bottles);
+               break;
             }
             case TableId::List:
             {
                auto wines    = rowCount(true);
                auto on_hand  = foldValues(CtProp::QtyOnHand,  int32_t{}, std::plus{});
                auto on_order = foldValues(CtProp::QtyPending, int32_t{}, std::plus{});
-               return ctb::format(constants::FMT_SUMMARY_MY_CELLAR, wines, on_hand, on_order);
+               result = ctb::format(constants::FMT_SUMMARY_MY_CELLAR, wines, on_hand, on_order);
+               break;
             }
             case TableId::Consumed:
             {
-               std::string result{ constants::SUMMARY_EMPTY };
                auto wine_count = rowCount(true);
                if (wine_count)
                {
@@ -125,11 +130,20 @@ namespace ctb
                   auto first_year = getDistinctValues(CtProp::ConsumeYear, true).begin()->asUInt16().value_or(0);
                   result = ctb::format(constants::FMT_SUMMARY_CONSUMED, wine_count, first_year);
                }
-               return result;
+               break;
+            }
+            case TableId::Purchase:
+            {
+               auto wines         = getDistinctValues(CtProp::WineAndVintage, true).size();
+               auto bottles_total = foldValues(CtProp::PurchaseQtyOrdered, int32_t{}, std::plus{});
+               auto bottles_left  = foldValues(CtProp::PurchaseQtyRemaining, int32_t{}, std::plus{});
+               result = ctb::format(constants::FMT_SUMMARY_PURCHASED, wines, bottles_total, bottles_left);
+               break;
             }
             default:
-               return {};
+               assert(false);
          }
+         return result;
       }
 
       /// @brief Retrieves the schema information for a specified property.

@@ -33,38 +33,55 @@ namespace ctb
       using TableSort        = detail::TableSorter<CtProp, CtPropertyMap>;
 
       static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
-         {
-            { Prop::iWineId,                FieldSchema { Prop::iWineId,               PropType::String,      0 }},
-            { Prop::WineName,               FieldSchema { Prop::WineName,              PropType::String,     17 }},
-            { Prop::Locale,                 FieldSchema { Prop::Locale,                PropType::String,     19 }},
-            { Prop::Vintage,                FieldSchema { Prop::Vintage,               PropType::UInt16,     16 }},
-            { Prop::Producer,               FieldSchema { Prop::Producer,              PropType::String,     23 }},
-            { Prop::Country,                FieldSchema { Prop::Country,               PropType::String,     28 }},
-            { Prop::Region,                 FieldSchema { Prop::Region,                PropType::String,     29 }},
-            { Prop::SubRegion,              FieldSchema { Prop::SubRegion,             PropType::String,     30 }},
-            { Prop::Appellation,            FieldSchema { Prop::Appellation,           PropType::String,     31 }},
-            { Prop::Color,                  FieldSchema { Prop::Color,                 PropType::String,     21 }},
-            { Prop::Category,               FieldSchema { Prop::Category,              PropType::String,     22 }},
-            { Prop::Varietal,               FieldSchema { Prop::Varietal,              PropType::String,     25 }},
-            { Prop::Size,                   FieldSchema { Prop::Size,                  PropType::String,     14 }},
-            { Prop::Currency,               FieldSchema { Prop::Currency,              PropType::String,      5 }},
-            { Prop::WineAndVintage,         FieldSchema { Prop::WineAndVintage,        PropType::String,     {} }},
-         });
+      {
+         { Prop::iWineId,                FieldSchema { Prop::iWineId,               PropType::String,      0 }},
+         { Prop::WineName,               FieldSchema { Prop::WineName,              PropType::String,     17 }},
+         { Prop::Locale,                 FieldSchema { Prop::Locale,                PropType::String,     19 }},
+         { Prop::Vintage,                FieldSchema { Prop::Vintage,               PropType::UInt16,     16 }},
+         { Prop::Producer,               FieldSchema { Prop::Producer,              PropType::String,     23 }},
+         { Prop::Country,                FieldSchema { Prop::Country,               PropType::String,     28 }},
+         { Prop::Region,                 FieldSchema { Prop::Region,                PropType::String,     29 }},
+         { Prop::SubRegion,              FieldSchema { Prop::SubRegion,             PropType::String,     30 }},
+         { Prop::Appellation,            FieldSchema { Prop::Appellation,           PropType::String,     31 }},
+         { Prop::Color,                  FieldSchema { Prop::Color,                 PropType::String,     21 }},
+         { Prop::Category,               FieldSchema { Prop::Category,              PropType::String,     22 }},
+         { Prop::Varietal,               FieldSchema { Prop::Varietal,              PropType::String,     25 }},
+         { Prop::Size,                   FieldSchema { Prop::Size,                  PropType::String,     14 }},
+         { Prop::MyPrice,                FieldSchema { Prop::MyPrice,               PropType::Double,      7 }},
+         { Prop::Currency,               FieldSchema { Prop::Currency,              PropType::String,      5 }},
+         { Prop::PendingPurchaseId,      FieldSchema { Prop::PendingPurchaseId,     PropType::String,      1 }},
+         { Prop::PendingStoreName,       FieldSchema { Prop::PendingStoreName,      PropType::String,      4 }},
+         { Prop::PendingOrderNumber,     FieldSchema { Prop::PendingOrderNumber,    PropType::String,     12 }},
+         { Prop::PendingOrderQty,        FieldSchema { Prop::PendingOrderQty,       PropType::UInt16,     10 }},
+         { Prop::PendingOrderDate,       FieldSchema { Prop::PendingOrderDate,      PropType::Date,        2 }},
+         { Prop::PendingDeliveryDate,    FieldSchema { Prop::PendingDeliveryDate,   PropType::Date,        3 }},
+         { Prop::PurchaseComplete,       FieldSchema { Prop::PurchaseComplete,      PropType::String,      3 }},
+         { Prop::PurchaseQtyOrdered,     FieldSchema { Prop::PurchaseQtyOrdered,    PropType::UInt16,     10 }},
+         { Prop::PurchaseQtyRemaining,   FieldSchema { Prop::PurchaseQtyRemaining,  PropType::UInt16,     11 }},
+         { Prop::WineAndVintage,         FieldSchema { Prop::WineAndVintage,        PropType::String,     {} }},
+      });
 
       /// @brief list of display columns that will show in the list view
       static inline const std::array DefaultListColumns { 
-         CtListColumn{ Prop::WineAndVintage,                                      constants::DISPLAY_COL_WINE       },
-         CtListColumn{ Prop::Size,                CtListColumn::Format::String,   constants::FILTER_BOTTLE_SIZE, ListColumn::Align::Right, ListColumn::Align::Center },
+         CtListColumn{ Prop::WineAndVintage,                                       constants::DISPLAY_COL_WINE       },
+         CtListColumn{ Prop::PendingStoreName,     CtListColumn::Format::String,   constants::DISPLAY_COL_STORE      },
+         CtListColumn{ Prop::PendingOrderDate,     CtListColumn::Format::Date,     constants::DISPLAY_COL_PURCH_DATE },
+         CtListColumn{ Prop::Size,                 CtListColumn::Format::String,   constants::FILTER_BOTTLE_SIZE, ListColumn::Align::Right, ListColumn::Align::Center },
+         CtListColumn{ Prop::PurchaseQtyRemaining, CtListColumn::Format::Number,   "Bottles Left"        },
       };
 
       /// @brief the available sort orders for this table.
       static inline const std::array AvailableSorts{ 
-         TableSort{ { Prop::WineName,            Prop::Vintage                  }, constants::SORT_OPTION_WINE_VINTAGE  },
-         TableSort{ { Prop::Vintage,             Prop::WineName                 }, constants::SORT_OPTION_VINTAGE_WINE  },
+         TableSort{ { Prop::PendingOrderDate,    Prop::WineName, Prop::Vintage  }, constants::SORT_OPTION_PURCHASE_DATE, true },
+         TableSort{ { Prop::WineName,            Prop::Vintage                  }, constants::SORT_OPTION_WINE_VINTAGE        },
+         TableSort{ { Prop::Vintage,             Prop::WineName                 }, constants::SORT_OPTION_VINTAGE_WINE        },
+         TableSort{ { Prop::PendingStoreName,    Prop::WineName, Prop::Vintage, }, constants::SORT_OPTION_STORE_NAME          },
       };
 
       /// @brief multi-value filters that can be used on this table.
       static inline const std::array MultiValueFilters{
+         MultiValueFilter{ Prop::PendingStoreName,  constants::FILTER_STORE       },
+         MultiValueFilter{ Prop::PendingOrderDate,  constants::FILTER_ORDER_DATE  },
          MultiValueFilter{ Prop::Varietal,          constants::FILTER_VARIETAL    },
          MultiValueFilter{ Prop::Vintage,           constants::FILTER_VINTAGE     },
          MultiValueFilter{ Prop::Country,           constants::FILTER_COUNTRY     },
@@ -116,6 +133,6 @@ namespace ctb
 
    };
 
-   using PendingWineTable = CtDataTable<PurchasedWineTraits>;
+   using PurchasedWineTable = CtDataTable<PurchasedWineTraits>;
 
 } // namespace ctb

@@ -90,6 +90,11 @@ namespace ctb
       BottleNote,
       Location,
       Bin,
+
+      // purchased wines table
+      PurchaseComplete,          // treated as string, contains "TRUE/FALSE"
+      PurchaseQtyOrdered,
+		PurchaseQtyRemaining,
    };
 
    

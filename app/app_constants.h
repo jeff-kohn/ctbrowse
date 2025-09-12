@@ -24,7 +24,7 @@ namespace ctb::constants
    inline constexpr const char* CMD_EDIT_REFRESH_DATA_TIP          = "Reload the current collection's data";
    inline constexpr const char* CMD_EDIT_CLEAR_FILTERS_LBL         = "Clear Filters";
    inline constexpr const char* CMD_EDIT_CLEAR_FILTERS_TIP         = "Remove all active data filters.";
-   inline constexpr const char* CMD_COLLECTION_CONSUMED_LBL        = "Wine &Consumed";
+   inline constexpr const char* CMD_COLLECTION_CONSUMED_LBL        = "&Consumed Wine History";
    inline constexpr const char* CMD_COLLECTION_CONSUMED_TIP        = "View Wine Consumption History";
    inline constexpr const char* CMD_COLLECTION_MY_CELLAR_LBL       = "Wine in &My Cellar\tCtrl+M";
    inline constexpr const char* CMD_COLLECTION_MY_CELLAR_TIP       = "View Personal Wine Collection";
@@ -32,6 +32,8 @@ namespace ctb::constants
    inline constexpr const char* CMD_COLLECTION_PENDING_WINE_TIP    = "View Pending Wine Deliveries";
    inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_LBL  = "Wine &Ready to Drink\tCtrl+D";
    inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_TIP  = "View Drinking Availability for Wines";
+   inline constexpr const char* CMD_COLLECTION_PURCHASED_WINE_LBL  = "Purchased Wine &History\tCtrl+H";
+   inline constexpr const char* CMD_COLLECTION_PURCHASED_WINE_TIP  = "View History of wines purchaes and orders";
    inline constexpr const char* CMD_ONLINE_WINE_DETAILS_LBL        = "View &Wine Details";
    inline constexpr const char* CMD_ONLINE_WINE_DETAILS_TIP        = "View the current wine's details on CellarTracker";
    inline constexpr const char* CMD_ONLINE_SEARCH_VINTAGES_LBL     = "Search All &Vintages";

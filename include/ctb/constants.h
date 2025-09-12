@@ -168,6 +168,7 @@ namespace ctb::constants
 
    inline constexpr const char* FMT_SUMMARY_AVAILABILITY          = "{} Wines with {} Bottles Ready to Drink (Default Formula)";
    inline constexpr const char* FMT_SUMMARY_CONSUMED              = "{} Wines Consumed Since {}";
+   inline constexpr const char* FMT_SUMMARY_PURCHASED             = "{} Wines, with {} Bottles Purchased and {} Bottles Remaining or Pending";
    inline constexpr const char* SUMMARY_EMPTY                     = "No data. Check filter options or download latest CellarTracker data.";
    inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, with {} Bottles Cellared and {} Pending Delivery";
    inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles";
@@ -175,6 +176,9 @@ namespace ctb::constants
    inline constexpr const char* LBL_SIZE_750ml                    = "750ml";
    inline constexpr const char* LBL_SIZE_375ml                    = "375ml";
    inline constexpr const char* LBL_SIZE_MAGNUM                   = "1.5L";
+
+	inline constexpr const char* VALUE_TRUE                        = "TRUE";  
+	inline constexpr const char* VALUE_FALSE                       = "FALSE";
 
    inline constexpr auto     ONE_MB                               = 1024 * 1024;
    inline constexpr uint16_t CT_NULL_YEAR                         =        9999;
