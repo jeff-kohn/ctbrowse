@@ -11,6 +11,8 @@
 #include "ctb/utility_chrono.h"
 #include "ctb/utility_templates.h"
 
+//#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <chrono>
 #include <optional>
 #include <string>
@@ -47,7 +49,7 @@ namespace ctb::detail
       /// @param text_value - The string_view to be converted and used to construct the PropertyValue.
       /// @return An PropertyValue containing the converted value if the conversion succeeds, or an empty 
       ///  PropertyValue otherwise.
-      template<ArithmeticType ValT> requires std::convertible_to<ValT, ValueType>
+		template<ArithmeticType ValT> requires std::convertible_to<ValT, ValueType> 
       [[nodiscard]] static auto parse(std::string_view text_value) -> PropertyValue
       {
          auto val = from_str<ValT>(text_value); 
@@ -67,6 +69,30 @@ namespace ctb::detail
       {
          auto parse_result = parseDate(date_str, constants::FMT_PARSE_DATE_SHORT);
          return parse_result.has_value() ? PropertyValue{ *parse_result } : PropertyValue{};
+      }
+
+      /// @brief Create a PropertyValue from a string_view by parsing it as a bool
+      /// @return a PropertyValue containing the parsed bool, or a null PropertyValue if 
+      ///  the string couldn't parsed
+		template<BooleanType ValT> requires requires(ValT val) { val = PropertyValue{ true }; }
+      [[nodiscard]] static auto parse(std::string_view bool_str) -> PropertyValue
+      {
+         PropertyValue result{};
+
+         if ( boost::icontains(bool_str, "true" ) || 
+              boost::icontains(bool_str, "1"    ) ||
+				  boost::icontains(bool_str, "yes"  ) )
+         {
+            result = PropertyValue{ true };
+         }
+         else if ( boost::icontains(bool_str, "false" ) || 
+                   boost::icontains(bool_str, "0"     ) ||
+                   boost::icontains(bool_str, "no"    ) )
+         { 
+            result = PropertyValue{ false };
+ 			}
+         
+         return result;
       }
 
       /// @brief construct a PropertyValue from any value convertible to ValueType

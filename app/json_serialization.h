@@ -114,6 +114,10 @@ namespace glz
                value = CtPropertyVal::parse<chrono::year_month_day>(json_val.value.value());
                break;
 
+            case PropType::Boolean:
+               //value = CtPropertyVal::parse<bool>(json_val.value.value());
+					break;
+
             default:
                assert(false);
          }
@@ -132,12 +136,13 @@ namespace glz
 
          auto getType = ctb::Overloaded
          {
-            [&](const std::string&)    { return PropType::String; },
-            [&](uint16_t)              { return PropType::UInt16; },
-            [&](uint64_t)              { return PropType::UInt64; },
-            [&](double)                { return PropType::Double; },
-            [&](const year_month_day&) { return PropType::Date;   },
-            [&](const std::monostate)  { return PropType::Null;   }
+            [&](const std::string&)    { return PropType::String;  },
+            [&](uint16_t)              { return PropType::UInt16;  },
+            [&](uint64_t)              { return PropType::UInt64;  },
+            [&](double)                { return PropType::Double;  },
+            [&](const year_month_day&) { return PropType::Date;    },
+            [&](const std::monostate)  { return PropType::Null;    },
+            [&](bool)                  { return PropType::Boolean; },
          };
          
          
