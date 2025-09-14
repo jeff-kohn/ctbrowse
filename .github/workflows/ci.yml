@@ -20,11 +20,11 @@ permissions:
 jobs:
   windows_build:
     name: "Window MSVC Build"
-    runs-on: windows-2022
+    runs-on: windows-latest
     env:
       CONFIGURE_PRESET: "ci-win-msvc"
       BUILD_PRESET: "ci-win-msvc"
-      BUILD_CONFIG: "RelWithDebInfo"
+      BUILD_CONFIG: "Release"
 
     steps:
     - uses: actions/checkout@v4
