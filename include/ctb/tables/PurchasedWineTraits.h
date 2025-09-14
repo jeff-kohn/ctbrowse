@@ -64,9 +64,9 @@ namespace ctb
       /// @brief list of display columns that will show in the list view
       static inline const std::array DefaultListColumns { 
          CtListColumn{ Prop::WineAndVintage,                                       constants::DISPLAY_COL_WINE       },
+         CtListColumn{ Prop::Size,                 CtListColumn::Format::String,   constants::FILTER_BOTTLE_SIZE, ListColumn::Align::Right, ListColumn::Align::Center },
          CtListColumn{ Prop::PendingStoreName,     CtListColumn::Format::String,   constants::DISPLAY_COL_STORE      },
          CtListColumn{ Prop::PendingOrderDate,     CtListColumn::Format::Date,     constants::DISPLAY_COL_PURCH_DATE },
-         CtListColumn{ Prop::Size,                 CtListColumn::Format::String,   constants::FILTER_BOTTLE_SIZE, ListColumn::Align::Right, ListColumn::Align::Center },
          CtListColumn{ Prop::PurchaseQtyRemaining, CtListColumn::Format::Number,   "Bottles Left"        },
       };
 

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <wxUiEditorData
-  data_version="19">
+  data_version="16">
   <node
     class="Project"
     base_directory="generated"
@@ -212,24 +212,44 @@
       base_file="winedetailspanel">
       <node
         class="wxBoxSizer"
-        orientation="wxVERTICAL">
+        orientation="wxVERTICAL"
+        flags="wxEXPAND">
         <node
-          class="wxCommandLinkButton"
-          class_access="none"
-          main_label="View Online"
-          note="At CellarTracker.com"
-          var_name="view_online_btn"
-          wxEVT_BUTTON="onViewWebPage" />
-        <node
-          class="wxStaticBitmap"
-          class_access="protected:"
-          scale_mode="AspectFit"
-          var_name="m_label_image"
-          flags="wxEXPAND" />
+          class="StaticCheckboxBoxSizer"
+          checkbox_var_name="m_checkBox3"
+          label="Price Filter"
+          flags="wxEXPAND">
+          <node
+            class="spacer"
+            add_default_border="1" />
+          <node
+            class="wxBoxSizer"
+            var_name="box_sizer2">
+            <node
+              class="wxStaticText"
+              label="$"
+              style="wxALIGN_RIGHT"
+              var_name="m_static_text2"
+              alignment="wxALIGN_CENTER_VERTICAL" />
+            <node
+              class="wxSpinCtrlDouble"
+              var_name="m_spin_ctrl_double" />
+            <node
+              class="wxStaticText"
+              label="  -  "
+              var_name="m_static_text" />
+            <node
+              class="wxStaticText"
+              label="$"
+              style="wxALIGN_RIGHT"
+              var_name="m_static_text3"
+              alignment="wxALIGN_CENTER_VERTICAL" />
+            <node
+              class="wxSpinCtrlDouble"
+              var_name="m_spin_ctrl_double2" />
+          </node>
+        </node>
       </node>
-      <node
-        class="wxTimer"
-        wxEVT_TIMER="onTimer" />
     </node>
     <node
       class="wxDialog"

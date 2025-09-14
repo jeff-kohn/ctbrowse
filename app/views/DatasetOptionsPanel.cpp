@@ -120,20 +120,20 @@ namespace ctb::app
       sort_options_box->Add(opt_descending, wxSizerFlags{1}.Expand().Border(wxALL));
       top_sizer->Add(sort_options_box, wxSizerFlags().Expand().Border(wxALL));
       top_sizer->AddSpacer(default_border);
-
-      // filter options box, contains filter tree and checkboxes
-      auto* filter_options_box = new wxStaticBoxSizer(wxVERTICAL, this, LBL_FILTER_OPTIONS);
-
-      // filter tree control
-      m_filter_tree = MultiValueFilterTree::create(*filter_options_box->GetStaticBox(), m_sink.getSource());
+      
+      // Match filter options box, contains filter tree 
+      auto* match_filters_box = new wxStaticBoxSizer(wxVERTICAL, this, LBL_MATCH_FILTERS);
+      m_filter_tree = MultiValueFilterTree::create(*match_filters_box->GetStaticBox(), m_sink.getSource());
       m_filter_tree->SetMaxSize(ConvertDialogToPixels(wxSize(-1, 500)));
       m_filter_tree->SetMinSize(ConvertDialogToPixels(wxSize(-1, 100)));
-      filter_options_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
-      filter_options_box->AddSpacer(default_border);
+      match_filters_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
+      match_filters_box->AddSpacer(default_border);
+      top_sizer->Add(match_filters_box, wxSizerFlags(1).Expand().Border(wxALL));
 
-      // checkbox filters
-      createOptionFilters(filter_options_box);
-      top_sizer->Add(filter_options_box, wxSizerFlags(1).Expand().Border(wxALL));
+      // checkbox option filters
+      auto* option_filters_box = new wxStaticBoxSizer(wxVERTICAL, this, LBL_OPTION_FILTERS);
+      createOptionFilters(option_filters_box);
+      top_sizer->Add(option_filters_box, wxSizerFlags{}.Expand().Border(wxALL));
 
       // finalize layout
       top_sizer->AddStretchSpacer(2);

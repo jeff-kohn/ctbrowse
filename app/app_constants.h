@@ -127,11 +127,12 @@ namespace ctb::constants
    inline constexpr const char* LBL_DRINK_WINDOW                  = "Drink Window:";
    inline constexpr const char* LBL_DRINK_WINDOW_MY               = "My Drink Window:";
    inline constexpr const char* LBL_DRINK_WINDOW_CT               = "CT Drink Window:";
-   inline constexpr const char* LBL_FILTER_OPTIONS                = "Filter Options";
+   inline constexpr const char* LBL_MATCH_FILTERS                 = "Match Filters";
    inline constexpr const char* LBL_LOCATION                      = "Location:";
    inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
    inline constexpr const char* LBL_MY_PRICE                      = "My Price:";
    inline constexpr const char* LBL_DELIVERY_DATE                 = "Delivery Date:";
+   inline constexpr const char* LBL_OPTION_FILTERS                = "Option Filters";
    inline constexpr const char* LBL_ORDER_DATE                    = "Order Date:";
    inline constexpr const char* LBL_ORDER_DETAILS                 = "Order Details";
    inline constexpr const char* LBL_ORDER_NUMBER                  = "Order Number:";
