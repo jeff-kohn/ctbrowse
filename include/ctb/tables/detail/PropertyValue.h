@@ -8,11 +8,10 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include "ctb/utility.h"
 #include "ctb/utility_chrono.h"
 #include "ctb/utility_templates.h"
 
-//#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include <chrono>
 #include <optional>
 #include <string>
@@ -77,22 +76,7 @@ namespace ctb::detail
 		template<BooleanType ValT> requires requires(ValT val) { val = PropertyValue{ true }; }
       [[nodiscard]] static auto parse(std::string_view bool_str) -> PropertyValue
       {
-         PropertyValue result{};
-
-         if ( boost::icontains(bool_str, "true" ) || 
-              boost::icontains(bool_str, "1"    ) ||
-				  boost::icontains(bool_str, "yes"  ) )
-         {
-            result = PropertyValue{ true };
-         }
-         else if ( boost::icontains(bool_str, "false" ) || 
-                   boost::icontains(bool_str, "0"     ) ||
-                   boost::icontains(bool_str, "no"    ) )
-         { 
-            result = PropertyValue{ false };
- 			}
-         
-         return result;
+         return { textToBool(bool_str) };
       }
 
       /// @brief construct a PropertyValue from any value convertible to ValueType
@@ -268,6 +252,19 @@ namespace ctb::detail
       auto asDouble() const -> NullableDouble
       {
          return as<double>();
+      }
+
+		/// Returns property as boolean. Incompatible types will always be false (date/time, etc)
+      auto asBool() const -> bool
+      {
+         auto asBool = Overloaded
+         {
+            [](const std::monostate)            -> bool { return false;                  },
+            [](const std::string& str)          -> bool { return textToBool(str);        },
+				[](const chrono::year_month_day&)   -> bool { return false;                  },
+            [](const auto& val)                 -> bool { return static_cast<bool>(val); }
+			};
+         return std::visit(asBool, m_val);
       }
 
       /// @brief Provides access to the variant so that it can be visited.

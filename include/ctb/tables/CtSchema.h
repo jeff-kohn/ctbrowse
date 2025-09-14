@@ -110,7 +110,7 @@ namespace ctb
   
    
    /// @brief Type alias for the property type used in CellarTracker data tables
-   using CtPropertyVal = detail::PropertyValue<std::string, uint16_t, uint64_t, double, std::chrono::year_month_day>;
+   using CtPropertyVal = detail::PropertyValue<std::string, uint16_t, uint64_t, double, std::chrono::year_month_day, bool>;
 
    
    /// @brief Type alias for a sorted collection of property values

@@ -41,6 +41,7 @@ namespace ctb::detail
          Decimal,
          Number,
          String,
+         Boolean,
       };
 
       /// @brief The property identifer for this ListColumn
@@ -114,6 +115,9 @@ namespace ctb::detail
 
             case Format::Date:
                return value.asString(constants::FMT_DATE_SHORT);
+
+            case Format::Boolean:
+               return value.asBool() ? "Yes" : "";
 
             // regular numbers don't have special formatting except for being right-aligned.   
             case Format::Number: 

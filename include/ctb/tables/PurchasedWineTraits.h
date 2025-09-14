@@ -55,7 +55,7 @@ namespace ctb
          { Prop::PendingOrderQty,        FieldSchema { Prop::PendingOrderQty,       PropType::UInt16,     10 }},
          { Prop::PendingOrderDate,       FieldSchema { Prop::PendingOrderDate,      PropType::Date,        2 }},
          { Prop::PendingDeliveryDate,    FieldSchema { Prop::PendingDeliveryDate,   PropType::Date,        3 }},
-         { Prop::PurchaseComplete,       FieldSchema { Prop::PurchaseComplete,      PropType::String,      3 }},
+         { Prop::PurchaseComplete,       FieldSchema { Prop::PurchaseComplete,      PropType::Boolean,     3 }},
          { Prop::PurchaseQtyOrdered,     FieldSchema { Prop::PurchaseQtyOrdered,    PropType::UInt16,     10 }},
          { Prop::PurchaseQtyRemaining,   FieldSchema { Prop::PurchaseQtyRemaining,  PropType::UInt16,     11 }},
          { Prop::WineAndVintage,         FieldSchema { Prop::WineAndVintage,        PropType::String,     {} }},
@@ -128,7 +128,7 @@ namespace ctb
          {
             rec[PendingDeliveryDate] = ct_null_prop;
          }
-         rec[WineAndVintage] =getWineAndVintage(rec);
+         rec[WineAndVintage] = getWineAndVintage(rec);
       }
 
    };
