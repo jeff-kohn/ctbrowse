@@ -47,6 +47,7 @@ namespace ctb::constants
    inline constexpr const char* DISPLAY_COL_PRICE           = "Price";
    inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Ordered";
    inline constexpr const char* DISPLAY_COL_INVENTORY       = "Inventory";
+   inline constexpr const char* DISPLAY_COL_REMAINING       = "Bottles Left";
    inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
    inline constexpr const char* DISPLAY_COL_STORE           = "Store";
    inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
