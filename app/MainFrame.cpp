@@ -63,6 +63,7 @@ namespace ctb::app
             case CMD_COLLECTION_READY_TO_DRINK: return TableId::Availability;
             case CMD_COLLECTION_CONSUMED:       return TableId::Consumed;
             case CMD_COLLECTION_PURCHASED_WINE: return TableId::Purchase;
+				case CMD_COLLECTION_TASTING_NOTES:  return TableId::Notes;
             default:
                throw Error(Error::Category::ArgumentError, "Table corresponding to ID {} not found.", event_id);
          }
@@ -220,10 +221,10 @@ namespace ctb::app
       Bind(wxEVT_MENU, &MainFrame::onMenuFileQuit,        this, wxID_EXIT);
 
       // Edit menu handlers
-      Bind(wxEVT_MENU, &MainFrame::onMenuEditFind, this, wxID_FIND);
-      Bind(wxEVT_MENU, &MainFrame::onMenuEditRefresh, this, CMD_EDIT_REFRESH_DATA);
+      Bind(wxEVT_MENU,      &MainFrame::onMenuEditFind, this, wxID_FIND);
+      Bind(wxEVT_MENU,      &MainFrame::onMenuEditRefresh, this, CMD_EDIT_REFRESH_DATA);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuEditRefreshUpdateUI, this, CMD_EDIT_REFRESH_DATA);
-      Bind(wxEVT_MENU, &MainFrame::onMenuEditClearFilters, this, CMD_EDIT_CLEAR_FILTERS);
+      Bind(wxEVT_MENU,      &MainFrame::onMenuEditClearFilters, this, CMD_EDIT_CLEAR_FILTERS);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuEditClearFiltersUpdateUI, this, CMD_EDIT_CLEAR_FILTERS);
 
       // Collection menu handlers
@@ -232,6 +233,7 @@ namespace ctb::app
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_READY_TO_DRINK);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_CONSUMED);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_PURCHASED_WINE);
+		Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_TASTING_NOTES);
 
       // Online menu events
       Bind(wxEVT_MENU, &MainFrame::onMenuOnlineWineDetails,    this, CMD_ONLINE_WINE_DETAILS);
@@ -384,7 +386,13 @@ namespace ctb::app
          wxITEM_NORMAL
          });
       m_menu_bar->Append(menu_data, constants::LBL_MENU_COLLECTION);
-
+      menu_data->Append(new wxMenuItem{
+         menu_data,
+         CmdId::CMD_COLLECTION_TASTING_NOTES,
+         constants::CMD_COLLECTION_TASTING_NOTES_LBL,
+         constants::CMD_COLLECTION_TASTING_NOTES_TIP,
+         wxITEM_NORMAL
+         });
 
       // Wine Menu
       auto* menu_wine = new wxMenu();

@@ -102,7 +102,7 @@ namespace ctb
             {
                auto wines   = rowCount(true);
                auto bottles = foldValues(CtProp::RtdQtyDefault, int32_t{}, std::plus{});
-               result = ctb::format(constants::FMT_SUMMARY_AVAILABILITY, wines, bottles);
+               result       = ctb::format(constants::FMT_SUMMARY_AVAILABILITY, wines, bottles);
                break;
             }
             case TableId::Pending:
@@ -110,7 +110,7 @@ namespace ctb
                auto wines   = rowCount(true);
                auto stores  = getDistinctValues(CtProp::PendingStoreName, true).size();
                auto bottles = foldValues(CtProp::QtyPending, int32_t{}, std::plus{});
-               result = ctb::format(constants::FMT_SUMMARY_PENDING, wines, stores, bottles);
+               result       = ctb::format(constants::FMT_SUMMARY_PENDING, wines, stores, bottles);
                break;
             }
             case TableId::List:
@@ -118,7 +118,7 @@ namespace ctb
                auto wines    = rowCount(true);
                auto on_hand  = foldValues(CtProp::QtyOnHand,  int32_t{}, std::plus{});
                auto on_order = foldValues(CtProp::QtyPending, int32_t{}, std::plus{});
-               result = ctb::format(constants::FMT_SUMMARY_MY_CELLAR, wines, on_hand, on_order);
+               result        = ctb::format(constants::FMT_SUMMARY_MY_CELLAR, wines, on_hand, on_order);
                break;
             }
             case TableId::Consumed:
@@ -128,16 +128,22 @@ namespace ctb
                {
                   // get earliest year (return values are sorted).
                   auto first_year = getDistinctValues(CtProp::ConsumeYear, true).begin()->asUInt16().value_or(0);
-                  result = ctb::format(constants::FMT_SUMMARY_CONSUMED, wine_count, first_year);
+                  result          = ctb::format(constants::FMT_SUMMARY_CONSUMED, wine_count, first_year);
                }
                break;
             }
             case TableId::Purchase:
             {
-               auto wines         = getDistinctValues(CtProp::WineAndVintage, true).size();
+               auto wines         = getDistinctValues(CtProp::iWineId, true).size();
                auto bottles_total = foldValues(CtProp::PurchaseQtyOrdered,   int32_t{}, std::plus{});
                auto bottles_left  = foldValues(CtProp::PurchaseQtyRemaining, int32_t{}, std::plus{});
-               result = ctb::format(constants::FMT_SUMMARY_PURCHASED, wines, bottles_total, bottles_left);
+               result             = ctb::format(constants::FMT_SUMMARY_PURCHASED, wines, bottles_total, bottles_left);
+               break;
+            }
+            case TableId::Notes:
+            {
+               auto wines = getDistinctValues(CtProp::iWineId, true).size();
+               result     = ctb::format(constants::FMT_SUMMARY_TASTING_NOTES, rowCount(true), wines);
                break;
             }
             default:

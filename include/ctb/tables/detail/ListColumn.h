@@ -73,8 +73,7 @@ namespace ctb::detail
          {
             case Format::Currency:  [[fallthrough]];
             case Format::Decimal:   [[fallthrough]];
-            case Format::Number:    [[fallthrough]];
-            case Format::Date:
+            case Format::Number:
                col_align    = Align::Right;
                header_align = Align::Center;
                break;
@@ -83,6 +82,12 @@ namespace ctb::detail
                col_align    = Align::Left;
                header_align = Align::Left;
                break;
+
+            case Format::Date:
+            case Format::Boolean:
+               col_align    = Align::Center;
+               header_align = Align::Center;
+					break;
 
             default:
                assert("Missing enum value, this is a bug" and false);
@@ -102,28 +107,32 @@ namespace ctb::detail
       /// currency values will use a dollar sign and 2 decimal places, decimal values will use decimal_places
       template<typename... Args>
       std::string getDisplayValue(const detail::PropertyValue<Args...>& value) const
-      {       
+      {
+         std::string result{};
          switch (format)
          {
             case Format::Decimal:
-            {
-               auto fmt_str = ctb::format("{{:.{}f}}", decimal_places);
-               return value.asString(fmt_str);
-            }
+               result = value.asString(ctb::format("{{:.{}f}}", decimal_places));
+               break;
+
             case Format::Currency:  
-               return value.asString(constants::FMT_NUMBER_CURRENCY);
+               result = value.asString(constants::FMT_NUMBER_CURRENCY);
+               break;
 
             case Format::Date:
-               return value.asString(constants::FMT_DATE_SHORT);
+               result = value.asString(constants::FMT_DATE_SHORT);
+               break;
 
             case Format::Boolean:
-               return value.asBool() ? "Yes" : "";
+               if (value)
+						result = value.asBool() ? "Yes" : "No";
+               break;
 
-            // regular numbers don't have special formatting except for being right-aligned.   
-            case Format::Number: 
+				case Format::Number: [[fallthrough]];
             default:                
-               return value.asString();
+               result = value.asString();
          }
+         return result;
       }
 
       ListColumn() = default;

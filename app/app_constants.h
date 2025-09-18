@@ -34,6 +34,8 @@ namespace ctb::constants
    inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_TIP  = "View Drinking Availability for Wines";
    inline constexpr const char* CMD_COLLECTION_PURCHASED_WINE_LBL  = "Purchased Wine &History\tCtrl+H";
    inline constexpr const char* CMD_COLLECTION_PURCHASED_WINE_TIP  = "View History of wines purchaes and orders";
+   inline constexpr const char* CMD_COLLECTION_TASTING_NOTES_LBL   = "&Tasting Notes\tCtrl+T";
+   inline constexpr const char* CMD_COLLECTION_TASTING_NOTES_TIP   = "View Your Personal Tasting Notes";
    inline constexpr const char* CMD_ONLINE_WINE_DETAILS_LBL        = "View &Wine Details";
    inline constexpr const char* CMD_ONLINE_WINE_DETAILS_TIP        = "View the current wine's details on CellarTracker";
    inline constexpr const char* CMD_ONLINE_SEARCH_VINTAGES_LBL     = "Search All &Vintages";

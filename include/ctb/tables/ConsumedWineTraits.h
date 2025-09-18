@@ -61,7 +61,8 @@ namespace ctb
       });
 
       /// @brief list of display columns that will show in the list view
-      static inline const std::array DefaultListColumns{
+      static inline const std::array DefaultListColumns
+      {
          CtListColumn{ Prop::WineAndVintage,                               constants::DISPLAY_COL_WINE           },
          CtListColumn{ Prop::ConsumeReason,                                constants::DISPLAY_COL_CONSUME_REASON },
          CtListColumn{ Prop::Location,                                     constants::DISPLAY_COL_CONSUME_FROM   },
@@ -70,14 +71,16 @@ namespace ctb
       };
 
       /// @brief the available sort orders for this table.
-      static inline const std::array AvailableSorts{ 
+      static inline const std::array AvailableSorts
+      { 
          TableSort{ { Prop::ConsumeDate, Prop::ConsumeDate, Prop::WineAndVintage }, constants::SORT_OPTION_CONSUME_DATE, true },
          TableSort{ { Prop::WineName,    Prop::Vintage                           }, constants::SORT_OPTION_WINE_VINTAGE       },
          TableSort{ { Prop::Vintage,     Prop::WineName                          }, constants::SORT_OPTION_VINTAGE_WINE       },
       };
 
       /// @brief multi-value filters that can be used on this table.
-      static inline const std::array MultiValueFilters{
+      static inline const std::array MultiValueFilters
+      {
          MultiValueFilter{ Prop::Vintage,       constants::FILTER_VINTAGE            },
          MultiValueFilter{ Prop::Varietal,      constants::FILTER_VARIETAL           },
          MultiValueFilter{ Prop::Country,       constants::FILTER_COUNTRY            },

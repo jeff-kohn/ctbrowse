@@ -36,29 +36,32 @@ namespace ctb::constants
    inline constexpr int         MAX_ENV_VAR_LENGTH          = 128;
 
    // column labels
+   inline constexpr const char* DISPLAY_COL_AVAILABLE       = "Ready";
    inline constexpr const char* DISPLAY_COL_CONSUME_DATE    = "Consumed On";
    inline constexpr const char* DISPLAY_COL_CONSUME_REASON  = "Reason";
    inline constexpr const char* DISPLAY_COL_CONSUME_FROM    = "Consumed From";
    inline constexpr const char* DISPLAY_COL_CT_SCORE        = "CT Score";
    inline constexpr const char* DISPLAY_COL_CT_WINDOW       = "CT Window";
+   inline constexpr const char* DISPLAY_COL_FLAWED          = "Flawed?";
+   inline constexpr const char* DISPLAY_COL_INVENTORY       = "Inventory";
+   inline constexpr const char* DISPLAY_COL_LIKED           = "Liked?";
    inline constexpr const char* DISPLAY_COL_LOCALE          = "Region and Appellation";
    inline constexpr const char* DISPLAY_COL_MY_SCORE        = "My Score";
    inline constexpr const char* DISPLAY_COL_MY_WINDOW       = "My Window";
    inline constexpr const char* DISPLAY_COL_PRICE           = "Price";
-   inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Ordered";
-   inline constexpr const char* DISPLAY_COL_INVENTORY       = "Inventory";
-   inline constexpr const char* DISPLAY_COL_REMAINING       = "Bottles Left";
+   inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Purchased";
    inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
+   inline constexpr const char* DISPLAY_COL_REMAINING       = "Bottles Left";
    inline constexpr const char* DISPLAY_COL_STORE           = "Store";
+   inline constexpr const char* DISPLAY_COL_TASTING_DATE    = "Tasting Date";
    inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
 
-   inline constexpr const char* DISPLAY_COL_AVAILABLE       = "Ready";
-   inline constexpr const char* DISPLAY_COL_LINEAR          = "Linear";
-   inline constexpr const char* DISPLAY_COL_BELL_CURVE      = "Bell";
-   inline constexpr const char* DISPLAY_COL_EARLY_CURVE     = "Early";
-   inline constexpr const char* DISPLAY_COL_LATE_CURVE      = "Late";
-   inline constexpr const char* DISPLAY_COL_EARLY_LATE      = "Both";
-   inline constexpr const char* DISPLAY_COL_FAST_MATURING   = "Fast";
+   inline constexpr const char* DISPLAY_COL_CURVE_LINEAR        = "Linear";
+   inline constexpr const char* DISPLAY_COL_CURVE_BELL          = "Bell";
+   inline constexpr const char* DISPLAY_COL_CURVE_EARLY         = "Early";
+   inline constexpr const char* DISPLAY_COL_CURVE_LATE          = "Late";
+   inline constexpr const char* DISPLAY_COL_CURVE_EARLY_LATE    = "Both";
+   inline constexpr const char* DISPLAY_COL_CURVE_FAST_MATURING = "Fast";
 
    // filter names
    inline constexpr const char* FILTER_APPELATION           = "Appellation";
@@ -93,6 +96,7 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_PRODUCER_WINE_NAME    = "Producer, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_REGION_WINE           = "Region, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_PURCHASE_DATE         = "Order Date, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_TASTING_DATE          = "Tasting Date, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_STORE_NAME            = "Store, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_CURVE_DEFAULT         = "Default Formula";
    inline constexpr const char* SORT_OPTION_CURVE_LINEAR          = "Linear Formula";
@@ -168,11 +172,12 @@ namespace ctb::constants
    inline constexpr const char* FMT_PARSE_ISO_DATE_ONLY           = "%F";
 
    inline constexpr const char* FMT_SUMMARY_AVAILABILITY          = "{} Wines with {} Bottles Ready to Drink (Default Formula)";
-   inline constexpr const char* FMT_SUMMARY_CONSUMED              = "{} Wines Consumed Since {}";
-   inline constexpr const char* FMT_SUMMARY_PURCHASED             = "{} Wines, with {} Bottles Purchased and {} Bottles Remaining or Pending";
+   inline constexpr const char* FMT_SUMMARY_CONSUMED              = "{} Wines Consumed Since {}.";
+   inline constexpr const char* FMT_SUMMARY_PURCHASED             = "{} Wines, with {} Bottles Purchased and {} Bottles Remaining or Pending.";
    inline constexpr const char* SUMMARY_EMPTY                     = "No data. Check filter options or download latest CellarTracker data.";
    inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, with {} Bottles Cellared and {} Pending Delivery";
-   inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles";
+   inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles.";
+   inline constexpr const char* FMT_SUMMARY_TASTING_NOTES         = "{} Tasting Notes Recorded for {} Wines.";
 
    inline constexpr const char* LBL_SIZE_750ml                    = "750ml";
    inline constexpr const char* LBL_SIZE_375ml                    = "375ml";

@@ -41,6 +41,7 @@ namespace ctb::app
    {
       Bind(wxEVT_DATAVIEW_SELECTION_CHANGED,         &DatasetListView::onSelectionChanged, this);
       Bind(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, &DatasetListView::onWineContextMenu,  this);
+      Bind(wxEVT_DATAVIEW_ITEM_ACTIVATED,            &DatasetListView::onWineDoubleClick,  this);
    }
 
 
@@ -174,6 +175,25 @@ namespace ctb::app
       catch (...) {
          wxGetApp().displayErrorMessage(packageError());
       }
+   }
+
+
+   void DatasetListView::onWineDoubleClick(wxDataViewEvent& event)
+   {
+      try
+      {
+         if (event.GetItem().IsOk() and m_sink.hasDataset())
+         {
+			   QueueEvent(new wxCommandEvent{ wxEVT_COMMAND_MENU_SELECTED, CMD_ONLINE_WINE_DETAILS });
+         }
+         else {
+            event.Skip();
+         }
+      }
+      catch (...) {
+         wxGetApp().displayErrorMessage(packageError());
+      }
+
    }
 
 

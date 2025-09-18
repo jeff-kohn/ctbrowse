@@ -27,8 +27,6 @@ namespace ctb::app
       [[nodiscard]] static DatasetListView* create(wxWindow* parent, const DatasetEventSourcePtr& source);
 
    private:
-
-
       DataViewModelPtr m_model{};
       ScopedEventSink  m_sink;
 
@@ -47,6 +45,7 @@ namespace ctb::app
       void notify(DatasetEvent event) override;
       void onSelectionChanged(wxDataViewEvent& event);
       void onWineContextMenu(wxDataViewEvent& event);
+      void onWineDoubleClick(wxDataViewEvent& event);
 
    };
 
