@@ -356,6 +356,7 @@ namespace ctb::app
       m_label_timer.Bind(wxEVT_TIMER, &DetailsPanel::onLabelTimer, this);
    }
 
+
    void DetailsPanel::addCommandLinkButton(wxBoxSizer* sizer, CmdId cmd, CategorizedControls::Category category, std::string_view command_text, std::string_view note)
    {
       auto* link_button = new wxCommandLinkButton{ this, cmd, wxFromSV(command_text), wxFromSV(note), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER };

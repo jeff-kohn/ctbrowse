@@ -13,6 +13,7 @@
 #include "model/CtDatasetOptions.h"
 #include "wx_helpers.h"
 
+#include <ctb/model/ScopedDatasetFreeze.h>
 #include <ctb/utility_chrono.h>
 
 #include <wx/button.h>
@@ -234,7 +235,7 @@ namespace ctb::app
    }
 
 
-   auto DatasetOptionsPanel::getSortOptionList(IDataset* dataset) -> wxArrayString
+   auto DatasetOptionsPanel::getSortOptionList(DatasetPtr dataset) -> wxArrayString
    {
       return vws::all(dataset->availableSorts()) 
          | vws::transform([](const IDataset::TableSort& s) {  return wxFromSV(s.sort_name); })
@@ -252,11 +253,11 @@ namespace ctb::app
          {
          case DatasetEvent::Id::Filter:              [[fallthrough]];
          case DatasetEvent::Id::DatasetInitialize:
-            onDatasetInitialize(event.dataset.get());
+            onDatasetInitialize(event.dataset);
             break;
 
          case DatasetEvent::Id::Sort:
-            onTableSorted(event.dataset.get());
+            onTableSorted(event.dataset);
             break;
 
          case DatasetEvent::Id::SubStringFilter:     [[fallthrough]];
@@ -271,7 +272,7 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onDatasetInitialize(IDataset* dataset)
+   void DatasetOptionsPanel::onDatasetInitialize(DatasetPtr dataset)
    {
       // reload sort/filter options
       m_sort_combo->Clear();
@@ -280,17 +281,42 @@ namespace ctb::app
       setTitle();
 
       // show/hide/initialize filter checkboxes
-      m_categorized.showCategory(ControlCategory::InStockFilter,       dataset->hasProperty(CtProp::QtyTotal            ));
-      m_categorized.showCategory(ControlCategory::MaxPriceFilter,      dataset->hasProperty(CtProp::MyPrice             ));
-      m_categorized.showCategory(ControlCategory::MinPriceFilter,      dataset->hasProperty(CtProp::MyPrice             ));
-      m_categorized.showCategory(ControlCategory::MinScoreFilter,      dataset->hasProperty(CtProp::CtScore             ));
-      m_categorized.showCategory(ControlCategory::ReadyToDrinkFilter,  dataset->hasProperty(CtProp::RtdQtyDefault       ));
+      m_categorized.showCategory(ControlCategory::InStockFilter,       dataset->hasProperty(CtProp::QtyTotal));
+      m_categorized.showCategory(ControlCategory::MaxPriceFilter,      dataset->hasProperty(CtProp::MyPrice));
+      m_categorized.showCategory(ControlCategory::MinPriceFilter,      dataset->hasProperty(CtProp::MyPrice));
+      m_categorized.showCategory(ControlCategory::MinScoreFilter,      dataset->hasProperty(CtProp::CtScore));
+      m_categorized.showCategory(ControlCategory::ReadyToDrinkFilter,  dataset->hasProperty(CtProp::RtdQtyDefault));
       m_categorized.showCategory(ControlCategory::WithRemainingFilter, dataset->hasProperty(CtProp::PurchaseQtyRemaining));
-      
+
+		// keep track of which filters we have controls for
+      StringSet matched_filter_names{};
+
+      // get the filters for our checkboxes
       for (auto* check_box : vws::values(m_filter_checkboxes))
       {
-         auto&& filter = dataset->propFilters().getFilter(check_box->filter().filter_name);
-         check_box->enable(filter.has_value() ? true : false);
+         auto filter = dataset->propFilters().getFilter(check_box->filter().filter_name);
+         if (filter)
+         {
+            matched_filter_names.insert(filter->filter_name);
+            check_box->enable(true);
+         }
+         else {
+				check_box->enable(false);
+         }
+      }
+
+      // For any property filters that we don't have a matching control for, we need to remove them from the dataset
+      {
+         ScopedDatasetFreeze freeze{ dataset };
+         auto active_filter_names = vws::keys(dataset->propFilters().activeFilters()) | rng::to<StringSet>();
+         for (const auto& name : active_filter_names)
+         {
+            if (!matched_filter_names.contains(name))
+            {
+               wxGetApp().displayFormattedMessage("Removing unsupported filter '{}'", name);
+               dataset->propFilters().removeFilter(name);
+            }
+         }
       }
       
       TransferDataToWindow();
@@ -298,7 +324,7 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onTableSorted(IDataset* dataset)
+   void DatasetOptionsPanel::onTableSorted(DatasetPtr dataset)
    {
       m_sort_config = dataset->activeSort();
       m_sort_ascending = (m_sort_config.reverse == false);

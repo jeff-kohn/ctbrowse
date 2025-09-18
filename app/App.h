@@ -119,7 +119,7 @@ namespace ctb::app
 
       /// @brief display an info message to the user, using format()-style syntax for string building.
       template <typename... Args>
-      void displayInfoMessage(ctb::format_string<Args...> fmt_str, Args&&... args)
+      void displayFormattedMessage(ctb::format_string<Args...> fmt_str, Args&&... args)
       {
          displayInfoMessage(ctb::vformat(fmt_str, ctb::make_format_args(args...)));
       }

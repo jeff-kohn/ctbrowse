@@ -86,13 +86,12 @@ namespace ctb::app
       void createOptionFilters(wxStaticBoxSizer* parent);
       auto setTitle() -> bool;
 
-      auto getSortOptionList(IDataset* dataset) -> wxArrayString;
+      auto getSortOptionList(DatasetPtr dataset) -> wxArrayString;
 
       // Dataset-related event handlers
       void notify(DatasetEvent event) override;
-      void onDatasetInitialize(IDataset* dataset);
-      void onTableSorted(IDataset* dataset);
-      auto getDataset() const noexcept(false) -> DatasetPtr ; // throws rather than return nullptr
+      void onDatasetInitialize(DatasetPtr dataset);
+      void onTableSorted(DatasetPtr dataset);
 
       // event handlers
       void onFilterChecked(ControlCategory cat);
