@@ -1,8 +1,7 @@
 /**************************************************************************************************
-* @file  PendingWineTraits.h
+* @file  PurchasedWineTraits.h
 *
-* @brief defines the PendingWineTraits class, which is an instantiation
-*        of CtDataTable<> implemented using the traits template PendingWineTraits 
+* @brief defines the PurchasedWineTraits class
 * 
 * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
 **************************************************************************************************/
@@ -20,7 +19,7 @@ namespace ctb
 
    /// @brief Traits class for a table record from the 'Pending Wine' CellarTracker CSV table.
    /// 
-   class PendingWineTraits
+   class PurchasedWineTraits
    {
    public:
       using Prop             = CtProp;
@@ -47,35 +46,36 @@ namespace ctb
          { Prop::Color,                  FieldSchema { Prop::Color,                 PropType::String,     21 }},
          { Prop::Category,               FieldSchema { Prop::Category,              PropType::String,     22 }},
          { Prop::Varietal,               FieldSchema { Prop::Varietal,              PropType::String,     25 }},
-         { Prop::QtyPending,             FieldSchema { Prop::QtyPending,            PropType::UInt16,     11 }},
          { Prop::Size,                   FieldSchema { Prop::Size,                  PropType::String,     14 }},
-         { Prop::Currency,               FieldSchema { Prop::Currency,              PropType::String,      5 }},
          { Prop::MyPrice,                FieldSchema { Prop::MyPrice,               PropType::Double,      7 }},
+         { Prop::Currency,               FieldSchema { Prop::Currency,              PropType::String,      5 }},
          { Prop::PendingPurchaseId,      FieldSchema { Prop::PendingPurchaseId,     PropType::String,      1 }},
          { Prop::PendingStoreName,       FieldSchema { Prop::PendingStoreName,      PropType::String,      4 }},
          { Prop::PendingOrderNumber,     FieldSchema { Prop::PendingOrderNumber,    PropType::String,     12 }},
          { Prop::PendingOrderQty,        FieldSchema { Prop::PendingOrderQty,       PropType::UInt16,     10 }},
-         { Prop::PendingOrderDate,       FieldSchema { Prop::PendingOrderDate,      PropType::Date,        2 }}, 
+         { Prop::PendingOrderDate,       FieldSchema { Prop::PendingOrderDate,      PropType::Date,        2 }},
          { Prop::PendingDeliveryDate,    FieldSchema { Prop::PendingDeliveryDate,   PropType::Date,        3 }},
+         { Prop::PurchaseComplete,       FieldSchema { Prop::PurchaseComplete,      PropType::Boolean,     3 }},
+         { Prop::PurchaseQtyOrdered,     FieldSchema { Prop::PurchaseQtyOrdered,    PropType::UInt16,     10 }},
+         { Prop::PurchaseQtyRemaining,   FieldSchema { Prop::PurchaseQtyRemaining,  PropType::UInt16,     11 }},
          { Prop::WineAndVintage,         FieldSchema { Prop::WineAndVintage,        PropType::String,     {} }},
       });
 
       /// @brief list of display columns that will show in the list view
       static inline const std::array DefaultListColumns { 
-         CtListColumn{ Prop::WineAndVintage,                                      constants::DISPLAY_COL_WINE       },
-         CtListColumn{ Prop::PendingStoreName,    CtListColumn::Format::String,   constants::DISPLAY_COL_STORE      },
-         CtListColumn{ Prop::PendingOrderDate,    CtListColumn::Format::Date,     constants::DISPLAY_COL_PURCH_DATE },
-         CtListColumn{ Prop::Size,                CtListColumn::Format::String,   constants::FILTER_BOTTLE_SIZE, ListColumn::Align::Right, ListColumn::Align::Center },
-         CtListColumn{ Prop::PendingOrderQty,     CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY        },
-         CtListColumn{ Prop::MyPrice,             CtListColumn::Format::Currency, constants::DISPLAY_COL_PRICE      },
+         CtListColumn{ Prop::WineAndVintage,                                       constants::DISPLAY_COL_WINE       },
+         CtListColumn{ Prop::PendingStoreName,     CtListColumn::Format::String,   constants::DISPLAY_COL_STORE      },
+         CtListColumn{ Prop::Size,                 CtListColumn::Format::String,   constants::FILTER_BOTTLE_SIZE, ListColumn::Align::Right, ListColumn::Align::Center },
+         CtListColumn{ Prop::PendingOrderDate,     CtListColumn::Format::Date,     constants::DISPLAY_COL_PURCH_DATE },
+         CtListColumn{ Prop::PurchaseQtyRemaining, CtListColumn::Format::Number,   constants::DISPLAY_COL_REMAINING  },
       };
 
       /// @brief the available sort orders for this table.
       static inline const std::array AvailableSorts{ 
-         TableSort{ { Prop::PendingOrderDate,    Prop::WineName, Prop::Vintage  }, constants::SORT_OPTION_PURCHASE_DATE },
-         TableSort{ { Prop::WineName,            Prop::Vintage                  }, constants::SORT_OPTION_WINE_VINTAGE  },
-         TableSort{ { Prop::Vintage,             Prop::WineName                 }, constants::SORT_OPTION_VINTAGE_WINE  },
-         TableSort{ { Prop::PendingStoreName,    Prop::WineName, Prop::Vintage, }, constants::SORT_OPTION_STORE_NAME    },
+         TableSort{ { Prop::PendingOrderDate,    Prop::WineName, Prop::Vintage  }, constants::SORT_OPTION_PURCHASE_DATE, true },
+         TableSort{ { Prop::WineName,            Prop::Vintage                  }, constants::SORT_OPTION_WINE_VINTAGE        },
+         TableSort{ { Prop::Vintage,             Prop::WineName                 }, constants::SORT_OPTION_VINTAGE_WINE        },
+         TableSort{ { Prop::PendingStoreName,    Prop::WineName, Prop::Vintage, }, constants::SORT_OPTION_STORE_NAME          },
       };
 
       /// @brief multi-value filters that can be used on this table.
@@ -96,7 +96,7 @@ namespace ctb
       /// @return the name of this CT table this traits class represents
       static constexpr auto getTableId() -> TableId
       { 
-         return TableId::Pending;
+         return TableId::Purchase;
       }
 
       /// @brief getTableName()
@@ -128,11 +128,11 @@ namespace ctb
          {
             rec[PendingDeliveryDate] = ct_null_prop;
          }
-         rec[WineAndVintage] =getWineAndVintage(rec);
+         rec[WineAndVintage] = getWineAndVintage(rec);
       }
-      
+
    };
 
-   using PendingWineTable = CtDataTable<PendingWineTraits>;
+   using PurchasedWineTable = CtDataTable<PurchasedWineTraits>;
 
 } // namespace ctb

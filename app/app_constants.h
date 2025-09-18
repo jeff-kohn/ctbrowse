@@ -24,7 +24,7 @@ namespace ctb::constants
    inline constexpr const char* CMD_EDIT_REFRESH_DATA_TIP          = "Reload the current collection's data";
    inline constexpr const char* CMD_EDIT_CLEAR_FILTERS_LBL         = "Clear Filters";
    inline constexpr const char* CMD_EDIT_CLEAR_FILTERS_TIP         = "Remove all active data filters.";
-   inline constexpr const char* CMD_COLLECTION_CONSUMED_LBL        = "Wine &Consumed";
+   inline constexpr const char* CMD_COLLECTION_CONSUMED_LBL        = "&Consumed Wine History";
    inline constexpr const char* CMD_COLLECTION_CONSUMED_TIP        = "View Wine Consumption History";
    inline constexpr const char* CMD_COLLECTION_MY_CELLAR_LBL       = "Wine in &My Cellar\tCtrl+M";
    inline constexpr const char* CMD_COLLECTION_MY_CELLAR_TIP       = "View Personal Wine Collection";
@@ -32,6 +32,8 @@ namespace ctb::constants
    inline constexpr const char* CMD_COLLECTION_PENDING_WINE_TIP    = "View Pending Wine Deliveries";
    inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_LBL  = "Wine &Ready to Drink\tCtrl+D";
    inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_TIP  = "View Drinking Availability for Wines";
+   inline constexpr const char* CMD_COLLECTION_PURCHASED_WINE_LBL  = "Purchased Wine &History\tCtrl+H";
+   inline constexpr const char* CMD_COLLECTION_PURCHASED_WINE_TIP  = "View History of wines purchaes and orders";
    inline constexpr const char* CMD_ONLINE_WINE_DETAILS_LBL        = "View &Wine Details";
    inline constexpr const char* CMD_ONLINE_WINE_DETAILS_TIP        = "View the current wine's details on CellarTracker";
    inline constexpr const char* CMD_ONLINE_SEARCH_VINTAGES_LBL     = "Search All &Vintages";
@@ -96,11 +98,26 @@ namespace ctb::constants
    inline constexpr const char* ERROR_USER_CANCELED               = "User canceled operation.";
    inline constexpr const char* NO_SCORE                          = " --";
    
+   /// Checkbox filter-related labels and values
+   inline constexpr int      FILTER_MIN_PRICE_DEFAULT             =          10;
+   inline constexpr int      FILTER_MAX_PRICE_DEFAULT             =         100;
+   inline constexpr int      FILTER_PRICE_MAX                     =         500;
+   inline constexpr int      FILTER_PRICE_INCREMENT               =          10;
+   inline constexpr double   FILTER_SCORE_DEFAULT                 =        90.0;
+   inline constexpr double   FILTER_SCORE_INCR                    =         0.1;
+   inline constexpr double   FILTER_SCORE_MIN                     =          50;
+   inline constexpr double   FILTER_SCORE_MAX                     =       100.0;
+   inline constexpr int      FILTER_SCORE_DIGITS                  =           1;
+   inline constexpr double   FILTER_AVAILABLE_MIN_QTY             =       0.999;
+
    // DetailsPanel labels
    inline constexpr const char* LBL_APPELLATION                   = "Appellation:";
    inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";
-   inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only Show In-Stock Wines";
-   inline constexpr const char* LBL_CHECK_MIN_SCORE               = "Minimum Score:";
+   inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only In-Stock Wines";
+   inline constexpr const char* LBL_CHECK_WITH_REMAINING          = "Only Show Remaining Bottles";
+   inline constexpr const char* LBL_CHECK_MAX_PRICE               = "Only Priced Below:";
+   inline constexpr const char* LBL_CHECK_MIN_PRICE               = "Only Priced Above:";
+   inline constexpr const char* LBL_CHECK_MIN_SCORE               = "Only with Score Above:";
    inline constexpr const char* LBL_CHECK_READY_TO_DRINK          = "Only Show 'Ready' Wines";
    inline constexpr const char* LBL_CONSUME_DATE                  = "Consumed On:";
    inline constexpr const char* LBL_CONSUME_REASON                = "Reason:";
@@ -110,11 +127,12 @@ namespace ctb::constants
    inline constexpr const char* LBL_DRINK_WINDOW                  = "Drink Window:";
    inline constexpr const char* LBL_DRINK_WINDOW_MY               = "My Drink Window:";
    inline constexpr const char* LBL_DRINK_WINDOW_CT               = "CT Drink Window:";
-   inline constexpr const char* LBL_FILTER_OPTIONS                = "Filter Options";
+   inline constexpr const char* LBL_MATCH_FILTERS                 = "Match Filters";
    inline constexpr const char* LBL_LOCATION                      = "Location:";
    inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
    inline constexpr const char* LBL_MY_PRICE                      = "My Price:";
    inline constexpr const char* LBL_DELIVERY_DATE                 = "Delivery Date:";
+   inline constexpr const char* LBL_OPTION_FILTERS                = "Option Filters";
    inline constexpr const char* LBL_ORDER_DATE                    = "Order Date:";
    inline constexpr const char* LBL_ORDER_DETAILS                 = "Order Details";
    inline constexpr const char* LBL_ORDER_NUMBER                  = "Order Number:";

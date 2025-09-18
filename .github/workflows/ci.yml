@@ -20,11 +20,11 @@ permissions:
 jobs:
   windows_build:
     name: "Window MSVC Build"
-    runs-on: windows-2022
+    runs-on: windows-2025
     env:
       CONFIGURE_PRESET: "ci-win-msvc"
       BUILD_PRESET: "ci-win-msvc"
-      BUILD_CONFIG: "RelWithDebInfo"
+      BUILD_CONFIG: "Release"
 
     steps:
     - uses: actions/checkout@v4
@@ -50,13 +50,9 @@ jobs:
          path: ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
          retention-days: 3    
 
-    # - name: Install winget
-    #   uses: Cyberboss/install-winget@v1
-
-    # - name: Install pre-reqs
-    #   run: |
-    #     winget install CppCheck --verbose --disable-interactivity  --accept-source-agreements --accept-package-agreements
-    #     choco install OpenCppCoverage -y
+    - name: Install pre-reqs
+      run: |
+        winget install CppCheck --verbose --disable-interactivity  --accept-source-agreements --accept-package-agreements
 
     - name: configure
       run: |
@@ -64,4 +60,4 @@ jobs:
 
     - name: build
       run: |
-        cmake --build --preset=$env:BUILD_PRESET --config=$env:BUILD_CONFIG --target=ALL_BUILD
+        cmake --build --preset=$env:BUILD_PRESET --config=$env:BUILD_CONFIG --target=all

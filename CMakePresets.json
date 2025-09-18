@@ -68,19 +68,19 @@
          "name": "win-msvc-flags",
          "hidden": true,
          "cacheVariables": {
-            "CTB_COMPILE_OPTIONS": "/MP;/bigobj;/cgthreads8;/EHsc;/GS;/permissive-;/sdl;/utf-8;/volatile:iso;/Zc:__cplusplus;/Zc:enumTypes;/Zc:externConstexpr;/Zc:inline;/Zc:lambda;/Zc:preprocessor;/Zc:rvalueCast;/Zc:strictStrings;/Zc:templateScope;/Zc:throwingNew;/Zc:wchar_t;/Zf;/Zi;$<$<CONFIG:Debug>:/Od;/EHr;/ZI;/RTC1>;$<$<CONFIG:Release,RelWithDebInfo>:/O2;/Ob3;/GL;/Gw;/Gy;/guard:cf;>",
+            "CTB_COMPILE_OPTIONS": "/MP;/bigobj;/cgthreads8;/EHsc;/GS;/permissive-;/sdl;/utf-8;/volatile:iso;/Zc:__cplusplus;/Zc:enumTypes;/Zc:externConstexpr;/Zc:inline;/Zc:lambda;/Zc:preprocessor;/Zc:rvalueCast;/Zc:strictStrings;/Zc:templateScope;/Zc:throwingNew;/Zc:wchar_t;;/Zi;/Zf;$<$<CONFIG:Debug>:/Od;/EHr;/RTC1>;$<$<CONFIG:Release>:/O2;/GL;/Gw;/Gy;/guard:cf;>;$<$<CONFIG:RelWithDebInfo>:/O2;/Ob3;/GL;/Gw;/Gy;/guard:cf;>",
             "CTB_WARNING_FLAGS": "/W4;/w14165;/w14186;/w14263;/w14265;/w14296;/w14311;/w14545;/w14546;/w14547;/w14549;/w14555;/w14640;/w14826;/w14905;/w14906;/w14928;/w24826;/w34265;/w34287;/w34619;/w34640;/w44242;/w44254;/w44263;/w44296;/w44365;/w44388;/w44464;/w45038;/wd4100;/WX;/external:anglebrackets;/external:W0;",
-            "CTB_COMPILE_DEFINITIONS": "_MBCS;_WIN32_WINNT=0x0A000000;_WINSOCK_DEPRECATED_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;wxUSE_CONFIG_NATIVE=0;wxUSE_STD_CONTAINERS=1;wxUSE_UTF8_LOCALE_ONLY=1;wxUSE_STD_STRING=1;wxUSE_STL=1;wxUSE_STL_BASED_WXSTRING=1;wxUSE_UNICODE_UTF8=1;wxUSE_UNICODE_WCHAR=0;wxUSE_UNSAFE_WXSTRING_CONV=0;$<$<CONFIG:DEBUG>:_DEBUG;_ALLOW_RTCc_IN_STL>;$<$<CONFIG:Release,RelWithDebInfo>:NDEBUG;>;SPDLOG_FMT_EXTERNAL=1",
-            "CTB_LINK_OPTIONS": "/machine:x64;/guard:cf;/DYNAMICBASE;/NXCOMPAT;/CGTHREADS:8;$<$<CONFIG:DEBUG>:/INCREMENTAL;/OPT:NOICF;>$<$<CONFIG:Release,RelWithDebInfo>:/LTCG;/OPT:ICF;/OPT:REF;>"
+            "CTB_COMPILE_DEFINITIONS": "_MBCS;_WIN32_WINNT=0x0A000000;_WINSOCK_DEPRECATED_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;wxUSE_CONFIG_NATIVE=0;wxUSE_STD_CONTAINERS=1;wxUSE_UTF8_LOCALE_ONLY=1;wxUSE_STD_STRING=1;wxUSE_STL=1;wxUSE_STL_BASED_WXSTRING=1;wxNO_IMPLICIT_WXSTRING_CONV_TO_PTR=1;wxUSE_UNICODE_UTF8=1;wxUSE_UNICODE_WCHAR=0;wxUSE_UNSAFE_WXSTRING_CONV=0;$<$<CONFIG:DEBUG>:_DEBUG;_ALLOW_RTCc_IN_STL>;$<$<CONFIG:Release,RelWithDebInfo>:NDEBUG;>;SPDLOG_FMT_EXTERNAL=1",
+            "CTB_LINK_OPTIONS": "/DEBUG:FULL;/machine:x64;/guard:cf;/DYNAMICBASE;/NXCOMPAT;/CGTHREADS:8;$<$<CONFIG:DEBUG>:/INCREMENTAL;/OPT:NOICF;/OPT:NOREF>$<$<CONFIG:Release,RelWithDebInfo>:/INCREMENTAL:NO;/LTCG;/OPT:ICF;/OPT:REF;>"
          }
       },
       {
-         "name": "clang-cl-flags",
+         "name": "clang-flags",
          "hidden": true,
          "cacheVariables": {
-            "CTB_COMPILE_OPTIONS": "/EHsc;/GS;/guard:cf;/permissive-;/sdl;/utf-8;/Zc:wchar_t;/Zi;$<$<CONFIG:Debug>:/Od;/RTC1>;$<$<CONFIG:Release,RelWithDebInfo>:/O2;/Ob3;/GL;/Gw;/Gy;>",
-            "CTB_WARNING_FLAGS": "-Weverything;-Wno-ctad-maybe-unsupported;-Wno-c++98-compat;-Wno-c++98-compat-pedantic;-Wno-c++98-c++11-compat-pedantic;-Wno-nested-anon-types;-Wno-missing-prototypes;-Wno-format-nonliteral;-Wno-exit-time-destructors;-Wno-c++20-compat;-Wno-unsafe-buffer-usage;-Wno-shadow-field-in-constructor;-Wno-string-conversion;-Wno-newline-eof;-Wno-covered-switch-default;-Wno-float-equal;-Wno-global-constructors;-Wno-shorten-64-to-32;-Wno-switch-enum;",
-            "CTB_COMPILE_DEFINITIONS": "_MBCS;_WIN32_WINNT=_WIN32_WINNT_WIN10;_WINSOCK_DEPRECATED_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;wxUSE_CONFIG_NATIVE=0;wxUSE_STD_CONTAINERS=1;wxUSE_STD_STRING=1;wxUSE_STL=1;wxUSE_STL_BASED_WXSTRING=1;wxUSE_UTF8_LOCALE_ONLY=1;wxUSE_UNICODE_UTF8=1;wxUSE_UNICODE_WCHAR=0;wxUSE_UNSAFE_WXSTRING_CONV=0;$<$<CONFIG:DEBUG>:_DEBUG;_ALLOW_RTCc_IN_STL>;$<$<CONFIG:Release,RelWithDebInfo>:NDEBUG;>;",
+            "CTB_COMPILE_OPTIONS": "$<$<CONFIG:Debug>:-Og;>;$<$<CONFIG:Release,RelWithDebInfo>:-O3>;-g;-fstack-protector-strong;-fexceptions;-grecord-gcc-switches;-fcf-protection;-pipe;-Werror=format-security;-fno-strict-overflow;-Wstrict-overflow",
+            "CTB_WARNING_FLAGS": "-Wall;-Wextra;-Wpedantic;-Werror;",
+            "CTB_COMPILE_DEFINITIONS": "_MBCS;_WIN32_WINNT=_WIN32_WINNT_WIN10;_WINSOCK_DEPRECATED_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;wxUSE_CONFIG_NATIVE=0;wxUSE_STD_CONTAINERS=1;wxUSE_UTF8_LOCALE_ONLY=1;wxUSE_UNICODE_UTF8=1;wxUSE_UNICODE_WCHAR=0;wxUSE_UNSAFE_WXSTRING_CONV=0;wxNO_IMPLICIT_WXSTRING_CONV_TO_PTR=1;$<$<CONFIG:DEBUG>:_DEBUG;_ALLOW_RTCc_IN_STL>;$<$<CONFIG:Release,RelWithDebInfo>:NDEBUG;>;",
             "CTB_LINK_OPTIONS": ""
          }
       },
@@ -88,36 +88,42 @@
          "name": "ci-win-msvc",
          "description": "Defines default compiler/linker flags for MSVC/Win",
          "inherits": [ "build-dir", "vcpkg-win64-static", "win-msvc-flags" ],
-         "generator": "Visual Studio 17 2022",
-         "architecture": "x64",
-         "toolset": {
-            "value": "v143,host=x64",
+         "generator": "Ninja Multi-Config",
+         "architecture": {
+            "value": "x64",
             "strategy": "external"
          },
          "vendor": {
             "microsoft.com/VisualStudioSettings/CMake/1.0": {
-               "intelliSenseMode": "windows-clang-x64",
+               "intelliSenseMode": "windows-msvc-x64",
                "enableMicrosoftCodeAnalysis": false,
-               "enableClangTidyCodeAnalysis": true
+               "enableClangTidyCodeAnalysis": false,
+               "enableUndefinedBehaviorSanitizer": true,
+               "disableExternalAnalysis": true
             }
          }
       },
       {
          "name": "ci-win-clang",
          "description": "Defines default compiler/linker flags for clang-cl/Win",
-         "inherits": [ "build-dir", "vcpkg-win64-static", "clang-cl-flags" ],
-         "generator": "Visual Studio 17 2022",
+         "inherits": [ "build-dir", "vcpkg-win64-static", "clang-flags" ],
+         "generator": "Ninja Multi-Config",
          "cacheVariables": {
-            "CMAKE_C_COMPILER": "clang-cl",
-            "CMAKE_CXX_COMPILER": "clang-cl",
+            "CMAKE_C_COMPILER": "clang",
+            "CMAKE_CXX_COMPILER": "clang++",
             "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
          },
-         "toolset": "ClangCL,host=x64",
+         "architecture": {
+            "value": "x64",
+            "strategy": "external"
+         },
          "vendor": {
             "microsoft.com/VisualStudioSettings/CMake/1.0": {
                "intelliSenseMode": "windows-clang-x64",
                "enableMicrosoftCodeAnalysis": false,
-               "enableClangTidyCodeAnalysis": true
+               "enableClangTidyCodeAnalysis": false,
+               "enableUndefinedBehaviorSanitizer": true,
+               "disableExternalAnalysis": true
             }
          }
       }

@@ -136,7 +136,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onCollapseExpandNode(wxCommandEvent& event)
+   void MultiValueFilterTree::onCollapseExpandNode([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -156,7 +156,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onCollapseAllNodes(wxCommandEvent& event)
+   void MultiValueFilterTree::onCollapseAllNodes([[maybe_unused]]wxCommandEvent& event)
    {
       try 
       {
@@ -168,7 +168,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onCopyValue(wxCommandEvent& event)
+   void MultiValueFilterTree::onCopyValue([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -185,7 +185,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onClearAllFilters(wxCommandEvent& event)
+   void MultiValueFilterTree::onClearAllFilters([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -199,7 +199,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onDeselectAll(wxCommandEvent& event)
+   void MultiValueFilterTree::onDeselectAll([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -215,7 +215,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onInvertSelection(wxCommandEvent& event)
+   void MultiValueFilterTree::onInvertSelection([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -224,7 +224,7 @@ namespace ctb::app
          auto dataset = m_sink.getDatasetOrThrow();
 
          // we want all select all unselected values and vice-versa. so remove current selected values from
-         // full list of values. 
+         // full list of values to get the list we need to select. 
          CtMultiValueFilter::MatchValues new_values{};
          auto all_values = dataset->getDistinctValues(current_filter.prop_id, false);
          std::ranges::set_difference(all_values, current_filter.match_values, std::inserter(new_values, new_values.begin()));
@@ -232,10 +232,6 @@ namespace ctb::app
 
          dataset->multivalFilters().replaceFilter(current_filter.prop_id, current_filter);
          m_sink.signal_source(DatasetEvent::Id::Filter, true);
-
-         // need to update state for filter's label
-         //m_check_counts[item] =  current_filter.match_values.size();
-         //updateFilterLabel(item);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -243,7 +239,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onToggleChecked(wxCommandEvent& event)
+   void MultiValueFilterTree::onToggleChecked([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -296,7 +292,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onTreePopupMenu(wxContextMenuEvent& event)
+   void MultiValueFilterTree::onTreePopupMenu([[maybe_unused]] wxContextMenuEvent& event)
    {
       try 
       {
@@ -346,7 +342,7 @@ namespace ctb::app
    void MultiValueFilterTree::onDeselectAllUpdateUI(wxUpdateUIEvent& event)
    {
       // Does filter node have at least one value checked?
-      event.Enable(rng::find_if(m_node_filters, [this](const auto& map_elem) { return map_elem.second.match_values.size() > 0; }) != m_node_filters.end());
+      event.Enable(rng::find_if(m_node_filters, [](const auto& map_elem) { return map_elem.second.match_values.size() > 0; }) != m_node_filters.end());
    }
 
    /// @return A reference to the filter object associated with the specified tree item. 

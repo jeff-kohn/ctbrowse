@@ -33,7 +33,7 @@ namespace ctb::app
       /// its own lifetime). 
       /// 
       [[nodiscard]] static 
-      auto create(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache) -> DetailsPanel*;
+      auto create(wxWindow* parent, const DatasetEventSourcePtr& source, LabelCachePtr cache) -> DetailsPanel*;
 
       /// @brief Indicates whether the details for a selected wine are currently displayed.
       /// @return true if a wine is displayed in details, false otherwise.
@@ -61,6 +61,7 @@ namespace ctb::app
          LinkOpenWineDetails,
          LinkReadyToDrink,
          Location,
+         MyPrice,
          Pending,
          Score,
          Size,
@@ -121,7 +122,7 @@ namespace ctb::app
 
       /// event source related 
       void notify(DatasetEvent event) override;
-      void configureControlsForDataset(DatasetPtr dataset);
+      void configureControlsForDataset(const DatasetPtr& dataset);
       void updateDetails(DatasetEvent event);
 
       // event handlers

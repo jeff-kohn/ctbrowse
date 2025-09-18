@@ -46,7 +46,8 @@ namespace ctb::constants
    inline constexpr const char* DISPLAY_COL_MY_WINDOW       = "My Window";
    inline constexpr const char* DISPLAY_COL_PRICE           = "Price";
    inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Ordered";
-   inline constexpr const char* DISPLAY_COL_PURCHASES       = "Purchases";
+   inline constexpr const char* DISPLAY_COL_INVENTORY       = "Inventory";
+   inline constexpr const char* DISPLAY_COL_REMAINING       = "Bottles Left";
    inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
    inline constexpr const char* DISPLAY_COL_STORE           = "Store";
    inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
@@ -168,19 +169,20 @@ namespace ctb::constants
 
    inline constexpr const char* FMT_SUMMARY_AVAILABILITY          = "{} Wines with {} Bottles Ready to Drink (Default Formula)";
    inline constexpr const char* FMT_SUMMARY_CONSUMED              = "{} Wines Consumed Since {}";
+   inline constexpr const char* FMT_SUMMARY_PURCHASED             = "{} Wines, with {} Bottles Purchased and {} Bottles Remaining or Pending";
    inline constexpr const char* SUMMARY_EMPTY                     = "No data. Check filter options or download latest CellarTracker data.";
    inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, with {} Bottles Cellared and {} Pending Delivery";
    inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles";
 
+   inline constexpr const char* LBL_SIZE_750ml                    = "750ml";
+   inline constexpr const char* LBL_SIZE_375ml                    = "375ml";
+   inline constexpr const char* LBL_SIZE_MAGNUM                   = "1.5L";
+
+	inline constexpr const char* VALUE_TRUE                        = "TRUE";  
+	inline constexpr const char* VALUE_FALSE                       = "FALSE";
 
    inline constexpr auto     ONE_MB                               = 1024 * 1024;
    inline constexpr uint16_t CT_NULL_YEAR                         =        9999;
-   inline constexpr double   FILTER_SCORE_DEFAULT                 =        90.0;
-   inline constexpr double   FILTER_SCORE_INCR                    =         0.1;
-   inline constexpr double   FILTER_SCORE_MIN                     =          50;
-   inline constexpr double   FILTER_SCORE_MAX                     =       100.0;
-   inline constexpr int      FILTER_SCORE_DIGITS                  =           1;
-   inline constexpr double   FILTER_AVAILABLE_MIN_QTY             =       0.999;
 
 
 } // namespace ctb::constants

@@ -8,7 +8,7 @@
 
 namespace ctb::app
 {
-   auto DatasetMultiView::create(wxWindow& parent, DatasetEventSourcePtr source, LabelCachePtr cache) -> DatasetMultiView*
+   auto DatasetMultiView::create(wxWindow& parent, const DatasetEventSourcePtr& source, LabelCachePtr cache) -> DatasetMultiView*
    {
       try
       {
@@ -16,7 +16,7 @@ namespace ctb::app
          {
             throw Error{ constants::ERROR_STR_NULLPTR_ARG, Error::Category::ArgumentError };
          }
-         std::unique_ptr<DatasetMultiView> wnd{ new DatasetMultiView{ &parent, source, cache } };
+         std::unique_ptr<DatasetMultiView> wnd{ new DatasetMultiView{ &parent, source, std::move(cache) } };
          return wnd.release(); // top-level window manages its own lifetime, we return non-owning pointer
       }
       catch (...){
@@ -26,7 +26,7 @@ namespace ctb::app
    }
 
    
-   DatasetMultiView::DatasetMultiView(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache) : wxSplitterWindow{ parent }
+   DatasetMultiView::DatasetMultiView(wxWindow* parent, const DatasetEventSourcePtr& source, const LabelCachePtr& cache) : wxSplitterWindow{ parent }
    {
       constexpr auto LEFT_SPLITTER_GRAVITY = 0.25;
       constexpr auto RIGHT_SPLITTER_GRAVITY = 0.75;

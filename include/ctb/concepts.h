@@ -118,11 +118,20 @@ namespace ctb
       v1 = t.value_or(v2);
    };
 
-
-   /// @brief Concept for a type that is either integral or floating point.
+  
+   /// @brief Concept for a type that is either a boolean. As dumb as that sounds, it's needed if you 
+	///  want to overload on bool vs other integral types, since bool is considered an integral type
    ///
    template <typename T>
-   concept ArithmeticType = std::integral<T> or std::floating_point<T>; 
+   concept BooleanType = std::same_as<bool, std::decay_t<T>>;
+
+   template <typename T>
+	concept IntegralType = std::integral<T> and !BooleanType<T>;
+
+   /// @brief Concept for a type that is either integral (but not bool) or floating point.
+   ///
+   template <typename T>
+	concept ArithmeticType = IntegralType<T> or std::floating_point<T>;
 
 
    /// @brief Concept for an enum type. 

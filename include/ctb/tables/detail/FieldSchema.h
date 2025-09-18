@@ -14,7 +14,8 @@ namespace ctb::detail
       UInt16,
       UInt64,
       Double,
-      Date
+      Date,
+      Boolean
    };
 
    /// @brief  contains the property type and CSV column index for a given Prop

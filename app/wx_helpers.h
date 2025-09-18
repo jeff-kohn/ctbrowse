@@ -31,7 +31,7 @@ namespace ctb::app
    /// 
    inline std::string_view wxViewString(const wxString& wx_string)
    {
-      return std::string_view{ wx_string.wx_str(), wx_string.length() };
+      return std::string_view{ wx_string.wx_str(), wx_string.utf8_length() };
    }
 
 

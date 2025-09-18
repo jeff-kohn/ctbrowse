@@ -20,15 +20,16 @@
 // forward declare member pointers to avoid header pollution.
 class wxBoxSizer;
 class wxChoice;
-class wxSpinCtrlDouble;
 class wxStaticBoxSizer;
 class wxStaticText;
+class wxSlider;
 
 
 namespace ctb::app
 {
 
    class FilterCheckBox;
+   class SpinDoubleFilterCtrl;
    class MultiValueFilterTree;
 
 
@@ -57,6 +58,9 @@ namespace ctb::app
          InStockFilter = 0,
          MinScoreFilter,
          ReadyToDrinkFilter,
+         MinPriceFilter,
+         MaxPriceFilter,
+         WithRemainingFilter, // for purchase history, will only show wines with bottles still remaining.
       };
       using CategorizedControls = CategorizedControls<ControlCategory>;         // show/hide controls based on dataset context
       using FilterCheckboxes    = std::map<ControlCategory, FilterCheckBox* >;  // checkbox controls for each of the check filters (see ControlCategory enum)
@@ -65,12 +69,16 @@ namespace ctb::app
       bool                  m_sort_descending    { false }; // whether descending sort ordes is active (yes we need both)
       CategorizedControls   m_categorized{};
       int                   m_sort_selection{ 0 };          // index of selected sort in combo, which matches a sort in availableSorts()
+      int                   m_min_price{};
+      int                   m_max_price{};
       FilterCheckboxes      m_filter_checkboxes{};          // checkbox controls for enabling/disabling different property filters
       IDataset::TableSort   m_sort_config{};                // the sort object that will be used to sort the dataset 
       MultiValueFilterTree* m_filter_tree{};
       ScopedEventSink       m_sink;               
       wxChoice*             m_sort_combo{};
-      wxSpinCtrlDouble*     m_score_spin_ctrl{};
+      SpinDoubleFilterCtrl* m_min_score_filter_ctrl{};
+      SpinDoubleFilterCtrl* m_min_price_filter_ctrl{};
+      SpinDoubleFilterCtrl* m_max_price_filter_ctrl{};
       wxStaticText*         m_dataset_title{};
 
       // window creation
@@ -78,21 +86,18 @@ namespace ctb::app
       void createOptionFilters(wxStaticBoxSizer* parent);
       auto setTitle() -> bool;
 
-      auto getSortOptionList(IDataset* dataset) -> wxArrayString;
+      auto getSortOptionList(DatasetPtr dataset) -> wxArrayString;
 
       // Dataset-related event handlers
       void notify(DatasetEvent event) override;
-      void onDatasetInitialize(IDataset* dataset);
-      void onTableSorted(IDataset* dataset);
-      auto getDataset() const noexcept(false) -> DatasetPtr ; // throws rather than return nullptr
+      void onDatasetInitialize(DatasetPtr dataset);
+      void onTableSorted(DatasetPtr dataset);
 
       // event handlers
       void onFilterChecked(ControlCategory cat);
       void onFilterInStockChecked(wxCommandEvent& event);
-      void onFilterMinScoreChecked(wxCommandEvent& event);
       void onFilterReadyToDrinkChecked(wxCommandEvent& event);
-      void onMinScoreChanged(wxSpinDoubleEvent& event);
-      void onMinScoreUpdateUI(wxUpdateUIEvent& event);
+      void onFilterWithRemainingChecked(wxCommandEvent& event);
       void onSortOrderClicked(wxCommandEvent& event);
       void onSortSelection(wxCommandEvent& event);
 

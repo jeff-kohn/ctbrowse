@@ -59,7 +59,6 @@ namespace ctb
 
       // Specific to Pending Wines table
       PendingOrderNumber,
-      PendingPrice,
       PendingOrderDate,
       PendingOrderQty,
       PendingStoreName,
@@ -75,7 +74,9 @@ namespace ctb
       RtdQtyFastMaturing,
       RtdQtyEarlyAndLate,
       RtdQtyBottlesPerYear,
-      RtdConsumed,
+      RtdInventorySummary,    // string summary of total bottles purchased/consumed/on-hand
+      RtdInventoryLogical,    // number of logical 750ml bottles in inventory
+      RtdInventoryPhysical,    // number of physical bottles in inventory (might be different than logical for 375's etc)
 
       // consumed bottles table
       iConsumeId,
@@ -89,6 +90,11 @@ namespace ctb
       BottleNote,
       Location,
       Bin,
+
+      // purchased wines table
+      PurchaseComplete,          // treated as string, contains "TRUE/FALSE"
+      PurchaseQtyOrdered,
+		PurchaseQtyRemaining,
    };
 
    
@@ -104,7 +110,7 @@ namespace ctb
   
    
    /// @brief Type alias for the property type used in CellarTracker data tables
-   using CtPropertyVal = detail::PropertyValue<std::string, uint16_t, uint64_t, double, std::chrono::year_month_day>;
+   using CtPropertyVal = detail::PropertyValue<std::string, uint16_t, uint64_t, double, std::chrono::year_month_day, bool>;
 
    
    /// @brief Type alias for a sorted collection of property values

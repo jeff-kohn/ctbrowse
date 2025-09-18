@@ -62,6 +62,7 @@ namespace ctb::app
             case CMD_COLLECTION_PENDING_WINE:   return TableId::Pending;
             case CMD_COLLECTION_READY_TO_DRINK: return TableId::Availability;
             case CMD_COLLECTION_CONSUMED:       return TableId::Consumed;
+            case CMD_COLLECTION_PURCHASED_WINE: return TableId::Purchase;
             default:
                throw Error(Error::Category::ArgumentError, "Table corresponding to ID {} not found.", event_id);
          }
@@ -82,7 +83,7 @@ namespace ctb::app
          return dataset;
       }
 
-   }
+   } // namespace
 
 
    [[nodiscard]] MainFrame* MainFrame::create()
@@ -202,8 +203,6 @@ namespace ctb::app
 
    void MainFrame::initControls()
    {
-      static const auto default_window_size = wxSize{ 800, 600 };
-
       SetTitle(constants::APP_NAME_LONG);
       SetIcon(wxIcon{constants::RES_NAME_ICON_PRODUCT});
 
@@ -232,6 +231,7 @@ namespace ctb::app
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_PENDING_WINE);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_READY_TO_DRINK);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_CONSUMED);
+      Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_PURCHASED_WINE);
 
       // Online menu events
       Bind(wxEVT_MENU, &MainFrame::onMenuOnlineWineDetails,    this, CMD_ONLINE_WINE_DETAILS);
@@ -370,9 +370,16 @@ namespace ctb::app
          });
       menu_data->AppendSeparator();
       menu_data->Append(new wxMenuItem{
-         menu_data, 
-         CmdId::CMD_COLLECTION_CONSUMED, 
-         constants::CMD_COLLECTION_CONSUMED_LBL, 
+         menu_data,
+         CmdId::CMD_COLLECTION_PURCHASED_WINE,
+         constants::CMD_COLLECTION_PURCHASED_WINE_LBL,
+         constants::CMD_COLLECTION_PURCHASED_WINE_TIP,
+         wxITEM_NORMAL
+         });
+      menu_data->Append(new wxMenuItem{
+         menu_data,
+         CmdId::CMD_COLLECTION_CONSUMED,
+         constants::CMD_COLLECTION_CONSUMED_LBL,
          constants::CMD_COLLECTION_CONSUMED_TIP,
          wxITEM_NORMAL
          });
@@ -566,23 +573,23 @@ namespace ctb::app
          ScopedStatusText end_status{ constants::STATUS_DOWNLOAD_COMPLETE, this };
 
          CtCredentialManager cred_mgr{};
-         auto cred_name = constants::CELLARTRACKER_DOT_COM;
+         const auto* cred_name = constants::CELLARTRACKER_DOT_COM;
          auto prompt_msg = ctb::format(constants::FMT_CREDENTIALDLG_PROMPT_MSG, cred_name);
          auto cred_result = cred_mgr.loadCredential(cred_name, prompt_msg, true);
 
          if (!cred_result)
          {
-            auto error = cred_result.error();
-            if (error.category == Error::Category::OperationCanceled)
+            if (cred_result.error().category == Error::Category::OperationCanceled)
                return;
 
-            throw error;
+            throw Error{ cred_result.error() };
          }
 
          // If cred doesn't work we need to reprompt so udpate prompt message.
          prompt_msg = ctb::format(constants::FMT_CREDENTIALDLG_REPROMPT_MSG, cred_name);
 
-         wxProgressDialog progress_dlg{"Download Progress", "Downloading Data Files", 100, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL };
+         constexpr auto max_percent = 100;
+         wxProgressDialog progress_dlg{"Download Progress", "Downloading Data Files", max_percent, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL };
 
          ProgressCallback progress_callback = [&progress_dlg] ([[maybe_unused]] int64_t downloadTotal, [[maybe_unused]] int64_t downloadNow,
                                                                      [[maybe_unused]] int64_t uploadTotal, [[maybe_unused]] int64_t uploadNow,
@@ -1007,7 +1014,7 @@ namespace ctb::app
    }
 
 
-   void MainFrame::setDataset(DatasetPtr dataset)
+   void MainFrame::setDataset(const DatasetPtr& dataset)
    {
       m_event_source->setDataset(dataset, true);
 

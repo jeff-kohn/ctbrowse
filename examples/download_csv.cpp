@@ -38,7 +38,7 @@ int main()
       }
 
       if (!result.has_value())
-         throw result.error();
+         throw Error{ std::move(result.error()) };
       
       // testing UTF-8/Win-1252 round-trip conversion
       auto& table = result.value();
@@ -55,9 +55,8 @@ int main()
 
       return 0;
    }
-   catch (std::exception& ex)
-   {
-      std::println("\r\nException occurred:{}\r\n", ex.what());
+   catch (...) {
+      std::println("\r\nException occurred:{}\r\n", ctb::packageError().formattedMesage());
    }
 }
 

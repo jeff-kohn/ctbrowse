@@ -9,6 +9,7 @@
 
 #include "ctb/ctb.h"
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <filesystem>
 
 
@@ -96,5 +97,14 @@ namespace ctb
       tryExpandEnvironmentVars(result);
       return result;
    }
+
+   inline auto textToBool(std::string_view text) -> bool
+   {
+		constexpr auto TRUE_STR = "true";
+		constexpr auto ONE_STR  = "1";
+		constexpr auto YES_STR  = "yes";
+
+      return boost::iequals(text, TRUE_STR) || boost::iequals(text, ONE_STR) || boost::iequals(text, YES_STR);
+	}
 
 } // namespace ctb

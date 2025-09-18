@@ -10,7 +10,7 @@ namespace ctb
    class ScopedDatasetFreeze final
    {
    public:
-      explicit ScopedDatasetFreeze(DatasetPtr dataset) : m_dataset{ dataset }
+      explicit ScopedDatasetFreeze(DatasetPtr dataset) : m_dataset{ std::move(dataset) }
       {
          freeze();
       }

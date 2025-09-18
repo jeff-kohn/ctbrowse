@@ -4,13 +4,9 @@
 #pragma code_page(65001) // UTF-8
 
 
-#ifndef wxUSE_RC_MANIFEST
-#define wxUSE_RC_MANIFEST 1
-#endif
+#define wxUSE_RC_MANIFEST 0
+#define wxUSE_DPI_AWARE_MANIFEST 0
 
-#ifndef wxUSE_DPI_AWARE_MANIFEST
-#define wxUSE_DPI_AWARE_MANIFEST 2
-#endif
 
 // SVG files for various images
 //
@@ -23,7 +19,5 @@ TOOLBAR_SETTINGS            RCDATA           "art\\toolbar_settings.svg"
 TREE_CHECKED_IMG            RCDATA           "art\\checked_box.svg"
 TREE_UNCHECKED_IMG          RCDATA           "art\\unchecked_box.svg"
 TREE_FILTER_IMG             RCDATA           "art\\filter.svg"
-
-
 
 #include "wx/msw/wx.rc"

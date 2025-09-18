@@ -26,7 +26,7 @@ namespace ctb::constants
 {
    constexpr auto LABEL_TIMER_RETRY_INTERVAL = 33; 
 
-} // namespace constants
+} // namespace ctb::constants
 
 
 namespace ctb::app
@@ -51,12 +51,12 @@ namespace ctb::app
 
 
    DetailsPanel::DetailsPanel(DatasetEventSourcePtr source, LabelCachePtr cache) : 
-      m_event_sink{ this, source },
-      m_label_cache{ cache }
+      m_event_sink{ this, std::move(source) },
+      m_label_cache{ std::move(cache) }
    {}
 
 
-   DetailsPanel* DetailsPanel::create(wxWindow* parent, DatasetEventSourcePtr source, LabelCachePtr cache)
+   DetailsPanel* DetailsPanel::create(wxWindow* parent, const DatasetEventSourcePtr& source, LabelCachePtr cache)
    {
       if (!source)
       {
@@ -253,8 +253,8 @@ namespace ctb::app
       auto* my_price_val = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
       my_price_val->SetValidator(wxGenericValidator{ &m_details.my_price });
       details_sizer->Add(my_price_val, wxSizerFlags{}.Border(wxLEFT|wxRIGHT, border_size));
-      m_category_controls.addControlDependency(Valuation, my_price_lbl);
-      m_category_controls.addControlDependency(Valuation, my_price_val);
+      m_category_controls.addControlDependency(MyPrice, my_price_lbl);
+      m_category_controls.addControlDependency(MyPrice, my_price_val);
 
       // Community Avg
       auto* ct_price_lbl = new wxStaticText(this, wxID_ANY, constants::LBL_CT_PRICE, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
@@ -356,6 +356,7 @@ namespace ctb::app
       m_label_timer.Bind(wxEVT_TIMER, &DetailsPanel::onLabelTimer, this);
    }
 
+
    void DetailsPanel::addCommandLinkButton(wxBoxSizer* sizer, CmdId cmd, CategorizedControls::Category category, std::string_view command_text, std::string_view note)
    {
       auto* link_button = new wxCommandLinkButton{ this, cmd, wxFromSV(command_text), wxFromSV(note), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER };
@@ -404,7 +405,7 @@ namespace ctb::app
          {
             auto result = m_details.image_result->getImage();
             if (!result)
-               throw result.error();
+               throw Error{ std::move(result.error()) };
 
             wxBitmap bmp{ *result };
             m_label_image->SetBitmap(bmp);    
@@ -439,7 +440,7 @@ namespace ctb::app
          auto rec_idx = event.affected_row.value();
 
          // note that we try to grab all properties even though some of them won't be available in this dataset,
-         // but that's fine because we'll just get a null value if it's not available, so no need to check hasProperty()
+         // but that's fine because we'll just get a null value if it's not available - no need to check hasProperty()
 
          m_details.wine_id        = dataset->getProperty(rec_idx, CtProp::iWineId       ).asString();
          m_details.wine_name      = dataset->getProperty(rec_idx, CtProp::WineName      ).asString();
@@ -476,7 +477,7 @@ namespace ctb::app
          m_details.pending_delivery_date = dataset->getProperty(rec_idx, CtProp::PendingDeliveryDate ).asString(constants::FMT_DATE_SHORT);
          m_details.pending_store_name    = dataset->getProperty(rec_idx, CtProp::PendingStoreName    ).asString();
          m_details.pending_qty           = dataset->getProperty(rec_idx, CtProp::PendingOrderQty     ).asString();
-         m_details.pending_price         = dataset->getProperty(rec_idx, CtProp::PendingPrice        ).asString(constants::FMT_NUMBER_CURRENCY);
+         m_details.pending_price         = dataset->getProperty(rec_idx, CtProp::MyPrice             ).asString(constants::FMT_NUMBER_CURRENCY);
 
          // show everything since detail panel may be blank if no record was selected previously...
          GetSizer()->ShowItems(true); 
@@ -526,7 +527,7 @@ namespace ctb::app
    }
 
 
-   void DetailsPanel::configureControlsForDataset(DatasetPtr dataset)
+   void DetailsPanel::configureControlsForDataset(const DatasetPtr& dataset)
    {
       using enum CategorizedControls::Category;
 
@@ -536,8 +537,8 @@ namespace ctb::app
       m_category_controls.showCategory(DrinkWindow,   dataset->hasProperty(CtProp::BeginConsume));
       m_category_controls.showCategory(Location,      dataset->hasProperty(CtProp::Location));
       m_category_controls.showCategory(Pending,       dataset->hasProperty(CtProp::PendingPurchaseId));
-      m_category_controls.showCategory(Score,         dataset->hasProperty(CtProp::CtScore));
-      m_category_controls.showCategory(Size,          dataset->hasProperty(CtProp::Size));
+      m_category_controls.showCategory(Score,         dataset->hasProperty(CtProp::MyScore));
+      m_category_controls.showCategory(MyPrice,       dataset->hasProperty(CtProp::MyPrice));
       m_category_controls.showCategory(Valuation,     dataset->hasProperty(CtProp::CtPrice));
 
       if (dataset->hasProperty(CtProp::CtBeginConsume))
@@ -552,7 +553,7 @@ namespace ctb::app
       // Command-Link buttons
       auto table_id = dataset->getTableId();
       m_category_controls.showCategory(LinkAcceptPending,   table_id == TableId::Pending);
-      m_category_controls.showCategory(LinkOpenWineDetails, table_id == TableId::List or table_id == TableId::Consumed);
+      m_category_controls.showCategory(LinkOpenWineDetails, table_id == TableId::List or table_id == TableId::Consumed or table_id == TableId::Purchase);
       m_category_controls.showCategory(LinkReadyToDrink,    table_id == TableId::Availability);
    }
 
@@ -568,4 +569,4 @@ namespace ctb::app
       wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, event.GetId()});
    }
 
-} // namesapce ctb::app
+} // namespace ctb::app

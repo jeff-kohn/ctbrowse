@@ -8,6 +8,7 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include "ctb/utility.h"
 #include "ctb/utility_chrono.h"
 #include "ctb/utility_templates.h"
 
@@ -47,7 +48,7 @@ namespace ctb::detail
       /// @param text_value - The string_view to be converted and used to construct the PropertyValue.
       /// @return An PropertyValue containing the converted value if the conversion succeeds, or an empty 
       ///  PropertyValue otherwise.
-      template<ArithmeticType ValT> requires std::convertible_to<ValT, ValueType>
+		template<ArithmeticType ValT> requires std::convertible_to<ValT, ValueType> 
       [[nodiscard]] static auto parse(std::string_view text_value) -> PropertyValue
       {
          auto val = from_str<ValT>(text_value); 
@@ -67,6 +68,15 @@ namespace ctb::detail
       {
          auto parse_result = parseDate(date_str, constants::FMT_PARSE_DATE_SHORT);
          return parse_result.has_value() ? PropertyValue{ *parse_result } : PropertyValue{};
+      }
+
+      /// @brief Create a PropertyValue from a string_view by parsing it as a bool
+      /// @return a PropertyValue containing the parsed bool, or a null PropertyValue if 
+      ///  the string couldn't parsed
+		template<BooleanType ValT> requires requires(ValT val) { val = PropertyValue{ true }; }
+      [[nodiscard]] static auto parse(std::string_view bool_str) -> PropertyValue
+      {
+         return { textToBool(bool_str) };
       }
 
       /// @brief construct a PropertyValue from any value convertible to ValueType
@@ -242,6 +252,19 @@ namespace ctb::detail
       auto asDouble() const -> NullableDouble
       {
          return as<double>();
+      }
+
+		/// Returns property as boolean. Incompatible types will always be false (date/time, etc)
+      auto asBool() const -> bool
+      {
+         auto asBool = Overloaded
+         {
+            [](const std::monostate)            -> bool { return false;                  },
+            [](const std::string& str)          -> bool { return textToBool(str);        },
+				[](const chrono::year_month_day&)   -> bool { return false;                  },
+            [](const auto& val)                 -> bool { return static_cast<bool>(val); }
+			};
+         return std::visit(asBool, m_val);
       }
 
       /// @brief Provides access to the variant so that it can be visited.
