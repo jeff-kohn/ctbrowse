@@ -40,7 +40,7 @@ int main()
 
    try
    {
-      fs::path file_path{ "C:/Users/jkohn/AppData/Roaming/ctBrowse for Windows/Tables/List.csv" };
+      fs::path file_path{ "%APPDATA%/ctBrowse for Windows/Tables/List.csv" };
 
       csv_table table{};
       auto size = std::filesystem::file_size(file_path);
