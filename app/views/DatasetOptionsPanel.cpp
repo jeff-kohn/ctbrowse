@@ -158,20 +158,28 @@ namespace ctb::app
 
       // ready-to-drink filter, matches if any formula  besides "fast" calculates RTD >= 0, only shows for RTD view
       auto props = { RtdQtyDefault, RtdQtyLinear, RtdQtyBellCurve, RtdQtyEarlyCurve, RtdQtyLateCurve, RtdQtyFastMaturing, RtdQtyEarlyAndLate, RtdQtyBottlesPerYear, };
-      m_filter_checkboxes[ReadyToDrinkFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_READY_TO_DRINK, props, FILTER_AVAILABLE_MIN_QTY, CtPropFilterPredicate{ CtPredicateType::GreaterEqual } } };
+		CtPropertyFilter filter{ LBL_CHECK_READY_TO_DRINK, props, FILTER_AVAILABLE_MIN_QTY, CtPropFilterPredicate{ CtPredicateType::GreaterEqual } };
+      m_filter_checkboxes[ReadyToDrinkFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), filter };
       parent->Add(m_filter_checkboxes[ReadyToDrinkFilter], wxSizerFlags().Border(wxALL));
       parent->AddSpacer(4);
+		m_supported_filters.insert(filter.filter_name);
+
 
       // in-stock filter
-      m_filter_checkboxes[InStockFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_IN_STOCK_ONLY, { QtyOnHand }, uint16_t{0}, CtPropFilterPredicate{ CtPredicateType::Greater } } };
+		filter = CtPropertyFilter{ LBL_CHECK_IN_STOCK_ONLY, { QtyOnHand }, uint16_t{0}, CtPropFilterPredicate{ CtPredicateType::Greater } };
+      m_filter_checkboxes[InStockFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), filter };
       parent->Add(m_filter_checkboxes[InStockFilter], wxSizerFlags().Border(wxALL));
       parent->AddSpacer(2);
+		m_supported_filters.insert(filter.filter_name);
 
 
       // 'remaining bottles' filter
-      m_filter_checkboxes[WithRemainingFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), { LBL_CHECK_WITH_REMAINING, { PurchaseQtyRemaining }, uint16_t{0}, CtPropFilterPredicate{ CtPredicateType::Greater } } };
+		filter = CtPropertyFilter{ LBL_CHECK_WITH_REMAINING, { PurchaseQtyRemaining }, uint16_t{0}, CtPropFilterPredicate{ CtPredicateType::Greater } };
+      m_filter_checkboxes[WithRemainingFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), filter };
       parent->Add(m_filter_checkboxes[WithRemainingFilter], wxSizerFlags().Border(wxALL));
       parent->AddSpacer(2);
+		m_supported_filters.insert(filter.filter_name);
+
 
       // min-score filter checkbox
       auto score_params = SpinDoubleFilterCtrl::SpinParams{
@@ -181,14 +189,16 @@ namespace ctb::app
          .default_value = FILTER_SCORE_DEFAULT,
          .decimal_places = FILTER_SCORE_DIGITS,
       };
-      auto score_filter = CtPropertyFilter{
+      filter = CtPropertyFilter{
          LBL_CHECK_MIN_SCORE,
          { CtScore, MyScore },
          score_params.default_value,
          CtPropFilterPredicate{ CtPredicateType::GreaterEqual }
       };
-      m_min_score_filter_ctrl = SpinDoubleFilterCtrl::create(*(parent->GetStaticBox()), m_sink.getSource(), score_filter, score_params);
+      m_min_score_filter_ctrl = SpinDoubleFilterCtrl::create(*(parent->GetStaticBox()), m_sink.getSource(), filter, score_params);
       parent->Add(m_min_score_filter_ctrl, wxSizerFlags{}.Expand().Border(wxALL));
+		m_supported_filters.insert(filter.filter_name);
+
 
       // min price filter checkbox
       auto price_params = SpinDoubleFilterCtrl::SpinParams{
@@ -198,23 +208,27 @@ namespace ctb::app
          .default_value  = FILTER_MIN_PRICE_DEFAULT,
          .decimal_places = 0,
       };
-      auto price_filter = CtPropertyFilter{
+      filter = CtPropertyFilter{
          LBL_CHECK_MIN_PRICE,
          { MyPrice },
          price_params.default_value,
          CtPropFilterPredicate{ CtPredicateType::GreaterEqual }
       };
-      m_min_price_filter_ctrl = SpinDoubleFilterCtrl::create(*(parent->GetStaticBox()), m_sink.getSource(), price_filter, price_params);
+      m_min_price_filter_ctrl = SpinDoubleFilterCtrl::create(*(parent->GetStaticBox()), m_sink.getSource(), filter, price_params);
       parent->Add(m_min_price_filter_ctrl, wxSizerFlags{}.Expand().Border(wxALL));
+		m_supported_filters.insert(filter.filter_name);
+
 
       // max price filter checkbox
       price_params.default_value = FILTER_MAX_PRICE_DEFAULT;
-      price_filter.compare_pred  = CtPropFilterPredicate{ CtPredicateType::LessEqual };
-      price_filter.compare_val   = price_params.default_value;
-      price_filter.filter_name   = LBL_CHECK_MAX_PRICE;
-      m_max_price_filter_ctrl    = SpinDoubleFilterCtrl::create(*(parent->GetStaticBox()), m_sink.getSource(), price_filter, price_params);
+      filter.compare_pred        = CtPropFilterPredicate{ CtPredicateType::LessEqual };
+      filter.compare_val         = price_params.default_value;
+      filter.filter_name         = LBL_CHECK_MAX_PRICE;
+      m_max_price_filter_ctrl    = SpinDoubleFilterCtrl::create(*(parent->GetStaticBox()), m_sink.getSource(), filter, price_params);
       parent->Add(m_max_price_filter_ctrl, wxSizerFlags{}.Expand().Border(wxALL));
+		m_supported_filters.insert(filter.filter_name);
 
+      
       // categorize controls so we can show/hide as appropriate.
       m_categorized.addControlDependency(ControlCategory::InStockFilter,       m_filter_checkboxes[InStockFilter ]     );
       m_categorized.addControlDependency(ControlCategory::MaxPriceFilter,      m_max_price_filter_ctrl                 );
@@ -288,35 +302,26 @@ namespace ctb::app
       m_categorized.showCategory(ControlCategory::ReadyToDrinkFilter,  dataset->hasProperty(CtProp::RtdQtyDefault));
       m_categorized.showCategory(ControlCategory::WithRemainingFilter, dataset->hasProperty(CtProp::PurchaseQtyRemaining));
 
-		// keep track of which filters we have controls for
-      StringSet matched_filter_names{};
-
-      // get the filters for our checkboxes
-      for (auto* check_box : vws::values(m_filter_checkboxes))
-      {
-         auto filter = dataset->propFilters().getFilter(check_box->filter().filter_name);
-         if (filter)
-         {
-            matched_filter_names.insert(filter->filter_name);
-            check_box->enable(true);
-         }
-         else {
-				check_box->enable(false);
-         }
-      }
-
-      // For any property filters that we don't have a matching control for, we need to remove them from the dataset
+      // For any property filters that we don't have UI for, we need to remove them from the dataset. Shouldn't happen 
+      // but might in the case of filters persisted to file from an earlier version.
       {
          ScopedDatasetFreeze freeze{ dataset };
          auto active_filter_names = vws::keys(dataset->propFilters().activeFilters()) | rng::to<StringSet>();
          for (const auto& name : active_filter_names)
          {
-            if (!matched_filter_names.contains(name))
+            if (!m_supported_filters.contains(name))
             {
                wxGetApp().displayFormattedMessage("Removing unsupported filter '{}'", name);
                dataset->propFilters().removeFilter(name);
             }
          }
+      }
+
+      // get the filters for our checkboxes
+      for (auto* check_box : vws::values(m_filter_checkboxes))
+      {
+         auto filter = dataset->propFilters().getFilter(check_box->filter().filter_name);
+			check_box->enable(filter.has_value() ? true : false);
       }
       
       TransferDataToWindow();

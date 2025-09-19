@@ -79,6 +79,7 @@ namespace ctb::app
       SpinDoubleFilterCtrl* m_min_score_filter_ctrl{};
       SpinDoubleFilterCtrl* m_min_price_filter_ctrl{};
       SpinDoubleFilterCtrl* m_max_price_filter_ctrl{};
+      StringSet             m_supported_filters{};        // set of filter names that we have controls for
       wxStaticText*         m_dataset_title{};
 
       // window creation
