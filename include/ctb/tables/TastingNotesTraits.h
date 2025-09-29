@@ -52,14 +52,13 @@ namespace ctb
          { Prop::TastingDate,           FieldSchema { Prop::TastingDate,          PropType::Date,       18 }},
          { Prop::TastingFlawed,         FieldSchema { Prop::TastingFlawed,        PropType::Boolean,    19 }},
          { Prop::TastingLiked,          FieldSchema { Prop::TastingLiked,         PropType::Boolean,    32 }},
-         { Prop::TastingNote,           FieldSchema { Prop::TastingNote,          PropType::String,     31 }},
-         { Prop::TastingNoteComments,   FieldSchema { Prop::TastingNoteComments,  PropType::String,     38 }},
-         { Prop::TastingNoteViews,      FieldSchema { Prop::TastingNoteViews,     PropType::UInt16,     21 }},
-         { Prop::TastingNoteVotes,      FieldSchema { Prop::TastingNoteVotes,     PropType::UInt16,     37 }},
+         { Prop::TastingNotes,          FieldSchema { Prop::TastingNotes,         PropType::String,     31 }},
+         { Prop::TastingCommentCount,   FieldSchema { Prop::TastingCommentCount,  PropType::UInt16,     38 }},
+         { Prop::TastingViewCount,      FieldSchema { Prop::TastingViewCount,     PropType::UInt16,     21 }},
+         { Prop::TastingVoteCount,      FieldSchema { Prop::TastingVoteCount,     PropType::UInt16,     37 }},
          { Prop::TastingCtNoteCount,    FieldSchema { Prop::TastingCtNoteCount,   PropType::UInt16,     33 }},
          { Prop::TastingCtLikePercent,  FieldSchema { Prop::TastingCtLikePercent, PropType::Double,     36 }},
          { Prop::TastingCtLikeCount,    FieldSchema { Prop::TastingCtLikeCount,   PropType::UInt16,     35 }},
-         { Prop::TastingCtSummary,      FieldSchema { Prop::TastingCtSummary,     PropType::UInt16,     {} }},
          { Prop::WineAndVintage,        FieldSchema { Prop::WineAndVintage,       PropType::String,     {} }},
       });
 
@@ -86,7 +85,7 @@ namespace ctb
       /// @brief multi-value filters that can be used on this table.
       static inline const std::array MultiValueFilters
       {
-         MultiValueFilter{ Prop::PendingOrderDate,  constants::FILTER_ORDER_DATE  },
+         MultiValueFilter{ Prop::TastingDate,       constants::FILTER_ORDER_DATE  },
          MultiValueFilter{ Prop::Varietal,          constants::FILTER_VARIETAL    },
          MultiValueFilter{ Prop::Vintage,           constants::FILTER_VINTAGE     },
          MultiValueFilter{ Prop::Country,           constants::FILTER_COUNTRY     },
@@ -127,15 +126,18 @@ namespace ctb
          using enum Prop;
 
          rec[WineAndVintage] = getWineAndVintage(rec);
+         
          auto score = rec[MyScore].asInt32().value_or(0);
          if (score == 0)
          {
-            rec[MyScore].setNull();
+            rec[MyScore].setNull();       // We don't want to see a bunch of zero's, make them blank/null.
 			}
          if (rec[TastingFlawed].asBool() == false)
          { 
-				rec[TastingFlawed].setNull();  // We don't want to see "No" values in the list.
+				rec[TastingFlawed].setNull();  // We don't want to see "No" values in the list for this property, just "Yes".
          }
+
+         
       }
 
    };

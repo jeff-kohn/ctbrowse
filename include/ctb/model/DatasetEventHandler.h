@@ -113,11 +113,15 @@ namespace ctb
          detach();
       }
 
+      DatasetEventHandler() = delete;
+      DatasetEventHandler(const DatasetEventHandler&) = default;
+      DatasetEventHandler(DatasetEventHandler&&) = default;
+      DatasetEventHandler& operator=(const DatasetEventHandler&) = default;
+      DatasetEventHandler& operator=(DatasetEventHandler&&) = default;
 
    private:
       DatasetEventSourcePtr m_source{ nullptr };
       CallbackMap           m_callbacks{};
-
 
       void notify(DatasetEvent event) override
       {

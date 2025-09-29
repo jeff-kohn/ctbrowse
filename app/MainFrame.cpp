@@ -11,9 +11,9 @@
 #include "CtCredentialManager.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
+#include "views/DatasetDetailsView.h"
 #include "views/DatasetMultiView.h"
-#include "views/DatasetOptionsPanel.h"
-#include "views/DetailsPanel.h"
+#include "views/DatasetOptionsView.h"
 
 #include <ctb/utility.h>
 #include <ctb/utility_chrono.h>

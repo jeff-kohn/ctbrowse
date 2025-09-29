@@ -1,16 +1,15 @@
 /*******************************************************************
- * @file DatasetOptionsPanel.cpp
+ * @file DatasetOptionsView.cpp
  *
- * @brief implementation file for the DatasetOptionsPanel class
+ * @brief implementation file for the DatasetOptionsView class
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
 
-#include "views/DatasetOptionsPanel.h"
-#include "views/FilterCheckBox.h" 
-#include "views/MultiValueFilterTree.h"
-#include "views/SpinDoubleFilterCtrl.h"
-#include "model/CtDatasetOptions.h"
+#include "controls/FilterCheckBox.h" 
+#include "controls/MultiValueFilterTree.h"
+#include "controls/SpinDoubleFilterCtrl.h"
+#include "views/DatasetOptionsView.h"
 #include "wx_helpers.h"
 
 #include <ctb/model/ScopedDatasetFreeze.h>
@@ -47,7 +46,7 @@ namespace ctb::app
    } // namespace
    
 
-   [[nodiscard]] auto DatasetOptionsPanel::create(wxWindow& parent, DatasetEventSourcePtr source) noexcept(false) -> DatasetOptionsPanel*
+   [[nodiscard]] auto DatasetOptionsView::create(wxWindow& parent, DatasetEventSourcePtr source) noexcept(false) -> DatasetOptionsView*
    {
       if (!source)
       {
@@ -55,7 +54,7 @@ namespace ctb::app
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
 
-      std::unique_ptr<DatasetOptionsPanel> wnd{ new DatasetOptionsPanel{source} };
+      std::unique_ptr<DatasetOptionsView> wnd{ new DatasetOptionsView{source} };
       if (!wnd->Create(&parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
@@ -65,11 +64,11 @@ namespace ctb::app
    }
 
 
-   DatasetOptionsPanel::DatasetOptionsPanel(DatasetEventSourcePtr source) : m_sink{ this, source }
+   DatasetOptionsView::DatasetOptionsView(DatasetEventSourcePtr source) : m_sink{ this, source }
    {}
 
 
-   void DatasetOptionsPanel::initControls()
+   void DatasetOptionsView::initControls()
    {
       using namespace ctb::constants;
 
@@ -141,16 +140,16 @@ namespace ctb::app
       SetSizer(top_sizer);
 
       // event bindings.
-      m_sort_combo->Bind(wxEVT_CHOICE, &DatasetOptionsPanel::onSortSelection, this);
-      opt_ascending->Bind( wxEVT_RADIOBUTTON,   &DatasetOptionsPanel::onSortOrderClicked, this);
-      opt_descending->Bind(wxEVT_RADIOBUTTON,   &DatasetOptionsPanel::onSortOrderClicked, this);
-      m_filter_checkboxes[ControlCategory::InStockFilter      ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterInStockChecked,       this);
-      m_filter_checkboxes[ControlCategory::ReadyToDrinkFilter ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterReadyToDrinkChecked,  this);     
-      m_filter_checkboxes[ControlCategory::WithRemainingFilter]->Bind(wxEVT_CHECKBOX, &DatasetOptionsPanel::onFilterWithRemainingChecked, this);
+      m_sort_combo->Bind(wxEVT_CHOICE, &DatasetOptionsView::onSortSelection, this);
+      opt_ascending->Bind( wxEVT_RADIOBUTTON,   &DatasetOptionsView::onSortOrderClicked, this);
+      opt_descending->Bind(wxEVT_RADIOBUTTON,   &DatasetOptionsView::onSortOrderClicked, this);
+      m_filter_checkboxes[ControlCategory::InStockFilter      ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsView::onFilterInStockChecked,       this);
+      m_filter_checkboxes[ControlCategory::ReadyToDrinkFilter ]->Bind(wxEVT_CHECKBOX, &DatasetOptionsView::onFilterReadyToDrinkChecked,  this);     
+      m_filter_checkboxes[ControlCategory::WithRemainingFilter]->Bind(wxEVT_CHECKBOX, &DatasetOptionsView::onFilterWithRemainingChecked, this);
    }
 
 
-   void DatasetOptionsPanel::createOptionFilters(wxStaticBoxSizer* parent)
+   void DatasetOptionsView::createOptionFilters(wxStaticBoxSizer* parent)
    {
       using enum CtProp;
       using enum ControlCategory;
@@ -240,7 +239,7 @@ namespace ctb::app
    }
 
 
-   auto DatasetOptionsPanel::setTitle() -> bool
+   auto DatasetOptionsView::setTitle() -> bool
    {
       auto dataset = m_sink.getDatasetOrThrow();
       m_dataset_title->SetLabelText( dataset->getCollectionName());
@@ -249,7 +248,7 @@ namespace ctb::app
    }
 
 
-   auto DatasetOptionsPanel::getSortOptionList(DatasetPtr dataset) -> wxArrayString
+   auto DatasetOptionsView::getSortOptionList(DatasetPtr dataset) -> wxArrayString
    {
       return vws::all(dataset->availableSorts()) 
          | vws::transform([](const IDataset::TableSort& s) {  return wxFromSV(s.sort_name); })
@@ -257,7 +256,7 @@ namespace ctb::app
    }
 
    
-   void DatasetOptionsPanel::notify(DatasetEvent event)
+   void DatasetOptionsView::notify(DatasetEvent event)
    {
       assert(event.dataset);
 
@@ -286,7 +285,7 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onDatasetInitialize(DatasetPtr dataset)
+   void DatasetOptionsView::onDatasetInitialize(DatasetPtr dataset)
    {
       // reload sort/filter options
       m_sort_combo->Clear();
@@ -329,7 +328,7 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onTableSorted(DatasetPtr dataset)
+   void DatasetOptionsView::onTableSorted(DatasetPtr dataset)
    {
       m_sort_config = dataset->activeSort();
       m_sort_ascending = (m_sort_config.reverse == false);
@@ -347,7 +346,7 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onFilterChecked(ControlCategory control_cat)
+   void DatasetOptionsView::onFilterChecked(ControlCategory control_cat)
    {
       try
       {
@@ -371,25 +370,25 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onFilterInStockChecked([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsView::onFilterInStockChecked([[maybe_unused]] wxCommandEvent& event)
    {
       onFilterChecked(ControlCategory::InStockFilter);
    }
 
 
-   void DatasetOptionsPanel::onFilterReadyToDrinkChecked([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsView::onFilterReadyToDrinkChecked([[maybe_unused]] wxCommandEvent& event)
    {
       onFilterChecked(ControlCategory::ReadyToDrinkFilter);
    }
 
 
-   void DatasetOptionsPanel::onFilterWithRemainingChecked([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsView::onFilterWithRemainingChecked([[maybe_unused]] wxCommandEvent& event)
    {
       onFilterChecked(ControlCategory::WithRemainingFilter);
    }
 
 
-   void DatasetOptionsPanel::onSortOrderClicked([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsView::onSortOrderClicked([[maybe_unused]] wxCommandEvent& event)
    {
       try
       {
@@ -406,7 +405,7 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsPanel::onSortSelection([[maybe_unused]] wxCommandEvent& event)
+   void DatasetOptionsView::onSortSelection([[maybe_unused]] wxCommandEvent& event)
    {
       try
       {
@@ -428,7 +427,7 @@ namespace ctb::app
                   m_sink.signal_source(DatasetEvent::Id::Sort, true); 
                }
                else {
-						log::warn("DatasetOptionsPanel::onSortSelection: invalid sort index selected: {}", m_sort_selection);
+						log::warn("DatasetOptionsView::onSortSelection: invalid sort index selected: {}", m_sort_selection);
                }
             });
       }

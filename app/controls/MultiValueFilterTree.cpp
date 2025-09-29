@@ -223,7 +223,7 @@ namespace ctb::app
          auto current_filter = getFilter(item);
          auto dataset = m_sink.getDatasetOrThrow();
 
-         // we want all select all unselected values and vice-versa. so remove current selected values from
+         // we want to select all unselected values and vice-versa. so remove current selected values from
          // full list of values to get the list we need to select. 
          CtMultiValueFilter::MatchValues new_values{};
          auto all_values = dataset->getDistinctValues(current_filter.prop_id, false);

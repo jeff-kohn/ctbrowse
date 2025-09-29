@@ -39,6 +39,7 @@ namespace ctb
       using ListColumnSpan      = base::ListColumnSpan;
       using MultiValueFilterMgr = base::MultiValueFilterMgr;
       using Prop                = base::Prop;
+      using PropType            = detail::PropType;
       using PropertyVal         = base::PropertyVal;
       using PropertyFilterMgr   = base::PropertyFilterMgr;
       using PropertyMap         = base::PropertyMap;

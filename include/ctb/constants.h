@@ -178,6 +178,18 @@ namespace ctb::constants
    inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, with {} Bottles Cellared and {} Pending Delivery";
    inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles.";
    inline constexpr const char* FMT_SUMMARY_TASTING_NOTES         = "{} Tasting Notes Recorded for {} Wines.";
+   inline constexpr const char* FMT_TASTING_CT_LIKE_SUMMARY       = "{} ({}%)";
+   inline constexpr const char* FMT_TASTING_LIKE_MSG              = "I {} this wine";
+   inline constexpr const char* FMT_TASTING_FEEDBACK_VWS_VOTES    = "{} Views, {} 'Helpful' Votes";
+   inline constexpr const char* FMT_TASTING_FEEDBACK_VWS_COMMENTS = "{} Views, {} comments";
+   inline constexpr const char* FMT_TASTING_FEEDBACK_VWS_COMMENTS_VOTES = "{} Views, {} Comments and {} 'Helpful' Votes";
+   inline constexpr const char* FMT_TASTING_FEEDBACK_VIEWS        = "{} Views";
+
+   inline constexpr const char* STR_LIKE                          = "like";
+   inline constexpr const char* STR_DONT_LIKE                     = "do NOT like";
+   inline constexpr const char* STR_CRLF                          = "\r\n";
+   inline constexpr const char* STR_FLAWED_WINE                   = "This wine was flawed";
+
 
    inline constexpr const char* LBL_SIZE_750ml                    = "750ml";
    inline constexpr const char* LBL_SIZE_375ml                    = "375ml";

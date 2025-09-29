@@ -112,7 +112,7 @@ namespace ctb::constants
    inline constexpr int      FILTER_SCORE_DIGITS                  =           1;
    inline constexpr double   FILTER_AVAILABLE_MIN_QTY             =       0.999;
 
-   // DetailsPanel labels
+   // DatasetDetailsView labels
    inline constexpr const char* LBL_APPELLATION                   = "Appellation:";
    inline constexpr const char* LBL_AUCTION_PRICE                 = "Auction Value:";
    inline constexpr const char* LBL_CHECK_IN_STOCK_ONLY           = "Only In-Stock Wines";
@@ -124,11 +124,14 @@ namespace ctb::constants
    inline constexpr const char* LBL_CONSUME_DATE                  = "Consumed On:";
    inline constexpr const char* LBL_CONSUME_REASON                = "Reason:";
    inline constexpr const char* LBL_COUNTRY                       = "Country:";
+   inline constexpr const char* LBL_CT_LIKES                      = "CT Likes:";
    inline constexpr const char* LBL_CT_PRICE                      = "Community Avg:";
    inline constexpr const char* LBL_CT_SCORE                      = "CT Score:";
    inline constexpr const char* LBL_DRINK_WINDOW                  = "Drink Window:";
    inline constexpr const char* LBL_DRINK_WINDOW_MY               = "My Drink Window:";
    inline constexpr const char* LBL_DRINK_WINDOW_CT               = "CT Drink Window:";
+   inline constexpr const char* LBL_FLAWED                        = "Flawed:";
+   inline constexpr const char* LBL_LIKED                         = "Liked:";
    inline constexpr const char* LBL_MATCH_FILTERS                 = "Match Filters";
    inline constexpr const char* LBL_LOCATION                      = "Location:";
    inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
@@ -148,6 +151,9 @@ namespace ctb::constants
    inline constexpr const char* LBL_SORT_OPTIONS                  = "Sort Options";
    inline constexpr const char* LBL_STORE_NAME                    = "Store:";
    inline constexpr const char* LBL_SUB_REGION                    = "Subregion:";
+   inline constexpr const char* LBL_TASTING_NOTE                  = "Tasting Note";
+   inline constexpr const char* LBL_TASTING_CT_SUMMARY            = "CT Stats:";
+
    inline constexpr const char* LBL_VALUATION                     = "Valuation";
    inline constexpr const char* LBL_VARIETAL                      = "Master Varietal:";
    inline constexpr const char* LBL_VINTAGE                       = "Vintage:";

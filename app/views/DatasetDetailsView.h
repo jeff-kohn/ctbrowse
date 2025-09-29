@@ -1,7 +1,7 @@
 /*********************************************************************
- * @file       DetailsPanel.h
+ * @file       DatasetDetailsView.h
  *
- * @brief      declaration for the DetailsPanel class
+ * @brief      declaration for the DatasetDetailsView class
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
@@ -19,11 +19,12 @@
 
 // forward declaration for member ptr
 class wxBoxSizer;
+class wxGridSizer;
 class wxGenericStaticBitmap;
 
 namespace ctb::app
 {
-   class DetailsPanel final : public wxPanel, public IDatasetEventSink
+   class DatasetDetailsView final : public wxPanel, public IDatasetEventSink
    {
    public:
       /// @brief creates and initializes a panel for showing wine details
@@ -33,7 +34,7 @@ namespace ctb::app
       /// its own lifetime). 
       /// 
       [[nodiscard]] static 
-      auto create(wxWindow* parent, const DatasetEventSourcePtr& source, LabelCachePtr cache) -> DetailsPanel*;
+      auto create(wxWindow* parent, const DatasetEventSourcePtr& source, LabelCachePtr cache) -> DatasetDetailsView*;
 
       /// @brief Indicates whether the details for a selected wine are currently displayed.
       /// @return true if a wine is displayed in details, false otherwise.
@@ -41,11 +42,11 @@ namespace ctb::app
       auto wineDetailsActive() const -> bool;
 
       // no copy/move/assign, this class is created on the heap.
-      DetailsPanel(const DetailsPanel&) = delete;
-      DetailsPanel(DetailsPanel&&) = delete;
-      DetailsPanel& operator=(const DetailsPanel&) = delete;
-      DetailsPanel& operator=(DetailsPanel&&) = delete;
-      ~DetailsPanel() override = default;
+      DatasetDetailsView(const DatasetDetailsView&) = delete;
+      DatasetDetailsView(DatasetDetailsView&&) = delete;
+      DatasetDetailsView& operator=(const DatasetDetailsView&) = delete;
+      DatasetDetailsView& operator=(DatasetDetailsView&&) = delete;
+      ~DatasetDetailsView() override = default;
 
    private:
       using wxImageTask    = LabelImageCache::wxImageTask;
@@ -54,6 +55,7 @@ namespace ctb::app
       // these control categories allow us to show/hide different controls based on context of current dataset
       enum class ControlCategory
       {
+         BottleImage,
          Consumed,
          CtDrinkWindow,        // ReadyToDrink dataset has both 'My' and 'CT' windows
          DrinkWindow,
@@ -65,7 +67,7 @@ namespace ctb::app
          Pending,
          Score,
          Size,
-         TastingNotes,
+         TastingNote,
          Valuation,
          WineDetails,
       };
@@ -94,6 +96,10 @@ namespace ctb::app
          wxString my_price{};
          wxString community_price{};
          wxString auction_value{};
+         wxString tasting_notes{};
+         wxString tasting_ct_likes_txt{};
+         wxString tasting_liked_flawed_txt{};
+         wxString tasting_feedback_txt{};
 
          std::string pending_purchase_id{}; // used for building CT url, not displayed
          wxString pending_order_date{};
@@ -113,9 +119,15 @@ namespace ctb::app
       wxGenericStaticBitmap* m_label_image{};
       wxTimer                m_label_timer{};
       wxString               m_drink_window_label{ constants::LBL_DRINK_WINDOW };
+      wxGridSizer*           m_details_sizer{};
 
       // impl
       void initControls();
+      void createDetailsGroup(wxBoxSizer* top_sizer);
+      void createScoreGroup(wxBoxSizer* top_sizer);
+      void createValuationGroup(wxBoxSizer* top_sizer);
+      void createPendingGroup(wxBoxSizer* top_sizer);
+      void createTastingGroup(wxBoxSizer* top_sizer);
       void addCommandLinkButton(wxBoxSizer* sizer, CmdId cmd, CategorizedControls::Category category, std::string_view command_text, std::string_view note = constants::DETAILS_CMD_LINK_NOTE);
       void checkLabelResult();
       void displayLabel();
@@ -130,7 +142,7 @@ namespace ctb::app
       void onLabelTimer(wxTimerEvent& event);
 
       // private ctor used by create()
-      explicit DetailsPanel(DatasetEventSourcePtr source, LabelCachePtr cache);
+      explicit DatasetDetailsView(DatasetEventSourcePtr source, LabelCachePtr cache);
    };
 
 } // namespace ctb::app

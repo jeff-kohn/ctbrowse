@@ -93,15 +93,18 @@
             "value": "x64",
             "strategy": "external"
          },
+         "cacheVariables": {
+            "CMAKE_CONFIGURATION_TYPES": "Debug;Release"
+         },
          "vendor": {
             "microsoft.com/VisualStudioSettings/CMake/1.0": {
-               "intelliSenseMode": "windows-msvc-x64",
-               "enableMicrosoftCodeAnalysis": false,
-               "enableClangTidyCodeAnalysis": false,
-               "enableUndefinedBehaviorSanitizer": true,
-               "disableExternalAnalysis": true
-            }
+            "intelliSenseMode": "windows-msvc-x64",
+            "enableMicrosoftCodeAnalysis": false,
+            "enableClangTidyCodeAnalysis": false,
+            "enableUndefinedBehaviorSanitizer": true,
+            "disableExternalAnalysis": true
          }
+      }
       },
       {
          "name": "ci-win-clang",

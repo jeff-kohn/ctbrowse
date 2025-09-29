@@ -101,14 +101,13 @@ namespace ctb
       TastingDate,
       TastingFlawed,
       TastingLiked,
-      TastingNote,
-      TastingNoteComments,
-      TastingNoteViews,
-      TastingNoteVotes,
+      TastingNotes,
+      TastingCommentCount,
+      TastingViewCount,
+      TastingVoteCount,
       TastingCtNoteCount,
       TastingCtLikePercent,
       TastingCtLikeCount,
-		TastingCtSummary,      // calculated field, combines the other three Ct fields into a summary string
    };
 
    

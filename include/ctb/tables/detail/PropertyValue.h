@@ -93,6 +93,12 @@ namespace ctb::detail
          return m_val.index() == 0;
       }
 
+      /// @return Returns true if isNull() == false
+      auto hasValue() const -> bool
+      {
+         return !isNull();
+      }
+
       /// @brief sets the contained value of this object to represent 'null' (e.g. std::monostate)
       /// 
       void setNull()

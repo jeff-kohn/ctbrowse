@@ -1,7 +1,7 @@
 /*******************************************************************
- * @file DatasetOptionsPanel.h
+ * @file DatasetOptionsView.h
  *
- * @brief Header file for DatasetOptionsPanel class
+ * @brief Header file for DatasetOptionsView class
  * 
  * @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
  *******************************************************************/
@@ -35,22 +35,22 @@ namespace ctb::app
 
    /// @brief panel class that provides UI for setting sorting and filtering options
    ///
-   class DatasetOptionsPanel final : public wxPanel, public IDatasetEventSink
+   class DatasetOptionsView final : public wxPanel, public IDatasetEventSink
    {
    public:
       /// @brief creates and initializes a panel for showing sort/filter options
       ///
       /// throws a ctb::Error if source == nullptr, or if the window can't be created;
       /// otherwise returns a non-owning pointer to the window
-      [[nodiscard]] static auto create(wxWindow& parent, DatasetEventSourcePtr source) noexcept(false) -> DatasetOptionsPanel* ;   
+      [[nodiscard]] static auto create(wxWindow& parent, DatasetEventSourcePtr source) noexcept(false) -> DatasetOptionsView* ;   
 
 
       // no copy/move/assign, this class is created on the heap.
-      DatasetOptionsPanel(const DatasetOptionsPanel&) = delete;
-      DatasetOptionsPanel(DatasetOptionsPanel&&) = delete;
-      DatasetOptionsPanel& operator=(const DatasetOptionsPanel&) = delete;
-      DatasetOptionsPanel& operator=(DatasetOptionsPanel&&) = delete;
-      ~DatasetOptionsPanel() override = default;
+      DatasetOptionsView(const DatasetOptionsView&) = delete;
+      DatasetOptionsView(DatasetOptionsView&&) = delete;
+      DatasetOptionsView& operator=(const DatasetOptionsView&) = delete;
+      DatasetOptionsView& operator=(DatasetOptionsView&&) = delete;
+      ~DatasetOptionsView() override = default;
       
    private:
       enum class ControlCategory : uint16_t
@@ -103,7 +103,7 @@ namespace ctb::app
       void onSortSelection(wxCommandEvent& event);
 
       /// @brief private ctor used by static create()
-      explicit DatasetOptionsPanel(DatasetEventSourcePtr source);
+      explicit DatasetOptionsView(DatasetEventSourcePtr source);
    };
 
 } // namespace ctb::app
