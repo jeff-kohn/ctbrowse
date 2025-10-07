@@ -176,7 +176,8 @@ namespace ctb::detail
             }
             case PropType::Boolean:
             {
-               return PropertyVal{ textToBool(fld.get<std::string_view>()) };
+               auto str = fld.get<std::string_view>();
+               return PropertyVal::template parse<bool>(str);
             }
             default:
                assert(false and "PropType enum contains unexpected value, this is a bug!");

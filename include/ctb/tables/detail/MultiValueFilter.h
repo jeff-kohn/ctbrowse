@@ -50,7 +50,7 @@ namespace ctb::detail
             return true;
 
          auto it = rec.find(prop_id);
-         if (it == rec.end() or it->second.isNull())
+         if (it == rec.end())
             return false;
 
         return match_values.find(it->second) != match_values.end();

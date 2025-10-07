@@ -106,31 +106,26 @@ namespace ctb::detail
       ///
       /// currency values will use a dollar sign and 2 decimal places, decimal values will use decimal_places
       template<typename... Args>
-      std::string getDisplayValue(const detail::PropertyValue<Args...>& value) const
+      std::string getDisplayValue(const detail::PropertyValue<Args...>& prop_value) const
       {
          std::string result{};
          switch (format)
          {
             case Format::Decimal:
-               result = value.asString(ctb::format("{{:.{}f}}", decimal_places));
+               result = prop_value.asString(ctb::format("{{:.{}f}}", decimal_places));
                break;
 
             case Format::Currency:  
-               result = value.asString(constants::FMT_NUMBER_CURRENCY);
+               result = prop_value.asString(constants::FMT_NUMBER_CURRENCY);
                break;
 
             case Format::Date:
-               result = value.asString(constants::FMT_DATE_SHORT);
-               break;
-
-            case Format::Boolean:
-               if (value)
-						result = value.asBool() ? "Yes" : "No";
+               result = prop_value.asString(constants::FMT_DATE_SHORT);
                break;
 
 				case Format::Number: [[fallthrough]];
             default:                
-               result = value.asString();
+               result = prop_value.asString();
          }
          return result;
       }

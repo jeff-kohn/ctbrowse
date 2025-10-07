@@ -86,14 +86,16 @@ namespace ctb
       /// @brief multi-value filters that can be used on this table.
       static inline const std::array MultiValueFilters
       {
-         MultiValueFilter{ Prop::TastingDate,       constants::FILTER_ORDER_DATE  },
-         MultiValueFilter{ Prop::Varietal,          constants::FILTER_VARIETAL    },
-         MultiValueFilter{ Prop::Vintage,           constants::FILTER_VINTAGE     },
-         MultiValueFilter{ Prop::Country,           constants::FILTER_COUNTRY     },
-         MultiValueFilter{ Prop::Region,            constants::FILTER_REGION      },
-         MultiValueFilter{ Prop::SubRegion,         constants::FILTER_SUB_REGION  },
-         MultiValueFilter{ Prop::Appellation,       constants::FILTER_APPELATION  },
-         MultiValueFilter{ Prop::Producer,          constants::FILTER_PRODUCER    },
+         MultiValueFilter{ Prop::TastingDate,       constants::FILTER_TASTING_DATE,   true },
+         MultiValueFilter{ Prop::TastingLiked,      constants::FILTER_TASTING_LIKED,  true },
+         MultiValueFilter{ Prop::TastingFlawed,     constants::FILTER_TASTING_FLAWED, true },
+         MultiValueFilter{ Prop::Varietal,          constants::FILTER_VARIETAL             },
+         MultiValueFilter{ Prop::Vintage,           constants::FILTER_VINTAGE              },
+         MultiValueFilter{ Prop::Country,           constants::FILTER_COUNTRY              },
+         MultiValueFilter{ Prop::Region,            constants::FILTER_REGION               },
+         MultiValueFilter{ Prop::SubRegion,         constants::FILTER_SUB_REGION           },
+         MultiValueFilter{ Prop::Appellation,       constants::FILTER_APPELATION           },
+         MultiValueFilter{ Prop::Producer,          constants::FILTER_PRODUCER             },
       };
 
       /// @brief getTableName()
@@ -133,12 +135,11 @@ namespace ctb
          {
             rec[MyScore].setNull();       // We don't want to see a bunch of zero's, make them blank/null.
 			}
-         if (rec[TastingFlawed].asBool() == false)
+         auto flawed = rec[TastingFlawed].asBool();
+         if (flawed.has_value() and *flawed == false)
          { 
 				rec[TastingFlawed].setNull();  // We don't want to see "No" values in the list for this property, just "Yes".
          }
-
-         
       }
 
    };

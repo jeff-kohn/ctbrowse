@@ -16,8 +16,12 @@ namespace ctb::app
    static constexpr int  IMG_CHECKED   = 2;
 
 
-   static constexpr auto getPropertyForFieldType(const CtFieldSchema& fld, std::string_view text_val) -> CtPropertyVal
+   static inline auto getPropertyForFieldType(const CtFieldSchema& fld, std::string_view text_val) -> CtPropertyVal
    {
+      // null?
+      if (boost::iequals(text_val, constants::STR_UNSPECIFIED))
+         return CtPropertyVal{};
+
       switch (fld.prop_type)
       {
       case PropType::String:
@@ -37,6 +41,9 @@ namespace ctb::app
          auto ymd = parseDate(text_val, constants::FMT_PARSE_DATE_SHORT);
          return ymd ? CtPropertyVal{ *ymd } : CtPropertyVal{};
       }
+      case PropType::Boolean:
+         return CtPropertyVal::parse<bool>(text_val);
+
       default:
          log::info("getPropertyForFieldType() encountered unexpected property type with value {}", std::to_underlying(fld.prop_type));
          assert("Unexpected property type, this is a bug" and false);
@@ -526,6 +533,10 @@ namespace ctb::app
       auto createChildNode = [&current_filter, &filter_node, this](const CtPropertyVal& match_value)
          {
             auto match_str = match_value.asString();
+            if (match_value.isNull())
+            {
+               match_str = constants::STR_UNSPECIFIED;
+            }
             auto item = AppendItem(filter_node, match_str);
             SetItemImage(item, IMG_UNCHECKED);
             if (current_filter.match_values.contains(match_value))

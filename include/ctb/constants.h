@@ -75,6 +75,9 @@ namespace ctb::constants
    inline constexpr const char* FILTER_SUB_REGION           = "Sub-Region";
    inline constexpr const char* FILTER_CONSUME_REASON       = "Reason";
    inline constexpr const char* FILTER_STORE                = "Store";
+   inline constexpr const char* FILTER_TASTING_DATE         = "Tasting Date";
+   inline constexpr const char* FILTER_TASTING_FLAWED       = "Flawed Wine";
+   inline constexpr const char* FILTER_TASTING_LIKED        = "I Liked It";
    inline constexpr const char* FILTER_VARIETAL             = "Varietal";
    inline constexpr const char* FILTER_VINTAGE              = "Vintage";
 
@@ -190,14 +193,15 @@ namespace ctb::constants
    inline constexpr const char* STR_DONT_LIKE                     = "do not like";
    inline constexpr const char* STR_CRLF                          = "\r\n";
    inline constexpr const char* STR_FLAWED_WINE                   = "This wine was flawed";
+   inline constexpr const char* STR_UNSPECIFIED                   = "Unspecified";
+   inline constexpr const char* STR_YES                           = "Yes";
+   inline constexpr const char* STR_NO                            = "No";
 
 
    inline constexpr const char* LBL_SIZE_750ml                    = "750ml";
    inline constexpr const char* LBL_SIZE_375ml                    = "375ml";
    inline constexpr const char* LBL_SIZE_MAGNUM                   = "1.5L";
 
-	inline constexpr const char* VALUE_TRUE                        = "TRUE";  
-	inline constexpr const char* VALUE_FALSE                       = "FALSE";
 
    inline constexpr auto     ONE_MB                               = 1024 * 1024;
    inline constexpr uint16_t CT_NULL_YEAR                         =        9999;

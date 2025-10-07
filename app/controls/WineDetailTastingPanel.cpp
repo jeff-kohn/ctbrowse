@@ -10,14 +10,14 @@ namespace ctb::app
 
    static inline wxString getTastingTitle(const DatasetPtr& dataset, int rec_idx)
    {
-      if (dataset->getProperty(rec_idx, CtProp::TastingFlawed).asBool() == true)
+      if (dataset->getProperty(rec_idx, CtProp::TastingFlawed).asBool().value_or(false) == true)
       {
          return constants::STR_FLAWED_WINE;
       }
-      auto liked = dataset->getProperty(rec_idx, CtProp::TastingLiked);
-      if (liked.hasValue())
+      auto maybe_liked = dataset->getProperty(rec_idx, CtProp::TastingLiked).asBool();
+      if (maybe_liked.has_value())
       {
-         return ctb::format(constants::FMT_TASTING_LIKE_MSG, liked.asBool() ? constants::STR_LIKE : constants::STR_DONT_LIKE );
+         return ctb::format(constants::FMT_TASTING_LIKE_MSG, *maybe_liked ? constants::STR_LIKE : constants::STR_DONT_LIKE );
       }
       return constants::LBL_TASTING_NOTE;
    }

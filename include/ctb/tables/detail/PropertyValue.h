@@ -73,10 +73,11 @@ namespace ctb::detail
       /// @brief Create a PropertyValue from a string_view by parsing it as a bool
       /// @return a PropertyValue containing the parsed bool, or a null PropertyValue if 
       ///  the string couldn't parsed
-		template<BooleanType ValT> requires requires(ValT val) { val = PropertyValue{ true }; }
+		template<BooleanType ValT> 
       [[nodiscard]] static auto parse(std::string_view bool_str) -> PropertyValue
       {
-         return { textToBool(bool_str) };
+         auto val = textToBool(bool_str);
+         return { val.has_value() ? PropertyValue{ *val } : PropertyValue{} };
       }
 
       /// @brief construct a PropertyValue from any value convertible to ValueType
@@ -192,9 +193,10 @@ namespace ctb::detail
 
          auto asStr = Overloaded
          {
-            [](std::monostate)                    {  return std::string{}; },
+            [](std::monostate)                    {  return std::string{};   },
             [&fmt_str](const year_month_day& val) {  return ctb::vformat(fmt_str == FMT_DEFAULT_FORMAT ? FMT_DATE_SHORT : fmt_str, make_format_args(val)); },
-            [&fmt_str](auto val)                  {  return ctb::vformat(fmt_str,  ctb::make_format_args(val)); }
+            [](bool val)                          {  return val ? std::string{ constants::STR_YES } : std::string{ constants::STR_NO };                    },
+            [&fmt_str](auto val)                  {  return ctb::vformat(fmt_str,  ctb::make_format_args(val));                                            }
          };
          return std::visit(asStr, m_val);
       }
@@ -261,14 +263,14 @@ namespace ctb::detail
       }
 
 		/// Returns property as boolean. Incompatible types will always be false (date/time, etc)
-      auto asBool() const -> bool
+      auto asBool() const -> NullableBool
       {
          auto asBool = Overloaded
          {
-            [](const std::monostate)            -> bool { return false;                  },
-            [](const std::string& str)          -> bool { return textToBool(str);        },
-				[](const chrono::year_month_day&)   -> bool { return false;                  },
-            [](const auto& val)                 -> bool { return static_cast<bool>(val); }
+            [](const std::monostate)            -> NullableBool { return std::nullopt;           },
+            [](const std::string& str)          -> NullableBool { return textToBool(str);        },
+            [](const chrono::year_month_day&)   -> NullableBool { return false;                  },
+            [](const auto& val)                 -> NullableBool { return static_cast<bool>(val); }
 			};
          return std::visit(asBool, m_val);
       }
@@ -293,13 +295,6 @@ namespace ctb::detail
       {
          self.m_val = std::forward<T>(t);         
          return std::forward<Self>(self);
-      }
-
-      /// @brief allow checking for null in a conditional statement
-      /// @return true if this object contains a non-null value, false if its value is null
-      explicit operator bool() const
-      {
-         return !isNull();
       }
 
       constexpr PropertyValue() noexcept = default;

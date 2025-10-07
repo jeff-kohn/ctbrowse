@@ -76,12 +76,9 @@ namespace ctb::app
 
       wxWindowUpdateLocker freeze_win(this);
 
-      //SetMaxSize(ConvertDialogToPixels( wxSize{220, -1} ));
       SetMinSize(ConvertDialogToPixels( wxSize{100, -1} ));
-
       auto* top_sizer = new wxBoxSizer(wxVERTICAL);
       SetSizer(top_sizer);
-
 
       top_sizer->Add(new WineDetailMainPanel    { this, m_event_sink.getSource() }, sizer_flags);
       top_sizer->AddSpacer(section_spacer);
@@ -92,7 +89,6 @@ namespace ctb::app
       top_sizer->Add(new WineDetailPendingPanel { this, m_event_sink.getSource() }, sizer_flags);
       top_sizer->AddSpacer(section_spacer);
       top_sizer->Add(new WineDetailTastingPanel { this, m_event_sink.getSource() }, sizer_flags);
-
 
       //// Command-Link buttons (Collection-Specific)
       addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_WINE_DETAILS,   LinkOpenWineDetails, constants::DETAILS_CMD_LINK_WINE_DETAILS);
@@ -115,7 +111,7 @@ namespace ctb::app
    void DatasetDetailsView::addCommandLinkButton(wxBoxSizer* sizer, CmdId cmd, CategorizedControls::Category category, std::string_view command_text, std::string_view note)
    {
       auto* link_button = new wxCommandLinkButton{ this, cmd, wxFromSV(command_text), wxFromSV(note), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER };
-      sizer->Add(link_button, wxSizerFlags().Center().Border(wxALL));
+      sizer->Add(link_button, wxSizerFlags().Center().Border(wxLEFT|wxRIGHT));
       link_button->Bind(wxEVT_BUTTON, &DatasetDetailsView::onCommand, this, cmd);
 
       m_category_controls.addControlDependency(category, link_button);
@@ -204,8 +200,8 @@ namespace ctb::app
 
          auto table_id = event.dataset->getTableId();
          m_category_controls.showCategory(BottleImage, true);
+         m_category_controls.showCategory(LinkOpenWineDetails, table_id != TableId::Pending and table_id != TableId::Availability);
          m_category_controls.showCategory(LinkAcceptPending,   table_id == TableId::Pending);
-         m_category_controls.showCategory(LinkOpenWineDetails, table_id == TableId::List or table_id == TableId::Consumed or table_id == TableId::Purchase);
          m_category_controls.showCategory(LinkReadyToDrink,    table_id == TableId::Availability);
 
          // image ctrl always starts hidden until background image fetch completes. But if it's already hidden, that 
