@@ -15,7 +15,7 @@ namespace ctb
 {
 
 
-   /// @brief Scoped RAII wrapper for subscribing/unsubscribing event handlers for a datasource
+   /// @brief Scoped RAII wrapper for subscribing/unsubscribing event handlers for a data source
    ///
    /// This class is meant to be used as a member in another class that wants to handle DatasetEvents. 
    /// 
@@ -30,7 +30,7 @@ namespace ctb
    public:
       using WeakRef                = std::weak_ptr<DatasetEventHandler>;
       using EventId                = DatasetEvent::Id;
-      using EventCallback          = std::function<void(DatasetEvent& event)>;
+      using EventCallback          = std::function<void(const DatasetEvent& event)>;
       using CallbackMap            = std::unordered_map<EventId, EventCallback>;
 
 
@@ -85,6 +85,11 @@ namespace ctb
          m_callbacks[event_id] = std::move(callback);
       }
 
+      void setDefaultHandler(EventCallback callback =  [](const DatasetEvent& event) {})
+      {
+         m_default_callback = std::move(callback);
+      }
+
 
       /// @brief Unsubscribe from notifications for the specified event_id
       /// @param event_id 
@@ -122,6 +127,7 @@ namespace ctb
    private:
       DatasetEventSourcePtr m_source{ nullptr };
       CallbackMap           m_callbacks{};
+      EventCallback         m_default_callback{ [](const DatasetEvent& event) {} }; // do-nothing default
 
       void notify(DatasetEvent event) override
       {
@@ -129,6 +135,10 @@ namespace ctb
          if (it != m_callbacks.end())
          {
             it->second(event);
+         }
+         else {
+            if (m_default_callback)
+               m_default_callback(event);
          }
       }
 

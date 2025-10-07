@@ -29,8 +29,8 @@ namespace ctb::app
    {
       m_filter.enabled = false;
       initControls(params);
-      m_event_handler.addHandler(DatasetEvent::Id::DatasetInitialize, [this](DatasetEvent& event) { onDatasetInitialize(event); });
-      m_event_handler.addHandler(DatasetEvent::Id::Filter,            [this](DatasetEvent& event) { onDatasetFilter(event);     });
+      m_event_handler.addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event); });
+      m_event_handler.addHandler(DatasetEvent::Id::Filter,            [this](const DatasetEvent& event) { onDatasetFilter(event);     });
    }
 
 
@@ -68,8 +68,6 @@ namespace ctb::app
 
       m_spin->Bind(wxEVT_SPINCTRLDOUBLE, &SpinDoubleFilterCtrl::onSpinValueChanged,  this);
       m_spin->Bind(wxEVT_UPDATE_UI,      &SpinDoubleFilterCtrl::onSpinValueUpdateUI, this);    
-      //m_spin->Bind(wxEVT_TEXT_ENTER,     &SpinDoubleFilterCtrl::onTextEnter,         this);
-      //m_spin->Bind(wxEVT_KEY_DOWN,       &SpinDoubleFilterCtrl::onTextKeyDown,       this);
       m_checkbox->Bind(wxEVT_CHECKBOX,   &SpinDoubleFilterCtrl::onFilterChecked,     this);
    }
 

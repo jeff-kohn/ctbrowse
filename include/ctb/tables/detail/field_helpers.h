@@ -85,7 +85,7 @@ namespace ctb::detail
          prop.setNull();
    }
 
-   auto getDrinkWindow(const CtPropertyVal& drink_start, const CtPropertyVal& drink_end) -> std::string
+   inline auto getDrinkWindow(const CtPropertyVal& drink_start, const CtPropertyVal& drink_end) -> std::string
    {
       if (drink_start.isNull() && drink_end.isNull())
          return "";

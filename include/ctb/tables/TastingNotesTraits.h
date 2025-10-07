@@ -69,6 +69,7 @@ namespace ctb
          CtListColumn{ Prop::TastingDate,     CtListColumn::Format::Date,     constants::DISPLAY_COL_TASTING_DATE },
 			CtListColumn{ Prop::TastingLiked,    CtListColumn::Format::Boolean,  constants::DISPLAY_COL_LIKED        },
 			CtListColumn{ Prop::TastingFlawed,   CtListColumn::Format::Boolean,  constants::DISPLAY_COL_FLAWED       },
+         CtListColumn{ Prop::CtScore,         CtListColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE, 1  },
          CtListColumn{ Prop::MyScore,         CtListColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE, 1  },
       };
 

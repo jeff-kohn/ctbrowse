@@ -180,6 +180,7 @@ namespace ctb::constants
    // app-specific error messages.
    inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN = "Label cache object is shutting down.";
    inline constexpr const char* ERROR_STR_NO_CONFIG_STORE       = "No configuration store available.";
+   inline constexpr const char* ERROR_STR_ORPHANED_SIZER        = "No configuration store available.";
    inline constexpr const char* CT_COOKIE_SECRET_NAME           = "CTSession";
 
 

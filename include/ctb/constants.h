@@ -146,6 +146,7 @@ namespace ctb::constants
    inline constexpr const char* ERROR_STR_RELATIVE_LABEL_CACHE    = "The label image cache folder must be an absolute path, not relative.";
    inline constexpr const char* ERORR_STR_NO_SECRET_STORE         = "Secret Store not available.";
    inline constexpr const char* ERROR_STR_UNKNOWN                 = "Unknown Error.";
+   inline constexpr const char* ERROR_STR_UNINITIALIZED_FIELDS    = "Attempt to use field controls before creating and initializing them.";
    inline constexpr const char* ERROR_VAL                         = "#Err#";
    inline constexpr const char* FMT_ERROR_CURL_ERROR              = "The operation failed with CURL error {}";
    inline constexpr const char* FMT_ERROR_FILE_NOT_FOUND          = "File '{}' was not found.";
@@ -186,7 +187,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_TASTING_FEEDBACK_VIEWS        = "{} Views";
 
    inline constexpr const char* STR_LIKE                          = "like";
-   inline constexpr const char* STR_DONT_LIKE                     = "do NOT like";
+   inline constexpr const char* STR_DONT_LIKE                     = "do not like";
    inline constexpr const char* STR_CRLF                          = "\r\n";
    inline constexpr const char* STR_FLAWED_WINE                   = "This wine was flawed";
 

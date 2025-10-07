@@ -118,7 +118,7 @@ namespace ctb
    };
 
 
-   /// @brief tranlate an exception_ptr to a ctb::Error
+   /// @brief translate an exception_ptr to a ctb::Error
    /// 
    /// useful for code that wants to handle all exceptions with a
    /// catch(...) and return them as an unexpected{ Error{} }
