@@ -153,8 +153,9 @@ namespace ctb::app
       {
          if (!m_sink.hasDataset()) return;
 
-         auto row = m_model->GetRow(event.GetItem());
-         m_sink.signal_source(DatasetEvent::Id::RowSelected, false, static_cast<int>(row));
+         auto row = static_cast<int>(m_model->GetRow(event.GetItem()));
+         if (row >= 0)
+            m_sink.signal_source(DatasetEvent::Id::RowSelected, false, row);
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError());
