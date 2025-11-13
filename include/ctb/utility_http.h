@@ -215,13 +215,13 @@ namespace ctb
    }
 
    /// @brief get the CT URL for accepting a pending delivery
-   inline auto getAcceptPendingUrl(uint64_t wine_id, std::string_view purch_id, const std::chrono::year_month_day& delivery_date) noexcept -> std::string
+   inline auto getAcceptPendingUrl(uint64_t wine_id, uint64_t purch_id, const std::chrono::year_month_day& delivery_date) noexcept -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_ACCEPT_PENDING, wine_id, purch_id, delivery_date);
    }
 
    /// @brief get the CT URL for editing a pending order
-   inline auto getEditPendingUrl(uint64_t wine_id, std::string_view purchase_id) noexcept -> std::string
+   inline auto getEditPendingUrl(uint64_t wine_id, uint64_t purchase_id) noexcept -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_EDIT_ORDER, wine_id, purchase_id);
    }

@@ -839,7 +839,7 @@ namespace ctb::app
       {
          auto dataset = getDataset();
          auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
-         auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asStringView();
+         auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getAcceptPendingUrl(wine_id, purchase_id, getCalendarDate()));
       }
       catch(...){
@@ -854,7 +854,7 @@ namespace ctb::app
       {
          auto dataset = getDataset();
          auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
-         auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asStringView();
+         auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getEditPendingUrl(wine_id, purchase_id));
       }
       catch(...){
