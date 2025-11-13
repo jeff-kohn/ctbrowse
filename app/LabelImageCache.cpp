@@ -67,7 +67,7 @@ namespace ctb::app
    }
 
 
-   auto LabelImageCache::fetchLabelImage(std::string_view wine_id) -> wxImageTask
+   auto LabelImageCache::fetchLabelImage(uint64_t wine_id) -> wxImageTask
    {
       checkShutdown();
 
@@ -101,7 +101,7 @@ namespace ctb::app
    }
 
 
-   auto LabelImageCache::runFetchAndSaveLabelTask(fs::path folder, std::string_view wine_id, std::stop_token token) noexcept(false) -> FetchFileTask::ReturnType
+   auto LabelImageCache::runFetchAndSaveLabelTask(fs::path folder, uint64_t wine_id, std::stop_token token) noexcept(false) -> FetchFileTask::ReturnType
    {
       try
       {

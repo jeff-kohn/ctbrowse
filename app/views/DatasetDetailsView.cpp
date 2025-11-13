@@ -208,7 +208,7 @@ namespace ctb::app
          // means it's not used for this collection so leave it be and don't fetch background image
          if (m_label_image->IsShownOnScreen())
          {
-            auto wine_id = event.dataset->getProperty(event.affected_row.value(), CtProp::iWineId).asStringView();
+            auto wine_id = event.dataset->getProperty(event.affected_row.value(), CtProp::iWineId).asUInt64().value_or(0);
             m_image_result = m_label_cache->fetchLabelImage(wine_id);
             m_label_image->Hide();
             checkLabelResult();

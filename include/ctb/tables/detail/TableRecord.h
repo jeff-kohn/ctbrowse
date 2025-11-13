@@ -148,7 +148,7 @@ namespace ctb::detail
                return fld.is_int() ? PropertyVal{ fld.get<uint16_t>() } : PropertyVal{};
 
             case PropType::UInt64:
-               return fld.is_int() ? PropertyVal{ fld.get<uint16_t>() } : PropertyVal{};
+               return fld.is_int() ? PropertyVal{ fld.get<uint64_t>() } : PropertyVal{};
 
             case PropType::Double:
             {

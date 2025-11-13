@@ -768,7 +768,7 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getWineDetailsUrl(wine_id));
       }
       catch(...){
@@ -796,7 +796,7 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getDrinkWindowUrl(wine_id));
       }
       catch(...){
@@ -810,7 +810,7 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getAddToCellarUrl(wine_id));
       }
       catch(...){
@@ -824,7 +824,7 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getAddTastingNoteUrl(wine_id));
       }
       catch(...){
@@ -838,7 +838,7 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asStringView();
          wxLaunchDefaultBrowser(getAcceptPendingUrl(wine_id, purchase_id, getCalendarDate()));
       }
@@ -853,7 +853,7 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asStringView();
          wxLaunchDefaultBrowser(getEditPendingUrl(wine_id, purchase_id));
       }
@@ -868,7 +868,7 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getDrinkRemoveUrl(wine_id));
       }
       catch(...){

@@ -36,8 +36,8 @@ namespace ctb
 
       static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
       {
-         { Prop::WineAndVintage,       FieldSchema { Prop::WineAndVintage,       PropType::Double,   {} }},
-         { Prop::iWineId,              FieldSchema { Prop::iWineId,              PropType::String,    0 }},
+         { Prop::WineAndVintage,       FieldSchema { Prop::WineAndVintage,       PropType::String,   {} }},
+         { Prop::iWineId,              FieldSchema { Prop::iWineId,              PropType::UInt64,    0 }},
          { Prop::WineName,             FieldSchema { Prop::WineName,             PropType::String,   23 }},
          { Prop::Locale,               FieldSchema { Prop::Locale,               PropType::String,   25 }},
          { Prop::Vintage,              FieldSchema { Prop::Vintage,              PropType::UInt16,   22 }},
