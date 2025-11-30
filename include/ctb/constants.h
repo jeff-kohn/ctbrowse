@@ -54,6 +54,7 @@ namespace ctb::constants
    inline constexpr const char* DISPLAY_COL_REMAINING       = "Bottles Left";
    inline constexpr const char* DISPLAY_COL_STORE           = "Store";
    inline constexpr const char* DISPLAY_COL_TASTING_DATE    = "Tasting Date";
+   inline constexpr const char* DISPLAY_COL_TAG_NAME        = "Tag Name";
    inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
 
    inline constexpr const char* DISPLAY_COL_CURVE_LINEAR        = "Linear";
@@ -78,6 +79,7 @@ namespace ctb::constants
    inline constexpr const char* FILTER_TASTING_DATE         = "Tasting Date";
    inline constexpr const char* FILTER_TASTING_FLAWED       = "Flawed Wine";
    inline constexpr const char* FILTER_TASTING_LIKED        = "I Liked It";
+   inline constexpr const char* FILTER_TAG_NAME             = "Tag/List Name";
    inline constexpr const char* FILTER_VARIETAL             = "Varietal";
    inline constexpr const char* FILTER_VINTAGE              = "Vintage";
 
@@ -95,6 +97,7 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_APPELATION_WINE       = "Appellation, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_CONSUME_DATE          = "Date Consumed";
    inline constexpr const char* SORT_OPTION_COUNTRY_APPELATION    = "Country, Appellation and Wine";
+   inline constexpr const char* SORT_OPTION_DRINK_BY              = "Drink By Year and Vintage";
    inline constexpr const char* SORT_OPTION_LOCALE_WINE           = "Country, Region, and Appellation";
    inline constexpr const char* SORT_OPTION_PRODUCER_WINE_NAME    = "Producer, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_REGION_WINE           = "Region, Wine and Vintage";
@@ -114,6 +117,8 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";
    inline constexpr const char* SORT_OPTION_MY_VALUE              = "My Value";
    inline constexpr const char* SORT_OPTION_VARIETAL_WINE         = "Varietal, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_TAG_VINTAGE_WINE      = "Tag, Vintage and Wine";
+   inline constexpr const char* SORT_OPTION_TAG_WINE_VINTAGE      = "Tag, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_VINTAGE_WINE          = "Vintage and Wine";
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";
 
@@ -126,7 +131,7 @@ namespace ctb::constants
    inline constexpr const char* TABLE_NAME_PENDING                = "Wine Pending Delivery";
    inline constexpr const char* TABLE_NAME_CONSUMED               = "Wine Consumed";
    inline constexpr const char* TABLE_NAME_AVAILABILITY           = "Ready to Drink List";
-   inline constexpr const char* TABLE_NAME_TAG                    = "Wish List Tags";
+   inline constexpr const char* TABLE_NAME_TAG                    = "Tagged Wines";
    inline constexpr const char* TABLE_NAME_PROREVIEW              = "Manually Entered Pro Reviews";
    inline constexpr const char* TABLE_NAME_BOTTLES                = "Raw Bottle List";
    inline constexpr const char* TABLE_NAME_FOODTAGS               = "Food Pairing Tag";
@@ -181,6 +186,7 @@ namespace ctb::constants
    inline constexpr const char* SUMMARY_EMPTY                     = "No data. Check filter options or download latest CellarTracker data.";
    inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, with {} Bottles Cellared and {} Pending Delivery";
    inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles.";
+   inline constexpr const char* FMT_SUMMARY_TAGGED_WINES          = "{} Lists Containing {} Wines.";
    inline constexpr const char* FMT_SUMMARY_TASTING_NOTES         = "{} Tasting Notes Recorded for {} Wines.";
    inline constexpr const char* FMT_TASTING_CT_LIKE_SUMMARY       = "{} ({}%)";
    inline constexpr const char* FMT_TASTING_LIKE_MSG              = "I {} this wine";

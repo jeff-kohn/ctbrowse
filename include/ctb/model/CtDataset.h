@@ -147,6 +147,13 @@ namespace ctb
                result     = ctb::format(constants::FMT_SUMMARY_TASTING_NOTES, rowCount(true), wines);
                break;
             }
+            case TableId::Tag:
+            {
+               auto tags  = getDistinctValues(CtProp::TagName, true).size();
+               auto wines = getDistinctValues(CtProp::iWineId, true).size();
+               result     = ctb::format(constants::FMT_SUMMARY_TAGGED_WINES, tags, wines);
+               break;
+            }
             default:
                assert(false);
          }

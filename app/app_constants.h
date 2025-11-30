@@ -34,7 +34,9 @@ namespace ctb::constants
    inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_TIP  = "View Drinking Availability for Wines";
    inline constexpr const char* CMD_COLLECTION_PURCHASED_WINE_LBL  = "Purchased Wine &History\tCtrl+H";
    inline constexpr const char* CMD_COLLECTION_PURCHASED_WINE_TIP  = "View History of wines purchaes and orders";
-   inline constexpr const char* CMD_COLLECTION_TASTING_NOTES_LBL   = "&Tasting Notes\tCtrl+T";
+   inline constexpr const char* CMD_COLLECTION_TAGGED_WINES_LBL    = "&Tagged Wines List\tCtrl+T";
+   inline constexpr const char* CMD_COLLECTION_TAGGED_WINES_TIP    = "View Your Tagged Wines";
+   inline constexpr const char* CMD_COLLECTION_TASTING_NOTES_LBL   = "Tasting &Notes\tCtrl+N";
    inline constexpr const char* CMD_COLLECTION_TASTING_NOTES_TIP   = "View Your Personal Tasting Notes";
    inline constexpr const char* CMD_ONLINE_WINE_DETAILS_LBL        = "View &Wine Details";
    inline constexpr const char* CMD_ONLINE_WINE_DETAILS_TIP        = "View the current wine's details on CellarTracker";
@@ -134,6 +136,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_LIKED                         = "Liked:";
    inline constexpr const char* LBL_MATCH_FILTERS                 = "Match Filters";
    inline constexpr const char* LBL_LOCATION                      = "Location:";
+   inline constexpr const char* LBL_MAX_PRICE                     = "Target Price:";
    inline constexpr const char* LBL_MY_SCORE                      = "My Score:";
    inline constexpr const char* LBL_MY_PRICE                      = "My Price:";
    inline constexpr const char* LBL_DELIVERY_DATE                 = "Delivery Date:";
@@ -151,6 +154,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_SORT_OPTIONS                  = "Sort Options";
    inline constexpr const char* LBL_STORE_NAME                    = "Store:";
    inline constexpr const char* LBL_SUB_REGION                    = "Subregion:";
+   inline constexpr const char* LBL_TAG_NAME                      = "Tag Name";
    inline constexpr const char* LBL_TASTING_NOTE                  = "Tasting Note";
    inline constexpr const char* LBL_TASTING_CT_SUMMARY            = "CT Stats:";
 

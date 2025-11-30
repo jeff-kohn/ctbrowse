@@ -74,10 +74,11 @@ namespace ctb
       /// @brief the available sort orders for this table.
       static inline const std::array AvailableSorts
       { 
-         TableSort{ { Prop::PendingOrderDate,    Prop::WineName, Prop::Vintage  }, constants::SORT_OPTION_PURCHASE_DATE },
-         TableSort{ { Prop::WineName,            Prop::Vintage                  }, constants::SORT_OPTION_WINE_VINTAGE  },
-         TableSort{ { Prop::Vintage,             Prop::WineName                 }, constants::SORT_OPTION_VINTAGE_WINE  },
-         TableSort{ { Prop::PendingStoreName,    Prop::WineName, Prop::Vintage, }, constants::SORT_OPTION_STORE_NAME    },
+         TableSort{ { Prop::PendingOrderDate,    Prop::WineName, Prop::Vintage   }, constants::SORT_OPTION_PURCHASE_DATE  },
+         TableSort{ { Prop::WineName,            Prop::Vintage                   }, constants::SORT_OPTION_WINE_VINTAGE   },
+         TableSort{ { Prop::Vintage,             Prop::WineName                  }, constants::SORT_OPTION_VINTAGE_WINE   },
+         TableSort{ { Prop::PendingStoreName,    Prop::WineName, Prop::Vintage   }, constants::SORT_OPTION_STORE_NAME     },
+         TableSort{ { Prop::MyPrice,             Prop::WineName, Prop::Vintage   }, constants::SORT_OPTION_MY_VALUE       },
       };
 
       /// @brief multi-value filters that can be used on this table.

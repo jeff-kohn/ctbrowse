@@ -20,8 +20,7 @@ namespace ctb::app
       public:
          static constexpr auto COL_COUNT = 2;
 
-         DetailFieldControls(wxSizer* parent_sizer, std::string_view heading_label) :
-            m_parent_sizer{ parent_sizer }
+         DetailFieldControls(wxSizer* parent_sizer, std::string_view heading_label) : m_parent_sizer{ parent_sizer }
          {
             auto* parent_wnd = m_parent_sizer ? m_parent_sizer->GetContainingWindow() : nullptr;
             if (!parent_wnd)

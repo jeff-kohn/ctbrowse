@@ -77,13 +77,14 @@ namespace ctb
       /// @brief the available sort orders for this table.
       static inline const std::array AvailableSorts 
       { 
-         TableSort{ { Prop::WineName, Prop::Vintage                       }, constants::SORT_OPTION_WINE_VINTAGE   },
-         TableSort{ { Prop::Vintage,  Prop::WineName                      }, constants::SORT_OPTION_VINTAGE_WINE   },
-         TableSort{ { Prop::Locale,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_LOCALE_WINE    },
-         TableSort{ { Prop::Region,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_REGION_WINE    },
-         TableSort{ { Prop::CtScore,  Prop::MyScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_CT, true },
-         TableSort{ { Prop::MyScore,  Prop::CtScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_MY, true },
-         TableSort{ { Prop::MyPrice,  Prop::WineName,    Prop::Vintage ,  }, constants::SORT_OPTION_MY_VALUE       }
+         TableSort{ { Prop::WineName,   Prop::Vintage                     }, constants::SORT_OPTION_WINE_VINTAGE   },
+         TableSort{ { Prop::Vintage,    Prop::WineName                    }, constants::SORT_OPTION_VINTAGE_WINE   },
+         TableSort{ { Prop::Locale,     Prop::WineName,  Prop::Vintage    }, constants::SORT_OPTION_LOCALE_WINE    },
+         TableSort{ { Prop::Region,     Prop::WineName,  Prop::Vintage    }, constants::SORT_OPTION_REGION_WINE    },
+         TableSort{ { Prop::CtScore,    Prop::MyScore,   Prop::WineName   }, constants::SORT_OPTION_SCORE_CT, true },
+         TableSort{ { Prop::MyScore,    Prop::CtScore,   Prop::WineName   }, constants::SORT_OPTION_SCORE_MY, true },
+         TableSort{ { Prop::MyPrice,    Prop::WineName,  Prop::Vintage    }, constants::SORT_OPTION_MY_VALUE       },
+         TableSort{ { Prop::EndConsume, Prop::Vintage,   Prop::WineName   }, constants::SORT_OPTION_DRINK_BY       },
       };
 
       /// @brief multi-value filters that can be used on this table.

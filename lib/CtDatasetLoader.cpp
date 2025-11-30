@@ -13,6 +13,7 @@
 #include "ctb/tables/PendingWineTraits.h"
 #include "ctb/tables/PurchasedWineTraits.h"
 #include "ctb/tables/ReadyToDrinkTraits.h"
+#include "ctb/tables/TaggedWinesTraits.h"
 #include "ctb/tables/TastingNotesTraits.h"
 #include "ctb/tables/WineListTraits.h"
 
@@ -64,6 +65,11 @@ namespace ctb
          [this](enum_constant<TableId::Purchase> tbl_id) -> DatasetPtr
             {
                return getOrThrow<PurchasedWineTable>(m_data_folder, tbl_id);
+            },
+
+         [this](enum_constant<TableId::Tag> tbl_id) -> DatasetPtr
+            {
+               return getOrThrow<TaggedWinesTable>(m_data_folder, tbl_id);
             },
 
          [this](enum_constant<TableId::Notes> tbl_id) -> DatasetPtr

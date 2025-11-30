@@ -9,6 +9,7 @@
 #include "controls/WineDetailMainPanel.h"
 #include "controls/WineDetailPendingPanel.h"
 #include "controls/WineDetailScorePanel.h"
+#include "controls/WineDetailTagsPanel.h"
 #include "controls/WineDetailTastingPanel.h"
 #include "controls/WineDetailValuePanel.h"
 
@@ -73,6 +74,7 @@ namespace ctb::app
 
       const     auto sizer_flags      = wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT );
       constexpr auto section_spacer   = 3;
+      constexpr auto tag_spacer       = section_spacer * 5;
 
       wxWindowUpdateLocker freeze_win(this);
 
@@ -81,6 +83,8 @@ namespace ctb::app
       SetSizer(top_sizer);
 
       top_sizer->Add(new WineDetailMainPanel    { this, m_event_sink.getSource() }, sizer_flags);
+      top_sizer->AddSpacer(tag_spacer);
+      top_sizer->Add(new WineDetailTagsPanel    { this, m_event_sink.getSource() }, sizer_flags);
       top_sizer->AddSpacer(section_spacer);
       top_sizer->Add(new WineDetailScorePanel   { this, m_event_sink.getSource() }, sizer_flags);
       top_sizer->AddSpacer(section_spacer);

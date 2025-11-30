@@ -39,6 +39,7 @@ target_sources(ctBrowse_lib
       "../include/ctb/tables/PurchasedWineTraits.h"
       "../include/ctb/tables/ReadyToDrinkTraits.h"
       "../include/ctb/tables/TastingNotesTraits.h"
+      "../include/ctb/tables/TaggedWinesTraits.h"
       "../include/ctb/tables/WineListTraits.h"
 
       "../include/ctb/tables/detail/field_helpers.h"

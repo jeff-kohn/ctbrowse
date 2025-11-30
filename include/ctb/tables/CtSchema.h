@@ -108,6 +108,11 @@ namespace ctb
       TastingCtNoteCount,
       TastingCtLikePercent,
       TastingCtLikeCount,
+
+      // Specific to Tagged Wines table
+      TagName,
+      TagWineNote,
+      TagMaxPrice
    };
 
    
@@ -189,5 +194,30 @@ namespace ctb
    /// @brief Type alias for span of CtTableSorts
    using CtTableSortSpan = std::span<const CtTableSort>;
 
+
+   class WineScoresCache
+   {
+   public:
+      struct CacheItem
+      {
+         uint64_t wine_id{};
+
+         std::string display_name{};
+         
+         std::string url{};
+
+         CtPropertyVal value{};
+      };
+
+      auto getScores(uint64_t wine_id) const 
+      {
+         auto matches = m_cache.equal_range(wine_id);
+         return rng::subrange{ matches.first, matches.second } | rng::views::values;
+      }
+
+   private:
+      std::multimap<uint64_t, CacheItem> m_cache{};
+
+   };
 
 } // namespace ctb

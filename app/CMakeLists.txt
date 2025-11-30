@@ -62,6 +62,8 @@ target_sources(${TARGET_NAME}
      "controls/WineDetailPendingPanel.h"
      "controls/WineDetailScorePanel.cpp"
      "controls/WineDetailScorePanel.h"
+     "controls/WineDetailTagsPanel.cpp"
+     "controls/WineDetailTagsPanel.h"
      "controls/WineDetailTastingPanel.cpp"
      "controls/WineDetailTastingPanel.h"
      "controls/WineDetailValuePanel.cpp"
