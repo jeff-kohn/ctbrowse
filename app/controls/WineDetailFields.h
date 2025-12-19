@@ -161,41 +161,6 @@ namespace ctb::app
       CtProp                      m_end_prop{};
    };
 
-   
-      //class CustomPropDetailField
-      //{
-      //public:
-      //   using CustomPropFn  = std::function<std::string(const DatasetPtr& ds, int rec_idx)>;
-
-
-      //   void clear()
-      //   {
-      //      m_controls.setValue("");
-      //      m_controls.hide();
-      //   }
-
-      //   void update(const DatasetPtr& ds, int rec_idx)
-      //   {
-      //      if (ds->hasProperty(m_end_prop))
-      //      {
-      //         auto begin_dt = ds->getProperty(rec_idx, m_begin_prop);
-      //         auto end_dt   = ds->getProperty(rec_idx, m_end_prop);
-      //         m_controls.setValue(ctb::detail::getDrinkWindow(begin_dt, end_dt));
-      //         m_controls.show();
-      //      }
-      //      else {
-      //         m_controls.setValue("");
-      //         m_controls.hide();
-      //      }
-      //   }
-
-      //private:
-      //
-      //   detail::DetailFieldControls m_controls;
-      //   CtProp                      m_begin_prop{};
-      //   CtProp                      m_end_prop{};
-      //};
-
    using WineDetailsField  = std::variant<SinglePropDetailField, DrinkWindowDetailField>;
    using WineDetailsFields = std::deque<WineDetailsField>;
 
