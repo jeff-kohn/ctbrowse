@@ -1,21 +1,16 @@
 #pragma once
 
 #include "App.h"
-
+#include <ctb/interfaces/IDatasetEventSource.h>
 #include <wx/splitter.h>
 #include <memory>
 
 
-namespace ctb
-{
-   struct IDatasetEventSource; // no need to pull in a bunch of datamodel headers
-}
-
 namespace ctb::app
 {
-   class DatasetListView;      // the wine-list window
-   class DatasetOptionsPanel;  // the sort/filter options panel
-   class DetailsPanel;         // details panel
+   class DatasetListView;     // the wine-list window
+   class DatasetOptionsView;  // the sort/filter options panel
+   class DatasetDetailsView;  // details panel
 
    class LabelImageCache;
    using LabelCachePtr = std::shared_ptr<LabelImageCache>;
@@ -50,8 +45,8 @@ namespace ctb::app
 
    private:
       // non-owning child window pointers.
-      DatasetOptionsPanel* m_options_panel{};
-      DetailsPanel*        m_details_panel{};
+      DatasetOptionsView* m_options_panel{};
+      DatasetDetailsView*        m_details_panel{};
       DatasetListView*     m_listView{};
       wxSplitterWindow*    m_right_splitter{};
 

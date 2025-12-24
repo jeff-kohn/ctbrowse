@@ -36,7 +36,7 @@ namespace ctb
 
       static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
       {
-         { Prop::iWineId,         FieldSchema { Prop::iWineId,        PropType::String,      0 }},
+         { Prop::iWineId,         FieldSchema { Prop::iWineId,        PropType::UInt64,      0 }},
          { Prop::WineName,        FieldSchema { Prop::WineName,       PropType::String,     13 }},
          { Prop::Locale,          FieldSchema { Prop::Locale,         PropType::String,     14 }},
          { Prop::Vintage,         FieldSchema { Prop::Vintage,        PropType::UInt16,     12 }},
@@ -65,7 +65,8 @@ namespace ctb
       });
 
       /// @brief list of display columns that will show in the list view
-      static inline const std::array DefaultListColumns { 
+      static inline const std::array DefaultListColumns 
+      { 
          CtListColumn{ Prop::WineAndVintage,                             constants::DISPLAY_COL_WINE        },
          CtListColumn{ Prop::Locale,                                     constants::DISPLAY_COL_LOCALE      },
          CtListColumn{ Prop::QtyTotal,   CtListColumn::Format::Number,   constants::DISPLAY_COL_QTY         },
@@ -74,18 +75,21 @@ namespace ctb
       };
 
       /// @brief the available sort orders for this table.
-      static inline const std::array AvailableSorts{ 
-         TableSort{ { Prop::WineName, Prop::Vintage                       }, constants::SORT_OPTION_WINE_VINTAGE   },
-         TableSort{ { Prop::Vintage,  Prop::WineName                      }, constants::SORT_OPTION_VINTAGE_WINE   },
-         TableSort{ { Prop::Locale,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_LOCALE_WINE    },
-         TableSort{ { Prop::Region,   Prop::WineName,    Prop::Vintage    }, constants::SORT_OPTION_REGION_WINE    },
-         TableSort{ { Prop::CtScore,  Prop::MyScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_CT, true },
-         TableSort{ { Prop::MyScore,  Prop::CtScore,     Prop::WineName,  }, constants::SORT_OPTION_SCORE_MY, true },
-         TableSort{ { Prop::MyPrice,  Prop::WineName,    Prop::Vintage ,  }, constants::SORT_OPTION_MY_VALUE       }
+      static inline const std::array AvailableSorts 
+      { 
+         TableSort{ { Prop::WineName,   Prop::Vintage                     }, constants::SORT_OPTION_WINE_VINTAGE   },
+         TableSort{ { Prop::Vintage,    Prop::WineName                    }, constants::SORT_OPTION_VINTAGE_WINE   },
+         TableSort{ { Prop::Locale,     Prop::WineName,  Prop::Vintage    }, constants::SORT_OPTION_LOCALE_WINE    },
+         TableSort{ { Prop::Region,     Prop::WineName,  Prop::Vintage    }, constants::SORT_OPTION_REGION_WINE    },
+         TableSort{ { Prop::CtScore,    Prop::MyScore,   Prop::WineName   }, constants::SORT_OPTION_SCORE_CT, true },
+         TableSort{ { Prop::MyScore,    Prop::CtScore,   Prop::WineName   }, constants::SORT_OPTION_SCORE_MY, true },
+         TableSort{ { Prop::MyPrice,    Prop::WineName,  Prop::Vintage    }, constants::SORT_OPTION_MY_VALUE       },
+         TableSort{ { Prop::EndConsume, Prop::Vintage,   Prop::WineName   }, constants::SORT_OPTION_DRINK_BY       },
       };
 
       /// @brief multi-value filters that can be used on this table.
-      static inline const std::array MultiValueFilters{
+      static inline const std::array MultiValueFilters 
+      {
          MultiValueFilter{ Prop::Varietal,    constants::FILTER_VARIETAL    },
          MultiValueFilter{ Prop::Vintage,     constants::FILTER_VINTAGE     },
          MultiValueFilter{ Prop::Country,     constants::FILTER_COUNTRY     },

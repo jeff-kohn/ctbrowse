@@ -1,7 +1,7 @@
-#include "views/DatasetListView.h"
 #include "views/DatasetMultiView.h"
-#include "views/DatasetOptionsPanel.h"
-#include "views/DetailsPanel.h"
+#include "views/DatasetDetailsView.h"
+#include "views/DatasetListView.h"
+#include "views/DatasetOptionsView.h"
 
 #include <wx/persist/splitter.h>
 
@@ -39,7 +39,7 @@ namespace ctb::app
       SetSashGravity(LEFT_SPLITTER_GRAVITY);
 
       // this splitter window contains options panel and right/nested splitter
-      m_options_panel = DatasetOptionsPanel::create(*this, source);
+      m_options_panel = DatasetOptionsView::create(*this, source);
       m_right_splitter = new wxSplitterWindow{ this };
       SplitVertically(m_options_panel, m_right_splitter);
       //SetMinimumPaneSize(MIN_PANE_SIZE);
@@ -47,7 +47,7 @@ namespace ctb::app
 
       // nested splitter contains grid and details
       m_listView = DatasetListView::create(m_right_splitter, source);
-      m_details_panel = DetailsPanel::create(m_right_splitter, source, cache);
+      m_details_panel = DatasetDetailsView::create(m_right_splitter, source, cache);
       m_right_splitter->SplitVertically(m_listView, m_details_panel);
       m_right_splitter->SetMinimumPaneSize(MIN_PANE_SIZE);
       wxPersistentRegisterAndRestore(m_right_splitter, "DatasetMultiViewNested");
@@ -55,12 +55,6 @@ namespace ctb::app
       // For some reason the CalLAfter() is required, otherwise this call messes up the
       // next splitter layout. No idea why but this works.
       CallAfter([this] { m_right_splitter->SetSashGravity(RIGHT_SPLITTER_GRAVITY); });
-   }
-
-
-   auto DatasetMultiView::wineDetailsActive() const -> bool
-   {
-      return m_details_panel ? m_details_panel->wineDetailsActive() : false;
    }
 
 

@@ -31,7 +31,6 @@
          "configurePreset": "dev-win-clang",
          "jobs": 16
       }
-
    ],
    "testPresets": [
       {

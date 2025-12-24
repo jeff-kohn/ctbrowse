@@ -115,7 +115,7 @@ namespace glz
                break;
 
             case PropType::Boolean:
-               //value = CtPropertyVal::parse<bool>(json_val.value.value());
+               value = CtPropertyVal::parse<bool>(json_val.value.value());
 					break;
 
             default:

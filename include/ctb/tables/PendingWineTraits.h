@@ -35,7 +35,7 @@ namespace ctb
 
       static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
       {
-         { Prop::iWineId,                FieldSchema { Prop::iWineId,               PropType::String,      0 }},
+         { Prop::iWineId,                FieldSchema { Prop::iWineId,               PropType::UInt64,      0 }},
          { Prop::WineName,               FieldSchema { Prop::WineName,              PropType::String,     17 }},
          { Prop::Locale,                 FieldSchema { Prop::Locale,                PropType::String,     19 }},
          { Prop::Vintage,                FieldSchema { Prop::Vintage,               PropType::UInt16,     16 }},
@@ -51,7 +51,7 @@ namespace ctb
          { Prop::Size,                   FieldSchema { Prop::Size,                  PropType::String,     14 }},
          { Prop::Currency,               FieldSchema { Prop::Currency,              PropType::String,      5 }},
          { Prop::MyPrice,                FieldSchema { Prop::MyPrice,               PropType::Double,      7 }},
-         { Prop::PendingPurchaseId,      FieldSchema { Prop::PendingPurchaseId,     PropType::String,      1 }},
+         { Prop::PendingPurchaseId,      FieldSchema { Prop::PendingPurchaseId,     PropType::UInt64,      1 }},
          { Prop::PendingStoreName,       FieldSchema { Prop::PendingStoreName,      PropType::String,      4 }},
          { Prop::PendingOrderNumber,     FieldSchema { Prop::PendingOrderNumber,    PropType::String,     12 }},
          { Prop::PendingOrderQty,        FieldSchema { Prop::PendingOrderQty,       PropType::UInt16,     10 }},
@@ -61,7 +61,8 @@ namespace ctb
       });
 
       /// @brief list of display columns that will show in the list view
-      static inline const std::array DefaultListColumns { 
+      static inline const std::array DefaultListColumns
+      { 
          CtListColumn{ Prop::WineAndVintage,                                      constants::DISPLAY_COL_WINE       },
          CtListColumn{ Prop::PendingStoreName,    CtListColumn::Format::String,   constants::DISPLAY_COL_STORE      },
          CtListColumn{ Prop::PendingOrderDate,    CtListColumn::Format::Date,     constants::DISPLAY_COL_PURCH_DATE },
@@ -71,15 +72,18 @@ namespace ctb
       };
 
       /// @brief the available sort orders for this table.
-      static inline const std::array AvailableSorts{ 
-         TableSort{ { Prop::PendingOrderDate,    Prop::WineName, Prop::Vintage  }, constants::SORT_OPTION_PURCHASE_DATE },
-         TableSort{ { Prop::WineName,            Prop::Vintage                  }, constants::SORT_OPTION_WINE_VINTAGE  },
-         TableSort{ { Prop::Vintage,             Prop::WineName                 }, constants::SORT_OPTION_VINTAGE_WINE  },
-         TableSort{ { Prop::PendingStoreName,    Prop::WineName, Prop::Vintage, }, constants::SORT_OPTION_STORE_NAME    },
+      static inline const std::array AvailableSorts
+      { 
+         TableSort{ { Prop::PendingOrderDate,    Prop::WineName, Prop::Vintage   }, constants::SORT_OPTION_PURCHASE_DATE  },
+         TableSort{ { Prop::WineName,            Prop::Vintage                   }, constants::SORT_OPTION_WINE_VINTAGE   },
+         TableSort{ { Prop::Vintage,             Prop::WineName                  }, constants::SORT_OPTION_VINTAGE_WINE   },
+         TableSort{ { Prop::PendingStoreName,    Prop::WineName, Prop::Vintage   }, constants::SORT_OPTION_STORE_NAME     },
+         TableSort{ { Prop::MyPrice,             Prop::WineName, Prop::Vintage   }, constants::SORT_OPTION_MY_VALUE       },
       };
 
       /// @brief multi-value filters that can be used on this table.
-      static inline const std::array MultiValueFilters{
+      static inline const std::array MultiValueFilters
+      {
          MultiValueFilter{ Prop::PendingStoreName,  constants::FILTER_STORE       },
          MultiValueFilter{ Prop::PendingOrderDate,  constants::FILTER_ORDER_DATE  },
          MultiValueFilter{ Prop::Varietal,          constants::FILTER_VARIETAL    },

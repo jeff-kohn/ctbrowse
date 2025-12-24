@@ -192,8 +192,10 @@ namespace ctb
    }
 
 
-   /// @brief get the CT URL for a Wine given it's iWineID
-   inline auto getWineDetailsUrl(std::string_view wine_id) noexcept -> std::string
+   /// @brief get the CT URL for a Wine given it's iWineID 
+   ///
+   /// Works with both string and numeric form of wine ID
+   inline auto getWineDetailsUrl(uint64_t wine_id) noexcept -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_WINE_DETAILS, wine_id);
    }
@@ -207,35 +209,34 @@ namespace ctb
       return ctb::format(constants::FMT_URL_CT_VINTAGES, percentEncode(wine_param));
    }
 
-   inline auto getDrinkWindowUrl(std::string_view wine_id) -> std::string
+   inline auto getDrinkWindowUrl(uint64_t wine_id) -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_DRINK_WINDOW, wine_id);
    }
 
-
    /// @brief get the CT URL for accepting a pending delivery
-   inline auto getAcceptPendingUrl(std::string_view wine_id, std::string_view purch_id, const std::chrono::year_month_day& delivery_date) noexcept -> std::string
+   inline auto getAcceptPendingUrl(uint64_t wine_id, uint64_t purch_id, const std::chrono::year_month_day& delivery_date) noexcept -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_ACCEPT_PENDING, wine_id, purch_id, delivery_date);
    }
 
    /// @brief get the CT URL for editing a pending order
-   inline auto getEditPendingUrl(std::string_view wine_id, std::string_view purchase_id) noexcept -> std::string
+   inline auto getEditPendingUrl(uint64_t wine_id, uint64_t purchase_id) noexcept -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_EDIT_ORDER, wine_id, purchase_id);
    }
 
-   inline auto getDrinkRemoveUrl(std::string_view wine_id) -> std::string
+   inline auto getDrinkRemoveUrl(uint64_t wine_id) -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_DRINK_REMOVE, wine_id);
    }
 
-   inline auto getAddToCellarUrl(std::string_view wine_id) -> std::string
+   inline auto getAddToCellarUrl(uint64_t wine_id) -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_ADD_TO_CELLAR, wine_id);
    }
 
-   inline auto getAddTastingNoteUrl(std::string_view wine_id) -> std::string
+   inline auto getAddTastingNoteUrl(uint64_t wine_id) -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_ADD_TASTING_NOTE, wine_id);
    }

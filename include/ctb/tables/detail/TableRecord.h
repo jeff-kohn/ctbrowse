@@ -1,3 +1,4 @@
+
 /*******************************************************************
 * @file  TableRecord.h
 *
@@ -147,7 +148,7 @@ namespace ctb::detail
                return fld.is_int() ? PropertyVal{ fld.get<uint16_t>() } : PropertyVal{};
 
             case PropType::UInt64:
-               return fld.is_int() ? PropertyVal{ fld.get<uint16_t>() } : PropertyVal{};
+               return fld.is_int() ? PropertyVal{ fld.get<uint64_t>() } : PropertyVal{};
 
             case PropType::Double:
             {
@@ -175,7 +176,8 @@ namespace ctb::detail
             }
             case PropType::Boolean:
             {
-               return PropertyVal{ textToBool(fld.get<std::string_view>()) };
+               auto str = fld.get<std::string_view>();
+               return PropertyVal::template parse<bool>(str);
             }
             default:
                assert(false and "PropType enum contains unexpected value, this is a bug!");

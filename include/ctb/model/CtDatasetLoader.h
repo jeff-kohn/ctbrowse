@@ -1,5 +1,5 @@
 /*******************************************************************
- * @file CtCtDatasetLoader
+ * @file CtDatasetLoader
  *
  * @brief Header file for the class CtDatasetLoader
  * 

@@ -1,5 +1,5 @@
 /*********************************************************************
- * @file       PropertyFilterPredicate.h
+ * @file       PropertyFilter.h
  *
  * @brief      declaration for the PropertyFilter class
  *

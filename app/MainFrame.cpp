@@ -11,9 +11,9 @@
 #include "CtCredentialManager.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
+#include "views/DatasetDetailsView.h"
 #include "views/DatasetMultiView.h"
-#include "views/DatasetOptionsPanel.h"
-#include "views/DetailsPanel.h"
+#include "views/DatasetOptionsView.h"
 
 #include <ctb/utility.h>
 #include <ctb/utility_chrono.h>
@@ -63,6 +63,8 @@ namespace ctb::app
             case CMD_COLLECTION_READY_TO_DRINK: return TableId::Availability;
             case CMD_COLLECTION_CONSUMED:       return TableId::Consumed;
             case CMD_COLLECTION_PURCHASED_WINE: return TableId::Purchase;
+            case CMD_COLLECTION_TAGGED_WINES:   return TableId::Tag;
+				case CMD_COLLECTION_TASTING_NOTES:  return TableId::Notes;
             default:
                throw Error(Error::Category::ArgumentError, "Table corresponding to ID {} not found.", event_id);
          }
@@ -220,10 +222,10 @@ namespace ctb::app
       Bind(wxEVT_MENU, &MainFrame::onMenuFileQuit,        this, wxID_EXIT);
 
       // Edit menu handlers
-      Bind(wxEVT_MENU, &MainFrame::onMenuEditFind, this, wxID_FIND);
-      Bind(wxEVT_MENU, &MainFrame::onMenuEditRefresh, this, CMD_EDIT_REFRESH_DATA);
+      Bind(wxEVT_MENU,      &MainFrame::onMenuEditFind, this, wxID_FIND);
+      Bind(wxEVT_MENU,      &MainFrame::onMenuEditRefresh, this, CMD_EDIT_REFRESH_DATA);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuEditRefreshUpdateUI, this, CMD_EDIT_REFRESH_DATA);
-      Bind(wxEVT_MENU, &MainFrame::onMenuEditClearFilters, this, CMD_EDIT_CLEAR_FILTERS);
+      Bind(wxEVT_MENU,      &MainFrame::onMenuEditClearFilters, this, CMD_EDIT_CLEAR_FILTERS);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuEditClearFiltersUpdateUI, this, CMD_EDIT_CLEAR_FILTERS);
 
       // Collection menu handlers
@@ -232,6 +234,8 @@ namespace ctb::app
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_READY_TO_DRINK);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_CONSUMED);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_PURCHASED_WINE);
+      Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_TAGGED_WINES);
+      Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_TASTING_NOTES);
 
       // Online menu events
       Bind(wxEVT_MENU, &MainFrame::onMenuOnlineWineDetails,    this, CMD_ONLINE_WINE_DETAILS);
@@ -368,7 +372,13 @@ namespace ctb::app
          constants::CMD_COLLECTION_READY_TO_DRINK_TIP,
          wxITEM_NORMAL
          });
-      menu_data->AppendSeparator();
+      menu_data->Append(new wxMenuItem{
+         menu_data,
+         CmdId::CMD_COLLECTION_TAGGED_WINES,
+         constants::CMD_COLLECTION_TAGGED_WINES_LBL,
+         constants::CMD_COLLECTION_TAGGED_WINES_TIP,
+         wxITEM_NORMAL
+         });      menu_data->AppendSeparator();
       menu_data->Append(new wxMenuItem{
          menu_data,
          CmdId::CMD_COLLECTION_PURCHASED_WINE,
@@ -384,7 +394,13 @@ namespace ctb::app
          wxITEM_NORMAL
          });
       m_menu_bar->Append(menu_data, constants::LBL_MENU_COLLECTION);
-
+      menu_data->Append(new wxMenuItem{
+         menu_data,
+         CmdId::CMD_COLLECTION_TASTING_NOTES,
+         constants::CMD_COLLECTION_TASTING_NOTES_LBL,
+         constants::CMD_COLLECTION_TASTING_NOTES_TIP,
+         wxITEM_NORMAL
+         });
 
       // Wine Menu
       auto* menu_wine = new wxMenu();
@@ -760,7 +776,7 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getWineDetailsUrl(wine_id));
       }
       catch(...){
@@ -788,7 +804,7 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getDrinkWindowUrl(wine_id));
       }
       catch(...){
@@ -802,7 +818,7 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getAddToCellarUrl(wine_id));
       }
       catch(...){
@@ -816,7 +832,7 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getAddTastingNoteUrl(wine_id));
       }
       catch(...){
@@ -830,8 +846,8 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
-         auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asStringView();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getAcceptPendingUrl(wine_id, purchase_id, getCalendarDate()));
       }
       catch(...){
@@ -845,8 +861,8 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
-         auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asStringView();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getEditPendingUrl(wine_id, purchase_id));
       }
       catch(...){
@@ -860,7 +876,7 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asStringView();
+         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getDrinkRemoveUrl(wine_id));
       }
       catch(...){

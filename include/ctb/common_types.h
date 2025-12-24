@@ -25,6 +25,7 @@ namespace ctb
    using NullableSize_t = std::optional<size_t>;
    using NullableDouble = std::optional<double>;
    using NullableDate   = std::optional<std::chrono::year_month_day>;
+   using NullableBool   = std::optional<bool>;
 
    using MaybeString    = std::optional<std::string>;
    using StringSet      = std::set<std::string, std::less<>>;

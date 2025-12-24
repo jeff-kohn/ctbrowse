@@ -98,13 +98,22 @@ namespace ctb
       return result;
    }
 
-   inline auto textToBool(std::string_view text) -> bool
+   inline auto textToBool(std::string_view text) -> NullableBool
    {
-		constexpr auto TRUE_STR = "true";
-		constexpr auto ONE_STR  = "1";
-		constexpr auto YES_STR  = "yes";
+      constexpr auto TRUE_STR = "true";
+      constexpr auto FALSE_STR = "false";
+      constexpr auto ONE_STR  = "1";
+      constexpr auto ZERO_STR  = "0";
+      constexpr auto YES_STR  = "yes";
+      constexpr auto NO_STR  = "no";
 
-      return boost::iequals(text, TRUE_STR) || boost::iequals(text, ONE_STR) || boost::iequals(text, YES_STR);
-	}
+      if (boost::iequals(text, TRUE_STR) || boost::iequals(text, ONE_STR) || boost::iequals(text, YES_STR))
+         return true;
+
+      if (boost::iequals(text, FALSE_STR) || boost::iequals(text, ZERO_STR) || boost::iequals(text, NO_STR))
+         return false;
+
+      return std::nullopt;
+   }
 
 } // namespace ctb

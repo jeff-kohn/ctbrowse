@@ -33,7 +33,7 @@ namespace ctb
 
       static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
       {
-         { Prop::iWineId,         FieldSchema { Prop::iWineId,        PropType::String,    1 }},
+         { Prop::iWineId,         FieldSchema { Prop::iWineId,        PropType::UInt64,    1 }},
          { Prop::WineName,        FieldSchema { Prop::WineName,       PropType::String,   33 }},
          { Prop::Locale,          FieldSchema { Prop::Locale,         PropType::String,   35 }},
          { Prop::Vintage,         FieldSchema { Prop::Vintage,        PropType::UInt16,   32 }},
@@ -46,8 +46,8 @@ namespace ctb
          { Prop::Category,        FieldSchema { Prop::Category,       PropType::String,   37 }},
          { Prop::MyPrice,         FieldSchema { Prop::MyPrice,        PropType::Double,   16 }},
          { Prop::Currency,        FieldSchema { Prop::Currency,       PropType::String,   17 }},
-         { Prop::iTastingNoteId,  FieldSchema { Prop::iTastingNoteId, PropType::String,   20 }},
-         { Prop::iConsumeId,      FieldSchema { Prop::iConsumeId,     PropType::String,    0 }},
+         { Prop::iTastingNoteId,  FieldSchema { Prop::iTastingNoteId, PropType::UInt64,   20 }},
+         { Prop::iConsumeId,      FieldSchema { Prop::iConsumeId,     PropType::UInt64,    0 }},
          { Prop::ConsumeDate,     FieldSchema { Prop::ConsumeDate,    PropType::Date,      3 }},
          { Prop::ConsumeYear,     FieldSchema { Prop::ConsumeYear,    PropType::UInt16,   {} }},
          { Prop::ConsumeMonth,    FieldSchema { Prop::ConsumeMonth,   PropType::String,   {} }},
@@ -61,7 +61,8 @@ namespace ctb
       });
 
       /// @brief list of display columns that will show in the list view
-      static inline const std::array DefaultListColumns{
+      static inline const std::array DefaultListColumns
+      {
          CtListColumn{ Prop::WineAndVintage,                               constants::DISPLAY_COL_WINE           },
          CtListColumn{ Prop::ConsumeReason,                                constants::DISPLAY_COL_CONSUME_REASON },
          CtListColumn{ Prop::Location,                                     constants::DISPLAY_COL_CONSUME_FROM   },
@@ -70,14 +71,16 @@ namespace ctb
       };
 
       /// @brief the available sort orders for this table.
-      static inline const std::array AvailableSorts{ 
+      static inline const std::array AvailableSorts
+      { 
          TableSort{ { Prop::ConsumeDate, Prop::ConsumeDate, Prop::WineAndVintage }, constants::SORT_OPTION_CONSUME_DATE, true },
          TableSort{ { Prop::WineName,    Prop::Vintage                           }, constants::SORT_OPTION_WINE_VINTAGE       },
          TableSort{ { Prop::Vintage,     Prop::WineName                          }, constants::SORT_OPTION_VINTAGE_WINE       },
       };
 
       /// @brief multi-value filters that can be used on this table.
-      static inline const std::array MultiValueFilters{
+      static inline const std::array MultiValueFilters
+      {
          MultiValueFilter{ Prop::Vintage,       constants::FILTER_VINTAGE            },
          MultiValueFilter{ Prop::Varietal,      constants::FILTER_VARIETAL           },
          MultiValueFilter{ Prop::Country,       constants::FILTER_COUNTRY            },

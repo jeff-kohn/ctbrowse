@@ -36,8 +36,8 @@ namespace ctb
 
       static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
       {
-         { Prop::WineAndVintage,       FieldSchema { Prop::WineAndVintage,       PropType::Double,   {} }},
-         { Prop::iWineId,              FieldSchema { Prop::iWineId,              PropType::String,    0 }},
+         { Prop::WineAndVintage,       FieldSchema { Prop::WineAndVintage,       PropType::String,   {} }},
+         { Prop::iWineId,              FieldSchema { Prop::iWineId,              PropType::UInt64,    0 }},
          { Prop::WineName,             FieldSchema { Prop::WineName,             PropType::String,   23 }},
          { Prop::Locale,               FieldSchema { Prop::Locale,               PropType::String,   25 }},
          { Prop::Vintage,              FieldSchema { Prop::Vintage,              PropType::UInt16,   22 }},
@@ -78,20 +78,22 @@ namespace ctb
       static inline constexpr int TWO_DECIMAL_PLACES{ 2 };
 
       /// @brief list of display columns that will show in the list view
-      static inline const std::array DefaultListColumns { 
-         CtListColumn{ Prop::WineAndVintage,      CtListColumn::Format::String,  constants::DISPLAY_COL_WINE             },
+      static inline const std::array DefaultListColumns 
+      { 
+         CtListColumn{ Prop::WineAndVintage,      CtListColumn::Format::String,  constants::DISPLAY_COL_WINE                                    },
          CtListColumn{ Prop::RtdInventorySummary, CtListColumn::Format::String,  constants::DISPLAY_COL_INVENTORY, ListColumn::Align::Right, ListColumn::Align::Center },
-         CtListColumn{ Prop::RtdQtyDefault,       CtListColumn::Format::Decimal, constants::DISPLAY_COL_AVAILABLE,     TWO_DECIMAL_PLACES },
-         CtListColumn{ Prop::RtdQtyLinear,        CtListColumn::Format::Decimal, constants::DISPLAY_COL_LINEAR,        TWO_DECIMAL_PLACES },
-         CtListColumn{ Prop::RtdQtyBellCurve,     CtListColumn::Format::Decimal, constants::DISPLAY_COL_BELL_CURVE ,   TWO_DECIMAL_PLACES },
-         CtListColumn{ Prop::RtdQtyEarlyCurve,    CtListColumn::Format::Decimal, constants::DISPLAY_COL_EARLY_CURVE,   TWO_DECIMAL_PLACES },
-         CtListColumn{ Prop::RtdQtyLateCurve,     CtListColumn::Format::Decimal, constants::DISPLAY_COL_LATE_CURVE,    TWO_DECIMAL_PLACES },
-         CtListColumn{ Prop::RtdQtyEarlyAndLate,  CtListColumn::Format::Decimal, constants::DISPLAY_COL_EARLY_LATE,    TWO_DECIMAL_PLACES },
-         CtListColumn{ Prop::RtdQtyFastMaturing,  CtListColumn::Format::Decimal, constants::DISPLAY_COL_FAST_MATURING, TWO_DECIMAL_PLACES },
+         CtListColumn{ Prop::RtdQtyDefault,       CtListColumn::Format::Decimal, constants::DISPLAY_COL_AVAILABLE,           TWO_DECIMAL_PLACES },
+         CtListColumn{ Prop::RtdQtyLinear,        CtListColumn::Format::Decimal, constants::DISPLAY_COL_CURVE_LINEAR,        TWO_DECIMAL_PLACES },
+         CtListColumn{ Prop::RtdQtyBellCurve,     CtListColumn::Format::Decimal, constants::DISPLAY_COL_CURVE_BELL,          TWO_DECIMAL_PLACES },
+         CtListColumn{ Prop::RtdQtyEarlyCurve,    CtListColumn::Format::Decimal, constants::DISPLAY_COL_CURVE_EARLY,         TWO_DECIMAL_PLACES },
+         CtListColumn{ Prop::RtdQtyLateCurve,     CtListColumn::Format::Decimal, constants::DISPLAY_COL_CURVE_LATE,          TWO_DECIMAL_PLACES },
+         CtListColumn{ Prop::RtdQtyEarlyAndLate,  CtListColumn::Format::Decimal, constants::DISPLAY_COL_CURVE_EARLY_LATE,    TWO_DECIMAL_PLACES },
+         CtListColumn{ Prop::RtdQtyFastMaturing,  CtListColumn::Format::Decimal, constants::DISPLAY_COL_CURVE_FAST_MATURING, TWO_DECIMAL_PLACES },
       };
 
       /// @brief the available sort orders for this table.
-      static inline const std::array AvailableSorts{ 
+      static inline const std::array AvailableSorts
+      { 
          TableSort{ { Prop::RtdQtyDefault,        Prop::WineName,  }, constants::SORT_OPTION_CURVE_DEFAULT,      true },
          TableSort{ { Prop::RtdQtyLinear,         Prop::WineName,  }, constants::SORT_OPTION_CURVE_LINEAR,       true },
          TableSort{ { Prop::RtdQtyBellCurve,      Prop::WineName,  }, constants::SORT_OPTION_CURVE_BELL,         true },
@@ -103,7 +105,8 @@ namespace ctb
       };
 
       /// @brief multi-value filters that can be used on this table.
-      static inline const std::array MultiValueFilters{
+      static inline const std::array MultiValueFilters
+      {
          MultiValueFilter{ Prop::Varietal,    constants::FILTER_VARIETAL    },
          MultiValueFilter{ Prop::Vintage,     constants::FILTER_VINTAGE     },
          MultiValueFilter{ Prop::Country,     constants::FILTER_COUNTRY     },

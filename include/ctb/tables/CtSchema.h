@@ -18,7 +18,7 @@ namespace ctb
 {
    /// @brief Enumeration for all of the properties supported by CellarTracker data tables.
    /// 
-   /// Many properties are common across all tables, some are table-specific. 
+   /// Some properties are common across all tables, some are table-specific. 
    enum class CtProp : uint16_t
    {
       iWineId,
@@ -65,7 +65,7 @@ namespace ctb
       PendingDeliveryDate,
       PendingPurchaseId,
 
-      // Specific to Ready To Drink Report
+      // Specific to Ready To Drink table
       RtdQtyDefault,
       RtdQtyLinear,
       RtdQtyBellCurve,
@@ -76,11 +76,10 @@ namespace ctb
       RtdQtyBottlesPerYear,
       RtdInventorySummary,    // string summary of total bottles purchased/consumed/on-hand
       RtdInventoryLogical,    // number of logical 750ml bottles in inventory
-      RtdInventoryPhysical,    // number of physical bottles in inventory (might be different than logical for 375's etc)
+      RtdInventoryPhysical,   // number of physical bottles in inventory (might be different than logical for 375's etc)
 
-      // consumed bottles table
+      // Specific to Consumed Bottles table
       iConsumeId,
-      iTastingNoteId,
       ConsumeDate,
       ConsumeYear,
       ConsumeMonth,
@@ -91,10 +90,29 @@ namespace ctb
       Location,
       Bin,
 
-      // purchased wines table
-      PurchaseComplete,          // treated as string, contains "TRUE/FALSE"
+      // Specific to Purchased Wines table
+      PurchaseComplete,          // as opposed to Pending orders
       PurchaseQtyOrdered,
-		PurchaseQtyRemaining,
+		PurchaseQtyRemaining,      // remaining from this purchase, could be others
+
+
+		// Specific to Tasting Notes table
+      iTastingNoteId,
+      TastingDate,
+      TastingFlawed,
+      TastingLiked,
+      TastingNotes,
+      TastingCommentCount,
+      TastingViewCount,
+      TastingVoteCount,
+      TastingCtNoteCount,
+      TastingCtLikePercent,
+      TastingCtLikeCount,
+
+      // Specific to Tagged Wines table
+      TagName,
+      TagWineNote,
+      TagMaxPrice
    };
 
    
@@ -176,5 +194,30 @@ namespace ctb
    /// @brief Type alias for span of CtTableSorts
    using CtTableSortSpan = std::span<const CtTableSort>;
 
+
+   class WineScoresCache
+   {
+   public:
+      struct CacheItem
+      {
+         uint64_t wine_id{};
+
+         std::string display_name{};
+         
+         std::string url{};
+
+         CtPropertyVal value{};
+      };
+
+      auto getScores(uint64_t wine_id) const 
+      {
+         auto matches = m_cache.equal_range(wine_id);
+         return rng::subrange{ matches.first, matches.second } | rng::views::values;
+      }
+
+   private:
+      std::multimap<uint64_t, CacheItem> m_cache{};
+
+   };
 
 } // namespace ctb

@@ -36,29 +36,33 @@ namespace ctb::constants
    inline constexpr int         MAX_ENV_VAR_LENGTH          = 128;
 
    // column labels
+   inline constexpr const char* DISPLAY_COL_AVAILABLE       = "Ready";
    inline constexpr const char* DISPLAY_COL_CONSUME_DATE    = "Consumed On";
    inline constexpr const char* DISPLAY_COL_CONSUME_REASON  = "Reason";
    inline constexpr const char* DISPLAY_COL_CONSUME_FROM    = "Consumed From";
    inline constexpr const char* DISPLAY_COL_CT_SCORE        = "CT Score";
    inline constexpr const char* DISPLAY_COL_CT_WINDOW       = "CT Window";
+   inline constexpr const char* DISPLAY_COL_FLAWED          = "Flawed?";
+   inline constexpr const char* DISPLAY_COL_INVENTORY       = "Inventory";
+   inline constexpr const char* DISPLAY_COL_LIKED           = "Liked?";
    inline constexpr const char* DISPLAY_COL_LOCALE          = "Region and Appellation";
    inline constexpr const char* DISPLAY_COL_MY_SCORE        = "My Score";
    inline constexpr const char* DISPLAY_COL_MY_WINDOW       = "My Window";
    inline constexpr const char* DISPLAY_COL_PRICE           = "Price";
-   inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Ordered";
-   inline constexpr const char* DISPLAY_COL_INVENTORY       = "Inventory";
-   inline constexpr const char* DISPLAY_COL_REMAINING       = "Bottles Left";
+   inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Purchased";
    inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
+   inline constexpr const char* DISPLAY_COL_REMAINING       = "Bottles Left";
    inline constexpr const char* DISPLAY_COL_STORE           = "Store";
+   inline constexpr const char* DISPLAY_COL_TASTING_DATE    = "Tasting Date";
+   inline constexpr const char* DISPLAY_COL_TAG_NAME        = "Tag Name";
    inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
 
-   inline constexpr const char* DISPLAY_COL_AVAILABLE       = "Ready";
-   inline constexpr const char* DISPLAY_COL_LINEAR          = "Linear";
-   inline constexpr const char* DISPLAY_COL_BELL_CURVE      = "Bell";
-   inline constexpr const char* DISPLAY_COL_EARLY_CURVE     = "Early";
-   inline constexpr const char* DISPLAY_COL_LATE_CURVE      = "Late";
-   inline constexpr const char* DISPLAY_COL_EARLY_LATE      = "Both";
-   inline constexpr const char* DISPLAY_COL_FAST_MATURING   = "Fast";
+   inline constexpr const char* DISPLAY_COL_CURVE_LINEAR        = "Linear";
+   inline constexpr const char* DISPLAY_COL_CURVE_BELL          = "Bell";
+   inline constexpr const char* DISPLAY_COL_CURVE_EARLY         = "Early";
+   inline constexpr const char* DISPLAY_COL_CURVE_LATE          = "Late";
+   inline constexpr const char* DISPLAY_COL_CURVE_EARLY_LATE    = "Both";
+   inline constexpr const char* DISPLAY_COL_CURVE_FAST_MATURING = "Fast";
 
    // filter names
    inline constexpr const char* FILTER_APPELATION           = "Appellation";
@@ -72,6 +76,10 @@ namespace ctb::constants
    inline constexpr const char* FILTER_SUB_REGION           = "Sub-Region";
    inline constexpr const char* FILTER_CONSUME_REASON       = "Reason";
    inline constexpr const char* FILTER_STORE                = "Store";
+   inline constexpr const char* FILTER_TASTING_DATE         = "Tasting Date";
+   inline constexpr const char* FILTER_TASTING_FLAWED       = "Flawed Wine";
+   inline constexpr const char* FILTER_TASTING_LIKED        = "I Liked It";
+   inline constexpr const char* FILTER_TAG_NAME             = "Tag/List Name";
    inline constexpr const char* FILTER_VARIETAL             = "Varietal";
    inline constexpr const char* FILTER_VINTAGE              = "Vintage";
 
@@ -89,10 +97,12 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_APPELATION_WINE       = "Appellation, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_CONSUME_DATE          = "Date Consumed";
    inline constexpr const char* SORT_OPTION_COUNTRY_APPELATION    = "Country, Appellation and Wine";
+   inline constexpr const char* SORT_OPTION_DRINK_BY              = "Drink By Year and Vintage";
    inline constexpr const char* SORT_OPTION_LOCALE_WINE           = "Country, Region, and Appellation";
    inline constexpr const char* SORT_OPTION_PRODUCER_WINE_NAME    = "Producer, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_REGION_WINE           = "Region, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_PURCHASE_DATE         = "Order Date, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_TASTING_DATE          = "Tasting Date, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_STORE_NAME            = "Store, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_CURVE_DEFAULT         = "Default Formula";
    inline constexpr const char* SORT_OPTION_CURVE_LINEAR          = "Linear Formula";
@@ -107,6 +117,8 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";
    inline constexpr const char* SORT_OPTION_MY_VALUE              = "My Value";
    inline constexpr const char* SORT_OPTION_VARIETAL_WINE         = "Varietal, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_TAG_VINTAGE_WINE      = "Tag, Vintage and Wine";
+   inline constexpr const char* SORT_OPTION_TAG_WINE_VINTAGE      = "Tag, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_VINTAGE_WINE          = "Vintage and Wine";
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";
 
@@ -119,7 +131,7 @@ namespace ctb::constants
    inline constexpr const char* TABLE_NAME_PENDING                = "Wine Pending Delivery";
    inline constexpr const char* TABLE_NAME_CONSUMED               = "Wine Consumed";
    inline constexpr const char* TABLE_NAME_AVAILABILITY           = "Ready to Drink List";
-   inline constexpr const char* TABLE_NAME_TAG                    = "Wish List Tags";
+   inline constexpr const char* TABLE_NAME_TAG                    = "Tagged Wines";
    inline constexpr const char* TABLE_NAME_PROREVIEW              = "Manually Entered Pro Reviews";
    inline constexpr const char* TABLE_NAME_BOTTLES                = "Raw Bottle List";
    inline constexpr const char* TABLE_NAME_FOODTAGS               = "Food Pairing Tag";
@@ -142,6 +154,7 @@ namespace ctb::constants
    inline constexpr const char* ERROR_STR_RELATIVE_LABEL_CACHE    = "The label image cache folder must be an absolute path, not relative.";
    inline constexpr const char* ERORR_STR_NO_SECRET_STORE         = "Secret Store not available.";
    inline constexpr const char* ERROR_STR_UNKNOWN                 = "Unknown Error.";
+   inline constexpr const char* ERROR_STR_UNINITIALIZED_FIELDS    = "Attempt to use field controls before creating and initializing them.";
    inline constexpr const char* ERROR_VAL                         = "#Err#";
    inline constexpr const char* FMT_ERROR_CURL_ERROR              = "The operation failed with CURL error {}";
    inline constexpr const char* FMT_ERROR_FILE_NOT_FOUND          = "File '{}' was not found.";
@@ -168,18 +181,33 @@ namespace ctb::constants
    inline constexpr const char* FMT_PARSE_ISO_DATE_ONLY           = "%F";
 
    inline constexpr const char* FMT_SUMMARY_AVAILABILITY          = "{} Wines with {} Bottles Ready to Drink (Default Formula)";
-   inline constexpr const char* FMT_SUMMARY_CONSUMED              = "{} Wines Consumed Since {}";
-   inline constexpr const char* FMT_SUMMARY_PURCHASED             = "{} Wines, with {} Bottles Purchased and {} Bottles Remaining or Pending";
+   inline constexpr const char* FMT_SUMMARY_CONSUMED              = "{} Wines Consumed Since {}.";
+   inline constexpr const char* FMT_SUMMARY_PURCHASED             = "{} Wines, with {} Bottles Purchased and {} Bottles Remaining or Pending.";
    inline constexpr const char* SUMMARY_EMPTY                     = "No data. Check filter options or download latest CellarTracker data.";
    inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, with {} Bottles Cellared and {} Pending Delivery";
-   inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles";
+   inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles.";
+   inline constexpr const char* FMT_SUMMARY_TAGGED_WINES          = "{} Lists Containing {} Wines.";
+   inline constexpr const char* FMT_SUMMARY_TASTING_NOTES         = "{} Tasting Notes Recorded for {} Wines.";
+   inline constexpr const char* FMT_TASTING_CT_LIKE_SUMMARY       = "{} ({}%)";
+   inline constexpr const char* FMT_TASTING_LIKE_MSG              = "I {} this wine";
+   inline constexpr const char* FMT_TASTING_FEEDBACK_VWS_VOTES    = "{} Views, {} 'Helpful' Votes";
+   inline constexpr const char* FMT_TASTING_FEEDBACK_VWS_COMMENTS = "{} Views, {} comments";
+   inline constexpr const char* FMT_TASTING_FEEDBACK_VWS_COMMENTS_VOTES = "{} Views, {} Comments and {} 'Helpful' Votes";
+   inline constexpr const char* FMT_TASTING_FEEDBACK_VIEWS        = "{} Views";
+
+   inline constexpr const char* STR_LIKE                          = "like";
+   inline constexpr const char* STR_DONT_LIKE                     = "do not like";
+   inline constexpr const char* STR_CRLF                          = "\r\n";
+   inline constexpr const char* STR_FLAWED_WINE                   = "This wine was flawed";
+   inline constexpr const char* STR_UNSPECIFIED                   = "Unspecified";
+   inline constexpr const char* STR_YES                           = "Yes";
+   inline constexpr const char* STR_NO                            = "No";
+
 
    inline constexpr const char* LBL_SIZE_750ml                    = "750ml";
    inline constexpr const char* LBL_SIZE_375ml                    = "375ml";
    inline constexpr const char* LBL_SIZE_MAGNUM                   = "1.5L";
 
-	inline constexpr const char* VALUE_TRUE                        = "TRUE";  
-	inline constexpr const char* VALUE_FALSE                       = "FALSE";
 
    inline constexpr auto     ONE_MB                               = 1024 * 1024;
    inline constexpr uint16_t CT_NULL_YEAR                         =        9999;

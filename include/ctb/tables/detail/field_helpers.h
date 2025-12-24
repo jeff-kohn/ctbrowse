@@ -85,6 +85,18 @@ namespace ctb::detail
          prop.setNull();
    }
 
+   inline auto getDrinkWindow(const CtPropertyVal& drink_start, const CtPropertyVal& drink_end) -> std::string
+   {
+      if (drink_start.isNull() && drink_end.isNull())
+         return "";
 
+      if (drink_start.isNull() && drink_end.hasValue())
+         return drink_end.asString("By {}").c_str();
+
+      if (drink_end.isNull())
+         return drink_start.asString("{}+").c_str();
+
+      return ctb::format("{} - {}", drink_start.asString(), drink_end.asString());
+   }
 
 } // namesapace ctb::detail
