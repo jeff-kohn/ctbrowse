@@ -8,6 +8,7 @@
 
 #include "App.h"
 #include "CtCredentialManager.h"
+#include "LabelImageCache.h"
 #include "MainFrame.h"
 
 #include <ctb/utility_http.h>
@@ -29,7 +30,7 @@
 namespace ctb::app
 {
 
-   App::App()
+   App::App() 
    {
       setlocale(LC_ALL, ".UTF8");
 
@@ -64,6 +65,9 @@ namespace ctb::app
 
       log::info("App startup.");
       wxConfigBase::Set(cfg.release());
+
+      // initialize label cache. needs to happen _after_ config store is set up
+      m_label_cache = std::make_shared<LabelImageCache>(getLabelCacheFolder());
 
    } // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks) unfortunately no way around it with wxWidgets
 
@@ -106,15 +110,16 @@ namespace ctb::app
 
 
 
-   auto App::labelCacheFolder() noexcept -> fs::path
+   auto App::getLabelCacheFolder() noexcept -> fs::path
    {
       try 
       {
          auto cfg = getConfig(constants::CONFIG_PATH_PREFERENCES);
-         auto val = cfg->Read(constants::CONFIG_VALUE_LABEL_CACHE_DIR, wxEmptyString);
+         auto val = cfg->Read(constants::CONFIG_VALUE_LABEL_CACHE_DIR, wxEmptyString).ToStdString();
+         tryExpandEnvironmentVars(val);
          if (!val.empty())
          {
-            return fs::path{ val.wx_str() };
+            return fs::path{ val };
          }
       }
       catch (...) {
@@ -123,6 +128,12 @@ namespace ctb::app
       return getDataFolder(AppFolder::Labels);
    }
    
+   void App::setLabelCacheFolder(const fs::path& cache_folder)
+   {
+      auto new_cache = std::make_shared<LabelImageCache>(cache_folder);
+      m_label_cache = new_cache;
+   }
+
 
    ScopedConfigPath App::getConfig(std::string_view initial_path) noexcept(false)
    {
@@ -138,8 +149,7 @@ namespace ctb::app
 
    void App::displayErrorMessage(const Error& err, bool log_error, std::source_location source_loc)
    {
-      auto title = ctb::format(constants::FMT_TITLE_TYPED_ERROR, err.categoryName());
-      displayErrorMessage(err.formattedMesage(), log_error, title, source_loc);
+      displayErrorMessage(err.formattedMesage(), log_error, std::string{ err.categoryName() }, source_loc);
    }
 
 

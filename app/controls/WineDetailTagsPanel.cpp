@@ -8,7 +8,7 @@
 namespace ctb::app
 {
 
-   WineDetailTagsPanel::WineDetailTagsPanel(wxWindow* parent, DatasetEventSourcePtr event_source) :
+   WineDetailTagsPanel::WineDetailTagsPanel(wxWindow* parent, const DatasetEventSourcePtr& event_source) :
       wxPanel{ parent },
       m_event_handler{ event_source }
    {

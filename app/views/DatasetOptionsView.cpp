@@ -46,7 +46,7 @@ namespace ctb::app
    } // namespace
    
 
-   [[nodiscard]] auto DatasetOptionsView::create(wxWindow& parent, DatasetEventSourcePtr source) noexcept(false) -> DatasetOptionsView*
+   [[nodiscard]] auto DatasetOptionsView::create(wxWindow* parent, const DatasetEventSourcePtr& source) noexcept(false) -> DatasetOptionsView*
    {
       if (!source)
       {
@@ -55,7 +55,7 @@ namespace ctb::app
       }
 
       std::unique_ptr<DatasetOptionsView> wnd{ new DatasetOptionsView{source} };
-      if (!wnd->Create(&parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
+      if (!wnd->Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
       }
@@ -194,7 +194,7 @@ namespace ctb::app
          score_params.default_value,
          CtPropFilterPredicate{ CtPredicateType::GreaterEqual }
       };
-      m_min_score_filter_ctrl = SpinDoubleFilterCtrl::create(*(parent->GetStaticBox()), m_sink.getSource(), filter, score_params);
+      m_min_score_filter_ctrl = SpinDoubleFilterCtrl::create(parent->GetStaticBox(), m_sink.getSource(), filter, score_params);
       parent->Add(m_min_score_filter_ctrl, wxSizerFlags{}.Expand().Border(wxALL));
 		m_supported_filters.insert(filter.filter_name);
 
@@ -213,7 +213,7 @@ namespace ctb::app
          price_params.default_value,
          CtPropFilterPredicate{ CtPredicateType::GreaterEqual }
       };
-      m_min_price_filter_ctrl = SpinDoubleFilterCtrl::create(*(parent->GetStaticBox()), m_sink.getSource(), filter, price_params);
+      m_min_price_filter_ctrl = SpinDoubleFilterCtrl::create(parent->GetStaticBox(), m_sink.getSource(), filter, price_params);
       parent->Add(m_min_price_filter_ctrl, wxSizerFlags{}.Expand().Border(wxALL));
 		m_supported_filters.insert(filter.filter_name);
 
@@ -223,7 +223,7 @@ namespace ctb::app
       filter.compare_pred        = CtPropFilterPredicate{ CtPredicateType::LessEqual };
       filter.compare_val         = price_params.default_value;
       filter.filter_name         = LBL_CHECK_MAX_PRICE;
-      m_max_price_filter_ctrl    = SpinDoubleFilterCtrl::create(*(parent->GetStaticBox()), m_sink.getSource(), filter, price_params);
+      m_max_price_filter_ctrl    = SpinDoubleFilterCtrl::create(parent->GetStaticBox(), m_sink.getSource(), filter, price_params);
       parent->Add(m_max_price_filter_ctrl, wxSizerFlags{}.Expand().Border(wxALL));
 		m_supported_filters.insert(filter.filter_name);
 

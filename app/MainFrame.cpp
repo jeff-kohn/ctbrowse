@@ -11,7 +11,6 @@
 #include "CtCredentialManager.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
-#include "views/DatasetDetailsView.h"
 #include "views/DatasetMultiView.h"
 #include "views/DatasetOptionsView.h"
 
@@ -197,8 +196,7 @@ namespace ctb::app
    
    MainFrame::MainFrame() :
       m_event_source{ DatasetEventSource::create() },
-      m_sink{ this, m_event_source },
-      m_label_cache{ std::make_shared<LabelImageCache>(wxGetApp().labelCacheFolder().generic_string()) }
+      m_sink{ this, m_event_source }
    {
    }
 
@@ -755,11 +753,6 @@ namespace ctb::app
       wxWindowUpdateLocker lock{ this };
       try
       {
-         if (!m_view)
-         {
-            m_view = DatasetMultiView::create(*this, m_event_source, m_label_cache);
-         }
-
          // apply any previously-saved default settings before attaching to source
          auto dataset = loadDataset(eventIdToTableId(event.GetId()));
          CtDatasetOptions::applyDefaultOptions(dataset);
@@ -1032,15 +1025,30 @@ namespace ctb::app
 
    void MainFrame::setDataset(const DatasetPtr& dataset)
    {
-      m_event_source->setDataset(dataset, true);
+      // clean up existing view and dataset. setting dataset to nullptr will fire the DatasetRemoved event so UI elements can
+      // perform cleanup if necessary.
+      m_event_source->setDataset(nullptr);
+      if (m_view)
+      {
+         m_view->Destroy();
+         m_view = nullptr;
+      }
 
-      // Update title bar
-      SetTitle(ctb::format("{} - {}", dataset->getCollectionName(), constants::APP_NAME_LONG));
+      if (dataset)
+      {
+         // our views are dynamic based on the dataset, so we need to make sure that m_event_source has the new
+         // dataset before creating the view, which means we'll set the dataset but defer the Initialized event 
+         // until after we create thew view so that sub-views and controls have a chance to receive it.
+         m_event_source->setDataset(dataset, false);
+         m_view = DatasetMultiView::create(this, m_event_source);
+         m_event_source->signal(DatasetEvent::Id::DatasetInitialize, this);
 
-      // Force a complete redraw of everything
-      Layout();
-      SendSizeEvent();
-      Update();
+         // Force a complete redraw of everything
+         SetTitle(ctb::format("{} - {}", dataset->getCollectionName(), constants::APP_NAME_LONG));
+         Layout();
+         SendSizeEvent();
+         Update();
+      }
    }
 
 

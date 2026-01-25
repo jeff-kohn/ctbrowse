@@ -10,10 +10,7 @@ namespace ctb::app
 {
    class DatasetListView;     // the wine-list window
    class DatasetOptionsView;  // the sort/filter options panel
-   class DatasetDetailsView;  // details panel
-
-   class LabelImageCache;
-   using LabelCachePtr = std::shared_ptr<LabelImageCache>;
+   class DetailsViewBase;     // details panel
 
 
    /// @brief Window class that implements three side-by-side views using splitter windows.
@@ -27,13 +24,8 @@ namespace ctb::app
       /// to the window (wx windows are self-deleting).
       /// 
       [[nodiscard]] static 
-      auto create(wxWindow& parent, const DatasetEventSourcePtr& source, LabelCachePtr cache) -> DatasetMultiView*;
+      auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> DatasetMultiView*;
 
-
-      /// @brief Indicates whether the details for a selected wine are currently displayed.
-      /// @return true if a wine is displayed in details, false otherwise.
-      /// 
-      auto wineDetailsActive() const -> bool;
 
       // no copy/move/assign, this class is created on the heap.
       DatasetMultiView() = delete;
@@ -45,13 +37,13 @@ namespace ctb::app
 
    private:
       // non-owning child window pointers.
-      DatasetOptionsView* m_options_panel{};
-      DatasetDetailsView*        m_details_panel{};
+      DatasetOptionsView*  m_options_panel{};
+      DetailsViewBase*     m_details_panel{};
       DatasetListView*     m_listView{};
       wxSplitterWindow*    m_right_splitter{};
 
       /// @brief Private constructor, used by DatasetMultiView::create()
-      DatasetMultiView(wxWindow* parent, const DatasetEventSourcePtr&, const LabelCachePtr& cache);
+      DatasetMultiView(wxWindow* parent, const DatasetEventSourcePtr& event_source);
    };
 
 

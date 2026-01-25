@@ -17,7 +17,7 @@ namespace ctb::app
    class WineDetailTastingPanel final : public wxPanel
    {
    public:
-      WineDetailTastingPanel(wxWindow* parent, DatasetEventSourcePtr event_source);
+      WineDetailTastingPanel(wxWindow* parent, const DatasetEventSourcePtr& event_source);
 
    private:
       DatasetEventHandler m_event_handler;

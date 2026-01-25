@@ -68,7 +68,7 @@ namespace ctb
       /// 
       std::string formattedMesage() const
       {
-         return ctb::format("{} ({} {})", what(), categoryName(), error_code);
+         return error_message;
       }
 
       /// @brief base class override

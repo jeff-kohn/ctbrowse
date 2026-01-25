@@ -18,7 +18,7 @@ namespace ctb::app
    class WineDetailMainPanel final : public wxPanel
    {
    public:
-      WineDetailMainPanel(wxWindow* parent, DatasetEventSourcePtr event_source);
+      WineDetailMainPanel(wxWindow* parent, const DatasetEventSourcePtr& event_source);
 
    private:
       using DetailField  = std::variant<SinglePropDetailField, DrinkWindowDetailField>;

@@ -8,7 +8,7 @@
 namespace ctb::app
 {
 
-   WineDetailPendingPanel::WineDetailPendingPanel(wxWindow* parent, DatasetEventSourcePtr event_source) :
+   WineDetailPendingPanel::WineDetailPendingPanel(wxWindow* parent, const DatasetEventSourcePtr& event_source) :
       wxPanel{ parent },
       m_event_handler{ event_source }
    {
@@ -49,8 +49,8 @@ namespace ctb::app
 
    void WineDetailPendingPanel::onDatasetEvent(const DatasetEvent& event)
    {
-      // only show this panel if score property present
-      if (event.dataset->hasProperty(CtProp::PendingPurchaseId) and event.affected_row.has_value())
+      // only show this panel if a row was selected.
+      if (event.affected_row.has_value())
       {
          rng::for_each(m_fields, [&event](auto&& fld) { fld.update(event.dataset, event.affected_row.value()); });
          GetSizer()->ShowItems(true);

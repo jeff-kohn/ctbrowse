@@ -30,7 +30,6 @@ class wxToolBar;
 namespace ctb::app
 {
    class DatasetMultiView;    // main child window, contains list view, options panel and details panel
-   class LabelImageCache;     // used for retrieving label images
 
 
    /// @brief class for the main window of the application
@@ -73,9 +72,6 @@ namespace ctb::app
       wxStatusBar*          m_status_bar{};   // non-owning ptr to statusbar ctrl
       wxToolBar*            m_tool_bar{};     // non-owning ptr to toolbar ctrl
       int                   m_selected_row{ ROW_NONE }; // whether or not a row is selected in the dataset view, for update-UI handlers. -1 means no selection
-
-      // we use a shared_ptr because we want to share the object with child window(s)
-      std::shared_ptr<LabelImageCache> m_label_cache{};
 
       /// @brief private ctor called by static create()
       MainFrame();

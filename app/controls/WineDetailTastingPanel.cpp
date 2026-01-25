@@ -52,7 +52,7 @@ namespace ctb::app
 
 
 
-   WineDetailTastingPanel::WineDetailTastingPanel(wxWindow* parent, DatasetEventSourcePtr event_source) :
+   WineDetailTastingPanel::WineDetailTastingPanel(wxWindow* parent, const DatasetEventSourcePtr& event_source) :
       wxPanel{ parent },
       m_event_handler{ event_source }
    {

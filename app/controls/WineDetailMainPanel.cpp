@@ -10,7 +10,7 @@
 
 namespace ctb::app
 {
-   WineDetailMainPanel::WineDetailMainPanel(wxWindow* parent, DatasetEventSourcePtr event_source) :
+   WineDetailMainPanel::WineDetailMainPanel(wxWindow* parent, const DatasetEventSourcePtr& event_source) :
       wxPanel{ parent },
       m_event_handler { event_source }
    {
@@ -44,10 +44,10 @@ namespace ctb::app
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Appellation,    constants::LBL_APPELLATION });
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Size,           constants::LBL_SIZE        });
       m_fields.emplace_back( DrinkWindowDetailField { top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW    });
-      m_fields.emplace_back( DrinkWindowDetailField { top_sizer, CtProp::CtBeginConsume, CtProp::CtEndConsume, constants::LBL_DRINK_WINDOW_CT });
-      m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Location,       constants::LBL_LOCATION       });
-      m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::ConsumeDate,    constants::LBL_CONSUME_DATE   });
-      m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::ConsumeReason,  constants::LBL_CONSUME_REASON });
+      //m_fields.emplace_back( DrinkWindowDetailField { top_sizer, CtProp::CtBeginConsume, CtProp::CtEndConsume, constants::LBL_DRINK_WINDOW_CT });
+      //m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Location,       constants::LBL_LOCATION       });
+      //m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::ConsumeDate,    constants::LBL_CONSUME_DATE   });
+      //m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::ConsumeReason,  constants::LBL_CONSUME_REASON });
 
       // need to know when to update (or hide) the detail panels
       m_event_handler.addHandler(DatasetEvent::Id::DatasetRemove, [this](const DatasetEvent& event){ onDatasetEvent(event); });
@@ -96,7 +96,7 @@ namespace ctb::app
       // vertically for large strings is beyond lame, this sizer stuff is a PITA sometimes.
 
       auto text_size = m_wine_ctrl->GetTextExtent(m_wine_title);
-      if (text_size.x > event.m_size.x)
+      if (event.m_size.x and text_size.x > event.m_size.x)
       {
          // text too long for one line, we need to calculate how many lines high the control should be to wrap
          text_size.y *= (text_size.x / event.m_size.x);

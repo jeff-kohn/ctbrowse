@@ -182,9 +182,13 @@ namespace ctb::constants
    inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = true;
 
    // app-specific error messages.
-   inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN = "Label cache object is shutting down.";
-   inline constexpr const char* ERROR_STR_NO_CONFIG_STORE       = "No configuration store available.";
-   inline constexpr const char* ERROR_STR_ORPHANED_SIZER        = "No configuration store available.";
+   inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN     = "Label cache object is shutting down.";
+   inline constexpr const char* ERROR_STR_NO_CONFIG_STORE           = "No configuration store available.";
+   inline constexpr const char* ERROR_STR_ORPHANED_SIZER            = "No configuration store available.";
+   inline constexpr const char* ERROR_STR_DETAILS_VIEW_NULL_DATASET = "Creating a details view requires a valid dataset";
+
+   inline constexpr const char* FMT_ERROR_STR_INVALID_DETAIL_DETAIL = "No DetailsView factory for table id '{}'";
+
    inline constexpr const char* CT_COOKIE_SECRET_NAME           = "CTSession";
 
 

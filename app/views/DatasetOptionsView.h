@@ -42,7 +42,7 @@ namespace ctb::app
       ///
       /// throws a ctb::Error if source == nullptr, or if the window can't be created;
       /// otherwise returns a non-owning pointer to the window
-      [[nodiscard]] static auto create(wxWindow& parent, DatasetEventSourcePtr source) noexcept(false) -> DatasetOptionsView* ;   
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) noexcept(false) -> DatasetOptionsView* ;
 
 
       // no copy/move/assign, this class is created on the heap.

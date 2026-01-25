@@ -35,7 +35,7 @@ namespace ctb::app
       /// 
       /// @param cache_folder - path of folder to use for disk cache. env vars will be expanded
       /// @throws ctb::Error if cache folder doesn't exist and can't be created, or is a relative path. 
-      explicit LabelImageCache(std::string cache_folder);
+      explicit LabelImageCache(fs::path cache_folder);
       ~LabelImageCache() noexcept;
 
 
@@ -114,6 +114,4 @@ namespace ctb::app
 
       static auto runFetchAndSaveLabelTask(fs::path folder, uint64_t wine_id, std::stop_token token) noexcept(false) -> tasks::FetchFileTask::ReturnType;
    };
-
-   using LabelCachePtr = std::shared_ptr<LabelImageCache>;
 }

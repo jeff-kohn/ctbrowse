@@ -38,7 +38,7 @@ namespace ctb::app
          uint16_t decimal_places{};
       };
 
-      static auto create(wxWindow& parent, const DatasetEventSourcePtr& source, const PropertyFilter& filter, const SpinParams& params) -> SpinDoubleFilterCtrl*;
+      static auto create(wxWindow* parent, const DatasetEventSourcePtr& source, const PropertyFilter& filter, const SpinParams& params) -> SpinDoubleFilterCtrl*;
 
       /// @brief Get a reference to the filter associated with this control
       /// @return reference to the filter, which will have the appropriate cvref corresponding to 'this'
@@ -66,7 +66,7 @@ namespace ctb::app
       wxCheckBox*            m_checkbox{};
       wxSpinCtrlDouble*      m_spin{};
 
-      SpinDoubleFilterCtrl(wxWindow& parent, DatasetEventSourcePtr source, PropertyFilter filter, const SpinParams& params);
+      SpinDoubleFilterCtrl(wxWindow* parent, DatasetEventSourcePtr source, PropertyFilter filter, const SpinParams& params);
 
       void initControls(const SpinParams& params);
       void onDatasetFilter(const DatasetEvent& event);
