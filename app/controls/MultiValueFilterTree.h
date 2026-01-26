@@ -2,7 +2,7 @@
 
 #include "App.h"
 
-#include <ctb/model/ScopedEventSink.h>
+#include <ctb/model/DatasetEventHandler.h>
 #include <wx/menu.h>
 #include <wx/treectrl.h>
 
@@ -16,7 +16,7 @@ namespace ctb::app
    /// 
    /// This class is an event sink for IDatasetEventSource and automatically handles updates from other views
    /// as well as notifying other views about changes made. 
-   class MultiValueFilterTree final : public wxTreeCtrl, public IDatasetEventSink
+   class MultiValueFilterTree final : public wxTreeCtrl
    {
    public:
 
@@ -26,7 +26,7 @@ namespace ctb::app
       /// to the window (parent owns/manages lifetime).
       /// 
       [[nodiscard]] static 
-      auto create(wxWindow& parent, DatasetEventSourcePtr source) -> MultiValueFilterTree*;
+      auto create(wxWindow& parent, const DatasetEventSourcePtr& source) -> MultiValueFilterTree*;
 
       // no copy/move/assign, this class is created on the heap.
       MultiValueFilterTree() = delete;
@@ -45,12 +45,12 @@ namespace ctb::app
       CheckCountMap         m_check_counts{};   // for keeping track of number of values selected for a filter/node.
       NameNodeMap           m_name_nodes{};
       NodeFilterMap         m_node_filters{}; 
-      ScopedEventSink       m_sink;    
+      DatasetEventHandler   m_event_handler;
       wxWithImages::Images  m_images{};
 
-      MultiValueFilterTree(wxWindow& parent, DatasetEventSourcePtr source);
+      MultiValueFilterTree(wxWindow& parent, const DatasetEventSourcePtr& source);
 
-      void notify(DatasetEvent event) override;
+      void onDatasetEvent(DatasetEvent event);
       void onDatasetInitialize(IDataset& dataset);
 
       void onCollapseExpandNode(wxCommandEvent& event);

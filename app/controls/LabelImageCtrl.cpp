@@ -96,7 +96,7 @@ namespace ctb::app
             SetBitmap(bmp);
             Show();
             GetParent()->Layout(); // required since the images vary in size
-            GetParent()->SendSizeEvent();
+            //GetParent()->SendSizeEvent();
          }
       }
       catch (...)

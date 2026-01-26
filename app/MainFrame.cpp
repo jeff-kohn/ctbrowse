@@ -196,7 +196,7 @@ namespace ctb::app
    
    MainFrame::MainFrame() :
       m_event_source{ DatasetEventSource::create() },
-      m_sink{ this, m_event_source }
+      m_event_handler{ m_event_source }
    {
    }
 
@@ -210,6 +210,9 @@ namespace ctb::app
       createMenuBar();
       createToolBar();
       m_status_bar = CreateStatusBar();
+
+      // Dataset event
+      m_event_handler.setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event);  });
 
       // File menu handlers
       //Bind(wxEVT_MENU, &MainFrame::onMenuFilePreferences, this, CmdId::CMD_FILE_SETTINGS);
@@ -699,7 +702,7 @@ namespace ctb::app
          auto&& dataset = getDataset();
          dataset->multivalFilters().clear();
          dataset->propFilters().clear();
-         m_sink.signal_source(DatasetEvent::Id::Filter, false);
+         m_event_handler.signal_source(DatasetEvent::Id::Filter, false);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -1041,7 +1044,7 @@ namespace ctb::app
          // until after we create thew view so that sub-views and controls have a chance to receive it.
          m_event_source->setDataset(dataset, false);
          m_view = DatasetMultiView::create(this, m_event_source);
-         m_event_source->signal(DatasetEvent::Id::DatasetInitialize, this);
+         m_event_source->signal(DatasetEvent::Id::DatasetInitialize, false);
 
          // Force a complete redraw of everything
          SetTitle(ctb::format("{} - {}", dataset->getCollectionName(), constants::APP_NAME_LONG));
@@ -1063,7 +1066,7 @@ namespace ctb::app
    }
 
 
-   void MainFrame::notify([[maybe_unused]] DatasetEvent event)
+   void MainFrame::onDatasetEvent([[maybe_unused]] DatasetEvent event)
    {
       constexpr int none = -1;
 

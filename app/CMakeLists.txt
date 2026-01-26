@@ -82,6 +82,14 @@ target_sources(${TARGET_NAME}
 
      "views/DetailsViewBase.cpp"
      "views/DetailsViewBase.h"
+     "views/DetailsViewConsumedWine.h"
+     "views/DetailsViewMyCellar.h"
+     "views/DetailsViewPending.h"
+     "views/DetailsViewPurchasedWine.h"
+     "views/DetailsViewReadyToDrink.h"
+     "views/DetailsViewTaggedWine.h"
+     "views/DetailsViewTastingNotes.h"
+
      
      "views/DatasetListView.cpp"
      "views/DatasetListView.h"

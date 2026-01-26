@@ -64,7 +64,7 @@ namespace ctb::app
    }
 
 
-   DatasetOptionsView::DatasetOptionsView(DatasetEventSourcePtr source) : m_sink{ this, source }
+   DatasetOptionsView::DatasetOptionsView(const DatasetEventSourcePtr& source) : m_event_handler{ source }
    {}
 
 
@@ -123,7 +123,7 @@ namespace ctb::app
       
       // Match filter options box, contains filter tree 
       auto* match_filters_box = new wxStaticBoxSizer(wxVERTICAL, this, LBL_MATCH_FILTERS);
-      m_filter_tree = MultiValueFilterTree::create(*match_filters_box->GetStaticBox(), m_sink.getSource());
+      m_filter_tree = MultiValueFilterTree::create(*match_filters_box->GetStaticBox(), m_event_handler.getSource());
       m_filter_tree->SetMaxSize(ConvertDialogToPixels(wxSize(-1, 500)));
       m_filter_tree->SetMinSize(ConvertDialogToPixels(wxSize(-1, 100)));
       match_filters_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
@@ -140,6 +140,7 @@ namespace ctb::app
       SetSizer(top_sizer);
 
       // event bindings.
+      m_event_handler.setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event);  });
       m_sort_combo->Bind(wxEVT_CHOICE, &DatasetOptionsView::onSortSelection, this);
       opt_ascending->Bind( wxEVT_RADIOBUTTON,   &DatasetOptionsView::onSortOrderClicked, this);
       opt_descending->Bind(wxEVT_RADIOBUTTON,   &DatasetOptionsView::onSortOrderClicked, this);
@@ -194,7 +195,7 @@ namespace ctb::app
          score_params.default_value,
          CtPropFilterPredicate{ CtPredicateType::GreaterEqual }
       };
-      m_min_score_filter_ctrl = SpinDoubleFilterCtrl::create(parent->GetStaticBox(), m_sink.getSource(), filter, score_params);
+      m_min_score_filter_ctrl = SpinDoubleFilterCtrl::create(parent->GetStaticBox(), m_event_handler.getSource(), filter, score_params);
       parent->Add(m_min_score_filter_ctrl, wxSizerFlags{}.Expand().Border(wxALL));
 		m_supported_filters.insert(filter.filter_name);
 
@@ -213,7 +214,7 @@ namespace ctb::app
          price_params.default_value,
          CtPropFilterPredicate{ CtPredicateType::GreaterEqual }
       };
-      m_min_price_filter_ctrl = SpinDoubleFilterCtrl::create(parent->GetStaticBox(), m_sink.getSource(), filter, price_params);
+      m_min_price_filter_ctrl = SpinDoubleFilterCtrl::create(parent->GetStaticBox(), m_event_handler.getSource(), filter, price_params);
       parent->Add(m_min_price_filter_ctrl, wxSizerFlags{}.Expand().Border(wxALL));
 		m_supported_filters.insert(filter.filter_name);
 
@@ -223,7 +224,7 @@ namespace ctb::app
       filter.compare_pred        = CtPropFilterPredicate{ CtPredicateType::LessEqual };
       filter.compare_val         = price_params.default_value;
       filter.filter_name         = LBL_CHECK_MAX_PRICE;
-      m_max_price_filter_ctrl    = SpinDoubleFilterCtrl::create(parent->GetStaticBox(), m_sink.getSource(), filter, price_params);
+      m_max_price_filter_ctrl    = SpinDoubleFilterCtrl::create(parent->GetStaticBox(), m_event_handler.getSource(), filter, price_params);
       parent->Add(m_max_price_filter_ctrl, wxSizerFlags{}.Expand().Border(wxALL));
 		m_supported_filters.insert(filter.filter_name);
 
@@ -241,7 +242,7 @@ namespace ctb::app
 
    auto DatasetOptionsView::setTitle() -> bool
    {
-      auto dataset = m_sink.getDatasetOrThrow();
+      auto dataset = m_event_handler.getDataset(true);
       m_dataset_title->SetLabelText( dataset->getCollectionName());
       forceLayoutUpdate(this);
       return true;
@@ -256,7 +257,7 @@ namespace ctb::app
    }
 
    
-   void DatasetOptionsView::notify(DatasetEvent event)
+   void DatasetOptionsView::onDatasetEvent(DatasetEvent event)
    {
       assert(event.dataset);
 
@@ -354,7 +355,7 @@ namespace ctb::app
 
          auto* checkbox = m_filter_checkboxes[control_cat];
          auto& filter = checkbox->filter();
-         auto&& dataset = m_sink.getDatasetOrThrow();
+         auto&& dataset = m_event_handler.getDataset(true);
          if (checkbox->enabled())
          {
             dataset->propFilters().replaceFilter(filter.filter_name, filter);
@@ -362,7 +363,7 @@ namespace ctb::app
          else {
             dataset->propFilters().removeFilter(filter.filter_name);
          }
-         m_sink.signal_source(DatasetEvent::Id::Filter, false);
+         m_event_handler.signal_source(DatasetEvent::Id::Filter, false);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -394,10 +395,10 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         auto dataset = m_sink.getDatasetOrThrow();
+         auto dataset = m_event_handler.getDataset(true);
          m_sort_config.reverse = m_sort_descending;
          dataset->applySort(m_sort_config);
-         m_sink.signal_source(DatasetEvent::Id::Sort, false);
+         m_event_handler.signal_source(DatasetEvent::Id::Sort, false);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -418,13 +419,13 @@ namespace ctb::app
          // let the combo close its list before we reload the dataset
          CallAfter([this]()
             {
-               auto dataset = m_sink.getDatasetOrThrow();
+               auto dataset = m_event_handler.getDataset(true);
                auto sorts = dataset->availableSorts();
                if (m_sort_selection <= std::ssize(sorts))
                {
                   // re-fetch sorter based on index. UI and member state will get updated in the event handler.
                   dataset->applySort(sorts[static_cast<size_t>(m_sort_selection)]);
-                  m_sink.signal_source(DatasetEvent::Id::Sort, true); 
+                  m_event_handler.signal_source(DatasetEvent::Id::Sort, true);
                }
                else {
 						log::warn("DatasetOptionsView::onSortSelection: invalid sort index selected: {}", m_sort_selection);

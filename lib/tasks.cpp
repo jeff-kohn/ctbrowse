@@ -27,32 +27,34 @@ namespace ctb::tasks
    {
       checkStopToken(token);
 
-      // First, execute task to get the initial HTTP request for the wine page.
-      // no need to validate response since it's direct function call and runHttpGetTask
-      // already validates it. That might change if this moves to coroutine impl in future
-      cpr::Redirect redir{1, true, false, cpr::PostRedirectFlags::POST_301 | cpr::PostRedirectFlags::POST_302};
-      auto response = runHttpGetTask(getWineDetailsUrl(wine_id), token, getPageRequestHeaders());
-      
-      SPDLOG_DEBUG("runLabelDownloadTask({}) successfully got wine details html.", wine_id);
+      throw Error{ "runLabelDownloadTask currently disabled, aborted" };
 
-      // parse the HTML to get the URL for the label image.
-      checkStopToken(token);
-      auto img_url = parseLabelUrlFromHtml(response.text);
-      if (img_url.empty())
-      {
-         throw Error{ constants::ERROR_STR_LABEL_URL_NOT_FOUND };
-      }
+      //// First, execute task to get the initial HTTP request for the wine page.
+      //// no need to validate response since it's direct function call and runHttpGetTask
+      //// already validates it. That might change if this moves to coroutine impl in future
+      //cpr::Redirect redir{1, true, false, cpr::PostRedirectFlags::POST_301 | cpr::PostRedirectFlags::POST_302};
+      //auto response = runHttpGetTask(getWineDetailsUrl(wine_id), token, getPageRequestHeaders());
+      //
+      //SPDLOG_DEBUG("runLabelDownloadTask({}) successfully got wine details html.", wine_id);
 
-      SPDLOG_DEBUG("runLabelDownloadTask({}) parsed image url of {}.", wine_id, img_url);
+      //// parse the HTML to get the URL for the label image.
+      //checkStopToken(token);
+      //auto img_url = parseLabelUrlFromHtml(response.text);
+      //if (img_url.empty())
+      //{
+      //   throw Error{ constants::ERROR_STR_LABEL_URL_NOT_FOUND };
+      //}
 
-      // now execute task to download the label image from the web
-      checkStopToken(token);
-      response = runHttpGetTask(img_url, token, getImageRequestHeaders());
-      auto [buf, type] = getBytes(response);
-      
-      SPDLOG_DEBUG("runLabelDownloadTask({}) downloaded {} bytes with content type {}.", wine_id, buf.size(), type);
+      //SPDLOG_DEBUG("runLabelDownloadTask({}) parsed image url of {}.", wine_id, img_url);
 
-      return Buffer{ std::from_range, buf };
+      //// now execute task to download the label image from the web
+      //checkStopToken(token);
+      //response = runHttpGetTask(img_url, token, getImageRequestHeaders());
+      //auto [buf, type] = getBytes(response);
+      //
+      //SPDLOG_DEBUG("runLabelDownloadTask({}) downloaded {} bytes with content type {}.", wine_id, buf.size(), type);
+
+      //return Buffer{ std::from_range, buf };
    }
 
 } // namespace ctb::tasks

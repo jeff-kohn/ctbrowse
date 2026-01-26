@@ -73,7 +73,6 @@ namespace ctb::app
       auto* title_ctrl = new wxStaticText(this, wxID_ANY,  constants::LBL_TASTING_NOTE, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
       title_ctrl->SetValidator(wxGenericValidator{ &m_title });
       auto title_font = GetFont().MakeBold();
-      title_font.SetPointSize(title_font.GetPointSize() + 1);
       title_ctrl->SetFont(title_font);
       title_ctrl->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT));
       top_sizer->Add(title_ctrl, wxSizerFlags{}.Expand().Border(wxTOP|wxLEFT|wxRIGHT));
@@ -104,7 +103,7 @@ namespace ctb::app
    void WineDetailTastingPanel::onDatasetEvent(const DatasetEvent& event)
    {
       const auto& dataset = event.dataset;
-      if (dataset and dataset->hasProperty(CtProp::TastingNotes) and event.affected_row.has_value())
+      if (dataset and event.affected_row.has_value())
       {
          auto rec_idx = event.affected_row.value();
 

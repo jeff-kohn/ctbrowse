@@ -8,8 +8,8 @@
 #pragma once
 
 #include "App.h"
-#include <ctb/model/DatasetEventSource.h>
-#include <ctb/model/ScopedEventSink.h>
+#include <ctb/model/DatasetEventHandler.h>
+
 
 #include <wx/event.h>
 #include <wx/menu.h>
@@ -34,7 +34,7 @@ namespace ctb::app
 
    /// @brief class for the main window of the application
    ///
-   class MainFrame final : public wxFrame, public IDatasetEventSink
+   class MainFrame final : public wxFrame
    {
    public:
       static inline constexpr int STATUS_BAR_PANE_STATUS  = 0;
@@ -68,7 +68,7 @@ namespace ctb::app
       DatasetEventSourcePtr m_event_source{}; // for synchronizing events between views and the underlying dataset
       wxMenuBar*            m_menu_bar{};     // non-owning ptr to main menubar
       wxSearchCtrl*         m_search_ctrl{};  // non-owning ptr to substring search box on the toolbar
-      ScopedEventSink       m_sink;           // so we can also handle events from our source
+      DatasetEventHandler   m_event_handler;  // so we can also handle events from our source
       wxStatusBar*          m_status_bar{};   // non-owning ptr to statusbar ctrl
       wxToolBar*            m_tool_bar{};     // non-owning ptr to toolbar ctrl
       int                   m_selected_row{ ROW_NONE }; // whether or not a row is selected in the dataset view, for update-UI handlers. -1 means no selection
@@ -127,8 +127,7 @@ namespace ctb::app
       void setDataset(const DatasetPtr& dataset);
       void updateStatusBarCounts();
 
-      // Inherited via IDatasetEventSink
-      void notify(DatasetEvent event) override;
+      void onDatasetEvent(DatasetEvent event);
    };
 
 

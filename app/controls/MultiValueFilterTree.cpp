@@ -52,15 +52,15 @@ namespace ctb::app
    }
 
 
-   auto MultiValueFilterTree::create(wxWindow& parent, DatasetEventSourcePtr source) -> MultiValueFilterTree*
+   auto MultiValueFilterTree::create(wxWindow& parent, const DatasetEventSourcePtr& source) -> MultiValueFilterTree*
    {
       return new MultiValueFilterTree{ parent, source };
    }
 
 
-   MultiValueFilterTree::MultiValueFilterTree(wxWindow& parent, DatasetEventSourcePtr source) :
+   MultiValueFilterTree::MultiValueFilterTree(wxWindow& parent, const DatasetEventSourcePtr& source) :
       wxTreeCtrl{ &parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, WINDOW_STYLE },
-      m_sink{ this, source }
+      m_event_handler { source }
    {
       using namespace ctb::constants;
 
@@ -89,11 +89,12 @@ namespace ctb::app
       Bind(wxEVT_UPDATE_UI, &MultiValueFilterTree::onDeselectAllUpdateUI,      this, CMD_FILTER_TREE_DESELECT_ALL);
       Bind(wxEVT_UPDATE_UI, &MultiValueFilterTree::onDeselectAllUpdateUI,      this, CND_FILTER_TREE_INVERT_SELECTION); // Same logic as Deselect All
 
+      m_event_handler.setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event);  });
    }
 
 
    /// @brief Event dispatcher for IDatasetEventSink
-   void MultiValueFilterTree::notify(DatasetEvent event)
+   void MultiValueFilterTree::onDatasetEvent(DatasetEvent event)
    {
       try
       {
@@ -196,9 +197,9 @@ namespace ctb::app
    {
       try 
       {
-         auto dataset = m_sink.getDatasetOrThrow();
+         auto dataset = m_event_handler.getDataset(true);
          dataset->multivalFilters().clear();
-         m_sink.signal_source(DatasetEvent::Id::Filter, true);
+         m_event_handler.signal_source(DatasetEvent::Id::Filter, true);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -212,9 +213,9 @@ namespace ctb::app
       {
          auto item = GetSelection();
          auto current_filter = getFilter(item);
-         auto dataset = m_sink.getDatasetOrThrow();
+         auto dataset = m_event_handler.getDataset(true);
          dataset->multivalFilters().removeFilter(current_filter.prop_id);
-         m_sink.signal_source(DatasetEvent::Id::Filter, true);
+         m_event_handler.signal_source(DatasetEvent::Id::Filter, true);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -228,7 +229,7 @@ namespace ctb::app
       {
          auto item = GetSelection();
          auto current_filter = getFilter(item);
-         auto dataset = m_sink.getDatasetOrThrow();
+         auto dataset = m_event_handler.getDataset(true);
 
          // we want to select all unselected values and vice-versa. so remove current selected values from
          // full list of values to get the list we need to select. 
@@ -238,7 +239,7 @@ namespace ctb::app
          current_filter.match_values.swap(new_values);
 
          dataset->multivalFilters().replaceFilter(current_filter.prop_id, current_filter);
-         m_sink.signal_source(DatasetEvent::Id::Filter, true);
+         m_event_handler.signal_source(DatasetEvent::Id::Filter, true);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -375,7 +376,7 @@ namespace ctb::app
    /// @return an appropriately-typed CtPropertyVal representing the specified tree item's value
    auto MultiValueFilterTree::getFilterValue(wxTreeItemId item) -> CtPropertyVal
    {
-      auto dataset    = m_sink.getDatasetOrThrow();
+      auto dataset    = m_event_handler.getDataset(true);
       auto& filter    = getFilter(item);
       auto fld_schema = dataset->getFieldSchema(filter.prop_id);
 
@@ -474,14 +475,14 @@ namespace ctb::app
    /// call SetCheck() for that.
    void MultiValueFilterTree::enableFilterMatchValue(wxTreeItemId item) noexcept(false)
    {
-      auto dataset = m_sink.getDatasetOrThrow();
+      auto dataset = m_event_handler.getDataset(true);
       auto& filter = getFilter(item);
 
       auto&& [iter, was_inserted] = filter.match_values.insert(getFilterValue(item));
       if (was_inserted)
       {
          dataset->multivalFilters().replaceFilter(filter.prop_id, filter);
-         m_sink.signal_source(DatasetEvent::Id::Filter, false); 
+         m_event_handler.signal_source(DatasetEvent::Id::Filter, false); 
       }
    }
 
@@ -514,7 +515,7 @@ namespace ctb::app
    void MultiValueFilterTree::populateFilterChildItems(wxTreeItemId filter_node) noexcept(false)
    {
       auto current_filter = getFilter(filter_node);
-      auto dataset = m_sink.getDatasetOrThrow();
+      auto dataset = m_event_handler.getDataset(true);
 
       DeleteChildren(filter_node);
       clearCheckCounts(filter_node);
@@ -575,12 +576,12 @@ namespace ctb::app
    void MultiValueFilterTree::removeFilter(wxTreeItemId item) noexcept(false)
    {
       auto& filter = getFilter(item);
-      auto dataset = m_sink.getDatasetOrThrow();
+      auto dataset = m_event_handler.getDataset(true);
 
       if (filter.match_values.erase(getFilterValue(item)))
       {
          dataset->multivalFilters().replaceFilter(filter.prop_id, filter);
-         m_sink.signal_source(DatasetEvent::Id::Filter, false); 
+         m_event_handler.signal_source(DatasetEvent::Id::Filter, false); 
       }
    }
 

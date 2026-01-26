@@ -1,7 +1,11 @@
 #include "views/DatasetMultiView.h"
+#include "views/DetailsViewConsumedWine.h"
 #include "views/DetailsViewMyCellar.h"
 #include "views/DetailsViewPending.h"
+#include "views/DetailsViewPurchasedWine.h"
 #include "views/DetailsViewReadyToDrink.h"
+#include "views/DetailsViewTaggedWine.h"
+#include "views/DetailsViewTastingNotes.h"
 #include "views/DatasetListView.h"
 #include "views/DatasetOptionsView.h"
 
@@ -37,12 +41,17 @@ namespace ctb::app
    {
       using DetailsViewFactory = std::function<DetailsViewBase*(wxWindow* parent, const DatasetEventSourcePtr& source)>;
    
-      static auto details_view_map = std::map<TableId, DetailsViewFactory>
+      static const auto details_view_map = std::map<TableId, DetailsViewFactory>
       {
          { TableId::List,         &DetailsViewMyCellar::create       } ,
          { TableId::Pending,      &DetailsViewPending::create        } ,
          { TableId::Availability, &DetailsViewReadyToDrink::create   } ,
+         { TableId::Tag,          &DetailsViewTaggedWine::create    } ,
+         { TableId::Consumed,     &DetailsViewConsumedWine::create   } ,
+         { TableId::Purchase,     &DetailsViewPurchasedWine::create  } ,
+         { TableId::Notes,        &DetailsViewTastingNotes::create   } ,
       };
+
 
       /// @brief Creates and returns the appropriate DetailsViewBase-derived window object for the event source's dataset 
       /// @return A non-owning pointer to the newly created details view for the dataset.

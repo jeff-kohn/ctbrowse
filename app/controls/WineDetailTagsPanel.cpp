@@ -19,7 +19,6 @@ namespace ctb::app
    void WineDetailTagsPanel::init()
    {
       static constexpr auto COL_COUNT = 2;
-      constexpr auto note_spacer = 15;
 
       wxWindowUpdateLocker freeze_win(this);
 
@@ -31,8 +30,8 @@ namespace ctb::app
 
       m_tag_note_ctrl = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
       m_tag_note_ctrl->SetValidator(wxGenericValidator{ &m_tag_note });
-      top_sizer->AddSpacer(note_spacer);
-      top_sizer->Add(m_tag_note_ctrl, wxSizerFlags{ 1 }.Expand());
+      
+      top_sizer->Add(m_tag_note_ctrl, wxSizerFlags{ 1 }.Border().Expand());
 
       // need to know when to update (or hide) the panel
       m_event_handler.addHandler(DatasetEvent::Id::DatasetRemove, [this](const DatasetEvent& event) { onDatasetEvent(event); });

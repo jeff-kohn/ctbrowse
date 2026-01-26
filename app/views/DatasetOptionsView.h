@@ -11,7 +11,7 @@
 #include "CategorizedControls.h"
 #include "model/CtDatasetOptions.h"
 
-#include <ctb/model/ScopedEventSink.h>
+#include <ctb/model/DatasetEventHandler.h>
 
 #include <wx/panel.h>
 #include <wx/spinctrl.h>
@@ -35,7 +35,7 @@ namespace ctb::app
 
    /// @brief panel class that provides UI for setting sorting and filtering options
    ///
-   class DatasetOptionsView final : public wxPanel, public IDatasetEventSink
+   class DatasetOptionsView final : public wxPanel
    {
    public:
       /// @brief creates and initializes a panel for showing sort/filter options
@@ -74,7 +74,7 @@ namespace ctb::app
       FilterCheckboxes      m_filter_checkboxes{};          // checkbox controls for enabling/disabling different property filters
       IDataset::TableSort   m_sort_config{};                // the sort object that will be used to sort the dataset 
       MultiValueFilterTree* m_filter_tree{};
-      ScopedEventSink       m_sink;               
+      DatasetEventHandler   m_event_handler;
       wxChoice*             m_sort_combo{};
       SpinDoubleFilterCtrl* m_min_score_filter_ctrl{};
       SpinDoubleFilterCtrl* m_min_price_filter_ctrl{};
@@ -90,7 +90,7 @@ namespace ctb::app
       auto getSortOptionList(DatasetPtr dataset) -> wxArrayString;
 
       // Dataset-related event handlers
-      void notify(DatasetEvent event) override;
+      void onDatasetEvent(DatasetEvent event) ;
       void onDatasetInitialize(DatasetPtr dataset);
       void onTableSorted(DatasetPtr dataset);
 
@@ -103,7 +103,7 @@ namespace ctb::app
       void onSortSelection(wxCommandEvent& event);
 
       /// @brief private ctor used by static create()
-      explicit DatasetOptionsView(DatasetEventSourcePtr source);
+      explicit DatasetOptionsView(const DatasetEventSourcePtr& source);
    };
 
 } // namespace ctb::app

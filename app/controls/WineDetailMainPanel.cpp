@@ -24,6 +24,8 @@ namespace ctb::app
 
       wxWindowUpdateLocker freeze_win(this);
 
+      auto dataset = m_event_handler.getDataset(true); // throws if dataset is nullptr
+
       // wine name/title
       m_wine_ctrl = new wxStaticText( this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER );
       m_wine_ctrl->SetValidator(wxGenericValidator(&m_wine_title));
@@ -43,11 +45,29 @@ namespace ctb::app
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::SubRegion,      constants::LBL_SUB_REGION  });
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Appellation,    constants::LBL_APPELLATION });
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Size,           constants::LBL_SIZE        });
-      m_fields.emplace_back( DrinkWindowDetailField { top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW    });
-      //m_fields.emplace_back( DrinkWindowDetailField { top_sizer, CtProp::CtBeginConsume, CtProp::CtEndConsume, constants::LBL_DRINK_WINDOW_CT });
-      //m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Location,       constants::LBL_LOCATION       });
-      //m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::ConsumeDate,    constants::LBL_CONSUME_DATE   });
-      //m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::ConsumeReason,  constants::LBL_CONSUME_REASON });
+
+      if (dataset->hasProperty(CtProp::CtBeginConsume))
+      {
+         m_fields.emplace_back( DrinkWindowDetailField{ top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW_MY  });
+         m_fields.emplace_back( DrinkWindowDetailField { top_sizer, CtProp::CtBeginConsume, CtProp::CtEndConsume, constants::LBL_DRINK_WINDOW_CT });
+
+      }
+      else {
+         m_fields.emplace_back(DrinkWindowDetailField{ top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW });
+      }
+
+      if (dataset->hasProperty(CtProp::Location))
+      {
+         m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Location,       constants::LBL_LOCATION       });
+      }
+      if (dataset->hasProperty(CtProp::ConsumeDate))
+      {
+         m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::ConsumeDate,    constants::LBL_CONSUME_DATE   });
+      }
+      if (dataset->hasProperty(CtProp::ConsumeReason))
+      {
+         m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::ConsumeReason,  constants::LBL_CONSUME_REASON });
+      }
 
       // need to know when to update (or hide) the detail panels
       m_event_handler.addHandler(DatasetEvent::Id::DatasetRemove, [this](const DatasetEvent& event){ onDatasetEvent(event); });
@@ -87,26 +107,21 @@ namespace ctb::app
 
       TransferDataToWindow();
       SendSizeEvent(); // So we can wrap the title
+      Layout();
    }
 
 
    void WineDetailMainPanel::onSize(wxSizeEvent& event)
    {
-      // The fact that we have to jump through this many hoops to get a static text to expand
-      // vertically for large strings is beyond lame, this sizer stuff is a PITA sometimes.
-
-      auto text_size = m_wine_ctrl->GetTextExtent(m_wine_title);
-      if (event.m_size.x and text_size.x > event.m_size.x)
+      // Need to figure out how many lines to make the wine title so we can wrap it and show the full name
+      constexpr auto margin = 5;
+      if (event.m_size.x > 0)
       {
-         // text too long for one line, we need to calculate how many lines high the control should be to wrap
-         text_size.y *= (text_size.x / event.m_size.x);
-         text_size.x = event.m_size.x;
+         m_wine_ctrl->Wrap(event.m_size.GetWidth() - margin);
+         wxSize best_size = m_wine_ctrl->GetBestSize();
+         m_wine_ctrl->SetClientSize(best_size);
       }
-
-      // Resize wine title to exact needed dimensions, then lay everything else out and wrap the text.
-      m_wine_ctrl->SetClientSize(text_size);
       Layout();
-      m_wine_ctrl->Wrap(event.m_size.GetWidth());
       Refresh();
       Update();
 
