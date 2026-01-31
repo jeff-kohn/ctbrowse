@@ -61,13 +61,13 @@ namespace ctb::app
       ~SpinDoubleFilterCtrl() override = default;
 
    private:
-      DatasetEventHandler    m_event_handler;
+      DatasetEventHandler    m_dataset_events;
       PropertyFilter         m_filter{};
       wxCheckBox*            m_checkbox{};
       wxSpinCtrlDouble*      m_spin{};
 
       SpinDoubleFilterCtrl(const DatasetEventSourcePtr& source, PropertyFilter filter) :
-         m_event_handler(source),
+         m_dataset_events(source),
          m_filter{ std::move(filter) }
       {}
 

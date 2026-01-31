@@ -20,13 +20,13 @@ namespace ctb::app
       static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailTastingPanel*;
 
    private:
-      DatasetEventHandler m_event_handler;
+      DatasetEventHandler m_dataset_events;
       wxString            m_title{ constants::LBL_TASTING_NOTE };
       wxString            m_feedback_summary{};
       wxString            m_tasting_notes{};
       wxStaticText*       m_tasting_notes_ctrl{};
 
-      WineDetailTastingPanel(const DatasetEventSourcePtr& event_source) : m_event_handler{ event_source }
+      WineDetailTastingPanel(const DatasetEventSourcePtr& event_source) : m_dataset_events{ event_source }
       {}
 
       void createWindow(wxWindow* parent);

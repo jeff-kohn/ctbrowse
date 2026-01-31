@@ -20,11 +20,11 @@ namespace ctb::app
    private:
       using DetailFields = std::deque<SinglePropDetailField>;
 
-      DatasetEventHandler m_event_handler;
+      DatasetEventHandler m_dataset_events;
       DetailFields        m_fields{};
       wxString            m_title{ constants::LBL_SCORES };
 
-      WineDetailPendingPanel(const DatasetEventSourcePtr& event_source) : m_event_handler{ event_source }
+      WineDetailPendingPanel(const DatasetEventSourcePtr& event_source) : m_dataset_events{ event_source }
       {}
 
       void createWindow(wxWindow* parent);

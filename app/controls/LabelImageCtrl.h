@@ -35,7 +35,7 @@ namespace ctb::app
       using MaybeImageTask = std::optional<wxImageTask>;
 
       LabelCachePtr          m_cache{};
-      DatasetEventHandler    m_event_handler;
+      DatasetEventHandler    m_dataset_events;
       MaybeImageTask         m_image_result{};
       wxTimer                m_label_timer{};
 

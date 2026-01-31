@@ -196,7 +196,7 @@ namespace ctb::app
    
    MainFrame::MainFrame() :
       m_event_source{ DatasetEventSource::create() },
-      m_event_handler{ m_event_source }
+      m_dataset_events{ m_event_source }
    {
    }
 
@@ -212,7 +212,7 @@ namespace ctb::app
       m_status_bar = CreateStatusBar();
 
       // Dataset event
-      m_event_handler.setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event);  });
+      m_dataset_events.setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event);  });
 
       // File menu handlers
       //Bind(wxEVT_MENU, &MainFrame::onMenuFilePreferences, this, CmdId::CMD_FILE_SETTINGS);
@@ -702,7 +702,7 @@ namespace ctb::app
          auto&& dataset = getDataset();
          dataset->multivalFilters().clear();
          dataset->propFilters().clear();
-         m_event_handler.signal_source(DatasetEvent::Id::Filter, false);
+         m_dataset_events.signal_source(DatasetEvent::Id::Filter, false);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);

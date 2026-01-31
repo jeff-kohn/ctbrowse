@@ -39,7 +39,7 @@ namespace ctb::app
 
       wxWindowUpdateLocker freeze_win(this);
 
-      auto dataset = m_event_handler.getDataset(true); // throws if dataset is nullptr
+      auto dataset = m_dataset_events.getDataset(true); // throws if dataset is nullptr
 
       // wine name/title
       m_wine_ctrl = new wxStaticText( this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER );
@@ -85,9 +85,9 @@ namespace ctb::app
       }
 
       // need to know when to update (or hide) the detail panels
-      m_event_handler.addHandler(DatasetEvent::Id::DatasetRemove, [this](const DatasetEvent& event){ onDatasetEvent(event); });
-      m_event_handler.addHandler(DatasetEvent::Id::Filter,        [this](const DatasetEvent& event){ onDatasetEvent(event); });
-      m_event_handler.addHandler(DatasetEvent::Id::RowSelected,   [this](const DatasetEvent& event){ onDatasetEvent(event); });
+      m_dataset_events.addHandler(DatasetEvent::Id::DatasetRemove, [this](const DatasetEvent& event){ onDatasetEvent(event); });
+      m_dataset_events.addHandler(DatasetEvent::Id::Filter,        [this](const DatasetEvent& event){ onDatasetEvent(event); });
+      m_dataset_events.addHandler(DatasetEvent::Id::RowSelected,   [this](const DatasetEvent& event){ onDatasetEvent(event); });
 
       // handle resize so children are laid out correctly when this panel is resized
       Bind(wxEVT_SIZE, &WineDetailMainPanel::onSize, this);

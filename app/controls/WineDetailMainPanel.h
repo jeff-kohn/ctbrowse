@@ -24,12 +24,12 @@ namespace ctb::app
       using DetailField  = std::variant<SinglePropDetailField, DrinkWindowDetailField>;
       using DetailFields = std::deque<DetailField>;
 
-      DatasetEventHandler m_event_handler;
+      DatasetEventHandler m_dataset_events;
       DetailFields        m_fields{};
       wxString            m_wine_title{};
       wxStaticText*       m_wine_ctrl{};
 
-      WineDetailMainPanel(const DatasetEventSourcePtr& event_source) : m_event_handler{ event_source }
+      WineDetailMainPanel(const DatasetEventSourcePtr& event_source) : m_dataset_events{ event_source }
       {}
 
       void createWindow(wxWindow* parent);

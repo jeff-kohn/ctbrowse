@@ -51,8 +51,8 @@ namespace ctb::app
       SetSizer(top_sizer);
 
       // add the base detail panel, then give derived classes the chance to add additional panels/fields.
-      top_sizer->Add(WineDetailMainPanel::create(this, m_event_handler.getSource()), sizer_flags);
-      this->addDatasetSpecificControls(top_sizer, m_event_handler.getSource());
+      top_sizer->Add(WineDetailMainPanel::create(this, m_dataset_events.getSource()), sizer_flags);
+      this->addDatasetSpecificControls(top_sizer, m_dataset_events.getSource());
    }
 
 

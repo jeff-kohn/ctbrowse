@@ -45,10 +45,10 @@ namespace ctb::app
       CheckCountMap         m_check_counts{};   // for keeping track of number of values selected for a filter/node.
       NameNodeMap           m_name_nodes{};
       NodeFilterMap         m_node_filters{}; 
-      DatasetEventHandler   m_event_handler;
+      DatasetEventHandler   m_dataset_events;
       wxWithImages::Images  m_images{};
 
-      MultiValueFilterTree(const DatasetEventSourcePtr& source) : m_event_handler{ source }
+      MultiValueFilterTree(const DatasetEventSourcePtr& source) : m_dataset_events{ source }
       {}
 
       void createWindow(wxWindow* parent);
