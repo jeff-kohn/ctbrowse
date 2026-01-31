@@ -17,7 +17,7 @@ namespace ctb::app
    class WineDetailTastingPanel final : public wxPanel
    {
    public:
-      WineDetailTastingPanel(wxWindow* parent, const DatasetEventSourcePtr& event_source);
+      static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailTastingPanel*;
 
    private:
       DatasetEventHandler m_event_handler;
@@ -26,11 +26,14 @@ namespace ctb::app
       wxString            m_tasting_notes{};
       wxStaticText*       m_tasting_notes_ctrl{};
 
-      void init();
+      WineDetailTastingPanel(const DatasetEventSourcePtr& event_source) : m_event_handler{ event_source }
+      {}
+
+      void createWindow(wxWindow* parent);
+
       void onDatasetEvent(const DatasetEvent& event);
-   
-      // size event handler
       void onSize(wxSizeEvent& event);
+      void calcNoteSize();
    };
 
 

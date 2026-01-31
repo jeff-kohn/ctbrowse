@@ -54,7 +54,6 @@ namespace ctb::app
       DatasetEventHandler    m_event_handler;  
       wxString               m_drink_window_label{ constants::LBL_DRINK_WINDOW };
 
-      void initControls();
       void onCommand(wxCommandEvent& event);
    };
 

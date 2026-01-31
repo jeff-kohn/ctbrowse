@@ -8,17 +8,32 @@
 namespace ctb::app
 {
 
-   WineDetailScorePanel::WineDetailScorePanel(wxWindow* parent, const DatasetEventSourcePtr& event_source) :
-      wxPanel{ parent },
-      m_event_handler{ event_source }
+   auto WineDetailScorePanel::create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailScorePanel*
    {
-      init();
+      if (!parent)
+      {
+         assert("parent window cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      }
+      if (!source)
+      {
+         assert("source parameter cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      }
+
+      std::unique_ptr<WineDetailScorePanel> wnd{ new WineDetailScorePanel{ source } };
+      wnd->createWindow(parent);
+      return wnd.release(); // if we get here parent owns it, so return non-owning*
    }
 
-
-   void WineDetailScorePanel::init()
+   void WineDetailScorePanel::createWindow(wxWindow* parent)
    {
       static constexpr auto COL_COUNT = 2;
+
+      if (!Create(parent))
+      {
+         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      }
 
       wxWindowUpdateLocker freeze_win(this);
 

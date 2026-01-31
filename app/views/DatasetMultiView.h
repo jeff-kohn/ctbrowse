@@ -28,7 +28,6 @@ namespace ctb::app
 
 
       // no copy/move/assign, this class is created on the heap.
-      DatasetMultiView() = delete;
       DatasetMultiView(const DatasetMultiView&) = delete;
       DatasetMultiView(DatasetMultiView&&) = delete;
       DatasetMultiView& operator=(const DatasetMultiView&) = delete;
@@ -42,8 +41,11 @@ namespace ctb::app
       DatasetListView*     m_listView{};
       wxSplitterWindow*    m_right_splitter{};
 
+      using wxSplitterWindow::Create;
+      void createWindow(wxWindow* parent, const DatasetEventSourcePtr& event_source);
+
       /// @brief Private constructor, used by DatasetMultiView::create()
-      DatasetMultiView(wxWindow* parent, const DatasetEventSourcePtr& event_source);
+      DatasetMultiView() = default;
    };
 
 

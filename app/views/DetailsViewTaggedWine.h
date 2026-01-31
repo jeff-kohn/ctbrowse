@@ -47,12 +47,11 @@ namespace ctb::app
          constexpr auto group_spacer = heading_spacer * 3;
 
          top_sizer->AddSpacer(group_spacer);
-         top_sizer->Add(new WineDetailTagsPanel{ this, source }, sizer_flags);
+         top_sizer->Add(WineDetailTagsPanel::create(this, source), sizer_flags);
          top_sizer->AddSpacer(group_spacer);
          addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_WINE_DETAILS);
          top_sizer->AddSpacer(heading_spacer);
          top_sizer->Add(LabelImageCtrl::create(this, source), wxSizerFlags().CenterHorizontal().Expand().Shaped());
-
       }
    };
 

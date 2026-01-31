@@ -36,16 +36,12 @@ namespace ctb::app
 
    void DetailsViewBase::createWindow(wxWindow* parent)
    {
+      const auto sizer_flags = wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT);
+
       if (!this->Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
       }
-      initControls();
-   }
-
-   void DetailsViewBase::initControls()
-   {
-      const auto sizer_flags = wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT);
 
       wxWindowUpdateLocker freeze_win(this);
 
@@ -55,7 +51,7 @@ namespace ctb::app
       SetSizer(top_sizer);
 
       // add the base detail panel, then give derived classes the chance to add additional panels/fields.
-      top_sizer->Add(new WineDetailMainPanel{ this, m_event_handler.getSource() }, sizer_flags);
+      top_sizer->Add(WineDetailMainPanel::create(this, m_event_handler.getSource()), sizer_flags);
       this->addDatasetSpecificControls(top_sizer, m_event_handler.getSource());
    }
 

@@ -26,7 +26,7 @@ namespace ctb::app
       /// to the window (parent owns/manages lifetime).
       /// 
       [[nodiscard]] static 
-      auto create(wxWindow& parent, const DatasetEventSourcePtr& source) -> MultiValueFilterTree*;
+      auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> MultiValueFilterTree*;
 
       // no copy/move/assign, this class is created on the heap.
       MultiValueFilterTree() = delete;
@@ -48,7 +48,10 @@ namespace ctb::app
       DatasetEventHandler   m_event_handler;
       wxWithImages::Images  m_images{};
 
-      MultiValueFilterTree(wxWindow& parent, const DatasetEventSourcePtr& source);
+      MultiValueFilterTree(const DatasetEventSourcePtr& source) : m_event_handler{ source }
+      {}
+
+      void createWindow(wxWindow* parent);
 
       void onDatasetEvent(DatasetEvent event);
       void onDatasetInitialize(IDataset& dataset);

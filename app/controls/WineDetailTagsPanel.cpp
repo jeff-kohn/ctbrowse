@@ -8,17 +8,32 @@
 namespace ctb::app
 {
 
-   WineDetailTagsPanel::WineDetailTagsPanel(wxWindow* parent, const DatasetEventSourcePtr& event_source) :
-      wxPanel{ parent },
-      m_event_handler{ event_source }
+   auto WineDetailTagsPanel::create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailTagsPanel*
    {
-      init();
+      if (!parent)
+      {
+         assert("parent window cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      }
+      if (!source)
+      {
+         assert("source parameter cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      }
+
+      std::unique_ptr<WineDetailTagsPanel> wnd{ new WineDetailTagsPanel{ source } };
+      wnd->createWindow(parent);
+      return wnd.release(); // if we get here parent owns it, so return non-owning*
    }
 
-
-   void WineDetailTagsPanel::init()
+   void WineDetailTagsPanel::createWindow(wxWindow* parent)
    {
       static constexpr auto COL_COUNT = 2;
+
+      if (!Create(parent))
+      {
+         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      }
 
       wxWindowUpdateLocker freeze_win(this);
 
@@ -30,7 +45,7 @@ namespace ctb::app
 
       m_tag_note_ctrl = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
       m_tag_note_ctrl->SetValidator(wxGenericValidator{ &m_tag_note });
-      
+
       top_sizer->Add(m_tag_note_ctrl, wxSizerFlags{ 1 }.Border().Expand());
 
       // need to know when to update (or hide) the panel

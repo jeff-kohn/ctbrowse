@@ -18,7 +18,7 @@ namespace ctb::app
    class WineDetailMainPanel final : public wxPanel
    {
    public:
-      WineDetailMainPanel(wxWindow* parent, const DatasetEventSourcePtr& event_source);
+      static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailMainPanel*;
 
    private:
       using DetailField  = std::variant<SinglePropDetailField, DrinkWindowDetailField>;
@@ -28,7 +28,11 @@ namespace ctb::app
       DetailFields        m_fields{};
       wxString            m_wine_title{};
       wxStaticText*       m_wine_ctrl{};
-      void init();
+
+      WineDetailMainPanel(const DatasetEventSourcePtr& event_source) : m_event_handler{ event_source }
+      {}
+
+      void createWindow(wxWindow* parent);
       void onDatasetEvent(const DatasetEvent& event);
 
       // size event handler

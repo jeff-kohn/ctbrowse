@@ -10,17 +10,32 @@
 
 namespace ctb::app
 {
-   WineDetailMainPanel::WineDetailMainPanel(wxWindow* parent, const DatasetEventSourcePtr& event_source) :
-      wxPanel{ parent },
-      m_event_handler { event_source }
+   auto WineDetailMainPanel::create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailMainPanel*
    {
-      init();
+      if (!parent)
+      {
+         assert("parent window cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      }
+      if (!source)
+      {
+         assert("source parameter cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      }
+
+      std::unique_ptr<WineDetailMainPanel> wnd{ new WineDetailMainPanel{ source } };
+      wnd->createWindow(parent);
+      return wnd.release(); // if we get here parent owns it, so return non-owning*
    }
 
-
-   void WineDetailMainPanel::init()
+   void WineDetailMainPanel::createWindow(wxWindow* parent)
    {
       static constexpr auto COL_COUNT = 2;
+
+      if (!Create(parent))
+      {
+         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      }
 
       wxWindowUpdateLocker freeze_win(this);
 
@@ -36,7 +51,7 @@ namespace ctb::app
       auto top_sizer = new wxBoxSizer{ wxVERTICAL };
       SetSizer(top_sizer);
       top_sizer->Add(m_wine_ctrl, wxSizerFlags{}.Center().Border());
-      
+
       // ordering matters here because it's the same as they'll be displayed
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Vintage,        constants::LBL_VINTAGE     });
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Varietal,       constants::LBL_VARIETAL    });

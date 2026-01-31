@@ -13,7 +13,7 @@ class wxSizer;
 namespace ctb::app
 {
 
-   class LabelImageCtrl sealed : public wxGenericStaticBitmap
+   class LabelImageCtrl final : public wxGenericStaticBitmap
    {
    public:
       static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> LabelImageCtrl*;
@@ -27,7 +27,9 @@ namespace ctb::app
       ~LabelImageCtrl() noexcept override = default;
 
    private:
-      LabelImageCtrl(wxWindow* parent, const DatasetEventSourcePtr& source);
+      LabelImageCtrl(const DatasetEventSourcePtr& source, LabelCachePtr cache);
+
+      void createWindow(wxWindow* parent);
 
       using wxImageTask    = LabelImageCache::wxImageTask;
       using MaybeImageTask = std::optional<wxImageTask>;
@@ -36,9 +38,7 @@ namespace ctb::app
       DatasetEventHandler    m_event_handler;
       MaybeImageTask         m_image_result{};
       wxTimer                m_label_timer{};
-      wxSizer*               m_parent_sizer{};
 
-      void initControls();
       void checkLabelResult();
       void displayLabel();
       void onLabelTimer(wxTimerEvent& event);

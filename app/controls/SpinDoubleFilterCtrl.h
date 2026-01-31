@@ -66,9 +66,12 @@ namespace ctb::app
       wxCheckBox*            m_checkbox{};
       wxSpinCtrlDouble*      m_spin{};
 
-      SpinDoubleFilterCtrl(wxWindow* parent, DatasetEventSourcePtr source, PropertyFilter filter, const SpinParams& params);
+      SpinDoubleFilterCtrl(const DatasetEventSourcePtr& source, PropertyFilter filter) :
+         m_event_handler(source),
+         m_filter{ std::move(filter) }
+      {}
 
-      void initControls(const SpinParams& params);
+      void createWindow(wxWindow* parent, const SpinParams& params);
       void onDatasetFilter(const DatasetEvent& event);
       void onDatasetInitialize(const DatasetEvent& event);
       void onFilterChecked(wxCommandEvent& event);

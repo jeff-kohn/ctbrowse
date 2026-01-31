@@ -19,25 +19,31 @@ namespace ctb::app
    class DatasetListView final : public wxDataViewCtrl
    {
    public:
-      /// @brief creates and initializes a panel for showing sort/filter options
+      /// @brief creates and initializes a panel containing a list view of dataset rows
       ///
       /// throws a ctb::Error if parent or source = nullptr, or if the window can't be created;
       /// otherwise returns a non-owning pointer to the window (parent window will manage 
       /// its lifetime). 
-      [[nodiscard]] static DatasetListView* create(wxWindow* parent, const DatasetEventSourcePtr& source);
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> DatasetListView*;
+
+      DatasetListView() = delete;
+      DatasetListView(const DatasetListView&) = delete;
+      DatasetListView(DatasetListView&&) = delete;
+      DatasetListView& operator=(const DatasetListView&) = delete;
+      DatasetListView& operator=(DatasetListView&&) = delete;
+      ~DatasetListView() noexcept override = default;
 
    private:
-      DataViewModelPtr m_model{};
       DatasetEventHandler  m_event_handler;
+      DataViewModelPtr     m_model{};
 
       /// @brief private ctor used by static create()
-      explicit DatasetListView(wxWindow* parent, DatasetEventSourcePtr source) : 
-         wxDataViewCtrl{ parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME },
-         m_model{ CtDataViewModel::create() },
-         m_event_handler { std::move(source) }
+      explicit DatasetListView(DatasetEventSourcePtr source) : 
+         m_event_handler { std::move(source) },
+         m_model{ CtDataViewModel::create() }
       {}
 
-      void init();
+      void createWindow(wxWindow* parent);
       void configureColumns();
       void setDataset(const DatasetPtr& dataset);
       void selectFirstRow();

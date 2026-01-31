@@ -44,7 +44,7 @@ namespace ctb::app
          constexpr auto group_spacer = heading_spacer * 2;
 
          top_sizer->AddSpacer(heading_spacer);
-         top_sizer->Add(new WineDetailPendingPanel{ this, source }, wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT));
+         top_sizer->Add(WineDetailPendingPanel::create(this, source), wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT));
          top_sizer->AddSpacer(group_spacer);
          addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_ACCEPT_PENDING);
          top_sizer->AddSpacer(heading_spacer);

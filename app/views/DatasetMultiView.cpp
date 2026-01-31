@@ -23,12 +23,18 @@ namespace ctb::app
       {
          if (!parent)
          {
-            assert("parent parameter cannot == nullptr");
+            assert("parent pointer cannot == nullptr");
             throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
          }
-         
-         // object is owned by its (guaranteed) non-nullptr parent, so we're returning raw non-nowning ptr.
-         return new DatasetMultiView{ parent, source };
+         if (!source)
+         {
+            assert("source parameter cannot == nullptr");
+            throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+         }
+
+         std::unique_ptr<DatasetMultiView> wnd{ new DatasetMultiView{} };
+         wnd->createWindow(parent, source);
+         return wnd.release(); // if we get here parent owns it, so return non-owning*
       }
       catch (...){
          log::exception(packageError());
@@ -78,11 +84,16 @@ namespace ctb::app
    } // namespace
 
    
-   DatasetMultiView::DatasetMultiView(wxWindow* parent, const DatasetEventSourcePtr& source) : wxSplitterWindow{ parent }
+   void DatasetMultiView::createWindow(wxWindow* parent, const DatasetEventSourcePtr& source)
    {
       constexpr auto LEFT_SPLITTER_GRAVITY = 0.25;
       constexpr auto RIGHT_SPLITTER_GRAVITY = 0.75;
       constexpr auto MIN_PANE_SIZE = 100;
+
+      if (!Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
+      {
+         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      }
 
       auto font = GetFont();
       font.SetPointSize(font.GetPointSize() + 1);

@@ -123,7 +123,7 @@ namespace ctb::app
       
       // Match filter options box, contains filter tree 
       auto* match_filters_box = new wxStaticBoxSizer(wxVERTICAL, this, LBL_MATCH_FILTERS);
-      m_filter_tree = MultiValueFilterTree::create(*match_filters_box->GetStaticBox(), m_event_handler.getSource());
+      m_filter_tree = MultiValueFilterTree::create(match_filters_box->GetStaticBox(), m_event_handler.getSource());
       m_filter_tree->SetMaxSize(ConvertDialogToPixels(wxSize(-1, 500)));
       m_filter_tree->SetMinSize(ConvertDialogToPixels(wxSize(-1, 100)));
       match_filters_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
@@ -159,7 +159,7 @@ namespace ctb::app
       // ready-to-drink filter, matches if any formula  besides "fast" calculates RTD >= 0, only shows for RTD view
       auto props = { RtdQtyDefault, RtdQtyLinear, RtdQtyBellCurve, RtdQtyEarlyCurve, RtdQtyLateCurve, RtdQtyFastMaturing, RtdQtyEarlyAndLate, RtdQtyBottlesPerYear, };
 		CtPropertyFilter filter{ LBL_CHECK_READY_TO_DRINK, props, FILTER_AVAILABLE_MIN_QTY, CtPropFilterPredicate{ CtPredicateType::GreaterEqual } };
-      m_filter_checkboxes[ReadyToDrinkFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), filter };
+      m_filter_checkboxes[ReadyToDrinkFilter] = FilterCheckBox::create(parent->GetStaticBox(), filter);
       parent->Add(m_filter_checkboxes[ReadyToDrinkFilter], wxSizerFlags().Border(wxALL));
       parent->AddSpacer(4);
 		m_supported_filters.insert(filter.filter_name);
@@ -167,7 +167,7 @@ namespace ctb::app
 
       // in-stock filter
 		filter = CtPropertyFilter{ LBL_CHECK_IN_STOCK_ONLY, { QtyOnHand }, uint16_t{0}, CtPropFilterPredicate{ CtPredicateType::Greater } };
-      m_filter_checkboxes[InStockFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), filter };
+      m_filter_checkboxes[InStockFilter] = FilterCheckBox::create(parent->GetStaticBox(), filter);
       parent->Add(m_filter_checkboxes[InStockFilter], wxSizerFlags().Border(wxALL));
       parent->AddSpacer(2);
 		m_supported_filters.insert(filter.filter_name);
@@ -175,7 +175,7 @@ namespace ctb::app
 
       // 'remaining bottles' filter
 		filter = CtPropertyFilter{ LBL_CHECK_WITH_REMAINING, { PurchaseQtyRemaining }, uint16_t{0}, CtPropFilterPredicate{ CtPredicateType::Greater } };
-      m_filter_checkboxes[WithRemainingFilter] = new FilterCheckBox{ *(parent->GetStaticBox()), filter };
+      m_filter_checkboxes[WithRemainingFilter] = FilterCheckBox::create(parent->GetStaticBox(), filter);
       parent->Add(m_filter_checkboxes[WithRemainingFilter], wxSizerFlags().Border(wxALL));
       parent->AddSpacer(2);
 		m_supported_filters.insert(filter.filter_name);

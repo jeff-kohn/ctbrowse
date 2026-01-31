@@ -44,7 +44,7 @@ namespace ctb::app
          constexpr auto group_spacer = heading_spacer * 2;
 
          top_sizer->AddSpacer(heading_spacer);
-         top_sizer->Add(new WineDetailScorePanel{ this, source }, wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT));
+         top_sizer->Add(WineDetailScorePanel::create(this, source), wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT));
          top_sizer->AddSpacer(group_spacer);
          addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_DRINK_REMOVE);
          top_sizer->AddSpacer(heading_spacer);

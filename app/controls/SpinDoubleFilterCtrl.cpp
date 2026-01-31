@@ -26,20 +26,10 @@ namespace ctb::app
          assert("source parameter cannot == nullptr");
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
-      // non-owning pointer, parent window manages lifetime.
-      return new SpinDoubleFilterCtrl{ parent, source, filter, params };
-   }
 
-    
-   SpinDoubleFilterCtrl::SpinDoubleFilterCtrl(wxWindow* parent, DatasetEventSourcePtr source, PropertyFilter filter, const SpinParams& params) : 
-      wxPanel{ parent },
-      m_event_handler{ std::move(source) },
-      m_filter{ std::move(filter) }
-   {
-      m_filter.enabled = false;
-      initControls(params);
-      m_event_handler.addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event); });
-      m_event_handler.addHandler(DatasetEvent::Id::Filter,            [this](const DatasetEvent& event) { onDatasetFilter(event);     });
+      std::unique_ptr<SpinDoubleFilterCtrl> wnd{ new SpinDoubleFilterCtrl{ source, filter } };
+      wnd->createWindow(parent, params);
+      return wnd.release(); // if we get here parent owns it, so return non-owning*
    }
 
 
@@ -55,8 +45,14 @@ namespace ctb::app
    }
 
 
-   void SpinDoubleFilterCtrl::initControls(const SpinParams& params)
+   void SpinDoubleFilterCtrl::createWindow(wxWindow* parent, const SpinParams& params) 
    {
+      if (!Create(parent))
+      {
+         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      }
+
+      m_filter.enabled = false;
       SetSizer(new wxBoxSizer{ wxHORIZONTAL });
       auto* sizer = GetSizer();
 
@@ -78,6 +74,9 @@ namespace ctb::app
       m_spin->Bind(wxEVT_SPINCTRLDOUBLE, &SpinDoubleFilterCtrl::onSpinValueChanged,  this);
       m_spin->Bind(wxEVT_UPDATE_UI,      &SpinDoubleFilterCtrl::onSpinValueUpdateUI, this);    
       m_checkbox->Bind(wxEVT_CHECKBOX,   &SpinDoubleFilterCtrl::onFilterChecked,     this);
+
+      m_event_handler.addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event); });
+      m_event_handler.addHandler(DatasetEvent::Id::Filter, [this](const DatasetEvent& event) { onDatasetFilter(event);     });
    }
 
 

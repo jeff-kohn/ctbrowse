@@ -52,17 +52,33 @@ namespace ctb::app
    }
 
 
-   auto MultiValueFilterTree::create(wxWindow& parent, const DatasetEventSourcePtr& source) -> MultiValueFilterTree*
+   auto MultiValueFilterTree::create(wxWindow* parent, const DatasetEventSourcePtr& source) -> MultiValueFilterTree*
    {
-      return new MultiValueFilterTree{ parent, source };
+      if (!parent)
+      {
+         assert("parent parameter cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      }
+      if (!source)
+      {
+         assert("source parameter cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      }
+
+      std::unique_ptr<MultiValueFilterTree> wnd{ new MultiValueFilterTree{ source } };
+      wnd->createWindow(parent);
+      return wnd.release(); // if we get here parent owns it, so return non-owning*
    }
 
 
-   MultiValueFilterTree::MultiValueFilterTree(wxWindow& parent, const DatasetEventSourcePtr& source) :
-      wxTreeCtrl{ &parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, WINDOW_STYLE },
-      m_event_handler { source }
+   void MultiValueFilterTree::createWindow(wxWindow* parent)
    {
       using namespace ctb::constants;
+
+      if (!Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, WINDOW_STYLE))
+      {
+         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      }
 
       // load images for the items in our filter tree.
       const auto tr_img_size = wxSize{ 16, 16 };

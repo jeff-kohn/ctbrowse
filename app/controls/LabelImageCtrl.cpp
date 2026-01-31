@@ -15,9 +15,9 @@ namespace ctb::app
 {
    auto LabelImageCtrl::create(wxWindow* parent, const DatasetEventSourcePtr& source) -> LabelImageCtrl*
    {
-      if (!parent or !parent->GetSizer())
+      if (!parent)
       {
-         assert("parent window and sizer cannot == nullptr");
+         assert("parent window cannot == nullptr");
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
       if (!source)
@@ -26,24 +26,26 @@ namespace ctb::app
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
 
-      // non-null parent owns the new object, so raw ptr is ok.
-      return new LabelImageCtrl{ parent, source };
+      std::unique_ptr<LabelImageCtrl> wnd{ new LabelImageCtrl{ source, wxGetApp().getLabelCache() }};
+      wnd->createWindow(parent);
+      return wnd.release(); // if we get here parent owns it, so return non-owning*
    }
 
 
-   LabelImageCtrl::LabelImageCtrl(wxWindow* parent, const DatasetEventSourcePtr& source) :
-      wxGenericStaticBitmap{ parent, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE },
-      m_cache { wxGetApp().getLabelCache() },
-      m_event_handler{ source },
-      m_parent_sizer{ parent->GetSizer() }
+   LabelImageCtrl::LabelImageCtrl(const DatasetEventSourcePtr& source, LabelCachePtr cache) :
+      m_cache { std::move(cache) },
+      m_event_handler{ source }
    {
       assert(m_cache);
-      initControls();
    }
 
-
-   void LabelImageCtrl::initControls()
+   void LabelImageCtrl::createWindow(wxWindow* parent)
    {
+      if (!Create(parent, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE))
+      {
+         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      }
+
       SetScaleMode(wxStaticBitmap::Scale_AspectFit);
 
       // hook up event handlers
