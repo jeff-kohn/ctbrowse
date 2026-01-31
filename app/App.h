@@ -22,6 +22,10 @@ namespace ctb::app
    ///
    class MainFrame;
 
+
+   class LabelImageCache;   
+   using LabelCachePtr = std::shared_ptr<LabelImageCache>;
+
    // we don't use enum class because then every time we need to pass an ID to wxObject,
    // we'd have to cast or use std::to_underlying and that's just an ugly waste of time 
    // with no benefit for this use-case.
@@ -102,7 +106,13 @@ namespace ctb::app
 
       /// @brief labelCacheFolder()
       /// @return the fully qualified path to the folder where label images are cached
-      auto labelCacheFolder() noexcept -> fs::path;
+      auto getLabelCacheFolder() noexcept -> fs::path;
+      void setLabelCacheFolder(const fs::path& cache_folder);
+
+      auto getLabelCache() noexcept -> LabelCachePtr
+      {
+         return m_label_cache;
+      }
 
       /// @brief Get the current config object.
       ///
@@ -129,6 +139,7 @@ namespace ctb::app
    private:
       MainFrame*         m_main_frame{};
       fs::path           m_user_data_folder{};
+      LabelCachePtr      m_label_cache{};
    };
 
 }  // namespace ctb::app

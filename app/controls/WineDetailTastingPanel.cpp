@@ -51,18 +51,32 @@ namespace ctb::app
    }
 
 
-
-   WineDetailTastingPanel::WineDetailTastingPanel(wxWindow* parent, DatasetEventSourcePtr event_source) :
-      wxPanel{ parent },
-      m_event_handler{ event_source }
+   auto WineDetailTastingPanel::create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailTastingPanel*
    {
-      init();
+      if (!parent)
+      {
+         assert("parent window cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      }
+      if (!source)
+      {
+         assert("source parameter cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      }
+
+      std::unique_ptr<WineDetailTastingPanel> wnd{ new WineDetailTastingPanel{ source } };
+      wnd->createWindow(parent);
+      return wnd.release(); // if we get here parent owns it, so return non-owning*
    }
 
-
-   void WineDetailTastingPanel::init()
+   void WineDetailTastingPanel::createWindow(wxWindow* parent)
    {
       static constexpr auto COL_COUNT = 2;
+
+      if (!Create(parent))
+      {
+         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      }
 
       wxWindowUpdateLocker freeze_win(this);
 
@@ -73,7 +87,6 @@ namespace ctb::app
       auto* title_ctrl = new wxStaticText(this, wxID_ANY,  constants::LBL_TASTING_NOTE, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
       title_ctrl->SetValidator(wxGenericValidator{ &m_title });
       auto title_font = GetFont().MakeBold();
-      title_font.SetPointSize(title_font.GetPointSize() + 1);
       title_ctrl->SetFont(title_font);
       title_ctrl->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT));
       top_sizer->Add(title_ctrl, wxSizerFlags{}.Expand().Border(wxTOP|wxLEFT|wxRIGHT));
@@ -87,7 +100,7 @@ namespace ctb::app
       // tasting note
       m_tasting_notes_ctrl = new wxStaticText(this, wxID_ANY,  "");//, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
       m_tasting_notes_ctrl->SetValidator(wxGenericValidator{ &m_tasting_notes });
-      top_sizer->Add(m_tasting_notes_ctrl, wxSizerFlags{ 1 }.Expand().TripleBorder());
+      top_sizer->Add(m_tasting_notes_ctrl, wxSizerFlags{ 2 }.Expand().TripleBorder());
 
       // need to know when to update (or hide) the panel
       m_event_handler.addHandler(DatasetEvent::Id::DatasetRemove, [this](const DatasetEvent& event) { onDatasetEvent(event); });
@@ -104,7 +117,7 @@ namespace ctb::app
    void WineDetailTastingPanel::onDatasetEvent(const DatasetEvent& event)
    {
       const auto& dataset = event.dataset;
-      if (dataset and dataset->hasProperty(CtProp::TastingNotes) and event.affected_row.has_value())
+      if (dataset and event.affected_row.has_value())
       {
          auto rec_idx = event.affected_row.value();
 
@@ -121,32 +134,34 @@ namespace ctb::app
       }
       // force full UI update
       TransferDataToWindow();
-      SendSizeEvent();
+      calcNoteSize();
+      SendSizeEventToParent(wxSEND_EVENT_POST);
    }
 
 
    void WineDetailTastingPanel::onSize(wxSizeEvent& event)
    {
-      // The fact that we have to jump through this many hoops to get a static text to expand
-      // vertically for large strings is beyond lame, this sizer stuff is a PITA sometimes.
+      // reset the label to remove any existing word-wrap, then re-fit/re-wrap the tasting note control for the new size.
+      m_tasting_notes_ctrl->SetLabel(m_tasting_notes);
+      calcNoteSize();
 
-      auto text_size = m_tasting_notes_ctrl->GetTextExtent(m_tasting_notes);
-      if (text_size.x > event.m_size.x)
+      // continue with parent processing
+      event.Skip(); 
+      return;
+   }
+
+
+   void WineDetailTastingPanel::calcNoteSize() 
+   {
+      if (m_tasting_notes.empty())
       {
-         // text too long for one line, we need to calculate how many lines high the control should be to wrap
-         text_size.y *= (text_size.x / event.m_size.x) + 1;
-         text_size.x = event.m_size.x;
+         m_tasting_notes_ctrl->SetClientSize(m_tasting_notes_ctrl->GetBestSize());
       }
 
-      // Resize wine title to exact needed dimensions, then lay everything else out and wrap the text.
-      m_tasting_notes_ctrl->SetClientSize(text_size);
-      Layout();
-      m_tasting_notes_ctrl->Wrap(m_tasting_notes_ctrl->GetClientSize().GetWidth());
-      Refresh();
-      Update();
-
-      // Preserve default processing (important for proper propagation to parent/layout).
-      event.Skip();
+      // calculate how wide our note control can be and still fit in panel, allowing for sizer borders.
+      constexpr auto margin = 30;
+      const auto max_width  = GetClientSize().GetWidth() - margin;
+      m_tasting_notes_ctrl->Wrap(max_width);
    }
 
 } // namespace ctb::app

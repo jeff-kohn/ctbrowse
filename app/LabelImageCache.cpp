@@ -42,15 +42,14 @@ namespace ctb::app
       catch (...) {
          return unexpected{ packageError() };
       }
-
    }
 
 
-   LabelImageCache::LabelImageCache(std::string cache_folder) : m_cache_folder{ expandEnvironmentVars(cache_folder) }
+   LabelImageCache::LabelImageCache(fs::path cache_folder) : m_cache_folder{ std::move(cache_folder) }
    {
       if (m_cache_folder.is_relative() or ( (fs::exists(m_cache_folder) and !fs::is_directory(m_cache_folder)) ))
       {
-         throw Error{ constants::ERROR_STR_RELATIVE_LABEL_CACHE };
+         throw Error{ constants::ERROR_STR_INVALID_LABEL_CACHE };
       }
 
       if (!fs::exists(m_cache_folder) )

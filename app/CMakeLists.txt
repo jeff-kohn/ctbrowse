@@ -51,6 +51,8 @@ target_sources(${TARGET_NAME}
      "wx_helpers.h"
 
      "controls/FilterCheckBox.h"
+     "controls/LabelImageCtrl.cpp"
+     "controls/LabelImageCtrl.h"
      "controls/MultiValueFilterTree.cpp"
      "controls/MultiValueFilterTree.h"
      "controls/SpinDoubleFilterCtrl.cpp"
@@ -78,14 +80,24 @@ target_sources(${TARGET_NAME}
      "model/CtDataViewModel.cpp"
      "model/CtDataViewModel.h"
 
-     "views/DatasetDetailsView.cpp"
-     "views/DatasetDetailsView.h"
+     "views/DetailsViewBase.cpp"
+     "views/DetailsViewBase.h"
+     "views/DetailsViewConsumedWine.h"
+     "views/DetailsViewMyCellar.h"
+     "views/DetailsViewPending.h"
+     "views/DetailsViewPurchasedWine.h"
+     "views/DetailsViewReadyToDrink.h"
+     "views/DetailsViewTaggedWine.h"
+     "views/DetailsViewTastingNotes.h"
+
+     
      "views/DatasetListView.cpp"
      "views/DatasetListView.h"
      "views/DatasetMultiView.cpp"
      "views/DatasetMultiView.h"
      "views/DatasetOptionsView.cpp"
      "views/DatasetOptionsView.h"
+     "views/DetailsViewMyCellar.h"
      "resources/ctBrowse.manifest"
      "resources/resource.rc"
      ${${PROJECT_NAME}_VERSION_RESOURCE}

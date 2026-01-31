@@ -10,19 +10,36 @@
 
 namespace ctb::app
 {
-   WineDetailMainPanel::WineDetailMainPanel(wxWindow* parent, DatasetEventSourcePtr event_source) :
-      wxPanel{ parent },
-      m_event_handler { event_source }
+   auto WineDetailMainPanel::create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailMainPanel*
    {
-      init();
+      if (!parent)
+      {
+         assert("parent window cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      }
+      if (!source)
+      {
+         assert("source parameter cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      }
+
+      std::unique_ptr<WineDetailMainPanel> wnd{ new WineDetailMainPanel{ source } };
+      wnd->createWindow(parent);
+      return wnd.release(); // if we get here parent owns it, so return non-owning*
    }
 
-
-   void WineDetailMainPanel::init()
+   void WineDetailMainPanel::createWindow(wxWindow* parent)
    {
       static constexpr auto COL_COUNT = 2;
 
+      if (!Create(parent))
+      {
+         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      }
+
       wxWindowUpdateLocker freeze_win(this);
+
+      auto dataset = m_event_handler.getDataset(true); // throws if dataset is nullptr
 
       // wine name/title
       m_wine_ctrl = new wxStaticText( this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER );
@@ -34,7 +51,7 @@ namespace ctb::app
       auto top_sizer = new wxBoxSizer{ wxVERTICAL };
       SetSizer(top_sizer);
       top_sizer->Add(m_wine_ctrl, wxSizerFlags{}.Center().Border());
-      
+
       // ordering matters here because it's the same as they'll be displayed
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Vintage,        constants::LBL_VINTAGE     });
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Varietal,       constants::LBL_VARIETAL    });
@@ -43,11 +60,29 @@ namespace ctb::app
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::SubRegion,      constants::LBL_SUB_REGION  });
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Appellation,    constants::LBL_APPELLATION });
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Size,           constants::LBL_SIZE        });
-      m_fields.emplace_back( DrinkWindowDetailField { top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW    });
-      m_fields.emplace_back( DrinkWindowDetailField { top_sizer, CtProp::CtBeginConsume, CtProp::CtEndConsume, constants::LBL_DRINK_WINDOW_CT });
-      m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Location,       constants::LBL_LOCATION       });
-      m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::ConsumeDate,    constants::LBL_CONSUME_DATE   });
-      m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::ConsumeReason,  constants::LBL_CONSUME_REASON });
+
+      if (dataset->hasProperty(CtProp::CtBeginConsume))
+      {
+         m_fields.emplace_back( DrinkWindowDetailField{ top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW_MY  });
+         m_fields.emplace_back( DrinkWindowDetailField { top_sizer, CtProp::CtBeginConsume, CtProp::CtEndConsume, constants::LBL_DRINK_WINDOW_CT });
+
+      }
+      else {
+         m_fields.emplace_back(DrinkWindowDetailField{ top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW });
+      }
+
+      if (dataset->hasProperty(CtProp::Location))
+      {
+         m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Location,       constants::LBL_LOCATION       });
+      }
+      if (dataset->hasProperty(CtProp::ConsumeDate))
+      {
+         m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::ConsumeDate,    constants::LBL_CONSUME_DATE   });
+      }
+      if (dataset->hasProperty(CtProp::ConsumeReason))
+      {
+         m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::ConsumeReason,  constants::LBL_CONSUME_REASON });
+      }
 
       // need to know when to update (or hide) the detail panels
       m_event_handler.addHandler(DatasetEvent::Id::DatasetRemove, [this](const DatasetEvent& event){ onDatasetEvent(event); });
@@ -87,26 +122,21 @@ namespace ctb::app
 
       TransferDataToWindow();
       SendSizeEvent(); // So we can wrap the title
+      Layout();
    }
 
 
    void WineDetailMainPanel::onSize(wxSizeEvent& event)
    {
-      // The fact that we have to jump through this many hoops to get a static text to expand
-      // vertically for large strings is beyond lame, this sizer stuff is a PITA sometimes.
-
-      auto text_size = m_wine_ctrl->GetTextExtent(m_wine_title);
-      if (text_size.x > event.m_size.x)
+      // Need to figure out how many lines to make the wine title so we can wrap it and show the full name
+      constexpr auto margin = 5;
+      if (event.m_size.x > 0)
       {
-         // text too long for one line, we need to calculate how many lines high the control should be to wrap
-         text_size.y *= (text_size.x / event.m_size.x);
-         text_size.x = event.m_size.x;
+         m_wine_ctrl->Wrap(event.m_size.GetWidth() - margin);
+         wxSize best_size = m_wine_ctrl->GetBestSize();
+         m_wine_ctrl->SetClientSize(best_size);
       }
-
-      // Resize wine title to exact needed dimensions, then lay everything else out and wrap the text.
-      m_wine_ctrl->SetClientSize(text_size);
       Layout();
-      m_wine_ctrl->Wrap(event.m_size.GetWidth());
       Refresh();
       Update();
 

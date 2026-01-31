@@ -20,28 +20,37 @@ namespace ctb::app
 
    [[nodiscard]] DatasetListView* DatasetListView::create(wxWindow* parent, const DatasetEventSourcePtr& source)
    {
+      if (!parent )
+      {
+         assert("parent window cannot == nullptr");
+         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      }
       if (!source)
       {
          assert("source parameter cannot == nullptr" and false);
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
-      if (!parent)
-      {
-         assert("parent parameter cannot == nullptr" and false);
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
-      }
 
-      std::unique_ptr<DatasetListView> wnd{ new DatasetListView{ parent, source } };
-      wnd->init();
-      return wnd.release(); // parent owns child, so we don't need to delete
+      std::unique_ptr<DatasetListView> wnd{ new DatasetListView{ source } };
+      wnd->createWindow(parent);
+      return wnd.release(); // parent window owns child, so we don't need to manage ownership/lifetime
    }
 
 
-   void DatasetListView::init()
+
+
+   void DatasetListView::createWindow(wxWindow* parent)
    {
+      if (!Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
+      {
+         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      }
+
       Bind(wxEVT_DATAVIEW_SELECTION_CHANGED,         &DatasetListView::onSelectionChanged, this);
       Bind(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, &DatasetListView::onWineContextMenu,  this);
       Bind(wxEVT_DATAVIEW_ITEM_ACTIVATED,            &DatasetListView::onWineDoubleClick,  this);
+
+      m_event_handler.setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event);  });
    }
 
 
@@ -119,7 +128,7 @@ namespace ctb::app
    }
 
 
-   void DatasetListView::notify(DatasetEvent event)
+   void DatasetListView::onDatasetEvent(DatasetEvent event)
    {
       switch (event.event_id)
       {
@@ -151,11 +160,11 @@ namespace ctb::app
    {
       try 
       {
-         if (!m_sink.hasDataset()) return;
+         if (!m_event_handler.hasDataset()) return;
 
          auto row = static_cast<int>(m_model->GetRow(event.GetItem()));
          if (row >= 0)
-            m_sink.signal_source(DatasetEvent::Id::RowSelected, false, row);
+            m_event_handler.signal_source(DatasetEvent::Id::RowSelected, false, row);
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError());
@@ -167,7 +176,7 @@ namespace ctb::app
    {
       try
       {
-         if (!m_sink.hasDataset())
+         if (!m_event_handler.hasDataset())
             event.Skip();
 
          auto popup = getWinePopup();
@@ -183,7 +192,7 @@ namespace ctb::app
    {
       try
       {
-         if (event.GetItem().IsOk() and m_sink.hasDataset())
+         if (event.GetItem().IsOk() and m_event_handler.hasDataset())
          {
 			   QueueEvent(new wxCommandEvent{ wxEVT_COMMAND_MENU_SELECTED, CMD_ONLINE_WINE_DETAILS });
          }

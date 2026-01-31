@@ -13,13 +13,19 @@ namespace ctb::app
    {
    public:
       using PropertyFilter = CtPropertyFilter;
-
-      FilterCheckBox(wxWindow& parent, PropertyFilter filter) : 
-         wxCheckBox{ &parent, wxID_ANY, wxFromSV(filter.filter_name) },
-         m_filter{ std::move(filter) }
+      static auto create(wxWindow* parent, const PropertyFilter& filter) -> FilterCheckBox*
       {
-         SetValidator(wxGenericValidator{ &m_filter_enabled });
+         if (!parent)
+         {
+            assert("FilterCheckBox parent pointer cannot == nullptr");
+            throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+         }
+
+         std::unique_ptr<FilterCheckBox> wnd{ new FilterCheckBox{ filter } };
+         wnd->createWindow(parent);
+         return wnd.release(); // if we get here parent owns it, so return non-owning*
       }
+
 
       /// @brief Get a reference to the filter associated with this control
       /// @return reference to the filter, which will have the appropriate cvref corresponding to 'this'
@@ -50,6 +56,18 @@ namespace ctb::app
    private:
       PropertyFilter  m_filter{};
       bool            m_filter_enabled{false};
+
+      FilterCheckBox(PropertyFilter filter) : m_filter{ std::move(filter) }
+      {}
+
+      void createWindow(wxWindow* parent)
+      {
+         if (!Create(parent, wxID_ANY, wxFromSV(m_filter.filter_name)))
+         {
+            throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+         }
+         SetValidator(wxGenericValidator{ &m_filter_enabled });
+      }
    };
 
 };

@@ -151,7 +151,7 @@ namespace ctb::constants
    inline constexpr const char* ERROR_STR_EDITING_NOT_SUPPORTED   = "Editing data is not supported.";
    inline constexpr const char* ERROR_STR_NO_DATASET              = "No Dataset Available!";
    inline constexpr const char* ERROR_STR_NULLPTR_ARG             = "Invalid Parameter (nullptr).";
-   inline constexpr const char* ERROR_STR_RELATIVE_LABEL_CACHE    = "The label image cache folder must be an absolute path, not relative.";
+   inline constexpr const char* ERROR_STR_INVALID_LABEL_CACHE     = "The label image cache folder must be an valid, existing absolute path (relative path not supported).";
    inline constexpr const char* ERORR_STR_NO_SECRET_STORE         = "Secret Store not available.";
    inline constexpr const char* ERROR_STR_UNKNOWN                 = "Unknown Error.";
    inline constexpr const char* ERROR_STR_UNINITIALIZED_FIELDS    = "Attempt to use field controls before creating and initializing them.";

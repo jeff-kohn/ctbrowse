@@ -127,7 +127,7 @@ namespace ctb
    private:
       DatasetEventSourcePtr m_source{ nullptr };
       CallbackMap           m_callbacks{};
-      EventCallback         m_default_callback{ [](const DatasetEvent& event) {} }; // do-nothing default
+      EventCallback         m_default_callback{}; // do-nothing default
 
       void notify(DatasetEvent event) override
       {

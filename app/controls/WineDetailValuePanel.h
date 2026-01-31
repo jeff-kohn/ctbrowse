@@ -1,3 +1,5 @@
+#pragma once
+
 #include "App.h"
 #include "controls/WineDetailFields.h"
 
@@ -12,7 +14,7 @@ namespace ctb::app
    class WineDetailValuePanel final : public wxPanel
    {
    public:
-      WineDetailValuePanel(wxWindow* parent, DatasetEventSourcePtr event_source);
+      static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailValuePanel*;
 
    private:
       using DetailFields = std::deque<SinglePropDetailField>;
@@ -21,7 +23,10 @@ namespace ctb::app
       DetailFields        m_fields{};
       wxString            m_title{ constants::LBL_SCORES };
 
-      void init();
+      WineDetailValuePanel(const DatasetEventSourcePtr& event_source) : m_event_handler{ event_source }
+      {}
+
+      void createWindow(wxWindow* parent);
       void onDatasetEvent(const DatasetEvent& event);
    };
 }
