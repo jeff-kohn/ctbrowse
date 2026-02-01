@@ -34,12 +34,12 @@ namespace ctb::app
       ~DatasetListView() noexcept override = default;
 
    private:
-      DatasetEventHandler  m_event_handler;
+      DatasetEventHandler  m_dataset_events;
       DataViewModelPtr     m_model{};
 
       /// @brief private ctor used by static create()
       explicit DatasetListView(DatasetEventSourcePtr source) : 
-         m_event_handler { std::move(source) },
+         m_dataset_events { std::move(source) },
          m_model{ CtDataViewModel::create() }
       {}
 

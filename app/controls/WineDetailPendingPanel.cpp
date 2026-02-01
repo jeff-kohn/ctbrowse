@@ -56,9 +56,9 @@ namespace ctb::app
       m_fields.push_back( SinglePropDetailField{ top_sizer, CtProp::PendingOrderNumber,  constants::LBL_ORDER_NUMBER  });
 
       // need to know when to update (or hide) the panel
-      m_event_handler.addHandler(DatasetEvent::Id::DatasetRemove, [this](const DatasetEvent& event) { onDatasetEvent(event); });
-      m_event_handler.addHandler(DatasetEvent::Id::Filter,        [this](const DatasetEvent& event) { onDatasetEvent(event); });
-      m_event_handler.addHandler(DatasetEvent::Id::RowSelected,   [this](const DatasetEvent& event) { onDatasetEvent(event); });
+      m_dataset_events.addHandler(DatasetEvent::Id::DatasetRemove, [this](const DatasetEvent& event) { onDatasetEvent(event); });
+      m_dataset_events.addHandler(DatasetEvent::Id::Filter,        [this](const DatasetEvent& event) { onDatasetEvent(event); });
+      m_dataset_events.addHandler(DatasetEvent::Id::RowSelected,   [this](const DatasetEvent& event) { onDatasetEvent(event); });
    }
 
 

@@ -39,7 +39,7 @@ namespace ctb::app
 
    protected:
       // this class can only be constructructed through derived classes
-      DetailsViewBase(const DatasetEventSourcePtr& source) : m_event_handler{ source }
+      DetailsViewBase(const DatasetEventSourcePtr& source) : m_dataset_events{ source }
       {}
 
       // Can be called by derived classes to add a commandlink button the to the specified sizer.
@@ -51,7 +51,7 @@ namespace ctb::app
    private:
       using wxPanel::Create;
 
-      DatasetEventHandler    m_event_handler;  
+      DatasetEventHandler    m_dataset_events;  
       wxString               m_drink_window_label{ constants::LBL_DRINK_WINDOW };
 
       void onCommand(wxCommandEvent& event);

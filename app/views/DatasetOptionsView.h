@@ -28,9 +28,9 @@ class wxSlider;
 namespace ctb::app
 {
 
-   class FilterCheckBox;
+   class CheckBoxFilterCtrl;
    class SpinDoubleFilterCtrl;
-   class MultiValueFilterTree;
+   class MultiValueFilterTreeCtrl;
 
 
    /// @brief panel class that provides UI for setting sorting and filtering options
@@ -53,54 +53,20 @@ namespace ctb::app
       ~DatasetOptionsView() override = default;
       
    private:
-      enum class ControlCategory : uint16_t
-      {
-         InStockFilter = 0,
-         MinScoreFilter,
-         ReadyToDrinkFilter,
-         MinPriceFilter,
-         MaxPriceFilter,
-         WithRemainingFilter, // for purchase history, will only show wines with bottles still remaining.
-      };
-      using CategorizedControls = CategorizedControls<ControlCategory>;         // show/hide controls based on dataset context
-      using FilterCheckboxes    = std::map<ControlCategory, FilterCheckBox* >;  // checkbox controls for each of the check filters (see ControlCategory enum)
-
-      bool                  m_sort_ascending     { true  }; // whether ascending sort order is active
-      bool                  m_sort_descending    { false }; // whether descending sort ordes is active (yes we need both)
-      CategorizedControls   m_categorized{};
-      int                   m_sort_selection{ 0 };          // index of selected sort in combo, which matches a sort in availableSorts()
-      int                   m_min_price{};
-      int                   m_max_price{};
-      FilterCheckboxes      m_filter_checkboxes{};          // checkbox controls for enabling/disabling different property filters
-      IDataset::TableSort   m_sort_config{};                // the sort object that will be used to sort the dataset 
-      MultiValueFilterTree* m_filter_tree{};
-      DatasetEventHandler   m_event_handler;
-      wxChoice*             m_sort_combo{};
-      SpinDoubleFilterCtrl* m_min_score_filter_ctrl{};
-      SpinDoubleFilterCtrl* m_min_price_filter_ctrl{};
-      SpinDoubleFilterCtrl* m_max_price_filter_ctrl{};
-      StringSet             m_supported_filters{};        // set of filter names that we have controls for
-      wxStaticText*         m_dataset_title{};
+      bool                      m_sort_ascending{ true  };     // whether ascending sort order is active
+      bool                      m_sort_descending{ false };    // whether descending sort ordes is active (yes we need both)
+      int                       m_sort_selection{ 0 };         // index of selected sort in combo, which matches a sort in availableSorts()
+      DatasetEventHandler       m_dataset_events; 
+      MultiValueFilterTreeCtrl* m_filter_tree{};
+      StringSet                 m_supported_filters{};        // set of filter names that we have controls for
+      wxStaticText*             m_dataset_title{};
 
       // window creation
-      void initControls();
+      void createWindow(wxWindow* parent);
       void createOptionFilters(wxStaticBoxSizer* parent);
-      auto setTitle() -> bool;
-
-      auto getSortOptionList(DatasetPtr dataset) -> wxArrayString;
 
       // Dataset-related event handlers
-      void onDatasetEvent(DatasetEvent event) ;
-      void onDatasetInitialize(DatasetPtr dataset);
-      void onTableSorted(DatasetPtr dataset);
-
-      // event handlers
-      void onFilterChecked(ControlCategory cat);
-      void onFilterInStockChecked(wxCommandEvent& event);
-      void onFilterReadyToDrinkChecked(wxCommandEvent& event);
-      void onFilterWithRemainingChecked(wxCommandEvent& event);
-      void onSortOrderClicked(wxCommandEvent& event);
-      void onSortSelection(wxCommandEvent& event);
+      void onDatasetInitialize(DatasetEvent event);
 
       /// @brief private ctor used by static create()
       explicit DatasetOptionsView(const DatasetEventSourcePtr& source);

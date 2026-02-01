@@ -50,7 +50,7 @@ namespace ctb::app
       Bind(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, &DatasetListView::onWineContextMenu,  this);
       Bind(wxEVT_DATAVIEW_ITEM_ACTIVATED,            &DatasetListView::onWineDoubleClick,  this);
 
-      m_event_handler.setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event);  });
+      m_dataset_events.setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event);  });
    }
 
 
@@ -160,11 +160,11 @@ namespace ctb::app
    {
       try 
       {
-         if (!m_event_handler.hasDataset()) return;
+         if (!m_dataset_events.hasDataset()) return;
 
          auto row = static_cast<int>(m_model->GetRow(event.GetItem()));
          if (row >= 0)
-            m_event_handler.signal_source(DatasetEvent::Id::RowSelected, false, row);
+            m_dataset_events.signal_source(DatasetEvent::Id::RowSelected, false, row);
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError());
@@ -176,7 +176,7 @@ namespace ctb::app
    {
       try
       {
-         if (!m_event_handler.hasDataset())
+         if (!m_dataset_events.hasDataset())
             event.Skip();
 
          auto popup = getWinePopup();
@@ -192,7 +192,7 @@ namespace ctb::app
    {
       try
       {
-         if (event.GetItem().IsOk() and m_event_handler.hasDataset())
+         if (event.GetItem().IsOk() and m_dataset_events.hasDataset())
          {
 			   QueueEvent(new wxCommandEvent{ wxEVT_COMMAND_MENU_SELECTED, CMD_ONLINE_WINE_DETAILS });
          }

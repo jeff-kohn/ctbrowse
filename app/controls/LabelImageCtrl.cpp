@@ -34,7 +34,7 @@ namespace ctb::app
 
    LabelImageCtrl::LabelImageCtrl(const DatasetEventSourcePtr& source, LabelCachePtr cache) :
       m_cache { std::move(cache) },
-      m_event_handler{ source }
+      m_dataset_events{ source }
    {
       assert(m_cache);
    }
@@ -50,7 +50,7 @@ namespace ctb::app
 
       // hook up event handlers
       m_label_timer.Bind(wxEVT_TIMER, &LabelImageCtrl::onLabelTimer, this);
-      m_event_handler.addHandler(DatasetEvent::Id::RowSelected, [this](const DatasetEvent& event) { fetchImage(event); });
+      m_dataset_events.addHandler(DatasetEvent::Id::RowSelected, [this](const DatasetEvent& event) { fetchImage(event); });
    }
 
 

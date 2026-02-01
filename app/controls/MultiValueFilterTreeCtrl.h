@@ -16,7 +16,7 @@ namespace ctb::app
    /// 
    /// This class is an event sink for IDatasetEventSource and automatically handles updates from other views
    /// as well as notifying other views about changes made. 
-   class MultiValueFilterTree final : public wxTreeCtrl
+   class MultiValueFilterTreeCtrl final : public wxTreeCtrl
    {
    public:
 
@@ -26,15 +26,15 @@ namespace ctb::app
       /// to the window (parent owns/manages lifetime).
       /// 
       [[nodiscard]] static 
-      auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> MultiValueFilterTree*;
+      auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> MultiValueFilterTreeCtrl*;
 
       // no copy/move/assign, this class is created on the heap.
-      MultiValueFilterTree() = delete;
-      MultiValueFilterTree(const MultiValueFilterTree&) = delete;
-      MultiValueFilterTree(MultiValueFilterTree&&) = delete;
-      MultiValueFilterTree& operator=(const MultiValueFilterTree&) = delete;
-      MultiValueFilterTree& operator=(MultiValueFilterTree&&) = delete;
-      ~MultiValueFilterTree() override = default;
+      MultiValueFilterTreeCtrl() = delete;
+      MultiValueFilterTreeCtrl(const MultiValueFilterTreeCtrl&) = delete;
+      MultiValueFilterTreeCtrl(MultiValueFilterTreeCtrl&&) = delete;
+      MultiValueFilterTreeCtrl& operator=(const MultiValueFilterTreeCtrl&) = delete;
+      MultiValueFilterTreeCtrl& operator=(MultiValueFilterTreeCtrl&&) = delete;
+      ~MultiValueFilterTreeCtrl() override = default;
 
    private:
       using NodeFilterMap = std::map<wxTreeItemId, CtMultiValueFilter>;  // maps tree node to corresponding filter 
@@ -45,10 +45,10 @@ namespace ctb::app
       CheckCountMap         m_check_counts{};   // for keeping track of number of values selected for a filter/node.
       NameNodeMap           m_name_nodes{};
       NodeFilterMap         m_node_filters{}; 
-      DatasetEventHandler   m_event_handler;
+      DatasetEventHandler   m_dataset_events;
       wxWithImages::Images  m_images{};
 
-      MultiValueFilterTree(const DatasetEventSourcePtr& source) : m_event_handler{ source }
+      MultiValueFilterTreeCtrl(const DatasetEventSourcePtr& source) : m_dataset_events{ source }
       {}
 
       void createWindow(wxWindow* parent);

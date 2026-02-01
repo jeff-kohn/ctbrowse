@@ -103,9 +103,9 @@ namespace ctb::app
       top_sizer->Add(m_tasting_notes_ctrl, wxSizerFlags{ 2 }.Expand().TripleBorder());
 
       // need to know when to update (or hide) the panel
-      m_event_handler.addHandler(DatasetEvent::Id::DatasetRemove, [this](const DatasetEvent& event) { onDatasetEvent(event); });
-      m_event_handler.addHandler(DatasetEvent::Id::Filter,        [this](const DatasetEvent& event) { onDatasetEvent(event); });
-      m_event_handler.addHandler(DatasetEvent::Id::RowSelected,   [this](const DatasetEvent& event) { onDatasetEvent(event); });
+      m_dataset_events.addHandler(DatasetEvent::Id::DatasetRemove, [this](const DatasetEvent& event) { onDatasetEvent(event); });
+      m_dataset_events.addHandler(DatasetEvent::Id::Filter,        [this](const DatasetEvent& event) { onDatasetEvent(event); });
+      m_dataset_events.addHandler(DatasetEvent::Id::RowSelected,   [this](const DatasetEvent& event) { onDatasetEvent(event); });
 
       // handle resize so children are laid out correctly when this panel is resized
       Bind(wxEVT_SIZE, &WineDetailTastingPanel::onSize, this);

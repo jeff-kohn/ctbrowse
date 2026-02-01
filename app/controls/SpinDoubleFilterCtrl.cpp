@@ -75,8 +75,8 @@ namespace ctb::app
       m_spin->Bind(wxEVT_UPDATE_UI,      &SpinDoubleFilterCtrl::onSpinValueUpdateUI, this);    
       m_checkbox->Bind(wxEVT_CHECKBOX,   &SpinDoubleFilterCtrl::onFilterChecked,     this);
 
-      m_event_handler.addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event); });
-      m_event_handler.addHandler(DatasetEvent::Id::Filter, [this](const DatasetEvent& event) { onDatasetFilter(event);     });
+      m_dataset_events.addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event); });
+      m_dataset_events.addHandler(DatasetEvent::Id::Filter, [this](const DatasetEvent& event) { onDatasetFilter(event);     });
    }
 
 
@@ -112,7 +112,7 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         auto&& dataset = m_event_handler.getDataset();
+         auto&& dataset = m_dataset_events.getDataset();
          if (m_filter.enabled)
          {
             dataset->propFilters().replaceFilter(m_filter.filter_name, m_filter);
@@ -120,7 +120,7 @@ namespace ctb::app
          else {
             dataset->propFilters().removeFilter(m_filter.filter_name);
          }
-         m_event_handler.signal_source(DatasetEvent::Id::Filter, false);
+         m_dataset_events.signal_source(DatasetEvent::Id::Filter, false);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -134,12 +134,12 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         auto dataset = m_event_handler.getDataset();
+         auto dataset = m_dataset_events.getDataset();
          m_filter.compare_val = event.GetValue();
          if (m_filter.enabled)
          {
             dataset->propFilters().replaceFilter(m_filter.filter_name, m_filter);
-            m_event_handler.signal_source(DatasetEvent::Id::Filter, false);
+            m_dataset_events.signal_source(DatasetEvent::Id::Filter, false);
          }
       }
       catch(...){

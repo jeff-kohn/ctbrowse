@@ -16,7 +16,7 @@ namespace ctb::app
    class LabelImageCtrl final : public wxGenericStaticBitmap
    {
    public:
-      static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> LabelImageCtrl*;
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> LabelImageCtrl*;
 
       // no copy/move/assign, this class is created on the heap and owned by parent window.
       LabelImageCtrl() = delete;
@@ -35,7 +35,7 @@ namespace ctb::app
       using MaybeImageTask = std::optional<wxImageTask>;
 
       LabelCachePtr          m_cache{};
-      DatasetEventHandler    m_event_handler;
+      DatasetEventHandler    m_dataset_events;
       MaybeImageTask         m_image_result{};
       wxTimer                m_label_timer{};
 
