@@ -119,7 +119,7 @@ namespace ctb::app
       SetSizer(top_sizer);
 
       // event bindings.
-      m_dataset_events.setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event);  });
+      m_dataset_events.addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event);  });
    }
 
 
@@ -130,34 +130,34 @@ namespace ctb::app
 
       auto&& dataset = m_dataset_events.getDataset(true);
 
-      // ready-to-drink filter, matches if any formula  besides "fast" calculates RTD >= 0, only shows for RTD view
       if (dataset->getTableId() == TableId::Availability)
       {
+         // ready-to-drink filter, matches if any formula  besides "fast" calculates RTD >= 0, only shows for RTD view
          auto props = { RtdQtyDefault, RtdQtyLinear, RtdQtyBellCurve, RtdQtyEarlyCurve, RtdQtyLateCurve, RtdQtyFastMaturing, RtdQtyEarlyAndLate, RtdQtyBottlesPerYear, };
          CtPropertyFilter filter{ LBL_CHECK_READY_TO_DRINK, props, FILTER_AVAILABLE_MIN_QTY, CtPropFilterPredicate{ CtPredicateType::GreaterEqual } };
          parent->Add(CheckBoxFilterCtrl::create(parent->GetStaticBox(), m_dataset_events.getSource(), filter), wxSizerFlags().Border(wxALL));
          m_supported_filters.insert(filter.filter_name);
       }
 
-      // in-stock filter
       if (dataset->hasProperty(QtyOnHand))
       {
+         // in-stock filter
          CtPropertyFilter filter{ LBL_CHECK_IN_STOCK_ONLY, { QtyOnHand }, uint16_t{0}, CtPropFilterPredicate{ CtPredicateType::Greater } };
          parent->Add(CheckBoxFilterCtrl::create(parent->GetStaticBox(), m_dataset_events.getSource(), filter), wxSizerFlags().Border(wxALL));
          m_supported_filters.insert(filter.filter_name);
       }
 
-      // 'remaining bottles' filter
       if (dataset->hasProperty(PurchaseQtyRemaining))
       {
+         // 'Remaining Bottles' filter
          CtPropertyFilter filter{ LBL_CHECK_WITH_REMAINING, { PurchaseQtyRemaining }, uint16_t{0}, CtPropFilterPredicate{ CtPredicateType::Greater } };
          parent->Add(CheckBoxFilterCtrl::create(parent->GetStaticBox(), m_dataset_events.getSource(), filter), wxSizerFlags().Border(wxALL));
          m_supported_filters.insert(filter.filter_name);
       }
 
-      // min-score filter checkbox
       if (dataset->hasProperty(CtScore) or dataset->hasProperty(MyScore))
       {
+         // min-score filter checkbox
          auto score_params = SpinDoubleFilterCtrl::SpinParams{
             .min_value = FILTER_SCORE_MIN,
             .max_value = FILTER_SCORE_MAX,
@@ -205,50 +205,23 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsView::onDatasetEvent(DatasetEvent event)
+   void DatasetOptionsView::onDatasetInitialize(DatasetEvent event)
    {
       assert(event.dataset);
 
-      try
-      {
-         switch (event.event_id)
-         {
-         case DatasetEvent::Id::Filter:              [[fallthrough]];
-         case DatasetEvent::Id::DatasetInitialize:
-            onDatasetInitialize(event.dataset);
-            break;
-
-         case DatasetEvent::Id::Sort:
-            //onTableSorted(event.dataset);
-            break;
-
-         case DatasetEvent::Id::SubStringFilter:     [[fallthrough]];
-         case DatasetEvent::Id::RowSelected:         [[fallthrough]];
-         default:
-            break;
-         }
-      }
-      catch(...){
-         wxGetApp().displayErrorMessage(packageError(), true);
-      }
-   }
-
-
-   void DatasetOptionsView::onDatasetInitialize(DatasetPtr dataset)
-   {
       setTitle();
 
       // For any property filters that we don't have UI for, we need to remove them from the dataset. Shouldn't happen 
       // but might in the case of filters persisted to file from an earlier version.
       {
-         ScopedDatasetFreeze freeze{ dataset };
-         auto active_filter_names = vws::keys(dataset->propFilters().activeFilters()) | rng::to<StringSet>();
+         ScopedDatasetFreeze freeze{ event.dataset };
+         auto active_filter_names = vws::keys(event.dataset->propFilters().activeFilters()) | rng::to<StringSet>();
          for (const auto& name : active_filter_names)
          {
             if (!m_supported_filters.contains(name))
             {
                wxGetApp().displayFormattedMessage("Removing unsupported filter '{}'", name);
-               dataset->propFilters().removeFilter(name);
+               event.dataset->propFilters().removeFilter(name);
             }
          }
       }

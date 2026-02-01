@@ -67,8 +67,7 @@ namespace ctb::app
       auto setTitle() -> bool;
 
       // Dataset-related event handlers
-      void onDatasetEvent(DatasetEvent event) ;
-      void onDatasetInitialize(DatasetPtr dataset);
+      void onDatasetInitialize(DatasetEvent event);
 
       /// @brief private ctor used by static create()
       explicit DatasetOptionsView(const DatasetEventSourcePtr& source);
