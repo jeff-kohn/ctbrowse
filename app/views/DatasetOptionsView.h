@@ -8,7 +8,6 @@
 #pragma once
 
 #include "App.h"
-#include "CategorizedControls.h"
 #include "model/CtDatasetOptions.h"
 
 #include <ctb/model/DatasetEventHandler.h>
