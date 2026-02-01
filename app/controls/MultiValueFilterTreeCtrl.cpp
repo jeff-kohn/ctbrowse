@@ -1,4 +1,4 @@
-#include "MultiValueFilterTree.h"
+#include "MultiValueFilterTreeCtrl.h"
 
 #include <ctb/interfaces/IDatasetEventSink.h>
 #include <ctb/interfaces/IDatasetEventSource.h>
@@ -52,7 +52,7 @@ namespace ctb::app
    }
 
 
-   auto MultiValueFilterTree::create(wxWindow* parent, const DatasetEventSourcePtr& source) -> MultiValueFilterTree*
+   auto MultiValueFilterTreeCtrl::create(wxWindow* parent, const DatasetEventSourcePtr& source) -> MultiValueFilterTreeCtrl*
    {
       if (!parent)
       {
@@ -65,13 +65,13 @@ namespace ctb::app
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
 
-      std::unique_ptr<MultiValueFilterTree> wnd{ new MultiValueFilterTree{ source } };
+      std::unique_ptr<MultiValueFilterTreeCtrl> wnd{ new MultiValueFilterTreeCtrl{ source } };
       wnd->createWindow(parent);
       return wnd.release(); // if we get here parent owns it, so return non-owning*
    }
 
 
-   void MultiValueFilterTree::createWindow(wxWindow* parent)
+   void MultiValueFilterTreeCtrl::createWindow(wxWindow* parent)
    {
       using namespace ctb::constants;
 
@@ -87,30 +87,30 @@ namespace ctb::app
       m_images.emplace_back(wxBitmapBundle::FromSVGResource(RES_NAME_TREE_CHECKED_IMG, tr_img_size));
       SetImages(m_images);
 
-      Bind(wxEVT_TREE_ITEM_EXPANDING, &MultiValueFilterTree::onNodeExpanding, this);
-      Bind(wxEVT_LEFT_DOWN,           &MultiValueFilterTree::onNodeLeftClick, this);
-      Bind(wxEVT_TREE_ITEM_MENU,      &MultiValueFilterTree::onNodePopupMenu, this);
-      Bind(wxEVT_CONTEXT_MENU,        &MultiValueFilterTree::onTreePopupMenu, this);
+      Bind(wxEVT_TREE_ITEM_EXPANDING, &MultiValueFilterTreeCtrl::onNodeExpanding, this);
+      Bind(wxEVT_LEFT_DOWN,           &MultiValueFilterTreeCtrl::onNodeLeftClick, this);
+      Bind(wxEVT_TREE_ITEM_MENU,      &MultiValueFilterTreeCtrl::onNodePopupMenu, this);
+      Bind(wxEVT_CONTEXT_MENU,        &MultiValueFilterTreeCtrl::onTreePopupMenu, this);
 
-      Bind(wxEVT_MENU, &MultiValueFilterTree::onCollapseExpandNode, this, CMD_FILTER_TREE_COLLAPSE_EXPAND);
-      Bind(wxEVT_MENU, &MultiValueFilterTree::onCopyValue,          this, wxID_COPY);
-      Bind(wxEVT_MENU, &MultiValueFilterTree::onCollapseAllNodes,   this, CMD_FILTER_TREE_COLLAPSE_ALL);
-      Bind(wxEVT_MENU, &MultiValueFilterTree::onClearAllFilters,    this, CMD_FILTER_TREE_CLEAR_ALL);
-      Bind(wxEVT_MENU, &MultiValueFilterTree::onDeselectAll,        this, CMD_FILTER_TREE_DESELECT_ALL);
-      Bind(wxEVT_MENU, &MultiValueFilterTree::onInvertSelection,    this, CND_FILTER_TREE_INVERT_SELECTION);
-      Bind(wxEVT_MENU, &MultiValueFilterTree::onToggleChecked,      this, CMD_FILTER_TREE_TOGGLE_CHECKED);
+      Bind(wxEVT_MENU, &MultiValueFilterTreeCtrl::onCollapseExpandNode, this, CMD_FILTER_TREE_COLLAPSE_EXPAND);
+      Bind(wxEVT_MENU, &MultiValueFilterTreeCtrl::onCopyValue,          this, wxID_COPY);
+      Bind(wxEVT_MENU, &MultiValueFilterTreeCtrl::onCollapseAllNodes,   this, CMD_FILTER_TREE_COLLAPSE_ALL);
+      Bind(wxEVT_MENU, &MultiValueFilterTreeCtrl::onClearAllFilters,    this, CMD_FILTER_TREE_CLEAR_ALL);
+      Bind(wxEVT_MENU, &MultiValueFilterTreeCtrl::onDeselectAll,        this, CMD_FILTER_TREE_DESELECT_ALL);
+      Bind(wxEVT_MENU, &MultiValueFilterTreeCtrl::onInvertSelection,    this, CND_FILTER_TREE_INVERT_SELECTION);
+      Bind(wxEVT_MENU, &MultiValueFilterTreeCtrl::onToggleChecked,      this, CMD_FILTER_TREE_TOGGLE_CHECKED);
 
-      Bind(wxEVT_UPDATE_UI, &MultiValueFilterTree::onCollapseAllNodesUpdateUI, this, CMD_FILTER_TREE_COLLAPSE_ALL);
-      Bind(wxEVT_UPDATE_UI, &MultiValueFilterTree::onClearAllFiltersUpdateUI,  this, CMD_FILTER_TREE_CLEAR_ALL);
-      Bind(wxEVT_UPDATE_UI, &MultiValueFilterTree::onDeselectAllUpdateUI,      this, CMD_FILTER_TREE_DESELECT_ALL);
-      Bind(wxEVT_UPDATE_UI, &MultiValueFilterTree::onDeselectAllUpdateUI,      this, CND_FILTER_TREE_INVERT_SELECTION); // Same logic as Deselect All
+      Bind(wxEVT_UPDATE_UI, &MultiValueFilterTreeCtrl::onCollapseAllNodesUpdateUI, this, CMD_FILTER_TREE_COLLAPSE_ALL);
+      Bind(wxEVT_UPDATE_UI, &MultiValueFilterTreeCtrl::onClearAllFiltersUpdateUI,  this, CMD_FILTER_TREE_CLEAR_ALL);
+      Bind(wxEVT_UPDATE_UI, &MultiValueFilterTreeCtrl::onDeselectAllUpdateUI,      this, CMD_FILTER_TREE_DESELECT_ALL);
+      Bind(wxEVT_UPDATE_UI, &MultiValueFilterTreeCtrl::onDeselectAllUpdateUI,      this, CND_FILTER_TREE_INVERT_SELECTION); // Same logic as Deselect All
 
       m_dataset_events.setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event);  });
    }
 
 
    /// @brief Event dispatcher for IDatasetEventSink
-   void MultiValueFilterTree::onDatasetEvent(DatasetEvent event)
+   void MultiValueFilterTreeCtrl::onDatasetEvent(DatasetEvent event)
    {
       try
       {
@@ -135,7 +135,7 @@ namespace ctb::app
 
 
    /// @brief Event handler called when a new dataset is associated with the event source
-   void MultiValueFilterTree::onDatasetInitialize(IDataset& dataset)
+   void MultiValueFilterTreeCtrl::onDatasetInitialize(IDataset& dataset)
    {
       wxBusyCursor busy{};
       wxWindowUpdateLocker freeze_updates{ this };
@@ -160,7 +160,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onCollapseExpandNode([[maybe_unused]] wxCommandEvent& event)
+   void MultiValueFilterTreeCtrl::onCollapseExpandNode([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -180,7 +180,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onCollapseAllNodes([[maybe_unused]]wxCommandEvent& event)
+   void MultiValueFilterTreeCtrl::onCollapseAllNodes([[maybe_unused]]wxCommandEvent& event)
    {
       try 
       {
@@ -192,7 +192,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onCopyValue([[maybe_unused]] wxCommandEvent& event)
+   void MultiValueFilterTreeCtrl::onCopyValue([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -209,7 +209,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onClearAllFilters([[maybe_unused]] wxCommandEvent& event)
+   void MultiValueFilterTreeCtrl::onClearAllFilters([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -223,7 +223,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onDeselectAll([[maybe_unused]] wxCommandEvent& event)
+   void MultiValueFilterTreeCtrl::onDeselectAll([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -239,7 +239,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onInvertSelection([[maybe_unused]] wxCommandEvent& event)
+   void MultiValueFilterTreeCtrl::onInvertSelection([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -263,7 +263,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onToggleChecked([[maybe_unused]] wxCommandEvent& event)
+   void MultiValueFilterTreeCtrl::onToggleChecked([[maybe_unused]] wxCommandEvent& event)
    {
       try 
       {
@@ -277,7 +277,7 @@ namespace ctb::app
 
 
    /// @brief Event handler fired when user is expanding a filter node to view its match values
-   void MultiValueFilterTree::onNodeExpanding(wxTreeEvent& event)
+   void MultiValueFilterTreeCtrl::onNodeExpanding(wxTreeEvent& event)
    {
       try
       {
@@ -298,7 +298,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onNodePopupMenu(wxTreeEvent& event)
+   void MultiValueFilterTreeCtrl::onNodePopupMenu(wxTreeEvent& event)
    {
       try 
       {
@@ -316,7 +316,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onTreePopupMenu([[maybe_unused]] wxContextMenuEvent& event)
+   void MultiValueFilterTreeCtrl::onTreePopupMenu([[maybe_unused]] wxContextMenuEvent& event)
    {
       try 
       {
@@ -330,7 +330,7 @@ namespace ctb::app
 
 
    /// @brief Event handler fired when user left-clicks on a tree item.
-   void MultiValueFilterTree::onNodeLeftClick(wxMouseEvent& event)
+   void MultiValueFilterTreeCtrl::onNodeLeftClick(wxMouseEvent& event)
    {
       try
       {
@@ -351,19 +351,19 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::onCollapseAllNodesUpdateUI(wxUpdateUIEvent& event)
+   void MultiValueFilterTreeCtrl::onCollapseAllNodesUpdateUI(wxUpdateUIEvent& event)
    {
       event.Enable(rng::find_if(m_node_filters, [this](const auto& map_elem) { return IsExpanded(map_elem.first); }) != m_node_filters.end());
    }
 
 
-   void MultiValueFilterTree::onClearAllFiltersUpdateUI(wxUpdateUIEvent& event)
+   void MultiValueFilterTreeCtrl::onClearAllFiltersUpdateUI(wxUpdateUIEvent& event)
    {
       event.Enable(rng::find_if(m_check_counts, [](const auto& map_elem) { return map_elem.second > 0; }) != m_check_counts.end());
    }
 
 
-   void MultiValueFilterTree::onDeselectAllUpdateUI(wxUpdateUIEvent& event)
+   void MultiValueFilterTreeCtrl::onDeselectAllUpdateUI(wxUpdateUIEvent& event)
    {
       // Does filter node have at least one value checked?
       event.Enable(rng::find_if(m_node_filters, [](const auto& map_elem) { return map_elem.second.match_values.size() > 0; }) != m_node_filters.end());
@@ -372,7 +372,7 @@ namespace ctb::app
    /// @return A reference to the filter object associated with the specified tree item. 
    /// 
    /// Note this filter is from our internal map, not dataset's activeMultivalFilters()
-   auto MultiValueFilterTree::getFilter(wxTreeItemId item)  noexcept(false) -> CtMultiValueFilter&
+   auto MultiValueFilterTreeCtrl::getFilter(wxTreeItemId item)  noexcept(false) -> CtMultiValueFilter&
    {
       auto parent_node = GetItemParent(item);
       auto filter_node = parent_node == GetRootItem() ? item : parent_node;
@@ -390,7 +390,7 @@ namespace ctb::app
 
 
    /// @return an appropriately-typed CtPropertyVal representing the specified tree item's value
-   auto MultiValueFilterTree::getFilterValue(wxTreeItemId item) -> CtPropertyVal
+   auto MultiValueFilterTreeCtrl::getFilterValue(wxTreeItemId item) -> CtPropertyVal
    {
       auto dataset    = m_dataset_events.getDataset(true);
       auto& filter    = getFilter(item);
@@ -408,7 +408,7 @@ namespace ctb::app
    }
 
 
-   auto MultiValueFilterTree::getPopupMenu(wxTreeItemId item) const -> wxMenuPtr
+   auto MultiValueFilterTreeCtrl::getPopupMenu(wxTreeItemId item) const -> wxMenuPtr
    {
       using namespace constants;
 
@@ -465,21 +465,21 @@ namespace ctb::app
 
 
    /// @return true if the specified tree item is a checked match-value 
-   auto MultiValueFilterTree::isItemChecked(wxTreeItemId item) const -> bool
+   auto MultiValueFilterTreeCtrl::isItemChecked(wxTreeItemId item) const -> bool
    {
       return item.IsOk() and GetItemImage(item) == IMG_CHECKED;
    }
 
 
    /// @return true if item represents a filter node containing match values as children
-   auto MultiValueFilterTree::isItemFilterNode(wxTreeItemId item) const -> bool
+   auto MultiValueFilterTreeCtrl::isItemFilterNode(wxTreeItemId item) const -> bool
    {
       return item.IsOk() and m_node_filters.contains(item.GetID());
    }
 
 
    /// @return true if the item represents a match value for a filter, false otherwise
-   auto MultiValueFilterTree::isItemMatchValueNode(wxTreeItemId item) const -> bool
+   auto MultiValueFilterTreeCtrl::isItemMatchValueNode(wxTreeItemId item) const -> bool
    {
       return item.IsOk() and GetItemImage(item) != IMG_CONTAINER;
    }
@@ -489,7 +489,7 @@ namespace ctb::app
    /// 
    /// This function does not update the UI to reflect the newly added filter value,
    /// call SetCheck() for that.
-   void MultiValueFilterTree::enableFilterMatchValue(wxTreeItemId item) noexcept(false)
+   void MultiValueFilterTreeCtrl::enableFilterMatchValue(wxTreeItemId item) noexcept(false)
    {
       auto dataset = m_dataset_events.getDataset(true);
       auto& filter = getFilter(item);
@@ -507,7 +507,7 @@ namespace ctb::app
    /// 
    /// Child nodes are not populated, that happens in onNodeExpanding()
    /// 
-   void MultiValueFilterTree::populateFilterNodes(IDataset& dataset)
+   void MultiValueFilterTreeCtrl::populateFilterNodes(IDataset& dataset)
    {
       m_check_counts.clear();
       m_name_nodes.clear();
@@ -528,7 +528,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::populateFilterChildItems(wxTreeItemId filter_node) noexcept(false)
+   void MultiValueFilterTreeCtrl::populateFilterChildItems(wxTreeItemId filter_node) noexcept(false)
    {
       auto current_filter = getFilter(filter_node);
       auto dataset = m_dataset_events.getDataset(true);
@@ -575,7 +575,7 @@ namespace ctb::app
    }
 
 
-   void MultiValueFilterTree::clearCheckCounts(wxTreeItemId filter_node)
+   void MultiValueFilterTreeCtrl::clearCheckCounts(wxTreeItemId filter_node)
    {
       if (isItemFilterNode(filter_node))
       {
@@ -589,7 +589,7 @@ namespace ctb::app
 
 
    /// @brief Removes the match value represented by the item from the filter's active match values.
-   void MultiValueFilterTree::removeFilter(wxTreeItemId item) noexcept(false)
+   void MultiValueFilterTreeCtrl::removeFilter(wxTreeItemId item) noexcept(false)
    {
       auto& filter = getFilter(item);
       auto dataset = m_dataset_events.getDataset(true);
@@ -603,7 +603,7 @@ namespace ctb::app
 
 
    /// @brief updates the checked/unchecked status of a node.
-   void MultiValueFilterTree::setChecked(wxTreeItemId item, bool checked)
+   void MultiValueFilterTreeCtrl::setChecked(wxTreeItemId item, bool checked)
    {
       if (!isItemMatchValueNode(item))
          return;
@@ -624,7 +624,7 @@ namespace ctb::app
 
    /// @brief toggles a filter value by updating its checked/unchecked image and 
    ///  applying/deleting the corresponding filter.
-   void MultiValueFilterTree::toggleFilterSelection(wxTreeItemId item)
+   void MultiValueFilterTreeCtrl::toggleFilterSelection(wxTreeItemId item)
    {
       if (!isItemMatchValueNode(item))
          return;
@@ -642,7 +642,7 @@ namespace ctb::app
 
 
    /// @brief Updates the label for a filter node to show the number of enabled match value it contains
-   void MultiValueFilterTree::updateFilterLabel(wxTreeItemId item)
+   void MultiValueFilterTreeCtrl::updateFilterLabel(wxTreeItemId item)
    {
       if (!isItemFilterNode(item))
          return;
