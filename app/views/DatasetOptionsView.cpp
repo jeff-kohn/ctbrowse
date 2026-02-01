@@ -196,20 +196,11 @@ namespace ctb::app
    }
 
 
-   auto DatasetOptionsView::setTitle() -> bool
-   {
-      auto dataset = m_dataset_events.getDataset(true);
-      m_dataset_title->SetLabelText( dataset->getCollectionName());
-      forceLayoutUpdate(this);
-      return true;
-   }
-
-
    void DatasetOptionsView::onDatasetInitialize(DatasetEvent event)
    {
       assert(event.dataset);
 
-      setTitle();
+      m_dataset_title->SetLabelText(event.dataset->getCollectionName());
 
       // For any property filters that we don't have UI for, we need to remove them from the dataset. Shouldn't happen 
       // but might in the case of filters persisted to file from an earlier version.
