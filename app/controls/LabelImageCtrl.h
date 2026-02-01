@@ -16,7 +16,7 @@ namespace ctb::app
    class LabelImageCtrl final : public wxGenericStaticBitmap
    {
    public:
-      static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> LabelImageCtrl*;
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> LabelImageCtrl*;
 
       // no copy/move/assign, this class is created on the heap and owned by parent window.
       LabelImageCtrl() = delete;

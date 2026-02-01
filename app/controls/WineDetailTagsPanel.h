@@ -14,7 +14,7 @@ namespace ctb::app
    class WineDetailTagsPanel final : public wxPanel
    {
    public:
-      static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailTagsPanel*;
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailTagsPanel*;
 
    private:
       using DetailFields = std::deque<SinglePropDetailField>;

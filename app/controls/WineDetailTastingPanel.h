@@ -17,7 +17,7 @@ namespace ctb::app
    class WineDetailTastingPanel final : public wxPanel
    {
    public:
-      static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailTastingPanel*;
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailTastingPanel*;
 
    private:
       DatasetEventHandler m_dataset_events;

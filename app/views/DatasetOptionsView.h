@@ -53,31 +53,22 @@ namespace ctb::app
       ~DatasetOptionsView() override = default;
       
    private:
-      bool                  m_sort_ascending     { true  }; // whether ascending sort order is active
-      bool                  m_sort_descending    { false }; // whether descending sort ordes is active (yes we need both)
-      int                   m_sort_selection{ 0 };          // index of selected sort in combo, which matches a sort in availableSorts()
-      IDataset::TableSort   m_sort_config{};                // the sort object that will be used to sort the dataset 
+      bool                      m_sort_ascending     { true  }; // whether ascending sort order is active
+      bool                      m_sort_descending    { false }; // whether descending sort ordes is active (yes we need both)
+      int                       m_sort_selection{ 0 };          // index of selected sort in combo, which matches a sort in availableSorts()
       MultiValueFilterTreeCtrl* m_filter_tree{};
-      DatasetEventHandler   m_dataset_events;
-      wxChoice*             m_sort_combo{};
-      StringSet             m_supported_filters{};        // set of filter names that we have controls for
-      wxStaticText*         m_dataset_title{};
+      DatasetEventHandler       m_dataset_events;
+      StringSet                 m_supported_filters{};        // set of filter names that we have controls for
+      wxStaticText*             m_dataset_title{};
 
       // window creation
       void createWindow(wxWindow* parent);
       void createOptionFilters(wxStaticBoxSizer* parent);
       auto setTitle() -> bool;
 
-      auto getSortOptionList(DatasetPtr dataset) -> wxArrayString;
-
       // Dataset-related event handlers
       void onDatasetEvent(DatasetEvent event) ;
       void onDatasetInitialize(DatasetPtr dataset);
-      void onTableSorted(DatasetPtr dataset);
-
-      // event handlers
-      void onSortOrderClicked(wxCommandEvent& event);
-      void onSortSelection(wxCommandEvent& event);
 
       /// @brief private ctor used by static create()
       explicit DatasetOptionsView(const DatasetEventSourcePtr& source);

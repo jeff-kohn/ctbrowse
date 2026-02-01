@@ -8,6 +8,7 @@
 
 #include "controls/CheckBoxFilterCtrl.h" 
 #include "controls/MultiValueFilterTreeCtrl.h"
+#include "controls/SortOptionsPanel.h"
 #include "controls/SpinDoubleFilterCtrl.h"
 #include "views/DatasetOptionsView.h"
 #include "wx_helpers.h"
@@ -97,34 +98,7 @@ namespace ctb::app
       top_sizer->Add(m_dataset_title, wxSizerFlags{}.Expand().Border(wxALL, title_border_size));
 
       // sort options box
-      auto* sort_options_box = new wxStaticBoxSizer(wxVERTICAL, this, LBL_SORT_OPTIONS);
-
-      // sort fields combo
-      m_sort_combo = new wxChoice(sort_options_box->GetStaticBox(), wxID_ANY);
-      m_sort_combo->SetFocus();
-      m_sort_combo->SetValidator(wxGenericValidator(&m_sort_selection));
-      sort_options_box->Add(m_sort_combo, wxSizerFlags{}.Expand().Border(wxALL));
-
-      // ascending sort order radio. 
-      auto opt_ascending = new wxRadioButton{
-         sort_options_box->GetStaticBox(),
-         wxID_ANY, 
-         LBL_SORT_ASCENDING,
-         wxDefaultPosition, 
-         wxDefaultSize, 
-         wxRB_GROUP
-      };
-      opt_ascending->SetValue(true);
-      opt_ascending->SetValidator(wxGenericValidator{ &m_sort_ascending });
-      sort_options_box->Add(opt_ascending, wxSizerFlags{}.Expand().Border(wxALL));
-
-      // descending sort order radio. Since the radio buttons aren't in a group box, the validator treats them as individual bools
-      // so we have a separate flag for the descending radio that we have to manually keep in sync (see onTableSorted)
-      auto opt_descending = new wxRadioButton{ sort_options_box->GetStaticBox(), wxID_ANY, LBL_SORT_DESCENDING };
-      opt_descending->SetValidator(wxGenericValidator{ &m_sort_descending });
-      sort_options_box->Add(opt_descending, wxSizerFlags{1}.Expand().Border(wxALL));
-      top_sizer->Add(sort_options_box, wxSizerFlags().Expand().Border(wxALL));
-      top_sizer->AddSpacer(default_border);
+      top_sizer->Add(SortOptionsPanel::create(this, m_dataset_events.getSource()), wxSizerFlags{}.Expand().Border(wxALL));
       
       // Match filter options box, contains filter tree 
       auto* match_filters_box = new wxStaticBoxSizer(wxVERTICAL, this, LBL_MATCH_FILTERS);
@@ -146,9 +120,6 @@ namespace ctb::app
 
       // event bindings.
       m_dataset_events.setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event);  });
-      m_sort_combo->Bind(wxEVT_CHOICE, &DatasetOptionsView::onSortSelection, this);
-      opt_ascending->Bind( wxEVT_RADIOBUTTON,   &DatasetOptionsView::onSortOrderClicked, this);
-      opt_descending->Bind(wxEVT_RADIOBUTTON,   &DatasetOptionsView::onSortOrderClicked, this);
    }
 
 
@@ -234,14 +205,6 @@ namespace ctb::app
    }
 
 
-   auto DatasetOptionsView::getSortOptionList(DatasetPtr dataset) -> wxArrayString
-   {
-      return vws::all(dataset->availableSorts()) 
-         | vws::transform([](const IDataset::TableSort& s) {  return wxFromSV(s.sort_name); })
-         | rng::to<wxArrayString>();
-   }
-
-   
    void DatasetOptionsView::onDatasetEvent(DatasetEvent event)
    {
       assert(event.dataset);
@@ -256,7 +219,7 @@ namespace ctb::app
             break;
 
          case DatasetEvent::Id::Sort:
-            onTableSorted(event.dataset);
+            //onTableSorted(event.dataset);
             break;
 
          case DatasetEvent::Id::SubStringFilter:     [[fallthrough]];
@@ -273,10 +236,6 @@ namespace ctb::app
 
    void DatasetOptionsView::onDatasetInitialize(DatasetPtr dataset)
    {
-      // reload sort/filter options
-      m_sort_combo->Clear();
-      m_sort_combo->Append(getSortOptionList(dataset));
-      onTableSorted(dataset);
       setTitle();
 
       // For any property filters that we don't have UI for, we need to remove them from the dataset. Shouldn't happen 
@@ -296,73 +255,6 @@ namespace ctb::app
      
       TransferDataToWindow();
       forceLayoutUpdate(this);
-   }
-
-
-   void DatasetOptionsView::onTableSorted(DatasetPtr dataset)
-   {
-      m_sort_config = dataset->activeSort();
-      m_sort_ascending = (m_sort_config.reverse == false);
-      m_sort_descending = m_sort_config.reverse;
-
-      for (const auto&& [idx, sort] : vws::enumerate(dataset->availableSorts()))
-      {
-         if (m_sort_config.sort_name == sort.sort_name)
-         {
-            m_sort_selection = idx;
-         }
-      }
-
-      TransferDataToWindow();
-   }
-
-
-   void DatasetOptionsView::onSortOrderClicked([[maybe_unused]] wxCommandEvent& event)
-   {
-      try
-      {
-         TransferDataFromWindow();
-
-         auto dataset = m_dataset_events.getDataset(true);
-         m_sort_config.reverse = m_sort_descending;
-         dataset->applySort(m_sort_config);
-         m_dataset_events.signal_source(DatasetEvent::Id::Sort, false);
-      }
-      catch(...){
-         wxGetApp().displayErrorMessage(packageError(), true);
-      }
-   }
-
-
-   void DatasetOptionsView::onSortSelection([[maybe_unused]] wxCommandEvent& event)
-   {
-      try
-      {
-         // event could get generated even if they didn't change the selection, don't waste our time.
-         auto old_index = m_sort_selection;
-         TransferDataFromWindow();
-         if (old_index == m_sort_selection)
-            return;
-
-         // let the combo close its list before we reload the dataset
-         CallAfter([this]()
-            {
-               auto dataset = m_dataset_events.getDataset(true);
-               auto sorts = dataset->availableSorts();
-               if (m_sort_selection <= std::ssize(sorts))
-               {
-                  // re-fetch sorter based on index. UI and member state will get updated in the event handler.
-                  dataset->applySort(sorts[static_cast<size_t>(m_sort_selection)]);
-                  m_dataset_events.signal_source(DatasetEvent::Id::Sort, true);
-               }
-               else {
-						log::warn("DatasetOptionsView::onSortSelection: invalid sort index selected: {}", m_sort_selection);
-               }
-            });
-      }
-      catch(...){
-         wxGetApp().displayErrorMessage(packageError(), true);
-      }
    }
 
 } // namespace ctb::app

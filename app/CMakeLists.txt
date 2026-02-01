@@ -56,6 +56,8 @@ target_sources(${TARGET_NAME}
      "controls/LabelImageCtrl.h"
      "controls/MultiValueFilterTreeCtrl.cpp"
      "controls/MultiValueFilterTreeCtrl.h"
+     "controls/SortOptionsPanel.cpp"
+     "controls/SortOptionsPanel.h"
      "controls/SpinDoubleFilterCtrl.cpp"
      "controls/SpinDoubleFilterCtrl.h"
      "controls/WineDetailFields.h"

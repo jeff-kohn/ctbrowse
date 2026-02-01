@@ -14,7 +14,8 @@ namespace ctb::app
    {
    public:
       using PropertyFilter = CtPropertyFilter;
-      static auto create(wxWindow* parent, const DatasetEventSourcePtr& source, const PropertyFilter& filter) -> CheckBoxFilterCtrl*;
+
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source, const PropertyFilter& filter) -> CheckBoxFilterCtrl*;
 
 
       /// @brief Get a reference to the filter associated with this control
