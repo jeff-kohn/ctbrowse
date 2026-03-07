@@ -8,6 +8,7 @@
 
 #include "App.h"
 #include "CtCredentialManager.h"
+#include "HiddenWebClient.h"
 #include "LabelImageCache.h"
 #include "MainFrame.h"
 
@@ -81,10 +82,19 @@ namespace ctb::app
 
          m_main_frame = MainFrame::create();
          m_main_frame->Show();
+         m_main_frame->Bind(wxEVT_CLOSE_WINDOW, &App::onMainFrameClosed, this);
          SetTopWindow(m_main_frame);
 
-         CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_COLLECTION_MY_CELLAR }); });
+         try
+         {
+            m_web_client = HiddenWebClient::create().value_or(WebClientPtr{});
+            m_label_cache = std::make_shared<LabelImageCache>(getLabelCacheFolder(), m_web_client.get());
+         }
+         catch (...) {
+            displayErrorMessage(packageError());
+         }
 
+         CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_COLLECTION_MY_CELLAR }); });
          return true;
       }
       catch(...){
@@ -166,6 +176,16 @@ namespace ctb::app
    void App::displayInfoMessage(const std::string& msg, const std::string& title /*= constants::APP_NAME_SHORT*/)
    {
       wxMessageBox(msg, title, wxICON_INFORMATION | wxOK, m_main_frame);
+   }
+
+   void App::onMainFrameClosed(wxCloseEvent& event)
+   {
+      // Need to destroy the webclient (hidden) window to prevent app from remaining in memory and prevent callback to 
+      // label cache after it shuts down (in App dtor).
+      m_web_client.reset();
+
+      // Allow the default window event process to close the mainframe.
+      event.Skip();
    }
 
 

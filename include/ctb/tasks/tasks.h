@@ -28,14 +28,14 @@ namespace ctb::tasks
    /// 
    /// @throws ctb::Error if stop_token if stop has been request
    /// 
-   inline auto checkStopToken(const std::stop_token& token) noexcept(false) -> void
+   inline void checkStopToken(const std::stop_token& token) noexcept(false)
    {
       if (token.stop_requested())
          throw Error{ constants::ERROR_STR_OPERATION_CANCELED, Error::Category::OperationCanceled };
    }
 
    
-   /// @brief Task type use for LoadFile, SaveFile, LabelDownload tasks while all return file bytes.
+   /// @brief Task type use for LoadFile, SaveFile, LabelDownload tasks which all return file bytes.
    ///
    using FetchFileTask = PollingTask<Buffer>;
 
@@ -53,13 +53,6 @@ namespace ctb::tasks
    using HttpRequestResult = cpr::Response;
    using HttpRequestTask   = PollingTask<HttpRequestResult>;
 
-   /// @brief Run a HTTP GET request for the specified URL
-   /// @param url - url for the request
-   /// @param token - cancellation support
-   /// @return the HTTP response returned by the request
-   /// @throws ctb::Error if the operation fails
-   /// 
-   //auto runHttpGetTask(std::string url, std::stop_token token = {}) noexcept(false) -> HttpRequestTask::ReturnType;
 
    /// @brief Run a HTTP GET request for the specified URL
    /// @param url - url for the request

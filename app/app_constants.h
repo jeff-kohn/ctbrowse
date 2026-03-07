@@ -187,9 +187,11 @@ namespace ctb::constants
    inline constexpr const char* ERROR_STR_ORPHANED_SIZER            = "No configuration store available.";
    inline constexpr const char* ERROR_STR_DETAILS_VIEW_NULL_DATASET = "Creating a details view requires a valid dataset";
 
-   inline constexpr const char* FMT_ERROR_STR_INVALID_DETAIL_DETAIL = "No DetailsView factory for table id '{}'";
+   inline constexpr const char* FMT_ERROR_STR_WEB_CLIENT_REQUEST_REJECTED = "Web client rejected request for url '{}'";
+   inline constexpr const char* FMT_ERROR_STR_INVALID_DETAIL_VIEW         = "No DetailsView factory for table id '{}'";
 
    inline constexpr const char* CT_COOKIE_SECRET_NAME           = "CTSession";
+   inline constexpr const char* URL_ABOUT_BLANK                 = "about:blank";
 
 
 }  // namespace ctb::constants

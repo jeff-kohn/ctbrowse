@@ -87,7 +87,7 @@ namespace ctb::app
    } // namespace
 
 
-   [[nodiscard]] MainFrame* MainFrame::create()
+   [[nodiscard]] auto MainFrame::create() -> MainFrame*
    {
       try
       {

@@ -125,7 +125,15 @@ namespace ctb::app
       if (event.dataset && event.affected_row.has_value())
       {
          auto wine_id = event.dataset->getProperty(event.affected_row.value(), CtProp::iWineId).asUInt64().value_or(0);
-         m_image_result = m_cache->fetchLabelImage(wine_id);
+
+         if (auto fetch_result = m_cache->fetchLabelImage(wine_id); fetch_result.has_value())
+         {
+            m_image_result = fetch_result.value();
+         }
+         else {
+            m_image_result = std::nullopt;
+            log::exception(fetch_result.error());
+         }
          checkLabelResult();
       }
    }

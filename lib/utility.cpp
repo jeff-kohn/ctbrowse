@@ -58,7 +58,7 @@ namespace ctb
    }
 
 
-   auto saveBinaryFile(const fs::path& file_path, BufferSpan buf, bool overwrite) noexcept(false)-> void
+   auto saveBinaryFile(const fs::path& file_path, BufferSpan buf, bool overwrite) noexcept(false) -> void
    {
       using std::ios_base;
 

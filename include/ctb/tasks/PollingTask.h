@@ -12,19 +12,27 @@ namespace ctb::tasks
 
    /// @brief PollingTask - provides a polling interface for an asynchronous task/future
    ///
+   /// This class accepts either a future or shared_future during initialization, but internally
+   /// it always gets stored as a shared_future. This makes the class trivially copyable and thread
+   /// safe since the only data member is a shared_future.
    template <typename ReturnTypeT>
    class PollingTask
    {
    public:
       using ReturnType     = ReturnTypeT;                      // type that the task function returns
-      using FutureType     = std::future<ReturnType>;          // type that std::async(task function...) returns
+      using Future         = std::future<ReturnType>;
+      using SharedFuture   = std::shared_future<ReturnType>;
       using ResultWrapper  = std::expected<ReturnType, Error>; // types that final result is packaged in
 
       /// @brief Constructor
       /// 
-      /// Construct an instance from a std::future
+      /// Construct an instance from a std::shared_future
       /// 
-      explicit PollingTask(FutureType&& f) noexcept : m_future{ std::move(f) }
+      //explicit PollingTask(const SharedFuture& f) noexcept : m_future{ f }
+      //{}
+      explicit PollingTask(SharedFuture f) noexcept : m_future{ std::move(f)}
+      {}
+      explicit PollingTask(Future&& f) noexcept : m_future{ std::move(f) }
       {}
 
       /// @brief check validity of the task
@@ -77,10 +85,13 @@ namespace ctb::tasks
       /// 
       /// @return the expected value, or an Error if the task threw an exception
       ///
-      auto getValue() noexcept -> ResultWrapper
+      auto getValue() const noexcept -> ResultWrapper
       {
          try 
          {
+            if (!isValid())
+               throw ctb::Error{ Error::Category::ArgumentError,  constants::FMT_ERROR_INVALID_FUTURE };
+
             return m_future.get();
          }
          catch (...) {
@@ -90,15 +101,8 @@ namespace ctb::tasks
          }
       }
 
-      PollingTask()                              = default;
-      PollingTask(PollingTask&&)                 = default;
-      PollingTask& operator=(PollingTask&&)      = default;
-      ~PollingTask() noexcept                    = default;
-      PollingTask(const PollingTask&)            = delete;
-      PollingTask& operator=(const PollingTask&) = delete;
-
    private:
-      FutureType m_future{};
+      SharedFuture m_future{};
    };
  
 } //  namespace ctb::tasks

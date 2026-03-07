@@ -168,6 +168,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_ERROR_NO_LABEL_CACHE_FOLDER   = "The image cache folder {} does not exist and could not be created.";
    inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND          = "Folder '{}' does not exist.";
    inline constexpr const char* FMT_ERROR_PROP_NOT_FOUND          = "Property '{}' was not found.";
+   inline constexpr const char* FMT_ERROR_INVALID_FUTURE          = "Attempt to get value from invalid future.";
 
    inline constexpr const char* FMT_DEFAULT_FORMAT                = "{}";
    inline constexpr const char* FMT_NUMBER_CURRENCY               = "${:.2f}";

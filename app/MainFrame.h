@@ -46,7 +46,7 @@ namespace ctb::app
       /// throws a ctb::Error if the window can't be created; otherwise returns a non-owning pointer 
       /// to the window (top-level window so it will manage its own lifetime). 
       /// 
-      [[nodiscard]] static MainFrame* create();
+      [[nodiscard]] static auto create() -> MainFrame*;
 
       /// @brief set status bar text using format() syntax
       template <typename... Args>
