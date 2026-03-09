@@ -26,7 +26,7 @@ namespace ctb::app
          return false;
 
       m_busy_flag = true;
-      m_requests.try_emplace(std::move(url), std::move(callback));
+      m_requests.try_emplace(url, std::move(callback));
       m_webview->LoadURL(wxFromSV(url));
 
       return true;
