@@ -127,7 +127,7 @@ namespace ctb::app
       void setDataset(const DatasetPtr& dataset);
       void updateStatusBarCounts();
 
-      void onDatasetEvent(DatasetEvent event);
+      void onDatasetEvent(const DatasetEvent& event);
    };
 
 

@@ -8,7 +8,7 @@ if(CTB_ENABLE_CLANG_TIDY)
       list(
          APPEND CMAKE_CXX_CLANG_TIDY
          "--use-color"
-         "--header-filter=.*/cts/**"
+         "--header-filter=.*/ctb/**"
          "--quiet"
       )
       message(STATUS "clang-tidy build integration is enabled for this preset.")

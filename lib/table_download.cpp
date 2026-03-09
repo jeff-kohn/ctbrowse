@@ -56,7 +56,7 @@ namespace ctb
       return std::unexpected{ error };
    }
 
-} // anon namespace
+} // namespace ctb
 
 
 namespace ctb

@@ -95,7 +95,7 @@ namespace ctb::app
    }
 
 
-   void SpinDoubleFilterCtrl::onDatasetInitialize(const DatasetEvent& event)
+   void SpinDoubleFilterCtrl::onDatasetInitialize([[maybe_unused]] const DatasetEvent& event)
    {
       auto&& filter = event.dataset->propFilters().getFilter(m_filter.filter_name);
       if (filter)
@@ -106,7 +106,7 @@ namespace ctb::app
    }
 
 
-   void SpinDoubleFilterCtrl::onFilterChecked(wxCommandEvent& event)
+   void SpinDoubleFilterCtrl::onFilterChecked([[maybe_unused]] wxCommandEvent& event)
    {
       try
       {
@@ -128,7 +128,7 @@ namespace ctb::app
    }
 
 
-   void SpinDoubleFilterCtrl::onSpinValueChanged(wxSpinDoubleEvent& event)
+   void SpinDoubleFilterCtrl::onSpinValueChanged([[maybe_unused]] wxSpinDoubleEvent& event)
    {
       try
       {
@@ -147,7 +147,7 @@ namespace ctb::app
       }
    }
 
-   void SpinDoubleFilterCtrl::onSpinValueUpdateUI(wxUpdateUIEvent& event)
+   void SpinDoubleFilterCtrl::onSpinValueUpdateUI([[maybe_unused]] wxUpdateUIEvent& event)
    {
       event.Enable(m_filter.enabled);
    }

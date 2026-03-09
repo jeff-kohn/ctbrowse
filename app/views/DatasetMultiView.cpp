@@ -47,6 +47,7 @@ namespace ctb::app
    {
       using DetailsViewFactory = std::function<DetailsViewBase*(wxWindow* parent, const DatasetEventSourcePtr& source)>;
    
+      // NOLINTNEXTLINE(bugprone-throwing-static-initialization, cert-err58-cpp)
       static const auto details_view_map = std::map<TableId, DetailsViewFactory>
       {
          { TableId::List,         &DetailsViewMyCellar::create       } ,

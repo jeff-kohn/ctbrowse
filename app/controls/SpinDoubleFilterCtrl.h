@@ -24,7 +24,7 @@ namespace ctb::app
 
    /// @brief UI component that combines a FilterCheckbox with a spin-control for a number filter value.
    ///
-   class SpinDoubleFilterCtrl sealed : public wxPanel
+   class SpinDoubleFilterCtrl final : public wxPanel
    {
    public:
       using PropertyFilter = CtPropertyFilter;

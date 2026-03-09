@@ -54,4 +54,4 @@ namespace ctb
    private:
       DatasetPtr m_dataset{};
    };
-}
+} // namespace ctb

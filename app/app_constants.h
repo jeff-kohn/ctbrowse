@@ -191,7 +191,14 @@ namespace ctb::constants
    inline constexpr const char* FMT_ERROR_STR_INVALID_DETAIL_VIEW         = "No DetailsView factory for table id '{}'";
 
    inline constexpr const char* CT_COOKIE_SECRET_NAME           = "CTSession";
-   inline constexpr const char* URL_ABOUT_BLANK                 = "about:blank";
+   inline constexpr const char* URL_ABOUT_BLANK                 = "about:blank"; 
+
+   // to make the linters happy, not that it actually improves maintainability.
+   inline constexpr int pix_20  = 20;
+   inline constexpr int pix_100 = 100;
+   inline constexpr int pix_112 = 112;
+   inline constexpr int pix_150 = 150;
+   inline constexpr int pix_500 = 500;
 
 
 }  // namespace ctb::constants

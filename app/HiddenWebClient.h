@@ -38,4 +38,4 @@ namespace ctb::app
       void onScriptResult(wxWebViewEvent& event);
    };
 
-}
+} // namespace ctb::app

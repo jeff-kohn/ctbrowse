@@ -64,10 +64,10 @@ namespace ctb::app
          checkStopToken(token);
 
          auto response = runHttpGetTask(img_url, token, getImageRequestHeaders());
-         auto [buf, type] = getBytes(response);
+         auto buf = viewResponseBytes(response);
 
-         log::info("runLabelDownloadTask() downloaded {} bytes with content type {}.", buf.size(), type);
-         return Buffer{ std::from_range, std::move(buf) };
+         log::info("downloadImage() downloaded {} bytes.", buf.size());
+         return Buffer{ std::from_range, buf };
       }
 
 
@@ -84,7 +84,7 @@ namespace ctb::app
             log::error("Unabled to save downloaded label image ({} bytes) to {}. {}", file_path.generic_string(), buf.size(), packageError().formattedMesage());
          }
       }
-   }
+   } // namespace
    
    
    auto wxImageTask::getImage() noexcept -> ResultWrapper
@@ -112,7 +112,7 @@ namespace ctb::app
    class LabelImageCache::Request
    {
    public:
-      Request(uint64_t wine_id) :
+      explicit Request(uint64_t wine_id) :
          m_task{ m_promise.get_future() },
          m_wine_id{ wine_id }
       {}
@@ -132,7 +132,7 @@ namespace ctb::app
          m_promise.set_value(std::move(value));
       }
 
-      void setError(std::exception_ptr ep = std::current_exception())
+      void setError(const std::exception_ptr& ep = std::current_exception())
       {
          m_promise.set_exception(ep);
       }
@@ -146,7 +146,7 @@ namespace ctb::app
    };
 
 
-   LabelImageCache::LabelImageCache(fs::path cache_folder, wxWeakRef<HiddenWebClient> web_cient_ref) :  
+   LabelImageCache::LabelImageCache(fs::path cache_folder, const wxWeakRef<HiddenWebClient>& web_cient_ref) :  
       m_cache_folder{ std::move(cache_folder) },
       m_web_client_ref{ web_cient_ref }
 
@@ -231,6 +231,7 @@ namespace ctb::app
    }
 
 
+   // NOLINTNEXTLINE(performance-unnecessary-value-param) 
    void LabelImageCache::fetchLabelThreadProc(RequestPtr request, std::string page_text, fs::path cache_folder, std::stop_token token)
    {
       try

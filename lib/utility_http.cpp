@@ -32,7 +32,7 @@ namespace ctb
       // this just makes sure that curl's global init has been called, we don't actually need a handle
       cpr::CurlHolder holder;
 
-      int outlength;
+      int outlength{};
       char* output = curl_easy_unescape(nullptr, text.data(), static_cast<int>(text.length()), &outlength);
       if (output)
       {
@@ -83,16 +83,16 @@ namespace ctb
    }
 
 
-   auto getBytes(cpr::Response& response) -> std::pair<BufferSpan, std::string_view>
+   auto viewResponseBytes(cpr::Response& response) -> BufferSpan
    {
       assert(response.downloaded_bytes == std::ssize(response.text));
 
-      auto result = std::make_pair(BufferSpan{}, std::string_view{});
       if (response.downloaded_bytes > 0)
       {
-         result.first = BufferSpan{ reinterpret_cast<std::byte*>(response.text.data()), response.text.size() };
+         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+         return BufferSpan{ reinterpret_cast<std::byte*>(response.text.data()), response.text.size() };
       }
-      return result;
+      return {};
    }
 
    auto parseLabelUrlFromHtml(const std::string& html) -> std::string
@@ -109,9 +109,9 @@ namespace ctb
             return images->Children[0]->GetAttribute(constants::HTML_ATTR_SRC);
          }
       }
-      catch (std::exception&)
+      catch (std::exception& e)
       {
-         // TODO: LOG?
+         log::warn("parseLabelUrlFromHtml returning empty string due to exception {}", e.what());
       }
       return {};
    }

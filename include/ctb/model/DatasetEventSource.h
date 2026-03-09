@@ -111,9 +111,6 @@ namespace ctb
       ///  observer threw an error.
       auto signal(DatasetEvent::Id event, NullableInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool override;
 
-      /// @brief destructor
-      ~DatasetEventSource() noexcept override;
-
    private:
       DatasetPtr m_data{};
       std::unordered_set<IDatasetEventSink*> m_observers{};

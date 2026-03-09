@@ -53,7 +53,7 @@ namespace ctb::app
 
       void createWindow(wxWindow* parent);
 
-      void onDatasetEvent(DatasetEvent event);
+      void onDatasetEvent(const DatasetEvent&);
       void onDatasetInitialize(IDataset& dataset);
 
       void onCollapseExpandNode(wxCommandEvent& event);

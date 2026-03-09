@@ -28,8 +28,6 @@ namespace ctb::app
 
    void WineDetailTagsPanel::createWindow(wxWindow* parent)
    {
-      static constexpr auto COL_COUNT = 2;
-
       if (!Create(parent))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
@@ -37,7 +35,7 @@ namespace ctb::app
 
       wxWindowUpdateLocker freeze_win(this);
 
-      auto top_sizer = new wxBoxSizer{ wxVERTICAL };
+      auto *top_sizer = new wxBoxSizer{ wxVERTICAL };
       SetSizer(top_sizer);
 
       m_fields.push_back(SinglePropDetailField{ top_sizer, CtProp::TagName,      constants::LBL_TAG_NAME });
@@ -66,7 +64,7 @@ namespace ctb::app
          GetSizer()->ShowItems(true);
       }
       else {
-         rng::for_each(m_fields, [&event](auto&& fld) { fld.clear(); });
+         rng::for_each(m_fields, [](auto&& fld) { fld.clear(); });
          Show(false);
          GetSizer()->ShowItems(false);
       }

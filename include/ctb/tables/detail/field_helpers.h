@@ -99,4 +99,4 @@ namespace ctb::detail
       return ctb::format("{} - {}", drink_start.asString(), drink_end.asString());
    }
 
-} // namesapace ctb::detail
+} // namespace ctb::detail

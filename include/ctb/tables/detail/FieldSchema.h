@@ -29,4 +29,4 @@ namespace ctb::detail
       NullableShort  csv_col{};   // will be std::nullopt for custom fields not in the CSV
    };
 
-}
+} // namespace ctb::detail

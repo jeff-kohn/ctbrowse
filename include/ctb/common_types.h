@@ -32,4 +32,4 @@ namespace ctb
 
    using Buffer         = std::vector<std::byte>;
    using BufferSpan     = std::span<std::byte>;
-}
+} // namespace ctb

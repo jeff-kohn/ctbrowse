@@ -45,7 +45,14 @@ FetchContent_Declare(
         SYSTEM
 )
 FetchContent_MakeAvailable(HtmlParser)
-target_compile_options(HtmlParser PRIVATE "-w")
+target_compile_options(HtmlParser PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:/W0>
+    $<$<CXX_COMPILER_ID:GNU,Clang>:-w>
+)
+# Disable clang-tidy for external library
+set_target_properties(HtmlParser PROPERTIES
+    CXX_CLANG_TIDY ""
+)
 
 find_package(cpr CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)

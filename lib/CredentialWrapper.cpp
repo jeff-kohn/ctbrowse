@@ -21,7 +21,6 @@ namespace ctb
       m_cred_name{ cred_name },
       m_username{ std::move(username) },
       m_password{ std::move(password) },
-      m_cleared{ false },
       m_save_requested{ save_requested }
    {}
 

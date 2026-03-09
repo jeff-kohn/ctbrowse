@@ -79,7 +79,7 @@ namespace ctb
       inline constexpr const char* ATTR_SRC               = "src";
 
 
-   }
+   } // namespace headers
 
    /// @brief  percent-encode a string to make it compatible with HTTP requests
    /// @return the encoded string, or a copy of the original text if the encoding failed
@@ -117,23 +117,22 @@ namespace ctb
    {
       auto result = validateResponse(response);
       if (!result)
-         throw result.error();
+         throw Error{ result.error() };
 
       return std::forward<Resp>(response);
    }
 
 
-   /// @brief Retrieves view of HTTP response's content as a byte span along with its content-type
+   /// @brief Retrieves view of HTTP response's content as a byte span 
    /// 
-   /// Note that both values are views into the  Response they  were generated 
-   /// from. This function only accepts l-value reference to avoid returning 
+   /// Note that returned value is a view into the supplied Response.
+   /// This function only accepts l-value reference to avoid returning 
    /// dangling views to temporaries
    /// 
-   /// @return a pair containing a span<byte> for the data with a string_view 
-   ///         for the content type. Both will be empty if the response doesn't
-   ///         contain any data
+   /// @return a span<byte> over the response's test; empty if the response 
+   ///         doesn't contain any data
    /// 
-   auto getBytes(cpr::Response& response) -> std::pair<BufferSpan, std::string_view>;
+   auto viewResponseBytes(cpr::Response& response) -> BufferSpan;
 
 
    /// @brief parses an HTML fragment looking for the element containing the label_photo URL
@@ -242,4 +241,4 @@ namespace ctb
    }
 
 
-}
+} // namespace ctb

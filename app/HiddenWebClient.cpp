@@ -4,12 +4,12 @@
 
 namespace ctb::app
 {
-   static inline constexpr auto* GET_LABEL_SCRIPT = "document.querySelector('#label_photo img').src;";
+   //static inline constexpr auto* GET_LABEL_SCRIPT = "document.querySelector('#label_photo img').src;";
 
 
    auto HiddenWebClient::create() ->std::expected<WebClientPtr, ctb::Error>
    {
-      if (!wxWebView::IsBackendAvailable(wxWebViewBackendEdge))
+      if (!wxWebView::IsBackendAvailable(wxWebViewBackendEdge)) // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
       {
          return std::unexpected{ ctb::Error{ Error::Category::GenericError, "WebView backend not available, online label image will be disabled"} };
       }
@@ -19,14 +19,14 @@ namespace ctb::app
       return wnd;
    }
 
-
+   // NOLINTNEXTLINE(performance-unnecessary-value-param)
    auto HiddenWebClient::requestPage(std::string url, PageLoadedCallback callback) -> bool
    {
       if (m_busy_flag)
          return false;
 
       m_busy_flag = true;
-      m_requests.try_emplace(url, std::move(callback));
+      m_requests.try_emplace(std::move(url), std::move(callback));
       m_webview->LoadURL(wxFromSV(url));
 
       return true;
@@ -121,5 +121,5 @@ namespace ctb::app
          static_cast<int>(event.GetNavigationAction()),
          wxViewString(event.GetString()));
    }   
-}
+} // namespace ctb::app
 

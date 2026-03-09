@@ -128,7 +128,7 @@ namespace ctb::app
    }
 
 
-   void DatasetListView::onDatasetEvent(DatasetEvent event)
+   void DatasetListView::onDatasetEvent(const DatasetEvent& event)
    {
       switch (event.event_id)
       {

@@ -32,7 +32,7 @@ struct csv_table
    std::vector<record> records{};
 };
 
-
+// NOLINTNEXTLINE(bugprone-exception-escape)
 int main()
 {
    using namespace std::literals;
@@ -43,7 +43,7 @@ int main()
       fs::path file_path{ "%APPDATA%/ctBrowse for Windows/Tables/List.csv" };
 
       csv_table table{};
-      auto size = std::filesystem::file_size(file_path);
+      auto size = std::filesystem::file_size(file_path); // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
       std::string buffer(size, '\0');
       std::ifstream in(file_path);
       in.read(&buffer[0], static_cast<std::streamsize>(size));

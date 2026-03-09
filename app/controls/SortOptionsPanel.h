@@ -29,8 +29,8 @@ namespace ctb::app
       void createWindow(wxWindow* parent);
       void onSortOrderClicked(wxCommandEvent& event);
       void onSortSelection(wxCommandEvent& event);
-      void onTableSorted(DatasetEvent event);
-      void onDatasetInitialize(DatasetEvent event);
+      void onTableSorted(const DatasetEvent& event);
+      void onDatasetInitialize(const DatasetEvent& event);
    };
 
 
