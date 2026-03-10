@@ -88,6 +88,6 @@ namespace ctb::detail
       CompareFunction m_compare_func{};
    };
 
-} // namespace ctb
+} // namespace ctb::detail
 
 

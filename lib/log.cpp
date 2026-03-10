@@ -58,7 +58,7 @@ namespace ctb::log
 
 
    [[nodiscard]] sinks_init_list::value_type makeFileSink(
-      fs::path log_folder, 
+      const fs::path& log_folder,
       std::string_view log_filename_base, 
       std::string_view pattern, 
       level_enum level)

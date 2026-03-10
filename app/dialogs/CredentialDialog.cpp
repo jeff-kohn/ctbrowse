@@ -95,4 +95,4 @@ namespace ctb::app
       Centre(wxBOTH);
       username_text->SetFocus();
    }
-}
+} // namespace ctb::app

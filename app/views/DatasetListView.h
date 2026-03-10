@@ -48,7 +48,7 @@ namespace ctb::app
       void setDataset(const DatasetPtr& dataset);
       void selectFirstRow();
 
-      void onDatasetEvent(DatasetEvent event);
+      void onDatasetEvent(const DatasetEvent& event);
       void onSelectionChanged(wxDataViewEvent& event);
       void onWineContextMenu(wxDataViewEvent& event);
       void onWineDoubleClick(wxDataViewEvent& event);

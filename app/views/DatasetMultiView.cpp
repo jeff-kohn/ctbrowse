@@ -47,6 +47,7 @@ namespace ctb::app
    {
       using DetailsViewFactory = std::function<DetailsViewBase*(wxWindow* parent, const DatasetEventSourcePtr& source)>;
    
+      // NOLINTNEXTLINE(bugprone-throwing-static-initialization, cert-err58-cpp)
       static const auto details_view_map = std::map<TableId, DetailsViewFactory>
       {
          { TableId::List,         &DetailsViewMyCellar::create       } ,
@@ -77,7 +78,7 @@ namespace ctb::app
          }
          else
          {
-            throw Error{ ctb::format(constants::FMT_ERROR_STR_INVALID_DETAIL_DETAIL, magic_enum::enum_name(table_id)), Error::Category::ArgumentError };
+            throw Error{ ctb::format(constants::FMT_ERROR_STR_INVALID_DETAIL_VIEW, magic_enum::enum_name(table_id)), Error::Category::ArgumentError };
          }
       }
 

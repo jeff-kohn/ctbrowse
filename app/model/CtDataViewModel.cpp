@@ -1,4 +1,6 @@
 
+#include <utility>
+
 #include "model/CtDataViewModel.h"
 
 namespace ctb::app
@@ -39,7 +41,7 @@ namespace ctb::app
    {
       auto row_count = m_dataset->rowCount();
       auto col_count = std::ssize(m_dataset->listColumns());
-      if ( row >= row_count or col >= col_count)
+      if ( std::cmp_greater_equal(row , row_count) or std::cmp_greater_equal(col , col_count))
       {
          SPDLOG_DEBUG("CtDataViewModel::GetValueByRow() called with invalid coordinates {} (max {}), {} (max{}).", row, row_count, col, col_count);
          return;

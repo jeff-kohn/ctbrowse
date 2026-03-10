@@ -34,7 +34,7 @@ namespace ctb
       using CallbackMap            = std::unordered_map<EventId, EventCallback>;
 
 
-      DatasetEventHandler(DatasetEventSourcePtr source) noexcept : m_source(std::move(source))
+      DatasetEventHandler(DatasetEventSourcePtr source) : m_source(std::move(source))
       {
          if (!m_source)
          {
@@ -85,7 +85,7 @@ namespace ctb
          m_callbacks[event_id] = std::move(callback);
       }
 
-      void setDefaultHandler(EventCallback callback =  [](const DatasetEvent& event) {})
+      void setDefaultHandler(EventCallback callback =  [](const DatasetEvent&) {})
       {
          m_default_callback = std::move(callback);
       }

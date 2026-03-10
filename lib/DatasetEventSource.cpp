@@ -70,7 +70,7 @@ namespace ctb
       bool retval{ true };
       if (m_data)
       {
-         for (auto observer : m_observers) 
+         for (auto* observer : m_observers) 
          { 
             try
             {
@@ -112,10 +112,10 @@ namespace ctb
    }
 
 
-   DatasetEventSource::~DatasetEventSource() noexcept
-   {
-      signal(DatasetEvent::Id::DatasetRemove);
-   }
+   //DatasetEventSource::~DatasetEventSource() noexcept
+   //{
+   //   signal(DatasetEvent::Id::DatasetRemove);
+   //}
 
 
 } // namespace ctb

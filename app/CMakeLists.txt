@@ -34,6 +34,7 @@ target_link_libraries(${TARGET_NAME}
    PRIVATE
       ctBrowse::ctBrowse_lib
       wxWidgets::wxWidgets
+      unofficial::webview2::webview2
 )
 
 target_sources(${TARGET_NAME}
@@ -41,9 +42,10 @@ target_sources(${TARGET_NAME}
      "App.cpp"
      "App.h"
      "app_constants.h"
-     "CategorizedControls.h"
      "CtCredentialManager.cpp"
      "CtCredentialManager.h"
+     "HiddenWebClient.cpp"
+     "HiddenWebClient.h"
      "LabelImageCache.cpp"
      "LabelImageCache.h"
      "MainFrame.cpp"

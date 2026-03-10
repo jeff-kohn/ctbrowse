@@ -43,12 +43,12 @@ namespace ctb::app
    }
 
 
-   static inline wxString getTastingCtLikesText(const DatasetPtr& dataset, int rec_idx)
-   {
-      auto like_pct = dataset->getProperty(rec_idx, CtProp::TastingCtLikePercent).asDouble().value_or(0.0) * 100; // convert to actual percent.
-      auto likes    = dataset->getProperty(rec_idx, CtProp::TastingCtLikeCount).asInt32().value_or(0);
-      return ctb::format(constants::FMT_TASTING_CT_LIKE_SUMMARY, likes, like_pct);
-   }
+   //static inline wxString getTastingCtLikesText(const DatasetPtr& dataset, int rec_idx)
+   //{
+   //   auto like_pct = dataset->getProperty(rec_idx, CtProp::TastingCtLikePercent).asDouble().value_or(0.0) * 100; // convert to actual percent.
+   //   auto likes    = dataset->getProperty(rec_idx, CtProp::TastingCtLikeCount).asInt32().value_or(0);
+   //   return ctb::format(constants::FMT_TASTING_CT_LIKE_SUMMARY, likes, like_pct);
+   //}
 
 
    auto WineDetailTastingPanel::create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailTastingPanel*
@@ -71,8 +71,6 @@ namespace ctb::app
 
    void WineDetailTastingPanel::createWindow(wxWindow* parent)
    {
-      static constexpr auto COL_COUNT = 2;
-
       if (!Create(parent))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
@@ -80,7 +78,7 @@ namespace ctb::app
 
       wxWindowUpdateLocker freeze_win(this);
 
-      auto top_sizer = new wxBoxSizer{ wxVERTICAL };
+      auto* top_sizer = new wxBoxSizer{ wxVERTICAL };
       SetSizer(top_sizer);
 
       // note title

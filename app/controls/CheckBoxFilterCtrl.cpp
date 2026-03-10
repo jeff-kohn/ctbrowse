@@ -32,7 +32,7 @@ namespace ctb::app
    }
 
 
-   void CheckBoxFilterCtrl::onFilterChecked(wxCommandEvent& event)
+   void CheckBoxFilterCtrl::onFilterChecked([[maybe_unused]] wxCommandEvent& event)
    {
       try
       {

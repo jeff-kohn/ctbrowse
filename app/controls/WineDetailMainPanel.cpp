@@ -30,8 +30,6 @@ namespace ctb::app
 
    void WineDetailMainPanel::createWindow(wxWindow* parent)
    {
-      static constexpr auto COL_COUNT = 2;
-
       if (!Create(parent))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
@@ -48,7 +46,7 @@ namespace ctb::app
       m_wine_ctrl->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT));
 
       // Top Level Sizer contains the wine title and the property grid of detail fields.
-      auto top_sizer = new wxBoxSizer{ wxVERTICAL };
+      auto *top_sizer = new wxBoxSizer{ wxVERTICAL };
       SetSizer(top_sizer);
       top_sizer->Add(m_wine_ctrl, wxSizerFlags{}.Center().Border());
 
@@ -144,4 +142,4 @@ namespace ctb::app
       event.Skip();
    }
 
-}
+} // namespace ctb::app

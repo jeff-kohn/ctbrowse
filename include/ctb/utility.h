@@ -39,7 +39,7 @@ namespace ctb
    /// @throws ctb::Error, possibly other std::exception-derived if file can't be written or already exists
    ///         and overwrite = false;
    /// 
-   auto saveTextToFile(fs::path file_path, std::string_view text, bool overwrite = false) noexcept(false) -> void;
+   auto saveTextToFile(const fs::path& file_path, std::string_view text, bool overwrite = false) noexcept(false) -> void;
 
 
    /// @brief Get a view/substring of just the filename from a string containing a path

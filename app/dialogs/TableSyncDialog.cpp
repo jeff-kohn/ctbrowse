@@ -42,7 +42,7 @@ namespace ctb::app
          }
          return str.str();
       }
-   }
+   } // namespace
 
 
 
@@ -191,7 +191,7 @@ namespace ctb::app
       m_table_selection_ctrl = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, nullptr,
          wxLB_EXTENDED);
       m_table_selection_ctrl->SetValidator(wxGenericValidator(&m_table_selection_val));
-      m_table_selection_ctrl->SetMinSize(ConvertDialogToPixels(wxSize(112, 112)));
+      m_table_selection_ctrl->SetMinSize(ConvertDialogToPixels(wxSize(constants::pix_112, constants::pix_112)));
       box_sizer3->Add(m_table_selection_ctrl,
          wxSizerFlags().Border(wxLEFT|wxTOP|wxBOTTOM, wxSizerFlags::GetDefaultBorder()));
 
@@ -207,7 +207,7 @@ namespace ctb::app
 
       auto* box_sizer = new wxBoxSizer(wxVERTICAL);
 
-      box_sizer->AddSpacer(20);
+      box_sizer->AddSpacer(constants::pix_20);
 
       auto* m_btn_select_all = new wxButton(this, wxID_ANY, "Select &All");
       box_sizer->Add(m_btn_select_all, wxSizerFlags().Expand().Border(wxTOP, wxSizerFlags::GetDefaultBorder()));

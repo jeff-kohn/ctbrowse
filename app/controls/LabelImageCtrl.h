@@ -31,7 +31,6 @@ namespace ctb::app
 
       void createWindow(wxWindow* parent);
 
-      using wxImageTask    = LabelImageCache::wxImageTask;
       using MaybeImageTask = std::optional<wxImageTask>;
 
       LabelCachePtr          m_cache{};

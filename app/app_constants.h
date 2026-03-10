@@ -186,10 +186,20 @@ namespace ctb::constants
    inline constexpr const char* ERROR_STR_NO_CONFIG_STORE           = "No configuration store available.";
    inline constexpr const char* ERROR_STR_ORPHANED_SIZER            = "No configuration store available.";
    inline constexpr const char* ERROR_STR_DETAILS_VIEW_NULL_DATASET = "Creating a details view requires a valid dataset";
+   inline constexpr const char* ERROR_STR_NO_WEBVIEW                = "WebView backend not available, online label image will be disabled";
 
-   inline constexpr const char* FMT_ERROR_STR_INVALID_DETAIL_DETAIL = "No DetailsView factory for table id '{}'";
+   inline constexpr const char* FMT_ERROR_STR_WEB_CLIENT_REQUEST_REJECTED = "Web client rejected request for url '{}'";
+   inline constexpr const char* FMT_ERROR_STR_INVALID_DETAIL_VIEW         = "No DetailsView factory for table id '{}'";
 
    inline constexpr const char* CT_COOKIE_SECRET_NAME           = "CTSession";
+   inline constexpr const char* URL_ABOUT_BLANK                 = "about:blank"; 
+
+   // to make the linters happy, not that it actually improves maintainability.
+   inline constexpr int pix_20  = 20;
+   inline constexpr int pix_100 = 100;
+   inline constexpr int pix_112 = 112;
+   inline constexpr int pix_150 = 150;
+   inline constexpr int pix_500 = 500;
 
 
 }  // namespace ctb::constants

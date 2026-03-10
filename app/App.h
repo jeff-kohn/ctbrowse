@@ -12,6 +12,7 @@
 
 #include <ctb/log.h>
 #include <wx/app.h>
+#include <wx/windowptr.h>
 
 
 namespace ctb::app
@@ -21,10 +22,11 @@ namespace ctb::app
    /// @brief forward declare top-level window class so we don't have to add header dependency
    ///
    class MainFrame;
+   class LabelImageCache;
+   class HiddenWebClient;
 
-
-   class LabelImageCache;   
    using LabelCachePtr = std::shared_ptr<LabelImageCache>;
+   using WebClientPtr  = wxWindowPtr<HiddenWebClient>;
 
    // we don't use enum class because then every time we need to pass an ID to wxObject,
    // we'd have to cast or use std::to_underlying and that's just an ugly waste of time 
@@ -139,7 +141,11 @@ namespace ctb::app
    private:
       MainFrame*         m_main_frame{};
       fs::path           m_user_data_folder{};
+      WebClientPtr       m_web_client{};
       LabelCachePtr      m_label_cache{};
+      
+
+      void onMainFrameClosed(wxCloseEvent&);
    };
 
 }  // namespace ctb::app

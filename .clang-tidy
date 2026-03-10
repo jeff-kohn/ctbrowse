@@ -25,7 +25,13 @@ Checks: "*,\
   -misc-use-internal-linkage, \
   -concurrency-mt-unsafe, \
   -bugprone-argument-comment, \
-  -performance-avoid-endl"
+  -performance-avoid-endl, \
+  -llvm-prefer-static-over-anonymous-namespace, \
+  -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access, \
+  -cppcoreguidelines-owning-memory, \
+  -misc-use-anonymous-namespace, \
+  -modernize-use-designated-initializers, \
+  -modernize-use-emplace"
 WarningsAsErrors: ''
 
 CheckOptions:
@@ -55,6 +61,11 @@ CheckOptions:
     value: 'true'
   - key: 'readability-redundant-access-specifiers.CheckFirstDeclaration'
     value: 'true'
+  - key: 'llvm-namespace-comment.ShortNamespaceLines'
+    value: 12
+  - key: bugprone-exception-escape.IgnoredExceptions
+    value: "bad_array_new_length,bad_cast,format_error,std::bad_alloc,bad_alloc"
+
 # These seem to be the most common identifier styles
   - key: 'readability-identifier-naming.AbstractClassCase'
     value: 'lower_case'

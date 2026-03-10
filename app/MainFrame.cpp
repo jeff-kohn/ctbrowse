@@ -87,7 +87,7 @@ namespace ctb::app
    } // namespace
 
 
-   [[nodiscard]] MainFrame* MainFrame::create()
+   [[nodiscard]] auto MainFrame::create() -> MainFrame*
    {
       try
       {
@@ -1044,7 +1044,7 @@ namespace ctb::app
          // until after we create thew view so that sub-views and controls have a chance to receive it.
          m_event_source->setDataset(dataset, false);
          m_view = DatasetMultiView::create(this, m_event_source);
-         m_event_source->signal(DatasetEvent::Id::DatasetInitialize, false);
+         m_event_source->signal(DatasetEvent::Id::DatasetInitialize);
 
          // Force a complete redraw of everything
          SetTitle(ctb::format("{} - {}", dataset->getCollectionName(), constants::APP_NAME_LONG));
@@ -1066,7 +1066,7 @@ namespace ctb::app
    }
 
 
-   void MainFrame::onDatasetEvent([[maybe_unused]] DatasetEvent event)
+   void MainFrame::onDatasetEvent([[maybe_unused]] const DatasetEvent& event)
    {
       constexpr int none = -1;
 

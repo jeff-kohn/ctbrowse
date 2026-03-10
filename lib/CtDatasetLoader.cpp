@@ -33,7 +33,7 @@ namespace ctb
       {
          auto result = loadTableData<TableT>(folder, tbl_id);
          if (!result)
-				throw result.error();
+            throw Error{ result.error() };
 
 			return CtDataset<TableT>::create(std::move(result.value()));
       }
@@ -80,4 +80,4 @@ namespace ctb
       return enum_switch(TableFactory, tbl);
    }
 
-}  // ctb
+}  // namespace ctb

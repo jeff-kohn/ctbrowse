@@ -46,7 +46,7 @@ namespace ctb::app
       wxWindowUpdateLocker freeze_win(this);
 
       // set up the sizer that all the detail panels will go into
-      SetMinSize(ConvertDialogToPixels(wxSize{ 100, -1 }));
+      SetMinSize(ConvertDialogToPixels(wxSize{ constants::pix_100, -1 }));
       auto* top_sizer = new wxBoxSizer(wxVERTICAL);
       SetSizer(top_sizer);
 
@@ -79,6 +79,7 @@ namespace ctb::app
 
    void DetailsViewBase::onCommand(wxCommandEvent& event)
    {
+      // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
       wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, event.GetId() });
    }
 

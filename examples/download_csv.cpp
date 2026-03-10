@@ -16,6 +16,7 @@
 #include <print>
 
 
+ // NOLINTNEXTLINE(bugprone-exception-escape)
 int main()
 {
    using namespace std::literals;
@@ -56,6 +57,7 @@ int main()
       return 0;
    }
    catch (...) {
+      // NOLINTNEXTLINE(bugprone-exception-escape)
       std::println("\r\nException occurred:{}\r\n", ctb::packageError().formattedMesage());
    }
 }

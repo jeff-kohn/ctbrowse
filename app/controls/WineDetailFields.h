@@ -64,7 +64,7 @@ namespace ctb::app
          std::unique_ptr<wxString> m_display_value{ new wxString{} };
       };
 
-   }
+   } // namespace detail
 
 
    class SinglePropDetailField

@@ -47,7 +47,7 @@ namespace ctb
 
       // read the data into appropriately buffer and return to caller
       Buffer buf(file_size);
-      file.read(reinterpret_cast<char*>(buf.data()), std::ssize(buf));
+      file.read(reinterpret_cast<char*>(buf.data()), std::ssize(buf)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
       if (file.fail())
       {
          throw Error{ Error::Category::FileError, constants::FMT_ERROR_FILE_READ_FAILED, file_path.generic_string() };
@@ -58,7 +58,7 @@ namespace ctb
    }
 
 
-   auto saveBinaryFile(const fs::path& file_path, BufferSpan buf, bool overwrite) noexcept(false)-> void
+   auto saveBinaryFile(const fs::path& file_path, BufferSpan buf, bool overwrite) noexcept(false) -> void
    {
       using std::ios_base;
 
@@ -69,7 +69,7 @@ namespace ctb
       if (!file)
          throw Error{ Error::Category::FileError, constants::FMT_ERROR_FILE_OPEN_FAILED, file_path.generic_string() };
 
-      file.write(reinterpret_cast<char*>(buf.data()), std::ssize(buf));
+      file.write(reinterpret_cast<char*>(buf.data()), std::ssize(buf)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
       if (file.fail())
       {
          throw Error{ Error::Category::FileError, constants::FMT_ERROR_FILE_READ_FAILED, file_path.generic_string() };
@@ -78,7 +78,7 @@ namespace ctb
    }
 
 
-   auto saveTextToFile(fs::path file_path, std::string_view text, bool overwrite) noexcept(false) -> void
+   auto saveTextToFile(const fs::path& file_path, std::string_view text, bool overwrite) noexcept(false) -> void
    {
       if (fs::exists(file_path) && !overwrite)
          throw Error{ Error::Category::FileError, constants::FMT_ERROR_FILE_ALREADY_EXISTS, file_path.generic_string() };
@@ -89,7 +89,7 @@ namespace ctb
       // use binary mode to keep ofstream from inserting extra carriage returns, since
       // we want to preserve whatever line feeds are already in the file
       auto file_out = openFile<std::ofstream>(file_path, std::ios_base::out | std::ios_base::binary, _SH_DENYRW);
-      file_out.write(text.data(), std::ssize(text));
+      file_out.write(text.data(), std::ssize(text)); // NOLINT(bugprone-suspicious-stringview-data-usage)
    }
 
 

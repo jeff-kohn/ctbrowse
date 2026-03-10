@@ -28,8 +28,6 @@ namespace ctb::app
 
    void WineDetailPendingPanel::createWindow(wxWindow* parent)
    {
-      static constexpr auto COL_COUNT = 2;
-
       if (!Create(parent))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
@@ -43,7 +41,7 @@ namespace ctb::app
       heading_lbl->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT));
 
       // top level sizer contains the heading and the property grid of detail fields.
-      auto top_sizer = new wxBoxSizer{ wxVERTICAL };
+      auto *top_sizer = new wxBoxSizer{ wxVERTICAL };
       SetSizer(top_sizer);
       top_sizer->Add(heading_lbl, wxSizerFlags{ 1 }.Expand().Border(wxBOTTOM | wxTOP));
 
@@ -72,7 +70,7 @@ namespace ctb::app
          Show(true);
       }
       else {
-         rng::for_each(m_fields, [&event](auto&& fld) { fld.clear(); });
+         rng::for_each(m_fields, [](auto&& fld) { fld.clear(); });
          GetSizer()->ShowItems(false);
          Show(false);
       }

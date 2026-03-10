@@ -65,7 +65,7 @@ namespace ctb::app
       wxCheckBox*    m_save_default_ctrl{};  
       wxCheckBox*    m_startup_sync_ctrl{};  
       wxArrayInt     m_table_selection_val{};
-      wxCheckListBox* m_table_selection_ctrl;
+      wxCheckListBox* m_table_selection_ctrl{};
 
       void onOkUpdateUI(wxUpdateUIEvent& event);
       void onOkClicked(wxCommandEvent& event);

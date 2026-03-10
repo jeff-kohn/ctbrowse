@@ -81,8 +81,8 @@ namespace ctb::app
       }
 
       // panel shouldn't grow infinitely
-      SetMaxSize(ConvertDialogToPixels(wxSize{ 150, WX_UNSPECIFIED_VALUE }));
-      SetMinSize(ConvertDialogToPixels(wxSize{ 100, WX_UNSPECIFIED_VALUE }));
+      SetMaxSize(ConvertDialogToPixels(wxSize{ constants::pix_150, WX_UNSPECIFIED_VALUE }));
+      SetMinSize(ConvertDialogToPixels(wxSize{ constants::pix_100, WX_UNSPECIFIED_VALUE }));
 
       // defines the rows of controls in our panel
       auto* top_sizer = new wxBoxSizer{ wxVERTICAL };
@@ -103,8 +103,8 @@ namespace ctb::app
       // Match filter options box, contains filter tree 
       auto* match_filters_box = new wxStaticBoxSizer(wxVERTICAL, this, LBL_MATCH_FILTERS);
       m_filter_tree = MultiValueFilterTreeCtrl::create(match_filters_box->GetStaticBox(), m_dataset_events.getSource());
-      m_filter_tree->SetMaxSize(ConvertDialogToPixels(wxSize(-1, 500)));
-      m_filter_tree->SetMinSize(ConvertDialogToPixels(wxSize(-1, 100)));
+      m_filter_tree->SetMaxSize(ConvertDialogToPixels(wxSize(-1, constants::pix_500)));
+      m_filter_tree->SetMinSize(ConvertDialogToPixels(wxSize(-1, constants::pix_100)));
       match_filters_box->Add(m_filter_tree, wxSizerFlags(2).Expand().Border(wxALL));
       match_filters_box->AddSpacer(default_border);
       top_sizer->Add(match_filters_box, wxSizerFlags(1).Expand().Border(wxALL));
@@ -196,7 +196,7 @@ namespace ctb::app
    }
 
 
-   void DatasetOptionsView::onDatasetInitialize(DatasetEvent event)
+   void DatasetOptionsView::onDatasetInitialize(const DatasetEvent& event)
    {
       assert(event.dataset);
 

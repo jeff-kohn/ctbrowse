@@ -10,7 +10,7 @@
 
 namespace ctb::app
 {
-   static constexpr auto WINDOW_STYLE  = wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_TWIST_BUTTONS | wxTR_NO_LINES | wxTR_HIDE_ROOT | wxTR_SINGLE;
+   static constexpr auto WINDOW_STYLE  = wxTR_DEFAULT_STYLE | wxTR_HIDE_ROOT;
    static constexpr int  IMG_CONTAINER = 0;
    static constexpr int  IMG_UNCHECKED = 1;
    static constexpr int  IMG_CHECKED   = 2;
@@ -110,7 +110,7 @@ namespace ctb::app
 
 
    /// @brief Event dispatcher for IDatasetEventSink
-   void MultiValueFilterTreeCtrl::onDatasetEvent(DatasetEvent event)
+   void MultiValueFilterTreeCtrl::onDatasetEvent(const DatasetEvent& event)
    {
       try
       {
@@ -424,16 +424,16 @@ namespace ctb::app
 
          // Check/Uncheck filter
          bool is_checked = isItemChecked(item);
-         auto lbl = is_checked ? CMD_FILTER_TREE_UNCHECK_FILTER_LBL : CMD_FILTER_TREE_CHECK_FILTER_LBL;
-         auto tip = is_checked ? CMD_FILTER_TREE_UNCHECK_FILTER_TIP : CMD_FILTER_TREE_CHECK_FILTER_TIP;
+         const auto *lbl = is_checked ? CMD_FILTER_TREE_UNCHECK_FILTER_LBL : CMD_FILTER_TREE_CHECK_FILTER_LBL;
+         const auto *tip = is_checked ? CMD_FILTER_TREE_UNCHECK_FILTER_TIP : CMD_FILTER_TREE_CHECK_FILTER_TIP;
          popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_FILTER_TREE_TOGGLE_CHECKED, lbl, tip, wxITEM_NORMAL });
       }
       else if (isItemFilterNode(item))
       {
          // Collapse/Expand
          bool is_expanded = IsExpanded(item);
-         auto lbl = is_expanded ? CMD_FILTER_TREE_COLLAPSE_LBL : CMD_FILTER_TREE_EXPAND_LBL;
-         auto tip = is_expanded ? CMD_FILTER_TREE_COLLAPSE_TIP : CMD_FILTER_TREE_EXPAND_TIP;
+         const auto *lbl = is_expanded ? CMD_FILTER_TREE_COLLAPSE_LBL : CMD_FILTER_TREE_EXPAND_LBL;
+         const auto *tip = is_expanded ? CMD_FILTER_TREE_COLLAPSE_TIP : CMD_FILTER_TREE_EXPAND_TIP;
          popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_FILTER_TREE_COLLAPSE_EXPAND, lbl, tip, wxITEM_NORMAL });
          popup_menu->AppendSeparator();
 
@@ -449,8 +449,8 @@ namespace ctb::app
       }
       else {
          // collapse all
-         auto lbl = CMD_FILTER_TREE_COLLAPSE_ALL_LBL;
-         auto tip = CMD_FILTER_TREE_COLLAPSE_ALL_TIP;
+         const auto *lbl = CMD_FILTER_TREE_COLLAPSE_ALL_LBL;
+         const auto *tip = CMD_FILTER_TREE_COLLAPSE_ALL_TIP;
          popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_FILTER_TREE_COLLAPSE_ALL, lbl, tip, wxITEM_NORMAL });
          popup_menu->AppendSeparator();
 

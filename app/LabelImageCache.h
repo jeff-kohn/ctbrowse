@@ -11,6 +11,7 @@
 
 #include <ctb/tasks/tasks.h>
 #include <wx/image.h>
+#include <wx/weakref.h>
 
 #include <expected>
 #include <memory>
@@ -18,15 +19,44 @@
 #include <stop_token>
 #include <vector>
 
-
 namespace ctb::app
 {
+   // used to load pages requiring javascript
+   class HiddenWebClient;
+
+
+   /// @brief wxImageTask - adapts FetchFileTask to return wxImage
+   ///
+   /// This wrapper just adds a convenience method for returning the 
+   /// future value as a wxImage instead of raw bytes. 
+   class wxImageTask final : public tasks::FetchFileTask
+   {
+   public:
+      using base          = tasks::FetchFileTask;
+      using SharedFuture  = base::SharedFuture;
+      using Future        = base::Future;
+      using ResultWrapper = std::expected<wxImage, Error>;
+
+      /// @brief wxImageTask constructor 
+      explicit wxImageTask(SharedFuture f) noexcept : base{ std::move(f) }
+      {}
+      explicit wxImageTask(Future&& f) noexcept : base{ std::move(f) }
+      {}
+
+      /// @brief getImage() - retrieve the future value from the task as a wxImage
+      /// 
+      /// This is a potentially long, BLOCKING call if file is still being downloaded!
+      ///
+      /// @return expected - the requested wxImage; unexpected - ctb::Error describing the failure
+      auto getImage() noexcept -> ResultWrapper;
+   };
+
+
 
    /// @brief manages a disk-based cache of wine label images.
    ///
-   /// note that while instances of this class are thread-safe,  you should be careful how 
-   /// you use the return value of loadImage() if you're not in the main UI thread, since since
-   /// using it with other UI code should only be done from the main UI thread.
+   /// The public interface of this class should only be called from the main UI thread, since it talks to 
+   /// a wxWebView. (This class does use multi-threading internally though). 
    /// 
    class LabelImageCache final
    {
@@ -35,49 +65,15 @@ namespace ctb::app
       /// 
       /// @param cache_folder - path of folder to use for disk cache. env vars will be expanded
       /// @throws ctb::Error if cache folder doesn't exist and can't be created, or is a relative path. 
-      explicit LabelImageCache(fs::path cache_folder);
+      explicit LabelImageCache(fs::path cache_folder, const wxWeakRef<HiddenWebClient>& web_client_ref = {});
       ~LabelImageCache() noexcept;
-
-
-      /// @brief wxImageTask - adapts FetchFileTask to return wxImage
-      ///
-      /// This wrapper just adds a convenience method for returning the 
-      /// future value as a wxImage instead of raw bytes. 
-      class wxImageTask final : public tasks::FetchFileTask
-      {
-      public:
-         using FetchFileTask = tasks::FetchFileTask;
-         using FutureType    = FetchFileTask::FutureType;
-         using ResultWrapper = std::expected<wxImage, Error>;
-
-         /// @brief getImage() - retrieve the future value from the task as a wxImage
-         /// 
-         /// This is a potentially long, BLOCKING call if file is still being downloaded!
-         ///
-         /// @return expected - the requested wxImage; unexpected - ctb::Error describing the failure
-         auto getImage() noexcept -> ResultWrapper;
-
-         wxImageTask()                               = default;
-         wxImageTask(wxImageTask&&)                  = default;
-         ~wxImageTask() noexcept                     = default;
-         wxImageTask& operator=(wxImageTask&&)       = default;
-         wxImageTask(const wxImageTask&)             = delete;
-         wxImageTask& operator=(const wxImageTask&)  = delete;
-
-      private:
-         /// @brief wxImageTask constructor (private, accessible only from LabelImageCache)
-         explicit wxImageTask(FetchFileTask::FutureType&& t) noexcept : FetchFileTask{ std::move(t) }
-         {}
-         friend class LabelImageCache;
-      };
-
 
       /// @brief Fetch a label image asynchronously.
       ///
       /// Caller can check if result is ready by polling the returned task and 
       /// then calling getImage() to retrieve the image when it's ready
       /// 
-      auto fetchLabelImage(uint64_t wine_id) -> wxImageTask;
+      auto fetchLabelImage(uint64_t wine_id) -> std::expected<wxImageTask, ctb::Error>;
 
       /// @brief shuts down the thread pool, attempting to cancel any remaining tasks. 
       ///
@@ -86,32 +82,32 @@ namespace ctb::app
       /// 
       void shutdown() noexcept;
 
+      /// @brief Indicates whether a shutdown has been initiated. If it has any subsequent fetchLabelImage() calls will fail.
+      /// @return true if shutdown has been initiated otherwise false.
+      auto shutdownInitiated() const noexcept(false) -> bool
+      {
+         return m_cancel_source.stop_possible() == false;
+      }
+
       // no default init or copy/assign
       LabelImageCache() = delete;
       LabelImageCache(const LabelImageCache&) = delete;
       LabelImageCache& operator=(const LabelImageCache&) = delete;
 
    private:
-      const fs::path    m_cache_folder;   // modifying after construction wouldn't be thread-safe anyways
-      std::stop_source  m_cancel_source{};
+      class Request;
+      using RequestPtr      = std::shared_ptr<Request>;
+      using LabelRequestMap = std::unordered_map<uint64_t, RequestPtr>;
 
-      void checkShutdown() const noexcept(false)
-      {
-         if (!m_cancel_source.stop_possible())
-            throw Error{ constants::ERROR_STR_LABEL_CACHE_SHUT_DOWN }; 
-      }
+      LabelRequestMap              m_requests{};
+      const fs::path               m_cache_folder;    // modifying after construction wouldn't be thread-safe anyways
+      std::stop_source             m_cancel_source{}; // For signaling cancellation if we're shutting down.
+      wxWeakRef<HiddenWebClient>   m_web_client_ref{};
 
-      static auto buildLabelPath(const fs::path& folder, uint64_t wine_id) -> fs::path
-      {
-         return folder / buildLabelFilename(wine_id);
-      }
+      // "thread proc" for processing a label image request after we've download the wine-details html
+      static void fetchLabelThreadProc(RequestPtr ptr, std::string page_text, fs::path folder, std::stop_token token);
 
-      static auto buildLabelFilename(uint64_t wine_id) -> std::string
-      {
-         constexpr auto image_num = 1;
-         return ctb::format(constants::FMT_LABEL_IMAGE_FILENAME, wine_id, image_num);
-      }
-
-      static auto runFetchAndSaveLabelTask(fs::path folder, uint64_t wine_id, std::stop_token token) noexcept(false) -> tasks::FetchFileTask::ReturnType;
+      // Callback when a web page requested from the web client has been successfully loaded.
+      void onPageLoaded(uint64_t wine_id, std::expected<std::string, ctb::Error> result);
    };
 }

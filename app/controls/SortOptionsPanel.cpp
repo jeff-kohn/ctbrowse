@@ -11,7 +11,7 @@ namespace ctb::app
 
    namespace
    {
-      auto getSortOptionList(DatasetPtr dataset) -> wxArrayString
+      auto getSortOptionList(const DatasetPtr& dataset) -> wxArrayString
       {
          return vws::all(dataset->availableSorts())
             | vws::transform([](const IDataset::TableSort& s) {  return wxFromSV(s.sort_name); })
@@ -58,7 +58,7 @@ namespace ctb::app
       sort_options_box->Add(m_sort_combo, wxSizerFlags{}.Expand().Border(wxALL));
 
       // ascending sort order radio. 
-      auto opt_ascending = new wxRadioButton{
+      auto *opt_ascending = new wxRadioButton{
          sort_options_box->GetStaticBox(),
          wxID_ANY,
          LBL_SORT_ASCENDING,
@@ -72,7 +72,7 @@ namespace ctb::app
 
       // descending sort order radio. Since the radio buttons aren't in a group box, the validator treats them as individual bools
       // so we have a separate flag for the descending radio that we have to manually keep in sync (see onTableSorted)
-      auto opt_descending = new wxRadioButton{ sort_options_box->GetStaticBox(), wxID_ANY, LBL_SORT_DESCENDING };
+      auto *opt_descending = new wxRadioButton{ sort_options_box->GetStaticBox(), wxID_ANY, LBL_SORT_DESCENDING };
       opt_descending->SetValidator(wxGenericValidator{ &m_sort_descending });
       sort_options_box->Add(opt_descending, wxSizerFlags{ 1 }.Expand().Border(wxALL));
 
@@ -135,7 +135,7 @@ namespace ctb::app
    }
 
 
-   void SortOptionsPanel::onDatasetInitialize(DatasetEvent event)
+   void SortOptionsPanel::onDatasetInitialize(const DatasetEvent& event)
    {
       assert(event.dataset);
     
@@ -144,7 +144,7 @@ namespace ctb::app
       onTableSorted(event); // a bit hacky but techincally correct.
    }
 
-   void SortOptionsPanel::onTableSorted(DatasetEvent event)
+   void SortOptionsPanel::onTableSorted(const DatasetEvent& event)
    {
       assert(event.dataset);
       try
@@ -158,7 +158,7 @@ namespace ctb::app
          {
             if (m_sort_config.sort_name == sort.sort_name)
             {
-               m_sort_selection = idx;
+               m_sort_selection = static_cast<int>(idx);
             }
          }
          TransferDataToWindow();
@@ -168,4 +168,4 @@ namespace ctb::app
       }
    }
 
-}
+} // namespace ctb::app
