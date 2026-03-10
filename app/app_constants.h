@@ -186,6 +186,7 @@ namespace ctb::constants
    inline constexpr const char* ERROR_STR_NO_CONFIG_STORE           = "No configuration store available.";
    inline constexpr const char* ERROR_STR_ORPHANED_SIZER            = "No configuration store available.";
    inline constexpr const char* ERROR_STR_DETAILS_VIEW_NULL_DATASET = "Creating a details view requires a valid dataset";
+   inline constexpr const char* ERROR_STR_NO_WEBVIEW                = "WebView backend not available, online label image will be disabled";
 
    inline constexpr const char* FMT_ERROR_STR_WEB_CLIENT_REQUEST_REJECTED = "Web client rejected request for url '{}'";
    inline constexpr const char* FMT_ERROR_STR_INVALID_DETAIL_VIEW         = "No DetailsView factory for table id '{}'";

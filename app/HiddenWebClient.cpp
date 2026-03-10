@@ -11,7 +11,7 @@ namespace ctb::app
    {
       if (!wxWebView::IsBackendAvailable(wxWebViewBackendEdge)) // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
       {
-         return std::unexpected{ ctb::Error{ Error::Category::GenericError, "WebView backend not available, online label image will be disabled"} };
+         return std::unexpected{ ctb::Error{ Error::Category::GenericError, constants::ERROR_STR_NO_WEBVIEW } };
       }
 
       WebClientPtr wnd{ new HiddenWebClient{} };
