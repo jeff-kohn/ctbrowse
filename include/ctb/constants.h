@@ -37,6 +37,7 @@ namespace ctb::constants
 
    // column labels
    inline constexpr const char* DISPLAY_COL_AVAILABLE       = "Ready";
+   inline constexpr const char* DISPLAY_COL_BIN             = "Bin";
    inline constexpr const char* DISPLAY_COL_CONSUME_DATE    = "Consumed On";
    inline constexpr const char* DISPLAY_COL_CONSUME_REASON  = "Reason";
    inline constexpr const char* DISPLAY_COL_CONSUME_FROM    = "Consumed From";
@@ -44,6 +45,7 @@ namespace ctb::constants
    inline constexpr const char* DISPLAY_COL_CT_WINDOW       = "CT Window";
    inline constexpr const char* DISPLAY_COL_FLAWED          = "Flawed?";
    inline constexpr const char* DISPLAY_COL_INVENTORY       = "Inventory";
+   inline constexpr const char* DISPLAY_COL_LOCATION        = "Location";
    inline constexpr const char* DISPLAY_COL_LIKED           = "Liked?";
    inline constexpr const char* DISPLAY_COL_LOCALE          = "Region and Appellation";
    inline constexpr const char* DISPLAY_COL_MY_SCORE        = "My Score";
@@ -66,10 +68,12 @@ namespace ctb::constants
 
    // filter names
    inline constexpr const char* FILTER_APPELATION           = "Appellation";
+   inline constexpr const char* FILTER_BIN                  = "Bin";
    inline constexpr const char* FILTER_BOTTLE_SIZE          = "Size";
    inline constexpr const char* FILTER_COUNTRY              = "Country";
    inline constexpr const char* FILTER_CONSUME_YEAR         = "Year Consumed";
    inline constexpr const char* FILTER_CONSUME_MONTH        = "Month Consumed";
+   inline constexpr const char* FILTER_LOCATION             = "Location";
    inline constexpr const char* FILTER_ORDER_DATE           = "Order Date";
    inline constexpr const char* FILTER_PRODUCER             = "Producer";
    inline constexpr const char* FILTER_REGION               = "Region";
@@ -95,6 +99,7 @@ namespace ctb::constants
 
    // sort option names
    inline constexpr const char* SORT_OPTION_APPELATION_WINE       = "Appellation, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_LOC_BIN               = "Location, Bin, Wine";
    inline constexpr const char* SORT_OPTION_CONSUME_DATE          = "Date Consumed";
    inline constexpr const char* SORT_OPTION_COUNTRY_APPELATION    = "Country, Appellation and Wine";
    inline constexpr const char* SORT_OPTION_DRINK_BY              = "Drink By Year and Vintage";
@@ -123,18 +128,18 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";
 
    // table names
-   inline constexpr const char* TABLE_NAME_LIST                   = "Wines in My Cellar";
+   inline constexpr const char* TABLE_NAME_LIST                   = "My Wine Collection";
    inline constexpr const char* TABLE_NAME_INVENTORY              = "Bottle Inventory";
    inline constexpr const char* TABLE_NAME_NOTES                  = "Tasting Notes";
    inline constexpr const char* TABLE_NAME_PRIVATENOTES           = "Private Notes";
    inline constexpr const char* TABLE_NAME_PURCHASE               = "Wine Purchases";
-   inline constexpr const char* TABLE_NAME_PENDING                = "Wine Pending Delivery";
+   inline constexpr const char* TABLE_NAME_PENDING                = "Pending Deliveries";
    inline constexpr const char* TABLE_NAME_CONSUMED               = "Wine Consumed";
    inline constexpr const char* TABLE_NAME_AVAILABILITY           = "Ready to Drink List";
-   inline constexpr const char* TABLE_NAME_TAG                    = "Tagged Wines";
+   inline constexpr const char* TABLE_NAME_TAG                    = "Tagged Wine Lists";
    inline constexpr const char* TABLE_NAME_PROREVIEW              = "Manually Entered Pro Reviews";
    inline constexpr const char* TABLE_NAME_BOTTLES                = "Raw Bottle List";
-   inline constexpr const char* TABLE_NAME_FOODTAGS               = "Food Pairing Tag";
+   inline constexpr const char* TABLE_NAME_FOODTAGS               = "Food Pairing Tags";
 
    // CT doesn't return an HTTP response code for invalid logon, it just returns this text instead of the requested file.
    inline constexpr const char* ERR_STR_INVALID_CELLARTRACKER_LOGON = "<html><body>You are currently not logged into CellarTracker.</body></html>";
@@ -185,6 +190,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_SUMMARY_CONSUMED              = "{} Wines Consumed Since {}.";
    inline constexpr const char* FMT_SUMMARY_PURCHASED             = "{} Wines, with {} Bottles Purchased and {} Bottles Remaining or Pending.";
    inline constexpr const char* SUMMARY_EMPTY                     = "No data. Check filter options or download latest CellarTracker data.";
+   inline constexpr const char* FMT_SUMMARY_BOTTLE_INVENTORY      = "{} Wines, with {} Bottles spanning {} vintages.";
    inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, with {} Bottles Cellared and {} Pending Delivery";
    inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles.";
    inline constexpr const char* FMT_SUMMARY_TAGGED_WINES          = "{} Lists Containing {} Wines.";

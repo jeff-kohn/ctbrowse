@@ -78,7 +78,7 @@ namespace ctb
       RtdInventoryLogical,    // number of logical 750ml bottles in inventory
       RtdInventoryPhysical,   // number of physical bottles in inventory (might be different than logical for 375's etc)
 
-      // Specific to Consumed Bottles table
+      // Specific to Consumed Bottles and/or Bottle Inventory tables
       iConsumeId,
       ConsumeDate,
       ConsumeYear,

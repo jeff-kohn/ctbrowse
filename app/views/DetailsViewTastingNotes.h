@@ -16,7 +16,7 @@
 namespace ctb::app
 {
 
-   class DetailsViewTastingNotes final : protected DetailsViewBase
+   class DetailsViewTastingNotes final : public DetailsViewBase
    {
    public:
       /// @brief creates and initializes a view for showing wine details

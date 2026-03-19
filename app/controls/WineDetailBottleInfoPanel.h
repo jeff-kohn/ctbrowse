@@ -12,18 +12,19 @@ namespace ctb::app
 {
    /// @brief A wxPanel-derived class that displays details about a wine, handling dataset events and rendering relevant fields.
    ///
-   class WineDetailPendingPanel final : public wxPanel
+   class WineDetailBottleInfoPanel final : public wxPanel
    {
    public:
-      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailPendingPanel*;
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailBottleInfoPanel*;
 
    private:
       using DetailFields = std::deque<SinglePropDetailField>;
 
       DatasetEventHandler m_dataset_events;
       DetailFields        m_fields{};
+      wxString            m_title{ constants::LBL_BOTTLE_INFO };
 
-      WineDetailPendingPanel(const DatasetEventSourcePtr& event_source) : m_dataset_events{ event_source }
+      WineDetailBottleInfoPanel(const DatasetEventSourcePtr& event_source) : m_dataset_events{ event_source }
       {}
 
       void createWindow(wxWindow* parent);

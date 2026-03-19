@@ -1,4 +1,5 @@
 #include "views/DatasetMultiView.h"
+#include "views/DetailsViewBottleInventory.h"
 #include "views/DetailsViewConsumedWine.h"
 #include "views/DetailsViewMyCellar.h"
 #include "views/DetailsViewPending.h"
@@ -50,13 +51,14 @@ namespace ctb::app
       // NOLINTNEXTLINE(bugprone-throwing-static-initialization, cert-err58-cpp)
       static const auto details_view_map = std::map<TableId, DetailsViewFactory>
       {
-         { TableId::List,         &DetailsViewMyCellar::create       } ,
-         { TableId::Pending,      &DetailsViewPending::create        } ,
-         { TableId::Availability, &DetailsViewReadyToDrink::create   } ,
-         { TableId::Tag,          &DetailsViewTaggedWine::create    } ,
-         { TableId::Consumed,     &DetailsViewConsumedWine::create   } ,
-         { TableId::Purchase,     &DetailsViewPurchasedWine::create  } ,
-         { TableId::Notes,        &DetailsViewTastingNotes::create   } ,
+         { TableId::List,         &DetailsViewMyCellar::create          } ,
+         { TableId::Pending,      &DetailsViewPending::create           } ,
+         { TableId::Availability, &DetailsViewReadyToDrink::create      } ,
+         { TableId::Tag,          &DetailsViewTaggedWine::create        } ,
+         { TableId::Consumed,     &DetailsViewConsumedWine::create      } ,
+         { TableId::Purchase,     &DetailsViewPurchasedWine::create     } ,
+         { TableId::Notes,        &DetailsViewTastingNotes::create      } ,
+         { TableId::Inventory,    &DetailsViewBottleInventory::create   } ,
       };
 
 

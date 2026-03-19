@@ -9,6 +9,7 @@
 #include "ctb/model/CtDatasetLoader.h"
 #include "ctb/model/CtDataset.h"
 
+#include "ctb/tables/BottleInventoryTraits.h"
 #include "ctb/tables/ConsumedWineTraits.h"
 #include "ctb/tables/PendingWineTraits.h"
 #include "ctb/tables/PurchasedWineTraits.h"
@@ -70,6 +71,11 @@ namespace ctb
          [this](enum_constant<TableId::Tag> tbl_id) -> DatasetPtr
             {
                return getOrThrow<TaggedWinesTable>(m_data_folder, tbl_id);
+            },
+
+         [this](enum_constant<TableId::Inventory> tbl_id) -> DatasetPtr
+            {
+               return getOrThrow<BottleInventoryTable>(m_data_folder, tbl_id);
             },
 
          [this](enum_constant<TableId::Notes> tbl_id) -> DatasetPtr

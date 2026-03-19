@@ -13,7 +13,7 @@
 #include <ctb/model/DatasetEventHandler.h>
 
 #include <wx/panel.h>
-
+#include <wx/weakref.h>
 #include <map>
 
 
@@ -33,13 +33,13 @@ namespace ctb::app
       DetailsViewBase& operator=(DetailsViewBase&&) = delete;
       ~DetailsViewBase() override = default;
 
-      // Handles the window creation, since constructors only create the C++ object not the actual window. 
-      virtual void createWindow(wxWindow* parent);
-
    protected:
       // this class can only be constructructed through derived classes
       DetailsViewBase(const DatasetEventSourcePtr& source) : m_dataset_events{ source }
       {}
+
+      // Handles the window creation, since constructors only create the C++ object not the actual window. 
+      virtual void createWindow(wxWindow* parent);
 
       // Can be called by derived classes to add a commandlink button the to the specified sizer.
       void addCommandLinkButton(wxBoxSizer* sizer, CmdId cmd);
@@ -48,11 +48,9 @@ namespace ctb::app
       virtual auto addDatasetSpecificControls(wxBoxSizer* top_sizer, const DatasetEventSourcePtr& source) -> void = 0;
 
    private:
-      using wxPanel::Create;
-
       DatasetEventHandler    m_dataset_events;  
-      wxString               m_drink_window_label{ constants::LBL_DRINK_WINDOW };
 
+      using wxPanel::Create;
       void onCommand(wxCommandEvent& event);
    };
 

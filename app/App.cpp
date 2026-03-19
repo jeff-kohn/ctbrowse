@@ -94,7 +94,7 @@ namespace ctb::app
             displayErrorMessage(packageError());
          }
 
-         CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_COLLECTION_MY_CELLAR }); });
+         CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_COLLECTION_BOTTLE_INVENTORY }); });
          return true;
       }
       catch(...){

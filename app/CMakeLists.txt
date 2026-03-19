@@ -62,6 +62,8 @@ target_sources(${TARGET_NAME}
      "controls/SortOptionsPanel.h"
      "controls/SpinDoubleFilterCtrl.cpp"
      "controls/SpinDoubleFilterCtrl.h"
+     "controls/WineDetailBottleInfoPanel.cpp"
+     "controls/WineDetailBottleInfoPanel.h"
      "controls/WineDetailFields.h"
      "controls/WineDetailMainPanel.cpp"
      "controls/WineDetailMainPanel.h"
@@ -87,6 +89,7 @@ target_sources(${TARGET_NAME}
 
      "views/DetailsViewBase.cpp"
      "views/DetailsViewBase.h"
+     "views/DetailsViewBottleInventory.h"
      "views/DetailsViewConsumedWine.h"
      "views/DetailsViewMyCellar.h"
      "views/DetailsViewPending.h"

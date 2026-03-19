@@ -57,29 +57,16 @@ namespace ctb::app
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Region,         constants::LBL_REGION      });
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::SubRegion,      constants::LBL_SUB_REGION  });
       m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Appellation,    constants::LBL_APPELLATION });
-      m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Size,           constants::LBL_SIZE        });
+//      m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Size,           constants::LBL_SIZE        });
 
       if (dataset->hasProperty(CtProp::CtBeginConsume))
       {
          m_fields.emplace_back( DrinkWindowDetailField{ top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW_MY  });
-         m_fields.emplace_back( DrinkWindowDetailField { top_sizer, CtProp::CtBeginConsume, CtProp::CtEndConsume, constants::LBL_DRINK_WINDOW_CT });
+         m_fields.emplace_back( DrinkWindowDetailField{ top_sizer, CtProp::CtBeginConsume, CtProp::CtEndConsume, constants::LBL_DRINK_WINDOW_CT  });
 
       }
       else {
          m_fields.emplace_back(DrinkWindowDetailField{ top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW });
-      }
-
-      if (dataset->hasProperty(CtProp::Location))
-      {
-         m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::Location,       constants::LBL_LOCATION       });
-      }
-      if (dataset->hasProperty(CtProp::ConsumeDate))
-      {
-         m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::ConsumeDate,    constants::LBL_CONSUME_DATE   });
-      }
-      if (dataset->hasProperty(CtProp::ConsumeReason))
-      {
-         m_fields.emplace_back( SinglePropDetailField  { top_sizer, CtProp::ConsumeReason,  constants::LBL_CONSUME_REASON });
       }
 
       // need to know when to update (or hide) the detail panels
