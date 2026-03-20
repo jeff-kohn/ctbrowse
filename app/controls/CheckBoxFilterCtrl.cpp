@@ -4,15 +4,7 @@ namespace ctb::app
 {
    auto CheckBoxFilterCtrl::create(wxWindow* parent, const DatasetEventSourcePtr& source, const PropertyFilter& filter) -> CheckBoxFilterCtrl*
    {
-      if (!parent)
-      {
-         assert("CheckBoxFilterCtrl parent pointer cannot == nullptr");
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
-      }
-
-      std::unique_ptr<CheckBoxFilterCtrl> wnd{ new CheckBoxFilterCtrl{ source, filter } };
-      wnd->createWindow(parent);
-      return wnd.release(); // if we get here parent owns it, so return non-owning*
+      return detail::createDatasetWindow<CheckBoxFilterCtrl>(parent, source, filter);
    }
 
 
@@ -27,8 +19,8 @@ namespace ctb::app
 
       Bind(wxEVT_CHECKBOX, &CheckBoxFilterCtrl::onFilterChecked, this);
 
-      m_dataset_events.addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetFilter(event); });
-      m_dataset_events.addHandler(DatasetEvent::Id::Filter,            [this](const DatasetEvent& event) { onDatasetFilter(event); });
+      getEventSource().addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetFilter(event); });
+      getEventSource().addHandler(DatasetEvent::Id::Filter,            [this](const DatasetEvent& event) { onDatasetFilter(event); });
    }
 
 
@@ -38,7 +30,7 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         auto&& dataset = m_dataset_events.getDataset(true);
+         auto&& dataset = getDataset();
          if (isEnabled())
          {
             dataset->propFilters().replaceFilter(m_filter.filter_name, m_filter);
@@ -46,7 +38,7 @@ namespace ctb::app
          else {
             dataset->propFilters().removeFilter(m_filter.filter_name);
          }
-         m_dataset_events.signal_source(DatasetEvent::Id::Filter, false);
+         getEventSource().signal_source(DatasetEvent::Id::Filter, false);
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError(), true);

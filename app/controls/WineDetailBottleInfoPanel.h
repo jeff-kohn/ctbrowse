@@ -1,35 +1,63 @@
 #pragma once
 
 #include "App.h"
-#include "controls/WineDetailFields.h"
-
-#include <ctb/model/DatasetEventHandler.h>
-#include <wx/panel.h>
-#include <deque>
+#include "controls/WineDetailBasePanel.h"
 
 
 namespace ctb::app
 {
-   /// @brief A wxPanel-derived class that displays details about a wine, handling dataset events and rendering relevant fields.
+   /// @brief A wxPanel-derived class that displays details about a bottle
    ///
-   class WineDetailBottleInfoPanel final : public wxPanel
+   class WineDetailBottleInfoPanel final : public WineDetailBasePanel
    {
    public:
-      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailBottleInfoPanel*;
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailBottleInfoPanel*
+      {
+         return detail::createDatasetWindow<WineDetailBottleInfoPanel>(parent, source);
+      }
 
    private:
-      using DetailFields = std::deque<SinglePropDetailField>;
+      // this class can only be constructructed through static create(), which uses createDetailsViewFactory to call private ctor
+      template<typename WndT, typename... Args>
+      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args... args)->WndT*;
 
-      DatasetEventHandler m_dataset_events;
-      DetailFields        m_fields{};
-      wxString            m_title{ constants::LBL_BOTTLE_INFO };
-
-      WineDetailBottleInfoPanel(const DatasetEventSourcePtr& event_source) : m_dataset_events{ event_source }
+      WineDetailBottleInfoPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source, constants::LBL_BOTTLE_INFO }
       {}
 
-      void createWindow(wxWindow* parent);
-      void onDatasetEvent(const DatasetEvent& event);
+      // base class overrides
+      void getDetailFields(DetailFields& fields) override
+      {
+         auto top_sizer = GetSizer(); assert(top_sizer);
+         auto dataset = getDataset();
+
+         fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::Size,              constants::LBL_SIZE });
+         fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::Location,          constants::LBL_LOCATION });
+         fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::Bin,               constants::LBL_BIN });
+
+         if (dataset->hasProperty(CtProp::PendingOrderDate))
+         {
+            fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::PendingOrderDate,  constants::LBL_PURCHASED }.setFormat(constants::FMT_DATE_SHORT));
+         }
+         if (dataset->hasProperty(CtProp::PendingStoreName))
+         {
+            fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::PendingStoreName,  constants::LBL_FROM });
+         }
+         if (dataset->hasProperty(CtProp::ConsumeDate))
+         {
+            fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::ConsumeDate,    constants::LBL_CONSUME_DATE });
+         }
+         if (dataset->hasProperty(CtProp::ConsumeReason))
+         {
+            fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::ConsumeReason,  constants::LBL_CONSUME_REASON });
+         }
+         if (dataset->hasProperty(CtProp::BottleNote))
+         {
+            fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::BottleNote, constants::LBL_BOTTLE_NOTE });
+         }
+         if (dataset->hasProperty(CtProp::ConsumeNote))
+         {
+            fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::ConsumeNote, constants::LBL_CONSUME_NOTE });
+         }
+      }
    };
-
-
 }

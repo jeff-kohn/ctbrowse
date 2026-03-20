@@ -52,9 +52,6 @@ namespace ctb::app
       ~DatasetOptionsView() override = default;
       
    private:
-      //bool                      m_sort_ascending{ true  };     // whether ascending sort order is active
-      //bool                      m_sort_descending{ false };    // whether descending sort ordes is active (yes we need both)
-      //int                       m_sort_selection{ 0 };         // index of selected sort in combo, which matches a sort in availableSorts()
       DatasetEventHandler       m_dataset_events; 
       MultiValueFilterTreeCtrl* m_filter_tree{};
       StringSet                 m_supported_filters{};        // set of filter names that we have controls for

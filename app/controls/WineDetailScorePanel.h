@@ -1,35 +1,37 @@
 #pragma once
 
 #include "App.h"
-#include "controls/WineDetailFields.h"
-
-#include <ctb/model/DatasetEventHandler.h>
-#include <wx/panel.h>
-#include <deque>
+#include "controls/WineDetailBasePanel.h"
 
 
 namespace ctb::app
 {
    /// @brief A wxPanel-derived class that displays details about a wine, handling dataset events and rendering relevant fields.
    ///
-   class WineDetailScorePanel final : public wxPanel
+   class WineDetailScorePanel final : public WineDetailBasePanel
    {
    public:
-      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailScorePanel*;
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailScorePanel*
+      {
+         return detail::createDatasetWindow<WineDetailScorePanel>(parent, source);
+      }
 
    private:
-      using DetailFields = std::deque<SinglePropDetailField>;
+      // this class can only be constructructed through static create(), which uses createDetailsViewFactory to call private ctor
+      template<typename WndT, typename... Args>
+      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args... args)->WndT*;
 
-      DatasetEventHandler m_dataset_events;
-      DetailFields        m_fields{};
-      wxString            m_title{ constants::LBL_SCORES };
-
-      WineDetailScorePanel(const DatasetEventSourcePtr& event_source) : m_dataset_events{ event_source }
+      WineDetailScorePanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source, constants::LBL_SCORES }
       {}
 
-      void createWindow(wxWindow* parent);
-      void onDatasetEvent(const DatasetEvent& event);
-   };
+      // base class overrides
+      void getDetailFields(DetailFields& fields) override
+      {
+         auto top_sizer = GetSizer(); assert(top_sizer);
 
+         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::MyScore, constants::LBL_MY_SCORE }.setFormat(constants::FMT_NUMBER_DECIMAL).setNullDisplayValue(constants::NO_SCORE));
+         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::CtScore, constants::LBL_CT_SCORE }.setFormat(constants::FMT_NUMBER_DECIMAL).setNullDisplayValue(constants::NO_SCORE));
+      }
+   };
 
 }

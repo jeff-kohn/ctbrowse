@@ -7,6 +7,7 @@
 *******************************************************************/
 
 #include "SpinDoubleFilterCtrl.h"
+
 #include <wx/checkbox.h>
 #include <wx/sizer.h>
 #include <wx/textctrl.h>
@@ -27,8 +28,8 @@ namespace ctb::app
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       }
 
-      std::unique_ptr<SpinDoubleFilterCtrl> wnd{ new SpinDoubleFilterCtrl{ source, filter } };
-      wnd->createWindow(parent, params);
+      std::unique_ptr<SpinDoubleFilterCtrl> wnd{ new SpinDoubleFilterCtrl{ source, filter, params } };
+      wnd->createWindow(parent);
       return wnd.release(); // if we get here parent owns it, so return non-owning*
    }
 
@@ -45,7 +46,7 @@ namespace ctb::app
    }
 
 
-   void SpinDoubleFilterCtrl::createWindow(wxWindow* parent, const SpinParams& params) 
+   void SpinDoubleFilterCtrl::createWindow(wxWindow* parent) 
    {
       if (!Create(parent))
       {
@@ -65,9 +66,9 @@ namespace ctb::app
          this, wxID_ANY, 
          wxEmptyString, wxDefaultPosition, wxDefaultSize, 
          wxSP_ARROW_KEYS | wxALIGN_RIGHT,
-         params.min_value, params.max_value, params.default_value, params.increment 
+         m_spin_params.min_value, m_spin_params.max_value, m_spin_params.default_value, m_spin_params.increment
       };
-      m_spin->SetDigits(params.decimal_places);
+      m_spin->SetDigits(m_spin_params.decimal_places);
       sizer->Add(m_spin, wxSizerFlags{});
 
 
@@ -75,8 +76,8 @@ namespace ctb::app
       m_spin->Bind(wxEVT_UPDATE_UI,      &SpinDoubleFilterCtrl::onSpinValueUpdateUI, this);    
       m_checkbox->Bind(wxEVT_CHECKBOX,   &SpinDoubleFilterCtrl::onFilterChecked,     this);
 
-      m_dataset_events.addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event); });
-      m_dataset_events.addHandler(DatasetEvent::Id::Filter, [this](const DatasetEvent& event) { onDatasetFilter(event);     });
+      getEventSource().addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event); });
+      getEventSource().addHandler(DatasetEvent::Id::Filter, [this](const DatasetEvent& event) { onDatasetFilter(event);     });
    }
 
 
@@ -112,7 +113,7 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         auto&& dataset = m_dataset_events.getDataset();
+         auto&& dataset = getEventSource().getDataset();
          if (m_filter.enabled)
          {
             dataset->propFilters().replaceFilter(m_filter.filter_name, m_filter);
@@ -120,7 +121,7 @@ namespace ctb::app
          else {
             dataset->propFilters().removeFilter(m_filter.filter_name);
          }
-         m_dataset_events.signal_source(DatasetEvent::Id::Filter, false);
+         getEventSource().signal_source(DatasetEvent::Id::Filter, false);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -134,12 +135,12 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         auto dataset = m_dataset_events.getDataset();
+         auto dataset = getEventSource().getDataset();
          m_filter.compare_val = event.GetValue();
          if (m_filter.enabled)
          {
             dataset->propFilters().replaceFilter(m_filter.filter_name, m_filter);
-            m_dataset_events.signal_source(DatasetEvent::Id::Filter, false);
+            getEventSource().signal_source(DatasetEvent::Id::Filter, false);
          }
       }
       catch(...){

@@ -51,35 +51,10 @@ namespace ctb::app
    //}
 
 
-   auto WineDetailTastingPanel::create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailTastingPanel*
+   void WineDetailTastingPanel::postWindowCreate()
    {
-      if (!parent)
-      {
-         assert("parent window cannot == nullptr");
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
-      }
-      if (!source)
-      {
-         assert("source parameter cannot == nullptr");
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
-      }
-
-      std::unique_ptr<WineDetailTastingPanel> wnd{ new WineDetailTastingPanel{ source } };
-      wnd->createWindow(parent);
-      return wnd.release(); // if we get here parent owns it, so return non-owning*
-   }
-
-   void WineDetailTastingPanel::createWindow(wxWindow* parent)
-   {
-      if (!Create(parent))
-      {
-         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
-      }
-
-      wxWindowUpdateLocker freeze_win(this);
-
-      auto* top_sizer = new wxBoxSizer{ wxVERTICAL };
-      SetSizer(top_sizer);
+      auto top_sizer = GetSizer(); assert(top_sizer);
+      auto dataset = getDataset();
 
       // note title
       auto* title_ctrl = new wxStaticText(this, wxID_ANY,  constants::LBL_TASTING_NOTE, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
@@ -100,15 +75,8 @@ namespace ctb::app
       m_tasting_notes_ctrl->SetValidator(wxGenericValidator{ &m_tasting_notes });
       top_sizer->Add(m_tasting_notes_ctrl, wxSizerFlags{ 2 }.Expand().TripleBorder());
 
-      // need to know when to update (or hide) the panel
-      m_dataset_events.addHandler(DatasetEvent::Id::DatasetRemove, [this](const DatasetEvent& event) { onDatasetEvent(event); });
-      m_dataset_events.addHandler(DatasetEvent::Id::Filter,        [this](const DatasetEvent& event) { onDatasetEvent(event); });
-      m_dataset_events.addHandler(DatasetEvent::Id::RowSelected,   [this](const DatasetEvent& event) { onDatasetEvent(event); });
-
       // handle resize so children are laid out correctly when this panel is resized
       Bind(wxEVT_SIZE, &WineDetailTastingPanel::onSize, this);
-
-      Fit();
    }
 
 
@@ -155,11 +123,13 @@ namespace ctb::app
       {
          m_tasting_notes_ctrl->SetClientSize(m_tasting_notes_ctrl->GetBestSize());
       }
-
-      // calculate how wide our note control can be and still fit in panel, allowing for sizer borders.
-      constexpr auto margin = 30;
-      const auto max_width  = GetClientSize().GetWidth() - margin;
-      m_tasting_notes_ctrl->Wrap(max_width);
+      else
+      {
+         // calculate how wide our note control can be and still fit in panel, allowing for sizer borders.
+         constexpr auto margin = 30;
+         const auto max_width = GetClientSize().GetWidth() - margin;
+         m_tasting_notes_ctrl->Wrap(max_width);
+      }
    }
 
 } // namespace ctb::app

@@ -1,43 +1,40 @@
 #pragma once
 
 #include "App.h"
-#include "controls/WineDetailFields.h"
-
-#include <ctb/model/DatasetEventHandler.h>
-#include <wx/panel.h>
-#include <deque>
-
+#include "controls/WineDetailBasePanel.h"
 
 class wxStaticText;
 
+
 namespace ctb::app
 {
-   
-   /// @brief A wxPanel-derived class that displays details about a wine, handling dataset events and rendering relevant fields.
+   /// @brief A panel class that displays details about a wine, handling dataset events and rendering relevant fields.
    ///
-   class WineDetailMainPanel final : public wxPanel
+   class WineDetailMainPanel final : public WineDetailBasePanel
    {
    public:
       static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailMainPanel*;
 
    private:
-      using DetailField  = std::variant<SinglePropDetailField, DrinkWindowDetailField>;
-      using DetailFields = std::deque<DetailField>;
+      wxString      m_wine_title{};
+      wxStaticText* m_wine_ctrl{};
 
-      DatasetEventHandler m_dataset_events;
-      DetailFields        m_fields{};
-      wxString            m_wine_title{};
-      wxStaticText*       m_wine_ctrl{};
+      // this class can only be constructructed through static create(), which uses createDetailsViewFactory to call private ctor
+      template<typename WndT, typename... Args>
+      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args... args)->WndT*;
 
-      WineDetailMainPanel(const DatasetEventSourcePtr& event_source) : m_dataset_events{ event_source }
+      WineDetailMainPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source }
       {}
 
-      void createWindow(wxWindow* parent);
-      void onDatasetEvent(const DatasetEvent& event);
+      // base class overrides
+      void getDetailFields(DetailFields& fields) override;
+      void postWindowCreate() override;
+      void onDatasetEvent(const DatasetEvent& event) override;
 
-      // size event handler
+      // size event handler for wrapping wine title.
       void onSize(wxSizeEvent& event);
    };
+
 
 
 }

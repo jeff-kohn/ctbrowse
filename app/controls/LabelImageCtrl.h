@@ -2,6 +2,8 @@
 
 #include "App.h"
 #include "LabelImageCache.h"
+#include "model/DatasetWindow.h"
+
 #include <ctb/model/DatasetEventHandler.h>
 
 #include <wx/generic/statbmpg.h>
@@ -13,31 +15,27 @@ class wxSizer;
 namespace ctb::app
 {
 
-   class LabelImageCtrl final : public wxGenericStaticBitmap
+   class LabelImageCtrl final : public DatasetWindow<wxGenericStaticBitmap>
    {
    public:
+      using Base = DatasetWindow<wxGenericStaticBitmap>;
+
       [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> LabelImageCtrl*;
 
-      // no copy/move/assign, this class is created on the heap and owned by parent window.
-      LabelImageCtrl() = delete;
-      LabelImageCtrl(const LabelImageCtrl&) = delete;
-      LabelImageCtrl(LabelImageCtrl&&) = delete;
-      LabelImageCtrl& operator=(const LabelImageCtrl&) = delete;
-      LabelImageCtrl& operator=(LabelImageCtrl&&) = delete;
-      ~LabelImageCtrl() noexcept override = default;
-
    private:
-      LabelImageCtrl(const DatasetEventSourcePtr& source, LabelCachePtr cache);
-
-      void createWindow(wxWindow* parent);
-
       using MaybeImageTask = std::optional<wxImageTask>;
 
       LabelCachePtr          m_cache{};
-      DatasetEventHandler    m_dataset_events;
       MaybeImageTask         m_image_result{};
       wxTimer                m_label_timer{};
 
+      // this class can only be constructructed through static create(), which uses createDetailsViewFactory to call protected ctor
+      template<typename WndT, typename... Args>
+      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args... args)->WndT*;
+
+      LabelImageCtrl(const DatasetEventSourcePtr& source, LabelCachePtr cache);
+
+      void createWindow(wxWindow* parent) override;
       void checkLabelResult();
       void displayLabel();
       void onLabelTimer(wxTimerEvent& event);
