@@ -5,6 +5,9 @@
 #include <ctb/model/DatasetEventHandler.h>
 #include <wx/window.h>
 
+#include <concepts>
+#include <memory>
+#include <utility>
 
 namespace ctb::app
 {
@@ -61,16 +64,16 @@ namespace ctb::app
       {
          if (!parent)
          {
-            assert("parent parameter cannot == nullptr");
+            assert("parent parameter cannot == nullptr" and false);
             throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
          }
          if (!source)
          {
-            assert("source parameter cannot == nullptr");
+            assert("source parameter cannot == nullptr" and false);
             throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
          }
 
-         std::unique_ptr<WndT> wnd{ new WndT{ source, args... } };
+         std::unique_ptr<WndT> wnd{ new WndT{ source, std::forward<Args>(args)... } };
          wnd->createWindow(parent);
          return wnd.release();
       }

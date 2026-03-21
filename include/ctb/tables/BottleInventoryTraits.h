@@ -19,7 +19,7 @@
 
 namespace ctb
 {
-   /// @brief Traits class for a table record from the 'List' CellarTracker CSV table.
+   /// @brief Traits class for a table record from the 'Inventory' CellarTracker CSV table.
    /// 
    class BottleInventoryTraits
    {
