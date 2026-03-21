@@ -33,7 +33,7 @@ namespace ctb::app
       }
 
    protected:
-      // this class can only be constructructed through static create(), which uses createDetailsViewFactory to call protected ctor
+      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call protected ctor
       template<typename BaseT>
       friend auto createDetailsViewFactory(wxWindow* parent, const DatasetEventSourcePtr& source) -> BaseT*;
 

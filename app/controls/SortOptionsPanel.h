@@ -25,9 +25,9 @@ namespace ctb::app
       bool                  m_sort_descending{ false };  // whether descending sort ordes is active (yes we need both)
       wxChoice*             m_sort_combo{};
 
-      // this class can only be constructructed through static create(), which uses createDetailsViewFactory to call protected ctor
+      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call protected ctor
       template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args... args)->WndT*;
+      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
 
       SortOptionsPanel(const DatasetEventSourcePtr& source) : Base{ source }
       {}

@@ -32,7 +32,7 @@ namespace ctb::app
       static constexpr int DEFAULT_GROUP_SPACER   = 3 * DEFAULT_HEADING_SPACER;
 
    protected:
-      // this class can only be constructructed through derived classes
+      // this class can only be constructed through derived classes
       DetailsViewBase(const DatasetEventSourcePtr& source) : Base{ source }
       {}
 
@@ -54,8 +54,8 @@ namespace ctb::app
 
 
    // helper function for DetailsViewBase-derived classes that want to use DetailsViewBase::createWindow to handle window creation and 
-   // just override DetailsViewBase::addDatasetSpecificControls to provide their customizations. If derived contructor is private
-   // (as it should be to prevent stack-based instances), you'll need to delcare this function a friend to use it.
+   // just override DetailsViewBase::addDatasetSpecificControls to provide their customizations. If derived constructor is private
+   // (as it should be to prevent stack-based instances), you'll need to declare this function a friend to use it.
    template<typename ViewT>
    auto createDetailsViewFactory(wxWindow* parent, const DatasetEventSourcePtr& source) -> ViewT*
    {

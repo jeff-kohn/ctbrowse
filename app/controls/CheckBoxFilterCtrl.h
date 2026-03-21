@@ -39,9 +39,9 @@ namespace ctb::app
          m_filter{ std::move(filter) }
       {}
 
-      // this class can only be constructructed through static create(), which uses createDetailsViewFactory to call protected ctor
+      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call protected ctor
       template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args... args)->WndT*;
+      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
 
       void createWindow(wxWindow* parent);
       void onFilterChecked(wxCommandEvent& event);

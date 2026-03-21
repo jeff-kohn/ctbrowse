@@ -56,11 +56,11 @@ namespace ctb::app
 
    namespace detail
    {
-      // helper function that DatasetWindow-derived classes. If derived contructor is private
-      // (as it should be to prevent stack-based instances), you'll need to delcare this function 
+      // helper function that DatasetWindow-derived classes. If derived constructor is private
+      // (as it should be to prevent stack-based instances), you'll need to declare this function 
       // a friend to use it.
       template<typename WndT, typename... Args>
-      auto createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args... args) -> WndT*
+      auto createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args) -> WndT*
       {
          if (!parent)
          {

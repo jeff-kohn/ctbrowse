@@ -16,9 +16,9 @@ namespace ctb::app
          return detail::createDatasetWindow<WineDetailPendingPanel>(parent, source);
       }
    private:
-      // this class can only be constructructed through static create(), which uses createDetailsViewFactory to call private ctor
+      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call private ctor
       template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args... args)->WndT*;
+      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
 
       WineDetailPendingPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source, constants::LBL_ORDER_DETAILS }
       {}

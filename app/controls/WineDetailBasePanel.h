@@ -25,7 +25,7 @@ namespace ctb::app
       using DetailField  = std::variant<SinglePropDetailField, DrinkWindowDetailField>;
       using DetailFields = std::deque<DetailField>;
 
-      /// @brief derived classes must implement this to popuulate DetailFields with the fields the panel will display.
+      /// @brief derived classes must implement this to populate DetailFields with the fields the panel will display.
       virtual void getDetailFields(DetailFields& fields) = 0;
 
       /// @brief derived classes can override this to bind message handlers or carry out any other setup that requires

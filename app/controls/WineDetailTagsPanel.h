@@ -20,9 +20,9 @@ namespace ctb::app
       wxString      m_tag_note{};
       wxStaticText* m_tag_note_ctrl{};
 
-      // this class can only be constructructed through static create(), which uses createDetailsViewFactory to call private ctor
+      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call private ctor
       template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args... args)->WndT*;
+      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
 
       WineDetailTagsPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source }
       {}

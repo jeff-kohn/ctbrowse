@@ -29,9 +29,9 @@ namespace ctb::app
       MaybeImageTask         m_image_result{};
       wxTimer                m_label_timer{};
 
-      // this class can only be constructructed through static create(), which uses createDetailsViewFactory to call protected ctor
+      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call protected ctor
       template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args... args)->WndT*;
+      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
 
       LabelImageCtrl(const DatasetEventSourcePtr& source, LabelCachePtr cache);
 

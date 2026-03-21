@@ -68,9 +68,9 @@ namespace ctb::app
       wxSpinCtrlDouble*      m_spin{};
       SpinParams             m_spin_params{};
 
-      // this class can only be constructructed through static create(), which uses createDetailsViewFactory to call protected ctor
+      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call protected ctor
       template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args... args)->WndT*;
+      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
 
       SpinDoubleFilterCtrl(const DatasetEventSourcePtr& source, PropertyFilter filter, SpinParams params) :
          Base{ source },
