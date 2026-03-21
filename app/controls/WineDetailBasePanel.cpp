@@ -63,4 +63,5 @@ namespace ctb::app
 
       getEventHandler().setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event); });
    }
-}
+
+} // namespace ctb::app

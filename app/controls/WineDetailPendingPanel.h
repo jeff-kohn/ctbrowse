@@ -25,7 +25,7 @@ namespace ctb::app
 
       void getDetailFields(DetailFields& fields) override
       {
-         auto top_sizer = GetSizer(); assert(top_sizer);
+         auto* top_sizer = GetSizer(); assert(top_sizer);
          auto dataset = getDataset();
 
          fields.push_back(SinglePropDetailField{ top_sizer, CtProp::PendingStoreName,    constants::LBL_STORE_NAME });

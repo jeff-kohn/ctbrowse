@@ -53,7 +53,7 @@ namespace ctb::app
 
    void WineDetailTastingPanel::postWindowCreate()
    {
-      auto top_sizer = GetSizer(); assert(top_sizer);
+      auto* top_sizer = GetSizer(); assert(top_sizer);
       auto dataset = getDataset();
 
       // note title

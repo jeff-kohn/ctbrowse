@@ -77,11 +77,12 @@ namespace ctb::app
       link_button->Bind(wxEVT_BUTTON, &DetailsViewBase::onCommand, this, cmd);
    }
 
+   // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
    void DetailsViewBase::onCommand(wxCommandEvent& event)
    {
-      // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
-      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, event.GetId() });
+      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, event.GetId() }); 
    }
+   // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
 
 } // namespace ctb::app

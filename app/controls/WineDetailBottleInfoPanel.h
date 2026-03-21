@@ -27,7 +27,7 @@ namespace ctb::app
       // base class overrides
       void getDetailFields(DetailFields& fields) override
       {
-         auto top_sizer = GetSizer(); assert(top_sizer);
+         auto* top_sizer = GetSizer(); assert(top_sizer);
          auto dataset = getDataset();
 
          fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::Size,              constants::LBL_SIZE });

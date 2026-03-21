@@ -27,7 +27,7 @@ namespace ctb::app
       // base class overrides
       void getDetailFields(DetailFields& fields) override
       {
-         auto top_sizer = GetSizer(); assert(top_sizer);
+         auto* top_sizer = GetSizer(); assert(top_sizer);
          auto dataset = getDataset();
 
          // ordering matters here because it's the same as they'll be displayed

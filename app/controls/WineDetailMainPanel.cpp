@@ -46,8 +46,8 @@ namespace ctb::app
 
    void WineDetailMainPanel::getDetailFields(DetailFields& fields)
    {
-      auto top_sizer = GetSizer(); assert(top_sizer);
-      auto dataset   = getDataset();
+      auto* top_sizer = GetSizer(); assert(top_sizer);
+      auto  dataset   = getDataset();
 
       // ordering matters here because it's the same as they'll be displayed
       fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::Vintage,        constants::LBL_VINTAGE });
@@ -75,7 +75,7 @@ namespace ctb::app
       m_wine_ctrl->SetFont(GetFont().MakeLarger().MakeBold());
       m_wine_ctrl->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT));
       
-      auto top_sizer = GetSizer(); assert(top_sizer);
+      auto* top_sizer = GetSizer(); assert(top_sizer);
       top_sizer->Insert(0, m_wine_ctrl, wxSizerFlags{}.Center().Border());
 
       Fit();

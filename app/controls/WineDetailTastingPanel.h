@@ -34,7 +34,7 @@ namespace ctb::app
       WineDetailTastingPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source }
       {}
 
-      void getDetailFields(DetailFields& fields) override {} // we don't use DataFields in this panel.
+      void getDetailFields(DetailFields&) override {} // we don't use DataFields in this panel.
       void onDatasetEvent(const DatasetEvent& event) override;
       void postWindowCreate() override;
 

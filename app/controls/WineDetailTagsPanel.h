@@ -29,7 +29,7 @@ namespace ctb::app
 
       void getDetailFields(DetailFields& fields) override
       {
-         auto top_sizer = GetSizer(); assert(top_sizer);
+         auto* top_sizer = GetSizer(); assert(top_sizer);
 
          fields.push_back(SinglePropDetailField{ top_sizer, CtProp::TagName,      constants::LBL_TAG_NAME });
          fields.push_back(SinglePropDetailField{ top_sizer, CtProp::TagMaxPrice,  constants::LBL_MAX_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
@@ -37,7 +37,7 @@ namespace ctb::app
 
       void postWindowCreate() override
       {
-         auto top_sizer = GetSizer(); assert(top_sizer);
+         auto* top_sizer = GetSizer(); assert(top_sizer);
 
          m_tag_note_ctrl = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
          m_tag_note_ctrl->SetValidator(wxGenericValidator{ &m_tag_note });
