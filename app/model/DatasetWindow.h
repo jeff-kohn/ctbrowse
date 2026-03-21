@@ -28,18 +28,18 @@ namespace ctb::app
 
       /// @brief returns a reference to the event source. 
       template<typename Self>
-      auto&& getEventSource(this Self&& self) noexcept(true)
+      auto&& getEventHandler(this Self&& self) noexcept(true)
       {
          return std::forward<Self>(self).m_dataset_events;
       }
 
       /// @brief returns reference to the DatasetPtr for our event source. Throws exception if 
-      ///        source has no Dataset. You can call getEventSource().getDataset(false) if you want
+      ///        source has no Dataset. You can call getEventHandler().getDataset(false) if you want
       ///        to do your own nullptr check.
       template<typename Self>
       auto getDataset(this Self&& self) noexcept(false)
       {
-         return std::forward<Self>(self).getEventSource().getDataset(true);
+         return std::forward<Self>(self).getEventHandler().getDataset(true);
       }
 
       /// @brief create the UI window object. Must be overridden by derived classes

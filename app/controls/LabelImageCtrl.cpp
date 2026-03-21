@@ -37,7 +37,7 @@ namespace ctb::app
 
       // hook up event handlers
       m_label_timer.Bind(wxEVT_TIMER, &LabelImageCtrl::onLabelTimer, this);
-      getEventSource().addHandler(DatasetEvent::Id::RowSelected, [this](const DatasetEvent& event) { fetchImage(event); });
+      getEventHandler().addHandler(DatasetEvent::Id::RowSelected, [this](const DatasetEvent& event) { fetchImage(event); });
    }
 
 

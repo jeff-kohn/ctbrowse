@@ -61,6 +61,6 @@ namespace ctb::app
       postWindowCreate();
       Fit();
 
-      getEventSource().setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event); });
+      getEventHandler().setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event); });
    }
 }

@@ -68,8 +68,8 @@ namespace ctb::app
       opt_ascending->Bind(wxEVT_RADIOBUTTON, &SortOptionsPanel::onSortOrderClicked, this);
       opt_descending->Bind(wxEVT_RADIOBUTTON, &SortOptionsPanel::onSortOrderClicked, this);
 
-      getEventSource().addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event);  });
-      getEventSource().addHandler(DatasetEvent::Id::Sort,              [this](const DatasetEvent& event) { onTableSorted(event);        });
+      getEventHandler().addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event);  });
+      getEventHandler().addHandler(DatasetEvent::Id::Sort,              [this](const DatasetEvent& event) { onTableSorted(event);        });
    }
 
 
@@ -79,10 +79,10 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         auto dataset = getEventSource().getDataset(true);
+         auto dataset = getEventHandler().getDataset(true);
          m_sort_config.reverse = m_sort_descending;
          dataset->applySort(m_sort_config);
-         getEventSource().signal_source(DatasetEvent::Id::Sort, false);
+         getEventHandler().signal_source(DatasetEvent::Id::Sort, false);
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -103,13 +103,13 @@ namespace ctb::app
          // let the combo close its list before we reload the dataset
          CallAfter([this]()
             {
-               auto dataset = getEventSource().getDataset(true);
+               auto dataset = getEventHandler().getDataset(true);
                auto sorts = dataset->availableSorts();
                if (m_sort_selection <= std::ssize(sorts))
                {
                   // re-fetch sorter based on index. UI and member state will get updated in the dataset event handler.
                   dataset->applySort(sorts[static_cast<size_t>(m_sort_selection)]);
-                  getEventSource().signal_source(DatasetEvent::Id::Sort, true);
+                  getEventHandler().signal_source(DatasetEvent::Id::Sort, true);
                }
                else {
                   log::warn("SortOptionsPanel::onSortSelection: invalid sort index selected: {}", m_sort_selection);

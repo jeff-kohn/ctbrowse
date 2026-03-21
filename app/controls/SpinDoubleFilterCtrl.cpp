@@ -76,8 +76,8 @@ namespace ctb::app
       m_spin->Bind(wxEVT_UPDATE_UI,      &SpinDoubleFilterCtrl::onSpinValueUpdateUI, this);    
       m_checkbox->Bind(wxEVT_CHECKBOX,   &SpinDoubleFilterCtrl::onFilterChecked,     this);
 
-      getEventSource().addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event); });
-      getEventSource().addHandler(DatasetEvent::Id::Filter, [this](const DatasetEvent& event) { onDatasetFilter(event);     });
+      getEventHandler().addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event); });
+      getEventHandler().addHandler(DatasetEvent::Id::Filter, [this](const DatasetEvent& event) { onDatasetFilter(event);     });
    }
 
 
@@ -113,7 +113,7 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         auto&& dataset = getEventSource().getDataset();
+         auto&& dataset = getEventHandler().getDataset();
          if (m_filter.enabled)
          {
             dataset->propFilters().replaceFilter(m_filter.filter_name, m_filter);
@@ -121,7 +121,7 @@ namespace ctb::app
          else {
             dataset->propFilters().removeFilter(m_filter.filter_name);
          }
-         getEventSource().signal_source(DatasetEvent::Id::Filter, false);
+         getEventHandler().signal_source(DatasetEvent::Id::Filter, false);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -135,12 +135,12 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         auto dataset = getEventSource().getDataset();
+         auto dataset = getEventHandler().getDataset();
          m_filter.compare_val = event.GetValue();
          if (m_filter.enabled)
          {
             dataset->propFilters().replaceFilter(m_filter.filter_name, m_filter);
-            getEventSource().signal_source(DatasetEvent::Id::Filter, false);
+            getEventHandler().signal_source(DatasetEvent::Id::Filter, false);
          }
       }
       catch(...){

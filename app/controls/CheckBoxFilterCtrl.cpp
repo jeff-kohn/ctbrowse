@@ -19,8 +19,8 @@ namespace ctb::app
 
       Bind(wxEVT_CHECKBOX, &CheckBoxFilterCtrl::onFilterChecked, this);
 
-      getEventSource().addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetFilter(event); });
-      getEventSource().addHandler(DatasetEvent::Id::Filter,            [this](const DatasetEvent& event) { onDatasetFilter(event); });
+      getEventHandler().addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetFilter(event); });
+      getEventHandler().addHandler(DatasetEvent::Id::Filter,            [this](const DatasetEvent& event) { onDatasetFilter(event); });
    }
 
 
@@ -38,7 +38,7 @@ namespace ctb::app
          else {
             dataset->propFilters().removeFilter(m_filter.filter_name);
          }
-         getEventSource().signal_source(DatasetEvent::Id::Filter, false);
+         getEventHandler().signal_source(DatasetEvent::Id::Filter, false);
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError(), true);

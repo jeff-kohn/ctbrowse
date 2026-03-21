@@ -92,7 +92,7 @@ namespace ctb::app
       Bind(wxEVT_UPDATE_UI, &MultiValueFilterTreeCtrl::onDeselectAllUpdateUI,      this, CMD_FILTER_TREE_DESELECT_ALL);
       Bind(wxEVT_UPDATE_UI, &MultiValueFilterTreeCtrl::onDeselectAllUpdateUI,      this, CND_FILTER_TREE_INVERT_SELECTION); // Same logic as Deselect All
 
-      getEventSource().setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event);  });
+      getEventHandler().setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event);  });
    }
 
 
@@ -202,7 +202,7 @@ namespace ctb::app
       {
          auto dataset = getDataset();
          dataset->multivalFilters().clear();
-         getEventSource().signal_source(DatasetEvent::Id::Filter, true);
+         getEventHandler().signal_source(DatasetEvent::Id::Filter, true);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -218,7 +218,7 @@ namespace ctb::app
          auto current_filter = getFilter(item);
          auto dataset = getDataset();
          dataset->multivalFilters().removeFilter(current_filter.prop_id);
-         getEventSource().signal_source(DatasetEvent::Id::Filter, true);
+         getEventHandler().signal_source(DatasetEvent::Id::Filter, true);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -242,7 +242,7 @@ namespace ctb::app
          current_filter.match_values.swap(new_values);
 
          dataset->multivalFilters().replaceFilter(current_filter.prop_id, current_filter);
-         getEventSource().signal_source(DatasetEvent::Id::Filter, true);
+         getEventHandler().signal_source(DatasetEvent::Id::Filter, true);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -485,7 +485,7 @@ namespace ctb::app
       if (was_inserted)
       {
          dataset->multivalFilters().replaceFilter(filter.prop_id, filter);
-         getEventSource().signal_source(DatasetEvent::Id::Filter, false);
+         getEventHandler().signal_source(DatasetEvent::Id::Filter, false);
       }
    }
 
@@ -584,7 +584,7 @@ namespace ctb::app
       if (filter.match_values.erase(getFilterValue(item)))
       {
          dataset->multivalFilters().replaceFilter(filter.prop_id, filter);
-         getEventSource().signal_source(DatasetEvent::Id::Filter, false); 
+         getEventHandler().signal_source(DatasetEvent::Id::Filter, false); 
       }
    }
 
