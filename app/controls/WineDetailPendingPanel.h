@@ -1,34 +1,41 @@
 #pragma once
 
 #include "App.h"
-#include "controls/WineDetailFields.h"
-
-#include <ctb/model/DatasetEventHandler.h>
-#include <wx/panel.h>
-#include <deque>
+#include "controls/WineDetailBasePanel.h"
 
 
 namespace ctb::app
 {
    /// @brief A wxPanel-derived class that displays details about a wine, handling dataset events and rendering relevant fields.
    ///
-   class WineDetailPendingPanel final : public wxPanel
+   class WineDetailPendingPanel final : public WineDetailBasePanel
    {
    public:
-      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailPendingPanel*;
-
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailPendingPanel*
+      {
+         return detail::createDatasetWindow<WineDetailPendingPanel>(parent, source);
+      }
    private:
-      using DetailFields = std::deque<SinglePropDetailField>;
+      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call private ctor
+      template<typename WndT, typename... Args>
+      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
 
-      DatasetEventHandler m_dataset_events;
-      DetailFields        m_fields{};
-      wxString            m_title{ constants::LBL_SCORES };
-
-      WineDetailPendingPanel(const DatasetEventSourcePtr& event_source) : m_dataset_events{ event_source }
+      WineDetailPendingPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source, constants::LBL_ORDER_DETAILS }
       {}
 
-      void createWindow(wxWindow* parent);
-      void onDatasetEvent(const DatasetEvent& event);
+      void getDetailFields(DetailFields& fields) override
+      {
+         auto* top_sizer = GetSizer(); assert(top_sizer);
+         auto dataset = getDataset();
+
+         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::PendingStoreName,    constants::LBL_STORE_NAME });
+         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::PendingOrderQty,     constants::LBL_QTY_ORDERED });
+         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::MyPrice,             constants::LBL_MY_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
+         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::PendingOrderDate,    constants::LBL_ORDER_DATE }.setFormat(constants::FMT_DATE_SHORT));
+         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::PendingDeliveryDate, constants::LBL_DELIVERY_DATE }.setFormat(constants::FMT_DATE_SHORT));
+         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::PendingOrderNumber,  constants::LBL_ORDER_NUMBER });
+      }
+
    };
 
 

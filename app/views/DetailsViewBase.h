@@ -10,10 +10,10 @@
 #include "App.h"
 #include "LabelImageCache.h"
 
-#include <ctb/model/DatasetEventHandler.h>
+#include "model/DatasetWindow.h"
 
 #include <wx/panel.h>
-
+#include <wx/weakref.h>
 #include <map>
 
 
@@ -23,23 +23,23 @@ class wxBoxSizer;
 namespace ctb::app
 {
 
-   class DetailsViewBase : public wxPanel
+   class DetailsViewBase : public DatasetWindow<wxPanel>
    {
    public:
-      // no copy/move/assign, this class is created on the heap and shouldn't be copied.
-      DetailsViewBase(const DetailsViewBase&) = delete;
-      DetailsViewBase(DetailsViewBase&&) = delete;
-      DetailsViewBase& operator=(const DetailsViewBase&) = delete;
-      DetailsViewBase& operator=(DetailsViewBase&&) = delete;
-      ~DetailsViewBase() override = default;
+      using Base = DatasetWindow<wxPanel>;
 
-      // Handles the window creation, since constructors only create the C++ object not the actual window. 
-      virtual void createWindow(wxWindow* parent);
+      static constexpr int DEFAULT_HEADING_SPACER = 3;
+      static constexpr int DEFAULT_GROUP_SPACER   = 3 * DEFAULT_HEADING_SPACER;
 
    protected:
-      // this class can only be constructructed through derived classes
-      DetailsViewBase(const DatasetEventSourcePtr& source) : m_dataset_events{ source }
+      // this class can only be constructed through derived classes
+      DetailsViewBase(const DatasetEventSourcePtr& source) : Base{ source }
       {}
+
+      // Handles the window creation, since constructors only create the C++ object not the actual window. This implementation
+      // will call wxPanel::Create(), then add the top/main details panel before calling addDatasetSpecificControls(), which 
+      // derived classes can use to add additional panels/buttons/etc. But this can be overridden if a different approach is needed.
+      virtual void createWindow(wxWindow* parent);
 
       // Can be called by derived classes to add a commandlink button the to the specified sizer.
       void addCommandLinkButton(wxBoxSizer* sizer, CmdId cmd);
@@ -49,17 +49,13 @@ namespace ctb::app
 
    private:
       using wxPanel::Create;
-
-      DatasetEventHandler    m_dataset_events;  
-      wxString               m_drink_window_label{ constants::LBL_DRINK_WINDOW };
-
       void onCommand(wxCommandEvent& event);
    };
 
 
    // helper function for DetailsViewBase-derived classes that want to use DetailsViewBase::createWindow to handle window creation and 
-   // just override DetailsViewBase::addDatasetSpecificControls to provide their customizations. If derived contructor is private
-   // (as it should be to prevent stack-based instances), you'll need to delcare this function a friend to use it.
+   // just override DetailsViewBase::addDatasetSpecificControls to provide their customizations. If derived constructor is private
+   // (as it should be to prevent stack-based instances), you'll need to declare this function a friend to use it.
    template<typename ViewT>
    auto createDetailsViewFactory(wxWindow* parent, const DatasetEventSourcePtr& source) -> ViewT*
    {

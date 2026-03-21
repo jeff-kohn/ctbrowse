@@ -1,32 +1,43 @@
 #pragma once
 
 #include "App.h"
-#include "controls/WineDetailFields.h"
+#include "controls/WineDetailBasePanel.h"
 
-#include <ctb/model/DatasetEventHandler.h>
-#include <wx/panel.h>
-#include <deque>
 
 namespace ctb::app
 {
    /// @brief A wxPanel-derived class that displays details about a wine, handling dataset events and rendering relevant fields.
    ///
-   class WineDetailValuePanel final : public wxPanel
+   class WineDetailValuePanel final : public WineDetailBasePanel
    {
    public:
-      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailValuePanel*;
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailValuePanel*
+      {
+         return detail::createDatasetWindow<WineDetailValuePanel>(parent, source);
+      }
 
    private:
-      using DetailFields = std::deque<SinglePropDetailField>;
+      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call private ctor
+      template<typename WndT, typename... Args>
+      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
 
-      DatasetEventHandler m_dataset_events;
-      DetailFields        m_fields{};
-      wxString            m_title{ constants::LBL_SCORES };
-
-      WineDetailValuePanel(const DatasetEventSourcePtr& event_source) : m_dataset_events{ event_source }
+      WineDetailValuePanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source, constants::LBL_VALUATION }
       {}
 
-      void createWindow(wxWindow* parent);
-      void onDatasetEvent(const DatasetEvent& event);
+      // base class overrides
+      void getDetailFields(DetailFields& fields) override
+      {
+         auto* top_sizer = GetSizer(); assert(top_sizer);
+         auto dataset = getDataset();
+
+         // ordering matters here because it's the same as they'll be displayed
+         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::MyPrice,      constants::LBL_MY_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
+         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::CtPrice,      constants::LBL_CT_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
+
+         if (dataset->hasProperty(CtProp::AuctionPrice))
+         {
+            fields.push_back(SinglePropDetailField{ top_sizer, CtProp::AuctionPrice, constants::LBL_AUCTION_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
+         }
+      }
    };
 }

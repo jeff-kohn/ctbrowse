@@ -57,13 +57,14 @@ namespace ctb::app
       {
          switch (event_id)
          {
-            case CMD_COLLECTION_MY_CELLAR:      return TableId::List;
-            case CMD_COLLECTION_PENDING_WINE:   return TableId::Pending;
-            case CMD_COLLECTION_READY_TO_DRINK: return TableId::Availability;
-            case CMD_COLLECTION_CONSUMED:       return TableId::Consumed;
-            case CMD_COLLECTION_PURCHASED_WINE: return TableId::Purchase;
-            case CMD_COLLECTION_TAGGED_WINES:   return TableId::Tag;
-				case CMD_COLLECTION_TASTING_NOTES:  return TableId::Notes;
+            case CMD_COLLECTION_MY_CELLAR:        return TableId::List;
+            case CMD_COLLECTION_PENDING_WINE:     return TableId::Pending;
+            case CMD_COLLECTION_BOTTLE_INVENTORY: return TableId::Inventory;
+            case CMD_COLLECTION_READY_TO_DRINK:   return TableId::Availability;
+            case CMD_COLLECTION_CONSUMED:         return TableId::Consumed;
+            case CMD_COLLECTION_PURCHASED_WINE:   return TableId::Purchase;
+            case CMD_COLLECTION_TAGGED_WINES:     return TableId::Tag;
+				case CMD_COLLECTION_TASTING_NOTES:    return TableId::Notes;
             default:
                throw Error(Error::Category::ArgumentError, "Table corresponding to ID {} not found.", event_id);
          }
@@ -232,6 +233,7 @@ namespace ctb::app
       // Collection menu handlers
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_MY_CELLAR);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_PENDING_WINE);
+      Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_BOTTLE_INVENTORY);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_READY_TO_DRINK);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_CONSUMED);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_PURCHASED_WINE);
@@ -360,10 +362,10 @@ namespace ctb::app
          wxITEM_NORMAL
       });
       menu_data->Append(new wxMenuItem{
-         menu_data, 
-         CmdId::CMD_COLLECTION_PENDING_WINE, 
-         constants::CMD_COLLECTION_PENDING_WINE_LBL, 
-         constants::CMD_COLLECTION_PENDING_WINE_TIP,
+         menu_data,
+         CmdId::CMD_COLLECTION_BOTTLE_INVENTORY,
+         constants::CMD_COLLECTION_BOTTLE_INVENTORY_LBL,
+         constants::CMD_COLLECTION_BOTTLE_INVENTORY_TIP,
          wxITEM_NORMAL
          });
       menu_data->Append(new wxMenuItem{
@@ -373,13 +375,29 @@ namespace ctb::app
          constants::CMD_COLLECTION_READY_TO_DRINK_TIP,
          wxITEM_NORMAL
          });
+      menu_data->AppendSeparator();
+      menu_data->Append(new wxMenuItem{
+         menu_data,
+         CmdId::CMD_COLLECTION_PENDING_WINE,
+         constants::CMD_COLLECTION_PENDING_WINE_LBL,
+         constants::CMD_COLLECTION_PENDING_WINE_TIP,
+         wxITEM_NORMAL
+         });
       menu_data->Append(new wxMenuItem{
          menu_data,
          CmdId::CMD_COLLECTION_TAGGED_WINES,
          constants::CMD_COLLECTION_TAGGED_WINES_LBL,
          constants::CMD_COLLECTION_TAGGED_WINES_TIP,
          wxITEM_NORMAL
-         });      menu_data->AppendSeparator();
+         });      
+      menu_data->AppendSeparator();
+      menu_data->Append(new wxMenuItem{
+         menu_data,
+         CmdId::CMD_COLLECTION_TASTING_NOTES,
+         constants::CMD_COLLECTION_TASTING_NOTES_LBL,
+         constants::CMD_COLLECTION_TASTING_NOTES_TIP,
+         wxITEM_NORMAL
+         });
       menu_data->Append(new wxMenuItem{
          menu_data,
          CmdId::CMD_COLLECTION_PURCHASED_WINE,
@@ -395,13 +413,6 @@ namespace ctb::app
          wxITEM_NORMAL
          });
       m_menu_bar->Append(menu_data, constants::LBL_MENU_COLLECTION);
-      menu_data->Append(new wxMenuItem{
-         menu_data,
-         CmdId::CMD_COLLECTION_TASTING_NOTES,
-         constants::CMD_COLLECTION_TASTING_NOTES_LBL,
-         constants::CMD_COLLECTION_TASTING_NOTES_TIP,
-         wxITEM_NORMAL
-         });
 
       // Wine Menu
       auto* menu_wine = new wxMenu();

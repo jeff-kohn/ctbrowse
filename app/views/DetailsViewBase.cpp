@@ -51,8 +51,8 @@ namespace ctb::app
       SetSizer(top_sizer);
 
       // add the base detail panel, then give derived classes the chance to add additional panels/fields.
-      top_sizer->Add(WineDetailMainPanel::create(this, m_dataset_events.getSource()), sizer_flags);
-      this->addDatasetSpecificControls(top_sizer, m_dataset_events.getSource());
+      top_sizer->Add(WineDetailMainPanel::create(this, getEventHandler().getSource()), sizer_flags);
+      this->addDatasetSpecificControls(top_sizer, getEventHandler().getSource());
    }
 
 
@@ -77,11 +77,12 @@ namespace ctb::app
       link_button->Bind(wxEVT_BUTTON, &DetailsViewBase::onCommand, this, cmd);
    }
 
+   // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
    void DetailsViewBase::onCommand(wxCommandEvent& event)
    {
-      // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
-      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, event.GetId() });
+      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, event.GetId() }); 
    }
+   // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
 
 } // namespace ctb::app

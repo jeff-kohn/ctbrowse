@@ -1,6 +1,7 @@
 #pragma once
 
 #include "App.h"
+#include "model/DatasetWindow.h"
 
 #include <ctb/model/DatasetEventHandler.h>
 #include <wx/menu.h>
@@ -16,9 +17,10 @@ namespace ctb::app
    /// 
    /// This class is an event sink for IDatasetEventSource and automatically handles updates from other views
    /// as well as notifying other views about changes made. 
-   class MultiValueFilterTreeCtrl final : public wxTreeCtrl
+   class MultiValueFilterTreeCtrl final : public DatasetWindow<wxTreeCtrl>
    {
    public:
+      using Base = DatasetWindow<wxTreeCtrl>;
 
       /// @brief static factory method to create an initialize an instance of the GridPanelsView class
       /// 
@@ -45,13 +47,16 @@ namespace ctb::app
       CheckCountMap         m_check_counts{};   // for keeping track of number of values selected for a filter/node.
       NameNodeMap           m_name_nodes{};
       NodeFilterMap         m_node_filters{}; 
-      DatasetEventHandler   m_dataset_events;
       wxWithImages::Images  m_images{};
 
-      MultiValueFilterTreeCtrl(const DatasetEventSourcePtr& source) : m_dataset_events{ source }
+      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call protected ctor
+      template<typename WndT, typename... Args>
+      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
+
+      MultiValueFilterTreeCtrl(const DatasetEventSourcePtr& source) : Base{ source }
       {}
 
-      void createWindow(wxWindow* parent);
+      void createWindow(wxWindow* parent) override;
 
       void onDatasetEvent(const DatasetEvent&);
       void onDatasetInitialize(IDataset& dataset);

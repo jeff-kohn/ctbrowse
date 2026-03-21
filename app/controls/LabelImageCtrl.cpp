@@ -15,26 +15,13 @@ namespace ctb::app
 {
    auto LabelImageCtrl::create(wxWindow* parent, const DatasetEventSourcePtr& source) -> LabelImageCtrl*
    {
-      if (!parent)
-      {
-         assert("parent window cannot == nullptr");
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
-      }
-      if (!source)
-      {
-         assert("source parameter cannot == nullptr");
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
-      }
-
-      std::unique_ptr<LabelImageCtrl> wnd{ new LabelImageCtrl{ source, wxGetApp().getLabelCache() }};
-      wnd->createWindow(parent);
-      return wnd.release(); // if we get here parent owns it, so return non-owning*
+      return detail::createDatasetWindow<LabelImageCtrl>(parent, source, wxGetApp().getLabelCache() );
    }
 
 
    LabelImageCtrl::LabelImageCtrl(const DatasetEventSourcePtr& source, LabelCachePtr cache) :
-      m_cache { std::move(cache) },
-      m_dataset_events{ source }
+      Base { source },
+      m_cache { std::move(cache) }
    {
       assert(m_cache);
    }
@@ -50,7 +37,7 @@ namespace ctb::app
 
       // hook up event handlers
       m_label_timer.Bind(wxEVT_TIMER, &LabelImageCtrl::onLabelTimer, this);
-      m_dataset_events.addHandler(DatasetEvent::Id::RowSelected, [this](const DatasetEvent& event) { fetchImage(event); });
+      getEventHandler().addHandler(DatasetEvent::Id::RowSelected, [this](const DatasetEvent& event) { fetchImage(event); });
    }
 
 
@@ -91,7 +78,6 @@ namespace ctb::app
          {
             auto result = m_image_result->getImage();
             if (!result)
-               // the move is necessary because expected::error() returns a reference that would immediately go out of scope.
                throw Error{ std::move(result.error()) }; 
 
             wxBitmap bmp{ *result };

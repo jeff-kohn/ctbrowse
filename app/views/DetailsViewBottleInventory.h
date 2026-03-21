@@ -1,7 +1,7 @@
 /*********************************************************************
- * @file       DetailsViewMyCellar.h
+ * @file       DetailsViewBottleInventory.h
  *
- * @brief      declaration for the DetailsViewMyCellar class
+ * @brief      declaration for the DetailsViewBottleInventory class
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
@@ -9,15 +9,16 @@
 
 #include "App.h"
 #include "views/DetailsViewBase.h"
-#include "controls/LabelImageCtrl.h"
-#include "controls/WineDetailMainPanel.h"
+#include "controls/WineDetailBottleInfoPanel.h"
+#include "controls/WineDetailPendingPanel.h"
 #include "controls/WineDetailScorePanel.h"
 #include "controls/WineDetailValuePanel.h"
+#include "controls/LabelImageCtrl.h"
 
 namespace ctb::app
 {
 
-   class DetailsViewMyCellar final : public DetailsViewBase
+   class DetailsViewBottleInventory final : public DetailsViewBase
    {
    public:
       /// @brief creates and initializes a view for showing wine details
@@ -28,7 +29,7 @@ namespace ctb::app
       /// 
       [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> DetailsViewBase*
       {
-         return createDetailsViewFactory<DetailsViewMyCellar>(parent, source);
+         return createDetailsViewFactory<DetailsViewBottleInventory>(parent, source);
       }
 
    protected:
@@ -36,25 +37,25 @@ namespace ctb::app
       template<typename BaseT>
       friend auto createDetailsViewFactory(wxWindow* parent, const DatasetEventSourcePtr& source) -> BaseT*;
 
-      DetailsViewMyCellar(DatasetEventSourcePtr source) : DetailsViewBase{ std::move(source) }
-      {}
-
+      DetailsViewBottleInventory(DatasetEventSourcePtr source) : DetailsViewBase{ std::move(source) }
+      {
+      }
 
       // derived classes must implement this to add their view-specific controls
       auto addDatasetSpecificControls(wxBoxSizer* top_sizer, const DatasetEventSourcePtr& source) -> void override
       {
-         const     auto sizer_flags = wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT);
-
-         top_sizer->AddSpacer(DEFAULT_GROUP_SPACER);
-         top_sizer->Add(WineDetailScorePanel::create(this, source), sizer_flags);
          top_sizer->AddSpacer(DEFAULT_HEADING_SPACER);
-         top_sizer->Add(WineDetailValuePanel::create(this, source), sizer_flags);
+         top_sizer->Add(WineDetailScorePanel::create(this, source), wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT));
+         top_sizer->AddSpacer(DEFAULT_HEADING_SPACER);
+         top_sizer->Add(WineDetailValuePanel::create(this, source), wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT));
          top_sizer->AddSpacer(DEFAULT_GROUP_SPACER);
+         top_sizer->Add(WineDetailBottleInfoPanel::create(this, source), wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT));
+         top_sizer->AddSpacer(DEFAULT_HEADING_SPACER);
          addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_WINE_DETAILS);
          top_sizer->AddSpacer(DEFAULT_HEADING_SPACER);
          top_sizer->Add(LabelImageCtrl::create(this, source), wxSizerFlags().CenterHorizontal().Expand().Shaped());
-
       }
+
    };
 
 } // namespace ctb::app

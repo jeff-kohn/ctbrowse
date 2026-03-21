@@ -26,7 +26,7 @@ namespace ctb
    /// 
    /// THIS CLASS IS NOT THREADSAFE. It doens't need to be since UI code in GUI frameworks like wxWidgets is tied to main message thread. 
    /// Any background threads should work on their own data and send messages to the main thread/window. Access to the dataset should 
-   /// always be from main thread since multiple UI windows are holding references to it.
+   /// always be from main UI thread since multiple UI windows are holding references to it.
    /// 
    template<DataTableType DataTableT>
    class CtDataset final : public IDataset
@@ -152,6 +152,14 @@ namespace ctb
                auto tags  = getDistinctValues(CtProp::TagName, true).size();
                auto wines = getDistinctValues(CtProp::iWineId, true).size();
                result     = ctb::format(constants::FMT_SUMMARY_TAGGED_WINES, tags, wines);
+               break;
+            }
+            case TableId::Inventory:
+            {
+               auto bottle_count  = rowCount(true);
+               auto wine_count    = getDistinctValues(CtProp::iWineId, true).size();
+               auto vintage_count = getDistinctValues(CtProp::Vintage, true).size();
+               result             = ctb::format(constants::FMT_SUMMARY_BOTTLE_INVENTORY, wine_count, bottle_count, vintage_count);
                break;
             }
             default:

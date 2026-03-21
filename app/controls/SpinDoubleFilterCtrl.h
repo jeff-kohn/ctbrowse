@@ -8,6 +8,7 @@
 #pragma once
 
 #include "App.h"
+#include "model/DatasetWindow.h"
 
 #include <ctb/model/DatasetEventHandler.h>
 #include <ctb/tables/CtSchema.h>
@@ -24,9 +25,10 @@ namespace ctb::app
 
    /// @brief UI component that combines a FilterCheckbox with a spin-control for a number filter value.
    ///
-   class SpinDoubleFilterCtrl final : public wxPanel
+   class SpinDoubleFilterCtrl final : public DatasetWindow<wxPanel>
    {
    public:
+      using Base           = DatasetWindow<wxPanel>;
       using PropertyFilter = CtPropertyFilter;
 
       struct SpinParams
@@ -61,17 +63,22 @@ namespace ctb::app
       ~SpinDoubleFilterCtrl() override = default;
 
    private:
-      DatasetEventHandler    m_dataset_events;
       PropertyFilter         m_filter{};
       wxCheckBox*            m_checkbox{};
       wxSpinCtrlDouble*      m_spin{};
+      SpinParams             m_spin_params{};
 
-      SpinDoubleFilterCtrl(const DatasetEventSourcePtr& source, PropertyFilter filter) :
-         m_dataset_events(source),
-         m_filter{ std::move(filter) }
+      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call protected ctor
+      template<typename WndT, typename... Args>
+      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
+
+      SpinDoubleFilterCtrl(const DatasetEventSourcePtr& source, PropertyFilter filter, SpinParams params) :
+         Base{ source },
+         m_filter{ std::move(filter) },
+         m_spin_params{ std::move(params) }
       {}
 
-      void createWindow(wxWindow* parent, const SpinParams& params);
+      void createWindow(wxWindow* parent) override;
       void onDatasetFilter(const DatasetEvent& event);
       void onDatasetInitialize(const DatasetEvent& event);
       void onFilterChecked(wxCommandEvent& event);

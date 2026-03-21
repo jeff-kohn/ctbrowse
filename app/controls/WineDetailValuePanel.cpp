@@ -34,6 +34,7 @@ namespace ctb::app
       }
 
       wxWindowUpdateLocker freeze_win(this);
+      auto dataset = m_dataset_events.getDataset(true); // throws if dataset is nullptr
 
       // heading
       auto* heading_lbl = new wxStaticText(this, wxID_ANY,  constants::LBL_VALUATION, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
@@ -48,8 +49,12 @@ namespace ctb::app
       // ordering matters here because it's the same as they'll be displayed
       m_fields.push_back( SinglePropDetailField{ top_sizer, CtProp::MyPrice,      constants::LBL_MY_PRICE      }.setFormat(constants::FMT_NUMBER_CURRENCY));
       m_fields.push_back( SinglePropDetailField{ top_sizer, CtProp::CtPrice,      constants::LBL_CT_PRICE      }.setFormat(constants::FMT_NUMBER_CURRENCY));
-      m_fields.push_back( SinglePropDetailField{ top_sizer, CtProp::AuctionPrice, constants::LBL_AUCTION_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
-
+      
+      if (dataset->hasProperty(CtProp::AuctionPrice))
+      {
+         m_fields.push_back(SinglePropDetailField{ top_sizer, CtProp::AuctionPrice, constants::LBL_AUCTION_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
+      }
+      
       // need to know when to update (or hide) the panel
       m_dataset_events.addHandler(DatasetEvent::Id::DatasetRemove, [this](const DatasetEvent& event) { onDatasetEvent(event); });
       m_dataset_events.addHandler(DatasetEvent::Id::Filter,        [this](const DatasetEvent& event) { onDatasetEvent(event); });

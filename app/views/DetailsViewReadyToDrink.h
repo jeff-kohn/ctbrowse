@@ -14,7 +14,7 @@
 namespace ctb::app
 {
 
-   class DetailsViewReadyToDrink final : protected DetailsViewBase
+   class DetailsViewReadyToDrink final : public DetailsViewBase
    {
    public:
       /// @brief creates and initializes a view for showing wine details
@@ -29,7 +29,7 @@ namespace ctb::app
       }
 
    protected:
-      // this class can only be constructructed through static create(), which uses createDetailsViewFactory to call protected ctor
+      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call protected ctor
       template<typename BaseT>
       friend auto createDetailsViewFactory(wxWindow* parent, const DatasetEventSourcePtr& source) -> BaseT*;
 
@@ -40,14 +40,11 @@ namespace ctb::app
       // derived classes must implement this to add their view-specific controls
       auto addDatasetSpecificControls(wxBoxSizer* top_sizer, const DatasetEventSourcePtr& source) -> void override
       {
-         constexpr auto heading_spacer = 3;
-         constexpr auto group_spacer = heading_spacer * 2;
-
-         top_sizer->AddSpacer(heading_spacer);
+         top_sizer->AddSpacer(DEFAULT_HEADING_SPACER);
          top_sizer->Add(WineDetailScorePanel::create(this, source), wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT));
-         top_sizer->AddSpacer(group_spacer);
+         top_sizer->AddSpacer(DEFAULT_GROUP_SPACER);
          addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_DRINK_REMOVE);
-         top_sizer->AddSpacer(heading_spacer);
+         top_sizer->AddSpacer(DEFAULT_HEADING_SPACER);
          top_sizer->Add(LabelImageCtrl::create(this, source), wxSizerFlags().CenterHorizontal().Expand().Shaped());
       }
    };
