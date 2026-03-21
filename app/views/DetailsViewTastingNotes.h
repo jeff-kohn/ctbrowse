@@ -43,19 +43,16 @@ namespace ctb::app
       // derived classes must implement this to add their view-specific controls
       auto addDatasetSpecificControls(wxBoxSizer* top_sizer, const DatasetEventSourcePtr& source) -> void override
       {
-         const     auto sizer_flags = wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT);
-         constexpr auto heading_spacer = 3;
-         constexpr auto group_spacer = heading_spacer * 3;
+         const auto sizer_flags = wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT);
 
-         top_sizer->AddSpacer(heading_spacer);
+         top_sizer->AddSpacer(DEFAULT_HEADING_SPACER);
          top_sizer->Add(WineDetailScorePanel::create(this, source), sizer_flags);
-         top_sizer->AddSpacer(group_spacer);
+         top_sizer->AddSpacer(DEFAULT_GROUP_SPACER);
          top_sizer->Add(WineDetailTastingPanel::create(this, source), sizer_flags);
-         top_sizer->AddSpacer(group_spacer);
+         top_sizer->AddSpacer(DEFAULT_GROUP_SPACER);
          addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_WINE_DETAILS);
-         top_sizer->AddSpacer(heading_spacer);
+         top_sizer->AddSpacer(DEFAULT_HEADING_SPACER);
          top_sizer->Add(LabelImageCtrl::create(this, source), wxSizerFlags().CenterHorizontal().Expand().Shaped());
-
       }
    };
 

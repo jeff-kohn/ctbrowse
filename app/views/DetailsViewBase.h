@@ -10,7 +10,7 @@
 #include "App.h"
 #include "LabelImageCache.h"
 
-#include <ctb/model/DatasetEventHandler.h>
+#include "model/DatasetWindow.h"
 
 #include <wx/panel.h>
 #include <wx/weakref.h>
@@ -23,22 +23,22 @@ class wxBoxSizer;
 namespace ctb::app
 {
 
-   class DetailsViewBase : public wxPanel
+   class DetailsViewBase : public DatasetWindow<wxPanel>
    {
    public:
-      // no copy/move/assign, this class is created on the heap and shouldn't be copied.
-      DetailsViewBase(const DetailsViewBase&) = delete;
-      DetailsViewBase(DetailsViewBase&&) = delete;
-      DetailsViewBase& operator=(const DetailsViewBase&) = delete;
-      DetailsViewBase& operator=(DetailsViewBase&&) = delete;
-      ~DetailsViewBase() override = default;
+      using Base = DatasetWindow<wxPanel>;
+
+      static constexpr int DEFAULT_HEADING_SPACER = 3;
+      static constexpr int DEFAULT_GROUP_SPACER   = 3 * DEFAULT_HEADING_SPACER;
 
    protected:
       // this class can only be constructructed through derived classes
-      DetailsViewBase(const DatasetEventSourcePtr& source) : m_dataset_events{ source }
+      DetailsViewBase(const DatasetEventSourcePtr& source) : Base{ source }
       {}
 
-      // Handles the window creation, since constructors only create the C++ object not the actual window. 
+      // Handles the window creation, since constructors only create the C++ object not the actual window. This implementation
+      // will call wxPanel::Create(), then add the top/main details panel before calling addDatasetSpecificControls(), which 
+      // derived classes can use to add additional panels/buttons/etc. But this can be overridden if a different approach is needed.
       virtual void createWindow(wxWindow* parent);
 
       // Can be called by derived classes to add a commandlink button the to the specified sizer.
@@ -48,8 +48,6 @@ namespace ctb::app
       virtual auto addDatasetSpecificControls(wxBoxSizer* top_sizer, const DatasetEventSourcePtr& source) -> void = 0;
 
    private:
-      DatasetEventHandler    m_dataset_events;  
-
       using wxPanel::Create;
       void onCommand(wxCommandEvent& event);
    };
