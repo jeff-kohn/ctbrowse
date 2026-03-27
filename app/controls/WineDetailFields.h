@@ -15,12 +15,12 @@ namespace ctb::app
    namespace detail
    {
 
-      class DetailFieldControls
+      class ValueWithLabelCtrls
       {
       public:
          static constexpr auto COL_COUNT = 2;
 
-         DetailFieldControls(wxSizer* parent_sizer, std::string_view heading_label) : m_parent_sizer{ parent_sizer }
+         ValueWithLabelCtrls(wxSizer* parent_sizer, std::string_view heading_label) : m_parent_sizer{ parent_sizer }
          {
             auto* parent_wnd = m_parent_sizer ? m_parent_sizer->GetContainingWindow() : nullptr;
             if (!parent_wnd)
@@ -51,6 +51,10 @@ namespace ctb::app
          void setValue(std::string_view value_str)
          {
             *m_display_value = wxFromSV(value_str);
+            if (m_display_value->Contains("&"))
+            {
+               m_display_value->Replace("&", "&&");
+            }
          }
 
       private:
@@ -72,14 +76,14 @@ namespace ctb::app
    public:
       SinglePropDetailField() = delete;
       SinglePropDetailField(wxSizer* parent_sizer, CtProp prop_id, std::string_view label_text) : 
-         m_controls{ parent_sizer, label_text },
+         m_value_ctrl{ parent_sizer, label_text },
          m_prop_id{ prop_id }
       {}
 
       void clear()
       {
-         m_controls.setValue("");
-         m_controls.hide();
+         m_value_ctrl.setValue("");
+         m_value_ctrl.hide();
       }
 
       /// @brief update the field values from the specified dataset row
@@ -88,12 +92,12 @@ namespace ctb::app
          if (ds->hasProperty(m_prop_id))
          {
             auto val = ds->getProperty(rec_idx, m_prop_id);
-            m_controls.setValue(val.hasValue() ? val.asString(m_format_str) : m_null_display);
-            m_controls.show();
+            m_value_ctrl.setValue(val.hasValue() ? val.asString(m_format_str) : m_null_display);
+            m_value_ctrl.show();
          }
          else {
-            m_controls.setValue("");
-            m_controls.hide();
+            m_value_ctrl.setValue("");
+            m_value_ctrl.hide();
          }
       }
 
@@ -116,7 +120,7 @@ namespace ctb::app
       }
 
    private:
-      detail::DetailFieldControls m_controls;
+      detail::ValueWithLabelCtrls m_value_ctrl;
       CtProp                      m_prop_id;
       std::string                 m_format_str{ constants::FMT_DEFAULT_FORMAT };
       std::string                 m_label_text{};
@@ -129,15 +133,15 @@ namespace ctb::app
    public:
       DrinkWindowDetailField() = delete;
       DrinkWindowDetailField(wxSizer* parent_sizer, CtProp begin_prop, CtProp end_prop, std::string_view label_text) :
-         m_controls{ parent_sizer, label_text },
+         m_value_ctrl{ parent_sizer, label_text },
          m_begin_prop{ begin_prop },
          m_end_prop{ end_prop }
       {}
 
       void clear()
       {
-         m_controls.setValue("");
-         m_controls.hide();
+         m_value_ctrl.setValue("");
+         m_value_ctrl.hide();
       }
 
       void update(const DatasetPtr& ds, int rec_idx)
@@ -146,22 +150,61 @@ namespace ctb::app
          {
             auto begin_dt = ds->getProperty(rec_idx, m_begin_prop);
             auto end_dt   = ds->getProperty(rec_idx, m_end_prop);
-            m_controls.setValue(ctb::detail::getDrinkWindow(begin_dt, end_dt));
-            m_controls.show();
+            m_value_ctrl.setValue(ctb::detail::getDrinkWindow(begin_dt, end_dt));
+            m_value_ctrl.show();
          }
          else {
-            m_controls.setValue("");
-            m_controls.hide();
+            m_value_ctrl.setValue("");
+            m_value_ctrl.hide();
          }
       }
       
    private:
-      detail::DetailFieldControls m_controls;
+      detail::ValueWithLabelCtrls m_value_ctrl;
       CtProp                      m_begin_prop{};
       CtProp                      m_end_prop{};
    };
 
-   using WineDetailsField  = std::variant<SinglePropDetailField, DrinkWindowDetailField>;
-   using WineDetailsFields = std::deque<WineDetailsField>;
+
+   class ProScoreSummaryField
+   {
+   public:
+      ProScoreSummaryField() = delete;
+      ProScoreSummaryField(wxSizer* parent_sizer, std::string_view label_text) :
+         m_value_ctrl{ parent_sizer, label_text }
+      {}
+
+      /// @brief update the field values from the specified dataset row
+      void update(const DatasetPtr& ds, int rec_idx)
+      {
+         auto wine_id = ds->getProperty(rec_idx, CtProp::iWineId).asUInt64().value_or(0);
+         auto cache = wxGetApp().getProReviewsCache();
+         std::string value{};
+         if (cache)
+         {
+            value = cache->getScoreSummary(wine_id);
+         }
+
+         if (value.empty())
+         {
+            m_value_ctrl.setValue("");
+            m_value_ctrl.hide();
+         }
+         else {
+            m_value_ctrl.setValue(value);
+            m_value_ctrl.show();
+         }
+      }
+
+      void clear()
+      {
+         m_value_ctrl.setValue("");
+         m_value_ctrl.hide();
+      }
+
+   private:
+      detail::ValueWithLabelCtrls m_value_ctrl;
+   };
+
 
 } // namespace ctb::app 

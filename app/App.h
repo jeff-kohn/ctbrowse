@@ -11,6 +11,8 @@
 #include "wx_helpers.h"
 
 #include <ctb/log.h>
+#include <ctb/model/ProReviewsCache.h>
+
 #include <wx/app.h>
 #include <wx/windowptr.h>
 
@@ -49,6 +51,7 @@ namespace ctb::app
       CMD_COLLECTION_PENDING_WINE,
       CMD_COLLECTION_BOTTLE_INVENTORY,
       CMD_COLLECTION_CONSUMED,
+      CMD_COLLECTION_PRIVATE_NOTES,
       CMD_COLLECTION_PURCHASED_WINE,
       CMD_COLLECTION_READY_TO_DRINK,
       CMD_COLLECTION_TAGGED_WINES,
@@ -117,6 +120,11 @@ namespace ctb::app
          return m_label_cache;
       }
 
+      auto getProReviewsCache() const -> const std::optional<ProReviewsCache>&
+      {
+         return m_review_cache;
+      }
+
       /// @brief Get the current config object.
       ///
       /// Calling this will throw an exception if there's no default config. AFAIK the wxWidgets config store is 
@@ -140,11 +148,11 @@ namespace ctb::app
       }
 
    private:
-      MainFrame*         m_main_frame{};
-      fs::path           m_user_data_folder{};
-      WebClientPtr       m_web_client{};
-      LabelCachePtr      m_label_cache{};
-      
+      MainFrame*                     m_main_frame{};
+      fs::path                       m_user_data_folder{};
+      WebClientPtr                   m_web_client{};
+      LabelCachePtr                  m_label_cache{};
+      std::optional<ProReviewsCache> m_review_cache{};
 
       void onMainFrameClosed(wxCloseEvent&);
    };

@@ -158,6 +158,12 @@ namespace ctb::detail
                   return PropertyVal{ static_cast<double>(val) };
                }
                else {
+                  auto str_val = fld.get<std::string_view>();
+                  if (auto dash_pos = str_val.find_last_of('-'); dash_pos <  str_val.size())
+                  {
+                     // score field may have a range like 91-92, we'll try taking the higher number.
+                     return PropertyVal::template parse<double>(str_val.substr(dash_pos + 1));
+                  }
                   SPDLOG_DEBUG("PropertyValue::fieldToProperty - Unable to parse value '{}' as a double", fld.get<std::string_view>());
                   return {};
                }

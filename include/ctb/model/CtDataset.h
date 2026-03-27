@@ -162,6 +162,12 @@ namespace ctb
                result             = ctb::format(constants::FMT_SUMMARY_BOTTLE_INVENTORY, wine_count, bottle_count, vintage_count);
                break;
             }
+            case TableId::PrivateNotes:
+            {
+               auto note_count = rowCount(true);
+               result = ctb::format(constants::FMT_SUMMARY_PRIVATE_NOTES, note_count);
+               break;
+            }            
             default:
                assert(false);
          }

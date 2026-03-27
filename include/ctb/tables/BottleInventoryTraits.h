@@ -61,8 +61,6 @@ namespace ctb
          { Prop::PendingStoreName, FieldSchema { Prop::PendingStoreName, PropType::String,     11 }},
          { Prop::PendingOrderDate, FieldSchema { Prop::PendingOrderDate, PropType::Date,       12 }},
          { Prop::WineAndVintage,   FieldSchema { Prop::WineAndVintage,   PropType::String,     {} }},
-
-
       });
 
       /// @brief list of display columns that will show in the list view

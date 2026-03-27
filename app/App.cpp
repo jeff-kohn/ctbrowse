@@ -13,6 +13,7 @@
 #include "MainFrame.h"
 
 #include <ctb/utility_http.h>
+#include <ctb/model/CtDatasetLoader.h>
 #include <ctb/tasks/tasks.h>
 
 #include <cpr/cpr.h>
@@ -94,6 +95,8 @@ namespace ctb::app
             displayErrorMessage(packageError());
          }
 
+         CtDatasetLoader loader{ getDataFolder(AppFolder::Tables) };
+         m_review_cache = loader.getProReviewsCache();
          CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_COLLECTION_BOTTLE_INVENTORY }); });
          return true;
       }

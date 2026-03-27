@@ -8,6 +8,7 @@
 #pragma once
 
 #include "ctb/table_data.h"
+#include "ctb/model/ProReviewsCache.h"
 #include "ctb/interfaces/IDataset.h"
 
 #include <filesystem>
@@ -56,6 +57,10 @@ namespace ctb
       ///
       /// @throws ctb::Error if the dataset couldn't be loaded.
       auto getDataset(TableId tbl) -> DatasetPtr;
+
+
+      /// @brief Retrieves the pro reviews cache.
+      auto getProReviewsCache() -> std::optional<ProReviewsCache>;
 
    private:
       fs::path m_data_folder{constants::CURRENT_DIRECTORY};

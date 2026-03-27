@@ -3,6 +3,7 @@
 #include "views/DetailsViewConsumedWine.h"
 #include "views/DetailsViewMyCellar.h"
 #include "views/DetailsViewPending.h"
+#include "views/DetailsViewPrivateNotes.h"
 #include "views/DetailsViewPurchasedWine.h"
 #include "views/DetailsViewReadyToDrink.h"
 #include "views/DetailsViewTaggedWine.h"
@@ -59,6 +60,7 @@ namespace ctb::app
          { TableId::Purchase,     &DetailsViewPurchasedWine::create     } ,
          { TableId::Notes,        &DetailsViewTastingNotes::create      } ,
          { TableId::Inventory,    &DetailsViewBottleInventory::create   } ,
+         { TableId::PrivateNotes, &DetailsViewPrivateNotes::create      } ,
       };
 
 

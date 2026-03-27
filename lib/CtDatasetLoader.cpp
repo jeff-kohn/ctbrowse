@@ -12,6 +12,8 @@
 #include "ctb/tables/BottleInventoryTraits.h"
 #include "ctb/tables/ConsumedWineTraits.h"
 #include "ctb/tables/PendingWineTraits.h"
+#include "ctb/tables/PrivateNotesTraits.h"
+#include "ctb/tables/ProReviewsCacheTraits.h"
 #include "ctb/tables/PurchasedWineTraits.h"
 #include "ctb/tables/ReadyToDrinkTraits.h"
 #include "ctb/tables/TaggedWinesTraits.h"
@@ -78,12 +80,27 @@ namespace ctb
                return getOrThrow<BottleInventoryTable>(m_data_folder, tbl_id);
             },
 
+         [this](enum_constant<TableId::PrivateNotes> tbl_id) -> DatasetPtr
+            {
+               return getOrThrow<PrivateNotesTable>(m_data_folder, tbl_id);
+            },
+
          [this](enum_constant<TableId::Notes> tbl_id) -> DatasetPtr
             {
                return getOrThrow<TastingNotesTable>(m_data_folder, tbl_id);
             }
       };
       return enum_switch(TableFactory, tbl);
+   }
+
+
+   auto CtDatasetLoader::getProReviewsCache() -> std::optional<ProReviewsCache>
+   {
+      auto result = loadTableData<ProReviewsCacheTable>(m_data_folder, TableId::Availability);
+      if (!result)
+         return {};
+
+      return ProReviewsCache{ result.value() };
    }
 
 }  // namespace ctb
