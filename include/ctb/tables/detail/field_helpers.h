@@ -96,7 +96,7 @@ namespace ctb::detail
       if (drink_end.isNull())
          return drink_start.asString("{}+").c_str();
 
-      return ctb::format("{} - {}", drink_start.asString(), drink_end.asString());
+      return ctb::format("{}-{}", drink_start.asString(), drink_end.asString());
    }
 
 } // namespace ctb::detail

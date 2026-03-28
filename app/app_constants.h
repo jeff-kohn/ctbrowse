@@ -140,6 +140,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_DRINK_WINDOW                  = "Drink Window:";
    inline constexpr const char* LBL_DRINK_WINDOW_MY               = "My Drink Window:";
    inline constexpr const char* LBL_DRINK_WINDOW_CT               = "CT Drink Window:";
+   inline constexpr const char* LBL_DRINK_WINDOW_PRO              = "Pro Drink Window(s):";
    inline constexpr const char* LBL_FROM                          = "From:";
    inline constexpr const char* LBL_FLAWED                        = "Flawed:";
    inline constexpr const char* LBL_LIKED                         = "Liked:";

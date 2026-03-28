@@ -14,13 +14,12 @@ namespace ctb::app
 {
    namespace detail
    {
-
-      class ValueWithLabelCtrls
+      class DisplayValue
       {
       public:
          static constexpr auto COL_COUNT = 2;
 
-         ValueWithLabelCtrls(wxSizer* parent_sizer, std::string_view heading_label) : m_parent_sizer{ parent_sizer }
+         DisplayValue(wxSizer* parent_sizer, std::string_view heading_label) : m_parent_sizer{ parent_sizer }
          {
             auto* parent_wnd = m_parent_sizer ? m_parent_sizer->GetContainingWindow() : nullptr;
             if (!parent_wnd)
@@ -71,19 +70,19 @@ namespace ctb::app
    } // namespace detail
 
 
-   class SinglePropDetailField
+   class SinglePropertyDisplay
    {
    public:
-      SinglePropDetailField() = delete;
-      SinglePropDetailField(wxSizer* parent_sizer, CtProp prop_id, std::string_view label_text) : 
-         m_value_ctrl{ parent_sizer, label_text },
+      SinglePropertyDisplay() = delete;
+      SinglePropertyDisplay(wxSizer* parent_sizer, CtProp prop_id, std::string_view label_text) : 
+         m_display_prop{ parent_sizer, label_text },
          m_prop_id{ prop_id }
       {}
 
       void clear()
       {
-         m_value_ctrl.setValue("");
-         m_value_ctrl.hide();
+         m_display_prop.setValue("");
+         m_display_prop.hide();
       }
 
       /// @brief update the field values from the specified dataset row
@@ -92,12 +91,12 @@ namespace ctb::app
          if (ds->hasProperty(m_prop_id))
          {
             auto val = ds->getProperty(rec_idx, m_prop_id);
-            m_value_ctrl.setValue(val.hasValue() ? val.asString(m_format_str) : m_null_display);
-            m_value_ctrl.show();
+            m_display_prop.setValue(val.hasValue() ? val.asString(m_format_str) : m_null_display);
+            m_display_prop.show();
          }
          else {
-            m_value_ctrl.setValue("");
-            m_value_ctrl.hide();
+            m_display_prop.setValue("");
+            m_display_prop.hide();
          }
       }
 
@@ -120,28 +119,28 @@ namespace ctb::app
       }
 
    private:
-      detail::ValueWithLabelCtrls m_value_ctrl;
-      CtProp                      m_prop_id;
-      std::string                 m_format_str{ constants::FMT_DEFAULT_FORMAT };
-      std::string                 m_label_text{};
-      std::string                 m_null_display{};
+      detail::DisplayValue m_display_prop;
+      CtProp                  m_prop_id;
+      std::string             m_format_str{ constants::FMT_DEFAULT_FORMAT };
+      std::string             m_label_text{};
+      std::string             m_null_display{};
    };
 
 
-   class DrinkWindowDetailField
+   class DrinkWindowDisplay
    {
    public:
-      DrinkWindowDetailField() = delete;
-      DrinkWindowDetailField(wxSizer* parent_sizer, CtProp begin_prop, CtProp end_prop, std::string_view label_text) :
-         m_value_ctrl{ parent_sizer, label_text },
+      DrinkWindowDisplay() = delete;
+      DrinkWindowDisplay(wxSizer* parent_sizer, CtProp begin_prop, CtProp end_prop, std::string_view label_text) :
+         m_display_prop{ parent_sizer, label_text },
          m_begin_prop{ begin_prop },
          m_end_prop{ end_prop }
       {}
 
       void clear()
       {
-         m_value_ctrl.setValue("");
-         m_value_ctrl.hide();
+         m_display_prop.setValue("");
+         m_display_prop.hide();
       }
 
       void update(const DatasetPtr& ds, int rec_idx)
@@ -150,28 +149,28 @@ namespace ctb::app
          {
             auto begin_dt = ds->getProperty(rec_idx, m_begin_prop);
             auto end_dt   = ds->getProperty(rec_idx, m_end_prop);
-            m_value_ctrl.setValue(ctb::detail::getDrinkWindow(begin_dt, end_dt));
-            m_value_ctrl.show();
+            m_display_prop.setValue(ctb::detail::getDrinkWindow(begin_dt, end_dt));
+            m_display_prop.show();
          }
          else {
-            m_value_ctrl.setValue("");
-            m_value_ctrl.hide();
+            m_display_prop.setValue("");
+            m_display_prop.hide();
          }
       }
       
    private:
-      detail::ValueWithLabelCtrls m_value_ctrl;
-      CtProp                      m_begin_prop{};
-      CtProp                      m_end_prop{};
+      detail::DisplayValue m_display_prop;
+      CtProp                  m_begin_prop{};
+      CtProp                  m_end_prop{};
    };
 
 
-   class ProScoreSummaryField
+   class ProScoreSummaryDisplay
    {
    public:
-      ProScoreSummaryField() = delete;
-      ProScoreSummaryField(wxSizer* parent_sizer, std::string_view label_text) :
-         m_value_ctrl{ parent_sizer, label_text }
+      ProScoreSummaryDisplay() = delete;
+      ProScoreSummaryDisplay(wxSizer* parent_sizer, std::string_view label_text) :
+         m_display_prop{ parent_sizer, label_text }
       {}
 
       /// @brief update the field values from the specified dataset row
@@ -187,24 +186,63 @@ namespace ctb::app
 
          if (value.empty())
          {
-            m_value_ctrl.setValue("");
-            m_value_ctrl.hide();
+            m_display_prop.setValue("");
+            m_display_prop.hide();
          }
          else {
-            m_value_ctrl.setValue(value);
-            m_value_ctrl.show();
+            m_display_prop.setValue(value);
+            m_display_prop.show();
          }
       }
 
       void clear()
       {
-         m_value_ctrl.setValue("");
-         m_value_ctrl.hide();
+         m_display_prop.setValue("");
+         m_display_prop.hide();
       }
 
    private:
-      detail::ValueWithLabelCtrls m_value_ctrl;
+      detail::DisplayValue m_display_prop;
    };
 
+
+   class ProDrinkWindowSummaryDisplay
+   {
+   public:
+      ProDrinkWindowSummaryDisplay() = delete;
+      ProDrinkWindowSummaryDisplay(wxSizer* parent_sizer, std::string_view label_text) :
+         m_display_prop{ parent_sizer, label_text }
+      {}
+
+      /// @brief update the field values from the specified dataset row
+      void update(const DatasetPtr& ds, int rec_idx)
+      {
+         auto wine_id = ds->getProperty(rec_idx, CtProp::iWineId).asUInt64().value_or(0);
+         std::string value{};
+         if (auto cache = wxGetApp().getProReviewsCache(); cache)
+         {
+            value = cache->getDrinkWindowSummary(wine_id);
+         }
+
+         if (value.empty())
+         {
+            m_display_prop.setValue("");
+            m_display_prop.hide();
+         }
+         else {
+            m_display_prop.setValue(value);
+            m_display_prop.show();
+         }
+      }
+
+      void clear()
+      {
+         m_display_prop.setValue("");
+         m_display_prop.hide();
+      }
+
+   private:
+      detail::DisplayValue m_display_prop;
+   };
 
 } // namespace ctb::app 

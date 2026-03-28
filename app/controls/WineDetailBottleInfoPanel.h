@@ -30,33 +30,33 @@ namespace ctb::app
          auto* top_sizer = GetSizer(); assert(top_sizer);
          auto dataset = getDataset();
 
-         fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::Size,              constants::LBL_SIZE });
-         fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::Location,          constants::LBL_LOCATION });
-         fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::Bin,               constants::LBL_BIN });
+         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::Size,              constants::LBL_SIZE });
+         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::Location,          constants::LBL_LOCATION });
+         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::Bin,               constants::LBL_BIN });
 
          if (dataset->hasProperty(CtProp::PendingOrderDate))
          {
-            fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::PendingOrderDate,  constants::LBL_PURCHASED }.setFormat(constants::FMT_DATE_SHORT));
+            fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::PendingOrderDate,  constants::LBL_PURCHASED }.setFormat(constants::FMT_DATE_SHORT));
          }
          if (dataset->hasProperty(CtProp::PendingStoreName))
          {
-            fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::PendingStoreName,  constants::LBL_FROM });
+            fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::PendingStoreName,  constants::LBL_FROM });
          }
          if (dataset->hasProperty(CtProp::ConsumeDate))
          {
-            fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::ConsumeDate,    constants::LBL_CONSUME_DATE });
+            fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::ConsumeDate,    constants::LBL_CONSUME_DATE });
          }
          if (dataset->hasProperty(CtProp::ConsumeReason))
          {
-            fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::ConsumeReason,  constants::LBL_CONSUME_REASON });
+            fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::ConsumeReason,  constants::LBL_CONSUME_REASON });
          }
          if (dataset->hasProperty(CtProp::BottleNote))
          {
-            fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::BottleNote, constants::LBL_BOTTLE_NOTE });
+            fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::BottleNote, constants::LBL_BOTTLE_NOTE });
          }
          if (dataset->hasProperty(CtProp::ConsumeNote))
          {
-            fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::ConsumeNote, constants::LBL_CONSUME_NOTE });
+            fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::ConsumeNote, constants::LBL_CONSUME_NOTE });
          }
       }
    };

@@ -28,12 +28,12 @@ namespace ctb::app
          auto* top_sizer = GetSizer(); assert(top_sizer);
          auto dataset = getDataset();
 
-         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::PendingStoreName,    constants::LBL_STORE_NAME });
-         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::PendingOrderQty,     constants::LBL_QTY_ORDERED });
-         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::MyPrice,             constants::LBL_MY_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
-         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::PendingOrderDate,    constants::LBL_ORDER_DATE }.setFormat(constants::FMT_DATE_SHORT));
-         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::PendingDeliveryDate, constants::LBL_DELIVERY_DATE }.setFormat(constants::FMT_DATE_SHORT));
-         fields.push_back(SinglePropDetailField{ top_sizer, CtProp::PendingOrderNumber,  constants::LBL_ORDER_NUMBER });
+         fields.push_back(SinglePropertyDisplay{ top_sizer, CtProp::PendingStoreName,    constants::LBL_STORE_NAME });
+         fields.push_back(SinglePropertyDisplay{ top_sizer, CtProp::PendingOrderQty,     constants::LBL_QTY_ORDERED });
+         fields.push_back(SinglePropertyDisplay{ top_sizer, CtProp::MyPrice,             constants::LBL_MY_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
+         fields.push_back(SinglePropertyDisplay{ top_sizer, CtProp::PendingOrderDate,    constants::LBL_ORDER_DATE }.setFormat(constants::FMT_DATE_SHORT));
+         fields.push_back(SinglePropertyDisplay{ top_sizer, CtProp::PendingDeliveryDate, constants::LBL_DELIVERY_DATE }.setFormat(constants::FMT_DATE_SHORT));
+         fields.push_back(SinglePropertyDisplay{ top_sizer, CtProp::PendingOrderNumber,  constants::LBL_ORDER_NUMBER });
       }
 
    };
