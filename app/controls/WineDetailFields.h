@@ -165,23 +165,27 @@ namespace ctb::app
    };
 
 
-   class ProScoreSummaryDisplay
+   class ProReviewDisplay
    {
    public:
-      ProScoreSummaryDisplay() = delete;
-      ProScoreSummaryDisplay(wxSizer* parent_sizer, std::string_view label_text) :
-         m_display_prop{ parent_sizer, label_text }
+      using CacheValueFn = std::string(ProReviewsCache::*)(uint64_t) const;
+
+      ProReviewDisplay() = delete;
+      ProReviewDisplay(wxSizer* parent_sizer, std::string_view label_text, CacheValueFn value_fn) :
+         m_display_prop{ parent_sizer, label_text },
+         m_value_fn{ value_fn }
       {}
 
       /// @brief update the field values from the specified dataset row
       void update(const DatasetPtr& ds, int rec_idx)
       {
          auto wine_id = ds->getProperty(rec_idx, CtProp::iWineId).asUInt64().value_or(0);
-         auto cache = wxGetApp().getProReviewsCache();
          std::string value{};
+
+         auto cache = wxGetApp().getProReviewsCache();
          if (cache)
          {
-            value = cache->getScoreSummary(wine_id);
+            value = (*cache.*m_value_fn)(wine_id);
          }
 
          if (value.empty())
@@ -201,48 +205,9 @@ namespace ctb::app
          m_display_prop.hide();
       }
 
-   private:
+   protected:
       detail::DisplayValue m_display_prop;
-   };
-
-
-   class ProDrinkWindowSummaryDisplay
-   {
-   public:
-      ProDrinkWindowSummaryDisplay() = delete;
-      ProDrinkWindowSummaryDisplay(wxSizer* parent_sizer, std::string_view label_text) :
-         m_display_prop{ parent_sizer, label_text }
-      {}
-
-      /// @brief update the field values from the specified dataset row
-      void update(const DatasetPtr& ds, int rec_idx)
-      {
-         auto wine_id = ds->getProperty(rec_idx, CtProp::iWineId).asUInt64().value_or(0);
-         std::string value{};
-         if (auto cache = wxGetApp().getProReviewsCache(); cache)
-         {
-            value = cache->getDrinkWindowSummary(wine_id);
-         }
-
-         if (value.empty())
-         {
-            m_display_prop.setValue("");
-            m_display_prop.hide();
-         }
-         else {
-            m_display_prop.setValue(value);
-            m_display_prop.show();
-         }
-      }
-
-      void clear()
-      {
-         m_display_prop.setValue("");
-         m_display_prop.hide();
-      }
-
-   private:
-      detail::DisplayValue m_display_prop;
+      CacheValueFn         m_value_fn{};
    };
 
 } // namespace ctb::app 

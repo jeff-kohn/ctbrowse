@@ -56,7 +56,7 @@ namespace ctb
       auto windows = getDrinkWindows(wine_id);
       for (const auto& window : windows)
       {
-         ostr << ctb::format("{}{}, ", window.pro_id.asStringView(), detail::getDrinkWindow(window.drink_begin, window.drink_end));
+         ostr << ctb::format("{}{}, ", window.pro_id.asStringView(), detail::getDrinkWindow(window.pro_drink_begin, window.pro_drink_end));
       }
 
       auto result = ostr.str();
@@ -67,6 +67,21 @@ namespace ctb
       return result;
    }
 
+#pragma warning(push)
+#pragma warning(disable: 4702) // stupid MSVC
+
+   auto ProReviewsCache::getCtDrinkWindow(uint64_t wine_id) const -> std::string
+   {
+
+      for (auto window : getDrinkWindows(wine_id))
+      {
+         return detail::getDrinkWindow(window.ct_drink_begin, window.ct_drink_end);
+      }
+      return {};
+
+   }
+
+#pragma warning(pop)
 
    void ProReviewsCache::processDataset(const ProReviewsCacheTable& tbl)
    {
@@ -79,7 +94,16 @@ namespace ctb
          {
             if (auto beg = rec[schema.drink_begin], end = rec[schema.drink_end]; beg.hasValue() or end.hasValue())
             {
-               m_drink_windows.emplace(std::make_pair(wine_id, ProDrinkWindow{ .wine_id = wine_id, .pro_id = schema.pro_id, .drink_begin = beg, .drink_end = end }));
+               m_drink_windows.emplace(std::make_pair(wine_id, 
+                  ProDrinkWindow{ 
+                     .wine_id = wine_id, 
+                     .pro_id = schema.pro_id, 
+                     .pro_drink_begin = beg, 
+                     .pro_drink_end = end, 
+                     .ct_drink_begin = rec[CtProp::CtBeginConsume], 
+                     .ct_drink_end = rec[CtProp::CtEndConsume]
+                  }
+               ));
             }
 
             if (auto score = rec[schema.score_text]; score.hasValue())

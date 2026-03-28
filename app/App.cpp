@@ -97,7 +97,7 @@ namespace ctb::app
 
          CtDatasetLoader loader{ getDataFolder(AppFolder::Tables) };
          m_review_cache = loader.getProReviewsCache();
-         CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_COLLECTION_BOTTLE_INVENTORY }); });
+         CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_COLLECTION_MY_CELLAR }); });
          return true;
       }
       catch(...){

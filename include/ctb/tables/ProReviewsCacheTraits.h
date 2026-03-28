@@ -49,16 +49,12 @@ namespace ctb
          { Prop::DR_DrinkEnd,          FieldSchema { Prop::DR_DrinkEnd,          PropType::UInt16,   54 }},
          { Prop::JD_ScoreDisplay,      FieldSchema { Prop::JD_ScoreDisplay,      PropType::String,  128 }},
          { Prop::JD_ScoreNumeric,      FieldSchema { Prop::JD_ScoreNumeric,      PropType::Double,  130 }},
-         //{ Prop::JD_DrinkBegin,        FieldSchema { Prop::JD_DrinkBegin,        PropType::UInt16,      }},
-         //{ Prop::JD_DrinkEnd,          FieldSchema { Prop::JD_DrinkEnd,          PropType::UInt16,      }},
          { Prop::JR_ScoreDisplay,      FieldSchema { Prop::JR_ScoreDisplay,      PropType::String,  110 }},
          { Prop::JR_ScoreNumeric,      FieldSchema { Prop::JR_ScoreNumeric,      PropType::Double,  112 }},
          { Prop::JR_DrinkBegin,        FieldSchema { Prop::JR_DrinkBegin,        PropType::UInt16,   51 }},
          { Prop::JR_DrinkEnd,          FieldSchema { Prop::JR_DrinkEnd,          PropType::UInt16,   52 }},
          { Prop::WFW_ScoreDisplay,     FieldSchema { Prop::WFW_ScoreDisplay,     PropType::String,  113 }},
          { Prop::WFW_ScoreNumeric,     FieldSchema { Prop::WFW_ScoreNumeric,     PropType::Double,  115 }},
-         //{ Prop::WFW_DrinkBegin,       FieldSchema { Prop::WFW_DrinkBegin,       PropType::UInt16,      }},
-         //{ Prop::WFW_DrinkEnd,         FieldSchema { Prop::WFW_DrinkEnd,         PropType::UInt16,      }},
       });
 
       static inline constexpr int TWO_DECIMAL_PLACES{ 2 };

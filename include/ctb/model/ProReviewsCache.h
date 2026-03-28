@@ -12,7 +12,7 @@ namespace ctb
    struct ProScore
    {
       uint64_t      wine_id{};
-      CtPropertyVal pro_id{};         // 2-3 letter code used for abbreviating
+      CtPropertyVal pro_id{};         // 2-3 letter code used for abbreviated scores e.g. JD90
       CtPropertyVal score_text{};
       CtPropertyVal score_numeric{};
    };
@@ -20,9 +20,11 @@ namespace ctb
    struct ProDrinkWindow
    {
       uint64_t      wine_id{};
-      CtPropertyVal pro_id{};         // 2-3 letter code used for abbreviating
-      CtPropertyVal drink_begin{};
-      CtPropertyVal drink_end{};
+      CtPropertyVal pro_id{};         
+      CtPropertyVal pro_drink_begin{};
+      CtPropertyVal pro_drink_end{};
+      CtPropertyVal ct_drink_begin{};
+      CtPropertyVal ct_drink_end{};
    };
 
    class ProReviewsCache
@@ -56,6 +58,8 @@ namespace ctb
          swap(m_scores,        other.m_scores);
          swap(m_drink_windows, other.m_drink_windows);
       }
+
+      auto getCtDrinkWindow(uint64_t wine_id) const -> std::string;
 
    private:
       std::multimap<uint64_t, ProScore>       m_scores{};
