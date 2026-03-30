@@ -220,6 +220,7 @@ namespace ctb::constants
 
    inline constexpr auto     ONE_MB                               = 1024 * 1024;
    inline constexpr uint16_t CT_NULL_YEAR                         =        9999;
+   inline constexpr uint16_t CT_NV_YEAR                           =        1001;
 
 
 } // namespace ctb::constants

@@ -132,11 +132,12 @@ namespace ctb
       {
          using enum Prop;
 
+         validateYear(rec[BeginConsume]);
+         validateYear(rec[EndConsume]);
+         validateYear(rec[Vintage]);
+
          rec[WineAndVintage] = getWineAndVintage(rec);
          rec[QtyTotal]       = calcQtyTotal(rec);
-
-         validateDrinkYear(rec[BeginConsume]);
-         validateDrinkYear(rec[EndConsume]);
       }
    };
 
