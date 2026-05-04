@@ -113,4 +113,4 @@ target_sources(${TARGET_NAME}
 )
 
 # ---- End-of-file commands ----
-add_folders(app)
+# add_folders(app)

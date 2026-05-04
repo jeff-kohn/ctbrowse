@@ -27,5 +27,5 @@ target_link_libraries(parse_csv PRIVATE ctBrowse::ctBrowse_lib)
 #      wxWidgets::wxWidgets
 # )
 
-add_folders(examples)
+# add_folders(examples)
 

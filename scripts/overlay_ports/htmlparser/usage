@@ -1,0 +1,5 @@
+The package htmlparser provides CMake targets:
+
+    find_package(htmlparser CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE htmlparser::htmlparser)
+

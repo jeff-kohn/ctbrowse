@@ -57,6 +57,7 @@ namespace ctb::app
    {
       assert(event.dataset);
       
+      // cppcheck-suppress [shadowFunction] 
       auto filter = event.dataset->propFilters().getFilter(m_filter.filter_name);
       enable(filter.has_value() ? true : false);
    }

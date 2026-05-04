@@ -156,7 +156,7 @@ namespace ctb::detail
       {
          // note we're looking for a miss, not a match, because we can return 
          // false on first miss but have to match all filters before we can return true
-         for (auto& filter : vws::values(m_filters))
+         for (const auto& filter : vws::values(m_filters))
          {
             if (false == filter(rec))
                return false;

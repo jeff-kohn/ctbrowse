@@ -1,7 +1,3 @@
----
-# Enable ALL the things! Except not really
-# misc-non-private-member-variables-in-classes: the options don't do anything
-# modernize-use-nodiscard: too aggressive, attribute is situationally useful
 Checks: "*,\
   -bugprone-easily-swappable-parameters, \
   -google-readability-todo,\

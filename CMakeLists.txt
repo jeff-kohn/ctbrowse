@@ -1,77 +1,102 @@
-cmake_minimum_required (VERSION 3.30)
+cmake_minimum_required (VERSION 4.2)
 
 project(
     ctBrowse
-    VERSION 0.1.0.0
+    VERSION 0.5.0.0
     DESCRIPTION "ctBrowse"
     LANGUAGES CXX
 )
 
-set (CMAKE_CXX_STANDARD 23)
-set (CMAKE_CXX_STANDARD_REQUIRED ON)
-set (CMAKE_CXX_EXTENSIONS OFF)
+if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR) 
+   message(FATAL_ERROR "In-source builds are not allowed") 
+endif()
 
-include(cmake/prelude.cmake)
-include(FetchContent)
+# Options that can be set by users of this project (eg through -D on the cmake command line). 
+# These are pre-configured by the presets or resonable defaults, but can be overridden when needed.
+option(CTB_BUILD_TESTS    "Enable building tests and test infrastructure. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }." ${PROJECT_IS_TOP_LEVEL} )
+option(CTB_BUILD_EXAMPLES "Enable building example programs. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }."              ${PROJECT_IS_TOP_LEVEL} )
+option(CTB_USE_CLANG_TIDY "Enable clang-tidy scanning. Default: OFF. Values: { ON, OFF }." "OFF" )
+option(CTB_USE_CPP_CHECK  "Enable CppCheck scanning. Default: OFF. Values: { ON, OFF }."   "OFF" )
+
+# include(FetchContent)
 
 # So that cmake can find any additional modules we've written (stuff like Find modules, export targets, etc)
-# list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-include(add-target)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
+include(add_folders)
+include(create_targets)
 include(product-version/generate-product-version)
-include(use-clang-tidy)
-include(variables)
 
 # export compile_commands.json for tools like clang-tidy and cppcheck
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") 
 
-# Only do these if this is the main project, and not if it is included through add_subdirectory
 if (PROJECT_IS_TOP_LEVEL)
-   include(folders)
+
+   # Only do these if this is the main project, and not if it is included through add_subdirectory
+   set (CMAKE_CXX_STANDARD 23)
+   set (CMAKE_CXX_STANDARD_REQUIRED ON)
+   set (CMAKE_CXX_EXTENSIONS OFF)
+
+   # Set platform-specific toolset options 
+   if (WIN32)
+      # By defualt cmake uses linux conventions (eg libname instead of name.lib) so override that for Windows builds.
+      SET(CMAKE_FIND_LIBRARY_PREFIXES "")
+      SET(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".dll")
+
+      if (MSVC)
+
+         #default compiler/linker flags for Windows/MSVC
+         set(CTB_COMPILE_OPTIONS "/MP;/bigobj;/cgthreads8;/EHsc;/GS;/permissive-;/sdl;/utf-8;/volatile:iso;/Zc:__cplusplus;/Zc:enumTypes;/Zc:externConstexpr;/Zc:inline;/Zc:lambda;/Zc:preprocessor;/Zc:rvalueCast;/Zc:strictStrings;/Zc:templateScope;/Zc:throwingNew;/Zc:wchar_t;;/Zi;/Zf;$<$<CONFIG:Debug>:/Od;/EHr;/RTC1>;$<$<CONFIG:Release>:/O2;/GL;/Gw;/Gy;/guard:cf;>;$<$<CONFIG:RelWithDebInfo>:/O2;/Ob3;/GL;/Gw;/Gy;/guard:cf;>")
+         set(CTB_WARNING_FLAGS "/W4;/w14165;/w14186;/w14263;/w14265;/w14296;/w14311;/w14545;/w14546;/w14547;/w14549;/w14555;/w14640;/w14826;/w14905;/w14906;/w14928;/w24826;/w34265;/w34287;/w34619;/w34640;/w44242;/w44254;/w44263;/w44296;/w44365;/w44388;/w44464;/w45038;/wd4100;/WX;/external:anglebrackets;/external:W0;")
+         set(CTB_COMPILE_DEFINITIONS "_MBCS;_WIN32_WINNT=0x0A000000;_WINSOCK_DEPRECATED_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;wxUSE_CONFIG_NATIVE=0;wxUSE_STD_CONTAINERS=1;wxUSE_UTF8_LOCALE_ONLY=1;wxUSE_STD_STRING=1;wxUSE_STL=1;wxUSE_STL_BASED_WXSTRING=1;wxNO_IMPLICIT_WXSTRING_CONV_TO_PTR=1;wxUSE_UNICODE_UTF8=1;wxUSE_UNICODE_WCHAR=0;wxUSE_UNSAFE_WXSTRING_CONV=0;$<$<CONFIG:DEBUG>:_DEBUG;_ALLOW_RTCc_IN_STL>;$<$<CONFIG:Release,RelWithDebInfo>:NDEBUG;>;SPDLOG_FMT_EXTERNAL=1")
+         set(CTB_LINK_OPTIONS "/DEBUG:FULL;/machine:x64;/guard:cf;/DYNAMICBASE;/NXCOMPAT;/CGTHREADS:8;$<$<CONFIG:DEBUG>:/INCREMENTAL;/OPT:NOICF;/OPT:NOREF>$<$<CONFIG:Release,RelWithDebInfo>:/INCREMENTAL:NO;/LTCG;/OPT:ICF;/OPT:REF;>")
+
+      elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+         #default compiler/linker flags for Windows/Clang (eg clang-cl)
+         set(CTB_COMPILE_OPTIONS "$<$<CONFIG:Debug>:-Og>;$<$<CONFIG:Release,RelWithDebInfo>:-O3>;-g;-fstack-protector-strong;-fexceptions;-grecord-gcc-switches;-fcf-protection;-pipe;-Werror=format-security;-fno-strict-overflow;-Wstrict-overflow")
+         set(CTB_WARNING_FLAGS "-Wall;-Wextra;-Wpedantic;-Werror;")
+         set(CTB_COMPILE_DEFINITIONS "_MBCS;_WIN32_WINNT=_WIN32_WINNT_WIN10;_WINSOCK_DEPRECATED_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;wxUSE_CONFIG_NATIVE=0;wxUSE_STD_CONTAINERS=1;wxUSE_UTF8_LOCALE_ONLY=1;wxUSE_UNICODE_UTF8=1;wxUSE_UNICODE_WCHAR=0;wxUSE_UNSAFE_WXSTRING_CONV=0;wxNO_IMPLICIT_WXSTRING_CONV_TO_PTR=1;$<$<CONFIG:DEBUG>:_DEBUG;_ALLOW_RTCc_IN_STL>;$<$<CONFIG:Release,RelWithDebInfo>:NDEBUG;>;")
+
+      endif()
+
+      add_custom_target (code_analysis DEPENDS all)
+
+      if (CTB_USE_CPP_CHECK)
+         include (cppcheck/use_cpp_check)
+      endif()
+
+      if (CTB_USE_CLANG_TIDY)
+         include (use_clang_tidy)
+      endif()
+
+   endif()
+
+else()
+
+   # If this project is being included through add_subdirectory, provide an default-enabled option to use the SYSTEM modifier for ctBrowse's includes, 
+   # which will disable warnings from ctBrowse's headers in the parent project. And we won't set any compiler/linker flags either.
+   option(ctBrowse_INCLUDES_WITH_SYSTEM  "Use SYSTEM modifier for ctBrowse's includes, disabling warnings"  ON)
+   mark_as_advanced(ctBrowse_INCLUDES_WITH_SYSTEM)
+   if (ctBrowse_INCLUDES_WITH_SYSTEM)
+      set(warning_guard SYSTEM)
+   endif()
+
 endif()
 
-include(FetchContent)
 
-
-# HTML parser library
-set(CMAKE_MSVC_RUNTIME_LIBRARY ${CTB_MSVC_RUNTIME_LIBRARY})
-option(HTMLPARSER_BUILD_TESTS "Build tests" OFF)
-option(HTMLPARSER_BUILD_BENCHMARKS "Build benchmarks" OFF)
-option(HTMLPARSER_BUILD_EXAMPLES "Build examples" OFF)
-FetchContent_Declare(
-        HtmlParser
-        GIT_REPOSITORY https://github.com/JustCabbage/HtmlParser.git
-        GIT_TAG master
-        SYSTEM
-)
-FetchContent_MakeAvailable(HtmlParser)
-target_compile_options(HtmlParser PRIVATE
-    $<$<CXX_COMPILER_ID:MSVC>:/W0>
-    $<$<CXX_COMPILER_ID:GNU,Clang>:-w>
-)
-# Disable clang-tidy for external library
-set_target_properties(HtmlParser PROPERTIES
-    CXX_CLANG_TIDY ""
-)
-
+find_package(HtmlParser CONFIG REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(unofficial-webview2 CONFIG REQUIRED)
-
 add_subdirectory(lib)
 add_subdirectory(app)
-add_subdirectory(examples)
 
-# ---- Developer mode, anything after endif() will only be included if developer mode is enabled ----5
-if(NOT ctBrowse_DEVELOPER_MODE)
-  return()
-elseif(NOT PROJECT_IS_TOP_LEVEL)
-  message(
-      AUTHOR_WARNING
-      "Developer mode is intended for developers of ctbrowse"
-  )
+if (CTB_BUILD_TESTS)
+      enable_testing()
+      add_subdirectory("tests")
 endif()
 
-include(dev-mode)
+if (CTB_BUILD_EXAMPLES)
+   add_subdirectory(examples)
+endif()

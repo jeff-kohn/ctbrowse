@@ -92,16 +92,16 @@ target_link_libraries(ctBrowse_lib
    PUBLIC
       cpr::cpr
       fmt::fmt
-      HtmlParser
+      HtmlParser::HtmlParser
       magic_enum::magic_enum
       spdlog::spdlog
+      unofficial::webview2::webview2
       "$<$<PLATFORM_ID:Windows>:Credui>"
       "$<$<PLATFORM_ID:Windows>:shlwapi>"
       "$<$<PLATFORM_ID:Windows>:Shell32.lib>"
-      
 )
 
 
 # ---- End-of-file commands ----
 
-add_folders(lib)
+# add_folders(lib)
