@@ -1,11 +1,13 @@
+
+find_package(unofficial-webview2 CONFIG REQUIRED)
 find_package(wxWidgets CONFIG REQUIRED)
 
 set(TARGET_NAME ctBrowse_app)
 
 # vars used for later statements
-set (${PROJECT_NAME}_AUTHOR "Jeff Kohn")
 string(TIMESTAMP CURRENT_YEAR "%Y")
-set (${PROJECT_NAME}_COPYRIGHT "Copyright © ${CURRENT_YEAR} ${${PROJECT_NAME}_AUTHOR}")
+set(${PROJECT_NAME}_COPYRIGHT "Copyright (c) ${CURRENT_YEAR} ${${PROJECT_NAME}_AUTHOR}")
+set(${PROJECT_NAME}_AUTHOR "Jeff Kohn")
 set(${PROJECT_NAME}_VERSION_RESOURCE "")
 
 generate_product_version(

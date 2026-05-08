@@ -77,14 +77,14 @@ target_sources(ctBrowse_lib
 target_include_directories(ctBrowse_lib
    ${warning_guard}
 	PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>"
+		"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
 target_include_directories(ctBrowse_lib
    SYSTEM
 	PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/3rdParty>
+		"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/3rdParty>"
 )
 
 # Note that since this target is a 
@@ -95,7 +95,6 @@ target_link_libraries(ctBrowse_lib
       HtmlParser::HtmlParser
       magic_enum::magic_enum
       spdlog::spdlog
-      unofficial::webview2::webview2
       "$<$<PLATFORM_ID:Windows>:Credui>"
       "$<$<PLATFORM_ID:Windows>:shlwapi>"
       "$<$<PLATFORM_ID:Windows>:Shell32.lib>"

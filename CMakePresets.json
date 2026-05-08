@@ -32,7 +32,16 @@
          "hidden": true,
          "inherits": "vcpkg-toolchain",
          "cacheVariables": {
-            "VCPKG_TARGET_TRIPLET": "win-static-wxwidgets",
+            "VCPKG_TARGET_TRIPLET": "win-static",
+            "CTB_MSVC_RUNTIME_LIBRARY": "$<$<CONFIG:Debug>:MultiThreadedDebug>$<$<CONFIG:Release,RelWithDebInfo>:MultiThreaded>"
+         }
+      },
+      {
+         "name": "vcpkg-win-clang",
+         "hidden": true,
+         "inherits": "vcpkg-toolchain",
+         "cacheVariables": {
+            "VCPKG_TARGET_TRIPLET": "win-clang",
             "CTB_MSVC_RUNTIME_LIBRARY": "$<$<CONFIG:Debug>:MultiThreadedDebug>$<$<CONFIG:Release,RelWithDebInfo>:MultiThreaded>"
          }
       },
@@ -67,16 +76,19 @@
          }
       },
       {
-         "name": "win-clang",
-         "displayName": "Windows-Clang",
-         "description": "Defines default compiler/linker flags for clang-cl/Win",
-         "inherits": [ "build-dir", "vcpkg-win-static" ],
+         "name": "win-clang-tidy",
+         "displayName": "Static Analysis (clang)",
+         "description": "Preset for clang-tidy and CppCheck",
+         "inherits": [ "build-dir", "vcpkg-win-clang" ],
          "generator": "Ninja Multi-Config",
          "cacheVariables": {
-            "CMAKE_C_COMPILER": "clang",
-            "CMAKE_CXX_COMPILER": "clang++",
+            "CMAKE_CONFIGURATION_TYPES": "Release",
+            "CMAKE_C_COMPILER": "clang-cl",
+            "CMAKE_CXX_COMPILER": "clang-cl",
             "CTB_BUILD_TESTS": "OFF",
             "CTB_BUILD_EXAMPLES": "OFF",
+            "CTB_USE_CPP_CHECK": "OFF",
+            "CTB_USE_CLANG_TIDY": "OFF",
             "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
          },
          "architecture": {
@@ -87,19 +99,8 @@
             "microsoft.com/VisualStudioSettings/CMake/1.0": {
                "intelliSenseMode": "windows-clang-x64",
                "enableMicrosoftCodeAnalysis": false,
-               "enableClangTidyCodeAnalysis": true,
-               "enableUndefinedBehaviorSanitizer": true
+               "enableClangTidyCodeAnalysis": false
             }
-         }
-      },
-      {
-         "name": "win-clang-tidy",
-         "displayName": "Static Analysis (clang)",
-         "description": "Adds clang-tidy and CppCheck scanning to the win-clang preset",
-         "inherits": [ "win-clang" ],
-         "cacheVariables": {
-            "CTB_USE_CPP_CHECK": "ON",
-            "CTB_USE_CLANG_TIDY": "ON"
          }
       }
    ],
@@ -115,27 +116,6 @@
          "displayName": "Release",
          "configurePreset": "win-msvc",
          "configuration": "Release",
-         "jobs": 16
-      },
-      {
-         "name": "win-clang-debug",
-         "displayName": "Debug",
-         "configurePreset": "win-clang",
-         "configuration": "Debug",
-         "jobs": 16
-      },
-      {
-         "name": "win-clang-release",
-         "displayName": "Release",
-         "configurePreset": "win-clang",
-         "configuration": "Release",
-         "jobs": 16
-      },
-      {
-         "name": "win-clang-tidy-debug",
-         "displayName": "Debug",
-         "configurePreset": "win-clang-tidy",
-         "configuration": "Debug",
          "jobs": 16
       },
       {
