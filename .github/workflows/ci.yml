@@ -16,6 +16,7 @@ env:
 permissions:
   contents: write
   checks: write
+  packages: write
 
 jobs:
   windows_build:
@@ -24,6 +25,7 @@ jobs:
     env:
       CONFIGURE_PRESET: "win-clang-tidy"
       BUILD_PRESET: "win-clang-tidy-release"
+      VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/jeff-kohn/index.json,readwrite"
 
     steps:
     - uses: actions/checkout@v4
