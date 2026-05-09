@@ -25,8 +25,9 @@ jobs:
     env:
       CONFIGURE_PRESET: "win-clang-tidy"
       BUILD_PRESET: "win-clang-tidy-release"
-      VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/jeff-kohn/index.json,readwrite"
-      NUGET_AUTH_TOKEN: ${{ secrets.VCPKG_CACHE_TOKEN }}
+      NUGET_FEED: "https://nuget.pkg.github.com/jeff-kohn/index.json"
+      VCPKG_BINARY_SOURCES: "clear;nuget,${{ env.NUGET_FEED }},readwrite"
+      NUGET_AUTH_TOKEN:  ${{ secrets.VCPKG_CACHE_TOKEN }}
       NUGET_SOURCE_USERNAME: ${{ github.actor }}
       NUGET_SOURCE_PASSWORD: ${{ secrets.VCPKG_CACHE_TOKEN }}
 
@@ -47,13 +48,11 @@ jobs:
       with:
         vcpkgJsonGlob: 'vcpkg.json'
 
-    - name: Upload vcpkg logs
-      uses: actions/upload-artifact@v7
-      if: always()
-      with:
-         name: vcpkg_logs
-         path: ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
-         retention-days: 3    
+    - name: Add NuGet sources
+      shell: pwsh
+      run: |
+        nuget sources add  -Source "${{ env.NUGET_FEED }}" -StorePasswordInClearText -Name GitHubPackages -UserName "${{ env.NUGET_SOURCE_USERNAME }}" -Password "${{ env.NUGET_SOURCE_PASSWORD }}"
+        nuget setapikey "${{ secrets.GITHUB_TOKEN }}" -Source "${{ env.NUGET_FEED }}"
 
     - name: Install pre-reqs
       run: |
@@ -61,9 +60,24 @@ jobs:
 
     - name: configure
       run: |
-        nuget
         cmake --preset=$env:CONFIGURE_PRESET
 
     - name: build
       run: |
         cmake --build --preset=$env:BUILD_PRESET --target=code_analysis
+
+    - name: Upload build logs
+      uses: actions/upload-artifact@v7
+      if: always()
+      with:
+         name: vcpkg_logs
+         path: ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+         retention-days: 3    
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v7
+      if: always()
+      with:
+         name: vcpkg_logs
+         path: ${{ github.workspace }}/build/$env:CONFIGURE_PRESET/Release/ctBrowse_app.exe
+         retention-days: 3    
