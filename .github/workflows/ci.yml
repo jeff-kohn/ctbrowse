@@ -23,7 +23,7 @@ jobs:
     name: "Window MSVC Build"
     runs-on: windows-2025
     env:
-      CONFIGURE_PRESET: "win-clang-tidy-clang"
+      CONFIGURE_PRESET: "win-clang-tidy"
       BUILD_PRESET: "win-clang-tidy-release"
       NUGET_FEED: "https://nuget.pkg.github.com/jeff-kohn/index.json"
       VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/jeff-kohn/index.json,readwrite"
