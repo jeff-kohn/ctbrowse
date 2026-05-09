@@ -26,6 +26,7 @@ jobs:
       CONFIGURE_PRESET: "win-clang-tidy"
       BUILD_PRESET: "win-clang-tidy-release"
       VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/jeff-kohn/index.json,readwrite"
+      NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
     - uses: actions/checkout@v4
@@ -53,7 +54,7 @@ jobs:
 
     - name: Install pre-reqs
       run: |
-        winget install CppCheck --verbose --disable-interactivity  --accept-source-agreements --accept-package-agreements
+        winget install CppCheck --verbose --disable-interactivity --source winget --accept-source-agreements --accept-package-agreements
 
     - name: configure
       run: |
