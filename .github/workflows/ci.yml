@@ -22,9 +22,8 @@ jobs:
     name: "Window MSVC Build"
     runs-on: windows-2025
     env:
-      CONFIGURE_PRESET: "ci-win-msvc"
-      BUILD_PRESET: "ci-win-msvc"
-      BUILD_CONFIG: "Release"
+      CONFIGURE_PRESET: "win-clang-tidy"
+      BUILD_PRESET: "win-clang-tidy-release"
 
     steps:
     - uses: actions/checkout@v4
@@ -60,4 +59,4 @@ jobs:
 
     - name: build
       run: |
-        cmake --build --preset=$env:BUILD_PRESET --config=$env:BUILD_CONFIG --target=all
+        cmake --build --preset=$env:BUILD_PRESET --target=code_analysis
