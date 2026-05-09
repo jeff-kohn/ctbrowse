@@ -39,9 +39,8 @@ if (PROJECT_IS_TOP_LEVEL)
       SET(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".dll")
 
       set(CTB_COMPILE_OPTIONS
-          /bigobj /permissive- /sdl /utf-8 /Zi
+          /bigobj /permissive- /sdl /utf-8 /Zi /EHsc
           $<$<CXX_COMPILER_ID:MSVC>:/Zf>
-          $<$<CONFIG:Debug>:/EHr>
           $<$<CONFIG:Release,ReleaseMinSize>:/Gw /Gy /guard:cf>
           $<$<CONFIG:RelWithDebInfo>:/Ob3 /Gw /Gy /guard:cf>
       )

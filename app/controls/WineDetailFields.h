@@ -14,7 +14,8 @@ namespace ctb::app
 {
    namespace detail
    {
-      class DisplayValue
+		
+      class DisplayValue 
       {
       public:
          static constexpr auto COL_COUNT = 2;
@@ -25,11 +26,11 @@ namespace ctb::app
             if (!parent_wnd)
                throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
 
-            m_label_wnd = new wxStaticText{ parent_wnd, wxID_ANY, wxFromSV(heading_label) };
-            m_value_wnd = new wxStaticText{ parent_wnd, wxID_ANY, wxEmptyString           };
+            m_label_wnd = new wxStaticText{ parent_wnd, wxID_ANY, wxFromSV(heading_label) };    // cppcheck-suppress noOperatorEq
+            m_value_wnd = new wxStaticText{ parent_wnd, wxID_ANY, wxEmptyString           };    // cppcheck-suppress noOperatorEq
             m_value_wnd->SetValidator(wxGenericValidator{ m_display_value.get() });
 
-            m_row_sizer = new wxGridSizer{ COL_COUNT };
+            m_row_sizer = new wxGridSizer{ COL_COUNT };                                         // cppcheck-suppress noOperatorEq
             m_row_sizer->Add(m_label_wnd, wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT).Right());
             m_row_sizer->Add(m_value_wnd, wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT));
             parent_sizer->Add(m_row_sizer, wxSizerFlags{}.CenterHorizontal());
@@ -55,6 +56,11 @@ namespace ctb::app
                m_display_value->Replace("&", "&&");
             }
          }
+
+         DisplayValue(const DisplayValue&) = delete;
+	      DisplayValue& operator=(const DisplayValue&) = delete;
+         DisplayValue(DisplayValue&&) = default;
+         DisplayValue& operator=(DisplayValue&&) = default;
 
       private:
          bool          m_created{ false };
@@ -119,7 +125,7 @@ namespace ctb::app
       }
 
    private:
-      detail::DisplayValue m_display_prop;
+      detail::DisplayValue    m_display_prop;
       CtProp                  m_prop_id;
       std::string             m_format_str{ constants::FMT_DEFAULT_FORMAT };
       std::string             m_label_text{};
@@ -173,7 +179,7 @@ namespace ctb::app
       ProReviewDisplay() = delete;
       ProReviewDisplay(wxSizer* parent_sizer, std::string_view label_text, CacheValueFn value_fn) :
          m_display_prop{ parent_sizer, label_text },
-         m_value_fn{ value_fn }
+         m_value_fn{ std::move(value_fn) }
       {}
 
       /// @brief update the field values from the specified dataset row

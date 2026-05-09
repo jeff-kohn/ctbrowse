@@ -232,7 +232,7 @@ namespace ctb::app
 
 
    // NOLINTNEXTLINE(performance-unnecessary-value-param) 
-   void LabelImageCache::fetchLabelThreadProc(RequestPtr request, std::string page_text, fs::path cache_folder, std::stop_token token)
+   void LabelImageCache::fetchLabelThreadProc(RequestPtr request, std::string page_text, fs::path cache_folder, std::stop_token token) // cppcheck-suppress passedByValueCallback
    {
       try
       {

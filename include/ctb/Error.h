@@ -66,7 +66,7 @@ namespace ctb
       /// @brief formattedMessage()
       /// @return a formatted error message combining the properties of this object.
       /// 
-      std::string formattedMesage() const
+      const std::string& formattedMesage() const
       {
          return error_message;
       }

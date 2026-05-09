@@ -48,7 +48,7 @@
       {
          "name": "win-msvc",
          "displayName": "Windows-MSVC",
-         "description": "Defines default build configuration for Windows, used for GHA CI builds",
+         "description": "Build preset for Windows with MSVC",
          "inherits": [ "build-dir", "vcpkg-win-static" ],
          "generator": "Visual Studio 18 2026",
          "architecture": {
@@ -76,20 +76,19 @@
          }
       },
       {
-         "name": "win-clang-tidy",
-         "displayName": "Static Analysis (clang)",
-         "description": "Preset for clang-tidy and CppCheck",
+         "name": "win-clang",
+         "displayName": "Windows-Clang",
+         "description": "Build preset for Clang on Windows",
          "inherits": [ "build-dir", "vcpkg-win-clang" ],
          "generator": "Ninja Multi-Config",
          "cacheVariables": {
-            "CMAKE_CONFIGURATION_TYPES": "Release",
+            "CMAKE_CONFIGURATION_TYPES": "Debug;RelWithDebInfo",
             "CMAKE_C_COMPILER": "clang-cl",
             "CMAKE_CXX_COMPILER": "clang-cl",
             "CTB_BUILD_TESTS": "OFF",
             "CTB_BUILD_EXAMPLES": "OFF",
             "CTB_USE_CPP_CHECK": "OFF",
-            "CTB_USE_CLANG_TIDY": "OFF",
-            "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            "CTB_USE_CLANG_TIDY": "OFF"
          },
          "architecture": {
             "value": "x64",
@@ -101,6 +100,16 @@
                "enableMicrosoftCodeAnalysis": false,
                "enableClangTidyCodeAnalysis": false
             }
+         }
+      },
+      {
+         "name": "win-clang-tidy",
+         "displayName": "Static Analysis (clang)",
+         "description": "Preset for clang-tidy and CppCheck",
+         "inherits": [ "win-clang" ],
+         "cacheVariables": {
+            "CTB_USE_CPP_CHECK": "ON",
+            "CTB_USE_CLANG_TIDY": "OFF"
          }
       }
    ],
@@ -119,10 +128,31 @@
          "jobs": 16
       },
       {
+         "name": "win-clang-release",
+         "displayName": "Release",
+         "configurePreset": "win-clang",
+         "configuration": "Release",
+         "jobs": 16
+      },
+      {
+         "name": "win-clang-debug",
+         "displayName": "Debug",
+         "configurePreset": "win-clang",
+         "configuration": "Debug",
+         "jobs": 16
+      },
+      {
          "name": "win-clang-tidy-release",
          "displayName": "Release",
          "configurePreset": "win-clang-tidy",
          "configuration": "Release",
+         "jobs": 16
+      },
+      {
+         "name": "win-clang-tidy-debug",
+         "displayName": "Debug",
+         "configurePreset": "win-clang-tidy",
+         "configuration": "Debug",
          "jobs": 16
       }
    ]
