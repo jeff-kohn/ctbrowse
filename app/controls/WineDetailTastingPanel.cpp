@@ -98,10 +98,8 @@ namespace ctb::app
          GetSizer()->ShowItems(false);
          Show(false);
       }
-      // force full UI update
       TransferDataToWindow();
-      calcNoteSize();
-      SendSizeEventToParent(wxSEND_EVENT_POST);
+      calcNoteSize();         // expand to fit note contents, parent will resize to accomodate
    }
 
 

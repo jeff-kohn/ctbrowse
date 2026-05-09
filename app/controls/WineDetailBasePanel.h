@@ -22,7 +22,7 @@ namespace ctb::app
 
    protected:
       using Base         = DatasetWindow<wxPanel>;
-      using DetailField  = std::variant<SinglePropDetailField, DrinkWindowDetailField>;
+      using DetailField  = std::variant<SinglePropertyDisplay, DrinkWindowDisplay, ProReviewDisplay>;
       using DetailFields = std::deque<DetailField>;
 
       /// @brief derived classes must implement this to populate DetailFields with the fields the panel will display.

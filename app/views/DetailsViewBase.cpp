@@ -53,6 +53,11 @@ namespace ctb::app
       // add the base detail panel, then give derived classes the chance to add additional panels/fields.
       top_sizer->Add(WineDetailMainPanel::create(this, getEventHandler().getSource()), sizer_flags);
       this->addDatasetSpecificControls(top_sizer, getEventHandler().getSource());
+
+      // As the selected wine changes, the contents of our subpanels may dynamically adjust size/contents, we we need to re-layout the window and
+      // sending a WM_SIZE event is the most reliable way to do that. Using CallAfter() ensures that this will happen after all other subscribers
+      // have handled the dataset event.
+      getEventHandler().addHandler(DatasetEvent::Id::RowSelected, [this](auto&&) { CallAfter([this] { SendSizeEvent(); }); });
    }
 
 

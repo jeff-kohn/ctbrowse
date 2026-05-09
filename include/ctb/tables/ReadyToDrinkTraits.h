@@ -148,10 +148,6 @@ namespace ctb
       {
          using enum Prop;
 
-         rec[WineAndVintage]      = getWineAndVintage(rec);
-         rec[QtyTotal]            = calcQtyTotal(rec);
-         rec[RtdInventorySummary] = getRtdInventory(rec);
-
          auto qty_logical  = rec[RtdInventoryLogical].asUInt16().value_or(0);
          auto qty_physical = rec[RtdInventoryPhysical].asUInt16().value_or(qty_logical); // so we default to 750ml
 
@@ -168,10 +164,15 @@ namespace ctb
             rec[Size] = constants::LBL_SIZE_750ml;
          }
 
-         validateDrinkYear(rec[BeginConsume]);
-         validateDrinkYear(rec[EndConsume]);
-         validateDrinkYear(rec[CtBeginConsume]);
-         validateDrinkYear(rec[CtEndConsume]);
+         validateYear(rec[BeginConsume]);
+         validateYear(rec[EndConsume]);
+         validateYear(rec[CtBeginConsume]);
+         validateYear(rec[CtEndConsume]);
+         validateYear(rec[Vintage]);
+
+         rec[WineAndVintage]      = getWineAndVintage(rec);
+         rec[QtyTotal]            = calcQtyTotal(rec);
+         rec[RtdInventorySummary] = getRtdInventory(rec);
       }
    };
 

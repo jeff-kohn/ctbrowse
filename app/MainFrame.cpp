@@ -62,6 +62,7 @@ namespace ctb::app
             case CMD_COLLECTION_BOTTLE_INVENTORY: return TableId::Inventory;
             case CMD_COLLECTION_READY_TO_DRINK:   return TableId::Availability;
             case CMD_COLLECTION_CONSUMED:         return TableId::Consumed;
+            case CMD_COLLECTION_PRIVATE_NOTES:    return TableId::PrivateNotes;
             case CMD_COLLECTION_PURCHASED_WINE:   return TableId::Purchase;
             case CMD_COLLECTION_TAGGED_WINES:     return TableId::Tag;
 				case CMD_COLLECTION_TASTING_NOTES:    return TableId::Notes;
@@ -159,7 +160,7 @@ namespace ctb::app
             });
       }
 
-      if (dataset->hasProperty(CtProp::QtyOnHand))  // can only drink if have can check available inventory
+      if (dataset->getTableId() == TableId::Inventory or dataset->hasProperty(CtProp::QtyOnHand))  // can only drink if have available inventory
       {
          popup_menu->AppendSeparator();
          popup_menu->Append(new wxMenuItem{
@@ -236,6 +237,7 @@ namespace ctb::app
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_BOTTLE_INVENTORY);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_READY_TO_DRINK);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_CONSUMED);
+      Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_PRIVATE_NOTES);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_PURCHASED_WINE);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_TAGGED_WINES);
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_TASTING_NOTES);
@@ -398,6 +400,14 @@ namespace ctb::app
          constants::CMD_COLLECTION_TASTING_NOTES_TIP,
          wxITEM_NORMAL
          });
+      menu_data->Append(new wxMenuItem{
+         menu_data,
+         CmdId::CMD_COLLECTION_PRIVATE_NOTES,
+         constants::CMD_COLLECTION_PRIVATE_NOTES_LBL,
+         constants::CMD_COLLECTION_PRIVATE_NOTES_TIP,
+         wxITEM_NORMAL
+         });      
+      menu_data->AppendSeparator();
       menu_data->Append(new wxMenuItem{
          menu_data,
          CmdId::CMD_COLLECTION_PURCHASED_WINE,
@@ -920,7 +930,7 @@ namespace ctb::app
       try 
       {
          auto dataset = getDataset(false);
-         bool enable = (m_selected_row >= 0) and dataset.get() and (dataset->getProperty(m_selected_row, CtProp::QtyOnHand).asInt32().value_or(0) > 0);
+         bool enable = (m_selected_row >= 0) and dataset.get() and (dataset->getTableId() == TableId::Inventory or dataset->getProperty(m_selected_row, CtProp::QtyOnHand).asInt32().value_or(0) > 0);
          event.Enable(enable);
       }
       catch (...) {

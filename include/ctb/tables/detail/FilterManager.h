@@ -34,7 +34,7 @@ namespace ctb::detail
 
       /// @brief Adds a filter to the collection if it does not already exist.
       /// @return true if the filter was successfully added; false if a filter with the same filter_name already exists.
-      auto addFilter(Key key, Filter filter) -> bool
+	  auto addFilter(const Key& key, Filter filter) -> bool
       {
          if (m_filters.try_emplace(std::move(key), std::move(filter)).second)
          {
@@ -45,7 +45,7 @@ namespace ctb::detail
       }
 
       /// @brief Replace an existing filter, or add it if it does not already exist.
-      void replaceFilter(Key key, Filter filter)
+	  void replaceFilter(const Key& key, Filter filter)
       {
          m_filters[key] = std::move(filter);
          notifyChange();
@@ -156,7 +156,7 @@ namespace ctb::detail
       {
          // note we're looking for a miss, not a match, because we can return 
          // false on first miss but have to match all filters before we can return true
-         for (auto& filter : vws::values(m_filters))
+         for (const auto& filter : vws::values(m_filters))
          {
             if (false == filter(rec))
                return false;

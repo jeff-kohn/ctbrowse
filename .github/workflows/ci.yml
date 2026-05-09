@@ -22,9 +22,8 @@ jobs:
     name: "Window MSVC Build"
     runs-on: windows-2025
     env:
-      CONFIGURE_PRESET: "ci-win-msvc"
-      BUILD_PRESET: "ci-win-msvc"
-      BUILD_CONFIG: "Release"
+      CONFIGURE_PRESET: "win-clang-tidy"
+      BUILD_PRESET: "win-clang-tidy-release"
 
     steps:
     - uses: actions/checkout@v4
@@ -38,12 +37,12 @@ jobs:
       uses: lukka/get-cmake@latest
 
     - name: "Run Vcpkg"
-      uses: lukka/run-vcpkg@v11.5
+      uses: lukka/run-vcpkg@v11
       with:
         vcpkgJsonGlob: 'vcpkg.json'
 
     - name: Upload vcpkg logs
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
          name: vcpkg_logs
@@ -60,4 +59,4 @@ jobs:
 
     - name: build
       run: |
-        cmake --build --preset=$env:BUILD_PRESET --config=$env:BUILD_CONFIG --target=all
+        cmake --build --preset=$env:BUILD_PRESET --target=code_analysis

@@ -31,12 +31,15 @@ target_sources(ctBrowse_lib
       "../include/ctb/model/CtDatasetLoader.h"
       "../include/ctb/model/DatasetEventSource.h"
       "../include/ctb/model/DatasetEventHandler.h"
+      "../include/ctb/model/ProReviewsCache.h"
       "../include/ctb/model/ScopedDatasetFreeze.h"
       
       "../include/ctb/tables/BottleInventoryTraits.h"
       "../include/ctb/tables/ConsumedWineTraits.h"
       "../include/ctb/tables/CtSchema.h"
       "../include/ctb/tables/PendingWineTraits.h"
+      "../include/ctb/tables/PrivateNotesTraits.h"
+      "../include/ctb/tables/ProReviewsCacheTraits.h"
       "../include/ctb/tables/PurchasedWineTraits.h"
       "../include/ctb/tables/ReadyToDrinkTraits.h"
       "../include/ctb/tables/TastingNotesTraits.h"
@@ -64,6 +67,7 @@ target_sources(ctBrowse_lib
       "CtDatasetLoader.cpp"
       "DatasetEventSource.cpp"
       "log.cpp"
+      "ProReviewsCache.cpp"
       "table_download.cpp"
       "tasks.cpp"
       "utility.cpp"
@@ -73,14 +77,14 @@ target_sources(ctBrowse_lib
 target_include_directories(ctBrowse_lib
    ${warning_guard}
 	PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>"
+		"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
 target_include_directories(ctBrowse_lib
    SYSTEM
 	PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/3rdParty>
+		"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/3rdParty>"
 )
 
 # Note that since this target is a 
@@ -88,16 +92,15 @@ target_link_libraries(ctBrowse_lib
    PUBLIC
       cpr::cpr
       fmt::fmt
-      HtmlParser
+      HtmlParser::HtmlParser
       magic_enum::magic_enum
       spdlog::spdlog
       "$<$<PLATFORM_ID:Windows>:Credui>"
       "$<$<PLATFORM_ID:Windows>:shlwapi>"
       "$<$<PLATFORM_ID:Windows>:Shell32.lib>"
-      
 )
 
 
 # ---- End-of-file commands ----
 
-add_folders(lib)
+# add_folders(lib)

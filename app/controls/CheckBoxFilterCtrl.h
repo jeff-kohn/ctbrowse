@@ -43,7 +43,7 @@ namespace ctb::app
       template<typename WndT, typename... Args>
       friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
 
-      void createWindow(wxWindow* parent);
+      void createWindow(wxWindow* parent) override;
       void onFilterChecked(wxCommandEvent& event);
       void onDatasetFilter(const DatasetEvent& event);
    };

@@ -1,10 +1,10 @@
 /**************************************************************************************************
-* @file  BottleInventoryTraits.h
+* @file  PrivateNotesTraits.h
 *
-* @brief defines the BottleInventoryTraits class, which is an instantiation of CtDataTable<> 
-*        implemented using the traits template BottleInventoryTraits 
-* 
-* @copyright Copyright © 2025 Jeff Kohn. All rights reserved. 
+* @brief defines the PrivateNotesTraits class, which is an instantiation of CtDataTable<>
+*        implemented using the traits template PrivateNotesTraits
+*
+* @copyright Copyright © 2025 Jeff Kohn. All rights reserved.
 **************************************************************************************************/
 #pragma once
 
@@ -21,63 +21,49 @@ namespace ctb
 {
    /// @brief Traits class for a table record from the 'Inventory' CellarTracker CSV table.
    /// 
-   class BottleInventoryTraits
+   class PrivateNotesTraits
    {
    public:
-      using Prop                 = CtProp;
-      using PropertyVal          = CtPropertyVal;
-      using PropType             = detail::PropType;
-      using PropertyMap          = CtPropertyMap;
-      using FieldSchema          = detail::FieldSchema<Prop>;
-      using ListColumn           = CtListColumn;
-      using ListColumnSpan       = CtListColumnSpan;
-      using MultiValueFilter     = detail::MultiValueFilter<Prop, PropertyMap>;
-      using TableSort            = detail::TableSorter<CtProp, CtPropertyMap>;
+      using Prop = CtProp;
+      using PropertyVal = CtPropertyVal;
+      using PropType = detail::PropType;
+      using PropertyMap = CtPropertyMap;
+      using FieldSchema = detail::FieldSchema<Prop>;
+      using ListColumn = CtListColumn;
+      using ListColumnSpan = CtListColumnSpan;
+      using MultiValueFilter = detail::MultiValueFilter<Prop, PropertyMap>;
+      using TableSort = detail::TableSorter<CtProp, CtPropertyMap>;
 
       static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
-      {
-         { Prop::iWineId,          FieldSchema { Prop::iWineId,          PropType::UInt64,      0 }},
-         { Prop::WineName,         FieldSchema { Prop::WineName,         PropType::String,     15 }},
-         { Prop::Locale,           FieldSchema { Prop::Locale,           PropType::String,     16 }},
-         { Prop::Vintage,          FieldSchema { Prop::Vintage,          PropType::UInt16,     14 }},
-         { Prop::Producer,         FieldSchema { Prop::Producer,         PropType::String,     21 }},
-         { Prop::Country,          FieldSchema { Prop::Country,          PropType::String,     17 }},
-         { Prop::Region,           FieldSchema { Prop::Region,           PropType::String,     18 }},
-         { Prop::SubRegion,        FieldSchema { Prop::SubRegion,        PropType::String,     19 }},
-         { Prop::Appellation,      FieldSchema { Prop::Appellation,      PropType::String,     20 }},
-         { Prop::Color,            FieldSchema { Prop::Color,            PropType::String,     24 }},
-         { Prop::Category,         FieldSchema { Prop::Category,         PropType::String,     25 }},
-         { Prop::Varietal,         FieldSchema { Prop::Varietal,         PropType::String,     27 }},
-         { Prop::CtScore,          FieldSchema { Prop::CtScore,          PropType::Double,     61 }},
-         { Prop::MyScore,          FieldSchema { Prop::MyScore,          PropType::Double,     63 }},
-         { Prop::Size,             FieldSchema { Prop::Size,             PropType::String,      4 }},
-         { Prop::BeginConsume,     FieldSchema { Prop::BeginConsume,     PropType::UInt16,     65 }},
-         { Prop::EndConsume,       FieldSchema { Prop::EndConsume,       PropType::UInt16,     66 }},
-         { Prop::MyPrice,          FieldSchema { Prop::MyPrice,          PropType::Double,      8 }},
-         { Prop::CtPrice,          FieldSchema { Prop::CtPrice,          PropType::Double,      7 }},
-         { Prop::Location,         FieldSchema { Prop::Location,         PropType::String,      2 }},
-         { Prop::Bin,              FieldSchema { Prop::Bin,              PropType::String,      3 }},
-         { Prop::BottleNote,       FieldSchema { Prop::BottleNote,       PropType::String,     13 }},
-         { Prop::PendingStoreName, FieldSchema { Prop::PendingStoreName, PropType::String,     11 }},
-         { Prop::PendingOrderDate, FieldSchema { Prop::PendingOrderDate, PropType::Date,       12 }},
-         { Prop::WineAndVintage,   FieldSchema { Prop::WineAndVintage,   PropType::String,     {} }},
-      });
+         {
+            { Prop::iWineId,          FieldSchema { Prop::iWineId,          PropType::UInt64,      1 }},
+            { Prop::iPrivateNoteId,   FieldSchema { Prop::iPrivateNoteId,   PropType::UInt64,      0 }},
+            { Prop::WineName,         FieldSchema { Prop::WineName,         PropType::String,      7 }},
+            { Prop::Locale,           FieldSchema { Prop::Locale,           PropType::String,      9 }},
+            { Prop::Vintage,          FieldSchema { Prop::Vintage,          PropType::UInt16,      6 }},
+            { Prop::Producer,         FieldSchema { Prop::Producer,         PropType::String,     10 }},
+            { Prop::Country,          FieldSchema { Prop::Country,          PropType::String,     16 }},
+            { Prop::Region,           FieldSchema { Prop::Region,           PropType::String,     17 }},
+            { Prop::SubRegion,        FieldSchema { Prop::SubRegion,        PropType::String,     18 }},
+            { Prop::Appellation,      FieldSchema { Prop::Appellation,      PropType::String,     19 }},
+            { Prop::Color,            FieldSchema { Prop::Color,            PropType::String,      3 }},
+            { Prop::Category,         FieldSchema { Prop::Category,         PropType::String,      4 }},
+            { Prop::Varietal,         FieldSchema { Prop::Varietal,         PropType::String,     13 }},
+            { Prop::PrivateNote,      FieldSchema { Prop::PrivateNote,      PropType::String,     21 }},
+            { Prop::WineAndVintage,   FieldSchema { Prop::WineAndVintage,   PropType::String,     {} }},
+         });
 
       /// @brief list of display columns that will show in the list view
-      static inline const std::array DefaultListColumns 
-      { 
+      static inline const std::array DefaultListColumns
+      {
          CtListColumn{ Prop::WineAndVintage,                                    constants::DISPLAY_COL_WINE        },
          CtListColumn{ Prop::Locale,                                            constants::DISPLAY_COL_LOCALE      },
-         CtListColumn{ Prop::Location,                                          constants::DISPLAY_COL_LOCATION    },
-         CtListColumn{ Prop::Bin,                                               constants::DISPLAY_COL_BIN         },
-         CtListColumn{ Prop::CtScore,           CtListColumn::Format::Decimal,  constants::DISPLAY_COL_CT_SCORE, 1 },
-         CtListColumn{ Prop::MyScore,           CtListColumn::Format::Decimal,  constants::DISPLAY_COL_MY_SCORE, 1 },
-
+         CtListColumn{ Prop::PrivateNote,                                       constants::DISPLAY_COL_NOTE        },
       };
 
       /// @brief the available sort orders for this table.
-      static inline const std::array AvailableSorts 
-      { 
+      static inline const std::array AvailableSorts
+      {
          TableSort{ { Prop::WineName,   Prop::Vintage                           }, constants::SORT_OPTION_WINE_VINTAGE   },
          TableSort{ { Prop::Vintage,    Prop::WineName                          }, constants::SORT_OPTION_VINTAGE_WINE   },
          TableSort{ { Prop::Location,   Prop::Bin,       Prop::WineAndVintage   }, constants::SORT_OPTION_LOC_BIN,       },
@@ -90,7 +76,7 @@ namespace ctb
       };
 
       /// @brief multi-value filters that can be used on this table.
-      static inline const std::array MultiValueFilters 
+      static inline const std::array MultiValueFilters
       {
          MultiValueFilter{ Prop::Location,    constants::FILTER_LOCATION    },
          MultiValueFilter{ Prop::Bin,         constants::FILTER_BIN         },
@@ -107,14 +93,14 @@ namespace ctb
       /// @brief getTableName()
       /// @return the name of this CT table this traits class represents
       static constexpr auto getTableId() -> TableId
-      { 
-         return TableId::Inventory;
+      {
+         return TableId::PrivateNotes;
       }
 
       /// @brief getTableName()
       /// @return the name of this CT table this traits class represents
-      static constexpr auto getTableName() -> std::string_view 
-      { 
+      static constexpr auto getTableName() -> std::string_view
+      {
          return TableDescriptions.at(getTableId());
       }
 
@@ -144,7 +130,7 @@ namespace ctb
       }
    };
 
-   using BottleInventoryTable = CtDataTable<BottleInventoryTraits>;
+   using PrivateNotesTable = CtDataTable<PrivateNotesTraits>;
 
 
 } // namespace ctb

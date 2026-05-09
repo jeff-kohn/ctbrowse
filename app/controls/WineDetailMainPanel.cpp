@@ -50,22 +50,24 @@ namespace ctb::app
       auto  dataset   = getDataset();
 
       // ordering matters here because it's the same as they'll be displayed
-      fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::Vintage,        constants::LBL_VINTAGE });
-      fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::Varietal,       constants::LBL_VARIETAL });
-      fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::Country,        constants::LBL_COUNTRY });
-      fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::Region,         constants::LBL_REGION });
-      fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::SubRegion,      constants::LBL_SUB_REGION });
-      fields.emplace_back(SinglePropDetailField{ top_sizer, CtProp::Appellation,    constants::LBL_APPELLATION });
+      fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::Vintage,        constants::LBL_VINTAGE     });
+      fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::Varietal,       constants::LBL_VARIETAL    });
+      fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::Country,        constants::LBL_COUNTRY     });
+      fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::Region,         constants::LBL_REGION      });
+      fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::SubRegion,      constants::LBL_SUB_REGION  });
+      fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::Appellation,    constants::LBL_APPELLATION });
 
       if (dataset->hasProperty(CtProp::CtBeginConsume))
       {
-         fields.emplace_back(DrinkWindowDetailField{ top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW_MY });
-         fields.emplace_back(DrinkWindowDetailField{ top_sizer, CtProp::CtBeginConsume, CtProp::CtEndConsume, constants::LBL_DRINK_WINDOW_CT });
+         fields.emplace_back(DrinkWindowDisplay{ top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW_MY });
+         fields.emplace_back(DrinkWindowDisplay{ top_sizer, CtProp::CtBeginConsume, CtProp::CtEndConsume, constants::LBL_DRINK_WINDOW_CT });
 
       }
       else {
-         fields.emplace_back(DrinkWindowDetailField{ top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW });
+         fields.emplace_back(DrinkWindowDisplay{ top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW });
+         fields.emplace_back(ProReviewDisplay  { top_sizer, constants::LBL_DRINK_WINDOW_CT, &ProReviewsCache::getCtDrinkWindow        });
       }
+      fields.emplace_back(ProReviewDisplay{ top_sizer, constants::LBL_DRINK_WINDOW_PRO, &ProReviewsCache::getDrinkWindowSummary });
    }
 
    void WineDetailMainPanel::postWindowCreate()

@@ -78,11 +78,18 @@ namespace ctb::detail
       return result;
    }
 
-   /// @brief  Replace drink date of 9999 with null
-   inline void validateDrinkYear(CtPropertyVal& prop) 
+   /// @brief  Replace drink date of 9999 with null, same for 1001, which is used for non-vintage.
+   inline void validateYear(CtPropertyVal& prop) 
    {
-      if (prop.asUInt16() == constants::CT_NULL_YEAR)
+      auto year = prop.asUInt16();
+      if (year == constants::CT_NULL_YEAR)
+      {
          prop.setNull();
+      }
+      else if (year == constants::CT_NV_YEAR)
+      {
+         prop = "NV";
+      }
    }
 
    inline auto getDrinkWindow(const CtPropertyVal& drink_start, const CtPropertyVal& drink_end) -> std::string
@@ -96,7 +103,7 @@ namespace ctb::detail
       if (drink_end.isNull())
          return drink_start.asString("{}+").c_str();
 
-      return ctb::format("{} - {}", drink_start.asString(), drink_end.asString());
+      return ctb::format("{}-{}", drink_start.asString(), drink_end.asString());
    }
 
 } // namespace ctb::detail

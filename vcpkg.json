@@ -9,6 +9,7 @@
     "cpr",
     "fmt",
     "frozen",
+    "htmlparser",
     "glaze",
     "magic-enum",
     {
@@ -24,5 +25,5 @@
     "spdlog",
     "webview2"
   ],
-  "builtin-baseline": "4b77da7fed37817f124936239197833469f1b9a8"
+  "builtin-baseline": "7fb558b02523aaa5f1f297e12d695962ce15fc92"
 }

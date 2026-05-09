@@ -8,7 +8,7 @@
    Command Prompt.
 
   .PARAMETER Preset
-  Specifies the CMake build preset to use. Defaults to "dev-vscode".
+  Specifies the CMake build preset to use. Defaults to "win-msvc-release".
 
   .PARAMETER Config
   Optionally specify the build configuration for multi-config presets that don't specify
@@ -22,13 +22,12 @@
   This switch causes cmake to run unit tests
 
   .EXAMPLE
-  PS> scripts/Build-Preset.ps1 -Preset="win-msvc" -Config="Release"
-
+  PS> scripts/Build-Preset.ps1 -Preset="win-msvc-release" 
   .EXAMPLE
   PS> scripts/Build-Preset.ps1 win-debug 
 
   .EXAMPLE
-  PS> scripts/Build-Preset.ps1 -Config="Debug" -Rebuild -Tests
+  PS> scripts/Build-Preset.ps1 -Config="Debug" -Rebuild -RunTests
 
 #>
 

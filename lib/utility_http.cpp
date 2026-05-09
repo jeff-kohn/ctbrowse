@@ -85,7 +85,7 @@ namespace ctb
 
    auto viewResponseBytes(cpr::Response& response) -> BufferSpan
    {
-      assert(response.downloaded_bytes == std::ssize(response.text));
+      assert(response.downloaded_bytes == std::ssize(response.text)); // cppcheck-suppress assertWithSideEffect
 
       if (response.downloaded_bytes > 0)
       {

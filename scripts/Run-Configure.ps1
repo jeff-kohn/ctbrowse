@@ -29,7 +29,7 @@
 
 param
 (
-   [string] $Preset = "dev-vscode",
+   [string] $Preset = "win-msvc",
    [switch] $WipeClean,
    [switch] $Force
 )

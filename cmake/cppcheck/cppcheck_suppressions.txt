@@ -1,0 +1,10 @@
+functionStatic
+missingIncludeSystem
+missingInclude
+unusedFunction
+unmatchedSuppression
+checkersReport
+useStlAlgorithm
+functionConst
+compareBoolExpressionWithInt
+unsafeClassCanLeak

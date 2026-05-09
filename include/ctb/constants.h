@@ -50,6 +50,7 @@ namespace ctb::constants
    inline constexpr const char* DISPLAY_COL_LOCALE          = "Region and Appellation";
    inline constexpr const char* DISPLAY_COL_MY_SCORE        = "My Score";
    inline constexpr const char* DISPLAY_COL_MY_WINDOW       = "My Window";
+   inline constexpr const char* DISPLAY_COL_NOTE            = "Note";
    inline constexpr const char* DISPLAY_COL_PRICE           = "Price";
    inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Purchased";
    inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
@@ -193,6 +194,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_SUMMARY_BOTTLE_INVENTORY      = "{} Wines, with {} Bottles spanning {} vintages.";
    inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, with {} Bottles Cellared and {} Pending Delivery";
    inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles.";
+   inline constexpr const char* FMT_SUMMARY_PRIVATE_NOTES         = "{} Private Notes.";
    inline constexpr const char* FMT_SUMMARY_TAGGED_WINES          = "{} Lists Containing {} Wines.";
    inline constexpr const char* FMT_SUMMARY_TASTING_NOTES         = "{} Tasting Notes Recorded for {} Wines.";
    inline constexpr const char* FMT_TASTING_CT_LIKE_SUMMARY       = "{} ({}%)";
@@ -218,6 +220,7 @@ namespace ctb::constants
 
    inline constexpr auto     ONE_MB                               = 1024 * 1024;
    inline constexpr uint16_t CT_NULL_YEAR                         =        9999;
+   inline constexpr uint16_t CT_NV_YEAR                           =        1001;
 
 
 } // namespace ctb::constants

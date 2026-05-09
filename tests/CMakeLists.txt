@@ -29,4 +29,4 @@ catch_discover_tests(cts_test)
 
 # ---- End-of-file commands ----
 
-add_folders(Test)
+# add_folders(Test)

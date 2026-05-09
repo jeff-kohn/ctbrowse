@@ -34,6 +34,8 @@ namespace ctb::constants
    inline constexpr const char* CMD_COLLECTION_PENDING_WINE_TIP     = "View Pending Wine Deliveries";
    inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_LBL   = "&Ready to Drink List\tCtrl+D";
    inline constexpr const char* CMD_COLLECTION_READY_TO_DRINK_TIP   = "View Drinking Availability for Wines";
+   inline constexpr const char* CMD_COLLECTION_PRIVATE_NOTES_LBL    = "Private Notes";
+   inline constexpr const char* CMD_COLLECTION_PRIVATE_NOTES_TIP    = "View Private notes";
    inline constexpr const char* CMD_COLLECTION_PURCHASED_WINE_LBL   = "Purchased Wine &History\tCtrl+H";
    inline constexpr const char* CMD_COLLECTION_PURCHASED_WINE_TIP   = "View History of wines purchases and orders";
    inline constexpr const char* CMD_COLLECTION_TAGGED_WINES_LBL     = "&Tagged Wine Lists\tCtrl+T";
@@ -138,6 +140,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_DRINK_WINDOW                  = "Drink Window:";
    inline constexpr const char* LBL_DRINK_WINDOW_MY               = "My Drink Window:";
    inline constexpr const char* LBL_DRINK_WINDOW_CT               = "CT Drink Window:";
+   inline constexpr const char* LBL_DRINK_WINDOW_PRO              = "Pro Drink Window(s):";
    inline constexpr const char* LBL_FROM                          = "From:";
    inline constexpr const char* LBL_FLAWED                        = "Flawed:";
    inline constexpr const char* LBL_LIKED                         = "Liked:";
@@ -153,6 +156,7 @@ namespace ctb::constants
    inline constexpr const char* LBL_ORDER_NUMBER                  = "Order Number:";
    inline constexpr const char* LBL_QTY_ORDERED                   = "Qty Ordered:";
    inline constexpr const char* LBL_REGION                        = "Region:";
+   inline constexpr const char* LBL_PRO_SCORES                    = "Pro Scores:";
    inline constexpr const char* LBL_PURCHASED                     = "Purchased:";
    inline constexpr const char* LBL_SCORES                        = "Scores";
    inline constexpr const char* LBL_SEARCH                        = "&Search";

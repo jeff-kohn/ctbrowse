@@ -1,5 +1,5 @@
 {
-   "version": 5,
+   "version": 6,
    "cmakeMinimumRequired": {
       "major": 3,
       "minor": 25,
@@ -7,36 +7,19 @@
    },
    "configurePresets": [
       {
-         "name": "dev-mode",
-         "hidden": true,
-         "cacheVariables": {
-            "ctBrowse_DEVELOPER_MODE": "ON",
-            "BUILD_TESTING": "OFF"
-         }
-      },
-      {
-         "name": "cppcheck",
-         "hidden": true,
-         "cacheVariables": {
-            "CMAKE_CXX_CPPCHECK": "cppcheck;--inline-suppr"
-         }
-      },
-      {
-         "name": "clang-tidy",
-         "hidden": true,
-         "cacheVariables": {
-            "CMAKE_CXX_CLANG_TIDY": "clang-tidy;--header-filter=^${sourceDir}/"
-         }
-      },
-      {
          "name": "build-dir",
-         "binaryDir": "${sourceDir}/build",
-         "installDir": "${sourceDir}/build/install",
+         "binaryDir": "${sourceDir}/build/${presetName}",
+         "installDir": "${sourceDir}/build/${presetName}/install",
          "hidden": true
       },
       {
          "name": "vcpkg-toolchain",
          "hidden": true,
+         "condition": {
+            "type": "equals",
+            "lhs": "${hostSystemName}",
+            "rhs": "Windows"
+         },
          "cacheVariables": {
             "CMAKE_TOOLCHAIN_FILE": {
                "value": "$env{VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake",
@@ -45,83 +28,64 @@
          }
       },
       {
-         "name": "vcpkg-win64-static",
+         "name": "vcpkg-win-static",
          "hidden": true,
          "inherits": "vcpkg-toolchain",
          "cacheVariables": {
-            "VCPKG_TARGET_TRIPLET": "x64-wxwindows-static",
+            "VCPKG_TARGET_TRIPLET": "win-static",
             "CTB_MSVC_RUNTIME_LIBRARY": "$<$<CONFIG:Debug>:MultiThreadedDebug>$<$<CONFIG:Release,RelWithDebInfo>:MultiThreaded>"
-         },
-         "condition": {
-            "type": "equals",
-            "lhs": "${hostSystemName}",
-            "rhs": "Windows"
-         },
-         "vendor": {
-            "microsoft.com/VisualStudioSettings/CMake/1.0": {
-               "enableMicrosoftCodeAnalysis": false,
-               "enableClangTidyCodeAnalysis": true
-            }
          }
       },
       {
-         "name": "win-msvc-flags",
+         "name": "vcpkg-win-clang",
          "hidden": true,
+         "inherits": "vcpkg-win-static",
          "cacheVariables": {
-            "CTB_COMPILE_OPTIONS": "/MP;/bigobj;/cgthreads8;/EHsc;/GS;/permissive-;/sdl;/utf-8;/volatile:iso;/Zc:__cplusplus;/Zc:enumTypes;/Zc:externConstexpr;/Zc:inline;/Zc:lambda;/Zc:preprocessor;/Zc:rvalueCast;/Zc:strictStrings;/Zc:templateScope;/Zc:throwingNew;/Zc:wchar_t;;/Zi;/Zf;$<$<CONFIG:Debug>:/Od;/EHr;/RTC1>;$<$<CONFIG:Release>:/O2;/GL;/Gw;/Gy;/guard:cf;>;$<$<CONFIG:RelWithDebInfo>:/O2;/Ob3;/GL;/Gw;/Gy;/guard:cf;>",
-            "CTB_WARNING_FLAGS": "/W4;/w14165;/w14186;/w14263;/w14265;/w14296;/w14311;/w14545;/w14546;/w14547;/w14549;/w14555;/w14640;/w14826;/w14905;/w14906;/w14928;/w24826;/w34265;/w34287;/w34619;/w34640;/w44242;/w44254;/w44263;/w44296;/w44365;/w44388;/w44464;/w45038;/wd4100;/WX;/external:anglebrackets;/external:W0;",
-            "CTB_COMPILE_DEFINITIONS": "_MBCS;_WIN32_WINNT=0x0A000000;_WINSOCK_DEPRECATED_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;wxUSE_CONFIG_NATIVE=0;wxUSE_STD_CONTAINERS=1;wxUSE_UTF8_LOCALE_ONLY=1;wxUSE_STD_STRING=1;wxUSE_STL=1;wxUSE_STL_BASED_WXSTRING=1;wxNO_IMPLICIT_WXSTRING_CONV_TO_PTR=1;wxUSE_UNICODE_UTF8=1;wxUSE_UNICODE_WCHAR=0;wxUSE_UNSAFE_WXSTRING_CONV=0;$<$<CONFIG:DEBUG>:_DEBUG;_ALLOW_RTCc_IN_STL>;$<$<CONFIG:Release,RelWithDebInfo>:NDEBUG;>;SPDLOG_FMT_EXTERNAL=1",
-            "CTB_LINK_OPTIONS": "/DEBUG:FULL;/machine:x64;/guard:cf;/DYNAMICBASE;/NXCOMPAT;/CGTHREADS:8;$<$<CONFIG:DEBUG>:/INCREMENTAL;/OPT:NOICF;/OPT:NOREF>$<$<CONFIG:Release,RelWithDebInfo>:/INCREMENTAL:NO;/LTCG;/OPT:ICF;/OPT:REF;>"
+            "VCPKG_TARGET_TRIPLET": "win-clang"
          }
       },
       {
-         "name": "clang-flags",
-         "hidden": true,
-         "cacheVariables": {
-            "CTB_COMPILE_OPTIONS": "$<$<CONFIG:Debug>:-Og;>;$<$<CONFIG:Release,RelWithDebInfo>:-O3>;-g;-fstack-protector-strong;-fexceptions;-grecord-gcc-switches;-fcf-protection;-pipe;-Werror=format-security;-fno-strict-overflow;-Wstrict-overflow",
-            "CTB_WARNING_FLAGS": "-Wall;-Wextra;-Wpedantic;-Werror;",
-            "CTB_COMPILE_DEFINITIONS": "_MBCS;_WIN32_WINNT=_WIN32_WINNT_WIN10;_WINSOCK_DEPRECATED_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;wxUSE_CONFIG_NATIVE=0;wxUSE_STD_CONTAINERS=1;wxUSE_UTF8_LOCALE_ONLY=1;wxUSE_UNICODE_UTF8=1;wxUSE_UNICODE_WCHAR=0;wxUSE_UNSAFE_WXSTRING_CONV=0;wxNO_IMPLICIT_WXSTRING_CONV_TO_PTR=1;$<$<CONFIG:DEBUG>:_DEBUG;_ALLOW_RTCc_IN_STL>;$<$<CONFIG:Release,RelWithDebInfo>:NDEBUG;>;",
-            "CTB_LINK_OPTIONS": ""
-         }
-      },
-      {
-         "name": "ci-win-msvc",
-         "description": "Defines default compiler/linker flags for MSVC/Win",
-         "inherits": [ "build-dir", "vcpkg-win64-static", "win-msvc-flags" ],
-         "generator": "Ninja Multi-Config",
+         "name": "win-msvc",
+         "displayName": "Windows-MSVC",
+         "description": "Build preset for Windows with MSVC",
+         "inherits": [ "build-dir", "vcpkg-win-static" ],
+         "generator": "Visual Studio 18 2026",
          "architecture": {
             "value": "x64",
             "strategy": "external"
          },
          "toolset": {
-           "strategy": "external",
-           "value": "v145,host=x64"
+            "strategy": "external",
+            "value": "host=x64,version=14.52"
          },
          "cacheVariables": {
-            "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
-            "CMAKE_C_COMPILER": "cl",
-            "CMAKE_CXX_COMPILER": "cl"
-
+            "CMAKE_CXX_COMPILER": "cl",
+            "CTB_BUILD_TESTS": "OFF",
+            "CTB_BUILD_EXAMPLES": "OFF",
+            "CTB_USE_CPP_CHECK":  "ON"
          },
          "vendor": {
             "microsoft.com/VisualStudioSettings/CMake/1.0": {
-            "intelliSenseMode": "windows-msvc-x64",
-            "enableMicrosoftCodeAnalysis": false,
-            "enableClangTidyCodeAnalysis": false,
-            "enableUndefinedBehaviorSanitizer": true,
-            "disableExternalAnalysis": true
+               "intelliSenseMode": "windows-msvc-x64",
+               "enableMicrosoftCodeAnalysis": false,
+               "enableClangTidyCodeAnalysis": false,
+               "enableUndefinedBehaviorSanitizer": true
+            }
          }
-      }
       },
       {
-         "name": "ci-win-clang",
-         "description": "Defines default compiler/linker flags for clang-cl/Win",
-         "inherits": [ "build-dir", "vcpkg-win64-static", "clang-flags" ],
+         "name": "win-clang",
+         "displayName": "Windows-Clang",
+         "description": "Build preset for Clang on Windows",
+         "inherits": [ "build-dir", "vcpkg-win-clang" ],
          "generator": "Ninja Multi-Config",
          "cacheVariables": {
-            "CMAKE_C_COMPILER": "clang",
-            "CMAKE_CXX_COMPILER": "clang++",
-            "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            "CMAKE_C_COMPILER": "clang-cl",
+            "CMAKE_CXX_COMPILER": "clang-cl",
+            "CTB_BUILD_TESTS": "OFF",
+            "CTB_BUILD_EXAMPLES": "OFF",
+            "CTB_USE_CPP_CHECK": "OFF",
+            "CTB_USE_CLANG_TIDY": "OFF"
          },
          "architecture": {
             "value": "x64",
@@ -131,17 +95,61 @@
             "microsoft.com/VisualStudioSettings/CMake/1.0": {
                "intelliSenseMode": "windows-clang-x64",
                "enableMicrosoftCodeAnalysis": false,
-               "enableClangTidyCodeAnalysis": false,
-               "enableUndefinedBehaviorSanitizer": true,
-               "disableExternalAnalysis": true
+               "enableClangTidyCodeAnalysis": false
             }
+         }
+      },
+      {
+         "name": "win-clang-tidy",
+         "displayName": "Static Analysis (clang)",
+         "description": "Preset for clang-tidy and CppCheck",
+         "inherits": [ "win-clang" ],
+         "cacheVariables": {
+            "CTB_USE_CPP_CHECK": "ON",
+            "CTB_USE_CLANG_TIDY": "ON"
          }
       }
    ],
    "buildPresets": [
       {
-         "name": "ci-win-msvc",
-         "configurePreset": "ci-win-msvc",
+         "name": "win-msvc-debug",
+         "displayName": "Debug",
+         "configurePreset": "win-msvc",
+         "jobs": 16
+      },
+      {
+         "name": "win-msvc-release",
+         "displayName": "Release",
+         "configurePreset": "win-msvc",
+         "configuration": "Release",
+         "jobs": 16
+      },
+      {
+         "name": "win-clang-release",
+         "displayName": "Release",
+         "configurePreset": "win-clang",
+         "configuration": "Release",
+         "jobs": 16
+      },
+      {
+         "name": "win-clang-debug",
+         "displayName": "Debug",
+         "configurePreset": "win-clang",
+         "configuration": "Debug",
+         "jobs": 16
+      },
+      {
+         "name": "win-clang-tidy-release",
+         "displayName": "Release",
+         "configurePreset": "win-clang-tidy",
+         "configuration": "Release",
+         "jobs": 16
+      },
+      {
+         "name": "win-clang-tidy-debug",
+         "displayName": "Debug",
+         "configurePreset": "win-clang-tidy",
+         "configuration": "Debug",
          "jobs": 16
       }
    ]

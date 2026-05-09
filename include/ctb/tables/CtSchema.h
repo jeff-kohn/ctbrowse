@@ -21,6 +21,7 @@ namespace ctb
    /// Some properties are common across all tables, some are table-specific. 
    enum class CtProp : uint16_t
    {
+      NoField = 0,
       iWineId,
       WineName,
       Vintage,
@@ -78,6 +79,20 @@ namespace ctb
       RtdInventoryLogical,    // number of logical 750ml bottles in inventory
       RtdInventoryPhysical,   // number of physical bottles in inventory (might be different than logical for 375's etc)
 
+      // Pro Scores and Drinking Dates, also from RTD table.
+      DR_ScoreDisplay,
+      DR_ScoreNumeric,
+      DR_DrinkBegin,
+      DR_DrinkEnd,
+      JD_ScoreDisplay,
+      JD_ScoreNumeric,
+      JR_ScoreDisplay,
+      JR_ScoreNumeric,
+      JR_DrinkBegin,
+      JR_DrinkEnd,
+      WFW_ScoreDisplay,
+      WFW_ScoreNumeric,
+
       // Specific to Consumed Bottles and/or Bottle Inventory tables
       iConsumeId,
       ConsumeDate,
@@ -108,6 +123,10 @@ namespace ctb
       TastingCtNoteCount,
       TastingCtLikePercent,
       TastingCtLikeCount,
+
+      // Private Notes
+      iPrivateNoteId,
+      PrivateNote,
 
       // Specific to Tagged Wines table
       TagName,
