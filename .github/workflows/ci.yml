@@ -58,7 +58,7 @@ jobs:
 
     - name: configure
       run: |
-        nuget --version
+        nuget
         cmake --preset=$env:CONFIGURE_PRESET
 
     - name: build
