@@ -15,8 +15,10 @@ endif()
 # These are pre-configured by the presets or resonable defaults, but can be overridden when needed.
 option(CTB_BUILD_TESTS    "Enable building tests and test infrastructure. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }." ${PROJECT_IS_TOP_LEVEL} )
 option(CTB_BUILD_EXAMPLES "Enable building example programs. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }."              ${PROJECT_IS_TOP_LEVEL} )
-option(CTB_USE_CLANG_TIDY "Enable clang-tidy scanning. Default: OFF. Values: { ON, OFF }." "OFF" )
-option(CTB_USE_CPP_CHECK  "Enable CppCheck scanning. Default: OFF. Values: { ON, OFF }."   "OFF" )
+option(CTB_CPPCHECK_BUILD_SCAN     "Enable CppCheck in-build scanning. Default: OFF. Values: { ON, OFF }."   "OFF" )
+option(CTB_CPPCHECK_PROJECT_SCAN   "Enable CppCheck project scanning in the 'code_analysis target. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }." ${PROJECT_IS_TOP_LEVEL})
+option(CTB_CLANG_TIDY_BUILD_SCAN   "Enable clang-tidy in-build scanning. Default: OFF. Values: { ON, OFF }." "OFF" )
+option(CTB_CLANG_TIDY_PROJECT_SCAN "Enable clang-tidy project scanning in the 'code_analysis target. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }." ${PROJECT_IS_TOP_LEVEL})
 
 # So that cmake can find any additional modules we've written (stuff like Find modules, export targets, etc)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
@@ -52,6 +54,10 @@ if (PROJECT_IS_TOP_LEVEL)
          set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") 
       endif()
 
+      add_custom_target (code_analysis DEPENDS all)
+      include (cppcheck/use_cpp_check)
+      include (use_clang_tidy)
+
       set(CTB_COMPILE_DEFINITIONS
           _MBCS WIN32 _WIN32_WINNT=0x0A00 WINVER=0x0A00 NTDDI_VERSION=0x0A000000 _WINSOCK_DEPRECATED_NO_WARNINGS NOMINMAX WIN32_LEAN_AND_MEAN 
           wxUSE_CONFIG_NATIVE=0 wxUSE_STD_CONTAINERS=1 wxUSE_UTF8_LOCALE_ONLY=1 wxUSE_STD_STRING=1 wxUSE_STL=1 wxUSE_STL_BASED_WXSTRING=1 wxNO_IMPLICIT_WXSTRING_CONV_TO_PTR=1 wxUSE_UNICODE_UTF8=1 wxUSE_UNICODE_WCHAR=0 wxUSE_UNSAFE_WXSTRING_CONV=0 
@@ -69,16 +75,7 @@ if (PROJECT_IS_TOP_LEVEL)
           $<$<CXX_COMPILER_ID:MSVC>:/w14165 /w14186 /w14263 /w14265 /w14296 /w14311 /w14545 /w14546 /w14547 /w14549 /w14555 /w14640 /w14826 /w14905 /w14906 /w14928 /w24826 /w34265 /w34287 /w34619 /w34640 /w44242 /w44254 /w44263 /w44296 /w44365 /w44388 /w44464 /w45038 /wd4100 /external:anglebrackets /external:W0>
       )
 
-      add_custom_target (code_analysis DEPENDS all)
-
-      if (CTB_USE_CPP_CHECK)
-         include (cppcheck/use_cpp_check)
-      endif()
-
-      if (CTB_USE_CLANG_TIDY)
-         include (use_clang_tidy)
-      endif()
-
+      
    endif()
 
 else()
