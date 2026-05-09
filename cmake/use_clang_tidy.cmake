@@ -8,6 +8,8 @@ if (CTB_USE_CLANG_TIDY)
       message(CHECK_PASS "clang-tidy found at '${CMAKE_CXX_CLANG_TIDY}'")
       list(
          APPEND CMAKE_CXX_CLANG_TIDY
+         "-p"
+         ${CMAKE_BINARY_DIR}
          "--use-color"
          "--header-filter=.*/ctb/**"
          "--quiet"

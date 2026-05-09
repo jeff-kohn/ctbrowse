@@ -39,10 +39,9 @@
       {
          "name": "vcpkg-win-clang",
          "hidden": true,
-         "inherits": "vcpkg-toolchain",
+         "inherits": "vcpkg-win-static",
          "cacheVariables": {
-            "VCPKG_TARGET_TRIPLET": "win-clang",
-            "CTB_MSVC_RUNTIME_LIBRARY": "$<$<CONFIG:Debug>:MultiThreadedDebug>$<$<CONFIG:Release,RelWithDebInfo>:MultiThreaded>"
+            "VCPKG_TARGET_TRIPLET": "win-clang"
          }
       },
       {
@@ -60,11 +59,10 @@
             "value": "host=x64,version=14.52"
          },
          "cacheVariables": {
-            "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
-            "CMAKE_C_COMPILER": "cl",
             "CMAKE_CXX_COMPILER": "cl",
             "CTB_BUILD_TESTS": "OFF",
-            "CTB_BUILD_EXAMPLES": "OFF"
+            "CTB_BUILD_EXAMPLES": "OFF",
+            "CTB_USE_CPP_CHECK":  "ON"
          },
          "vendor": {
             "microsoft.com/VisualStudioSettings/CMake/1.0": {
@@ -82,7 +80,6 @@
          "inherits": [ "build-dir", "vcpkg-win-clang" ],
          "generator": "Ninja Multi-Config",
          "cacheVariables": {
-            "CMAKE_CONFIGURATION_TYPES": "Debug;RelWithDebInfo",
             "CMAKE_C_COMPILER": "clang-cl",
             "CMAKE_CXX_COMPILER": "clang-cl",
             "CTB_BUILD_TESTS": "OFF",
@@ -109,7 +106,7 @@
          "inherits": [ "win-clang" ],
          "cacheVariables": {
             "CTB_USE_CPP_CHECK": "ON",
-            "CTB_USE_CLANG_TIDY": "OFF"
+            "CTB_USE_CLANG_TIDY": "ON"
          }
       }
    ],

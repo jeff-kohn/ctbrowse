@@ -39,28 +39,28 @@ if (PROJECT_IS_TOP_LEVEL)
       SET(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".dll")
 
       set(CTB_COMPILE_OPTIONS
-          /bigobj /permissive- /sdl /utf-8 /Zi /EHsc
-          $<$<CXX_COMPILER_ID:MSVC>:/Zf>
-          $<$<CONFIG:Release,ReleaseMinSize>:/Gw /Gy /guard:cf>
-          $<$<CONFIG:RelWithDebInfo>:/Ob3 /Gw /Gy /guard:cf>
+          /bigobj /permissive- /sdl /utf-8 /EHsc /Zc:__cplusplus /cgthreads8
+          $<$<CONFIG:Debug>:/Od $<$<CXX_COMPILER_ID:MSVC>:/ZI> >
+          $<$<NOT:$<CONFIG:Debug>>:/Zi /Gw /Gy /guard:cf>
+          $<$<CONFIG:RelWithDebInfo>:/Ob3>
       )
 
-      if (CXX_COMPILER_ID STREQUAL "MSVC")
-         list(APPEND CTB_COMPILE_OPTIONS $<$<CONFIG:Release,RelWithDebInfo>:/GL>)
+      if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+         list(APPEND CTB_COMPILE_OPTIONS /Zf $<$<CONFIG:Release,ReleaseMinSize,RelWithDebInfo>:/GL>)
       else()
          # for other compilers we're using Ninja so generate compile_commands.json
          set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") 
       endif()
 
       set(CTB_COMPILE_DEFINITIONS
-          _MBCS _WIN32_WINNT=0x0A000000 _WINSOCK_DEPRECATED_NO_WARNINGS NOMINMAX WIN32_LEAN_AND_MEAN 
+          _MBCS WIN32 _WIN32_WINNT=0x0A00 WINVER=0x0A00 NTDDI_VERSION=0x0A000000 _WINSOCK_DEPRECATED_NO_WARNINGS NOMINMAX WIN32_LEAN_AND_MEAN 
           wxUSE_CONFIG_NATIVE=0 wxUSE_STD_CONTAINERS=1 wxUSE_UTF8_LOCALE_ONLY=1 wxUSE_STD_STRING=1 wxUSE_STL=1 wxUSE_STL_BASED_WXSTRING=1 wxNO_IMPLICIT_WXSTRING_CONV_TO_PTR=1 wxUSE_UNICODE_UTF8=1 wxUSE_UNICODE_WCHAR=0 wxUSE_UNSAFE_WXSTRING_CONV=0 
           SPDLOG_FMT_EXTERNAL=1
           $<$<CONFIG:DEBUG>:_DEBUG _ALLOW_RTCc_IN_STL>
       )
 
       set(CTB_LINK_OPTIONS
-          /DEBUG:FULL /guard:cf
+          /DEBUG:FULL /guard:cf $<$<CXX_COMPILER_ID:MSVC>:/CGTHREADS:8>
           $<$<CONFIG:Release,RelWithDebInfo,ReleaseMinSize>:/LTCG>
       )
 
@@ -111,3 +111,5 @@ endif()
 if (CTB_BUILD_EXAMPLES)
    add_subdirectory(examples)
 endif()
+
+# include(CMakePrintHelpers)

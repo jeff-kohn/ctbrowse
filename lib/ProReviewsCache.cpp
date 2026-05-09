@@ -1,5 +1,6 @@
 #include "ctb/model/ProReviewsCache.h"
 
+#include <string_view>
 #include <sstream>
 
 namespace ctb
@@ -9,8 +10,8 @@ namespace ctb
    {
       struct ProSchema
       {
-         std::string pro_id{};
-         std::string pro_name{};
+         std::string_view pro_id{};
+         std::string_view pro_name{};
          CtProp drink_begin{};
          CtProp drink_end{};
          CtProp score_numeric{};
@@ -94,21 +95,28 @@ namespace ctb
          {
             if (auto beg = rec[schema.drink_begin], end = rec[schema.drink_end]; beg.hasValue() or end.hasValue())
             {
-               m_drink_windows.emplace(std::make_pair(wine_id, 
+               m_drink_windows.emplace(wine_id, 
                   ProDrinkWindow{ 
                      .wine_id = wine_id, 
-                     .pro_id = schema.pro_id, 
+                     .pro_id = std::string{ schema.pro_id }, 
                      .pro_drink_begin = beg, 
                      .pro_drink_end = end, 
                      .ct_drink_begin = rec[CtProp::CtBeginConsume], 
                      .ct_drink_end = rec[CtProp::CtEndConsume]
                   }
-               ));
+               );
             }
 
             if (auto score = rec[schema.score_text]; score.hasValue())
             {
-               m_scores.emplace(std::make_pair(wine_id, ProScore{ .wine_id = wine_id, .pro_id = schema.pro_id, .score_text = score, .score_numeric = rec[schema.score_numeric] }));
+               m_scores.emplace(wine_id, 
+                  ProScore{ 
+                     .wine_id = wine_id, 
+                     .pro_id = std::string{schema.pro_id},
+	   					.score_text = score, 
+                     .score_numeric = rec[schema.score_numeric] 
+                  }                   
+               );
             }
          }
       }
