@@ -61,8 +61,7 @@
          "cacheVariables": {
             "CMAKE_CXX_COMPILER": "cl",
             "CTB_BUILD_TESTS": "OFF",
-            "CTB_BUILD_EXAMPLES": "OFF",
-            "CTB_USE_CPP_CHECK":  "ON"
+            "CTB_BUILD_EXAMPLES": "OFF"
          },
          "vendor": {
             "microsoft.com/VisualStudioSettings/CMake/1.0": {
@@ -80,12 +79,9 @@
          "inherits": [ "build-dir", "vcpkg-win-clang" ],
          "generator": "Ninja Multi-Config",
          "cacheVariables": {
-            "CMAKE_C_COMPILER": "clang-cl",
             "CMAKE_CXX_COMPILER": "clang-cl",
             "CTB_BUILD_TESTS": "OFF",
-            "CTB_BUILD_EXAMPLES": "OFF",
-            "CTB_USE_CPP_CHECK": "OFF",
-            "CTB_USE_CLANG_TIDY": "OFF"
+            "CTB_BUILD_EXAMPLES": "OFF"
          },
          "architecture": {
             "value": "x64",
@@ -105,8 +101,8 @@
          "description": "Preset for clang-tidy and CppCheck",
          "inherits": [ "win-clang" ],
          "cacheVariables": {
-            "CTB_USE_CPP_CHECK": "ON",
-            "CTB_USE_CLANG_TIDY": "ON"
+            "CTB_CPPCHECK_BUILD_SCAN": "ON",
+            "CTB_CLANG_TIDY_BUILD_SCAN": "ON"
          }
       }
    ],

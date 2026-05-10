@@ -12,46 +12,37 @@ on:
 
 env:
   VCPKG_INSTALLATION_ROOT: "${{ github.workspace }}\\vcpkg"
+  NUGET_FEED: "https://nuget.pkg.github.com/jeff-kohn/index.json"
+  VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/jeff-kohn/index.json,readwrite"
+  NUGET_SOURCE_USERNAME: ${{ github.actor }}
+  NUGET_SOURCE_PASSWORD: ${{ secrets.VCPKG_CACHE_TOKEN }}
 
 permissions:
-  contents: write
+  contents: read
   checks: write
+  packages: write
 
 jobs:
-  windows_build:
+  msvc_build:
     name: "Window MSVC Build"
-    runs-on: windows-2025
+    runs-on: windows-2025-vs2026
     env:
-      CONFIGURE_PRESET: "win-clang-tidy"
-      BUILD_PRESET: "win-clang-tidy-release"
-
+      CONFIGURE_PRESET: "win-msvc"
+      BUILD_PRESET: "win-msvc-release"
+      
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-
-    - name: 'Set vcvars'
-      uses: ilammy/msvc-dev-cmd@v1
-
-    - name: "Setup CMake/ninja"
-      uses: lukka/get-cmake@latest
+    - uses: actions/checkout@v6
 
     - name: "Run Vcpkg"
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgJsonGlob: 'vcpkg.json'
 
-    - name: Upload vcpkg logs
-      uses: actions/upload-artifact@v7
-      if: always()
-      with:
-         name: vcpkg_logs
-         path: ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
-         retention-days: 3    
-
-    - name: Install pre-reqs
+    - name: Add NuGet sources
+      shell: pwsh
       run: |
-        winget install CppCheck --verbose --disable-interactivity  --accept-source-agreements --accept-package-agreements
+        nuget sources add  -Source "${{ env.NUGET_FEED }}" -StorePasswordInClearText -Name GitHubPackages -UserName "${{ env.NUGET_SOURCE_USERNAME }}" -Password "${{ env.NUGET_SOURCE_PASSWORD }}"
+        nuget setapikey "${{ secrets.GITHUB_TOKEN }}" -Source "${{ env.NUGET_FEED }}"
 
     - name: configure
       run: |
@@ -59,4 +50,71 @@ jobs:
 
     - name: build
       run: |
-        cmake --build --preset=$env:BUILD_PRESET --target=code_analysis
+        cmake --build --preset=$env:BUILD_PRESET
+
+    - name: Upload build logs
+      uses: actions/upload-artifact@v7
+      if: always()
+      with:
+         name: msvc_vcpkg_logs
+         path: ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+         retention-days: 3    
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v7
+      with:
+         name: msvc_binary
+         path: ${{ github.workspace }}/build/${{ env.CONFIGURE_PRESET }}/app/Release/ctBrowse_app.exe
+         retention-days: 30
+
+
+  clang_build:
+    name: "Window Clang Build"
+    runs-on: windows-latest
+    env:
+      CONFIGURE_PRESET: "win-clang-tidy"
+      BUILD_PRESET: "win-clang-tidy-release"
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: "Run Vcpkg"
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgJsonGlob: 'vcpkg.json'
+
+    - name: Add NuGet sources
+      shell: pwsh
+      run: |
+        nuget sources add  -Source "${{ env.NUGET_FEED }}" -StorePasswordInClearText -Name GitHubPackages -UserName "${{ env.NUGET_SOURCE_USERNAME }}" -Password "${{ env.NUGET_SOURCE_PASSWORD }}"
+        nuget setapikey "${{ secrets.GITHUB_TOKEN }}" -Source "${{ env.NUGET_FEED }}"
+        
+    - name: "Setup CMake/ninja"
+      uses: lukka/get-cmake@latest
+
+    - name: Install pre-reqs
+      run: |
+        winget install CppCheck --verbose --disable-interactivity --source winget --accept-source-agreements --accept-package-agreements
+
+    - name: configure
+      run: |
+        cmake --preset=$env:CONFIGURE_PRESET
+
+    - name: build
+      run: |
+        cmake --build --preset=$env:BUILD_PRESET
+
+    - name: Upload build logs
+      uses: actions/upload-artifact@v7
+      if: always()
+      with:
+         name: clang_vcpkg_logs
+         path: ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+         retention-days: 3    
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v7
+      with:
+         name: clang_binary
+         path: ${{ github.workspace }}/build/${{ env.CONFIGURE_PRESET }}/app/Release/ctBrowse_app.exe
+         retention-days: 30
