@@ -64,7 +64,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
          name: msvc_binary
-         path: ${{ github.workspace }}/build/${{ env.CONFIGURE_PRESET }}/Release/ctBrowse_app.exe
+         path: ${{ github.workspace }}/build/${{ env.CONFIGURE_PRESET }}/app/Release/ctBrowse_app.exe
          retention-days: 30
 
 
@@ -113,5 +113,5 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
          name: clang_binary
-         path: ${{ github.workspace }}/build/${{ env.CONFIGURE_PRESET }}/Release/ctBrowse_app.exe
+         path: ${{ github.workspace }}/build/${{ env.CONFIGURE_PRESET }}/app/Release/ctBrowse_app.exe
          retention-days: 30
