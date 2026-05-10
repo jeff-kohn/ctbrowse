@@ -31,13 +31,7 @@ jobs:
       BUILD_PRESET: "win-msvc-release"
       
     steps:
-    - uses: actions/checkout@v4
-
-    - name: 'Set vcvars'
-      uses: ilammy/msvc-dev-cmd@v1
-
-    - name: "Setup CMake/ninja"
-      uses: lukka/get-cmake@latest
+    - uses: actions/checkout@vlatest
 
     - name: "Run Vcpkg"
       uses: lukka/run-vcpkg@v11
@@ -82,10 +76,7 @@ jobs:
       BUILD_PRESET: "win-clang-tidy-release"
 
     steps:
-    - uses: actions/checkout@v4
-
-    - name: "Setup CMake/ninja"
-      uses: lukka/get-cmake@latest
+    - uses: actions/checkout@vlastest
 
     - name: "Run Vcpkg"
       uses: lukka/run-vcpkg@v11
