@@ -31,7 +31,7 @@ jobs:
       BUILD_PRESET: "win-msvc-release"
       
     steps:
-    - uses: actions/checkout@vlatest
+    - uses: actions/checkout@v6
 
     - name: "Run Vcpkg"
       uses: lukka/run-vcpkg@v11
@@ -76,7 +76,7 @@ jobs:
       BUILD_PRESET: "win-clang-tidy-release"
 
     steps:
-    - uses: actions/checkout@vlastest
+    - uses: actions/checkout@v6
 
     - name: "Run Vcpkg"
       uses: lukka/run-vcpkg@v11
