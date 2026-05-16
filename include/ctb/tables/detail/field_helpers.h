@@ -58,7 +58,7 @@ namespace ctb::detail
 
    /// @brief  Get total quantity as formatted string
    /// @return string in format  "1" (in-stock only), "1+(1)" (in-stock + pending) or "(1)" (pending only)
-   inline auto calcQtyTotal(const CtPropertyMap& rec) -> CtPropertyVal
+   inline auto calcQtyTotalDisplay(const CtPropertyMap& rec) -> CtPropertyVal
    {
       auto qty     = getValueOrNull(rec, CtProp::QtyOnHand ).asUInt16().value_or(0u);
       auto pending = getValueOrNull(rec, CtProp::QtyPending).asUInt16().value_or(0u);

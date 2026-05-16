@@ -59,16 +59,11 @@
             "value": "host=x64,version=14.52"
          },
          "cacheVariables": {
-            "CMAKE_CXX_COMPILER": "cl",
-            "CTB_BUILD_TESTS": "OFF",
-            "CTB_BUILD_EXAMPLES": "OFF"
+            "CTB_BUILD_TESTS": "OFF"
          },
          "vendor": {
             "microsoft.com/VisualStudioSettings/CMake/1.0": {
-               "intelliSenseMode": "windows-msvc-x64",
-               "enableMicrosoftCodeAnalysis": false,
-               "enableClangTidyCodeAnalysis": false,
-               "enableUndefinedBehaviorSanitizer": true
+               "intelliSenseMode": "windows-msvc-x64"
             }
          }
       },
@@ -80,18 +75,19 @@
          "generator": "Ninja Multi-Config",
          "cacheVariables": {
             "CMAKE_CXX_COMPILER": "clang-cl",
-            "CTB_BUILD_TESTS": "OFF",
-            "CTB_BUILD_EXAMPLES": "OFF"
+            "CTB_BUILD_TESTS": "OFF"
          },
          "architecture": {
             "value": "x64",
             "strategy": "external"
          },
+         "toolset": {
+            "strategy": "external",
+            "value": "Clang"
+         },
          "vendor": {
             "microsoft.com/VisualStudioSettings/CMake/1.0": {
-               "intelliSenseMode": "windows-clang-x64",
-               "enableMicrosoftCodeAnalysis": false,
-               "enableClangTidyCodeAnalysis": false
+               "intelliSenseMode": "windows-clang-x64"
             }
          }
       },
