@@ -105,7 +105,7 @@ namespace ctb::app
       wxWeakRef<HiddenWebClient>   m_web_client_ref{};
 
       // "thread proc" for processing a label image request after we've download the wine-details html
-      static void fetchLabelThreadProc(RequestPtr ptr, std::string page_text, fs::path folder, std::stop_token token);
+      static void fetchLabelThreadProc(RequestPtr request, std::string page_text, fs::path cache_folder, std::stop_token token);
 
       // Callback when a web page requested from the web client has been successfully loaded.
       void onPageLoaded(uint64_t wine_id, std::expected<std::string, ctb::Error> result);

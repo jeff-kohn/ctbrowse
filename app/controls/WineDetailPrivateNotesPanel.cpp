@@ -51,7 +51,6 @@ namespace ctb::app
 
       // continue with parent processing
       event.Skip(); 
-      return;
    }
 
 

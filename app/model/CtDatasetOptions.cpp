@@ -44,7 +44,7 @@ namespace ctb::app
       dataset->setCollectionName(collection_name);
 
       // make sure the saved sort's primary property is one supported by the dataset 
-      if (active_sort.sort_props.size() > 0 and dataset->hasProperty(active_sort.sort_props[0]))
+      if (!active_sort.sort_props.empty() && dataset->hasProperty(active_sort.sort_props[0]))
       {
          dataset->applySort(active_sort);
       }

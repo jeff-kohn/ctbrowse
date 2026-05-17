@@ -85,7 +85,7 @@ namespace ctb
       /// 
       /// @return true if every observer was notified without error, false if at least one
       ///  observer threw an error.
-      auto signal(DatasetEvent::Id event_id) noexcept -> bool override;
+      auto signal(DatasetEvent::Id event) noexcept -> bool override;
 
       /// @brief this is called to signal that an event needs to be sent to all observers EXCEPT 
       ///  for event_source. 
@@ -109,7 +109,7 @@ namespace ctb
       /// 
       /// @return true if every observer was notified without error, false if at least one
       ///  observer threw an error.
-      auto signal(DatasetEvent::Id event, NullableInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool override;
+      auto signal(DatasetEvent::Id event_id, NullableInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool override;
 
    private:
       DatasetPtr m_data{};

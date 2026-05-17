@@ -33,8 +33,9 @@ namespace ctb
             error.error_message = constants::ERROR_STR_AUTHENTICATION_FAILED;
             error.category = Error::Category::HttpStatus;
          }
-         else
+         else {
             return true; // we actually got a file, so return success
+         }
       }
       else if (response.error.code != cpr::ErrorCode::OK)
       {

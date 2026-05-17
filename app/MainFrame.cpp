@@ -732,7 +732,7 @@ namespace ctb::app
       bool enable = false;
       if (auto dataset = getDataset(false); dataset != nullptr)
       {
-         if (dataset->multivalFilters().size() > 0 or dataset->propFilters().size() > 0)
+         if (!dataset->multivalFilters().empty() or !dataset->propFilters().empty())
          {
             enable = true;
          }

@@ -61,7 +61,7 @@ namespace ctb::app
    {
       try 
       {
-         CredentialDialog dlg{ wxGetApp().GetMainTopWindow(), cred_name, prompt_message, allow_save };
+         CredentialDialog dlg{ wxGetApp().GetMainTopWindow(), cred_name, prompt_message, allow_save }; // NOLINT readability-static-accessed-through-instance
 
          if (dlg.ShowModal() == wxID_OK)
          {

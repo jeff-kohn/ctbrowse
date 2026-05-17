@@ -49,7 +49,7 @@ namespace ctb::app
       const auto& list_col = m_dataset->listColumns()[col];
 
       // format as string and return it to caller
-      auto& val = m_dataset->getProperty(static_cast<int>(row), list_col.prop_id);
+      const auto& val = m_dataset->getProperty(static_cast<int>(row), list_col.prop_id);
       variant = list_col.getDisplayValue(val);
    }
 

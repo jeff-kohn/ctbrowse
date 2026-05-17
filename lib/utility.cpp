@@ -134,14 +134,14 @@ namespace ctb
    }
 
 
-   [[nodiscard]] auto toUTF8(const std::string& text, unsigned int code_page) -> MaybeString
+   [[nodiscard]] auto toUTF8(const std::string& text, unsigned int from_code_page) -> MaybeString
    {
-      int length = MultiByteToWideChar(code_page, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, text.c_str(), -1, nullptr, 0);
+      int length = MultiByteToWideChar(from_code_page, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, text.c_str(), -1, nullptr, 0);
       if (!length)
          return {};
 
       std::vector<wchar_t> wide_buf(static_cast<size_t>(length), '\0');
-      if (!MultiByteToWideChar(code_page, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS,  text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
+      if (!MultiByteToWideChar(from_code_page, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS,  text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
          return {};
 
       // Get needed buffer length since some UTF-16 chars may need multiple bytes in UTF-8. 
@@ -157,17 +157,17 @@ namespace ctb
       return {};
    }
 
-   [[nodiscard]] auto fromUTF8(const std::string& utf_text, unsigned int to_code_page) -> MaybeString
+   [[nodiscard]] auto fromUTF8(const std::string& utf8_text, unsigned int to_code_page) -> MaybeString
    {
       MaybeString result{};
 
       // First convert UTF-8 to UTF-16
-      int length = MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, utf_text.c_str(), -1, nullptr, 0);
+      int length = MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, utf8_text.c_str(), -1, nullptr, 0);
       if (!length)
          return result;
 
       std::vector<wchar_t> wide_buf(static_cast<size_t>(length), '\0');
-      if (!MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, utf_text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
+      if (!MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS, utf8_text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
          return result;
 
       // Get needed buffer length for the target code page then do the conversion

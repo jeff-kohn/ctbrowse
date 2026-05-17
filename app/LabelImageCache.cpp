@@ -146,12 +146,12 @@ namespace ctb::app
    };
 
 
-   LabelImageCache::LabelImageCache(fs::path cache_folder, const wxWeakRef<HiddenWebClient>& web_cient_ref) :  
+   LabelImageCache::LabelImageCache(fs::path cache_folder, const wxWeakRef<HiddenWebClient>& web_client_ref) :  
       m_cache_folder{ std::move(cache_folder) },
-      m_web_client_ref{ web_cient_ref }
+      m_web_client_ref{ web_client_ref }
 
    {
-      if (m_cache_folder.is_relative() or ( (fs::exists(m_cache_folder) and !fs::is_directory(m_cache_folder)) ))
+      if (m_cache_folder.is_relative() or (fs::exists(m_cache_folder) and !fs::is_directory(m_cache_folder)))
       {
          throw Error{ constants::ERROR_STR_INVALID_LABEL_CACHE };
       }

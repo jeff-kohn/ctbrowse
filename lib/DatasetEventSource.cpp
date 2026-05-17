@@ -22,7 +22,7 @@ namespace ctb
 
    auto DatasetEventSource::hasDataset() const  noexcept-> bool
    { 
-      return m_data ? true : false; 
+      return m_data != nullptr; 
    }
 
 
