@@ -98,7 +98,7 @@ namespace ctb::app
          if (folder == AppFolder::Root)
             return m_user_data_folder; 
 
-         auto path = ctb::format("{}/{}", m_user_data_folder.generic_string(), magic_enum::enum_name(folder));
+         auto path = ctb::format("{}/{}", m_user_data_folder.generic_string(), enum_to_string(folder));
          fs::create_directories(path);
          return path;
       }

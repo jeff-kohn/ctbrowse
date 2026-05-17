@@ -82,7 +82,7 @@ namespace ctb::app
          }
          else
          {
-            throw Error{ ctb::format(constants::FMT_ERROR_STR_INVALID_DETAIL_VIEW, magic_enum::enum_name(table_id)), Error::Category::ArgumentError };
+            throw Error{ ctb::format(constants::FMT_ERROR_STR_INVALID_DETAIL_VIEW, table_id), Error::Category::ArgumentError };
          }
       }
 

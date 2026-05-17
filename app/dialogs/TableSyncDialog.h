@@ -43,7 +43,7 @@ namespace ctb::app
       template <rng::input_range RngT>
       void selectTables(RngT&& values) requires std::is_same_v<rng::range_value_t<RngT>, TableId>
       {
-         m_table_selection_val = values | vws::transform([] (TableId tbl) { return magic_enum::enum_index(tbl); })
+         m_table_selection_val = values | vws::transform([] (TableId tbl) { return enum_to_index(tbl); })
                                         | rng::to<wxArrayString>();
       }
 

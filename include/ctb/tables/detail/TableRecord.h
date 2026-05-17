@@ -1,4 +1,3 @@
-
 /*******************************************************************
 * @file  TableRecord.h
 *
@@ -14,8 +13,6 @@
 #include "ctb/tables/detail/FieldSchema.h"
 
 #include <external/csv.hpp>
-#include <magic_enum/magic_enum.hpp>
-
 #include <cassert>
 
 
@@ -62,8 +59,6 @@ namespace ctb::detail
       ///
       void parseRow(const RowType& row)
       {
-         using namespace magic_enum;
-
          // parse all the CSV properties
          auto csv_cols = vws::values(Traits::Schema)
                        | vws::filter([](auto& field) { return field.csv_col.has_value(); });
@@ -78,7 +73,7 @@ namespace ctb::detail
             catch (...)
             {
                m_props[fld_schema.prop_id].setNull();
-               SPDLOG_DEBUG("TableRecord::Parse() encountered error parsing field {}. {}", enum_name(fld_schema.prop_id), packageError().formattedMesage());
+               SPDLOG_DEBUG("TableRecord::Parse() encountered error parsing field {}. {}", enum_to_string(fld_schema.prop_id), packageError().formattedMesage());
             }
          }
 

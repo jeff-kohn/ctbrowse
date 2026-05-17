@@ -39,7 +39,7 @@ namespace ctb::detail
       /// @brief simplified constructor for a filter with a single property and match value, using the prop_id for filter name and default equality predicate.
       template<std::convertible_to<PropertyVal> T> 
       constexpr PropertyFilter(Prop prop_id, T&& val, ComparePred compare) :
-         filter_name{ magic_enum::enum_name(prop_id) },
+         filter_name{ enum_to_string(prop_id) },
          prop_ids{ { prop_id } }, 
          compare_val{ std::forward<T>(val) },
          compare_pred{ std::move(compare) }

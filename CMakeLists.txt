@@ -94,7 +94,6 @@ endif()
 find_package(HtmlParser CONFIG REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
-find_package(magic_enum CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
 add_subdirectory(lib)

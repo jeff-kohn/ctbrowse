@@ -47,12 +47,8 @@
 
 namespace ctb::app
 {
-
-   using namespace magic_enum;
-
    namespace
    {
-
       auto eventIdToTableId(int event_id) -> TableId
       {
          switch (event_id)

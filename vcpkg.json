@@ -7,11 +7,11 @@
     "boost-unordered",
     "catch2",
     "cpr",
+    "enchantum",
     "fmt",
     "frozen",
     "htmlparser",
     "glaze",
-    "magic-enum",
     {
       "name": "wxwidgets",
       "features": [

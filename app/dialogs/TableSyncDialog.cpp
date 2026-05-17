@@ -11,8 +11,6 @@
 #include "CtCredentialManager.h"
 #include "wx_helpers.h"
 
-#include <magic_enum/magic_enum.hpp>
-
 #include <wx/button.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
@@ -23,8 +21,6 @@
 
 namespace ctb::app
 {
-   using namespace magic_enum;
-
    inline constexpr auto ENUM_DELIMETER = ';';
 
    namespace 
@@ -104,9 +100,9 @@ namespace ctb::app
       // values that don't map to an enum (should never happen, but best to be
       // prepared since alternative is UB)
       return all(m_table_selection_val)
-         | transform([] (int val) { return enum_cast<EnumT>(val); }) // convert to optional<EnumT>
-         | filter([](auto maybe_enum) { return maybe_enum.has_value(); })        // filter only valid values
-         | transform([](auto maybe_enum) { return maybe_enum.value(); })         // retrieve actual value from optionals
+         | transform([] (int val)         { return enum_cast<EnumT>(val);  })   // convert to optional<EnumT>
+         | filter([](auto maybe_enum)     { return maybe_enum.has_value(); })   // filter only valid values
+         | transform([](auto maybe_enum)  { return maybe_enum.value();     })   // retrieve actual value from optionals
          | rng::to<std::vector>();
    }
 

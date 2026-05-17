@@ -9,7 +9,7 @@
 
 #include "ctb/constants.h"
 #include "ctb/ctb_format.h"
-#include <magic_enum/magic_enum.hpp>
+#include "ctb/ctb_enum.h"
 
 #include <exception>
 #include <string>
@@ -60,7 +60,7 @@ namespace ctb
       /// @brief  the textual name of the Error::Category
       std::string_view categoryName() const
       {
-         return magic_enum::enum_name(category);
+         return enum_to_string(category);
       }
 
       /// @brief formattedMessage()

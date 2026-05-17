@@ -93,7 +93,6 @@ target_link_libraries(ctBrowse_lib
       cpr::cpr
       fmt::fmt
       HtmlParser::HtmlParser
-      magic_enum::magic_enum
       spdlog::spdlog
       "$<$<PLATFORM_ID:Windows>:Credui>"
       "$<$<PLATFORM_ID:Windows>:shlwapi>"
