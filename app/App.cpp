@@ -67,10 +67,6 @@ namespace ctb::app
 
       log::info("App startup.");
       wxConfigBase::Set(cfg.release());
-
-      // initialize label cache. needs to happen _after_ config store is set up
-      m_label_cache = std::make_shared<LabelImageCache>(getLabelCacheFolder());
-
    } // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks) unfortunately no way around it with wxWidgets
 
 
@@ -89,7 +85,7 @@ namespace ctb::app
          try
          {
             m_web_client = HiddenWebClient::create().value_or(WebClientPtr{});
-            m_label_cache = std::make_shared<LabelImageCache>(getLabelCacheFolder(), m_web_client.get());
+            m_label_cache = std::make_shared<LabelImageCache>(getLabelCacheFolder(), m_web_client.get()); 
          }
          catch (...) {
             displayErrorMessage(packageError());

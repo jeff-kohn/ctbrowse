@@ -7,12 +7,11 @@
  *********************************************************************/
 #include "App.h"
 #include "MainFrame.h"
-#include "LabelImageCache.h"
 #include "CtCredentialManager.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
+#include "model/CtDatasetOptions.h"
 #include "views/DatasetMultiView.h"
-#include "views/DatasetOptionsView.h"
 
 #include <ctb/utility.h>
 #include <ctb/utility_chrono.h>

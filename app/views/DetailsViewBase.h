@@ -8,13 +8,10 @@
 #pragma once
 
 #include "App.h"
-#include "LabelImageCache.h"
-
 #include "model/DatasetWindow.h"
 
 #include <wx/panel.h>
 #include <wx/weakref.h>
-#include <map>
 
 
  // forward declaration for member ptr
