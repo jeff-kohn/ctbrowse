@@ -16,6 +16,7 @@ Checks: "clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,cer
   -readability-make-member-function-const, \
   -readability-named-parameter"
 
+
 WarningsAsErrors: ''
 
 CheckOptions:
@@ -47,3 +48,6 @@ CheckOptions:
     value: 'true'
   - key: 'readability-redundant-access-specifiers.CheckFirstDeclaration'
     value: 'true'
+
+ExcludeHeaderFilterRegex: '.*/(3rdParty|build)/.*'
+ExtraArgsBefore: ['--driver-mode=cl']

@@ -12,7 +12,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
             "-p"
             ${CMAKE_BINARY_DIR}
             "--use-color"
-            "--header-filter=.*/ctb/**"
             "--quiet"
          )
          message(STATUS "clang-tidy build integration is enabled for this preset.")

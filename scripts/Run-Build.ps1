@@ -68,7 +68,7 @@ try
    }
    else
    {
-      cmake --build --preset=$Preset  $ConfigArg --target=$Target
+      cmake --build --preset=$Preset $ConfigArg --target=$Target
    }
 
    if ( $RunTests )
