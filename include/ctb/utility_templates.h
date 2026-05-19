@@ -32,7 +32,8 @@ namespace ctb
    std::optional<T> from_str(std::string_view str)
    {
       T val{};
-      auto result = std::from_chars(str.data(), str.data() + str.size(), val);
+      auto result = std::from_chars(str.data(), str.data() + str.size(), val); // NOLINT [cppcoreguidelines-pro-bounds-pointer-arithmetic]
+
 
       if (result.ec != std::errc())
          return std::nullopt;  // there was an error, so return null

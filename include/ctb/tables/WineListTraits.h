@@ -34,7 +34,7 @@ namespace ctb
       using MultiValueFilter     = detail::MultiValueFilter<Prop, PropertyMap>;
       using TableSort            = detail::TableSorter<CtProp, CtPropertyMap>;
 
-      static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
+      static constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
       {
          { Prop::iWineId,         FieldSchema { Prop::iWineId,         PropType::UInt64,      0 }},
          { Prop::WineName,        FieldSchema { Prop::WineName,        PropType::String,     13 }},
@@ -137,7 +137,7 @@ namespace ctb
          validateYear(rec[EndConsume]);
          validateYear(rec[Vintage]);
 
-		   rec[QtyTotalNum]     = static_cast<uint16_t>(rec[QtyOnHand].asUInt16().value_or(0u) + rec[QtyPending].asUInt16().value_or(0u));
+		   rec[QtyTotalNum]     = static_cast<uint16_t>(rec[QtyOnHand].asUInt16().value_or(0U) + rec[QtyPending].asUInt16().value_or(0U));
          rec[WineAndVintage]  = getWineAndVintage(rec);
          rec[QtyTotalDisplay] = calcQtyTotalDisplay(rec);
       }

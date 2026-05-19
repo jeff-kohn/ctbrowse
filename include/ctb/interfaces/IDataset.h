@@ -22,7 +22,8 @@ namespace ctb
 {
    /// @brief Data model class that provides a base implementation for accessing CellarTracker data files
    /// 
-   class IDataset
+   class IDataset               // NOLINT [cppcoreguidelines-special-member-functions]
+
    {
    public:
       using FieldSchema         = CtFieldSchema;

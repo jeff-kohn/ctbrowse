@@ -37,9 +37,9 @@ namespace ctb::app
    class MainFrame final : public wxFrame
    {
    public:
-      static inline constexpr int STATUS_BAR_PANE_STATUS  = 0;
-      static inline constexpr int STATUS_BAR_PANE_CENTER  = 1;
-      static inline constexpr int STATUS_BAR_PANE_SUMMARY = 2;
+      static constexpr int STATUS_BAR_PANE_STATUS  = 0;
+      static constexpr int STATUS_BAR_PANE_CENTER  = 1;
+      static constexpr int STATUS_BAR_PANE_SUMMARY = 2;
 
       /// @brief static factor method to create an initialize an instance of the MainFrame class
       /// 
@@ -62,7 +62,7 @@ namespace ctb::app
       auto getWinePopupMenu() const -> wxMenuPtr;
 
    private:
-      static inline constexpr int ROW_NONE = -1;
+      static constexpr int ROW_NONE = -1;
 
       DatasetMultiView*     m_view{};         // non-owning ptr to main child window
       DatasetEventSourcePtr m_event_source{}; // for synchronizing events between views and the underlying dataset

@@ -77,8 +77,9 @@ namespace ctb::app
          log::info("wxWebView::OnNavigating: Veto navigation for '{}', page already loaded", wxViewString(event.GetURL()));
          event.Veto();
       }
-      else
+      else {
          log::info("wxWebView::OnNavigating: URL: '{}', Target: '{}'", wxViewString(event.GetURL()), wxViewString(event.GetTarget()));
+      }
    }
 
    void HiddenWebClient::onNavigated(wxWebViewEvent& event)

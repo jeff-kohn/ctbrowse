@@ -116,11 +116,14 @@ namespace glz
          parse<JSON>::template op<Opts>(json_val, ctx, args...);
          if (ctx.error != error_code::none)
          {
-            return value.setNull();
+            value.setNull();
+			   return;
          }
 
          if (not json_val.value.has_value())
-            json_val.prop_type = PropType::Null;
+         {
+			   json_val.prop_type = PropType::Null;
+		   }
 
          switch (json_val.prop_type)
          {
@@ -128,6 +131,7 @@ namespace glz
                value.setNull();
                break;
 
+            // NOLINTBEGIN bugprone-unchecked-optional-access
             case PropType::String:
                value = std::move(json_val.value.value());
                break;
@@ -151,6 +155,7 @@ namespace glz
             case PropType::Boolean:
                value = CtPropertyVal::parse<bool>(json_val.value.value());
 					break;
+            // NOLINTEND bugprone-unchecked-optional-access
 
             default:
                assert(false);

@@ -26,7 +26,7 @@ namespace ctb::app
    public:
       /// @brief  ctor for two-phase window creation, requires manually calling Create()
       ///
-      TableSyncDialog() {}
+      TableSyncDialog() = default;
 
       /// @brief ctor for implicit window creation, no need to call create.
       ///
@@ -43,8 +43,8 @@ namespace ctb::app
       template <rng::input_range RngT>
       void selectTables(RngT&& values) requires std::is_same_v<rng::range_value_t<RngT>, TableId>
       {
-         m_table_selection_val = values | vws::transform([] (TableId tbl) { return enum_to_index(tbl); })
-                                        | rng::to<wxArrayString>();
+         m_table_selection_val = std::forward<RngT>(values) | vws::transform([] (TableId tbl) { return enum_to_index(tbl); })
+                                                            | rng::to<wxArrayString>();
       }
 
       /// @brief retrieve the list of tables the user selected for download
@@ -59,12 +59,12 @@ namespace ctb::app
       ///
       bool syncOnStartup() const noexcept { return m_startup_sync_val; }
 
-   protected:
-      bool           m_save_default_val{ false };
-      bool           m_startup_sync_val{ false };
-      wxCheckBox*    m_save_default_ctrl{};  
-      wxCheckBox*    m_startup_sync_ctrl{};  
-      wxArrayInt     m_table_selection_val{};
+   private:
+      bool            m_save_default_val{ false };
+      bool            m_startup_sync_val{ false };
+      wxCheckBox*     m_save_default_ctrl{};  
+      wxCheckBox*     m_startup_sync_ctrl{};  
+      wxArrayInt      m_table_selection_val{};
       wxCheckListBox* m_table_selection_ctrl{};
 
       void onOkUpdateUI(wxUpdateUIEvent& event);

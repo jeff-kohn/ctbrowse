@@ -60,8 +60,8 @@ namespace ctb::detail
    /// @return string in format  "1" (in-stock only), "1+(1)" (in-stock + pending) or "(1)" (pending only)
    inline auto calcQtyTotalDisplay(const CtPropertyMap& rec) -> CtPropertyVal
    {
-      auto qty     = getValueOrNull(rec, CtProp::QtyOnHand ).asUInt16().value_or(0u);
-      auto pending = getValueOrNull(rec, CtProp::QtyPending).asUInt16().value_or(0u);
+      auto qty     = getValueOrNull(rec, CtProp::QtyOnHand ).asUInt16().value_or(0U);
+      auto pending = getValueOrNull(rec, CtProp::QtyPending).asUInt16().value_or(0U);
 
       CtPropertyVal result{};
       if (qty == 0)
@@ -98,10 +98,10 @@ namespace ctb::detail
          return "";
 
       if (drink_start.isNull() && drink_end.hasValue())
-         return drink_end.asString("By {}").c_str();
+         return drink_end.asString("By {}");
 
       if (drink_end.isNull())
-         return drink_start.asString("{}+").c_str();
+         return drink_start.asString("{}+");
 
       return ctb::format("{}-{}", drink_start.asString(), drink_end.asString());
    }

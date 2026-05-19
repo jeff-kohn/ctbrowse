@@ -31,12 +31,12 @@ namespace ctb::app
          auto dataset = getDataset();
 
          // ordering matters here because it's the same as they'll be displayed
-         fields.push_back(SinglePropertyDisplay{ top_sizer, CtProp::MyPrice,      constants::LBL_MY_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
-         fields.push_back(SinglePropertyDisplay{ top_sizer, CtProp::CtPrice,      constants::LBL_CT_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
+         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::MyPrice,      constants::LBL_MY_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
+         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::CtPrice,      constants::LBL_CT_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
 
          if (dataset->hasProperty(CtProp::AuctionPrice))
          {
-            fields.push_back(SinglePropertyDisplay{ top_sizer, CtProp::AuctionPrice, constants::LBL_AUCTION_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
+            fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::AuctionPrice, constants::LBL_AUCTION_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
          }
       }
    };

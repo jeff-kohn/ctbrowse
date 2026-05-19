@@ -31,8 +31,8 @@ namespace ctb::app
       {
          auto* top_sizer = GetSizer(); assert(top_sizer);
 
-         fields.push_back(SinglePropertyDisplay{ top_sizer, CtProp::TagName,      constants::LBL_TAG_NAME });
-         fields.push_back(SinglePropertyDisplay{ top_sizer, CtProp::TagMaxPrice,  constants::LBL_MAX_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
+         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::TagName,      constants::LBL_TAG_NAME });
+         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::TagMaxPrice,  constants::LBL_MAX_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
       }
 
       void postWindowCreate() override

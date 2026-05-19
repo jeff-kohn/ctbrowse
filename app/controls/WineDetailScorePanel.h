@@ -29,9 +29,9 @@ namespace ctb::app
       {
          auto* top_sizer = GetSizer(); assert(top_sizer);
 
-         fields.push_back(SinglePropertyDisplay{ top_sizer, CtProp::MyScore, constants::LBL_MY_SCORE }.setFormat(constants::FMT_NUMBER_DECIMAL).setNullDisplayValue(constants::NO_SCORE));
-         fields.push_back(SinglePropertyDisplay{ top_sizer, CtProp::CtScore, constants::LBL_CT_SCORE }.setFormat(constants::FMT_NUMBER_DECIMAL).setNullDisplayValue(constants::NO_SCORE));
-         fields.push_back(ProReviewDisplay     { top_sizer, constants::LBL_PRO_SCORES, &ProReviewsCache::getScoreSummary });
+         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::MyScore, constants::LBL_MY_SCORE }.setFormat(constants::FMT_NUMBER_DECIMAL).setNullDisplayValue(constants::NO_SCORE));
+         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::CtScore, constants::LBL_CT_SCORE }.setFormat(constants::FMT_NUMBER_DECIMAL).setNullDisplayValue(constants::NO_SCORE));
+         fields.emplace_back(ProReviewDisplay     { top_sizer, constants::LBL_PRO_SCORES, &ProReviewsCache::getScoreSummary });
       }
    };
 

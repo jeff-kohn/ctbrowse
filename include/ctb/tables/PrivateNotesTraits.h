@@ -34,7 +34,7 @@ namespace ctb
       using MultiValueFilter = detail::MultiValueFilter<Prop, PropertyMap>;
       using TableSort = detail::TableSorter<CtProp, CtPropertyMap>;
 
-      static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
+      static constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
          {
             { Prop::iWineId,          FieldSchema { Prop::iWineId,          PropType::UInt64,      1 }},
             { Prop::iPrivateNoteId,   FieldSchema { Prop::iPrivateNoteId,   PropType::UInt64,      0 }},

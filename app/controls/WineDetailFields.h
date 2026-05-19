@@ -61,6 +61,7 @@ namespace ctb::app
 	      DisplayValue& operator=(const DisplayValue&) = delete;
          DisplayValue(DisplayValue&&) = default;
          DisplayValue& operator=(DisplayValue&&) = default;
+         ~DisplayValue() noexcept = default;
 
       private:
          bool          m_created{ false };
@@ -211,7 +212,7 @@ namespace ctb::app
          m_display_prop.hide();
       }
 
-   protected:
+   private:
       detail::DisplayValue m_display_prop;
       CacheValueFn         m_value_fn{};
    };

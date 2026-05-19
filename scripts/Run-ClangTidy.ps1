@@ -4,7 +4,7 @@
 #>
 param
 (
-   [string] $ConfigPreset = "run-clang-tidy",
+   [string] $BuildDir = "build\run-clang-tidy\",
    [string] $RunClangTidyPath = "$env:ProgramFiles\LLVM\bin\run-clang-tidy",
    [switch] $Fix
 )
@@ -21,15 +21,16 @@ try
 {
    if ($Fix)
    {
-      Write-Host "Running clang-tidy with fix enabled for $ConfigPreset..." -ForegroundColor Cyan
-      $FixArg = "-fix style file"
+      Write-Host "Running clang-tidy with fix enabled for $BuildDir..." -ForegroundColor Cyan
+      $FixArg = "-fix"
    }
    else
    {
-      Write-Host "Running clang-tidy for $ConfigPreset..." -ForegroundColor Cyan
+      Write-Host "Running clang-tidy for $BuildDir..." -ForegroundColor Cyan
       $FixArg = ""
    }
-   python "$RunClangTidyPath" -source-filter .*\.cpp -quiet $FixArg -p build\$ConfigPreset\
+
+   python "$RunClangTidyPath" -source-filter .*\.cpp -quiet $FixArg -p $BuildDir
 }
 finally
 {

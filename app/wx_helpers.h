@@ -41,7 +41,7 @@ namespace ctb::app
    wxArrayString wxToArrayString(Rng&& strings)
    {
       Overloaded overloaded{
-         [](std::string&& str)
+         [](const std::string& str)
          {
             return wxString{ str };
          },
@@ -89,11 +89,14 @@ namespace ctb::app
    ///
    /// this is useful because the config object's current path is persistent and some
    /// of the wxWidgets code assumes starting path of "/" (eg wxPersist functionality)
+   ///
+   /// It should go without saying that the wxConfigBase& referenced passed to the
+   /// constructor of an instance of this class needs to outlive the ScopedConfigPath
    /// 
    class ScopedConfigPath final
    {
    public:
-      static inline constexpr const char* CONFIG_ROOT = "/";
+      static constexpr const char* CONFIG_ROOT = "/";
 
       explicit ScopedConfigPath(wxConfigBase& config) : m_config(config)
       {}
@@ -104,9 +107,14 @@ namespace ctb::app
       wxConfigBase& operator*()  { return m_config;       }
 
       ScopedConfigPath() = delete;
+      ScopedConfigPath(const ScopedConfigPath&) = delete;
+      ScopedConfigPath(ScopedConfigPath&&) = delete;
+      ScopedConfigPath& operator=(const ScopedConfigPath&) = delete;
+      ScopedConfigPath& operator=(ScopedConfigPath&&) = delete;
 
    private:
-      wxConfigBase& m_config;
+      wxConfigBase& m_config; // NOLINT cppcoreguidelines-avoid-const-or-ref-data-members
+
    };
 
 

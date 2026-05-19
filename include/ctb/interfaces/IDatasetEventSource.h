@@ -15,7 +15,7 @@ namespace ctb
 {
    /// @brief Interface for an event source that generates events for datasets
    /// 
-   struct IDatasetEventSource
+   struct IDatasetEventSource                // NOLINT [cppcoreguidelines-special-member-functions]
    {
       /// @brief returns true if this source has a dataset attached, false otherwise
       virtual auto hasDataset() const noexcept -> bool = 0;
@@ -89,8 +89,7 @@ namespace ctb
       virtual auto signal(DatasetEvent::Id event, NullableInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool = 0;
 
       /// @brief virtual destructor
-      virtual ~IDatasetEventSource() noexcept
-      {}
+      virtual ~IDatasetEventSource() noexcept = default;
    };
 
    using DatasetEventSourcePtr = std::shared_ptr<IDatasetEventSource>;

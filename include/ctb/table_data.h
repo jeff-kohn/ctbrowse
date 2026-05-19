@@ -91,7 +91,7 @@ namespace ctb
    ///
    inline auto getTableDescription(TableId tbl) -> std::string_view
    {
-      auto it = TableDescriptions.find(tbl);
+      const auto *it = TableDescriptions.find(tbl);
       if (it != TableDescriptions.end())
          return it->second;
       else

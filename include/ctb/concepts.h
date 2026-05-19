@@ -35,7 +35,7 @@ namespace ctb
    template <typename T>
    concept PropertyValueType = std::is_default_constructible_v<T> 
                                and std::is_move_constructible_v<T>
-                               and requires (T t, typename T::ValueType v)
+                               and requires (T t, T::ValueType v)
    {
       t = T{ v };
       t.setNull();
@@ -55,7 +55,7 @@ namespace ctb
    template <typename T>
    concept PropertyMapType = std::is_enum_v<typename T::key_type> 
                              and PropertyValueType<typename T::mapped_type>
-                             and requires (T t, typename T::key_type key)
+                             and requires (T t, T::key_type key)
    {
       { t.begin()       } -> std::same_as<typename T::iterator>;
       { t.end()         } -> std::same_as<typename T::iterator>;
@@ -68,7 +68,7 @@ namespace ctb
    /// @brief Concept for a traits type defining the schema for a TableRecordType instantiation
    ///
    template <typename T> 
-   concept RecordTraitsType = requires (typename T::Prop pid, typename T::PropertyMap props)
+   concept RecordTraitsType = requires (T::Prop pid, T::PropertyMap props)
    {
       { T::Schema.find(pid)->second } -> std::same_as<const typename T::FieldSchema&>;
       { T::DefaultListColumns[0]    } -> std::same_as<const typename T::ListColumn&>;
@@ -86,9 +86,9 @@ namespace ctb
    ///
    template <typename T> 
    concept TableRecordType = requires (T t, 
-      typename T::Prop pid, 
-      typename T::PropertyVal prop, 
-      typename T::RowType row, 
+      T::Prop pid, 
+      T::PropertyVal prop, 
+      T::RowType row, 
       std::string_view sv)
    {
      t.parseRow(row);
@@ -100,7 +100,7 @@ namespace ctb
 
 
    template <typename T>
-   concept DataTableType = rng::random_access_range<T> and requires (T t, typename T::value_type::Prop pid)
+   concept DataTableType = rng::random_access_range<T> and requires (T t, T::value_type::Prop pid)
    {
       { t.size()   } -> std::same_as<size_t>;
       { t[0]       } -> std::same_as<typename T::value_type&>;

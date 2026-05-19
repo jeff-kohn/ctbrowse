@@ -120,7 +120,7 @@ namespace ctb
 
       DatasetEventHandler() = delete;
       DatasetEventHandler(const DatasetEventHandler&) = default;
-      DatasetEventHandler(DatasetEventHandler&&) = default;
+      DatasetEventHandler(DatasetEventHandler&&)  noexcept = default;
       DatasetEventHandler& operator=(const DatasetEventHandler&) = default;
       DatasetEventHandler& operator=(DatasetEventHandler&&) = default;
 

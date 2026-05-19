@@ -111,12 +111,7 @@ namespace ctb
       ///  observer threw an error.
       auto signal(DatasetEvent::Id event_id, NullableInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool override;
 
-   private:
-      DatasetPtr m_data{};
-      std::unordered_set<IDatasetEventSink*> m_observers{};
-   
-      /// @brief default ctor is private, use static create()
-      DatasetEventSource() = default;
+      ~DatasetEventSource() override = default;
 
       // no copy/move/assign, this class is created on the heap and passed around in shared_ptr
       DatasetEventSource(const DatasetEventSource&) = delete;
@@ -124,6 +119,12 @@ namespace ctb
       DatasetEventSource& operator=(const DatasetEventSource&) = delete;
       DatasetEventSource& operator=(DatasetEventSource&&) = delete;   
 
+   private:
+      DatasetPtr m_data{};
+      std::unordered_set<IDatasetEventSink*> m_observers{};
+   
+      /// @brief default ctor is private, use static create()
+      DatasetEventSource() = default;
    };
 
 

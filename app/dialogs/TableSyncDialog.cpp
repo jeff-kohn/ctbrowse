@@ -136,7 +136,7 @@ namespace ctb::app
 
    void TableSyncDialog::onDeselectAll([[maybe_unused]] wxCommandEvent& event)
    {
-      for (auto idx = 0u; idx < m_table_selection_ctrl->GetCount(); ++idx)
+      for (auto idx = 0U; idx < m_table_selection_ctrl->GetCount(); ++idx)
       {
          m_table_selection_ctrl->Check(idx, false);
       }
@@ -152,7 +152,7 @@ namespace ctb::app
 
    void TableSyncDialog::onSelectAll([[maybe_unused]] wxCommandEvent & event)
    {
-      for (auto idx = 0u; idx < m_table_selection_ctrl->GetCount(); ++idx)
+      for (auto idx = 0U; idx < m_table_selection_ctrl->GetCount(); ++idx)
       {
          m_table_selection_ctrl->Check(idx, true);
       }

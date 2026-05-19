@@ -54,6 +54,8 @@ namespace ctb::detail
       TableRecord(const TableRecord&) = default;
       TableRecord(TableRecord&&) = default;
       TableRecord& operator=(TableRecord&&) = default;
+      TableRecord& operator=(const TableRecord&) = delete;
+      ~TableRecord() = default;
 
       /// @brief parse a CSVRow into TableProperties for each property in m_props
       ///
@@ -67,7 +69,8 @@ namespace ctb::detail
          {
             try
             {
-               auto csv_field = row[fld_schema.csv_col.value()];
+               auto csv_field = row[fld_schema.csv_col.value()]; // NOLINT [bugprone-unchecked-optional-access] we checked above with filter.
+
                m_props[fld_schema.prop_id] = fieldToProperty(csv_field, fld_schema.prop_type);
             }
             catch (...)
@@ -123,7 +126,6 @@ namespace ctb::detail
          return m_props;
       }
 
-      TableRecord& operator=(const TableRecord&) = delete;
 
    private:
       PropertyMap m_props{ Traits::Schema.size()};

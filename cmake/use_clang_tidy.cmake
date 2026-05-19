@@ -30,11 +30,12 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
             # When 'code_analysis' target is built/run, clang-tidy will be run for the entire project using compile_commands.json
             add_custom_command(TARGET code_analysis POST_BUILD
-               COMMAND "${CMAKE_SOURCE_DIR}/scripts/Run-ClangTidyProjectScan.ps1"
-                        "--SourceDir"
-                        "${CMAKE_SOURCE_DIR}"
-                        "--BuildDir"
-                        "${CMAKE_BINARY_DIR}"
+               COMMAND "pwsh"
+                          "${CMAKE_SOURCE_DIR}/scripts/Run-ClangTidy.ps1"
+                          "-BuildDir"
+                          "${CMAKE_BINARY_DIR}\\"
+                          "-RunClangTidyPath"
+                          "${RUN_CLANG_TIDY}"
                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
             )
             message (STATUS "run-clang-tidy project scanning enabled for target 'code_analysis'")

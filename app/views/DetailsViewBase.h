@@ -36,7 +36,7 @@ namespace ctb::app
       // Handles the window creation, since constructors only create the C++ object not the actual window. This implementation
       // will call wxPanel::Create(), then add the top/main details panel before calling addDatasetSpecificControls(), which 
       // derived classes can use to add additional panels/buttons/etc. But this can be overridden if a different approach is needed.
-      virtual void createWindow(wxWindow* parent) override;
+      void createWindow(wxWindow* parent) override;
 
       // Can be called by derived classes to add a commandlink button the to the specified sizer.
       void addCommandLinkButton(wxBoxSizer* sizer, CmdId cmd);

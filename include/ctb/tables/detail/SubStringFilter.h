@@ -21,7 +21,6 @@ namespace ctb::detail
    template <TableRecordType RecordTypeT>
    struct SubStringFilter
    {
-   public:
       using Record = RecordTypeT;
       using Prop   = Record::Prop;
 
@@ -38,7 +37,7 @@ namespace ctb::detail
       /// search is used
       auto operator()(const Record& rec) const -> bool 
       {
-         for (auto prop : search_props)
+         for (auto prop : search_props) 
          {
             const auto& val = rec.getProperty(prop);
 
