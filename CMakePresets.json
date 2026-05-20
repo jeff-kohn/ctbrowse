@@ -64,7 +64,6 @@
       },
       {
          "name": "win-clang",
-         "$comment": "clang-tidy doesn't get along with multi-config generators or PCH so its disabled",
          "displayName": "Windows-Clang",
          "description": "Build preset for Clang on Windows",
          "inherits": [ "build-dir", "vcpkg-win-clang" ],
@@ -92,7 +91,6 @@
       },
       {
          "name": "ci-static-analysis",
-         "$comment":  "This preset only supports Release config so that we can run-clang-tidy without it scanning files multiple times",
          "displayName": "Static Analysis",
          "description": "Preset for clang-tidy and CppCheck project scan",
          "inherits": [ "win-clang" ],

@@ -47,6 +47,7 @@ jobs:
 
     - name: configure
       run: |
+        cmake --version
         cmake --preset=$env:CONFIGURE_PRESET
 
     - name: build
@@ -97,6 +98,7 @@ jobs:
 
     - name: configure
       run: |
+        cmake --version
         cmake --preset=$env:PRESET_NAME
 
     - name: build clang binary
