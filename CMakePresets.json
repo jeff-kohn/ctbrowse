@@ -33,6 +33,7 @@
          "inherits": "vcpkg-toolchain",
          "cacheVariables": {
             "VCPKG_TARGET_TRIPLET": "win-static",
+            "CTB_USE_PRECOMPILED_HEADERS": "ON",
             "CTB_MSVC_RUNTIME_LIBRARY": "$<$<CONFIG:Debug>:MultiThreadedDebug>$<$<CONFIG:Release,RelWithDebInfo>:MultiThreaded>"
          }
       },
