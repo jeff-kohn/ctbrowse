@@ -68,12 +68,11 @@ jobs:
          path: ${{ github.workspace }}/build/${{ env.CONFIGURE_PRESET }}/app/Release/ctBrowse_app.exe
          retention-days: 30
 
-
   clang_build:
     name: "Run-Clang-Tidy"
     runs-on: windows-latest
     env:
-      PRESET_NAME: "run-clang-tidy"
+      PRESET_NAME: "ci-static-analysis"
 
     steps:
     - uses: actions/checkout@v6

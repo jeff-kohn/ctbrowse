@@ -33,7 +33,6 @@
          "inherits": "vcpkg-toolchain",
          "cacheVariables": {
             "VCPKG_TARGET_TRIPLET": "win-static",
-            "CTB_USE_PRECOMPILED_HEADERS": "ON",
             "CTB_MSVC_RUNTIME_LIBRARY": "$<$<CONFIG:Debug>:MultiThreadedDebug>$<$<CONFIG:Release,RelWithDebInfo>:MultiThreaded>"
          }
       },
@@ -60,7 +59,8 @@
             "value": "host=x64,version=14.52"
          },
          "cacheVariables": {
-            "CTB_BUILD_TESTS": "OFF"
+            "CTB_BUILD_TESTS": "OFF",
+            "CTB_USE_PRECOMPILED_HEADERS": "ON"
          },
          "vendor": {
             "microsoft.com/VisualStudioSettings/CMake/1.0": {
@@ -76,9 +76,10 @@
          "generator": "Ninja Multi-Config",
          "cacheVariables": {
             "CMAKE_CXX_COMPILER": "clang-cl",
+            "CTB_BUILD_TESTS": "OFF",
+            "CTB_CLANG_TIDY_PROJECT_SCAN": "ON",
             "CTB_CPPCHECK_BUILD_SCAN": "ON",
-            "CTB_CLANG_TIDY_BUILD_SCAN": "ON",
-            "CTB_BUILD_TESTS": "OFF"
+            "CTB_USE_PRECOMPILED_HEADERS": "ON"
          },
          "architecture": {
             "value": "x64",
@@ -95,16 +96,16 @@
          }
       },
       {
-         "name": "run-clang-tidy",
-         "displayName": "Static Analysis (run-clang-tidy)",
+         "name": "ci-static-analysis",
+         "displayName": "Static Analysis",
          "description": "Preset for clang-tidy and CppCheck project scan",
          "inherits": [ "win-clang" ],
          "cacheVariables": {
-            "CTB_CPPCHECK_BUILD_SCAN": "OFF",
+            "CMAKE_CONFIGURATION_TYPES": "Release",
             "CTB_CLANG_TIDY_BUILD_SCAN": "OFF",
-            "CTB_CPPCHECK_PROJECT_SCAN": "ON",
             "CTB_CLANG_TIDY_PROJECT_SCAN": "ON",
-            "CMAKE_CONFIGURATION_TYPES": "Release"
+            "CTB_CPPCHECK_BUILD_SCAN": "OFF",
+            "CTB_CPPCHECK_PROJECT_SCAN": "ON"
          }
       }
    ],
@@ -126,22 +127,19 @@
          "name": "win-clang-release",
          "displayName": "Release",
          "configurePreset": "win-clang",
-         "configuration": "Release",
-         "jobs": 16
+         "configuration": "Release"
       },
       {
          "name": "win-clang-debug",
          "displayName": "Debug",
          "configurePreset": "win-clang",
-         "configuration": "Debug",
-         "jobs": 16
+         "configuration": "Debug"
       },
       {
-         "name": "run-clang-tidy",
-         "displayName": "Release (run-clang-tidy)",
-         "configurePreset": "run-clang-tidy",
-         "configuration": "Release",
-         "jobs": 16
+         "name": "ci-static-analysis",
+         "displayName": "Release",
+         "configurePreset": "ci-static-analysis",
+         "configuration": "Release"
       }
    ]
 }

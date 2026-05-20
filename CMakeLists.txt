@@ -19,7 +19,7 @@ option(CTB_CPPCHECK_BUILD_SCAN     "Enable CppCheck in-build scanning. Default: 
 option(CTB_CPPCHECK_PROJECT_SCAN   "Enable CppCheck project scanning in the 'code_analysis target. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }." ${PROJECT_IS_TOP_LEVEL})
 option(CTB_CLANG_TIDY_BUILD_SCAN   "Enable clang-tidy in-build scanning. Default: OFF. Values: { ON, OFF }." "OFF" )
 option(CTB_CLANG_TIDY_PROJECT_SCAN "Enable clang-tidy project scanning in the 'code_analysis target. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }." ${PROJECT_IS_TOP_LEVEL})
-option(CTB_USE_PRECOMPILED_HEADERS "Use precompiled headers during build. Default: OFF. Values: { ON, OFF }." "ON")
+option(CTB_USE_PRECOMPILED_HEADERS "Use precompiled headers during build. Default: OFF. Values: { ON, OFF }." "OFF")
 
 # So that cmake can find any additional modules we've written (stuff like Find modules, export targets, etc)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")

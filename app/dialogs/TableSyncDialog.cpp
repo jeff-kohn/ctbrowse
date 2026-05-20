@@ -70,7 +70,7 @@ namespace ctb::app
 
          // default-selected tables are stored as a string of enum values (e.g int values not names)
          // delimited by ENUM_DELIMTER. The default value is the table enum value 0 (List)
-         m_table_selection_val = std::string_view{ cfg->Read(constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES, "0").wx_str() } // read the config value
+         m_table_selection_val = std::string_view{ cfg->Read(constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES, "0").wx_str() } 
             | vws::split(ENUM_DELIMETER)                                                                                 // split by token ';'
             | vws::transform([] (auto subrange) { return std::string_view(subrange.begin(), subrange.end()); })          // convert subranges to string_view's
             | vws::transform([] (std::string_view sv) { return from_str<int>(sv); })                                     // convert string view to from_chars() result
