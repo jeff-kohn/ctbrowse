@@ -4,8 +4,9 @@
 #>
 param
 (
-   [string] $BuildDir = "build\run-clang-tidy\",
+   [string] $BuildDir = "build\ci-static-analysis\",
    [string] $RunClangTidyPath = "$env:ProgramFiles\LLVM\bin\run-clang-tidy",
+   [int] $Jobs = 16,
    [switch] $Fix
 )
 
@@ -21,16 +22,16 @@ try
 {
    if ($Fix)
    {
-      Write-Host "Running clang-tidy with fix enabled for $BuildDir..." -ForegroundColor Cyan
+      Write-Host "Running clang-tidy with fix enabled for $BuildDir ..." -ForegroundColor Cyan
       $FixArg = "-fix"
    }
    else
    {
-      Write-Host "Running clang-tidy for $BuildDir..." -ForegroundColor Cyan
+      Write-Host "Running clang-tidy for $BuildDir ..." -ForegroundColor Cyan
       $FixArg = ""
    }
-
-   python "$RunClangTidyPath" -source-filter .*\.cpp -quiet $FixArg -p $BuildDir
+   $JobsArg = "-j $Jobs"
+   python "$RunClangTidyPath" -source-filter .*\.cpp -quiet -use-color $JobsArg $FixArg -p $BuildDir
 }
 finally
 {

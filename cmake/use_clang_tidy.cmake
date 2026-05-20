@@ -28,6 +28,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
             message(CHECK_PASS "found at '${RUN_CLANG_TIDY}'")
 
+            # Jobs should be same as number of cores, you can override this with a machine-specific value using CACHE var
+            set(CTB_RUN_CLANG_TIDY_JOBS "4")
+
             # When 'code_analysis' target is built/run, clang-tidy will be run for the entire project using compile_commands.json
             add_custom_command(TARGET code_analysis POST_BUILD
                COMMAND "pwsh"
@@ -36,6 +39,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
                           "${CMAKE_BINARY_DIR}\\"
                           "-RunClangTidyPath"
                           "${RUN_CLANG_TIDY}"
+                          "-Jobs"
+                          "${CTB_RUN_CLANG_TIDY_JOBS}"
                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
             )
             message (STATUS "run-clang-tidy project scanning enabled for target 'code_analysis'")
