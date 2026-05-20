@@ -99,7 +99,11 @@ jobs:
       run: |
         cmake --preset=$env:PRESET_NAME
 
-    - name: build and run static analysis
+    - name: build clang binary
+      run: |
+        cmake --build --preset=$env:PRESET_NAME --target=ctBrowse_app
+        
+    - name: run static analysis
       run: |
         cmake --build --preset=$env:PRESET_NAME --target=code_analysis
 
