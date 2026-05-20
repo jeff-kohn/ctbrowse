@@ -181,15 +181,12 @@ namespace ctb::app
       auto* box_sizer3 = new wxBoxSizer(wxVERTICAL);
 
       auto* static_text2 = new wxStaticText(this, wxID_ANY, "&Tables to Download:");
-      box_sizer3->Add(static_text2,
-         wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
+      box_sizer3->Add(static_text2, wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
 
-      m_table_selection_ctrl = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, nullptr,
-         wxLB_EXTENDED);
+      m_table_selection_ctrl = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, nullptr, wxLB_EXTENDED);
       m_table_selection_ctrl->SetValidator(wxGenericValidator(&m_table_selection_val));
       m_table_selection_ctrl->SetMinSize(ConvertDialogToPixels(wxSize(constants::pix_112, constants::pix_112)));
-      box_sizer3->Add(m_table_selection_ctrl,
-         wxSizerFlags().Border(wxLEFT|wxTOP|wxBOTTOM, wxSizerFlags::GetDefaultBorder()));
+      box_sizer3->Add(m_table_selection_ctrl, wxSizerFlags().Border(wxLEFT|wxTOP|wxBOTTOM, wxSizerFlags::GetDefaultBorder()));
 
       m_startup_sync_ctrl = new wxCheckBox(this, wxID_ANY, "Sync on &Program Startup");
       m_startup_sync_ctrl->SetValidator(wxGenericValidator(&m_startup_sync_val));

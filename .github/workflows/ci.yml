@@ -43,7 +43,7 @@ jobs:
       run: |
         nuget sources add  -Source "${{ env.NUGET_FEED }}" -StorePasswordInClearText -Name GitHubPackages -UserName "${{ env.NUGET_SOURCE_USERNAME }}" -Password "${{ env.NUGET_SOURCE_PASSWORD }}"
         nuget setapikey "${{ secrets.GITHUB_TOKEN }}" -Source "${{ env.NUGET_FEED }}"
-        dir C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC
+        dir "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC"
 
     - name: configure
       run: |
