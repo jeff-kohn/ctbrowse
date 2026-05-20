@@ -1,5 +1,5 @@
 {
-   "version": 6,
+   "version": 9,
    "cmakeMinimumRequired": {
       "major": 3,
       "minor": 25,
@@ -51,7 +51,7 @@
          "inherits": [ "build-dir", "vcpkg-win-static" ],
          "generator": "Visual Studio 18 2026",
          "architecture": "x64",
-         "toolset": "v145,host=x64,version=14.52",
+         "toolset": "v145",
          "cacheVariables": {
             "CTB_BUILD_TESTS": "OFF",
             "CTB_USE_PRECOMPILED_HEADERS": "ON"
@@ -64,6 +64,7 @@
       },
       {
          "name": "win-clang",
+         "$comment": "clang-tidy doesn't get along with multi-config generators or PCH so its disabled",
          "displayName": "Windows-Clang",
          "description": "Build preset for Clang on Windows",
          "inherits": [ "build-dir", "vcpkg-win-clang" ],
@@ -71,7 +72,7 @@
          "cacheVariables": {
             "CMAKE_CXX_COMPILER": "clang-cl",
             "CTB_BUILD_TESTS": "OFF",
-            "CTB_CLANG_TIDY_BUILD_SCAN": "ON",
+            "CTB_CLANG_TIDY_BUILD_SCAN": "OFF",
             "CTB_CLANG_TIDY_PROJECT_SCAN": "OFF",
             "CTB_USE_PRECOMPILED_HEADERS": "ON"
          },
@@ -91,12 +92,12 @@
       },
       {
          "name": "ci-static-analysis",
+         "$comment":  "This preset only supports Release config so that we can run-clang-tidy without it scanning files multiple times",
          "displayName": "Static Analysis",
          "description": "Preset for clang-tidy and CppCheck project scan",
          "inherits": [ "win-clang" ],
          "cacheVariables": {
             "CMAKE_CONFIGURATION_TYPES": "Release",
-            "CTB_CLANG_TIDY_BUILD_SCAN": "OFF",
             "CTB_CLANG_TIDY_PROJECT_SCAN": "ON",
             "CTB_RUN_CLANG_TIDY_JOBS": "4"
          }
