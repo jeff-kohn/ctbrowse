@@ -1,11 +1,12 @@
+set(TARGET_NAME "ctBrowse_lib")
 
 # this call creates the target and sets compiler/linker settings and flags
-create_lib_target(ctBrowse_lib)
+create_lib_target(${TARGET_NAME})
 
 #add an alias so it can be used with find_package or add_subdirectory
-add_library(${PROJECT_NAME}::ctBrowse_lib ALIAS ctBrowse_lib)
+add_library(${PROJECT_NAME}::${TARGET_NAME} ALIAS ${TARGET_NAME})
 
-target_sources(ctBrowse_lib
+target_sources(${TARGET_NAME}
    PUBLIC
       "../include/ctb/ctb.h"
       "../include/ctb/common_types.h"
@@ -74,21 +75,21 @@ target_sources(ctBrowse_lib
       "utility_http.cpp"
 )
 
-target_include_directories(ctBrowse_lib
+target_include_directories(${TARGET_NAME}
    ${warning_guard}
 	PUBLIC
 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>"
 		"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_include_directories(ctBrowse_lib
+target_include_directories(${TARGET_NAME}
    SYSTEM
 	PUBLIC
 		"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/3rdParty>"
 )
 
 # Note that since this target is a 
-target_link_libraries(ctBrowse_lib
+target_link_libraries(${TARGET_NAME}
    PUBLIC
       cpr::cpr
       fmt::fmt
@@ -98,6 +99,45 @@ target_link_libraries(ctBrowse_lib
       "$<$<PLATFORM_ID:Windows>:shlwapi>"
       "$<$<PLATFORM_ID:Windows>:Shell32.lib>"
 )
+
+if (CTB_USE_PRECOMPILED_HEADERS)
+   target_precompile_headers(${TARGET_NAME}
+      PRIVATE
+         <algorithm>
+         <array>
+         <boost/algorithm/string.hpp>
+         <boost/algorithm/string/predicate.hpp>
+         <boost/unordered/unordered_flat_map.hpp>
+         <chrono>
+         <concepts>
+         <cpr/api.h>
+         <cpr/cprtypes.h>
+         <cpr/cprtypes.h>
+         <cpr/response.h>
+         <enchantum/enchantum.hpp>
+         <enchantum/fmt_format.hpp>
+         <exception>
+         <expected>
+         <external/csv.hpp>
+         <filesystem>
+         <fmt/chrono.h>
+         <fmt/format.h>
+         <frozen/map.h>
+         <functional>
+         <map>
+         <memory>
+         <optional>
+         <ranges>
+         <set>
+         <span>
+         <string_view>
+         <string>
+         <unordered_set>
+         <variant>
+         <vector>
+   )
+   message(STATUS "precompiled header support enabled for ${TARGET_NAME}")
+endif()
 
 
 # ---- End-of-file commands ----

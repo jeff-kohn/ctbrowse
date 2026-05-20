@@ -14,7 +14,7 @@
 // logging done with SPDLOG_DEBUG() will be omitted at compile time but 
 // included for debug builds.
 #if !defined(NDEBUG)
-   #define SPDLOG_ACTIVE_LEVEL 1 // SPDLOG_LEVEL_DEBUG
+   #define SPDLOG_ACTIVE_LEVEL 1 // SPDLOG_LEVEL_DEBUG NOLINT cppcoreguidelines-macro-usage
 #endif
 
 #include <spdlog/spdlog.h>
@@ -25,7 +25,6 @@
 
 #include <memory>
 #include <filesystem>
-#include <string>
 #include <string_view>
 #include <source_location>
 

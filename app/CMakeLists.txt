@@ -114,5 +114,56 @@ target_sources(${TARGET_NAME}
      ${${PROJECT_NAME}_VERSION_RESOURCE}
 )
 
+
+if (CTB_USE_PRECOMPILED_HEADERS)
+   target_precompile_headers(${TARGET_NAME}
+      PRIVATE
+         <algorithm>
+         <array>
+         <boost/algorithm/string.hpp>
+         <boost/algorithm/string/predicate.hpp>
+         <boost/unordered/unordered_flat_map.hpp>
+         <chrono>
+         <concepts>
+         <enchantum/enchantum.hpp>
+         <enchantum/fmt_format.hpp>
+         <exception>
+         <expected>
+         <external/csv.hpp>
+         <filesystem>
+         <fmt/chrono.h>
+         <fmt/format.h>
+         <frozen/map.h>
+         <map>
+         <memory>
+         <optional>
+         <ranges>
+         <set>
+         <span>
+         <string_view>
+         <string>
+         <unordered_set>
+         <variant>
+         <vector>
+         <wx/app.h>
+         <wx/button.h>
+         <wx/checklst.h>
+         <wx/config.h>
+         <wx/event.h>
+         <wx/fileconf.h>
+         <wx/frame.h>
+         <wx/gdicmn.h>
+         <wx/panel.h>
+         <wx/sizer.h>
+         <wx/stattext.h>
+         <wx/textctrl.h>
+         <wx/valgen.h>
+         <wx/window.h>
+         <wx/wupdlock.h>
+         <wx/xrc/xmlres.h>
+   )
+   message(STATUS "precompiled header support enabled for ${TARGET_NAME}")
+endif()
+
 # ---- End-of-file commands ----
 # add_folders(app)
