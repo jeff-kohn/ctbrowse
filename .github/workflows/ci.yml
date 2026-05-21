@@ -71,7 +71,7 @@ jobs:
 
   clang_build:
     name: "Run-Clang-Tidy"
-    runs-on: windows-latest
+    runs-on: windows-2025-vs2026
     env:
       PRESET_NAME: "ci-static-analysis"
 
