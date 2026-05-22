@@ -89,8 +89,8 @@ jobs:
         nuget sources add  -Source "${{ env.NUGET_FEED }}" -StorePasswordInClearText -Name GitHubPackages -UserName "${{ env.NUGET_SOURCE_USERNAME }}" -Password "${{ env.NUGET_SOURCE_PASSWORD }}"
         nuget setapikey "${{ secrets.GITHUB_TOKEN }}" -Source "${{ env.NUGET_FEED }}"
         
-    - name: "Setup CMake/ninja"
-      uses: lukka/get-cmake@latest
+    # - name: "Setup CMake/ninja"
+    #   uses: lukka/get-cmake@latest
 
     - name: Install pre-reqs
       run: |
@@ -98,6 +98,7 @@ jobs:
 
     - name: configure
       run: |
+        clang --version
         cmake --version
         cmake --preset=$env:PRESET_NAME
 
