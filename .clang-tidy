@@ -51,5 +51,6 @@ CheckOptions:
   - key: 'readability-redundant-access-specifiers.CheckFirstDeclaration'
     value: 'true'
 
-ExcludeHeaderFilterRegex: '.*/(3rdParty|build)/.*'
+ExcludeHeaderFilterRegex: '.*((3rdParty|build|Program Files)[/\\].*'
+# ExcludeHeaderFilterRegex: '.*/(3rdParty|build)/.*'
 ExtraArgsBefore: ['--driver-mode=cl']
