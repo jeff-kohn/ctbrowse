@@ -59,7 +59,10 @@ jobs:
       if: always()
       with:
          name: msvc_vcpkg_logs
-         path: ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+         path: |
+            ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+            ${{ github.workspace }}/build/**/vcpkg-manifest-install.log
+            ${{ github.workspace }}/build/**/CMakeFiles\CMakeConfigureLog.yaml
          retention-days: 3    
 
     - name: Upload binary
@@ -89,9 +92,6 @@ jobs:
         nuget sources add  -Source "${{ env.NUGET_FEED }}" -StorePasswordInClearText -Name GitHubPackages -UserName "${{ env.NUGET_SOURCE_USERNAME }}" -Password "${{ env.NUGET_SOURCE_PASSWORD }}"
         nuget setapikey "${{ secrets.GITHUB_TOKEN }}" -Source "${{ env.NUGET_FEED }}"
         
-    # - name: "Setup CMake/ninja"
-    #   uses: lukka/get-cmake@latest
-
     - name: Install pre-reqs
       run: |
         winget install CppCheck --verbose --disable-interactivity --source winget --accept-source-agreements --accept-package-agreements
@@ -115,7 +115,10 @@ jobs:
       if: always()
       with:
          name: clang_vcpkg_logs
-         path: ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+         path: |
+            ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+            ${{ github.workspace }}/build/**/vcpkg-manifest-install.log
+            ${{ github.workspace }}/build/**/CMakeFiles\CMakeConfigureLog.yaml
          retention-days: 3    
 
     - name: Upload binary

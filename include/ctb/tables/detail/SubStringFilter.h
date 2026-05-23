@@ -9,7 +9,7 @@
 
 #include "ctb/ctb.h"
 
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <vector>
 
 

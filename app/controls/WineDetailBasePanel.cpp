@@ -30,7 +30,7 @@ namespace ctb::app
       }
 
       TransferDataToWindow();
-      SendSizeEvent(); // So we can wrap the title
+      SendSizeEvent(); // So we can wrap the wine title/heading
       Layout();
    }
 

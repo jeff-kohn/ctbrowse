@@ -5,6 +5,7 @@
 
 #include <wx/sizer.h>
 #include <wx/stattext.h>
+#include <wx/textctrl.h>
 #include <wx/valgen.h>
 
 #include <variant>
@@ -26,8 +27,8 @@ namespace ctb::app
             if (!parent_wnd)
                throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
 
-            m_label_wnd = new wxStaticText{ parent_wnd, wxID_ANY, wxFromSV(heading_label) };    // cppcheck-suppress noOperatorEq
-            m_value_wnd = new wxStaticText{ parent_wnd, wxID_ANY, wxEmptyString           };    // cppcheck-suppress noOperatorEq
+            m_label_wnd = new wxStaticText{ parent_wnd, wxID_ANY, wxFromSV(heading_label) };                                                         // cppcheck-suppress noOperatorEq
+            m_value_wnd = new wxTextCtrl  { parent_wnd, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxBORDER_NONE  };    // cppcheck-suppress noOperatorEq
             m_value_wnd->SetValidator(wxGenericValidator{ m_display_value.get() });
 
             m_row_sizer = new wxGridSizer{ COL_COUNT };                                         // cppcheck-suppress noOperatorEq
@@ -55,6 +56,12 @@ namespace ctb::app
             {
                m_display_value->Replace("&", "&&");
             }
+
+            // text controls don't auto-expand to fit text the way static controls do, have to force it.
+            auto sz = m_value_wnd->GetSizeFromText(*m_display_value);
+            sz.SetWidth(sz.GetWidth() + 3); // a little wiggle room to prevent horizontal scrolling when selecting text.
+            m_value_wnd->InvalidateBestSize();
+            m_value_wnd->SetMinClientSize(sz);
          }
 
          DisplayValue(const DisplayValue&) = delete;
@@ -68,7 +75,7 @@ namespace ctb::app
          wxSizer*      m_parent_sizer{};
          wxSizer*      m_row_sizer{};
          wxStaticText* m_label_wnd{};
-         wxStaticText* m_value_wnd{};
+         wxTextCtrl*   m_value_wnd{};
 
          // we need the address of the wxString to be stable for the validator, which stores a ptr. 
          std::unique_ptr<wxString> m_display_value{ new wxString{} };

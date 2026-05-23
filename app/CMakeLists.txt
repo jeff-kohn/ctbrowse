@@ -120,7 +120,6 @@ if (CTB_USE_PRECOMPILED_HEADERS)
       PRIVATE
          <algorithm>
          <array>
-         <boost/algorithm/string.hpp>
          <boost/algorithm/string/predicate.hpp>
          <boost/unordered/unordered_flat_map.hpp>
          <chrono>
