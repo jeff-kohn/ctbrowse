@@ -7,7 +7,7 @@
 #include <deque>
 
 
-class wxStaticText;
+class wxTextCtrl;
 
 namespace ctb::app
 {
@@ -25,7 +25,7 @@ namespace ctb::app
       wxString            m_title{ constants::LBL_TASTING_NOTE };
       wxString            m_feedback_summary{};
       wxString            m_tasting_notes{};
-      wxStaticText*       m_tasting_notes_ctrl{};
+      wxTextCtrl*         m_tasting_notes_ctrl{};
 
       // this class can only be constructed through static create(), which uses createDetailsViewFactory to call private ctor
       template<typename WndT, typename... Args>

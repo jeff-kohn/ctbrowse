@@ -1,39 +1,40 @@
 #pragma once
 
+#include "App.h"
+#include "controls/ElasticTextCtrl.h"
+
 #include <ctb/interfaces/IDataset.h>
 #include <ctb/tables/detail/field_helpers.h>
 
 #include <wx/sizer.h>
 #include <wx/stattext.h>
-#include <wx/textctrl.h>
-#include <wx/valgen.h>
-
-#include <variant>
 
 
 namespace ctb::app
 {
    namespace detail
    {
-		
-      class DisplayValue 
+      // simple class that uses a 2-column sizer to arrange a static text and a text ctrl as a lable/value pair.
+      //
+      class LabeledTextValue 
       {
       public:
          static constexpr auto COL_COUNT = 2;
 
-         DisplayValue(wxSizer* parent_sizer, std::string_view heading_label) : m_parent_sizer{ parent_sizer }
+         LabeledTextValue(wxSizer* parent_sizer, std::string_view heading_label) : m_parent_sizer{ parent_sizer }
          {
             auto* parent_wnd = m_parent_sizer ? m_parent_sizer->GetContainingWindow() : nullptr;
             if (!parent_wnd)
                throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
 
-            m_label_wnd = new wxStaticText{ parent_wnd, wxID_ANY, wxFromSV(heading_label) };                                                         // cppcheck-suppress noOperatorEq
-            m_value_wnd = new wxTextCtrl  { parent_wnd, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxBORDER_NONE  };    // cppcheck-suppress noOperatorEq
-            m_value_wnd->SetValidator(wxGenericValidator{ m_display_value.get() });
+            m_row_sizer = new wxGridSizer{ COL_COUNT };                                              // cppcheck-suppress noOperatorEq
 
-            m_row_sizer = new wxGridSizer{ COL_COUNT };                                         // cppcheck-suppress noOperatorEq
+            m_label_wnd = new wxStaticText{ parent_wnd, wxID_ANY, wxFromSV(heading_label) };         // cppcheck-suppress noOperatorEq
             m_row_sizer->Add(m_label_wnd, wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT).Right());
+
+            m_value_wnd = ElasticTextCtrl::create(parent_wnd);
             m_row_sizer->Add(m_value_wnd, wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT));
+
             parent_sizer->Add(m_row_sizer, wxSizerFlags{}.CenterHorizontal());
 
             m_created = true;
@@ -51,34 +52,21 @@ namespace ctb::app
 
          void setValue(std::string_view value_str)
          {
-            *m_display_value = wxFromSV(value_str);
-            if (m_display_value->Contains("&"))
-            {
-               m_display_value->Replace("&", "&&");
-            }
-
-            // text controls don't auto-expand to fit text the way static controls do, have to force it.
-            auto sz = m_value_wnd->GetSizeFromText(*m_display_value);
-            sz.SetWidth(sz.GetWidth() + 3); // a little wiggle room to prevent horizontal scrolling when selecting text.
-            m_value_wnd->InvalidateBestSize();
-            m_value_wnd->SetMinClientSize(sz);
+            m_value_wnd->setValue(value_str);
          }
 
-         DisplayValue(const DisplayValue&) = delete;
-	      DisplayValue& operator=(const DisplayValue&) = delete;
-         DisplayValue(DisplayValue&&) = default;
-         DisplayValue& operator=(DisplayValue&&) = default;
-         ~DisplayValue() noexcept = default;
+         LabeledTextValue(const LabeledTextValue&) = delete;
+	      LabeledTextValue& operator=(const LabeledTextValue&) = delete;
+         LabeledTextValue(LabeledTextValue&&) = default;
+         LabeledTextValue& operator=(LabeledTextValue&&) = default;
+         ~LabeledTextValue() noexcept = default;
 
       private:
-         bool          m_created{ false };
-         wxSizer*      m_parent_sizer{};
-         wxSizer*      m_row_sizer{};
-         wxStaticText* m_label_wnd{};
-         wxTextCtrl*   m_value_wnd{};
-
-         // we need the address of the wxString to be stable for the validator, which stores a ptr. 
-         std::unique_ptr<wxString> m_display_value{ new wxString{} };
+         bool             m_created{ false };
+         wxSizer*         m_parent_sizer{};
+         wxSizer*         m_row_sizer{};
+         wxStaticText*    m_label_wnd{};
+         ElasticTextCtrl* m_value_wnd{};
       };
 
    } // namespace detail
@@ -133,7 +121,7 @@ namespace ctb::app
       }
 
    private:
-      detail::DisplayValue    m_display_prop;
+      detail::LabeledTextValue    m_display_prop;
       CtProp                  m_prop_id;
       std::string             m_format_str{ constants::FMT_DEFAULT_FORMAT };
       std::string             m_label_text{};
@@ -173,7 +161,7 @@ namespace ctb::app
       }
       
    private:
-      detail::DisplayValue m_display_prop;
+      detail::LabeledTextValue m_display_prop;
       CtProp                  m_begin_prop{};
       CtProp                  m_end_prop{};
    };
@@ -220,7 +208,7 @@ namespace ctb::app
       }
 
    private:
-      detail::DisplayValue m_display_prop;
+      detail::LabeledTextValue m_display_prop;
       CacheValueFn         m_value_fn{};
    };
 

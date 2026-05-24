@@ -2,6 +2,7 @@
 #include "controls/WineDetailFields.h"
 
 #include <wx/stattext.h>
+#include <wx/textctrl.h>
 #include <wx/sizer.h>
 #include <wx/wupdlock.h>
 
@@ -71,9 +72,11 @@ namespace ctb::app
       top_sizer->Add(feedback_summary_ctrl, wxSizerFlags{}.Center().Border(wxLEFT|wxRIGHT));
 
       // tasting note
-      m_tasting_notes_ctrl = new wxStaticText(this, wxID_ANY,  "");//, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+      constexpr auto styles = wxTE_MULTILINE | wxTE_BESTWRAP | wxTE_READONLY | wxTE_NO_VSCROLL | wxBORDER_NONE;
+      m_tasting_notes_ctrl = new wxTextCtrl{ this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, styles }; // new wxStaticText(this, wxID_ANY,  "");//, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+      m_tasting_notes_ctrl->SetBackgroundColour(GetBackgroundColour());
       m_tasting_notes_ctrl->SetValidator(wxGenericValidator{ &m_tasting_notes });
-      top_sizer->Add(m_tasting_notes_ctrl, wxSizerFlags{ 2 }.Expand().TripleBorder());
+      top_sizer->Add(m_tasting_notes_ctrl, wxSizerFlags{2}.Expand().TripleBorder());
 
       // handle resize so children are laid out correctly when this panel is resized
       Bind(wxEVT_SIZE, &WineDetailTastingPanel::onSize, this);
@@ -105,8 +108,6 @@ namespace ctb::app
 
    void WineDetailTastingPanel::onSize(wxSizeEvent& event)
    {
-      // reset the label to remove any existing word-wrap, then re-fit/re-wrap the tasting note control for the new size.
-      m_tasting_notes_ctrl->SetLabel(m_tasting_notes);
       calcNoteSize();
 
       // continue with parent processing
@@ -116,17 +117,31 @@ namespace ctb::app
 
    void WineDetailTastingPanel::calcNoteSize() 
    {
-      if (m_tasting_notes.empty())
-      {
-         m_tasting_notes_ctrl->SetClientSize(m_tasting_notes_ctrl->GetBestSize());
-      }
-      else
-      {
-         // calculate how wide our note control can be and still fit in panel, allowing for sizer borders.
-         constexpr auto margin = 30;
-         const auto max_width = GetClientSize().GetWidth() - margin;
-         m_tasting_notes_ctrl->Wrap(max_width);
-      }
+      // Lock updates to prevent cascading size events
+      wxWindowUpdateLocker lock(m_tasting_notes_ctrl);
+
+      // reset the label to remove any existing word-wrap, then re-fit/re-wrap the tasting note control for the new size.
+      m_tasting_notes_ctrl->SetValue(m_tasting_notes);
+      //if (m_tasting_notes.empty())
+      //{
+      //   m_tasting_notes_ctrl->SetClientSize(m_tasting_notes_ctrl->GetBestSize());
+      //   return;
+      //}
+
+      // calculate how wide our note control can be and still fit in panel, allowing for sizer borders.
+      constexpr auto margin = 30;
+      const auto max_width = GetClientSize().GetWidth() - margin;
+      //m_tasting_notes_ctrl->Wrap(max_width);
+
+      // Calculate height based on number of lines
+      auto num_lines    = m_tasting_notes_ctrl->GetNumberOfLines() + 1;
+      auto line_height  = m_tasting_notes_ctrl->GetCharHeight();
+      auto total_height = num_lines * line_height;
+        
+      // Set client size
+      m_tasting_notes_ctrl->InvalidateBestSize();
+      m_tasting_notes_ctrl->SetMinClientSize(wxSize{ max_width, total_height });
+      Layout();
    }
 
 } // namespace ctb::app
