@@ -122,16 +122,10 @@ namespace ctb::app
 
       // reset the label to remove any existing word-wrap, then re-fit/re-wrap the tasting note control for the new size.
       m_tasting_notes_ctrl->SetValue(m_tasting_notes);
-      //if (m_tasting_notes.empty())
-      //{
-      //   m_tasting_notes_ctrl->SetClientSize(m_tasting_notes_ctrl->GetBestSize());
-      //   return;
-      //}
 
       // calculate how wide our note control can be and still fit in panel, allowing for sizer borders.
       constexpr auto margin = 30;
       const auto max_width = GetClientSize().GetWidth() - margin;
-      //m_tasting_notes_ctrl->Wrap(max_width);
 
       // Calculate height based on number of lines
       auto num_lines    = m_tasting_notes_ctrl->GetNumberOfLines() + 1;

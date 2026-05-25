@@ -44,11 +44,11 @@ namespace ctb::app
          SetMinClientSize(sz);
       }
 
-      ElasticTextCtrl(ElasticTextCtrl&&) = default;
-      ElasticTextCtrl& operator=(ElasticTextCtrl&&) = default;
       ~ElasticTextCtrl() noexcept = default;
 
+      ElasticTextCtrl(ElasticTextCtrl&&) = delete;
       ElasticTextCtrl(const ElasticTextCtrl&) = delete;
+      ElasticTextCtrl& operator=(ElasticTextCtrl&&) = delete;
       ElasticTextCtrl& operator=(const ElasticTextCtrl&) = delete;
 
    private:
