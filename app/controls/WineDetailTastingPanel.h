@@ -24,8 +24,6 @@ namespace ctb::app
    private:
       wxString            m_title{ constants::LBL_TASTING_NOTE };
       wxString            m_feedback_summary{};
-      wxString            m_tasting_notes{};
-      wxTextCtrl*         m_tasting_notes_ctrl{};
 
       // this class can only be constructed through static create(), which uses createDetailsViewFactory to call private ctor
       template<typename WndT, typename... Args>
@@ -37,9 +35,6 @@ namespace ctb::app
       void getDetailFields(DetailFields&) override {} // we don't use DataFields in this panel.
       void onDatasetEvent(const DatasetEvent& event) override;
       void postWindowCreate() override;
-
-      void onSize(wxSizeEvent& event);
-      void calcNoteSize();
    };
 
 

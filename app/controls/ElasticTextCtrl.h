@@ -27,18 +27,18 @@ namespace ctb::app
 
       void setValue(std::string_view value_str)
       {
-         *m_display_value = wxFromSV(value_str);
+         m_display_value = wxFromSV(value_str);
 
-         if (m_display_value->empty()) { return; }
+         if (m_display_value.empty()) { return; }
          
-         if (m_display_value->Contains(SINGLE_AMPERSAND))
+         if (m_display_value.Contains(SINGLE_AMPERSAND))
          {
-            m_display_value->Replace(SINGLE_AMPERSAND, DOUBLE_AMPERSAND);
+            m_display_value.Replace(SINGLE_AMPERSAND, DOUBLE_AMPERSAND);
          }
 
          // text controls don't auto-expand to fit text the way static controls do, have to force it.
          constexpr auto select_margin = 3;
-         auto sz = GetSizeFromText(*m_display_value);
+         auto sz = GetSizeFromText(m_display_value);
          sz.SetWidth(sz.GetWidth() + select_margin); // a little wiggle room to prevent horizontal scrolling when selecting text.
          InvalidateBestSize();
          SetMinClientSize(sz);
@@ -52,14 +52,12 @@ namespace ctb::app
       ElasticTextCtrl& operator=(const ElasticTextCtrl&) = delete;
 
    private:
-      // we need the address of the wxString to be stable for the validator, which stores a ptr. 
-      using wxStringPtr = std::unique_ptr<wxString>;
-      wxStringPtr  m_display_value{ new wxString{} };
+      wxString  m_display_value{};
 
       ElasticTextCtrl(wxWindow* parent)
          : wxTextCtrl{ parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxBORDER_NONE }
       {
-         SetValidator(wxGenericValidator{ m_display_value.get() });
+         SetValidator(wxGenericValidator{ &m_display_value });
       }
    };
 

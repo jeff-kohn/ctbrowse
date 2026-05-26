@@ -40,6 +40,7 @@ namespace ctb::app
          uint16_t decimal_places{};
       };
 
+      [[nodiscard]]
       static auto create(wxWindow* parent, const DatasetEventSourcePtr& source, const PropertyFilter& filter, const SpinParams& params) -> SpinDoubleFilterCtrl*;
 
       /// @brief Get a reference to the filter associated with this control

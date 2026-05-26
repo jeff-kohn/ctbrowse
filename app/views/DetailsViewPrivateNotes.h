@@ -48,7 +48,7 @@ namespace ctb::app
          top_sizer->Add(WineDetailPrivateNotesPanel::create(this, source), sizer_flags);
          top_sizer->AddSpacer(DEFAULT_GROUP_SPACER);
          addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_WINE_DETAILS);
-         top_sizer->AddSpacer(DEFAULT_HEADING_SPACER);
+         top_sizer->AddStretchSpacer(DEFAULT_HEADING_SPACER);
          top_sizer->Add(LabelImageCtrl::create(this, source), wxSizerFlags().CenterHorizontal().Expand().Shaped());
       }
    };

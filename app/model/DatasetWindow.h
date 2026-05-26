@@ -23,13 +23,13 @@ namespace ctb::app
       DatasetWindow(DatasetWindow&&) = delete;
       DatasetWindow& operator=(const DatasetWindow&) = delete;
       DatasetWindow& operator=(DatasetWindow&&) = delete;
-      ~DatasetWindow() override = default;
+      ~DatasetWindow() noexcept override = default;
 
    protected:
       DatasetWindow(const DatasetEventSourcePtr& event_source) : m_dataset_events{ event_source }
       {}
 
-      /// @brief returns a reference to the event source. 
+      /// @brief returns a reference to the event source so derived classes can register event handlers. 
       template<typename Self>
       auto&& getEventHandler(this Self&& self) noexcept(true)
       {

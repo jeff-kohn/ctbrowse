@@ -14,7 +14,7 @@ namespace ctb::app
 {
    namespace detail
    {
-      // simple class that uses a 2-column sizer to arrange a static text and a text ctrl as a lable/value pair.
+      // simple class that uses a 2-column sizer to arrange a static text and a text ctrl as a label/value pair.
       //
       class LabeledTextValue 
       {
@@ -36,8 +36,6 @@ namespace ctb::app
             m_row_sizer->Add(m_value_wnd, wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT));
 
             parent_sizer->Add(m_row_sizer, wxSizerFlags{}.CenterHorizontal());
-
-            m_created = true;
          }
 
          void show()
@@ -62,7 +60,6 @@ namespace ctb::app
          ~LabeledTextValue() noexcept = default;
 
       private:
-         bool             m_created{ false };
          wxSizer*         m_parent_sizer{};
          wxSizer*         m_row_sizer{};
          wxStaticText*    m_label_wnd{};

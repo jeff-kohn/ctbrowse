@@ -40,12 +40,12 @@ namespace ctb::app
       /// this version from derived version is fine/recommended.
       virtual void onDatasetEvent(const DatasetEvent& event);
 
-      /// @brief protectec ctor
+      /// @brief protected ctor
       ///
       /// empty title will not be displayed.
       WineDetailBasePanel(const DatasetEventSourcePtr& event_source, std::string_view title = "") :
          Base{ event_source },
-         m_title(wxFromSV(title))
+         m_title{ wxFromSV(title) }
       {}
 
       void createWindow(wxWindow* parent) override;

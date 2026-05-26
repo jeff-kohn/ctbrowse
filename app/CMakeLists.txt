@@ -55,6 +55,9 @@ target_sources(${TARGET_NAME}
      "wx_helpers.h"
 
      "controls/CheckBoxFilterCtrl.cpp"
+     "controls/ElasticMultiLineTextCtrl.cpp"
+     "controls/ElasticMultiLineTextCtrl.h"
+     "controls/ElasticTextCtrl.h"
      "controls/CheckBoxFilterCtrl.h"
      "controls/LabelImageCtrl.cpp"
      "controls/LabelImageCtrl.h"
