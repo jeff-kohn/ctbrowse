@@ -9,7 +9,7 @@
 
 #include "App.h"
 #include "views/DetailsViewBase.h"
-#include "controls/WineDetailScorePanel.h"
+#include "panels/WineDetailScorePanel.h"
 
 namespace ctb::app
 {

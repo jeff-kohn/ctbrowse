@@ -9,10 +9,9 @@
 
 #include "App.h"
 #include "views/DetailsViewBase.h"
-#include "controls/WineDetailBottleInfoPanel.h"
-#include "controls/WineDetailPendingPanel.h"
-#include "controls/WineDetailScorePanel.h"
-#include "controls/WineDetailValuePanel.h"
+#include "panels/WineDetailBottleInfoPanel.h"
+#include "panels/WineDetailScorePanel.h"
+#include "panels/WineDetailValuePanel.h"
 #include "controls/LabelImageCtrl.h"
 
 namespace ctb::app

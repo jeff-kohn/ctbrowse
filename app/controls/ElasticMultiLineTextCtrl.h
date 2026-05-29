@@ -19,9 +19,6 @@ namespace ctb::app
    public:
       using Base = DatasetWindow<wxTextCtrl>;
 
-      static constexpr auto SINGLE_AMPERSAND = "&";
-      static constexpr auto DOUBLE_AMPERSAND = "&&";
-
       [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source, CtProp bound_prop) -> ElasticMultiTextCtrl*;
 
       ~ElasticMultiTextCtrl() noexcept override = default;
@@ -32,11 +29,11 @@ namespace ctb::app
       ElasticMultiTextCtrl& operator=(const ElasticMultiTextCtrl&) = delete;
 
    private:
-      wxString  m_display_value{};
-      CtProp    m_prop;
-      bool      m_need_resize{ false };
+      wxString m_display_value{};
+      CtProp   m_prop;
+      bool     m_need_resize{ false };
 
-      ElasticMultiTextCtrl(const DatasetEventSourcePtr& source, CtProp bound_prop) : Base{source}, m_prop(bound_prop)
+      ElasticMultiTextCtrl(const DatasetEventSourcePtr& source, CtProp bound_prop) : Base{ source }, m_prop(bound_prop)
       {}
 
       // this class can only be constructed through static create(), which uses createDetailsViewFactory to call private ctor
@@ -50,4 +47,4 @@ namespace ctb::app
       void onSize(wxSizeEvent& event);
    };
 
-} // namespace ctb::app
+}   // namespace ctb::app

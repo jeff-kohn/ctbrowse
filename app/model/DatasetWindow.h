@@ -11,32 +11,32 @@
 
 namespace ctb::app
 {
-   
+
    /// @brief Base-class  A base-class for wxPanel-derived classes that are dataset-aware.
    ///
-   template <typename BaseWindowT> requires std::derived_from<BaseWindowT, wxWindow>
-   class DatasetWindow : public BaseWindowT 
+   template<typename BaseWindowT> requires std::derived_from<BaseWindowT, wxWindow>
+   class DatasetWindow : public BaseWindowT
    {
    public:
       // no copy/move/assign, this class is created on the heap and shouldn't be copied.
-      DatasetWindow(const DatasetWindow&) = delete;
-      DatasetWindow(DatasetWindow&&) = delete;
+      DatasetWindow(const DatasetWindow&)            = delete;
+      DatasetWindow(DatasetWindow&&)                 = delete;
       DatasetWindow& operator=(const DatasetWindow&) = delete;
-      DatasetWindow& operator=(DatasetWindow&&) = delete;
-      ~DatasetWindow() noexcept override = default;
+      DatasetWindow& operator=(DatasetWindow&&)      = delete;
+      ~DatasetWindow() noexcept override             = default;
 
    protected:
       DatasetWindow(const DatasetEventSourcePtr& event_source) : m_dataset_events{ event_source }
       {}
 
-      /// @brief returns a reference to the event source so derived classes can register event handlers. 
+      /// @brief returns a reference to the event source so derived classes can register event handlers.
       template<typename Self>
       auto&& getEventHandler(this Self&& self) noexcept(true)
       {
          return std::forward<Self>(self).m_dataset_events;
       }
 
-      /// @brief returns reference to the DatasetPtr for our event source. Throws exception if 
+      /// @brief returns reference to the DatasetPtr for our event source. Throws exception if
       ///        source has no Dataset. You can call getEventHandler().getDataset(false) if you want
       ///        to do your own nullptr check.
       template<typename Self>
@@ -57,7 +57,7 @@ namespace ctb::app
    namespace detail
    {
       // helper function that DatasetWindow-derived classes. If derived constructor is private
-      // (as it should be to prevent stack-based instances), you'll need to declare this function 
+      // (as it should be to prevent stack-based instances), you'll need to declare this function
       // a friend to use it.
       template<typename WndT, typename... Args>
       auto createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args) -> WndT*
@@ -78,6 +78,6 @@ namespace ctb::app
          return wnd.release();
       }
 
-   } // namespace detail
+   }   // namespace detail
 
-} // namespace ctb::app
+}   // namespace ctb::app

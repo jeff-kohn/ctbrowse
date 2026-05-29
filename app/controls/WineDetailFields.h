@@ -16,7 +16,7 @@ namespace ctb::app
    {
       // simple class that uses a 2-column sizer to arrange a static text and a text ctrl as a label/value pair.
       //
-      class LabeledTextValue 
+      class LabeledTextValue
       {
       public:
          static constexpr auto COL_COUNT = 2;
@@ -24,12 +24,12 @@ namespace ctb::app
          LabeledTextValue(wxSizer* parent_sizer, std::string_view heading_label) : m_parent_sizer{ parent_sizer }
          {
             auto* parent_wnd = m_parent_sizer ? m_parent_sizer->GetContainingWindow() : nullptr;
-            if (!parent_wnd)
-               throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
 
-            m_row_sizer = new wxGridSizer{ COL_COUNT };                                              // cppcheck-suppress noOperatorEq
+            if (!parent_wnd) throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
 
-            m_label_wnd = new wxStaticText{ parent_wnd, wxID_ANY, wxFromSV(heading_label) };         // cppcheck-suppress noOperatorEq
+            m_row_sizer = new wxGridSizer{ COL_COUNT };                                        // cppcheck-suppress noOperatorEq
+
+            m_label_wnd = new wxStaticText{ parent_wnd, wxID_ANY, wxFromSV(heading_label) };   // cppcheck-suppress noOperatorEq
             m_row_sizer->Add(m_label_wnd, wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT).Right());
 
             m_value_wnd = ElasticTextCtrl::create(parent_wnd);
@@ -53,11 +53,11 @@ namespace ctb::app
             m_value_wnd->setValue(value_str);
          }
 
-         LabeledTextValue(const LabeledTextValue&) = delete;
-	      LabeledTextValue& operator=(const LabeledTextValue&) = delete;
-         LabeledTextValue(LabeledTextValue&&) = default;
-         LabeledTextValue& operator=(LabeledTextValue&&) = default;
-         ~LabeledTextValue() noexcept = default;
+         LabeledTextValue(const LabeledTextValue&)            = delete;
+         LabeledTextValue& operator=(const LabeledTextValue&) = delete;
+         LabeledTextValue(LabeledTextValue&&)                 = default;
+         LabeledTextValue& operator=(LabeledTextValue&&)      = default;
+         ~LabeledTextValue() noexcept                         = default;
 
       private:
          wxSizer*         m_parent_sizer{};
@@ -66,16 +66,15 @@ namespace ctb::app
          ElasticTextCtrl* m_value_wnd{};
       };
 
-   } // namespace detail
+   }   // namespace detail
 
 
    class SinglePropertyDisplay
    {
    public:
       SinglePropertyDisplay() = delete;
-      SinglePropertyDisplay(wxSizer* parent_sizer, CtProp prop_id, std::string_view label_text) : 
-         m_display_prop{ parent_sizer, label_text },
-         m_prop_id{ prop_id }
+      SinglePropertyDisplay(wxSizer* parent_sizer, CtProp prop_id, std::string_view label_text)
+         : m_display_prop{ parent_sizer, label_text }, m_prop_id{ prop_id }
       {}
 
       void clear()
@@ -93,17 +92,18 @@ namespace ctb::app
             m_display_prop.setValue(val.hasValue() ? val.asString(m_format_str) : m_null_display);
             m_display_prop.show();
          }
-         else {
+         else
+         {
             m_display_prop.setValue("");
             m_display_prop.hide();
          }
       }
 
-      /// @brief Set the display format. 
-      /// 
+      /// @brief Set the display format.
+      ///
       /// Default is "{}" which just displays the string property, but you can change it if needed (e.g. currency etc)
       template<typename Self>
-      auto setFormat(this Self&& self, std::string_view fmt_str) 
+      auto setFormat(this Self&& self, std::string_view fmt_str)
       {
          self.m_format_str = fmt_str;
          return std::forward<Self>(self);
@@ -111,18 +111,18 @@ namespace ctb::app
 
       /// @brief Set the value to display when the bound field isNull(). Default is empty string
       template<typename Self>
-      auto setNullDisplayValue(this Self&& self, std::string_view val) 
+      auto setNullDisplayValue(this Self&& self, std::string_view val)
       {
          self.m_null_display = val;
          return std::forward<Self>(self);
       }
 
    private:
-      detail::LabeledTextValue    m_display_prop;
-      CtProp                  m_prop_id;
-      std::string             m_format_str{ constants::FMT_DEFAULT_FORMAT };
-      std::string             m_label_text{};
-      std::string             m_null_display{};
+      detail::LabeledTextValue m_display_prop;
+      CtProp                   m_prop_id;
+      std::string              m_format_str{ constants::FMT_DEFAULT_FORMAT };
+      std::string              m_label_text{};
+      std::string              m_null_display{};
    };
 
 
@@ -130,10 +130,8 @@ namespace ctb::app
    {
    public:
       DrinkWindowDisplay() = delete;
-      DrinkWindowDisplay(wxSizer* parent_sizer, CtProp begin_prop, CtProp end_prop, std::string_view label_text) :
-         m_display_prop{ parent_sizer, label_text },
-         m_begin_prop{ begin_prop },
-         m_end_prop{ end_prop }
+      DrinkWindowDisplay(wxSizer* parent_sizer, CtProp begin_prop, CtProp end_prop, std::string_view label_text)
+         : m_display_prop{ parent_sizer, label_text }, m_begin_prop{ begin_prop }, m_end_prop{ end_prop }
       {}
 
       void clear()
@@ -151,34 +149,34 @@ namespace ctb::app
             m_display_prop.setValue(ctb::detail::getDrinkWindow(begin_dt, end_dt));
             m_display_prop.show();
          }
-         else {
+         else
+         {
             m_display_prop.setValue("");
             m_display_prop.hide();
          }
       }
-      
+
    private:
       detail::LabeledTextValue m_display_prop;
-      CtProp                  m_begin_prop{};
-      CtProp                  m_end_prop{};
+      CtProp                   m_begin_prop{};
+      CtProp                   m_end_prop{};
    };
 
 
    class ProReviewDisplay
    {
    public:
-      using CacheValueFn = std::string(ProReviewsCache::*)(uint64_t) const;
+      using CacheValueFn = std::string (ProReviewsCache::*)(uint64_t) const;
 
       ProReviewDisplay() = delete;
-      ProReviewDisplay(wxSizer* parent_sizer, std::string_view label_text, CacheValueFn value_fn) :
-         m_display_prop{ parent_sizer, label_text },
-         m_value_fn{ std::move(value_fn) }
+      ProReviewDisplay(wxSizer* parent_sizer, std::string_view label_text, CacheValueFn value_fn)
+         : m_display_prop{ parent_sizer, label_text }, m_value_fn{ std::move(value_fn) }
       {}
 
       /// @brief update the field values from the specified dataset row
       void update(const DatasetPtr& ds, int rec_idx)
       {
-         auto wine_id = ds->getProperty(rec_idx, CtProp::iWineId).asUInt64().value_or(0);
+         auto        wine_id = ds->getProperty(rec_idx, CtProp::iWineId).asUInt64().value_or(0);
          std::string value{};
 
          auto cache = wxGetApp().getProReviewsCache();
@@ -192,7 +190,8 @@ namespace ctb::app
             m_display_prop.setValue("");
             m_display_prop.hide();
          }
-         else {
+         else
+         {
             m_display_prop.setValue(value);
             m_display_prop.show();
          }
@@ -206,7 +205,7 @@ namespace ctb::app
 
    private:
       detail::LabeledTextValue m_display_prop;
-      CacheValueFn         m_value_fn{};
+      CacheValueFn             m_value_fn{};
    };
 
-} // namespace ctb::app 
+}   // namespace ctb::app

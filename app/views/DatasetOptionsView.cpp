@@ -8,8 +8,8 @@
 
 #include "controls/CheckBoxFilterCtrl.h" 
 #include "controls/MultiValueFilterTreeCtrl.h"
-#include "controls/SortOptionsPanel.h"
 #include "controls/SpinDoubleFilterCtrl.h"
+#include "panels/SortOptionsPanel.h"
 #include "views/DatasetOptionsView.h"
 #include "wx_helpers.h"
 

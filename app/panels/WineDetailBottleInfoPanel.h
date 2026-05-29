@@ -1,7 +1,7 @@
 #pragma once
 
 #include "App.h"
-#include "controls/WineDetailBasePanel.h"
+#include "panels/WineDetailBasePanel.h"
 
 
 namespace ctb::app
