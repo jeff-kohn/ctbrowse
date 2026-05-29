@@ -19,9 +19,7 @@ namespace ctb::app
       wxString      m_wine_title{};
       wxStaticText* m_wine_ctrl{};
 
-      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call private ctor
-      template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
+      DECLARE_DATASET_WINDOW_FACTORY;
 
       WineDetailMainPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source }
       {}

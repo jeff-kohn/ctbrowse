@@ -39,9 +39,7 @@ namespace ctb::app
          m_filter{ std::move(filter) }
       {}
 
-      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call protected ctor
-      template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
+      DECLARE_DATASET_WINDOW_FACTORY;
 
       void createWindow(wxWindow* parent) override;
       void onFilterChecked(wxCommandEvent& event);

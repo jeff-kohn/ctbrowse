@@ -36,9 +36,7 @@ namespace ctb::app
       ElasticMultiTextCtrl(const DatasetEventSourcePtr& source, CtProp bound_prop) : Base{ source }, m_prop(bound_prop)
       {}
 
-      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call private ctor
-      template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args) -> WndT*;
+      DECLARE_DATASET_WINDOW_FACTORY;
 
       void createWindow(wxWindow* parent) override;
       auto calcTextSize() -> wxSize;

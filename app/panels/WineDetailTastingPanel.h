@@ -25,9 +25,7 @@ namespace ctb::app
       wxString            m_title{ constants::LBL_TASTING_NOTE };
       wxString            m_feedback_summary{};
 
-      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call private ctor
-      template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
+      DECLARE_DATASET_WINDOW_FACTORY;
 
       WineDetailTastingPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source }
       {}

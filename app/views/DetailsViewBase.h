@@ -49,29 +49,5 @@ namespace ctb::app
       void onCommand(wxCommandEvent& event);
    };
 
-
-   // helper function for DetailsViewBase-derived classes that want to use DetailsViewBase::createWindow to handle window creation and 
-   // just override DetailsViewBase::addDatasetSpecificControls to provide their customizations. If derived constructor is private
-   // (as it should be to prevent stack-based instances), you'll need to declare this function a friend to use it.
-   template<typename ViewT>
-   auto createDetailsViewFactory(wxWindow* parent, const DatasetEventSourcePtr& source) -> ViewT*
-   {
-      if (!parent)
-      {
-         assert("parent parameter cannot == nullptr");
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
-      }
-      if (!source)
-      {
-         assert("source parameter cannot == nullptr");
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
-      }
-
-      std::unique_ptr<ViewT> wnd{ new ViewT{ source } };
-      wnd->createWindow(parent);
-      return wnd.release();
-   }
-
-
 } // namespace ctb::app
 

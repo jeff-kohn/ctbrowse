@@ -80,4 +80,9 @@ namespace ctb::app
 
    }   // namespace detail
 
+   // just a helper macro since the friend decl is pretty ugly/verbose.
+#define DECLARE_DATASET_WINDOW_FACTORY                                                                                                                         \
+   template<typename WndT, typename... Args>                                                                                                                   \
+   friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args) -> WndT*
+
 }   // namespace ctb::app

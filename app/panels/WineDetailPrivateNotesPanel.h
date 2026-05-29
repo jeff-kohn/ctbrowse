@@ -17,12 +17,10 @@ namespace ctb::app
       }
 
    private:
-      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call private ctor
-      template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
-
       WineDetailPrivateNotesPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source }
       {}
+
+      DECLARE_DATASET_WINDOW_FACTORY;
 
       void getDetailFields(DetailFields&) override {} // we don't use DataFields in this panel.
       void postWindowCreate() override;

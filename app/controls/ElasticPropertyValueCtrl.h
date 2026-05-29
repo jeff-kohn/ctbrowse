@@ -29,6 +29,8 @@ namespace ctb::app
    private:
       wxString m_display_value{};
 
+      DECLARE_DATASET_WINDOW_FACTORY;
+
       void createWindow(wxWindow* parent) override;
       void onDatasetRowSelected(const DatasetEvent& event);
    };
@@ -69,14 +71,13 @@ namespace ctb::app
       std::string m_format_str{ constants::FMT_DEFAULT_FORMAT };
       std::string m_null_display{};
 
+      DECLARE_DATASET_WINDOW_FACTORY;
+
       PropertyValueCtrl(const DatasetEventSourcePtr& source, CtProp bound_prop) : ElasticPropertyValueCtrl{ source }, m_prop{ bound_prop }
       {}
 
       auto getDisplayValue(const DatasetPtr& ds, int rec_idx) const -> std::string override;
 
-      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call private ctor
-      template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args) -> WndT*;
    };
 
 
@@ -102,9 +103,7 @@ namespace ctb::app
 
       auto getDisplayValue(const DatasetPtr& ds, int rec_idx) const -> std::string override;
 
-      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call private ctor
-      template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args) -> WndT*;
+      DECLARE_DATASET_WINDOW_FACTORY;
    };
 
 
@@ -126,15 +125,12 @@ namespace ctb::app
    private:
       CacheValueFn m_value_fn{};
 
-      ProReviewsCacheCtrl(wxSizer* parent_sizer, const DatasetEventSourcePtr& source, CacheValueFn value_fn) :
-         ElasticPropertyValueCtrl{ source }, m_value_fn{ std::move(value_fn) }
+      ProReviewsCacheCtrl(const DatasetEventSourcePtr& source, CacheValueFn value_fn) : ElasticPropertyValueCtrl{ source }, m_value_fn{ std::move(value_fn) }
       {}
 
       auto getDisplayValue(const DatasetPtr& ds, int rec_idx) const -> std::string override;
 
-      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call private ctor
-      template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args) -> WndT*;
+      DECLARE_DATASET_WINDOW_FACTORY;
    };
 
 
