@@ -17,24 +17,31 @@ namespace ctb::app
       }
 
    private:
-      WineDetailValuePanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source, constants::LBL_VALUATION }
+      WineDetailValuePanel(const DatasetEventSourcePtr& source) : WineDetailBasePanel{ source, constants::LBL_VALUATION }
       {}
 
       DECLARE_DATASET_WINDOW_FACTORY;
 
       // base class overrides
-      void getDetailFields(DetailFields& fields) override
+      void getDetailRows(DetailRows& rows, const DatasetEventSourcePtr& source) override
       {
-         auto* top_sizer = GetSizer(); assert(top_sizer);
-         auto dataset = getDataset();
+         auto* top_sizer = GetSizer();          assert(top_sizer);
+         auto dataset = source->getDataset();   assert(dataset);
 
          // ordering matters here because it's the same as they'll be displayed
-         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::MyPrice,      constants::LBL_MY_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
-         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::CtPrice,      constants::LBL_CT_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
+         auto* ctrl = PropertyValueCtrl::create(this, source, CtProp::MyPrice);
+         ctrl->setFormat(constants::FMT_NUMBER_CURRENCY);
+         rows.emplace_back(top_sizer, ctrl, constants::LBL_STORE_NAME);
+
+         ctrl = PropertyValueCtrl::create(this, source, CtProp::CtPrice);
+         ctrl->setFormat(constants::FMT_NUMBER_CURRENCY);
+         rows.emplace_back(top_sizer, ctrl, constants::LBL_CT_PRICE);
 
          if (dataset->hasProperty(CtProp::AuctionPrice))
          {
-            fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::AuctionPrice, constants::LBL_AUCTION_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
+            ctrl = PropertyValueCtrl::create(this, source, CtProp::AuctionPrice);
+            ctrl->setFormat(constants::FMT_NUMBER_CURRENCY);
+            rows.emplace_back(top_sizer, ctrl, constants::LBL_AUCTION_PRICE);
          }
       }
    };

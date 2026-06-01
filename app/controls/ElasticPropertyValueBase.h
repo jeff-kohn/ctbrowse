@@ -13,16 +13,22 @@ namespace ctb::app
    /// This control displays a formatted single-line value in a read-only text control that looks
    /// like a static text control but supports selecting/copying text. The control will dynamically
    /// expand its width to accommodate changing values just like a static text ctrl.
-   /// 
-   class ElasticPropertyValueCtrl : public DatasetWindow<wxTextCtrl>
+   ///
+   class ElasticPropertyValueBase : public DatasetWindow<wxTextCtrl>
    {
+   public:
+      auto hasDisplayValue() const -> bool
+      {
+         return m_display_value.empty() == false;
+      }
+
    protected:
-      ElasticPropertyValueCtrl(const DatasetEventSourcePtr& event_source);
+      ElasticPropertyValueBase(const DatasetEventSourcePtr& event_source);
 
       /// @brief retrieve the value to be displayed in the control from the dataset
       ///
       /// derived classes must implement this so that the control knows what to display
-      /// 
+      ///
       /// @return formatted display string for the property value
       virtual auto getDisplayValue(const DatasetPtr& ds, int rec_idx) const -> std::string = 0;
 
@@ -38,52 +44,51 @@ namespace ctb::app
 
    /// @brief standard/default property control that displays a single property
    ///
-   class PropertyValueCtrl : public ElasticPropertyValueCtrl
+   class PropertyValueCtrl : public ElasticPropertyValueBase
    {
    public:
+      // clang-format off
       /// @brief static factory method for creating PropertyValueCtrl objects
       /// @param parent parent window for the control, must be non-null
       /// @param source dataset event source to bind the control to, must be non-null
       /// @param bound_prop the property id to bind the control to
       /// @return non-owning pointer to the newly created window.
       [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source, CtProp bound_prop) -> PropertyValueCtrl*;
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source, CtProp bound_prop,
+                                       std::string_view format, std::string_view null_display) -> PropertyValueCtrl*;
+      // clang-format on
 
       /// @brief Set the display format.
       ///
       /// Default is "{}" which just displays the string property, but you can change it if needed (e.g. currency etc)
-      template<typename Self>
-      auto setFormat(this Self&& self, std::string_view fmt_str)
+      auto setFormat(std::string_view fmt_str)
       {
-         self.m_format_str = fmt_str;
-         return std::forward<Self>(self);
+         m_format_str = fmt_str;
       }
 
       /// @brief Set the value to display when the bound field isNull(). Default is empty string
-      template<typename Self>
-      auto setNullDisplayValue(this Self&& self, std::string_view val)
+      auto setNullDisplayValue(std::string_view val)
       {
-         self.m_null_display = val;
-         return std::forward<Self>(self);
+         m_null_display = val;
       }
 
    private:
-      CtProp m_prop{};
+      CtProp      m_prop{};
       std::string m_format_str{ constants::FMT_DEFAULT_FORMAT };
       std::string m_null_display{};
 
       DECLARE_DATASET_WINDOW_FACTORY;
 
-      PropertyValueCtrl(const DatasetEventSourcePtr& source, CtProp bound_prop) : ElasticPropertyValueCtrl{ source }, m_prop{ bound_prop }
+      PropertyValueCtrl(const DatasetEventSourcePtr& source, CtProp bound_prop) : ElasticPropertyValueBase{ source }, m_prop{ bound_prop }
       {}
 
       auto getDisplayValue(const DatasetPtr& ds, int rec_idx) const -> std::string override;
-
    };
 
 
    /// @brief This class uses drink start/end properties to display a formatted drinking window.
    ///
-   class DrinkWindowCtrl : public ElasticPropertyValueCtrl
+   class DrinkWindowCtrl : public ElasticPropertyValueBase
    {
    public:
       /// @brief static factory method for creating DrinkWindowCtrl objects
@@ -98,7 +103,7 @@ namespace ctb::app
       CtProp m_end_prop{};
 
       DrinkWindowCtrl(const DatasetEventSourcePtr& source, CtProp begin_prop, CtProp end_prop)
-         : ElasticPropertyValueCtrl{ source }, m_begin_prop{ begin_prop }, m_end_prop{ end_prop }
+         : ElasticPropertyValueBase{ source }, m_begin_prop{ begin_prop }, m_end_prop{ end_prop }
       {}
 
       auto getDisplayValue(const DatasetPtr& ds, int rec_idx) const -> std::string override;
@@ -109,7 +114,7 @@ namespace ctb::app
 
    /// @brief This class binds a property value control to one of the getXXX() methods in the ProReviewsCache class.
    ///
-   class ProReviewsCacheCtrl final : public ElasticPropertyValueCtrl
+   class ProReviewsCacheCtrl final : public ElasticPropertyValueBase
    {
    public:
       using CacheValueFn = std::string (ProReviewsCache::*)(uint64_t) const;
@@ -121,11 +126,10 @@ namespace ctb::app
       /// @return non-owning pointer to the newly created window.
       [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source, CacheValueFn value_fn) -> ProReviewsCacheCtrl*;
 
-
    private:
       CacheValueFn m_value_fn{};
 
-      ProReviewsCacheCtrl(const DatasetEventSourcePtr& source, CacheValueFn value_fn) : ElasticPropertyValueCtrl{ source }, m_value_fn{ std::move(value_fn) }
+      ProReviewsCacheCtrl(const DatasetEventSourcePtr& source, CacheValueFn value_fn) : ElasticPropertyValueBase{ source }, m_value_fn{ std::move(value_fn) }
       {}
 
       auto getDisplayValue(const DatasetPtr& ds, int rec_idx) const -> std::string override;

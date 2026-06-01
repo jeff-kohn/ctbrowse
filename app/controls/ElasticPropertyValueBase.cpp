@@ -1,4 +1,4 @@
-#include "ElasticPropertyValueCtrl.h"
+#include "ElasticPropertyValueBase.h"
 
 #include <ctb/tables/detail/field_helpers.h>
 #include <wx/valgen.h>
@@ -6,13 +6,13 @@
 namespace ctb::app
 {
 
-   ElasticPropertyValueCtrl::ElasticPropertyValueCtrl(const DatasetEventSourcePtr& event_source) : DatasetWindow<wxTextCtrl>(event_source)
+   ElasticPropertyValueBase::ElasticPropertyValueBase(const DatasetEventSourcePtr& event_source) : DatasetWindow<wxTextCtrl>(event_source)
    {
       SetValidator(wxGenericValidator{ &m_display_value });
    }
 
 
-   void ElasticPropertyValueCtrl::onDatasetRowSelected(const DatasetEvent& event)
+   void ElasticPropertyValueBase::onDatasetRowSelected(const DatasetEvent& event)
    {
       m_display_value = getDisplayValue(event.dataset, event.affected_row.value_or(0));
       TransferDataToWindow();
@@ -30,11 +30,11 @@ namespace ctb::app
    }
 
 
-   void ElasticPropertyValueCtrl::createWindow(wxWindow* parent)
+   void ElasticPropertyValueBase::createWindow(wxWindow* parent)
    {
       assert(parent);
 
-      constexpr auto styles = wxTE_MULTILINE | wxTE_BESTWRAP | wxTE_READONLY | wxTE_NO_VSCROLL | wxBORDER_NONE;
+      constexpr auto styles = wxTE_READONLY | wxBORDER_NONE;
       if (!wxTextCtrl::Create(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, styles))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
@@ -51,10 +51,28 @@ namespace ctb::app
       return detail::createDatasetWindow<PropertyValueCtrl>(parent, source, bound_prop);
    }
 
+   // clang-format off
+   auto PropertyValueCtrl::create(wxWindow* parent, const DatasetEventSourcePtr& source, CtProp bound_prop,
+                                  std::string_view format, std::string_view null_display) -> PropertyValueCtrl*
+   {
+      auto* ctrl = detail::createDatasetWindow<PropertyValueCtrl>(parent, source, bound_prop);
+
+      ctrl->setNullDisplayValue(null_display);
+      if (!format.empty())
+      {
+         ctrl->setFormat(format);
+      }
+      return ctrl;
+   }
+   // clang-format on
 
    auto PropertyValueCtrl::getDisplayValue(const DatasetPtr& ds, int rec_idx) const -> std::string
    {
-      return ds->getProperty(rec_idx, m_prop).asString(m_format_str);
+      auto val = ds->getProperty(rec_idx, m_prop);
+
+      if (val.isNull()) return m_null_display;
+
+      return val.asString(m_format_str);
    }
 
 

@@ -17,12 +17,13 @@ namespace ctb::app
       }
 
    private:
+      DECLARE_DATASET_WINDOW_FACTORY;
+
       WineDetailPrivateNotesPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source }
       {}
 
-      DECLARE_DATASET_WINDOW_FACTORY;
-
-      void getDetailFields(DetailFields&) override {} // we don't use DataFields in this panel.
+      void getDetailRows(DetailRows& rows, const DatasetEventSourcePtr& event_source) override  // we don't add any detail rows in this panel.
+      {} 
       void postWindowCreate() override;
    };
 

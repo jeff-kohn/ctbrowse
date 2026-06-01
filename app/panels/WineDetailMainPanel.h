@@ -25,9 +25,9 @@ namespace ctb::app
       {}
 
       // base class overrides
-      void getDetailFields(DetailFields& fields) override;
-      void postWindowCreate() override;
+      void getDetailRows(DetailRows& rows, const DatasetEventSourcePtr& source) override;
       void onDatasetEvent(const DatasetEvent& event) override;
+      void postWindowCreate() override;
 
       // size event handler for wrapping wine title.
       void onSize(wxSizeEvent& event);

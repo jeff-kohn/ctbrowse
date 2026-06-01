@@ -7,31 +7,32 @@
 namespace ctb::app
 {
 
-   void WineDetailBasePanel::onDatasetEvent(const DatasetEvent& event)
+   void WineDetailBasePanel::onDatasetEventPrivate(const DatasetEvent& event)
    {
-      if (event.affected_row.has_value())
+      // give derived classes a chance to do their thing.
+      onDatasetEvent(event);
+
+      // we want to update the detail rows' visibility AFTER all of the child windows have had a
+      // chance to update, so we'll make a deferred call to do it.
+      switch (event.event_id)
       {
-         // refresh everything since something affecting the current row happened
-         auto update_visitor = [&event](auto&& field)
-            {
-               field.update(event.dataset, event.affected_row.value_or(0));
-            };
+         case DatasetEvent::Id::RowSelected:       [[fallthrough]];
+         case DatasetEvent::Id::Filter:            [[fallthrough]];
+         case DatasetEvent::Id::Sort:              [[fallthrough]];
+         case DatasetEvent::Id::SubStringFilter:
+            CallAfter(&WineDetailBasePanel::updateVisibility);
+            break;
 
-         rng::for_each(m_fields, [&update_visitor](DetailField& fld) { std::visit(update_visitor, fld); });
-      }
-      else {
-         // clear and hide everything until next row-level event.
-         auto clear_visitor = [](auto&& field)
-            {
-               field.clear();
-            };
+         default: break;
+      };
+   }
 
-         rng::for_each(m_fields, [&clear_visitor](DetailField& fld) { std::visit(clear_visitor, fld); });
-      }
+   void WineDetailBasePanel::updateVisibility()
+   {
+      rng::for_each(m_rows, &WineDetailPanelRow::updateVisibility);
 
-      TransferDataToWindow();
-      SendSizeEvent(); // So we can wrap the wine title/heading
-      Layout();
+      InvalidateBestSize();     // force recalc since rows may have been shown/hidden
+      PostSizeEventToParent();  // So parent can re-layout all the panels.
    }
 
 
@@ -57,11 +58,14 @@ namespace ctb::app
          top_sizer->Add(heading_lbl, wxSizerFlags{ 1 }.Expand().Border(wxBOTTOM | wxTOP));
       }
 
-      getDetailFields(m_fields);
+      getDetailRows(m_rows, getEventHandler().getSource());
       postWindowCreate();
+      Layout();
       Fit();
 
-      getEventHandler().setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event); });
+      getEventHandler().setDefaultHandler([this](const DatasetEvent& event) { onDatasetEventPrivate(event); });
+
+      //PostSizeEvent();
    }
 
 } // namespace ctb::app

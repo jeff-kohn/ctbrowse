@@ -18,10 +18,10 @@ namespace ctb::app
       {
          m_wine_title = event.dataset->getProperty(event.affected_row.value(), CtProp::WineName).asString();
       }
-      else {
+      else
+      {
          m_wine_title.clear();
       }
-      WineDetailBasePanel::onDatasetEvent(event);
    }
 
 
@@ -31,43 +31,45 @@ namespace ctb::app
       constexpr auto margin = 5;
       if (event.m_size.x > 0)
       {
+         m_wine_ctrl->SetLabelText(m_wine_title); // to remove any line feeds from previously-wrapped label.
          m_wine_ctrl->Wrap(event.m_size.GetWidth() - margin);
          wxSize best_size = m_wine_ctrl->GetBestSize();
          m_wine_ctrl->SetClientSize(best_size);
       }
-      Layout();
-      Refresh();
-      Update();
 
       // Preserve default processing (important for proper propagation to parent/layout).
       event.Skip();
    }
 
 
-   void WineDetailMainPanel::getDetailFields(DetailFields& fields)
+   void WineDetailMainPanel::getDetailRows(DetailRows& rows, const DatasetEventSourcePtr& source)
    {
-      auto* top_sizer = GetSizer(); assert(top_sizer);
-      auto  dataset   = getDataset();
+      auto* top_sizer = GetSizer();
+      assert(top_sizer);
+      auto dataset = source->getDataset();
+      assert(dataset);
 
+      // clang-format off
       // ordering matters here because it's the same as they'll be displayed
-      fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::Vintage,        constants::LBL_VINTAGE     });
-      fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::Varietal,       constants::LBL_VARIETAL    });
-      fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::Country,        constants::LBL_COUNTRY     });
-      fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::Region,         constants::LBL_REGION      });
-      fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::SubRegion,      constants::LBL_SUB_REGION  });
-      fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::Appellation,    constants::LBL_APPELLATION });
+      rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::Vintage    ), constants::LBL_VINTAGE     );
+      rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::Varietal   ), constants::LBL_VARIETAL    );
+      rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::Country    ), constants::LBL_COUNTRY     );
+      rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::Region     ), constants::LBL_REGION      );
+      rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::SubRegion  ), constants::LBL_SUB_REGION  );
+      rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::Appellation), constants::LBL_APPELLATION );
 
       if (dataset->hasProperty(CtProp::CtBeginConsume))
       {
-         fields.emplace_back(DrinkWindowDisplay{ top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW_MY });
-         fields.emplace_back(DrinkWindowDisplay{ top_sizer, CtProp::CtBeginConsume, CtProp::CtEndConsume, constants::LBL_DRINK_WINDOW_CT });
+         rows.emplace_back(top_sizer, DrinkWindowCtrl::create(this, source, CtProp::BeginConsume,   CtProp::EndConsume   ), constants::LBL_DRINK_WINDOW_MY);
+         rows.emplace_back(top_sizer, DrinkWindowCtrl::create(this, source, CtProp::CtBeginConsume, CtProp::CtEndConsume ), constants::LBL_DRINK_WINDOW_CT);
+      }
+      else
+      {
+         rows.emplace_back(top_sizer, DrinkWindowCtrl::create(this, source, CtProp::BeginConsume, CtProp::EndConsume), constants::LBL_DRINK_WINDOW);
+      }
+      // clang-format on
 
-      }
-      else {
-         fields.emplace_back(DrinkWindowDisplay{ top_sizer, CtProp::BeginConsume,   CtProp::EndConsume,   constants::LBL_DRINK_WINDOW });
-         fields.emplace_back(ProReviewDisplay  { top_sizer, constants::LBL_DRINK_WINDOW_CT, &ProReviewsCache::getCtDrinkWindow        });
-      }
-      fields.emplace_back(ProReviewDisplay{ top_sizer, constants::LBL_DRINK_WINDOW_PRO, &ProReviewsCache::getDrinkWindowSummary });
+      rows.emplace_back(top_sizer, ProReviewsCacheCtrl::create(this, source, &ProReviewsCache::getDrinkWindowSummary), constants::LBL_DRINK_WINDOW_PRO);
    }
 
    void WineDetailMainPanel::postWindowCreate()
@@ -76,14 +78,16 @@ namespace ctb::app
       m_wine_ctrl->SetValidator(wxGenericValidator(&m_wine_title));
       m_wine_ctrl->SetFont(GetFont().MakeLarger().MakeBold());
       m_wine_ctrl->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT));
-      
-      auto* top_sizer = GetSizer(); assert(top_sizer);
+
+      auto* top_sizer = GetSizer();
+      assert(top_sizer);
       top_sizer->Insert(0, m_wine_ctrl, wxSizerFlags{}.Center().Border());
 
       Fit();
+      Layout();
 
       // handle resize so children are laid out correctly when this panel is resized
       Bind(wxEVT_SIZE, &WineDetailMainPanel::onSize, this);
    }
 
-} // namespace ctb::app
+}   // namespace ctb::app

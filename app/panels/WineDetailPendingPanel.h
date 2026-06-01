@@ -15,27 +15,36 @@ namespace ctb::app
       {
          return detail::createDatasetWindow<WineDetailPendingPanel>(parent, source);
       }
+
    private:
-
-      WineDetailPendingPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source, constants::LBL_ORDER_DETAILS }
-      {}
-
       DECLARE_DATASET_WINDOW_FACTORY;
 
-      void getDetailFields(DetailFields& fields) override
+      WineDetailPendingPanel(const DatasetEventSourcePtr& source) : WineDetailBasePanel{ source, constants::LBL_ORDER_DETAILS }
+      {}
+
+      void getDetailRows(DetailRows& rows, const DatasetEventSourcePtr& source) override
       {
-         auto* top_sizer = GetSizer(); assert(top_sizer);
-         auto dataset = getDataset();
+         auto* top_sizer = GetSizer();         assert(top_sizer);
+         auto dataset = source->getDataset();  assert(dataset);
 
-         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::PendingStoreName,    constants::LBL_STORE_NAME });
-         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::PendingOrderQty,     constants::LBL_QTY_ORDERED });
-         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::MyPrice,             constants::LBL_MY_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
-         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::PendingOrderDate,    constants::LBL_ORDER_DATE }.setFormat(constants::FMT_DATE_SHORT));
-         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::PendingDeliveryDate, constants::LBL_DELIVERY_DATE }.setFormat(constants::FMT_DATE_SHORT));
-         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::PendingOrderNumber,  constants::LBL_ORDER_NUMBER });
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::PendingStoreName), constants::LBL_STORE_NAME);
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::PendingOrderQty), constants::LBL_QTY_ORDERED);
+
+         auto* ctrl = PropertyValueCtrl::create(this, source, CtProp::MyPrice);
+         ctrl->setFormat(constants::FMT_NUMBER_CURRENCY);
+         rows.emplace_back(top_sizer, ctrl, constants::LBL_MY_PRICE);
+
+         ctrl = PropertyValueCtrl::create(this, source, CtProp::PendingOrderDate);
+         ctrl->setFormat(constants::FMT_DATE_SHORT);
+         rows.emplace_back(top_sizer, ctrl, constants::LBL_ORDER_DATE);
+
+         ctrl = PropertyValueCtrl::create(this, source, CtProp::PendingDeliveryDate);
+         ctrl->setFormat(constants::FMT_DATE_SHORT);
+         rows.emplace_back(top_sizer, ctrl, constants::LBL_DELIVERY_DATE);
+
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::PendingOrderNumber), constants::LBL_ORDER_NUMBER);
       }
-
    };
 
 
-}
+}   // namespace ctb::app

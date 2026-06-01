@@ -25,12 +25,15 @@ namespace ctb::app
       WineDetailTagsPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source }
       {}
 
-      void getDetailFields(DetailFields& fields) override
+      void getDetailRows(DetailRows& rows, const DatasetEventSourcePtr& source) override
       {
          auto* top_sizer = GetSizer(); assert(top_sizer);
 
-         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::TagName,      constants::LBL_TAG_NAME });
-         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::TagMaxPrice,  constants::LBL_MAX_PRICE }.setFormat(constants::FMT_NUMBER_CURRENCY));
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::TagName), constants::LBL_TAG_NAME);
+
+         auto* ctrl = PropertyValueCtrl::create(this, source, CtProp::TagName);
+         ctrl->setFormat(constants::FMT_NUMBER_CURRENCY);
+         rows.emplace_back(top_sizer, ctrl, constants::LBL_MAX_PRICE);
       }
 
       void postWindowCreate() override

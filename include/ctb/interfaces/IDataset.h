@@ -174,7 +174,8 @@ namespace ctb
 
 
    /// @brief the smart-ptr-to-base that's used to work with the IDataset-derived datasets
-   using DatasetPtr = std::shared_ptr<IDataset>;
+   using DatasetPtr      = std::shared_ptr<IDataset>;
+   using DatasetConstPtr = std::shared_ptr<const IDataset>;
 
 
 }  // namespace ctb

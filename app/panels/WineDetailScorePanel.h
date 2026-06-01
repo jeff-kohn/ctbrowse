@@ -19,17 +19,25 @@ namespace ctb::app
    private:
       DECLARE_DATASET_WINDOW_FACTORY;
 
-      WineDetailScorePanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source, constants::LBL_SCORES }
+      WineDetailScorePanel(const DatasetEventSourcePtr& source) : WineDetailBasePanel{ source, constants::LBL_SCORES }
       {}
 
       // base class overrides
-      void getDetailFields(DetailFields& fields) override
+      void getDetailRows(DetailRows& rows, const DatasetEventSourcePtr& source) override
       {
          auto* top_sizer = GetSizer(); assert(top_sizer);
 
-         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::MyScore, constants::LBL_MY_SCORE }.setFormat(constants::FMT_NUMBER_DECIMAL).setNullDisplayValue(constants::NO_SCORE));
-         fields.emplace_back(SinglePropertyDisplay{ top_sizer, CtProp::CtScore, constants::LBL_CT_SCORE }.setFormat(constants::FMT_NUMBER_DECIMAL).setNullDisplayValue(constants::NO_SCORE));
-         fields.emplace_back(ProReviewDisplay     { top_sizer, constants::LBL_PRO_SCORES, &ProReviewsCache::getScoreSummary });
+         auto* ctrl = PropertyValueCtrl::create(this, source, CtProp::MyScore);
+         ctrl->setFormat(constants::FMT_NUMBER_DECIMAL);
+         ctrl->setNullDisplayValue(constants::NO_SCORE);
+         rows.emplace_back(top_sizer, ctrl, constants::LBL_MY_SCORE);
+
+         ctrl = PropertyValueCtrl::create(this, source, CtProp::CtScore);
+         ctrl->setFormat(constants::FMT_NUMBER_DECIMAL);
+         ctrl->setNullDisplayValue(constants::NO_SCORE);
+         rows.emplace_back(top_sizer, ctrl, constants::LBL_CT_SCORE);
+
+         rows.emplace_back(top_sizer, ProReviewsCacheCtrl::create(this, source, &ProReviewsCache::getScoreSummary), constants::LBL_PRO_SCORES);
       }
    };
 
