@@ -3,11 +3,13 @@
 #include "App.h"
 #include "panels/WineDetailBasePanel.h"
 
-class wxStaticText;
-
 
 namespace ctb::app
 {
+
+   class ElasticMultiLineTextCtrl;
+
+
    /// @brief A panel class that displays details about a wine, handling dataset events and rendering relevant fields.
    ///
    class WineDetailMainPanel final : public WineDetailBasePanel
@@ -16,8 +18,8 @@ namespace ctb::app
       static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailMainPanel*;
 
    private:
-      wxString      m_wine_title{};
-      wxStaticText* m_wine_ctrl{};
+      wxString                  m_wine_title{};
+      ElasticMultiLineTextCtrl* m_wine_ctrl{};
 
       DECLARE_DATASET_WINDOW_FACTORY;
 
@@ -26,13 +28,7 @@ namespace ctb::app
 
       // base class overrides
       void getDetailRows(DetailRows& rows, const DatasetEventSourcePtr& source) override;
-      void onDatasetEvent(const DatasetEvent& event) override;
-      void postWindowCreate() override;
-
-      // size event handler for wrapping wine title.
-      void onSize(wxSizeEvent& event);
    };
 
 
-
-}
+}   // namespace ctb::app

@@ -60,7 +60,7 @@ target_sources(${TARGET_NAME}
      "controls/ElasticMultiLineTextCtrl.h"
      "controls/ElasticPropertyValueBase.cpp"
      "controls/ElasticPropertyValueBase.h"
-     "controls/ElasticTextCtrl.h"
+     
      "controls/LabelImageCtrl.cpp"
      "controls/LabelImageCtrl.h"
      "controls/MultiValueFilterTreeCtrl.cpp"

@@ -30,7 +30,7 @@ namespace ctb::app
 
          rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::Size    ), constants::LBL_SIZE);
          rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::Location), constants::LBL_LOCATION);
-         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::Bin), constants::LBL_BIN);
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::Bin     ), constants::LBL_BIN);
 
          if (dataset->hasProperty(CtProp::PendingOrderDate))
          {

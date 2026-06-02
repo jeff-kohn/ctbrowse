@@ -7,7 +7,7 @@
 
 namespace ctb::app
 {
-   /// @brief this class manages a property row in a WineDetailsBaseBasePanel-derived panel, and handles showing/hiding
+   /// @brief this class manages a property row in a WineDetailsBasePanel-derived panel, and handles showing/hiding
    ///        the row based on whether or not the property exists in the dataset.
    ///
    class WineDetailPanelRow

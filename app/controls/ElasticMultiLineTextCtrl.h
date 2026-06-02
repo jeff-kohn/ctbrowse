@@ -12,28 +12,31 @@
 
 namespace ctb::app
 {
-   // multi-line, readonly text control that automatically resizes to fit its text
+   // multi-line, read-only dataset-bound text control that automatically resizes to fit its text
    //
-   class ElasticMultiTextCtrl : public DatasetWindow<wxTextCtrl>
+   class ElasticMultiLineTextCtrl : public DatasetWindow<wxTextCtrl>
    {
    public:
       using Base = DatasetWindow<wxTextCtrl>;
 
-      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source, CtProp bound_prop) -> ElasticMultiTextCtrl*;
+      [[nodiscard]]
+      static auto create(wxWindow* parent, const DatasetEventSourcePtr& source, CtProp bound_prop, wxAlignment align = wxALIGN_LEFT) -> ElasticMultiLineTextCtrl*;
 
-      ~ElasticMultiTextCtrl() noexcept override = default;
+      ~ElasticMultiLineTextCtrl() noexcept override = default;
 
-      ElasticMultiTextCtrl(ElasticMultiTextCtrl&&)                 = delete;
-      ElasticMultiTextCtrl(const ElasticMultiTextCtrl&)            = delete;
-      ElasticMultiTextCtrl& operator=(ElasticMultiTextCtrl&&)      = delete;
-      ElasticMultiTextCtrl& operator=(const ElasticMultiTextCtrl&) = delete;
+      ElasticMultiLineTextCtrl(ElasticMultiLineTextCtrl&&)                 = delete;
+      ElasticMultiLineTextCtrl(const ElasticMultiLineTextCtrl&)            = delete;
+      ElasticMultiLineTextCtrl& operator=(ElasticMultiLineTextCtrl&&)      = delete;
+      ElasticMultiLineTextCtrl& operator=(const ElasticMultiLineTextCtrl&) = delete;
 
    private:
-      wxString m_display_value{};
-      CtProp   m_prop;
-      bool     m_need_resize{ false };
+      wxString    m_display_value{};
+      CtProp      m_prop;
+      bool        m_need_resize{ false };
+      wxAlignment m_align_flag{};
 
-      ElasticMultiTextCtrl(const DatasetEventSourcePtr& source, CtProp bound_prop) : Base{ source }, m_prop(bound_prop)
+      ElasticMultiLineTextCtrl(const DatasetEventSourcePtr& source, CtProp bound_prop, wxAlignment align = wxALIGN_LEFT)
+         : Base{ source }, m_prop(bound_prop), m_align_flag{ align }
       {}
 
       DECLARE_DATASET_WINDOW_FACTORY;

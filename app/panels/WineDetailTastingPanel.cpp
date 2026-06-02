@@ -1,6 +1,5 @@
 #include "WineDetailTastingPanel.h"
 #include "controls/ElasticMultiLineTextCtrl.h"
-#include "controls/WineDetailFields.h"
 
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
@@ -74,7 +73,7 @@ namespace ctb::app
       top_sizer->Add(feedback_summary_ctrl, wxSizerFlags{}.Center().Border(wxLEFT|wxRIGHT));
 
       // tasting note
-      auto* note_ctrl = ElasticMultiTextCtrl::create(this, event_handler.getSource(), CtProp::TastingNotes);
+      auto* note_ctrl = ElasticMultiLineTextCtrl::create(this, event_handler.getSource(), CtProp::TastingNotes);
       top_sizer->Add(note_ctrl, wxSizerFlags{2}.Expand().TripleBorder());
    }
 

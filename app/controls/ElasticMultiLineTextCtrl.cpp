@@ -5,17 +5,19 @@
 namespace ctb::app
 {
 
-   [[nodiscard]] auto ElasticMultiTextCtrl::create(wxWindow* parent, const DatasetEventSourcePtr& source, CtProp bound_prop) -> ElasticMultiTextCtrl*
+   [[nodiscard]] auto
+   ElasticMultiLineTextCtrl::create(wxWindow* parent, const DatasetEventSourcePtr& source, CtProp bound_prop, wxAlignment align)
+      -> ElasticMultiLineTextCtrl*
    {
-      return detail::createDatasetWindow<ElasticMultiTextCtrl>(parent, source, bound_prop);
+      return detail::createDatasetWindow<ElasticMultiLineTextCtrl>(parent, source, bound_prop, align);
    }
 
 
-   void ElasticMultiTextCtrl::createWindow(wxWindow* parent)
+   void ElasticMultiLineTextCtrl::createWindow(wxWindow* parent)
    {
       assert(parent);
 
-      constexpr auto styles = wxTE_MULTILINE | wxTE_BESTWRAP | wxTE_READONLY | wxTE_NO_VSCROLL | wxBORDER_NONE;
+      const auto styles = wxTE_MULTILINE | wxTE_BESTWRAP | wxTE_READONLY | wxTE_NO_VSCROLL | wxBORDER_NONE | m_align_flag;
       if (!wxTextCtrl::Create(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, styles))
       {
          throw Error{Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED};
@@ -23,12 +25,12 @@ namespace ctb::app
       SetBackgroundColour(parent->GetBackgroundColour());
       SetValidator(wxGenericValidator{ &m_display_value });
 
-      Bind(wxEVT_SIZE, &ElasticMultiTextCtrl::onSize, this);
+      Bind(wxEVT_SIZE, &ElasticMultiLineTextCtrl::onSize, this);
       getEventHandler().addHandler(DatasetEventHandler::EventId::RowSelected, [this](const DatasetEvent& event) { onDatasetRowSelected(event); });
    }
 
 
-   void ElasticMultiTextCtrl::onSize([[maybe_unused]] wxSizeEvent& event)
+   void ElasticMultiLineTextCtrl::onSize([[maybe_unused]] wxSizeEvent& event)
    {
       if (m_need_resize)
       {
@@ -51,7 +53,7 @@ namespace ctb::app
    }
 
 
-   void ElasticMultiTextCtrl::onDatasetRowSelected(const DatasetEvent& event)
+   void ElasticMultiLineTextCtrl::onDatasetRowSelected(const DatasetEvent& event)
    {
       assert(event.dataset);
       if (!event.affected_row.has_value()) return;
@@ -68,14 +70,14 @@ namespace ctb::app
    }
 
 
-   auto ElasticMultiTextCtrl::calcTextSize() -> wxSize
+   auto ElasticMultiLineTextCtrl::calcTextSize() -> wxSize
    {
       // calculate how wide our note control can be and still fit in panel, allowing for sizer borders.
       constexpr auto margin = 30;
       const auto max_width  = GetClientSize().GetWidth() - margin;
 
       // Calculate height based on number of lines
-      auto num_lines    = GetNumberOfLines() + 1;
+      auto num_lines    = GetNumberOfLines();
       auto line_height  = GetCharHeight();
 
       return wxSize{ max_width, num_lines * line_height };

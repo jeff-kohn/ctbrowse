@@ -49,7 +49,7 @@ namespace ctb::app
       auto* top_sizer = new wxBoxSizer{ wxVERTICAL };
       SetSizer(top_sizer);
 
-      // heading
+      // show a title (optional)
       if (!m_title.empty())
       {
          auto* heading_lbl = new wxStaticText(this, wxID_ANY, m_title, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
@@ -64,8 +64,6 @@ namespace ctb::app
       Fit();
 
       getEventHandler().setDefaultHandler([this](const DatasetEvent& event) { onDatasetEventPrivate(event); });
-
-      //PostSizeEvent();
    }
 
 } // namespace ctb::app
