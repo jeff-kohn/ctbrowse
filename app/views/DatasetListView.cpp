@@ -73,7 +73,7 @@ namespace ctb::app
       {
          ClearColumns();
      
-         auto cols = m_model->getDataset()->listColumns();
+         auto cols = m_model->getDataset()->availableListColumns();
          for (const auto&& [idx, col] : vws::enumerate(cols))
          {
             AppendTextColumn(col.display_name.c_str(), 

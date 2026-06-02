@@ -69,7 +69,7 @@ namespace ctb
       /// @brief Gets the collection of columns for the list display
       /// 
       /// Note that some may be hidden and not visible.
-      virtual auto listColumns() const -> ListColumnSpan = 0;
+      virtual auto availableListColumns() const -> ListColumnSpan = 0;
 
       /// @brief Check whether the current dataset supports the given property
       /// 
