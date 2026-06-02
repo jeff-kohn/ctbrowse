@@ -1,6 +1,7 @@
 #pragma once
 
 #include "App.h"
+#include "controls/ProReviewsCacheCtrl.h"
 #include "panels/WineDetailBasePanel.h"
 
 

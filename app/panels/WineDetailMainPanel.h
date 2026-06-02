@@ -2,6 +2,9 @@
 
 #include "App.h"
 
+#include "controls/DrinkWindowCtrl.h"
+#include "controls/PropertyValueCtrl.h"
+#include "controls/ProReviewsCacheCtrl.h"
 #include "controls/ElasticMultiLineTextCtrl.h"
 #include "panels/WineDetailBasePanel.h"
 

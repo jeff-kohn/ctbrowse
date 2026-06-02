@@ -56,6 +56,7 @@ target_sources(${TARGET_NAME}
 
      "controls/CheckBoxFilterCtrl.cpp"
      "controls/CheckBoxFilterCtrl.h"
+     "controls/DrinkWindowCtrl.h"
      "controls/ElasticMultiLineTextCtrl.cpp"
      "controls/ElasticMultiLineTextCtrl.h"
      "controls/ElasticPropertyValueBase.cpp"
@@ -64,6 +65,8 @@ target_sources(${TARGET_NAME}
      "controls/LabelImageCtrl.h"
      "controls/MultiValueFilterTreeCtrl.cpp"
      "controls/MultiValueFilterTreeCtrl.h"
+     "controls/PropertyValueCtrl.h"
+     "controls/ProReviewsCacheCtrl.h"
      "controls/SpinDoubleFilterCtrl.cpp"
      "controls/SpinDoubleFilterCtrl.h"
 
