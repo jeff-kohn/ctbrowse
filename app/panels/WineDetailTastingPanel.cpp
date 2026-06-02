@@ -52,7 +52,7 @@ namespace ctb::app
    //}
 
 
-   void WineDetailTastingPanel::addDetails(DetailRows& rows, const DatasetEventSourcePtr& source)
+   void WineDetailTastingPanel::addDetails([[maybe_unused]] DetailRows& rows, const DatasetEventSourcePtr& source)
    {
       auto* top_sizer = GetSizer();          assert(top_sizer);
       auto dataset = source->getDataset();   assert(dataset);

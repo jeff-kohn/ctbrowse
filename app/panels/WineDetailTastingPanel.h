@@ -31,8 +31,7 @@ namespace ctb::app
       {}
 
       void addDetails(DetailRows& rows, const DatasetEventSourcePtr& source) override;
-
-      void onDatasetEvent(const DatasetEvent& event);
+      void onDatasetEvent(const DatasetEvent& event) override;
    };
 
 

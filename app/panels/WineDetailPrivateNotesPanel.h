@@ -24,7 +24,7 @@ namespace ctb::app
       WineDetailPrivateNotesPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source }
       {}
 
-      void addDetails(DetailRows& rows, const DatasetEventSourcePtr& source) override  // we don't add any detail rows in this panel.
+      void addDetails([[maybe_unused]] DetailRows& rows, const DatasetEventSourcePtr& source) override   // we don't add any detail rows in this panel.
       {
          auto* top_sizer = GetSizer();
          assert(top_sizer);

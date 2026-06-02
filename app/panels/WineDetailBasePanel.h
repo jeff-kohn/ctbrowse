@@ -41,7 +41,7 @@ namespace ctb::app
       /// derived classes need not call the base-class version, since base class uses private handler 
       /// before calling this. Overriding this will often be unnecessary for panels that use bound
       /// controls which have their own event handlers.
-      virtual void onDatasetEvent(const DatasetEvent& event)
+      virtual void onDatasetEvent([[maybe_unused]] const DatasetEvent& event)
       {}
 
    private:
