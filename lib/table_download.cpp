@@ -20,8 +20,6 @@ namespace ctb
    ///
    std::expected<bool, ctb::Error> validateCtRequest(cpr::Response& response)
    {
-      using namespace magic_enum;
-
       // unexpected return value, will be populated below if request failed.
       Error error{}; 
 
@@ -35,8 +33,9 @@ namespace ctb
             error.error_message = constants::ERROR_STR_AUTHENTICATION_FAILED;
             error.category = Error::Category::HttpStatus;
          }
-         else
+         else {
             return true; // we actually got a file, so return success
+         }
       }
       else if (response.error.code != cpr::ErrorCode::OK)
       {
@@ -44,8 +43,8 @@ namespace ctb
          error.error_message = ctb::format(constants::FMT_ERROR_CURL_ERROR, error.error_code);
 
          // use a separate category for cancellation, so the caller can distinguish and avoid showing unnecessary error messages
-         error.category = error.error_code == enum_index(cpr::ErrorCode::ABORTED_BY_CALLBACK) ? Error::Category::OperationCanceled
-                                                                                              : Error::Category::CurlError;
+         error.category = error.error_code == enum_to_index(cpr::ErrorCode::ABORTED_BY_CALLBACK) ? Error::Category::OperationCanceled
+                                                                                                            : Error::Category::CurlError;
       }
       else {
          error.error_code = static_cast<int64_t>(response.status_code);
@@ -66,8 +65,8 @@ namespace ctb
    [[nodiscard]] auto downloadRawTableData(const CredentialWrapper& cred, TableId table,  DataFormatId format, ProgressCallback* callback, 
                                            bool convert_to_utf, uint32_t table_code_page ) -> DownloadResult
    {
-      auto table_name = magic_enum::enum_name(table);
-      auto data_format = magic_enum::enum_name(format);
+      auto table_name = enum_to_string(table);
+      auto data_format = enum_to_string(format);
 
       cpr::Url url{ ctb::format(constants::FMT_URL_CT_TABLE,
                                 percentEncode(cred.username()),

@@ -31,11 +31,11 @@ namespace ctb::app
    using WebClientPtr  = wxWindowPtr<HiddenWebClient>;
 
    // we don't use enum class because then every time we need to pass an ID to wxObject,
-   // we'd have to cast or use std::to_underlying and that's just an ugly waste of time 
+   // we'd have to cast or use std::to_underlying and that's just an ugly waste of time
    // with no benefit for this use-case.
-   enum CmdId : uint16_t
+   enum CmdId : uint16_t   // NOLINT cppcoreguidelines-use-enum-class
    {
-      CMD_FILE_OPEN = wxID_HIGHEST, 
+      CMD_FILE_OPEN = wxID_HIGHEST,
       CMD_FILE_SAVE,
       CMD_FILE_DOWNLOAD_DATA,
       CMD_FILE_SETTINGS,
@@ -45,7 +45,7 @@ namespace ctb::app
       CMD_FILTER_TREE_DESELECT_ALL,
       CMD_FILTER_TREE_TOGGLE_CHECKED,
       CMD_FILTER_TREE_CLEAR_ALL,
-      CMD_FILTER_TREE_COLLAPSE_ALL, 
+      CMD_FILTER_TREE_COLLAPSE_ALL,
       CND_FILTER_TREE_INVERT_SELECTION,
       CMD_COLLECTION_MY_CELLAR,
       CMD_COLLECTION_PENDING_WINE,
@@ -65,15 +65,15 @@ namespace ctb::app
       CMD_ONLINE_EDIT_ORDER,
       CMD_ONLINE_DRINK_REMOVE,
    };
-   
-   
+
+
    enum class AppFolder
    {
       Root,
       Defaults,
       Favorites,
       Labels,
-      Tables
+      Tables,
    };
 
 
@@ -84,7 +84,7 @@ namespace ctb::app
    public:
       App();
 
-      /// @brief called by the framework on app startup, this is the place for program initialization 
+      /// @brief called by the framework on app startup, this is the place for program initialization
       ///
       auto OnInit() -> bool override;
 
@@ -95,12 +95,21 @@ namespace ctb::app
       /// @brief  returns the path where the application stores data files.
       auto getDataFolder(AppFolder folder) const noexcept -> fs::path
       {
-         if (folder == AppFolder::Root)
-            return m_user_data_folder; 
+         if (folder == AppFolder::Root) return m_user_data_folder;
 
-         auto path = ctb::format("{}/{}", m_user_data_folder.generic_string(), magic_enum::enum_name(folder));
-         fs::create_directories(path);
-         return path;
+         std::string path{};
+         try
+         {
+            path = ctb::format("{}/{}", m_user_data_folder.generic_string(), enum_to_string(folder));
+            fs::create_directories(path);
+            return fs::path{ path };
+         }
+         catch (...)
+         {
+            displayFormattedMessage("Data folder '{}' does not exist and could not be created.", path);
+            assert(false);
+            return {};
+         }
       }
 
       /// @brief Retrieve a pointer to main window that doesn't need dynamic_cast (or wx-equivalent).
@@ -127,22 +136,25 @@ namespace ctb::app
 
       /// @brief Get the current config object.
       ///
-      /// Calling this will throw an exception if there's no default config. AFAIK the wxWidgets config store is 
+      /// Calling this will throw an exception if there's no default config. AFAIK the wxWidgets config store is
       /// not thread-safe since multiple calls to SetPath() would be problematic. This should only be used from UI thread.
       auto getConfig(std::string_view initial_path = ScopedConfigPath::CONFIG_ROOT) noexcept(false) -> ScopedConfigPath;
 
       /// @brief Display a message box with an error description.
       ///
       /// If log_error is true, the exception will also be logged. source_loc is only used for logging.
-      void displayErrorMessage(const Error& err, bool log_error = true, std::source_location source_loc = std::source_location::current());
-      void displayErrorMessage(const std::string& msg, bool log_error, const std::string& title = constants::ERROR_STR, std::source_location source_loc = std::source_location::current());
+      void displayErrorMessage(const Error& err, bool log_error = true, std::source_location source_loc = std::source_location::current()) const;
+      void displayErrorMessage(
+         const std::string& msg, bool log_error, const std::string& title = constants::ERROR_STR,
+         std::source_location source_loc = std::source_location::current()
+      ) const;
 
       /// @brief display a message box with informational text
-      void displayInfoMessage(const std::string& msg, const std::string& title = constants::APP_NAME_SHORT);
+      void displayInfoMessage(const std::string& msg, const std::string& title = constants::APP_NAME_SHORT) const;
 
       /// @brief display an info message to the user, using format()-style syntax for string building.
-      template <typename... Args>
-      void displayFormattedMessage(ctb::format_string<Args...> fmt_str, Args&&... args)
+      template<typename... Args>
+      void displayFormattedMessage(ctb::format_string<Args...> fmt_str, Args&&... args) const   // NOLINT [cppcoreguidelines-missing-std-forward]
       {
          displayInfoMessage(ctb::vformat(fmt_str, ctb::make_format_args(args...)));
       }
@@ -157,7 +169,7 @@ namespace ctb::app
       void onMainFrameClosed(wxCloseEvent&);
    };
 
-}  // namespace ctb::app
+}   // namespace ctb::app
 
 
 wxDECLARE_APP(ctb::app::App);

@@ -22,7 +22,8 @@ namespace ctb
 {
    /// @brief Data model class that provides a base implementation for accessing CellarTracker data files
    /// 
-   class IDataset
+   class IDataset               // NOLINT [cppcoreguidelines-special-member-functions]
+
    {
    public:
       using FieldSchema         = CtFieldSchema;
@@ -68,7 +69,7 @@ namespace ctb
       /// @brief Gets the collection of columns for the list display
       /// 
       /// Note that some may be hidden and not visible.
-      virtual auto listColumns() const -> ListColumnSpan = 0;
+      virtual auto availableListColumns() const -> ListColumnSpan = 0;
 
       /// @brief Check whether the current dataset supports the given property
       /// 
@@ -173,7 +174,8 @@ namespace ctb
 
 
    /// @brief the smart-ptr-to-base that's used to work with the IDataset-derived datasets
-   using DatasetPtr = std::shared_ptr<IDataset>;
+   using DatasetPtr      = std::shared_ptr<IDataset>;
+   using DatasetConstPtr = std::shared_ptr<const IDataset>;
 
 
 }  // namespace ctb

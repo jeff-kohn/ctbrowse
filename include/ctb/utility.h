@@ -98,6 +98,10 @@ namespace ctb
       return result;
    }
 
+
+   /// @brief Parses a text value into a nullable boolean.
+   /// @param text Case-insensitive input to parse. Recognized true values: "true", "1", "yes"; recognized false values: "false", "0", "no".
+   /// @return NullableBool containing true or false when the input matches a recognized value, otherwise std::nullopt to indicate an unknown/invalid boolean.
    inline auto textToBool(std::string_view text) -> NullableBool
    {
       constexpr auto TRUE_STR = "true";

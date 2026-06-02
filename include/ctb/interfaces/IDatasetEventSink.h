@@ -15,7 +15,7 @@ namespace ctb
 {
    /// @brief listener interface for classes that want to receive notification events about a dataset.
    ///
-   struct IDatasetEventSink
+   struct IDatasetEventSink               // NOLINT [cppcoreguidelines-special-member-functions]
    {
       /// @brief called to notify the sink that a dataset event has occurred.
       ///

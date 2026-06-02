@@ -20,14 +20,10 @@
 #include "ctb/tables/TastingNotesTraits.h"
 #include "ctb/tables/WineListTraits.h"
 
-#include <magic_enum/magic_enum.hpp>
-#include <magic_enum/magic_enum_switch.hpp>
-
+#include <optional>
 
 namespace ctb
 {
-   using namespace magic_enum;
-
 
    namespace
    {
@@ -44,53 +40,20 @@ namespace ctb
 
    auto CtDatasetLoader::getDataset(TableId tbl) -> DatasetPtr
    {
-      Overloaded TableFactory{
-         [this](enum_constant<TableId::List> tbl_id)  -> DatasetPtr
-            { 
-					return getOrThrow<WineListTable>(m_data_folder, tbl_id);
-            },
-
-         [this](enum_constant<TableId::Pending> tbl_id) -> DatasetPtr
-            { 
-               return getOrThrow<PendingWineTable>(m_data_folder, tbl_id);
-            }, 
-
-         [this](enum_constant<TableId::Consumed> tbl_id) -> DatasetPtr
-            { 
-               return getOrThrow<ConsumedWineTable>(m_data_folder, tbl_id);
-            }, 
-
-         [this](enum_constant<TableId::Availability> tbl_id) -> DatasetPtr
-            { 
-               return getOrThrow<ReadyToDrinkTable>(m_data_folder, tbl_id);
-            },
-
-         [this](enum_constant<TableId::Purchase> tbl_id) -> DatasetPtr
-            {
-               return getOrThrow<PurchasedWineTable>(m_data_folder, tbl_id);
-            },
-
-         [this](enum_constant<TableId::Tag> tbl_id) -> DatasetPtr
-            {
-               return getOrThrow<TaggedWinesTable>(m_data_folder, tbl_id);
-            },
-
-         [this](enum_constant<TableId::Inventory> tbl_id) -> DatasetPtr
-            {
-               return getOrThrow<BottleInventoryTable>(m_data_folder, tbl_id);
-            },
-
-         [this](enum_constant<TableId::PrivateNotes> tbl_id) -> DatasetPtr
-            {
-               return getOrThrow<PrivateNotesTable>(m_data_folder, tbl_id);
-            },
-
-         [this](enum_constant<TableId::Notes> tbl_id) -> DatasetPtr
-            {
-               return getOrThrow<TastingNotesTable>(m_data_folder, tbl_id);
-            }
+      switch (tbl)
+      {
+         case TableId::List:          return getOrThrow<WineListTable>(m_data_folder, tbl);
+         case TableId::Pending:       return getOrThrow<PendingWineTable>(m_data_folder, tbl);
+         case TableId::Consumed:      return getOrThrow<ConsumedWineTable>(m_data_folder, tbl);
+         case TableId::Availability:  return getOrThrow<ReadyToDrinkTable>(m_data_folder, tbl);
+         case TableId::Purchase:      return getOrThrow<PurchasedWineTable>(m_data_folder, tbl);
+         case TableId::Tag:           return getOrThrow<TaggedWinesTable>(m_data_folder, tbl);
+         case TableId::Inventory:     return getOrThrow<BottleInventoryTable>(m_data_folder, tbl);
+         case TableId::PrivateNotes:  return getOrThrow<PrivateNotesTable>(m_data_folder, tbl);
+		   case TableId::Notes:         return getOrThrow<TastingNotesTable>(m_data_folder, tbl);
+		   default:
+	         throw Error{"Table not found."};
       };
-      return enum_switch(TableFactory, tbl);
    }
 
 

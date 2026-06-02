@@ -50,7 +50,7 @@ namespace ctb::app
       using DetailsViewFactory = std::function<DetailsViewBase*(wxWindow* parent, const DatasetEventSourcePtr& source)>;
    
       // NOLINTNEXTLINE(bugprone-throwing-static-initialization, cert-err58-cpp)
-      static const auto details_view_map = std::map<TableId, DetailsViewFactory>
+      const auto details_view_map = std::map<TableId, DetailsViewFactory>
       {
          { TableId::List,         &DetailsViewMyCellar::create          } ,
          { TableId::Pending,      &DetailsViewPending::create           } ,
@@ -82,14 +82,14 @@ namespace ctb::app
          }
          else
          {
-            throw Error{ ctb::format(constants::FMT_ERROR_STR_INVALID_DETAIL_VIEW, magic_enum::enum_name(table_id)), Error::Category::ArgumentError };
+            throw Error{ ctb::format(constants::FMT_ERROR_STR_INVALID_DETAIL_VIEW, table_id), Error::Category::ArgumentError };
          }
       }
 
    } // namespace
 
    
-   void DatasetMultiView::createWindow(wxWindow* parent, const DatasetEventSourcePtr& source)
+   void DatasetMultiView::createWindow(wxWindow* parent, const DatasetEventSourcePtr& event_source)
    {
       constexpr auto LEFT_SPLITTER_GRAVITY = 0.25;
       constexpr auto RIGHT_SPLITTER_GRAVITY = 0.75;
@@ -107,14 +107,14 @@ namespace ctb::app
       SetSashGravity(LEFT_SPLITTER_GRAVITY);
 
       // this splitter window contains options panel and right/nested splitter
-      m_options_panel = DatasetOptionsView::create(this, source);
+      m_options_panel = DatasetOptionsView::create(this, event_source);
       m_right_splitter = new wxSplitterWindow{ this };
       SplitVertically(m_options_panel, m_right_splitter);
       wxPersistentRegisterAndRestore(this, "DatasetMultiView");
 
       // nested splitter contains grid and details
-      m_listView = DatasetListView::create(m_right_splitter, source);
-      m_details_panel = createDetailsView(m_right_splitter, source);
+      m_listView = DatasetListView::create(m_right_splitter, event_source);
+      m_details_panel = createDetailsView(m_right_splitter, event_source);
       m_right_splitter->SplitVertically(m_listView, m_details_panel);
       m_right_splitter->SetMinimumPaneSize(MIN_PANE_SIZE);
       wxPersistentRegisterAndRestore(m_right_splitter, "DatasetMultiViewNested");

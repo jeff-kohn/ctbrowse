@@ -21,8 +21,6 @@ namespace ctb::app
 
    auto CtDatasetOptions::applyToDataset(DatasetPtr& dataset) const -> bool
    {
-      using magic_enum::enum_name;
-
       if (nullptr == dataset)
          return false;
 
@@ -40,20 +38,18 @@ namespace ctb::app
       // warn if table-id doesn't match, but we can still try to apply other settings.
       if (table_id != dataset->getTableId())
       {
-         auto expected_id = enum_name(table_id);
-         auto actual_id = enum_name(dataset->getTableId());
-         failed(ctb::format("Dataset Options for '{}' being applied to dataset '{}', this is probably a bug or an invalid options file.", expected_id, actual_id));
+         failed(ctb::format("Dataset Options for '{}' being applied to dataset '{}', this is probably a bug or an invalid options file.", table_id, dataset->getTableId()));
       }
 
       dataset->setCollectionName(collection_name);
 
       // make sure the saved sort's primary property is one supported by the dataset 
-      if (active_sort.sort_props.size() > 0 and dataset->hasProperty(active_sort.sort_props[0]))
+      if (!active_sort.sort_props.empty() && dataset->hasProperty(active_sort.sort_props[0]))
       {
          dataset->applySort(active_sort);
       }
       else {
-         failed(ctb::format("Dataset Options being applied to dataset '{}' contains invalid sort specification, this is probably a bug or an invalid options file.", enum_name(table_id)));
+         failed(ctb::format("Dataset Options being applied to dataset '{}' contains invalid sort specification, this is probably a bug or an invalid options file.", table_id));
       }
 
       /// filter manager class stores the filters in a map, so we have to extract the key

@@ -7,13 +7,12 @@
 namespace ctb::detail
 {
 
-   /// @brief Retrieve a property from a record's property map. 
+   /// @brief Retrieve a property from a record's property map.
    /// @return const reference to the requested property, or a null property if requested property is not found.
    inline auto getValueOrNull(const CtPropertyMap& rec, CtProp prop_id) -> const CtPropertyVal&
    {
       auto it = rec.find(prop_id);
-      if (it == rec.end() )
-         return ct_null_prop;  // null is better option than throwing
+      if (it == rec.end()) return ct_null_prop;   // null is better option than throwing
 
       return it->second;
    }
@@ -43,14 +42,15 @@ namespace ctb::detail
          else
             result = ctb::format("{}-{}={}", purchased, consumed, remaining);
       }
-      else if (purchased) 
+      else if (purchased)
       {
          if (pending)
             result = ctb::format("{}+({})={}", purchased, pending, remaining);
          else
             result = ctb::format("{}", purchased);
       }
-      else {
+      else
+      {
          result = ctb::format("({})", pending);
       }
       return result;
@@ -58,10 +58,10 @@ namespace ctb::detail
 
    /// @brief  Get total quantity as formatted string
    /// @return string in format  "1" (in-stock only), "1+(1)" (in-stock + pending) or "(1)" (pending only)
-   inline auto calcQtyTotal(const CtPropertyMap& rec) -> CtPropertyVal
+   inline auto calcQtyTotalDisplay(const CtPropertyMap& rec) -> CtPropertyVal
    {
-      auto qty     = getValueOrNull(rec, CtProp::QtyOnHand ).asUInt16().value_or(0u);
-      auto pending = getValueOrNull(rec, CtProp::QtyPending).asUInt16().value_or(0u);
+      auto qty     = getValueOrNull(rec, CtProp::QtyOnHand ).asUInt16().value_or(0U);
+      auto pending = getValueOrNull(rec, CtProp::QtyPending).asUInt16().value_or(0U);
 
       CtPropertyVal result{};
       if (qty == 0)
@@ -72,14 +72,15 @@ namespace ctb::detail
       {
          result = qty;
       }
-      else {
+      else
+      {
          result = ctb::format("{}+({})", qty, pending);
       }
       return result;
    }
 
    /// @brief  Replace drink date of 9999 with null, same for 1001, which is used for non-vintage.
-   inline void validateYear(CtPropertyVal& prop) 
+   inline void validateYear(CtPropertyVal& prop)
    {
       auto year = prop.asUInt16();
       if (year == constants::CT_NULL_YEAR)
@@ -98,10 +99,10 @@ namespace ctb::detail
          return "";
 
       if (drink_start.isNull() && drink_end.hasValue())
-         return drink_end.asString("By {}").c_str();
+         return drink_end.asString("By {}");
 
       if (drink_end.isNull())
-         return drink_start.asString("{}+").c_str();
+         return drink_start.asString("{}+");
 
       return ctb::format("{}-{}", drink_start.asString(), drink_end.asString());
    }

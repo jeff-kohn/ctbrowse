@@ -1,6 +1,8 @@
 #pragma once
 
 #include <fmt/format.h>
+#include <enchantum/fmt_format.hpp>
+
 
 namespace ctb
 {

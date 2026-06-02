@@ -65,12 +65,19 @@ namespace ctb::tasks
          if (!isValid()) 
             return Status::Invalid;
 
-         switch (m_future.wait_for(timeout))
+         try
          {
-            case future_status::deferred:  return Status::Deferred;
-            case future_status::timeout:   return Status::Running;
-            case future_status::ready:     return Status::Finished;
-            default:                       assert(false);
+            switch (m_future.wait_for(timeout))
+            {
+               case future_status::deferred:  return Status::Deferred;
+               case future_status::timeout:   return Status::Running;
+               case future_status::ready:     return Status::Finished;
+               default:                       assert(false);
+            }
+         }
+         catch(std::future_error& e)
+         {
+            SPDLOG_DEBUG("PollingTask::poll() caught future_error:{}", e.what());
          }
          return Status::Invalid;
       }

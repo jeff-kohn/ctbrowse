@@ -1,8 +1,9 @@
 #include "WineDetailTastingPanel.h"
-#include "controls/WineDetailFields.h"
+#include "controls/ElasticMultiLineTextCtrl.h"
 
-#include <wx/stattext.h>
 #include <wx/sizer.h>
+#include <wx/stattext.h>
+#include <wx/textctrl.h>
 #include <wx/wupdlock.h>
 
 namespace ctb::app
@@ -17,7 +18,7 @@ namespace ctb::app
       auto maybe_liked = dataset->getProperty(rec_idx, CtProp::TastingLiked).asBool();
       if (maybe_liked.has_value())
       {
-         return ctb::format(constants::FMT_TASTING_LIKE_MSG, *maybe_liked ? constants::STR_LIKE : constants::STR_DONT_LIKE );
+         return ctb::format(constants::FMT_TASTING_LIKE_MSG, *maybe_liked ? constants::STR_LIKE : constants::STR_DONT_LIKE);
       }
       return constants::LBL_TASTING_NOTE;
    }
@@ -51,32 +52,28 @@ namespace ctb::app
    //}
 
 
-   void WineDetailTastingPanel::postWindowCreate()
+   void WineDetailTastingPanel::addDetails([[maybe_unused]] DetailRows& rows, const DatasetEventSourcePtr& source)
    {
-      auto* top_sizer = GetSizer(); assert(top_sizer);
-      auto dataset = getDataset();
+      auto* top_sizer = GetSizer();          assert(top_sizer);
+      auto dataset = source->getDataset();   assert(dataset);
 
       // note title
-      auto* title_ctrl = new wxStaticText(this, wxID_ANY,  constants::LBL_TASTING_NOTE, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+      auto* title_ctrl = new wxStaticText(this, wxID_ANY, constants::LBL_TASTING_NOTE, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
       title_ctrl->SetValidator(wxGenericValidator{ &m_title });
       auto title_font = GetFont().MakeBold();
       title_ctrl->SetFont(title_font);
       title_ctrl->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT));
-      top_sizer->Add(title_ctrl, wxSizerFlags{}.Expand().Border(wxTOP|wxLEFT|wxRIGHT));
+      top_sizer->Add(title_ctrl, wxSizerFlags{}.Expand().Border(wxTOP | wxLEFT | wxRIGHT));
 
       // feedback summary
-      auto* feedback_summary_ctrl = new wxStaticText(this, wxID_ANY,  "", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+      auto* feedback_summary_ctrl = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
       feedback_summary_ctrl->SetValidator(wxGenericValidator{ &m_feedback_summary });
       feedback_summary_ctrl->SetFont(feedback_summary_ctrl->GetFont().MakeItalic());
-      top_sizer->Add(feedback_summary_ctrl, wxSizerFlags{}.Center().Border(wxLEFT|wxRIGHT));
+      top_sizer->Add(feedback_summary_ctrl, wxSizerFlags{}.Center().Border(wxLEFT | wxRIGHT));
 
       // tasting note
-      m_tasting_notes_ctrl = new wxStaticText(this, wxID_ANY,  "");//, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-      m_tasting_notes_ctrl->SetValidator(wxGenericValidator{ &m_tasting_notes });
-      top_sizer->Add(m_tasting_notes_ctrl, wxSizerFlags{ 2 }.Expand().TripleBorder());
-
-      // handle resize so children are laid out correctly when this panel is resized
-      Bind(wxEVT_SIZE, &WineDetailTastingPanel::onSize, this);
+      auto* note_ctrl = ElasticMultiLineTextCtrl::create(this, source, CtProp::TastingNotes);
+      top_sizer->Add(note_ctrl, wxSizerFlags{ 2 }.Expand().TripleBorder());
    }
 
 
@@ -85,49 +82,19 @@ namespace ctb::app
       const auto& dataset = event.dataset;
       if (dataset and event.affected_row.has_value())
       {
-         auto rec_idx = event.affected_row.value();
-
-         m_title               = getTastingTitle(dataset, rec_idx);
-         m_feedback_summary    = getTastingFeedbackText(dataset, rec_idx);
-         m_tasting_notes       = wxFromSV(dataset->getProperty(rec_idx, CtProp::TastingNotes).asStringView());
+         auto rec_idx       = event.affected_row.value();
+         m_title            = getTastingTitle(dataset, rec_idx);
+         m_feedback_summary = getTastingFeedbackText(dataset, rec_idx);
 
          GetSizer()->ShowItems(true);
          Show(true);
       }
-      else {
+      else
+      {
          GetSizer()->ShowItems(false);
          Show(false);
       }
       TransferDataToWindow();
-      calcNoteSize();         // expand to fit note contents, parent will resize to accomodate
    }
 
-
-   void WineDetailTastingPanel::onSize(wxSizeEvent& event)
-   {
-      // reset the label to remove any existing word-wrap, then re-fit/re-wrap the tasting note control for the new size.
-      m_tasting_notes_ctrl->SetLabel(m_tasting_notes);
-      calcNoteSize();
-
-      // continue with parent processing
-      event.Skip(); 
-      return;
-   }
-
-
-   void WineDetailTastingPanel::calcNoteSize() 
-   {
-      if (m_tasting_notes.empty())
-      {
-         m_tasting_notes_ctrl->SetClientSize(m_tasting_notes_ctrl->GetBestSize());
-      }
-      else
-      {
-         // calculate how wide our note control can be and still fit in panel, allowing for sizer borders.
-         constexpr auto margin = 30;
-         const auto max_width = GetClientSize().GetWidth() - margin;
-         m_tasting_notes_ctrl->Wrap(max_width);
-      }
-   }
-
-} // namespace ctb::app
+}   // namespace ctb::app

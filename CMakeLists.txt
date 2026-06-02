@@ -14,11 +14,12 @@ endif()
 # Options that can be set by users of this project (eg through -D on the cmake command line). 
 # These are pre-configured by the presets or resonable defaults, but can be overridden when needed.
 option(CTB_BUILD_TESTS    "Enable building tests and test infrastructure. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }." ${PROJECT_IS_TOP_LEVEL} )
-option(CTB_BUILD_EXAMPLES "Enable building example programs. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }."              ${PROJECT_IS_TOP_LEVEL} )
+#option(CTB_BUILD_EXAMPLES "Enable building example programs. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }."              ${PROJECT_IS_TOP_LEVEL} )
 option(CTB_CPPCHECK_BUILD_SCAN     "Enable CppCheck in-build scanning. Default: OFF. Values: { ON, OFF }."   "OFF" )
 option(CTB_CPPCHECK_PROJECT_SCAN   "Enable CppCheck project scanning in the 'code_analysis target. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }." ${PROJECT_IS_TOP_LEVEL})
 option(CTB_CLANG_TIDY_BUILD_SCAN   "Enable clang-tidy in-build scanning. Default: OFF. Values: { ON, OFF }." "OFF" )
 option(CTB_CLANG_TIDY_PROJECT_SCAN "Enable clang-tidy project scanning in the 'code_analysis target. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }." ${PROJECT_IS_TOP_LEVEL})
+option(CTB_USE_PRECOMPILED_HEADERS "Use precompiled headers during build. Default: OFF. Values: { ON, OFF }." "OFF")
 
 # So that cmake can find any additional modules we've written (stuff like Find modules, export targets, etc)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
@@ -94,7 +95,6 @@ endif()
 find_package(HtmlParser CONFIG REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
-find_package(magic_enum CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
 add_subdirectory(lib)
@@ -103,10 +103,6 @@ add_subdirectory(app)
 if (CTB_BUILD_TESTS)
       enable_testing()
       add_subdirectory("tests")
-endif()
-
-if (CTB_BUILD_EXAMPLES)
-   add_subdirectory(examples)
 endif()
 
 # include(CMakePrintHelpers)

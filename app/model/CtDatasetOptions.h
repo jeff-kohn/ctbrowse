@@ -49,7 +49,7 @@ namespace ctb::app
 
       /// @brief Retrieve a CtDatasetOptions initialized from the specified json file
       /// @throw ctb::Error if file can't be read and loaded into object
-      static auto retrieveOptions(const fs::path& json_path) noexcept(false) -> CtDatasetOptions;
+      static auto retrieveOptions(const fs::path& path) noexcept(false) -> CtDatasetOptions;
 
       /// @brief Retrieve a CtDatasetOptions with default options for the specified TableId, if it exists
       /// @return the requested options object, or std::nullopt if no default was found.

@@ -40,6 +40,7 @@ namespace ctb::app
          uint16_t decimal_places{};
       };
 
+      [[nodiscard]]
       static auto create(wxWindow* parent, const DatasetEventSourcePtr& source, const PropertyFilter& filter, const SpinParams& params) -> SpinDoubleFilterCtrl*;
 
       /// @brief Get a reference to the filter associated with this control
@@ -68,9 +69,7 @@ namespace ctb::app
       wxSpinCtrlDouble*      m_spin{};
       SpinParams             m_spin_params{};
 
-      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call protected ctor
-      template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
+      DECLARE_DATASET_WINDOW_FACTORY;
 
       SpinDoubleFilterCtrl(const DatasetEventSourcePtr& source, PropertyFilter filter, SpinParams params) :
          Base{ source },

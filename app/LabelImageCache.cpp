@@ -51,6 +51,7 @@ namespace ctb::app
          auto img_url = parseLabelUrlFromHtml(wine_details_html);
          if (img_url.empty())
          {
+            SPDLOG_DEBUG("Returned Wine Details HTML did not contain image  url:\n {}", wine_details_html);
             throw Error{ constants::ERROR_STR_LABEL_URL_NOT_FOUND };
          }
 
@@ -108,7 +109,7 @@ namespace ctb::app
    }
 
 
-   /// @brief OnlineReqest - class representing a request to retrieve a wine's label image from the web 
+   /// @brief Request - class representing a request to retrieve a wine's label image from the web 
    class LabelImageCache::Request
    {
    public:
@@ -146,12 +147,12 @@ namespace ctb::app
    };
 
 
-   LabelImageCache::LabelImageCache(fs::path cache_folder, const wxWeakRef<HiddenWebClient>& web_cient_ref) :  
+   LabelImageCache::LabelImageCache(fs::path cache_folder, const wxWeakRef<HiddenWebClient>& web_client_ref) :  
       m_cache_folder{ std::move(cache_folder) },
-      m_web_client_ref{ web_cient_ref }
+      m_web_client_ref{ web_client_ref }
 
    {
-      if (m_cache_folder.is_relative() or ( (fs::exists(m_cache_folder) and !fs::is_directory(m_cache_folder)) ))
+      if (m_cache_folder.is_relative() or (fs::exists(m_cache_folder) and !fs::is_directory(m_cache_folder)))
       {
          throw Error{ constants::ERROR_STR_INVALID_LABEL_CACHE };
       }
@@ -199,7 +200,7 @@ namespace ctb::app
       auto [request_iter, was_inserted] = m_requests.try_emplace(wine_id, std::move(req));
       assert(was_inserted);
 
-      // We have to request the intial page from webClient so we can then parse it to get the image URL.
+      // We have to request the initial page from webClient so we can then parse it to get the image URL.
       auto url = getWineDetailsUrl(wine_id);
       if (m_web_client_ref->requestPage(url, [this, wine_id](auto&& callback) { onPageLoaded(wine_id, callback); }))
       {

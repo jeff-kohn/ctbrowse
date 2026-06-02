@@ -24,8 +24,8 @@ namespace ctb
       TableId      table_id{};
       DataFormatId data_format{};
 
-      std::string_view tableName() const noexcept { return magic_enum::enum_name(table_id); }
-      std::string_view formatName() const noexcept { return magic_enum::enum_name(data_format); }
+      std::string_view tableName() const noexcept  { return enum_to_string(table_id);    }
+      std::string_view formatName() const noexcept { return enum_to_string(data_format); }
    };
 
 

@@ -10,8 +10,7 @@
 #include "App.h"
 #include "views/DetailsViewBase.h"
 #include "controls/LabelImageCtrl.h"
-#include "controls/WineDetailScorePanel.h"
-#include "controls/WineDetailPrivateNotesPanel.h"
+#include "panels/WineDetailPrivateNotesPanel.h"
 
 namespace ctb::app
 {
@@ -27,17 +26,14 @@ namespace ctb::app
       /// 
       [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> DetailsViewBase*
       {
-         return createDetailsViewFactory<DetailsViewPrivateNotes>(parent, source);
+         return detail::createDatasetWindow<DetailsViewPrivateNotes>(parent, source);
       }
 
    protected:
-      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call protected ctor
-      template<typename BaseT>
-      friend auto createDetailsViewFactory(wxWindow* parent, const DatasetEventSourcePtr& source) -> BaseT*;
-
       DetailsViewPrivateNotes(DatasetEventSourcePtr source) : DetailsViewBase{ std::move(source) }
       {}
 
+      DECLARE_DATASET_WINDOW_FACTORY;
 
       // derived classes must implement this to add their view-specific controls
       auto addDatasetSpecificControls(wxBoxSizer* top_sizer, const DatasetEventSourcePtr& source) -> void override
@@ -48,7 +44,7 @@ namespace ctb::app
          top_sizer->Add(WineDetailPrivateNotesPanel::create(this, source), sizer_flags);
          top_sizer->AddSpacer(DEFAULT_GROUP_SPACER);
          addCommandLinkButton(top_sizer, CmdId::CMD_ONLINE_WINE_DETAILS);
-         top_sizer->AddSpacer(DEFAULT_HEADING_SPACER);
+         top_sizer->AddStretchSpacer(DEFAULT_HEADING_SPACER);
          top_sizer->Add(LabelImageCtrl::create(this, source), wxSizerFlags().CenterHorizontal().Expand().Shaped());
       }
    };

@@ -17,21 +17,26 @@ namespace ctb
 
    /// @brief Scoped RAII wrapper for subscribing/unsubscribing event handlers for a data source
    ///
-   /// This class is meant to be used as a member in another class that wants to handle DatasetEvents. 
+   /// DatasetEventHandler is meant to be used as a member in another class that wants to handle DatasetEvents.
    /// 
-   /// The functors passed to addHandler() must be valid for the lifetime of this object, including any 
+   /// This class is pretty basic and is meant to be used by a single class, since it only supports
+   /// one handler per event-type plus an optional default handler that will be called for events with
+   /// no event-specific handler. This means if you can't have a base class and derived class(es) handling
+   /// the same event(s) from the same DatasetEventHandler; you'd either have to make the handler virtual in the base
+   /// class so it can be overridden, or derived class should have its own handler.
+   ///
+   /// The functors passed to addHandler() must be valid for the lifetime of this object, including any
    /// captured pointers.
-   /// 
-   /// This class is not thread-safe at the instance level, because you could get a race condition where
-   /// the notify callback gets called during or just after destruction.
-   /// 
+   ///
+   /// This class is not thread-safe at the instance level
+   ///
    class DatasetEventHandler final : public IDatasetEventSink
    {
    public:
-      using WeakRef                = std::weak_ptr<DatasetEventHandler>;
-      using EventId                = DatasetEvent::Id;
-      using EventCallback          = std::function<void(const DatasetEvent& event)>;
-      using CallbackMap            = std::unordered_map<EventId, EventCallback>;
+      using WeakRef       = std::weak_ptr<DatasetEventHandler>;
+      using EventId       = DatasetEvent::Id;
+      using EventCallback = std::function<void(const DatasetEvent& event)>;
+      using CallbackMap   = std::unordered_map<EventId, EventCallback>;
 
 
       DatasetEventHandler(DatasetEventSourcePtr source) : m_source(std::move(source))
@@ -39,7 +44,7 @@ namespace ctb
          if (!m_source)
          {
             assert("source ptr cannot == nullptr" and false);
-            throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };            
+            throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
          }
          m_source->attach(this);
       }
@@ -50,18 +55,18 @@ namespace ctb
       {
          return m_source->getDataset() != nullptr;
       }
-      
+
 
       /// @brief returns a copy of the dataset currently associated with this source, if any
-      /// 
+      ///
       /// @param throw_if_null - if true, throw an exception on nullptr dataset; otherwise return nullptr;
-      [[nodiscard]] auto getDataset(bool throw_if_null = true) noexcept(false) -> DatasetPtr 
+      [[nodiscard]] auto getDataset(bool throw_if_null = true) noexcept(false) -> DatasetPtr
       {
          if (hasDataset() == false and throw_if_null)
          {
             throw Error{ constants::ERROR_STR_NO_DATASET, Error::Category::DataError };
          }
-         
+
          return m_source->getDataset();
       }
 
@@ -74,25 +79,25 @@ namespace ctb
 
 
       /// @brief Add a handler for the specified event type.
-      /// 
-      /// Any existing handler for event_id will be replaced. 
-      /// 
-      /// The supplied callback must remain valid for the lifetime of this object or until you call 
+      ///
+      /// Any existing handler for event_id will be replaced.
+      ///
+      /// The supplied callback must remain valid for the lifetime of this object or until you call
       /// removeHandler() for the event, so be careful with callables containing captured pointers.
-      /// 
+      ///
       void addHandler(EventId event_id, EventCallback callback)
       {
          m_callbacks[event_id] = std::move(callback);
       }
 
-      void setDefaultHandler(EventCallback callback =  [](const DatasetEvent&) {})
+      void setDefaultHandler(EventCallback callback = [](const DatasetEvent&) {})
       {
          m_default_callback = std::move(callback);
       }
 
 
       /// @brief Unsubscribe from notifications for the specified event_id
-      /// @param event_id 
+      /// @param event_id
       void removeHandler(EventId event_id)
       {
          m_callbacks.erase(event_id);
@@ -100,15 +105,15 @@ namespace ctb
 
 
       /// @brief method to signal the source to fire an event
-      /// 
-      /// If notify_self is true,  the caller will receive a notification for this event.  
+      ///
+      /// If notify_self is true,  the caller will receive a notification for this event.
       /// If notify_self is false, the caller will NOT receive notification for this event.
       ///
       /// @return true if successful, false if the source couldn'tsend all notifications (meaning
       ///  at least one notfication threw an error)
       auto signal_source(DatasetEvent::Id event_id, bool notify_self, NullableInt rec_idx = std::nullopt) noexcept -> bool
       {
-          return m_source->signal(event_id, rec_idx, notify_self ? nullptr : this);
+         return m_source->signal(event_id, rec_idx, notify_self ? nullptr : this);
       }
 
 
@@ -118,16 +123,16 @@ namespace ctb
          detach();
       }
 
-      DatasetEventHandler() = delete;
-      DatasetEventHandler(const DatasetEventHandler&) = default;
-      DatasetEventHandler(DatasetEventHandler&&) = default;
+      DatasetEventHandler()                                      = delete;
+      DatasetEventHandler(const DatasetEventHandler&)            = default;
+      DatasetEventHandler(DatasetEventHandler&&) noexcept        = default;
       DatasetEventHandler& operator=(const DatasetEventHandler&) = default;
-      DatasetEventHandler& operator=(DatasetEventHandler&&) = default;
+      DatasetEventHandler& operator=(DatasetEventHandler&&)      = default;
 
    private:
       DatasetEventSourcePtr m_source{ nullptr };
       CallbackMap           m_callbacks{};
-      EventCallback         m_default_callback{}; // do-nothing default
+      EventCallback         m_default_callback{};   // do-nothing default
 
       void notify(DatasetEvent event) override
       {
@@ -136,13 +141,13 @@ namespace ctb
          {
             it->second(event);
          }
-         else {
-            if (m_default_callback)
-               m_default_callback(event);
+         else
+         {
+            if (m_default_callback) m_default_callback(event);
          }
       }
 
-      void detach() noexcept 
+      void detach() noexcept
       {
          if (m_source)
          {
@@ -152,4 +157,4 @@ namespace ctb
       }
    };
 
-}  // namespace ctb
+}   // namespace ctb

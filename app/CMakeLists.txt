@@ -56,28 +56,20 @@ target_sources(${TARGET_NAME}
 
      "controls/CheckBoxFilterCtrl.cpp"
      "controls/CheckBoxFilterCtrl.h"
+     "controls/DrinkWindowCtrl.h"
+     "controls/ElasticMultiLineTextCtrl.cpp"
+     "controls/ElasticMultiLineTextCtrl.h"
+     "controls/ElasticPropertyValueBase.cpp"
+     "controls/ElasticPropertyValueBase.h"
      "controls/LabelImageCtrl.cpp"
      "controls/LabelImageCtrl.h"
      "controls/MultiValueFilterTreeCtrl.cpp"
      "controls/MultiValueFilterTreeCtrl.h"
-     "controls/SortOptionsPanel.cpp"
-     "controls/SortOptionsPanel.h"
+     "controls/PropertyValueCtrl.h"
+     "controls/ProReviewsCacheCtrl.h"
      "controls/SpinDoubleFilterCtrl.cpp"
      "controls/SpinDoubleFilterCtrl.h"
-     "controls/WineDetailBasePanel.cpp"
-     "controls/WineDetailBasePanel.h"
-     "controls/WineDetailBottleInfoPanel.h"
-     "controls/WineDetailFields.h"
-     "controls/WineDetailMainPanel.cpp"
-     "controls/WineDetailMainPanel.h"
-     "controls/WineDetailPendingPanel.h"
-     "controls/WineDetailPrivateNotesPanel.cpp"
-     "controls/WineDetailPrivateNotesPanel.h"
-     "controls/WineDetailScorePanel.h"
-     "controls/WineDetailTagsPanel.h"
-     "controls/WineDetailTastingPanel.cpp"
-     "controls/WineDetailTastingPanel.h"
-     "controls/WineDetailValuePanel.h"
+
      "dialogs/CredentialDialog.cpp"
      "dialogs/CredentialDialog.h"
      "dialogs/TableSyncDialog.cpp"
@@ -88,6 +80,21 @@ target_sources(${TARGET_NAME}
      "model/CtDataViewModel.cpp"
      "model/CtDataViewModel.h"
      "model/DatasetWindow.h"
+
+     "panels/SortOptionsPanel.cpp"
+     "panels/SortOptionsPanel.h"
+     "panels/WineDetailBasePanel.cpp"
+     "panels/WineDetailBasePanel.h"
+     "panels/WineDetailBottleInfoPanel.h"
+     "panels/WineDetailMainPanel.h"
+     "panels/WineDetailPanelRow.h"
+     "panels/WineDetailPendingPanel.h"
+     "panels/WineDetailPrivateNotesPanel.h"
+     "panels/WineDetailScorePanel.h"
+     "panels/WineDetailTagsPanel.h"
+     "panels/WineDetailTastingPanel.cpp"
+     "panels/WineDetailTastingPanel.h"
+     "panels/WineDetailValuePanel.h"
 
      "views/DetailsViewBase.cpp"
      "views/DetailsViewBase.h"
@@ -113,6 +120,56 @@ target_sources(${TARGET_NAME}
      "resources/resource.rc"
      ${${PROJECT_NAME}_VERSION_RESOURCE}
 )
+
+
+if (CTB_USE_PRECOMPILED_HEADERS)
+   target_precompile_headers(${TARGET_NAME}
+      PRIVATE
+         <algorithm>
+         <array>
+         <boost/algorithm/string/predicate.hpp>
+         <boost/unordered/unordered_flat_map.hpp>
+         <chrono>
+         <concepts>
+         <enchantum/enchantum.hpp>
+         <enchantum/fmt_format.hpp>
+         <exception>
+         <expected>
+         <external/csv.hpp>
+         <filesystem>
+         <fmt/chrono.h>
+         <fmt/format.h>
+         <frozen/map.h>
+         <map>
+         <memory>
+         <optional>
+         <ranges>
+         <set>
+         <span>
+         <string_view>
+         <string>
+         <unordered_set>
+         <variant>
+         <vector>
+         <wx/app.h>
+         <wx/button.h>
+         <wx/checklst.h>
+         <wx/config.h>
+         <wx/event.h>
+         <wx/fileconf.h>
+         <wx/frame.h>
+         <wx/gdicmn.h>
+         <wx/panel.h>
+         <wx/sizer.h>
+         <wx/stattext.h>
+         <wx/textctrl.h>
+         <wx/valgen.h>
+         <wx/window.h>
+         <wx/wupdlock.h>
+         <wx/xrc/xmlres.h>
+   )
+   message(STATUS "precompiled header support enabled for ${TARGET_NAME}")
+endif()
 
 # ---- End-of-file commands ----
 # add_folders(app)

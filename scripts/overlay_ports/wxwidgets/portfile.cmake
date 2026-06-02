@@ -111,6 +111,7 @@ vcpkg_cmake_configure(
         -DCMAKE_DISABLE_FIND_PACKAGE_GSPELL=ON
         -DCMAKE_DISABLE_FIND_PACKAGE_MSPACK=ON
         -DwxBUILD_INSTALL_RUNTIME_DIR:PATH=bin
+        -DwxUSE_UNICODE_WCHAR=OFF
         -DwxUSE_UNICODE_UTF8=1          # utf8-everywhere
         -DwxUSE_UTF8_LOCALE_ONLY=1      # utf8-everywhere
         -DwxUSE_CONFIG_NATIVE=OFF       # Use file instead of registry

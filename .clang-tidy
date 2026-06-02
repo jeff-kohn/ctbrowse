@@ -1,27 +1,44 @@
-Checks: "clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,cert-*, \
+Checks: "clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,cert-*, bugprone-*, readability-*, \
+  -bugprone-easily-swappable-parameters, \
+  -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access, \
   -modernize-use-trailing-return-type, \
   -modernize-use-nodiscard,\
-  -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access, \
-  -modernize-use-designated-initializers"
+  -modernize-use-designated-initializers, \
+  -readability-redundant-member-init, \
+  -readability-identifier-length, \
+  -readability-braces-around-statements, \
+  -readability-use-concise-preprocessor-directives, \
+  -readability-else-after-return, \
+  -readability-implicit-bool-conversion, \
+  -readability-else-after-return, \
+  -readability-convert-member-functions-to-static, \
+  -readability-simplify-boolean-expr, \
+  -readability-make-member-function-const, \
+  -readability-use-anyofallof, \
+  -bugprone-throwing-static-initialization,-cert-err58-cpp, \
+  -readability-named-parameter"
+
 
 WarningsAsErrors: ''
 
 CheckOptions:
+  - key: bugprone-exception-escape.IgnoredExceptions
+    value: "bad_array_new_length,bad_cast,format_error,std::bad_alloc,bad_alloc"
   - key: 'bugprone-misplaced-widening-cast.CheckImplicitCasts'
     value: 'true'
   - key: 'bugprone-sizeof-expression.WarnOnSizeOfIntegerExpression'
     value: 'true'
   - key: 'bugprone-suspicious-string-compare.WarnOnLogicalNotComparison'
     value: 'true'
+  - key: 'cppcoreguidelines-init-variables.MathHeader'
+    value: '<cmath>'
+  - key: 'cppcoreguidelines-narrowing-conversions.PedanticMode'
+    value: 'true'
   - key: 'readability-simplify-boolean-expr.ChainedConditionalReturn'
     value: 'true'
   - key: 'readability-simplify-boolean-expr.ChainedConditionalAssignment'
     value: 'true'
   - key: 'readability-uniqueptr-delete-release.PreferResetCall'
-    value: 'true'
-  - key: 'cppcoreguidelines-init-variables.MathHeader'
-    value: '<cmath>'
-  - key: 'cppcoreguidelines-narrowing-conversions.PedanticMode'
     value: 'true'
   - key: 'readability-else-after-return.WarnOnUnfixable'
     value: 'true'
@@ -33,5 +50,7 @@ CheckOptions:
     value: 'true'
   - key: 'readability-redundant-access-specifiers.CheckFirstDeclaration'
     value: 'true'
-  - key: bugprone-exception-escape.IgnoredExceptions
-    value: "bad_array_new_length,bad_cast,format_error,std::bad_alloc,bad_alloc"
+
+ExcludeHeaderFilterRegex: '.*((3rdParty|build|Program Files)[/\\].*'
+# ExcludeHeaderFilterRegex: '.*/(3rdParty|build)/.*'
+ExtraArgsBefore: ['--driver-mode=cl']

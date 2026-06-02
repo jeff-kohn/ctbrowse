@@ -34,7 +34,7 @@ namespace ctb
       using MultiValueFilter     = detail::MultiValueFilter<Prop, PropertyMap>;
       using TableSort            = detail::TableSorter<CtProp, CtPropertyMap>;
 
-      static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
+      static constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
       {
          { Prop::iWineId,              FieldSchema { Prop::iWineId,              PropType::UInt64,    0 }},
          { Prop::CtScore,              FieldSchema { Prop::CtScore,              PropType::Double,  174 }},
@@ -57,7 +57,7 @@ namespace ctb
          { Prop::WFW_ScoreNumeric,     FieldSchema { Prop::WFW_ScoreNumeric,     PropType::Double,  115 }},
       });
 
-      static inline constexpr int TWO_DECIMAL_PLACES{ 2 };
+      static constexpr int TWO_DECIMAL_PLACES{ 2 };
 
       /// @brief list of display columns that will show in the list view
       static inline const std::array DefaultListColumns

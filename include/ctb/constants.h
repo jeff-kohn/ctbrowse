@@ -43,6 +43,7 @@ namespace ctb::constants
    inline constexpr const char* DISPLAY_COL_CONSUME_FROM    = "Consumed From";
    inline constexpr const char* DISPLAY_COL_CT_SCORE        = "CT Score";
    inline constexpr const char* DISPLAY_COL_CT_WINDOW       = "CT Window";
+   inline constexpr const char* DISPLAY_COL_DRINK_BY        = "Drink By";
    inline constexpr const char* DISPLAY_COL_FLAWED          = "Flawed?";
    inline constexpr const char* DISPLAY_COL_INVENTORY       = "Inventory";
    inline constexpr const char* DISPLAY_COL_LOCATION        = "Location";
@@ -118,7 +119,6 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_CURVE_FAST_MATURE     = "Fast Maturing Formula";
    inline constexpr const char* SORT_OPTION_CURVE_EARLY_LATE      = "Early & Late Formula";
    inline constexpr const char* SORT_OPTION_CURVE_BOTTLES_YEAR    = "Bottles per Year Formula";
-
    inline constexpr const char* SORT_OPTION_SCORE_MY              = "My Score";
    inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";
    inline constexpr const char* SORT_OPTION_MY_VALUE              = "My Value";
@@ -127,6 +127,8 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_TAG_WINE_VINTAGE      = "Tag, Wine and Vintage";
    inline constexpr const char* SORT_OPTION_VINTAGE_WINE          = "Vintage and Wine";
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_QTY_TOTAL             = "Bottle Count, Wine Name";
+   
 
    // table names
    inline constexpr const char* TABLE_NAME_LIST                   = "My Wine Collection";

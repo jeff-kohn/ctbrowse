@@ -136,7 +136,7 @@ namespace ctb::app
       assert(event.dataset);
       try
       {
-         auto& dataset = event.dataset;
+         const auto& dataset = event.dataset;
          m_sort_config = dataset->activeSort();
          m_sort_ascending = (m_sort_config.reverse == false);
          m_sort_descending = m_sort_config.reverse;

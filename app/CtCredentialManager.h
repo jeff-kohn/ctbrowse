@@ -10,7 +10,7 @@ namespace ctb::app
    ///
    struct CtCredentialPersist
    {
-      static inline constexpr const char* CRED_SERVICE_BASE = constants::APP_NAME_SHORT;
+      static constexpr const char* CRED_SERVICE_BASE = constants::APP_NAME_SHORT;
 
       auto credentialExists(std::string_view cred_name) -> bool;
       

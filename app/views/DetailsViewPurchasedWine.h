@@ -9,8 +9,8 @@
 
 #include "App.h"
 #include "views/DetailsViewBase.h"
-#include "controls/WineDetailPendingPanel.h"
 #include "controls/LabelImageCtrl.h"
+#include "panels/WineDetailPendingPanel.h"
 
 namespace ctb::app
 {
@@ -26,17 +26,14 @@ namespace ctb::app
       /// 
       [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> DetailsViewBase*
       {
-         return createDetailsViewFactory<DetailsViewPurchasedWine>(parent, source);
+         return detail::createDatasetWindow<DetailsViewPurchasedWine>(parent, source);
       }
 
    protected:
-      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call protected ctor
-      template<typename BaseT>
-      friend auto createDetailsViewFactory(wxWindow* parent, const DatasetEventSourcePtr& source) -> BaseT*;
-
       DetailsViewPurchasedWine(DatasetEventSourcePtr source) : DetailsViewBase{ std::move(source) }
-      {
-      }
+      {}
+
+      DECLARE_DATASET_WINDOW_FACTORY;
 
       // derived classes must implement this to add their view-specific controls
       auto addDatasetSpecificControls(wxBoxSizer* top_sizer, const DatasetEventSourcePtr& source) -> void override

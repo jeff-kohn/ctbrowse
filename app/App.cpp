@@ -67,10 +67,6 @@ namespace ctb::app
 
       log::info("App startup.");
       wxConfigBase::Set(cfg.release());
-
-      // initialize label cache. needs to happen _after_ config store is set up
-      m_label_cache = std::make_shared<LabelImageCache>(getLabelCacheFolder());
-
    } // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks) unfortunately no way around it with wxWidgets
 
 
@@ -89,7 +85,7 @@ namespace ctb::app
          try
          {
             m_web_client = HiddenWebClient::create().value_or(WebClientPtr{});
-            m_label_cache = std::make_shared<LabelImageCache>(getLabelCacheFolder(), m_web_client.get());
+            m_label_cache = std::make_shared<LabelImageCache>(getLabelCacheFolder(), m_web_client.get()); 
          }
          catch (...) {
             displayErrorMessage(packageError());
@@ -160,13 +156,13 @@ namespace ctb::app
    }
 
 
-   void App::displayErrorMessage(const Error& err, bool log_error, std::source_location source_loc)
+   void App::displayErrorMessage(const Error& err, bool log_error, std::source_location source_loc) const
    {
       displayErrorMessage(err.formattedMesage(), log_error, std::string{ err.categoryName() }, source_loc);
    }
 
 
-   void App::displayErrorMessage(const std::string& msg, bool log_error, const std::string& title, std::source_location source_loc)
+   void App::displayErrorMessage(const std::string& msg, bool log_error, const std::string& title, std::source_location source_loc) const
    {
       if (log_error)
       {
@@ -176,7 +172,7 @@ namespace ctb::app
    }
 
 
-   void App::displayInfoMessage(const std::string& msg, const std::string& title /*= constants::APP_NAME_SHORT*/)
+   void App::displayInfoMessage(const std::string& msg, const std::string& title /*= constants::APP_NAME_SHORT*/) const
    {
       wxMessageBox(msg, title, wxICON_INFORMATION | wxOK, m_main_frame);
    }

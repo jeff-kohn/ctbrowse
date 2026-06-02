@@ -26,7 +26,7 @@ namespace ctb::detail
       ///
       /// these values align with wxWidgets' wxALIGN_xxxx values, but we don't want the dependency
       /// in the lib so just use the value directly.
-      enum Align : uint16_t
+      enum class Align : uint16_t
       {
          Left     = 0x0000,
          Right    = 0x0200,
@@ -34,7 +34,7 @@ namespace ctb::detail
       };
 
       /// @brief enum to specify the format the value will be displayed in
-      enum Format
+      enum class Format
       {
          Currency,
          Date,

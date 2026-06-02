@@ -11,8 +11,6 @@
 #include "CtCredentialManager.h"
 #include "wx_helpers.h"
 
-#include <magic_enum/magic_enum.hpp>
-
 #include <wx/button.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
@@ -23,8 +21,6 @@
 
 namespace ctb::app
 {
-   using namespace magic_enum;
-
    inline constexpr auto ENUM_DELIMETER = ';';
 
    namespace 
@@ -74,7 +70,7 @@ namespace ctb::app
 
          // default-selected tables are stored as a string of enum values (e.g int values not names)
          // delimited by ENUM_DELIMTER. The default value is the table enum value 0 (List)
-         m_table_selection_val = std::string_view{ cfg->Read(constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES, "0").wx_str() } // read the config value
+         m_table_selection_val = std::string_view{ cfg->Read(constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES, "0").wx_str() } 
             | vws::split(ENUM_DELIMETER)                                                                                 // split by token ';'
             | vws::transform([] (auto subrange) { return std::string_view(subrange.begin(), subrange.end()); })          // convert subranges to string_view's
             | vws::transform([] (std::string_view sv) { return from_str<int>(sv); })                                     // convert string view to from_chars() result
@@ -104,9 +100,9 @@ namespace ctb::app
       // values that don't map to an enum (should never happen, but best to be
       // prepared since alternative is UB)
       return all(m_table_selection_val)
-         | transform([] (int val) { return enum_cast<EnumT>(val); }) // convert to optional<EnumT>
-         | filter([](auto maybe_enum) { return maybe_enum.has_value(); })        // filter only valid values
-         | transform([](auto maybe_enum) { return maybe_enum.value(); })         // retrieve actual value from optionals
+         | transform([] (int val)         { return enum_cast<EnumT>(val);  })   // convert to optional<EnumT>
+         | filter([](auto maybe_enum)     { return maybe_enum.has_value(); })   // filter only valid values
+         | transform([](auto maybe_enum)  { return maybe_enum.value();     })   // retrieve actual value from optionals
          | rng::to<std::vector>();
    }
 
@@ -140,7 +136,7 @@ namespace ctb::app
 
    void TableSyncDialog::onDeselectAll([[maybe_unused]] wxCommandEvent& event)
    {
-      for (auto idx = 0u; idx < m_table_selection_ctrl->GetCount(); ++idx)
+      for (auto idx = 0U; idx < m_table_selection_ctrl->GetCount(); ++idx)
       {
          m_table_selection_ctrl->Check(idx, false);
       }
@@ -156,7 +152,7 @@ namespace ctb::app
 
    void TableSyncDialog::onSelectAll([[maybe_unused]] wxCommandEvent & event)
    {
-      for (auto idx = 0u; idx < m_table_selection_ctrl->GetCount(); ++idx)
+      for (auto idx = 0U; idx < m_table_selection_ctrl->GetCount(); ++idx)
       {
          m_table_selection_ctrl->Check(idx, true);
       }
@@ -185,15 +181,12 @@ namespace ctb::app
       auto* box_sizer3 = new wxBoxSizer(wxVERTICAL);
 
       auto* static_text2 = new wxStaticText(this, wxID_ANY, "&Tables to Download:");
-      box_sizer3->Add(static_text2,
-         wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
+      box_sizer3->Add(static_text2, wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
 
-      m_table_selection_ctrl = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, nullptr,
-         wxLB_EXTENDED);
+      m_table_selection_ctrl = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, nullptr, wxLB_EXTENDED);
       m_table_selection_ctrl->SetValidator(wxGenericValidator(&m_table_selection_val));
       m_table_selection_ctrl->SetMinSize(ConvertDialogToPixels(wxSize(constants::pix_112, constants::pix_112)));
-      box_sizer3->Add(m_table_selection_ctrl,
-         wxSizerFlags().Border(wxLEFT|wxTOP|wxBOTTOM, wxSizerFlags::GetDefaultBorder()));
+      box_sizer3->Add(m_table_selection_ctrl, wxSizerFlags().Border(wxLEFT|wxTOP|wxBOTTOM, wxSizerFlags::GetDefaultBorder()));
 
       m_startup_sync_ctrl = new wxCheckBox(this, wxID_ANY, "Sync on &Program Startup");
       m_startup_sync_ctrl->SetValidator(wxGenericValidator(&m_startup_sync_val));

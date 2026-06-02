@@ -43,9 +43,11 @@ jobs:
       run: |
         nuget sources add  -Source "${{ env.NUGET_FEED }}" -StorePasswordInClearText -Name GitHubPackages -UserName "${{ env.NUGET_SOURCE_USERNAME }}" -Password "${{ env.NUGET_SOURCE_PASSWORD }}"
         nuget setapikey "${{ secrets.GITHUB_TOKEN }}" -Source "${{ env.NUGET_FEED }}"
+        dir "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC"
 
     - name: configure
       run: |
+        cmake --version
         cmake --preset=$env:CONFIGURE_PRESET
 
     - name: build
@@ -57,7 +59,10 @@ jobs:
       if: always()
       with:
          name: msvc_vcpkg_logs
-         path: ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+         path: |
+            ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+            ${{ github.workspace }}/build/**/vcpkg-manifest-install.log
+            ${{ github.workspace }}/build/**/CMakeFiles\CMakeConfigureLog.yaml
          retention-days: 3    
 
     - name: Upload binary
@@ -67,13 +72,11 @@ jobs:
          path: ${{ github.workspace }}/build/${{ env.CONFIGURE_PRESET }}/app/Release/ctBrowse_app.exe
          retention-days: 30
 
-
   clang_build:
-    name: "Window Clang Build"
-    runs-on: windows-latest
+    name: "Run-Clang-Tidy"
+    runs-on: windows-2025-vs2026
     env:
-      CONFIGURE_PRESET: "win-clang-tidy"
-      BUILD_PRESET: "win-clang-tidy-release"
+      PRESET_NAME: "ci-static-analysis"
 
     steps:
     - uses: actions/checkout@v6
@@ -89,32 +92,38 @@ jobs:
         nuget sources add  -Source "${{ env.NUGET_FEED }}" -StorePasswordInClearText -Name GitHubPackages -UserName "${{ env.NUGET_SOURCE_USERNAME }}" -Password "${{ env.NUGET_SOURCE_PASSWORD }}"
         nuget setapikey "${{ secrets.GITHUB_TOKEN }}" -Source "${{ env.NUGET_FEED }}"
         
-    - name: "Setup CMake/ninja"
-      uses: lukka/get-cmake@latest
-
     - name: Install pre-reqs
       run: |
         winget install CppCheck --verbose --disable-interactivity --source winget --accept-source-agreements --accept-package-agreements
 
     - name: configure
       run: |
-        cmake --preset=$env:CONFIGURE_PRESET
+        clang --version
+        cmake --version
+        cmake --preset=$env:PRESET_NAME
 
-    - name: build
+    - name: build clang binary
       run: |
-        cmake --build --preset=$env:BUILD_PRESET
+        cmake --build --preset=$env:PRESET_NAME --target=ctBrowse_app
+        
+    - name: run static analysis
+      run: |
+        cmake --build --preset=$env:PRESET_NAME --target=code_analysis
 
     - name: Upload build logs
       uses: actions/upload-artifact@v7
       if: always()
       with:
          name: clang_vcpkg_logs
-         path: ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+         path: |
+            ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+            ${{ github.workspace }}/build/**/vcpkg-manifest-install.log
+            ${{ github.workspace }}/build/**/CMakeFiles\CMakeConfigureLog.yaml
          retention-days: 3    
 
     - name: Upload binary
       uses: actions/upload-artifact@v7
       with:
          name: clang_binary
-         path: ${{ github.workspace }}/build/${{ env.CONFIGURE_PRESET }}/app/Release/ctBrowse_app.exe
+         path: ${{ github.workspace }}/build/${{ env.PRESET_NAME }}/app/Release/ctBrowse_app.exe
          retention-days: 30

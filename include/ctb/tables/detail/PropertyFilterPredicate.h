@@ -14,24 +14,25 @@
 
 namespace ctb::detail
 {
+
+   enum class PredicateType
+   {
+      Equal,
+      Greater,
+      GreaterEqual,
+      Less,
+      LessEqual
+   };
+
    /// @brief wraps a binary predicate so that it can be serialized, since std::function<> can't be directly serialized
    //
    template<PropertyValueType PropertyValT>
    class PropertyFilterPredicate
    {
    public:
-      using PropertyVal = PropertyValT;
+      using PropertyVal     = PropertyValT;
       using CompareFunction = std::function<bool(const PropertyVal&, const PropertyVal&)>;
-
-      enum class PredicateType
-      {
-         Equal,
-         Greater,
-         GreaterEqual,
-         Less,
-         LessEqual
-      };
-
+      using PredicateType   = ctb::detail::PredicateType;
 
       explicit PropertyFilterPredicate(PredicateType predicate_type)
       {

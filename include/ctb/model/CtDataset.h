@@ -189,8 +189,8 @@ namespace ctb
          return it->second;
       }
 
-      /// @brief Gets the collection of active display columns 
-      auto listColumns() const -> CtListColumnSpan override
+      /// @brief Gets the collection of available display columns for this dataset
+      auto availableListColumns() const -> CtListColumnSpan override
       { 
          return Traits::DefaultListColumns; 
       }
@@ -260,7 +260,7 @@ namespace ctb
       auto filterBySubstring(std::string_view substr) -> bool override
       {
          // this overload searches all columns in the current list view, so get the prop_id's 
-         auto cols = listColumns() | vws::transform([](const CtListColumn& disp_col) -> auto { return disp_col.prop_id; })
+         auto cols = availableListColumns() | vws::transform([](const CtListColumn& disp_col) -> auto { return disp_col.prop_id; })
                                    | rng::to<std::vector>();
 
          return applySubStringFilter(SubStringFilter{ std::string{substr}, cols });
@@ -530,8 +530,6 @@ namespace ctb
                                           return row[prop_id]; 
                                        });
       }
-
-
 };
 
 } // namespace ctb

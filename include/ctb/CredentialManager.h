@@ -83,15 +83,14 @@ namespace ctb
       using CredPersistType = CredPersistT;
       using CredPromptType  = CredPromptT;
 
-      static inline constexpr int MAX_USERNAME_LENGTH = 513; /// max username length not including null terminator
-      static inline constexpr int MAX_PASSWORD_LENGTH = 256; /// max password length not including null terminator
+      static constexpr int MAX_USERNAME_LENGTH = 513; /// max username length not including null terminator
+      static constexpr int MAX_PASSWORD_LENGTH = 256; /// max password length not including null terminator
 
 
       CredentialManager(CredPromptType prompt) : m_prompt(std::move(prompt))
       {}
-         
+
       CredentialManager() = default;
-      ~CredentialManager() noexcept = default;
 
 
       /// @brief Checks whether a credential with the specified name is available be loaded

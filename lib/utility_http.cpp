@@ -46,8 +46,6 @@ namespace ctb
 
    auto validateResponse(const cpr::Response& response) noexcept -> std::expected<bool, ctb::Error>
    {
-      using namespace magic_enum;
-
       // unexpected return value, will be populated below if request failed.
       Error error{};
 
@@ -61,8 +59,9 @@ namespace ctb
             error.error_message = constants::ERROR_STR_AUTHENTICATION_FAILED;
             error.category = Error::Category::HttpStatus;
          }
-         else
+         else{
             return true; // we actually got a file, so return success
+         }
       }
       else if (response.error.code != cpr::ErrorCode::OK)
       {
@@ -70,7 +69,7 @@ namespace ctb
          error.error_message = ctb::format(constants::FMT_ERROR_CURL_ERROR, error.error_code);
 
          // use a separate category for cancellation, so the caller can distinguish and avoid showing unnecessary error messages
-         error.category = error.error_code == enum_index(cpr::ErrorCode::ABORTED_BY_CALLBACK) ? Error::Category::OperationCanceled
+         error.category = error.error_code == enum_to_index(cpr::ErrorCode::ABORTED_BY_CALLBACK) ? Error::Category::OperationCanceled
             : Error::Category::CurlError;
       }
       else {
@@ -109,9 +108,9 @@ namespace ctb
             return images->Children[0]->GetAttribute(constants::HTML_ATTR_SRC);
          }
       }
-      catch (std::exception& e)
+      catch ([[maybe_unused]] std::exception& e)
       {
-         log::warn("parseLabelUrlFromHtml returning empty string due to exception {}", e.what());
+         SPDLOG_DEBUG("parseLabelUrlFromHtml returning empty string due to exception {}", e.what());
       }
       return {};
    }

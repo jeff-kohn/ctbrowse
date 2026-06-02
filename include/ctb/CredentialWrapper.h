@@ -88,7 +88,7 @@ namespace ctb
 
 
    /// @brief standalone swap implementation for move semantics 
-   inline void swap(CredentialWrapper& left, CredentialWrapper& right)
+   inline void swap(CredentialWrapper& left, CredentialWrapper& right) noexcept
    {
       left.swap(right);
    }

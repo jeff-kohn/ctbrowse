@@ -18,7 +18,7 @@ namespace ctb
          CtProp score_text{};
       };
 
-      static const std::array ProSchemas =
+      const std::array ProSchemas =
       {
          ProSchema{.pro_id = "DR",  .pro_name = "Decanter",           .drink_begin = CtProp::DR_DrinkBegin,  .drink_end = CtProp::DR_DrinkEnd,  .score_numeric = CtProp::DR_ScoreNumeric,  .score_text = CtProp::DR_ScoreDisplay  },
          ProSchema{.pro_id = "JD",  .pro_name = "Jeb Dunnuck",        .drink_begin = CtProp::NoField,        .drink_end = CtProp::NoField,      .score_numeric = CtProp::JD_ScoreNumeric,  .score_text = CtProp::JD_ScoreDisplay  },

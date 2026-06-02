@@ -26,17 +26,14 @@ namespace ctb::app
       /// 
       [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> DetailsViewBase*
       {
-         return createDetailsViewFactory<DetailsViewConsumedWine>(parent, source);
+         return detail::createDatasetWindow<DetailsViewConsumedWine>(parent, source);
       }
 
    protected:
-      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call protected ctor
-      template<typename BaseT>
-      friend auto createDetailsViewFactory(wxWindow* parent, const DatasetEventSourcePtr& source) -> BaseT*;
-
       DetailsViewConsumedWine(DatasetEventSourcePtr source) : DetailsViewBase{ std::move(source) }
-      {
-      }
+      {}
+
+      DECLARE_DATASET_WINDOW_FACTORY;
 
       // derived classes must implement this to add their view-specific controls
       auto addDatasetSpecificControls(wxBoxSizer* top_sizer, const DatasetEventSourcePtr& source) -> void override

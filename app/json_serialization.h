@@ -6,7 +6,6 @@
 #include <ctb/utility_chrono.h>
 
 #include <glaze/glaze.hpp>
-
 #include <optional>
 
 
@@ -30,6 +29,40 @@ struct glz::meta<ctb::CtPropertyFilter>
                                         "compare_pred", &T::compare_pred );
 };
 
+
+///
+/// @brief json serialization support for enums as names instead of values.
+///
+
+template<>
+struct glz::meta<ctb::CtProp>
+{
+   constexpr static auto value = enchantum::values<ctb::CtProp>;
+   constexpr static auto keys  = enchantum::names <ctb::CtProp>;
+};
+
+template<>
+struct glz::meta<ctb::TableId>
+{
+   constexpr static auto value = enchantum::values<ctb::TableId>;
+   constexpr static auto keys  = enchantum::names <ctb::TableId>;
+};
+
+template<>
+struct glz::meta<ctb::detail::PropType>
+{
+   constexpr static auto value = enchantum::values<ctb::detail::PropType>;
+   constexpr static auto keys  = enchantum::names <ctb::detail::PropType>;
+};
+
+template<>
+struct glz::meta<ctb::detail::PredicateType>
+{
+   constexpr static auto value = enchantum::values<ctb::detail::PredicateType>;
+   constexpr static auto keys  = enchantum::names <ctb::detail::PredicateType>;
+};
+
+
 namespace ctb::detail
 {
    struct PropertyValJson
@@ -38,6 +71,7 @@ namespace ctb::detail
       std::optional<std::string> value{};
    };
 }
+
 namespace glz
 {
    /// @brief json serialization support for std::chrono::year_month_day
@@ -82,11 +116,14 @@ namespace glz
          parse<JSON>::template op<Opts>(json_val, ctx, args...);
          if (ctx.error != error_code::none)
          {
-            return value.setNull();
+            value.setNull();
+			   return;
          }
 
          if (not json_val.value.has_value())
-            json_val.prop_type = PropType::Null;
+         {
+			   json_val.prop_type = PropType::Null;
+		   }
 
          switch (json_val.prop_type)
          {
@@ -94,6 +131,7 @@ namespace glz
                value.setNull();
                break;
 
+            // NOLINTBEGIN bugprone-unchecked-optional-access
             case PropType::String:
                value = std::move(json_val.value.value());
                break;
@@ -117,6 +155,7 @@ namespace glz
             case PropType::Boolean:
                value = CtPropertyVal::parse<bool>(json_val.value.value());
 					break;
+            // NOLINTEND bugprone-unchecked-optional-access
 
             default:
                assert(false);

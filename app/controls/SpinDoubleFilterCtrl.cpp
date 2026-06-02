@@ -15,22 +15,9 @@
 
 namespace ctb::app
 {
-   auto SpinDoubleFilterCtrl::create(wxWindow* parent, const DatasetEventSourcePtr& source,  const PropertyFilter& filter, const SpinParams& params) -> SpinDoubleFilterCtrl*
+   [[nodiscard]] auto SpinDoubleFilterCtrl::create(wxWindow* parent, const DatasetEventSourcePtr& source,  const PropertyFilter& filter, const SpinParams& params) -> SpinDoubleFilterCtrl*
    {
-      if (!parent)
-      {
-         assert("parent parameter cannot == nullptr");
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
-      }
-      if (!source)
-      {
-         assert("source parameter cannot == nullptr");
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
-      }
-
-      std::unique_ptr<SpinDoubleFilterCtrl> wnd{ new SpinDoubleFilterCtrl{ source, filter, params } };
-      wnd->createWindow(parent);
-      return wnd.release(); // if we get here parent owns it, so return non-owning*
+      return detail::createDatasetWindow<SpinDoubleFilterCtrl>(parent, source, filter, params);
    }
 
 

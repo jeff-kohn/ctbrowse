@@ -7,12 +7,11 @@
  *********************************************************************/
 #include "App.h"
 #include "MainFrame.h"
-#include "LabelImageCache.h"
 #include "CtCredentialManager.h"
 #include "wx_helpers.h"
 #include "dialogs/TableSyncDialog.h"
+#include "model/CtDatasetOptions.h"
 #include "views/DatasetMultiView.h"
-#include "views/DatasetOptionsView.h"
 
 #include <ctb/utility.h>
 #include <ctb/utility_chrono.h>
@@ -47,12 +46,8 @@
 
 namespace ctb::app
 {
-
-   using namespace magic_enum;
-
    namespace
    {
-
       auto eventIdToTableId(int event_id) -> TableId
       {
          switch (event_id)
@@ -736,7 +731,7 @@ namespace ctb::app
       bool enable = false;
       if (auto dataset = getDataset(false); dataset != nullptr)
       {
-         if (dataset->multivalFilters().size() > 0 or dataset->propFilters().size() > 0)
+         if (!dataset->multivalFilters().empty() or !dataset->propFilters().empty())
          {
             enable = true;
          }

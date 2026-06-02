@@ -34,7 +34,7 @@ namespace ctb
       using MultiValueFilter     = detail::MultiValueFilter<Prop, PropertyMap>;
       using TableSort            = detail::TableSorter<CtProp, CtPropertyMap>;
 
-      static inline constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
+      static constexpr auto Schema = frozen::make_map<Prop, FieldSchema>(
       {
          { Prop::WineAndVintage,       FieldSchema { Prop::WineAndVintage,       PropType::String,   {} }},
          { Prop::iWineId,              FieldSchema { Prop::iWineId,              PropType::UInt64,    0 }},
@@ -53,7 +53,8 @@ namespace ctb
          { Prop::MyScore,              FieldSchema { Prop::MyScore,              PropType::Double,  171 }},
          { Prop::QtyOnHand,            FieldSchema { Prop::QtyOnHand,            PropType::UInt16,   16 }},
          { Prop::QtyPending,           FieldSchema { Prop::QtyPending,           PropType::UInt16,   15 }},
-         { Prop::QtyTotal,             FieldSchema { Prop::QtyTotal,             PropType::String,   {} }},
+         { Prop::QtyTotalNum,          FieldSchema { Prop::QtyTotalNum,          PropType::UInt16,   {} }},
+         { Prop::QtyTotalDisplay,      FieldSchema { Prop::QtyTotalDisplay,      PropType::String,   {} }},
          { Prop::QtyConsumed,          FieldSchema { Prop::QtyConsumed,          PropType::UInt16,   19 }},
          { Prop::QtyPurchased,         FieldSchema { Prop::QtyPurchased,         PropType::UInt16,   13 }},
          { Prop::BeginConsume,         FieldSchema { Prop::BeginConsume,         PropType::UInt16,   35 }},
@@ -75,7 +76,7 @@ namespace ctb
 
       });
 
-      static inline constexpr int TWO_DECIMAL_PLACES{ 2 };
+      static constexpr int TWO_DECIMAL_PLACES{ 2 };
 
       /// @brief list of display columns that will show in the list view
       static inline const std::array DefaultListColumns 
@@ -148,7 +149,7 @@ namespace ctb
       {
          using enum Prop;
 
-         auto qty_logical  = rec[RtdInventoryLogical].asUInt16().value_or(0);
+         auto qty_logical  = rec[RtdInventoryLogical].asUInt16().value_or(0U);
          auto qty_physical = rec[RtdInventoryPhysical].asUInt16().value_or(qty_logical); // so we default to 750ml
 
          if (qty_logical > qty_physical)
@@ -163,6 +164,7 @@ namespace ctb
             // yes I realize I'm skipping some bottle sizes, don't really care.
             rec[Size] = constants::LBL_SIZE_750ml;
          }
+		   rec[QtyTotalNum] = static_cast<uint16_t>(rec[QtyOnHand].asUInt16().value_or(0U) + rec[QtyPending].asUInt16().value_or(0U) );
 
          validateYear(rec[BeginConsume]);
          validateYear(rec[EndConsume]);
@@ -171,7 +173,7 @@ namespace ctb
          validateYear(rec[Vintage]);
 
          rec[WineAndVintage]      = getWineAndVintage(rec);
-         rec[QtyTotal]            = calcQtyTotal(rec);
+         rec[QtyTotalDisplay]     = calcQtyTotalDisplay(rec);
          rec[RtdInventorySummary] = getRtdInventory(rec);
       }
    };

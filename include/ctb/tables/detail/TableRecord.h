@@ -1,4 +1,3 @@
-
 /*******************************************************************
 * @file  TableRecord.h
 *
@@ -14,8 +13,6 @@
 #include "ctb/tables/detail/FieldSchema.h"
 
 #include <external/csv.hpp>
-#include <magic_enum/magic_enum.hpp>
-
 #include <cassert>
 
 
@@ -57,13 +54,13 @@ namespace ctb::detail
       TableRecord(const TableRecord&) = default;
       TableRecord(TableRecord&&) = default;
       TableRecord& operator=(TableRecord&&) = default;
+      TableRecord& operator=(const TableRecord&) = delete;
+      ~TableRecord() = default;
 
       /// @brief parse a CSVRow into TableProperties for each property in m_props
       ///
       void parseRow(const RowType& row)
       {
-         using namespace magic_enum;
-
          // parse all the CSV properties
          auto csv_cols = vws::values(Traits::Schema)
                        | vws::filter([](auto& field) { return field.csv_col.has_value(); });
@@ -72,13 +69,14 @@ namespace ctb::detail
          {
             try
             {
-               auto csv_field = row[fld_schema.csv_col.value()];
+               auto csv_field = row[fld_schema.csv_col.value()]; // NOLINT [bugprone-unchecked-optional-access] we checked above with filter.
+
                m_props[fld_schema.prop_id] = fieldToProperty(csv_field, fld_schema.prop_type);
             }
             catch (...)
             {
                m_props[fld_schema.prop_id].setNull();
-               SPDLOG_DEBUG("TableRecord::Parse() encountered error parsing field {}. {}", enum_name(fld_schema.prop_id), packageError().formattedMesage());
+               SPDLOG_DEBUG("TableRecord::Parse() encountered error parsing field {}. {}", enum_to_string(fld_schema.prop_id), packageError().formattedMesage());
             }
          }
 
@@ -128,7 +126,6 @@ namespace ctb::detail
          return m_props;
       }
 
-      TableRecord& operator=(const TableRecord&) = delete;
 
    private:
       PropertyMap m_props{ Traits::Schema.size()};

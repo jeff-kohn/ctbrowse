@@ -43,11 +43,11 @@ namespace ctb
                                                    username.data(), static_cast<ULONG>(username.size()),
                                                    password.data(), static_cast<ULONG>(password.size()),
                                                    &save, flags);
-
-         if (NO_ERROR == result)
-            return CredentialWrapper{ cred_name, username.data(), password.data() };
-         else
+         if (NO_ERROR != result)
+         {
             throw ctb::Error{ static_cast<int64_t>(result), "Login Failed." };
+         }
+         return CredentialWrapper{ cred_name, username.data(), password.data() };
       }
       catch (...) {
          auto e = packageError();

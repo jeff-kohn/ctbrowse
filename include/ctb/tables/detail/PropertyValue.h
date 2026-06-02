@@ -289,13 +289,18 @@ namespace ctb::detail
       }
       auto operator==(const PropertyValue& prop) const -> bool = default;
             
+
+      // NOLINTBEGIN cppcoreguidelines-c-copy-assignment-signature
+
       /// @brief allow assigning values, not just TableProperties
       template<typename Self, std::convertible_to<ValueType> T>
-      auto&& operator=(this Self&& self, T&& t) 
+      auto&& operator=(this Self&& self, T&& t)  
+
       {
          self.m_val = std::forward<T>(t);         
          return std::forward<Self>(self);
       }
+      // NOLINTEND cppcoreguidelines-c-copy-assignment-signature
 
       constexpr PropertyValue() noexcept = default;
       ~PropertyValue() noexcept = default;

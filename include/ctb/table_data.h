@@ -17,7 +17,6 @@
 #pragma warning(pop)
 
 #include <frozen/map.h>
-#include <magic_enum/magic_enum.hpp>
 #include <algorithm>
 #include <expected>
 #include <filesystem>
@@ -67,12 +66,12 @@ namespace ctb
 
 
    /// @brief type alias for a static map of TableId's to display name
-   using TableDescriptionMap = frozen::map<TableId, std::string_view, magic_enum::enum_count<TableId>()>;
+   using TableDescriptionMap = frozen::map<TableId, std::string_view, enum_count<TableId>() >;
 
    /// @brief maps TableId to descriptive name.
    inline constexpr TableDescriptionMap TableDescriptions
    {
-      { TableId::List,           constants::TABLE_NAME_LIST          },
+      { TableId::List,           constants::TABLE_NAME_LIST          }, 
       { TableId::Inventory,      constants::TABLE_NAME_INVENTORY     },
       { TableId::Notes,          constants::TABLE_NAME_NOTES         },
       { TableId::PrivateNotes,   constants::TABLE_NAME_PRIVATENOTES  },
@@ -92,7 +91,7 @@ namespace ctb
    ///
    inline auto getTableDescription(TableId tbl) -> std::string_view
    {
-      auto it = TableDescriptions.find(tbl);
+      const auto *it = TableDescriptions.find(tbl);
       if (it != TableDescriptions.end())
          return it->second;
       else
@@ -104,8 +103,7 @@ namespace ctb
    ///
    inline auto getTableFileName(TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT) -> std::string
    {
-      using magic_enum::enum_name;
-      return ctb::format("{}.{}", enum_name(tbl), enum_name(fmt));
+      return ctb::format("{}.{}", tbl, fmt);
    }
 
 

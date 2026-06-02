@@ -85,7 +85,7 @@ namespace ctb
       /// 
       /// @return true if every observer was notified without error, false if at least one
       ///  observer threw an error.
-      auto signal(DatasetEvent::Id event_id) noexcept -> bool override;
+      auto signal(DatasetEvent::Id event) noexcept -> bool override;
 
       /// @brief this is called to signal that an event needs to be sent to all observers EXCEPT 
       ///  for event_source. 
@@ -109,14 +109,9 @@ namespace ctb
       /// 
       /// @return true if every observer was notified without error, false if at least one
       ///  observer threw an error.
-      auto signal(DatasetEvent::Id event, NullableInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool override;
+      auto signal(DatasetEvent::Id event_id, NullableInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool override;
 
-   private:
-      DatasetPtr m_data{};
-      std::unordered_set<IDatasetEventSink*> m_observers{};
-   
-      /// @brief default ctor is private, use static create()
-      DatasetEventSource() = default;
+      ~DatasetEventSource() override = default;
 
       // no copy/move/assign, this class is created on the heap and passed around in shared_ptr
       DatasetEventSource(const DatasetEventSource&) = delete;
@@ -124,6 +119,12 @@ namespace ctb
       DatasetEventSource& operator=(const DatasetEventSource&) = delete;
       DatasetEventSource& operator=(DatasetEventSource&&) = delete;   
 
+   private:
+      DatasetPtr m_data{};
+      std::unordered_set<IDatasetEventSink*> m_observers{};
+   
+      /// @brief default ctor is private, use static create()
+      DatasetEventSource() = default;
    };
 
 

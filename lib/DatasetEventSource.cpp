@@ -22,7 +22,7 @@ namespace ctb
 
    auto DatasetEventSource::hasDataset() const  noexcept-> bool
    { 
-      return m_data ? true : false; 
+      return m_data != nullptr; 
    }
 
 
@@ -64,7 +64,7 @@ namespace ctb
 
    auto DatasetEventSource::signal(DatasetEvent::Id event_id, NullableInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool
    {
-      [[maybe_unused]] auto event_name = magic_enum::enum_name(event_id);
+      [[maybe_unused]] auto event_name = enum_to_string(event_id);
       SPDLOG_DEBUG("DatasetEventSource::signal({},{}) called", event_name, rec_idx.value_or(-1));
 
       bool retval{ true };

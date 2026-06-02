@@ -49,9 +49,7 @@ namespace ctb::app
       NodeFilterMap         m_node_filters{}; 
       wxWithImages::Images  m_images{};
 
-      // this class can only be constructed through static create(), which uses createDetailsViewFactory to call protected ctor
-      template<typename WndT, typename... Args>
-      friend auto detail::createDatasetWindow(wxWindow* parent, const DatasetEventSourcePtr& source, Args&&... args)->WndT*;
+      DECLARE_DATASET_WINDOW_FACTORY;
 
       MultiValueFilterTreeCtrl(const DatasetEventSourcePtr& source) : Base{ source }
       {}

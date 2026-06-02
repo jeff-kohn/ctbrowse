@@ -34,7 +34,7 @@ namespace ctb::detail
 
       /// @brief Adds a filter to the collection if it does not already exist.
       /// @return true if the filter was successfully added; false if a filter with the same filter_name already exists.
-	  auto addFilter(const Key& key, Filter filter) -> bool
+	   auto addFilter(const Key& key, Filter filter) -> bool
       {
          if (m_filters.try_emplace(std::move(key), std::move(filter)).second)
          {
@@ -45,7 +45,7 @@ namespace ctb::detail
       }
 
       /// @brief Replace an existing filter, or add it if it does not already exist.
-	  void replaceFilter(const Key& key, Filter filter)
+	   void replaceFilter(const Key& key, Filter filter)
       {
          m_filters[key] = std::move(filter);
          notifyChange();
@@ -154,14 +154,7 @@ namespace ctb::detail
       /// @brief returns true if the record is a match 
       auto operator()(const PropertyMap& rec) const -> bool
       {
-         // note we're looking for a miss, not a match, because we can return 
-         // false on first miss but have to match all filters before we can return true
-         for (const auto& filter : vws::values(m_filters))
-         {
-            if (false == filter(rec))
-               return false;
-         }
-         return true;
+		   return rng::all_of(vws::values(m_filters), [&rec](const auto& filter) { return filter(rec); });
       }
 
       /// @brief Subscribe to callback to be notified when a filter is added/changed/removed/etc
@@ -179,7 +172,7 @@ namespace ctb::detail
 
       /// @brief Construct a FilterManager and use the provided callback for change notifications
       /// @throw ctb::Error if dataset == nullptr
-      FilterManager(ChangeCallback callback) noexcept(false) : m_callback(callback)
+      FilterManager(ChangeCallback callback) noexcept(false) : m_callback{ std::move(callback) }
       {}
 
       FilterManager() noexcept                        = default;

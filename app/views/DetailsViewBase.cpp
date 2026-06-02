@@ -6,12 +6,12 @@
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 #include "DetailsViewBase.h"
-#include "controls/WineDetailMainPanel.h"
-#include "controls/WineDetailPendingPanel.h"
-#include "controls/WineDetailScorePanel.h"
-#include "controls/WineDetailTagsPanel.h"
-#include "controls/WineDetailTastingPanel.h"
-#include "controls/WineDetailValuePanel.h"
+#include "panels/WineDetailMainPanel.h"
+#include "panels/WineDetailPendingPanel.h"
+#include "panels/WineDetailScorePanel.h"
+#include "panels/WineDetailTagsPanel.h"
+#include "panels/WineDetailTastingPanel.h"
+#include "panels/WineDetailValuePanel.h"
 
 #include <ctb/utility_chrono.h>
 #include <ctb/utility_http.h>
