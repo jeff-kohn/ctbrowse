@@ -23,7 +23,7 @@ namespace ctb::app
       {}
 
       // base class overrides
-      void getDetailRows(DetailRows& rows, const DatasetEventSourcePtr& source) override
+      void addDetails(DetailRows& rows, const DatasetEventSourcePtr& source) override
       {
          auto* top_sizer = GetSizer(); assert(top_sizer);
 

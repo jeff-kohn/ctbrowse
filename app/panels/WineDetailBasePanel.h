@@ -13,7 +13,7 @@ namespace ctb::app
    ///         showing an optional title along with a 2-column table of property labels and values.
    ///
    /// To make use of this class, all the derived class has to do is inherit from WineDetailBasePanel
-   /// pass the title (if any) to ctor land implement getDetailRows() to add the property fields.
+   /// pass the title (if any) to ctor and implement addDetails() to add the property fields.
    ///
    class WineDetailBasePanel : public DatasetWindow<wxPanel>
    {
@@ -24,26 +24,23 @@ namespace ctb::app
       using Base       = DatasetWindow<wxPanel>;
       using DetailRows = std::deque<WineDetailPanelRow>;
 
-      /// @brief derived classes must implement this to add the rows the panel will display to the DetailRows container.
-      virtual void getDetailRows(DetailRows& rows, const DatasetEventSourcePtr& event_source) = 0;
-
-      /// @brief derived classes can override this to bind message handlers or carry out any other setup that requires
-      ///        a valid window object.
+      /// @brief derived classes must implement this to add the detail rows the panel will display.
       ///
-      /// This is called after createWindow() has done initial setup including calling getDetailRows().
-      virtual void postWindowCreate()
-      {}
+      /// This is called just after window creation. Other controls besides DetailRows can also be added,
+      /// but won't have their visibility managed automatically. Message bindings can also be set up if needed.
+      virtual void addDetails(DetailRows& rows, const DatasetEventSourcePtr& event_source) = 0;
 
       /// @brief protected ctor
-      ///
-      /// empty title will not be displayed.
-      WineDetailBasePanel(const DatasetEventSourcePtr& event_source, std::string_view title = "") : Base{ event_source }, m_title{ wxFromSV(title) }
+      /// @param source - event source that controls should be bound to
+      /// @param title - The title to use for the panel heading. If blank no heading will be shown.
+      WineDetailBasePanel(const DatasetEventSourcePtr& source, std::string_view title = "") : Base{ source }, m_title{ wxFromSV(title) }
       {}
 
       /// @brief virtual event handler function for derived classes to handle dataset events.
       ///
-      /// derived classes need not call base-class version, as the base class does its necessary event handling in a private
-      /// implementation before calling this.
+      /// derived classes need not call the base-class version, since base class uses private handler 
+      /// before calling this. Overriding this will often be unnecessary for panels that use bound
+      /// controls which have their own event handlers.
       virtual void onDatasetEvent(const DatasetEvent& event)
       {}
 
@@ -53,18 +50,17 @@ namespace ctb::app
 
       DECLARE_DATASET_WINDOW_FACTORY;
 
-      /// @brief this method creates the panel window and adds the detail row controls. It also gives derived classes
-      ///        a chance to add their controls by calling postWindowCreate().
+      /// @brief this method creates the panel window and adds the detail rows. It also gives derived classes
+      ///        a chance to add their controls.
       /// @param parent 
       void createWindow(wxWindow* parent) override;
 
-      /// this is the registered event handler. It calls onDatasetEvent() so that derived classes can also get notifed.
+      /// this is the registered event handler. It calls the protected onDatasetEvent() so that derived classes can also get notified.
       void onDatasetEventPrivate(const DatasetEvent& event);
 
-      /// @brief this gets called for dataset events and will update the visiblity of detail rows depending on whether they contain
+      /// @brief this gets called for dataset events and will update the visibility of detail rows depending on whether they contain
       ///        data for the current record or not. (null properties are not displayed unless they have a null display value).
       void updateVisibility();
-
    };
 
 }   // namespace ctb::app

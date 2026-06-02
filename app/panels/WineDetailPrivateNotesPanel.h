@@ -1,6 +1,8 @@
 #pragma once
 
 #include "App.h"
+
+#include "controls/ElasticMultiLineTextCtrl.h"
 #include "panels/WineDetailBasePanel.h"
 
 
@@ -22,9 +24,14 @@ namespace ctb::app
       WineDetailPrivateNotesPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source }
       {}
 
-      void getDetailRows(DetailRows& rows, const DatasetEventSourcePtr& event_source) override  // we don't add any detail rows in this panel.
-      {} 
-      void postWindowCreate() override;
+      void addDetails(DetailRows& rows, const DatasetEventSourcePtr& source) override  // we don't add any detail rows in this panel.
+      {
+         auto* top_sizer = GetSizer();
+         assert(top_sizer);
+
+         auto* note_ctrl = ElasticMultiLineTextCtrl::create(this, source, CtProp::PrivateNote);
+         top_sizer->Add(note_ctrl, wxSizerFlags{ 2 }.Expand().TripleBorder());
+      } 
    };
 
 }

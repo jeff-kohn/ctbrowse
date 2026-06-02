@@ -25,7 +25,7 @@ namespace ctb::app
       WineDetailTagsPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source }
       {}
 
-      void getDetailRows(DetailRows& rows, const DatasetEventSourcePtr& source) override
+      void addDetails(DetailRows& rows, const DatasetEventSourcePtr& source) override
       {
          auto* top_sizer = GetSizer(); assert(top_sizer);
 
@@ -34,17 +34,10 @@ namespace ctb::app
          auto* ctrl = PropertyValueCtrl::create(this, source, CtProp::TagName);
          ctrl->setFormat(constants::FMT_NUMBER_CURRENCY);
          rows.emplace_back(top_sizer, ctrl, constants::LBL_MAX_PRICE);
-      }
-
-      void postWindowCreate() override
-      {
-         auto* top_sizer = GetSizer(); assert(top_sizer);
 
          m_tag_note_ctrl = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
          m_tag_note_ctrl->SetValidator(wxGenericValidator{ &m_tag_note });
-
          top_sizer->Add(m_tag_note_ctrl, wxSizerFlags{ 1 }.Border().Expand());
       }
-
    };
 }

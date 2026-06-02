@@ -58,8 +58,7 @@ namespace ctb::app
          top_sizer->Add(heading_lbl, wxSizerFlags{ 1 }.Expand().Border(wxBOTTOM | wxTOP));
       }
 
-      getDetailRows(m_rows, getEventHandler().getSource());
-      postWindowCreate();
+      addDetails(m_rows, getEventHandler().getSource());
       Layout();
       Fit();
 

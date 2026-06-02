@@ -22,7 +22,7 @@ namespace ctb::app
       WineDetailPendingPanel(const DatasetEventSourcePtr& source) : WineDetailBasePanel{ source, constants::LBL_ORDER_DETAILS }
       {}
 
-      void getDetailRows(DetailRows& rows, const DatasetEventSourcePtr& source) override
+      void addDetails(DetailRows& rows, const DatasetEventSourcePtr& source) override
       {
          auto* top_sizer = GetSizer();         assert(top_sizer);
          auto dataset = source->getDataset();  assert(dataset);

@@ -1,9 +1,9 @@
 #include "WineDetailTastingPanel.h"
 #include "controls/ElasticMultiLineTextCtrl.h"
 
+#include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
-#include <wx/sizer.h>
 #include <wx/wupdlock.h>
 
 namespace ctb::app
@@ -18,7 +18,7 @@ namespace ctb::app
       auto maybe_liked = dataset->getProperty(rec_idx, CtProp::TastingLiked).asBool();
       if (maybe_liked.has_value())
       {
-         return ctb::format(constants::FMT_TASTING_LIKE_MSG, *maybe_liked ? constants::STR_LIKE : constants::STR_DONT_LIKE );
+         return ctb::format(constants::FMT_TASTING_LIKE_MSG, *maybe_liked ? constants::STR_LIKE : constants::STR_DONT_LIKE);
       }
       return constants::LBL_TASTING_NOTE;
    }
@@ -52,29 +52,28 @@ namespace ctb::app
    //}
 
 
-   void WineDetailTastingPanel::postWindowCreate()
+   void WineDetailTastingPanel::addDetails(DetailRows& rows, const DatasetEventSourcePtr& source)
    {
-      auto* top_sizer = GetSizer(); assert(top_sizer);
-      auto event_handler = getEventHandler();
-      auto dataset = event_handler.getDataset();
+      auto* top_sizer = GetSizer();          assert(top_sizer);
+      auto dataset = source->getDataset();   assert(dataset);
 
       // note title
-      auto* title_ctrl = new wxStaticText(this, wxID_ANY,  constants::LBL_TASTING_NOTE, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+      auto* title_ctrl = new wxStaticText(this, wxID_ANY, constants::LBL_TASTING_NOTE, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
       title_ctrl->SetValidator(wxGenericValidator{ &m_title });
       auto title_font = GetFont().MakeBold();
       title_ctrl->SetFont(title_font);
       title_ctrl->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT));
-      top_sizer->Add(title_ctrl, wxSizerFlags{}.Expand().Border(wxTOP|wxLEFT|wxRIGHT));
+      top_sizer->Add(title_ctrl, wxSizerFlags{}.Expand().Border(wxTOP | wxLEFT | wxRIGHT));
 
       // feedback summary
-      auto* feedback_summary_ctrl = new wxStaticText(this, wxID_ANY,  "", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+      auto* feedback_summary_ctrl = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
       feedback_summary_ctrl->SetValidator(wxGenericValidator{ &m_feedback_summary });
       feedback_summary_ctrl->SetFont(feedback_summary_ctrl->GetFont().MakeItalic());
-      top_sizer->Add(feedback_summary_ctrl, wxSizerFlags{}.Center().Border(wxLEFT|wxRIGHT));
+      top_sizer->Add(feedback_summary_ctrl, wxSizerFlags{}.Center().Border(wxLEFT | wxRIGHT));
 
       // tasting note
-      auto* note_ctrl = ElasticMultiLineTextCtrl::create(this, event_handler.getSource(), CtProp::TastingNotes);
-      top_sizer->Add(note_ctrl, wxSizerFlags{2}.Expand().TripleBorder());
+      auto* note_ctrl = ElasticMultiLineTextCtrl::create(this, source, CtProp::TastingNotes);
+      top_sizer->Add(note_ctrl, wxSizerFlags{ 2 }.Expand().TripleBorder());
    }
 
 
@@ -90,11 +89,12 @@ namespace ctb::app
          GetSizer()->ShowItems(true);
          Show(true);
       }
-      else {
+      else
+      {
          GetSizer()->ShowItems(false);
          Show(false);
       }
       TransferDataToWindow();
    }
 
-} // namespace ctb::app
+}   // namespace ctb::app
