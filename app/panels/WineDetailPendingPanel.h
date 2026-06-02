@@ -24,23 +24,28 @@ namespace ctb::app
 
       void addDetails(DetailRows& rows, const DatasetEventSourcePtr& source) override
       {
+         // clang-format off
          auto* top_sizer = GetSizer();         assert(top_sizer);
          auto dataset = source->getDataset();  assert(dataset);
 
-         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::PendingStoreName), constants::LBL_STORE_NAME);
-         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::PendingOrderQty), constants::LBL_QTY_ORDERED);
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::PendingStoreName ), constants::LBL_STORE_NAME);
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::PendingOrderQty  ), constants::LBL_QTY_ORDERED);
 
-         auto* ctrl = PropertyValueCtrl::create(this, source, CtProp::MyPrice);
-         ctrl->setFormat(constants::FMT_NUMBER_CURRENCY);
-         rows.emplace_back(top_sizer, ctrl, constants::LBL_MY_PRICE);
-
-         ctrl = PropertyValueCtrl::create(this, source, CtProp::PendingOrderDate);
-         ctrl->setFormat(constants::FMT_DATE_SHORT);
-         rows.emplace_back(top_sizer, ctrl, constants::LBL_ORDER_DATE);
-
-         ctrl = PropertyValueCtrl::create(this, source, CtProp::PendingDeliveryDate);
-         ctrl->setFormat(constants::FMT_DATE_SHORT);
-         rows.emplace_back(top_sizer, ctrl, constants::LBL_DELIVERY_DATE);
+         rows.emplace_back(
+            top_sizer,
+            PropertyValueCtrl::create(this, source, CtProp::MyPrice, constants::FMT_NUMBER_CURRENCY, {}),
+            constants::LBL_MY_PRICE
+         );
+         rows.emplace_back(
+            top_sizer,
+            PropertyValueCtrl::create(this, source, CtProp::PendingOrderDate, constants::FMT_NUMBER_CURRENCY, {}),
+            constants::LBL_ORDER_DATE
+         );
+         rows.emplace_back(
+            top_sizer,
+            PropertyValueCtrl::create(this, source, CtProp::PendingDeliveryDate, constants::FMT_NUMBER_CURRENCY, {}),
+            constants::LBL_DELIVERY_DATE
+         );
 
          rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::PendingOrderNumber), constants::LBL_ORDER_NUMBER);
       }

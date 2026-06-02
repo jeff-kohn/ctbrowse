@@ -27,15 +27,17 @@ namespace ctb::app
       {
          auto* top_sizer = GetSizer(); assert(top_sizer);
 
-         auto* ctrl = PropertyValueCtrl::create(this, source, CtProp::MyScore);
-         ctrl->setFormat(constants::FMT_NUMBER_DECIMAL);
-         ctrl->setNullDisplayValue(constants::NO_SCORE);
-         rows.emplace_back(top_sizer, ctrl, constants::LBL_MY_SCORE);
+         rows.emplace_back(
+            top_sizer,
+            PropertyValueCtrl::create(this, source, CtProp::MyScore, constants::FMT_NUMBER_DECIMAL, constants::NO_SCORE),
+            constants::LBL_MY_SCORE
+         );
 
-         ctrl = PropertyValueCtrl::create(this, source, CtProp::CtScore);
-         ctrl->setFormat(constants::FMT_NUMBER_DECIMAL);
-         ctrl->setNullDisplayValue(constants::NO_SCORE);
-         rows.emplace_back(top_sizer, ctrl, constants::LBL_CT_SCORE);
+         rows.emplace_back(
+            top_sizer,
+            PropertyValueCtrl::create(this, source, CtProp::CtScore, constants::FMT_NUMBER_DECIMAL, constants::NO_SCORE),
+            constants::LBL_CT_SCORE
+         );
 
          rows.emplace_back(top_sizer, ProReviewsCacheCtrl::create(this, source, &ProReviewsCache::getScoreSummary), constants::LBL_PRO_SCORES);
       }

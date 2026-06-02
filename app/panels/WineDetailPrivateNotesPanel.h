@@ -29,8 +29,7 @@ namespace ctb::app
          auto* top_sizer = GetSizer();
          assert(top_sizer);
 
-         auto* note_ctrl = ElasticMultiLineTextCtrl::create(this, source, CtProp::PrivateNote);
-         top_sizer->Add(note_ctrl, wxSizerFlags{ 2 }.Expand().TripleBorder());
+         top_sizer->Add(ElasticMultiLineTextCtrl::create(this, source, CtProp::PrivateNote), wxSizerFlags{ 2 }.Expand().TripleBorder());
       } 
    };
 

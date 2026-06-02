@@ -25,23 +25,21 @@ namespace ctb::app
       // base class overrides
       void addDetails(DetailRows& rows, const DatasetEventSourcePtr& source) override
       {
-         auto* top_sizer = GetSizer();          assert(top_sizer);
-         auto dataset = source->getDataset();   assert(dataset);
+         // clang-format off
+         auto* top_sizer = GetSizer();             assert(top_sizer);
+         auto dataset    = source->getDataset();   assert(dataset);
 
          // ordering matters here because it's the same as they'll be displayed
-         auto* ctrl = PropertyValueCtrl::create(this, source, CtProp::MyPrice);
-         ctrl->setFormat(constants::FMT_NUMBER_CURRENCY);
-         rows.emplace_back(top_sizer, ctrl, constants::LBL_STORE_NAME);
-
-         ctrl = PropertyValueCtrl::create(this, source, CtProp::CtPrice);
-         ctrl->setFormat(constants::FMT_NUMBER_CURRENCY);
-         rows.emplace_back(top_sizer, ctrl, constants::LBL_CT_PRICE);
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::MyPrice, constants::FMT_NUMBER_CURRENCY, {}), constants::LBL_STORE_NAME);
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::CtPrice, constants::FMT_NUMBER_CURRENCY, {}), constants::LBL_CT_PRICE);
 
          if (dataset->hasProperty(CtProp::AuctionPrice))
          {
-            ctrl = PropertyValueCtrl::create(this, source, CtProp::AuctionPrice);
-            ctrl->setFormat(constants::FMT_NUMBER_CURRENCY);
-            rows.emplace_back(top_sizer, ctrl, constants::LBL_AUCTION_PRICE);
+            rows.emplace_back(
+               top_sizer,
+               PropertyValueCtrl::create(this, source, CtProp::AuctionPrice, constants::FMT_NUMBER_CURRENCY, {}),
+               constants::LBL_AUCTION_PRICE
+            );
          }
       }
    };

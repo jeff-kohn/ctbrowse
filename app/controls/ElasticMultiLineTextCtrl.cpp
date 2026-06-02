@@ -59,9 +59,7 @@ namespace ctb::app
       if (!event.affected_row.has_value()) return;
 
       auto val = event.dataset->getProperty(event.affected_row.value(), m_prop);
-      assert(val.hasString());
-
-      m_display_value = wxFromSV(val.asStringView());
+      m_display_value = val.hasString() ? wxFromSV(val.asStringView()) : val.asString();
       TransferDataToWindow();
 
       InvalidateBestSize();

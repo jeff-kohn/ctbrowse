@@ -30,14 +30,12 @@ namespace ctb::app
          auto* top_sizer = GetSizer(); assert(top_sizer);
 
          rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::TagName), constants::LBL_TAG_NAME);
-
-         auto* ctrl = PropertyValueCtrl::create(this, source, CtProp::TagName);
-         ctrl->setFormat(constants::FMT_NUMBER_CURRENCY);
-         rows.emplace_back(top_sizer, ctrl, constants::LBL_MAX_PRICE);
-
-         m_tag_note_ctrl = new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-         m_tag_note_ctrl->SetValidator(wxGenericValidator{ &m_tag_note });
-         top_sizer->Add(m_tag_note_ctrl, wxSizerFlags{ 1 }.Border().Expand());
+         rows.emplace_back(
+            top_sizer,
+            PropertyValueCtrl::create(this, source, CtProp::TagMaxPrice, constants::FMT_NUMBER_CURRENCY, {}),
+            constants::LBL_MAX_PRICE
+         );
+         top_sizer->Add(ElasticMultiLineTextCtrl::create(this, source, CtProp::TagWineNote), wxSizerFlags{ 1 }.Border().Expand());
       }
    };
 }
