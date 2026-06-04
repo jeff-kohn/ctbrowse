@@ -64,7 +64,7 @@ namespace ctb::app
    {
       // this may get by base class (via event handler) when our dataset is null because we received a DatasetRemoved() event.
       if (m_dataset)
-         return static_cast<uint32_t>(m_dataset->rowCount());
+         return m_dataset->rowCount();
 
       return 0;
    }

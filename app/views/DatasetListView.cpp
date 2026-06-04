@@ -116,7 +116,7 @@ namespace ctb::app
 
    void DatasetListView::selectFirstRow()
    {
-      auto dataset = m_model->getDataset();
+      const auto* dataset = m_model->getDataset();
       if (!dataset or dataset->rowCount() == 0)
          return;
 

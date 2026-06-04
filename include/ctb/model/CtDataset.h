@@ -320,7 +320,7 @@ namespace ctb
       ///
       /// @return const reference to the requested property. It may contain a null value, but it
       ///  will always be a valid CtPropertyVal reference
-      [[nodiscard]] virtual auto getRowProperty(uint32_t row_index, CtProp prop_id) const noexcept(false) -> const PropertyVal& override
+      [[nodiscard]] auto getRowProperty(uint32_t row_index, CtProp prop_id) const noexcept(false) -> const PropertyVal& override
       {
          assert(rowCount() > row_index and "This is a logic bug, invalid index should never happen here.");
 

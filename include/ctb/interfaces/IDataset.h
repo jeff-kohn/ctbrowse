@@ -34,9 +34,8 @@ namespace ctb
    /// getDataSummary(). And finally there are methods for returning schema information (table name/id, available
    /// list columns, etc)
    ///
-   class IDataset   // NOLINT [cppcoreguidelines-special-member-functions] we just declare dtor virtual, don't need the others
+   struct IDataset   // NOLINT [cppcoreguidelines-special-member-functions] we just declare dtor virtual, don't need the others
    {
-   public:
       using FieldSchema         = CtFieldSchema;
       using MultiValueFilterMgr = CtMultiValueFilterMgr;
       using Prop                = CtProp;
@@ -49,13 +48,12 @@ namespace ctb
       using TableSort           = CtTableSort;
       using TableSortSpan       = CtTableSortSpan;
 
-      static constexpr int64_t NPOS = -1;   // our equivalant of string::npos for row position.
 
       /// @brief Returns the TableId enum for this dataset's underlying table.
       virtual auto getTableId() const -> TableId = 0;
 
       /// @return the name of the CT table this dataset represents. Not meant to be
-      ///         displayed to the user, this is for internal use.
+      ///  displayed to the user, this is for internal use.
       [[nodiscard]] virtual auto getTableName() const -> std::string_view = 0;
 
       /// @brief Returns a reference to the collection name.
@@ -186,7 +184,8 @@ namespace ctb
       /// This can be used to get filter values for match-filters. The supplied custom_filter will be used to limit
       /// values to only those from records that match the filter. Any active dataset filters applied to the dataset
       /// will be ignored, ONLY custom_filter will be used to limit values returned.
-      [[nodiscard]] virtual auto getDistinctValues(CtProp prop_id, std::function<bool(const PropertyMap&)> custom_filter) const -> PropertyValueSet = 0;
+      [[nodiscard]] virtual auto getDistinctValues(CtProp prop_id, std::function<bool(const PropertyMap&)> custom_filter) const
+         -> PropertyValueSet = 0;
 
       /// @brief returns the number of records in the underlying dataset
       ///
@@ -221,7 +220,7 @@ namespace ctb
       /// @brief Move the current row position forwards/backwards
       ///
       /// If moving by increment rows would result in invalid position, this will be a no-op. No partial moves.
-      /// 
+      ///
       /// @param increment - number of rows to move by. negative number moves backwards.
       /// @return true if successful, false if row position was unchanged.
       virtual auto advanceRow(int32_t increment) noexcept -> bool = 0;

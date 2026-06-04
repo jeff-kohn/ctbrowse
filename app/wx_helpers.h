@@ -113,7 +113,7 @@ namespace ctb::app
       ScopedConfigPath& operator=(ScopedConfigPath&&) = delete;
 
    private:
-      wxConfigBase& m_config; // NOLINT cppcoreguidelines-avoid-const-or-ref-data-members
+      wxConfigBase& m_config; // NOLINT 
 
    };
 
