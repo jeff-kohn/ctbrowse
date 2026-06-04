@@ -432,7 +432,7 @@ namespace ctb
       /// @brief move to a specific row in the dataset
       /// @param row_index - zero-based row index to move to
       /// @return true if successful, false if row_index was invalid.
-      auto moveToRow(uint32_t row_index) noexcept -> bool
+      auto moveToRow(uint32_t row_index) noexcept -> bool override
       {
          if (row_index <= rowCount())
          {
@@ -448,7 +448,7 @@ namespace ctb
       ///
       /// @param increment number of rows to move by. negative number moves backwards.
       /// @return true if successful, false if row position was unchanged.
-      auto advanceRow(int32_t increment) noexcept -> bool
+      auto advanceRow(int32_t increment) noexcept -> bool override
       {
          auto new_pos = m_current_row + increment;
          if (new_pos < rowCount())
