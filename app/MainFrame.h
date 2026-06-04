@@ -69,7 +69,7 @@ namespace ctb::app
       DatasetEventHandler   m_dataset_events;  // so we can also handle events from our source
       wxStatusBar*          m_status_bar{};   // non-owning ptr to statusbar ctrl
       wxToolBar*            m_tool_bar{};     // non-owning ptr to toolbar ctrl
-      NullableUint          m_selected_row{}; // whether or not a row is selected in the dataset view, for update-UI handlers. -1 means no selection
+      NullableUInt          m_selected_row{}; // stores the currently-selected row (if there is one) for menu handlers
 
       /// @brief private ctor called by static create()
       MainFrame();

@@ -22,7 +22,7 @@ namespace ctb
    using NullableShort  = std::optional<uint16_t>;
    using NullableInt    = std::optional<int32_t>;
    using NullableLong   = std::optional<int64_t>;
-   using NullableUint   = std::optional<uint32_t>;
+   using NullableUInt   = std::optional<uint32_t>;
    using NullableSize_t = std::optional<size_t>;
    using NullableDouble = std::optional<double>;
    using NullableDate   = std::optional<std::chrono::year_month_day>;

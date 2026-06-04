@@ -62,7 +62,7 @@ namespace ctb
    }
 
 
-   auto DatasetEventSource::signal(DatasetEvent::Id event_id, NullableUint rec_idx, IDatasetEventSink* event_source) noexcept -> bool
+   auto DatasetEventSource::signal(DatasetEvent::Id event_id, NullableUInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool
    {
       [[maybe_unused]] auto event_name = enum_to_string(event_id);
       SPDLOG_DEBUG("DatasetEventSource::signal({},{}) called", event_name, static_cast<int>(rec_idx.value_or(-1)));
@@ -108,7 +108,7 @@ namespace ctb
    }
 
 
-   auto DatasetEventSource::signal(DatasetEvent::Id event, NullableUint rec_idx) noexcept -> bool 
+   auto DatasetEventSource::signal(DatasetEvent::Id event, NullableUInt rec_idx) noexcept -> bool 
    {
       return signal(event, rec_idx, nullptr);
    }
