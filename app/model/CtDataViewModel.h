@@ -14,13 +14,13 @@ namespace ctb::app
 
       /// @brief Create a new model for the supplied DatasetPtr
       /// @return smart ptr to the newly created model object
-      [[nodiscard]] static auto create(const DatasetPtr& dataset = {}) -> ModelPtr;
+      [[nodiscard]] static auto create(const IDataset* dataset = nullptr) -> ModelPtr;
 
       /// @brief Returns the active dataset for this model (may be empty/null)
-      auto getDataset() -> DatasetPtr;
+      auto getDataset() -> const IDataset*;
 
       /// @brief Associates a new dataset with this model
-      void setDataset(DatasetPtr dataset);
+      void setDataset(const IDataset* dataset);
 
       /// @brief Forces a refresh of the data view after large changes to underlying dataset
       void reQuery();
@@ -33,12 +33,12 @@ namespace ctb::app
       using base::GetRow;
 
    private:
-      DatasetPtr       m_dataset{};
+      const IDataset*  m_dataset{};
 
-      explicit CtDataViewModel(DatasetPtr dataset = {}) : m_dataset{ std::move(dataset) }
+      explicit CtDataViewModel(const IDataset* dataset = nullptr) : m_dataset{ dataset }
       {}
 
-      // instrusive ref counting in wxWidgets means smart ptr need access to ref-counting methods.
+      // intrusive ref counting in wxWidgets means smart ptr need access to ref-counting methods.
       friend ModelPtr;
 
       // these are the real purpose of this class, they're called by the base class to

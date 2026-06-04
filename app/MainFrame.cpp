@@ -718,7 +718,7 @@ namespace ctb::app
          auto&& dataset = getDataset();
          dataset->multivalFilters().clear();
          dataset->propFilters().clear();
-         m_dataset_events.signal_source(DatasetEvent::Id::Filter, false);
+         m_dataset_events.signal_source(DatasetEvent::Id::DatasetFiltered, false);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -785,10 +785,11 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineWineDetails(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto wine_id = dataset->getRowProperty(*m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getWineDetailsUrl(wine_id));
       }
       catch(...){
@@ -799,10 +800,11 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineSearchVintages(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
          auto dataset = getDataset();
-         auto wine = dataset->getProperty(m_selected_row, CtProp::WineName).asString();
+         auto wine = dataset->getRowProperty(*m_selected_row, CtProp::WineName).asString();
          wxLaunchDefaultBrowser(getWineVintagesUrl(wine));
       }
       catch(...){
@@ -813,10 +815,11 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineDrinkWindow(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto wine_id = dataset->getRowProperty(*m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getDrinkWindowUrl(wine_id));
       }
       catch(...){
@@ -827,10 +830,11 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineAddToCellar(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto wine_id = dataset->getRowProperty(*m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getAddToCellarUrl(wine_id));
       }
       catch(...){
@@ -841,10 +845,11 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineAddTastingNote(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto wine_id = dataset->getRowProperty(*m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getAddTastingNoteUrl(wine_id));
       }
       catch(...){
@@ -855,11 +860,12 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineAcceptDelivery(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
-         auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asUInt64().value_or(0);
+         auto wine_id = dataset->getRowProperty(*m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto purchase_id = dataset->getRowProperty(*m_selected_row, CtProp::PendingPurchaseId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getAcceptPendingUrl(wine_id, purchase_id, getCalendarDate()));
       }
       catch(...){
@@ -870,11 +876,12 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineEditOrder(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
-         auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asUInt64().value_or(0);
+         auto wine_id     = dataset->getRowProperty(*m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto purchase_id = dataset->getRowProperty(*m_selected_row, CtProp::PendingPurchaseId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getEditPendingUrl(wine_id, purchase_id));
       }
       catch(...){
@@ -885,10 +892,11 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineDrinkRemove(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto wine_id = dataset->getRowProperty(*m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getDrinkRemoveUrl(wine_id));
       }
       catch(...){
@@ -900,14 +908,14 @@ namespace ctb::app
    void MainFrame::onMenuOnlineWineSelectionUI(wxUpdateUIEvent& event)
    {
       // Enable only when a wine row is selected
-      event.Enable(m_selected_row >= 0);
+      event.Enable(m_selected_row.has_value());
    }
 
 
    void MainFrame::onMenuOnlineAddToCellarUI(wxUpdateUIEvent& event)
    {
       auto dataset = getDataset(false);
-      bool enable = (m_selected_row >= 0) and dataset.get() and (dataset->getTableId() != TableId::Pending);
+      bool enable = m_selected_row and dataset.get() and (dataset->getTableId() != TableId::Pending);
       event.Enable(enable);
    }
 
@@ -915,17 +923,19 @@ namespace ctb::app
    void MainFrame::onMenuOnlineAcceptDeliveryUI(wxUpdateUIEvent& event)
    {
       auto dataset = getDataset(false);
-      bool enable = (m_selected_row >= 0) and dataset.get() and (dataset->getTableId() == TableId::Pending);
+      bool enable = m_selected_row and dataset.get() and (dataset->getTableId() == TableId::Pending);
       event.Enable(enable);
    }
 
 
    void MainFrame::onMenuOnlineDrinkRemoveUI(wxUpdateUIEvent& event)
    {
+      if (!m_selected_row) return;
       try 
       {
-         auto dataset = getDataset(false);
-         bool enable = (m_selected_row >= 0) and dataset.get() and (dataset->getTableId() == TableId::Inventory or dataset->getProperty(m_selected_row, CtProp::QtyOnHand).asInt32().value_or(0) > 0);
+         auto dataset = getDataset();
+         bool enable = (dataset->getTableId() == TableId::Inventory
+                        or dataset->getRowProperty(*m_selected_row, CtProp::QtyOnHand).asInt32().value_or(0) > 0);
          event.Enable(enable);
       }
       catch (...) {
@@ -1001,7 +1011,7 @@ namespace ctb::app
       {
          m_search_ctrl->ChangeValue("");
          m_event_source->getDataset()->clearSubStringFilter();
-         m_event_source->signal(DatasetEvent::Id::Filter);
+         m_event_source->signal(DatasetEvent::Id::DatasetFiltered);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -1018,7 +1028,7 @@ namespace ctb::app
          auto dataset = m_event_source->getDataset();
          if (dataset->filterBySubstring(m_search_ctrl->GetValue().wx_str()))
          {
-            m_event_source->signal(DatasetEvent::Id::SubStringFilter);
+            m_event_source->signal(DatasetEvent::Id::DatasetSubStringFilter);
          }
          else {
             wxGetApp().displayInfoMessage(constants::INFO_MSG_NO_MATCHING_ROWS);
@@ -1084,20 +1094,7 @@ namespace ctb::app
 
    void MainFrame::onDatasetEvent([[maybe_unused]] const DatasetEvent& event)
    {
-      constexpr int none = -1;
-
-      switch (event.event_id)
-      {
-         case DatasetEvent::Id::RowSelected:
-            m_selected_row = event.affected_row.value_or(none);
-            break;
-
-         case DatasetEvent::Id::DatasetRemove:
-            break;
-
-         default:
-            m_selected_row = none;
-      }
+      m_selected_row = event.affected_row;
       updateStatusBarCounts();
    }
 

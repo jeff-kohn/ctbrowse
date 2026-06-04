@@ -11,7 +11,7 @@
 #include "ctb/interfaces/IDatasetEventSource.h"
 
 #include <memory>
-#include <unordered_set>
+#include <flat_set>
 
 
 namespace ctb
@@ -21,6 +21,9 @@ namespace ctb
    ///
    /// Sinks should handle their own exceptions in notify() if possible; any exceptions caught by this 
    /// class while sending notifications will be logged in debug builds but otherwise lost.
+   ///
+   /// No assumptions should be made about the order that sinks get notified; since the callbacks
+   /// are pointers, they get sorted by address not order of insertion.
    ///
    /// This implementation is not thread-safe, since we're using it with UI classes that must
    /// only be accessed from the main thread. If communication with background threads is
@@ -100,7 +103,7 @@ namespace ctb
       /// 
       /// @return true if every observer was notified without error, false if at least one
       ///  observer threw an error.
-      auto signal(DatasetEvent::Id event, NullableInt rec_idx) noexcept -> bool override;
+      auto signal(DatasetEvent::Id event, NullableUint rec_idx) noexcept -> bool override;
  
       /// @brief this is called to signal that an event needs to be sent to all observers EXCEPT 
       ///  for event_source. 
@@ -109,7 +112,7 @@ namespace ctb
       /// 
       /// @return true if every observer was notified without error, false if at least one
       ///  observer threw an error.
-      auto signal(DatasetEvent::Id event_id, NullableInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool override;
+      auto signal(DatasetEvent::Id event_id, NullableUint rec_idx, IDatasetEventSink* event_source) noexcept -> bool override;
 
       ~DatasetEventSource() override = default;
 
@@ -121,7 +124,7 @@ namespace ctb
 
    private:
       DatasetPtr m_data{};
-      std::unordered_set<IDatasetEventSink*> m_observers{};
+      std::flat_set<IDatasetEventSink*> m_observers{};
    
       /// @brief default ctor is private, use static create()
       DatasetEventSource() = default;

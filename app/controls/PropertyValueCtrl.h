@@ -62,9 +62,9 @@ namespace ctb::app
       PropertyValueCtrl(const DatasetEventSourcePtr& source, CtProp bound_prop) : ElasticPropertyValueBase{ source }, m_prop{ bound_prop }
       {}
 
-      auto getDisplayValue(const DatasetPtr& ds, int rec_idx) const -> std::string override
+      auto getDisplayValue(const IDataset* dataset) const -> std::string override
       {
-         auto val = ds->getProperty(rec_idx, m_prop);
+         auto val = dataset->getProperty(m_prop);
 
          if (val.isNull()) return m_null_display;
 

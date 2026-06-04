@@ -6,19 +6,19 @@
 namespace ctb::app
 {
 
-   [[nodiscard]] auto CtDataViewModel::create(const DatasetPtr& dataset) -> ModelPtr
+   [[nodiscard]] auto CtDataViewModel::create(const IDataset* dataset) -> ModelPtr
    {
       return ModelPtr{ new CtDataViewModel{ dataset } };
    }
 
 
-   auto CtDataViewModel::getDataset() -> DatasetPtr 
+   auto CtDataViewModel::getDataset() -> const IDataset* 
    {
       return m_dataset;
    }
 
 
-   void CtDataViewModel::setDataset(DatasetPtr dataset)
+   void CtDataViewModel::setDataset(const IDataset* dataset)
    {
       m_dataset = std::move(dataset);
       reQuery();
@@ -49,7 +49,7 @@ namespace ctb::app
       const auto& list_col = m_dataset->availableListColumns()[col];
 
       // format as string and return it to caller
-      const auto& val = m_dataset->getProperty(static_cast<int>(row), list_col.prop_id);
+      const auto& val = m_dataset->getRowProperty(row, list_col.prop_id);
       variant = list_col.getDisplayValue(val);
    }
 

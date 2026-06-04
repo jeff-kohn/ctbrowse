@@ -29,14 +29,14 @@ namespace ctb::app
       ProReviewsCacheCtrl(const DatasetEventSourcePtr& source, CacheValueFn value_fn) : ElasticPropertyValueBase{ source }, m_value_fn{ std::move(value_fn) }
       {}
 
-      auto getDisplayValue(const DatasetPtr& ds, int rec_idx) const -> std::string override
+      auto getDisplayValue(const IDataset* ds) const -> std::string override
       {
          std::string value{};
 
          auto cache = wxGetApp().getProReviewsCache();
          if (cache)
          {
-            auto wine_id = ds->getProperty(rec_idx, CtProp::iWineId).asUInt64().value_or(0);
+            auto wine_id = ds->getProperty(CtProp::iWineId).asUInt64().value_or(0);
             value        = (*cache.*m_value_fn)(wine_id);
          }
          return value;

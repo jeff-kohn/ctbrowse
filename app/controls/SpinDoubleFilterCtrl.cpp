@@ -64,7 +64,7 @@ namespace ctb::app
       m_checkbox->Bind(wxEVT_CHECKBOX,   &SpinDoubleFilterCtrl::onFilterChecked,     this);
 
       getEventHandler().addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event); });
-      getEventHandler().addHandler(DatasetEvent::Id::Filter, [this](const DatasetEvent& event) { onDatasetFilter(event);     });
+      getEventHandler().addHandler(DatasetEvent::Id::DatasetFiltered, [this](const DatasetEvent& event) { onDatasetFilter(event);     });
    }
 
 
@@ -108,7 +108,7 @@ namespace ctb::app
          else {
             dataset->propFilters().removeFilter(m_filter.filter_name);
          }
-         getEventHandler().signal_source(DatasetEvent::Id::Filter, false);
+         getEventHandler().signal_source(DatasetEvent::Id::DatasetFiltered, false);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -127,7 +127,7 @@ namespace ctb::app
          if (m_filter.enabled)
          {
             dataset->propFilters().replaceFilter(m_filter.filter_name, m_filter);
-            getEventHandler().signal_source(DatasetEvent::Id::Filter, false);
+            getEventHandler().signal_source(DatasetEvent::Id::DatasetFiltered, false);
          }
       }
       catch(...){

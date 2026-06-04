@@ -14,7 +14,7 @@ namespace ctb::app
 
    void ElasticPropertyValueBase::onDatasetRowSelected(const DatasetEvent& event)
    {
-      m_display_value = getDisplayValue(event.dataset, event.affected_row.value_or(0));
+      m_display_value = getDisplayValue(event.dataset);
       TransferDataToWindow();
       InvalidateBestSize();
 

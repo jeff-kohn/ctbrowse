@@ -110,7 +110,7 @@ namespace ctb::app
       Hide();
       if (event.dataset && event.affected_row.has_value())
       {
-         auto wine_id = event.dataset->getProperty(event.affected_row.value(), CtProp::iWineId).asUInt64().value_or(0);
+         auto wine_id = event.dataset->getProperty(CtProp::iWineId).asUInt64().value_or(0);
 
          if (auto fetch_result = m_cache->fetchLabelImage(wine_id); fetch_result.has_value())
          {

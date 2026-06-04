@@ -62,21 +62,23 @@ namespace ctb
    }
 
 
-   auto DatasetEventSource::signal(DatasetEvent::Id event_id, NullableInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool
+   auto DatasetEventSource::signal(DatasetEvent::Id event_id, NullableUint rec_idx, IDatasetEventSink* event_source) noexcept -> bool
    {
       [[maybe_unused]] auto event_name = enum_to_string(event_id);
-      SPDLOG_DEBUG("DatasetEventSource::signal({},{}) called", event_name, rec_idx.value_or(-1));
+      SPDLOG_DEBUG("DatasetEventSource::signal({},{}) called", event_name, static_cast<int>(rec_idx.value_or(-1)));
 
       bool retval{ true };
       if (m_data)
       {
+         if (rec_idx) m_data->moveToRow(*rec_idx);
+
          for (auto* observer : m_observers) 
          { 
             try
             {
                if (observer != event_source)
                {
-                  observer->notify({ event_id, m_data, rec_idx });
+                  observer->notify({ event_id, m_data.get(), rec_idx });
                }
             }
             catch(...){
@@ -106,16 +108,9 @@ namespace ctb
    }
 
 
-   auto DatasetEventSource::signal(DatasetEvent::Id event, NullableInt rec_idx) noexcept -> bool 
+   auto DatasetEventSource::signal(DatasetEvent::Id event, NullableUint rec_idx) noexcept -> bool 
    {
       return signal(event, rec_idx, nullptr);
    }
-
-
-   //DatasetEventSource::~DatasetEventSource() noexcept
-   //{
-   //   signal(DatasetEvent::Id::DatasetRemove);
-   //}
-
 
 } // namespace ctb

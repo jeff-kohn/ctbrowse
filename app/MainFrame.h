@@ -62,8 +62,6 @@ namespace ctb::app
       auto getWinePopupMenu() const -> wxMenuPtr;
 
    private:
-      static constexpr int ROW_NONE = -1;
-
       DatasetMultiView*     m_view{};         // non-owning ptr to main child window
       DatasetEventSourcePtr m_event_source{}; // for synchronizing events between views and the underlying dataset
       wxMenuBar*            m_menu_bar{};     // non-owning ptr to main menubar
@@ -71,7 +69,7 @@ namespace ctb::app
       DatasetEventHandler   m_dataset_events;  // so we can also handle events from our source
       wxStatusBar*          m_status_bar{};   // non-owning ptr to statusbar ctrl
       wxToolBar*            m_tool_bar{};     // non-owning ptr to toolbar ctrl
-      int                   m_selected_row{ ROW_NONE }; // whether or not a row is selected in the dataset view, for update-UI handlers. -1 means no selection
+      NullableUint          m_selected_row{}; // whether or not a row is selected in the dataset view, for update-UI handlers. -1 means no selection
 
       /// @brief private ctor called by static create()
       MainFrame();

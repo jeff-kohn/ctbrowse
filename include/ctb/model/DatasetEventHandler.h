@@ -109,8 +109,8 @@ namespace ctb
       /// If notify_self is true,  the caller will receive a notification for this event.
       /// If notify_self is false, the caller will NOT receive notification for this event.
       ///
-      /// @return true if successful, false if the source couldn'tsend all notifications (meaning
-      ///  at least one notfication threw an error)
+      /// @return true if successful, false if the source couldn't send all notifications (meaning
+      ///  at least one notification threw an error)
       auto signal_source(DatasetEvent::Id event_id, bool notify_self, NullableInt rec_idx = std::nullopt) noexcept -> bool
       {
          return m_source->signal(event_id, rec_idx, notify_self ? nullptr : this);

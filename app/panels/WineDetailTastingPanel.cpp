@@ -9,13 +9,13 @@
 namespace ctb::app
 {
 
-   static inline wxString getTastingTitle(const DatasetPtr& dataset, int rec_idx)
+   static inline wxString getTastingTitle(const IDataset* dataset)
    {
-      if (dataset->getProperty(rec_idx, CtProp::TastingFlawed).asBool().value_or(false) == true)
+      if (dataset->getProperty(CtProp::TastingFlawed).asBool().value_or(false) == true)
       {
          return constants::STR_FLAWED_WINE;
       }
-      auto maybe_liked = dataset->getProperty(rec_idx, CtProp::TastingLiked).asBool();
+      auto maybe_liked = dataset->getProperty(CtProp::TastingLiked).asBool();
       if (maybe_liked.has_value())
       {
          return ctb::format(constants::FMT_TASTING_LIKE_MSG, *maybe_liked ? constants::STR_LIKE : constants::STR_DONT_LIKE);
@@ -24,11 +24,11 @@ namespace ctb::app
    }
 
 
-   static inline wxString getTastingFeedbackText(const DatasetPtr& dataset, int rec_idx)
+   static inline wxString getTastingFeedbackText(const IDataset* dataset)
    {
-      auto comments = dataset->getProperty(rec_idx, CtProp::TastingCommentCount).asInt32().value_or(0);
-      auto views    = dataset->getProperty(rec_idx, CtProp::TastingViewCount).asInt32().value_or(0);
-      auto votes    = dataset->getProperty(rec_idx, CtProp::TastingVoteCount).asInt32().value_or(0);
+      auto comments = dataset->getProperty(CtProp::TastingCommentCount).asInt32().value_or(0);
+      auto views    = dataset->getProperty(CtProp::TastingViewCount).asInt32().value_or(0);
+      auto votes    = dataset->getProperty(CtProp::TastingVoteCount).asInt32().value_or(0);
 
       if (votes and comments)
          return ctb::format(constants::FMT_TASTING_FEEDBACK_VWS_COMMENTS_VOTES, views, comments, votes);
@@ -54,8 +54,7 @@ namespace ctb::app
 
    void WineDetailTastingPanel::addDetails([[maybe_unused]] DetailRows& rows, const DatasetEventSourcePtr& source)
    {
-      auto* top_sizer = GetSizer();          assert(top_sizer);
-      auto dataset = source->getDataset();   assert(dataset);
+      auto* top_sizer = GetSizer();  assert(top_sizer);
 
       // note title
       auto* title_ctrl = new wxStaticText(this, wxID_ANY, constants::LBL_TASTING_NOTE, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
@@ -79,12 +78,10 @@ namespace ctb::app
 
    void WineDetailTastingPanel::onDatasetEvent(const DatasetEvent& event)
    {
-      const auto& dataset = event.dataset;
-      if (dataset and event.affected_row.has_value())
+      if (event.dataset and event.affected_row.has_value())
       {
-         auto rec_idx       = event.affected_row.value();
-         m_title            = getTastingTitle(dataset, rec_idx);
-         m_feedback_summary = getTastingFeedbackText(dataset, rec_idx);
+         m_title            = getTastingTitle(event.dataset);
+         m_feedback_summary = getTastingFeedbackText(event.dataset);
 
          GetSizer()->ShowItems(true);
          Show(true);

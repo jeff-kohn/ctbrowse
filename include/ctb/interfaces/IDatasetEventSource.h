@@ -77,7 +77,7 @@ namespace ctb
       /// 
       /// @return true if every observer was notified without error, false if at least one
       ///  observer threw an error.
-      virtual auto signal(DatasetEvent::Id event, NullableInt rec_idx) noexcept -> bool = 0;
+      virtual auto signal(DatasetEvent::Id event, NullableUint rec_idx) noexcept -> bool = 0;
 
       /// @brief this is called to signal that an event needs to be sent to all observers EXCEPT 
       ///  for event_source. 
@@ -86,7 +86,7 @@ namespace ctb
       /// 
       /// @return true if every observer was notified without error, false if at least one
       ///  observer threw an error.
-      virtual auto signal(DatasetEvent::Id event, NullableInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool = 0;
+      virtual auto signal(DatasetEvent::Id event, NullableUint rec_idx, IDatasetEventSink* event_source) noexcept -> bool = 0;
 
       /// @brief virtual destructor
       virtual ~IDatasetEventSource() noexcept = default;

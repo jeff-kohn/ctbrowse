@@ -16,10 +16,10 @@ namespace ctb::app
       // chance to update, so we'll make a deferred call to do it.
       switch (event.event_id)
       {
-         case DatasetEvent::Id::RowSelected:       [[fallthrough]];
-         case DatasetEvent::Id::Filter:            [[fallthrough]];
-         case DatasetEvent::Id::Sort:              [[fallthrough]];
-         case DatasetEvent::Id::SubStringFilter:
+         case DatasetEvent::Id::RowSelected:             [[fallthrough]];
+         case DatasetEvent::Id::DatasetFiltered:         [[fallthrough]];
+         case DatasetEvent::Id::DatasetSorted:           [[fallthrough]];
+         case DatasetEvent::Id::DatasetSubStringFilter:
             CallAfter(&WineDetailBasePanel::updateVisibility);
             break;
 

@@ -32,14 +32,14 @@ namespace ctb::app
          : ElasticPropertyValueBase{ source }, m_begin_prop{ begin_prop }, m_end_prop{ end_prop }
       {}
 
-      auto getDisplayValue(const DatasetPtr& ds, int rec_idx) const -> std::string override
+      auto getDisplayValue(const IDataset* ds) const -> std::string override
       {
          std::string value{};
 
          if (ds->hasProperty(m_end_prop))
          {
-            auto begin_dt = ds->getProperty(rec_idx, m_begin_prop);
-            auto end_dt   = ds->getProperty(rec_idx, m_end_prop);
+            auto begin_dt = ds->getProperty(m_begin_prop);
+            auto end_dt   = ds->getProperty(m_end_prop);
             value         = ctb::detail::getDrinkWindow(begin_dt, end_dt);
          }
          return value;

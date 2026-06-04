@@ -13,7 +13,7 @@
 
 namespace ctb
 {
-   /// @brief Event object passed for Dataset-related events 
+   /// @brief Event object passed for Dataset-related events
    ///
    struct DatasetEvent
    {
@@ -22,24 +22,26 @@ namespace ctb
 
       enum class Id
       {
-         DatasetInitialize,  /// fired when a dataset is being loaded
-         DatasetRemove,      /// fired when a dataset is being removed/detached.
-         Sort,               /// fired when a dataset has been sorted
-         Filter,             /// fired when a dataset has been filtered
-         SubStringFilter,    /// fired when a substring filter has been applied to the dataset
-         RowSelected,        /// fired when the user selects a row
+         DatasetInitialize,        /// fired when a dataset is being loaded
+         DatasetRemove,            /// fired when a dataset is being removed/detached.
+         DatasetSorted,            /// fired when a dataset has been sorted
+         DatasetFiltered,          /// fired when a dataset has been filtered
+         DatasetSubStringFilter,   /// fired when a substring filter has been applied to the dataset
+         RowSelected,              /// fired when the user selects a row
       };
 
       /// @brief Identifier for the type of event this object represents.
-      Id event_id{};
+      Id event_id{ Id::DatasetRemove };
 
-      /// @brief Pointer to active dataset. This will never be null unless event_id == Id::DatasetRemove
-      DatasetPtr dataset{};
+      /// @brief Pointer to active dataset. This will never be null unless event_id == Id::DatasetRemove.
+      ///        rowPosition() will return affected_row.value(). If affected_row doesn't have a value,
+      ///        then rowPosition() may be any valid position.
+      const IDataset* const dataset{};
 
-      /// @brief The zero-based index of the dataset row that generated the event. Will be null/empty for 
-      ///  dataset-level events.
+      /// @brief The zero-based index of the dataset row that generated the event. Will be null/empty for
+      ///  dataset-level events (which is currently most of them)
       NullableInt affected_row{};
    };
 
 
-} // namespace ctb
+}   // namespace ctb
