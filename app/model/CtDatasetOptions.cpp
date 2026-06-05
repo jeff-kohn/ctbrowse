@@ -107,7 +107,7 @@ namespace ctb::app
          }
       }
       catch(...){ 
-         log::info("Saved default for Dataset '{}' could not be loaded ({}).", getTableDescription(table_id), packageError().formattedMesage());
+         log::info("Saved default for Dataset '{}' could not be loaded ({}).", getTableDescription(table_id), packageError().formattedMessage());
       }
       return {};
    }

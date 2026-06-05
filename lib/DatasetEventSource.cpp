@@ -87,7 +87,7 @@ namespace ctb
                   "DatasetEventSource::signal({}, {}) caught exception from observer. {}", 
                   event_name, 
                   rec_idx.value_or(-1),
-                  packageError().formattedMesage()
+                  packageError().formattedMessage()
                );
             }
          }

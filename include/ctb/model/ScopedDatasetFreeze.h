@@ -22,7 +22,7 @@ namespace ctb
             unfreeze();
          }
          catch (...) {
-            SPDLOG_DEBUG("ScopedDatasetFreeze destructor caught unexpected exception. {}", packageError().formattedMesage());
+            SPDLOG_DEBUG("ScopedDatasetFreeze destructor caught unexpected exception. {}", packageError().formattedMessage());
          }
       }
 
