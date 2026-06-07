@@ -22,11 +22,12 @@ namespace ctb
    /// 
    /// This class implements a dataset representing one of the CT user tables (Wine List, Pending Wines, etc)
    /// It provides access to all properties of the underlying dataset, but also has ListColumns, which are 
-   /// the properties displayed in the main list-view. 
+   /// the properties displayed in the main list-view. There are a number of sorting/filteriing operations as well.
+   ///
+   /// This dataset models a "current row", with properties like 
    /// 
-   /// THIS CLASS IS NOT THREADSAFE. It doens't need to be since UI code in GUI frameworks like wxWidgets is tied to main message thread. 
-   /// Any background threads should work on their own data and send messages to the main thread/window. Access to the dataset should 
-   /// always be from main UI thread since multiple UI windows are holding references to it.
+   /// THIS CLASS IS NOT THREADSAFE. It doesn't need to be since UI code in GUI frameworks like wxWidgets is tied to main message thread. 
+   /// Any background threads should work on their own data and send messages to the main thread/window. 
    /// 
    template<DataTableType DataTableT>
    class CtDataset final : public IDataset
@@ -52,9 +53,13 @@ namespace ctb
 
       /// @brief Create a data model object for the specified table
       /// 
-      /// @return shared_ptr to the requested object
+      /// @return shared_ptr to the requested object, will throw an exception
+      ///         if data is empty().
       static auto create(DataTable data) -> DatasetPtr
       {
+         if (data.empty())
+            throw Error{ Error::Category::DataError, constants::FMT_ERROR_EMPTY_DATASET, Traits::getTableName() };
+
          return DatasetPtr{ static_cast<IDataset*>(new CtDataset{ std::move(data) }) };
       }
 
@@ -101,14 +106,14 @@ namespace ctb
          {
             case TableId::Availability:
             {
-               auto wines   = rowCount(true);
+               auto wines   = rowCount();
                auto bottles = foldValues(CtProp::RtdQtyDefault, int32_t{}, std::plus{});
                result       = ctb::format(constants::FMT_SUMMARY_AVAILABILITY, wines, bottles);
                break;
             }
             case TableId::Pending:
             {
-               auto wines   = rowCount(true);
+               auto wines   = rowCount();
                auto stores  = getDistinctValues(CtProp::PendingStoreName, true).size();
                auto bottles = foldValues(CtProp::QtyPending, int32_t{}, std::plus{});
                result       = ctb::format(constants::FMT_SUMMARY_PENDING, wines, stores, bottles);
@@ -116,7 +121,7 @@ namespace ctb
             }
             case TableId::List:
             {
-               auto wines    = rowCount(true);
+               auto wines    = rowCount();
                auto on_hand  = foldValues(CtProp::QtyOnHand,  int32_t{}, std::plus{});
                auto on_order = foldValues(CtProp::QtyPending, int32_t{}, std::plus{});
                result        = ctb::format(constants::FMT_SUMMARY_MY_CELLAR, wines, on_hand, on_order);
@@ -124,7 +129,7 @@ namespace ctb
             }
             case TableId::Consumed:
             {
-               auto wine_count = rowCount(true);
+               auto wine_count = rowCount();
                if (wine_count)
                {
                   // get earliest year (return values are sorted).
@@ -144,7 +149,7 @@ namespace ctb
             case TableId::Notes:
             {
                auto wines = getDistinctValues(CtProp::iWineId, true).size();
-               result     = ctb::format(constants::FMT_SUMMARY_TASTING_NOTES, rowCount(true), wines);
+               result     = ctb::format(constants::FMT_SUMMARY_TASTING_NOTES, unfilteredRowCount(), wines);
                break;
             }
             case TableId::Tag:
@@ -156,7 +161,7 @@ namespace ctb
             }
             case TableId::Inventory:
             {
-               auto bottle_count  = rowCount(true);
+               auto bottle_count  = rowCount();
                auto wine_count    = getDistinctValues(CtProp::iWineId, true).size();
                auto vintage_count = getDistinctValues(CtProp::Vintage, true).size();
                result             = ctb::format(constants::FMT_SUMMARY_BOTTLE_INVENTORY, wine_count, bottle_count, vintage_count);
@@ -164,7 +169,7 @@ namespace ctb
             }
             case TableId::PrivateNotes:
             {
-               auto note_count = rowCount(true);
+               auto note_count = rowCount();
                result = ctb::format(constants::FMT_SUMMARY_PRIVATE_NOTES, note_count);
                break;
             }            
@@ -298,7 +303,32 @@ namespace ctb
          return Traits::hasProperty(prop_id);
       }
 
-      /// @brief Retrieve a property for a specified record/row in the dataset
+      /// @brief Retrieve a property from the specified row in the dataset.
+      ///
+      /// This method allows retrieving data from a row at row_index without using or
+      /// altering rowPosition(). Since row_index is bounds-checked, there could be
+      /// performance implications. Using the row-based methods should be preferred,
+      /// especially when retrieving multiple property values from any given row.
+      ///
+      /// This function returns a reference to null for not-found properties. Since
+      /// found properties could also have null value, the only way to differentiate
+      /// is by calling hasProperty()
+      ///
+      /// The returned reference will remain valid until a modifying (non-const) method
+      /// is called on this dataset, after which it may be invalid. You should copy-construct
+      /// a new object if you need to hold onto it for a while rather than holding the reference.
+      ///
+      /// @return const reference to the requested property. It may contain a null value, but it
+      ///  will always be a valid CtPropertyVal reference
+      [[nodiscard]] auto getRowProperty(uint32_t row_index, CtProp prop_id) const noexcept(false) -> const PropertyVal& override
+      {
+         assert(rowCount() > row_index and "This is a logic bug, invalid index should never happen here.");
+
+         const auto& record = m_current_view->at(row_index);
+         return record[prop_id];
+      }
+
+      /// @brief Retrieve a property for from the current row in the dataset
       /// 
       /// This function returns a reference to null for not-found properties. Since
       /// found properties could also have null value, the only way to differentiate
@@ -310,11 +340,11 @@ namespace ctb
       /// 
       /// @return const reference to the requested property. It may contain a null value, but it 
       ///  will always be a valid CtPropertyVal&.
-      auto getProperty(int rec_idx, CtProp prop_id) const noexcept(false) -> const PropertyVal & override
+      auto getProperty(CtProp prop_id) const noexcept -> const PropertyVal & override
       {
-         assert(rowCount(true) > rec_idx and "This is a logic bug, invalid index should never happen here.");
+         assert(rowCount() > m_current_row and "This is a logic bug, m_current_row should never be invalid.");
 
-         const auto& record = m_current_view->at(static_cast<size_t>(rec_idx));
+         const auto& record = (*m_current_view)[m_current_row];
          return record[prop_id];
       }
 
@@ -358,12 +388,75 @@ namespace ctb
                                  | rng::to<PropertyValueSet>();
       }
 
-      /// @brief returns the number of rows in the underlying dataset
-      /// @param filtered_only - if true, the count will only include rows matching any active filters.
-      ///                        if false, the count will always be the raw/total number of rows
-      auto rowCount(bool filtered_only) const -> int64_t override
+      /// @brief returns the number of records in the underlying dataset
+      ///
+      /// This returns the number of navigable rows with current active filters. If you want a total count of unfiltered
+      /// rows, use unfilteredRowCount()
+      auto rowCount() const noexcept -> uint32_t override
       {
-         return filtered_only ? std::ssize(*m_current_view) : std::ssize(m_data);
+         return static_cast<uint32_t>(m_current_view->size());
+      }
+
+      /// @brief returns to total number of records in the underlying dataset, ignoring current filters
+      auto unfilteredRowCount() const noexcept -> uint32_t override
+      {
+         return static_cast<uint32_t>(m_data.size());
+      }
+
+      /// @brief returns the current row position in the dataset.
+      ///
+      /// This will always be a valid row position, gets reset to 0 (first row) whenever changes are made to the active
+      /// dataset (filtering/sorting/etc).
+      auto rowPosition() const noexcept -> uint32_t override
+      {
+         return m_current_row;
+      }
+
+      /// @brief Move to the first row in the dataset.
+      ///
+      /// Since a dataset cannot be created without at least one row, this method will never fail.
+      void moveFirst() noexcept override
+      {
+         m_current_row = 0;
+      }
+
+      /// @brief Move to the last row in the dataset.
+      ///
+      /// Since a dataset cannot be created without at least one row, this method will never fail.
+      void moveLast() noexcept override
+      {
+         assert(rowCount() > 0);
+         m_current_row = rowCount() - 1;
+      }
+
+      /// @brief move to a specific row in the dataset
+      /// @param row_index - zero-based row index to move to
+      /// @return true if successful, false if row_index was invalid.
+      auto moveToRow(uint32_t row_index) noexcept -> bool override
+      {
+         if (row_index <= rowCount())
+         {
+            m_current_row = row_index;
+            return true;
+         }
+         return false;
+      }
+
+      /// @brief Move the current row position forwards/backwards
+      ///
+      /// If moving by increment rows would result in invalid position, this will be a no-op. No partial moves.
+      ///
+      /// @param increment number of rows to move by. negative number moves backwards.
+      /// @return true if successful, false if row position was unchanged.
+      auto advanceRow(int32_t increment) noexcept -> bool override
+      {
+         auto new_pos = m_current_row + increment;
+         if (new_pos < rowCount())
+         {
+            m_current_row = new_pos;
+            return true;
+         }
+         return false;
       }
 
       void freezeData() noexcept override
@@ -380,7 +473,7 @@ namespace ctb
          sortData();       // also applies filters, so it's a full refresh
       }
 
-      // default dtor, others are deleted since this object is meant to be heap-only
+      // default dtor, others are deleted since this object is meant to be used through IDataset* ptr to heap object.
       ~CtDataset() noexcept override
       {
          m_mval_filters.unsubscribeChanges();
@@ -407,6 +500,7 @@ namespace ctb
       MaybeSubStringFilter m_substring_filter{};
       std::string          m_collection_name{};
       TableSort            m_current_sort{};
+      uint32_t             m_current_row{};
       
       // private construction, use static factory method create();
       explicit CtDataset(DataTable&& data) : 

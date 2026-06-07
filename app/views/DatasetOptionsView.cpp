@@ -199,26 +199,34 @@ namespace ctb::app
    void DatasetOptionsView::onDatasetInitialize(const DatasetEvent& event)
    {
       assert(event.dataset);
-
       m_dataset_title->SetLabelText(event.dataset->getCollectionName());
 
-      // For any property filters that we don't have UI for, we need to remove them from the dataset. Shouldn't happen 
-      // but might in the case of filters persisted to file from an earlier version.
-      {
-         ScopedDatasetFreeze freeze{ event.dataset };
-         auto active_filter_names = vws::keys(event.dataset->propFilters().activeFilters()) | rng::to<StringSet>();
-         for (const auto& name : active_filter_names)
-         {
-            if (!m_supported_filters.contains(name))
-            {
-               wxGetApp().displayFormattedMessage("Removing unsupported filter '{}'", name);
-               event.dataset->propFilters().removeFilter(name);
-            }
-         }
-      }
-     
       TransferDataToWindow();
       forceLayoutUpdate(this);
+
+      // We don't do this from the event handler, let all subscribers handle event
+      // first, also we need a non-const dataset* anyways
+      CallAfter(&DatasetOptionsView::checkFilters);
+   }
+
+
+   void DatasetOptionsView::checkFilters()
+   {
+      auto dataset = m_dataset_events.getDataset(false);
+      if (!dataset) return;
+
+      // For any property filters that we don't have UI for, we need to remove them from the dataset. Shouldn't happen
+      // but might in the case of filters persisted to file from an earlier version.
+      ScopedDatasetFreeze freeze{ dataset };
+      auto active_filter_names = vws::keys(dataset->propFilters().activeFilters()) | rng::to<StringSet>();
+      for (const auto& name : active_filter_names)
+      {
+         if (!m_supported_filters.contains(name))
+         {
+            wxGetApp().displayFormattedMessage("Removing unsupported filter '{}'", name);
+            dataset->propFilters().removeFilter(name);
+         }
+      }
    }
 
 } // namespace ctb::app

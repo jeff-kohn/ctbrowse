@@ -103,7 +103,7 @@ namespace ctb::tasks
          }
          catch (...) {
             auto err = packageError();
-            log::error("PollingTask::getValue() threw an exception: {}", err.formattedMesage());
+            log::error("PollingTask::getValue() threw an exception: {}", err.formattedMessage());
             return std::unexpected{ err };
          }
       }

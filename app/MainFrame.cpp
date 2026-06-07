@@ -8,17 +8,19 @@
 #include "App.h"
 #include "MainFrame.h"
 #include "CtCredentialManager.h"
-#include "wx_helpers.h"
+
 #include "dialogs/TableSyncDialog.h"
 #include "model/CtDatasetOptions.h"
 #include "views/DatasetMultiView.h"
 
+#include "wx_helpers.h"
+
+#include <ctb/model/CtDatasetLoader.h>
+#include <ctb/model/DatasetEventSource.h>
+#include <ctb/table_download.h>
 #include <ctb/utility.h>
 #include <ctb/utility_chrono.h>
 #include <ctb/utility_http.h>
-#include <ctb/table_download.h>
-#include <ctb/model/DatasetEventSource.h>
-#include <ctb/model/CtDatasetLoader.h>
 
 #include <external/HttpStatusCodes.h>
 
@@ -52,17 +54,16 @@ namespace ctb::app
       {
          switch (event_id)
          {
-            case CMD_COLLECTION_MY_CELLAR:        return TableId::List;
-            case CMD_COLLECTION_PENDING_WINE:     return TableId::Pending;
+            case CMD_COLLECTION_MY_CELLAR       : return TableId::List;
+            case CMD_COLLECTION_PENDING_WINE    : return TableId::Pending;
             case CMD_COLLECTION_BOTTLE_INVENTORY: return TableId::Inventory;
-            case CMD_COLLECTION_READY_TO_DRINK:   return TableId::Availability;
-            case CMD_COLLECTION_CONSUMED:         return TableId::Consumed;
-            case CMD_COLLECTION_PRIVATE_NOTES:    return TableId::PrivateNotes;
-            case CMD_COLLECTION_PURCHASED_WINE:   return TableId::Purchase;
-            case CMD_COLLECTION_TAGGED_WINES:     return TableId::Tag;
-				case CMD_COLLECTION_TASTING_NOTES:    return TableId::Notes;
-            default:
-               throw Error(Error::Category::ArgumentError, "Table corresponding to ID {} not found.", event_id);
+            case CMD_COLLECTION_READY_TO_DRINK  : return TableId::Availability;
+            case CMD_COLLECTION_CONSUMED        : return TableId::Consumed;
+            case CMD_COLLECTION_PRIVATE_NOTES   : return TableId::PrivateNotes;
+            case CMD_COLLECTION_PURCHASED_WINE  : return TableId::Purchase;
+            case CMD_COLLECTION_TAGGED_WINES    : return TableId::Tag;
+            case CMD_COLLECTION_TASTING_NOTES   : return TableId::Notes;
+            default                             : throw Error(Error::Category::ArgumentError, "Table corresponding to ID {} not found.", event_id);
          }
       }
 
@@ -70,7 +71,6 @@ namespace ctb::app
       {
          CtDatasetLoader loader{ wxGetApp().getDataFolder(AppFolder::Tables) };
          return loader.getDataset(table_id);
-
       }
       /// @brief Load a dataset and apply options
       auto loadDataset(const CtDatasetOptions& options) -> DatasetPtr
@@ -81,7 +81,7 @@ namespace ctb::app
          return dataset;
       }
 
-   } // namespace
+   }   // namespace
 
 
    [[nodiscard]] auto MainFrame::create() -> MainFrame*
@@ -91,15 +91,16 @@ namespace ctb::app
          // give base class a chance set up controls etc
          std::unique_ptr<MainFrame> wnd{ new MainFrame{} };
 
-         const auto default_size = wnd->FromDIP(wxSize{800, 600});
+         const auto default_size = wnd->FromDIP(wxSize{ 800, 600 });
          if (!wnd->Create(nullptr, wxID_ANY, constants::APP_NAME_LONG, wxDefaultPosition, default_size))
          {
             throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
          }
          wnd->initControls();
-         return wnd.release(); // top-level window manages its own lifetime, we return non-owning pointer
+         return wnd.release();   // top-level window manages its own lifetime, we return non-owning pointer
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
          throw;
       }
@@ -108,100 +109,85 @@ namespace ctb::app
 
    auto MainFrame::getWinePopupMenu() const -> wxMenuPtr
    {
-      if (!m_event_source->hasDataset())
-         return {};
+      if (!m_event_source->hasDataset()) return {};
 
 
       // build our popup menu based first on the universal commands then the property/dataset-specific ones.
       auto popup_menu = std::make_unique<wxMenu>();
       popup_menu->Append(new wxMenuItem{ popup_menu.get(),
-         CmdId::CMD_ONLINE_WINE_DETAILS,
-         constants::CMD_ONLINE_VIEW_ON_CT_LBL,
-         constants::CMD_ONLINE_VIEW_ON_CT_TIP,
-         wxITEM_NORMAL
-         });
+                                         CmdId::CMD_ONLINE_WINE_DETAILS,
+                                         constants::CMD_ONLINE_VIEW_ON_CT_LBL,
+                                         constants::CMD_ONLINE_VIEW_ON_CT_TIP,
+                                         wxITEM_NORMAL });
 
       popup_menu->Append(new wxMenuItem{ popup_menu.get(),
-         CmdId::CMD_ONLINE_SEARCH_VINTAGES,
-         constants::CMD_ONLINE_SEARCH_VINTAGES_LBL,
-         constants::CMD_ONLINE_SEARCH_VINTAGES_TIP,
-         wxITEM_NORMAL
-         });
-
-      popup_menu->AppendSeparator();
-      popup_menu->Append(new wxMenuItem{ popup_menu.get(), 
-         CmdId::CMD_ONLINE_DRINK_WINDOW, 
-         constants::CMD_ONLINE_DRINK_WINDOW_LBL, 
-         constants::CMD_ONLINE_DRINK_WINDOW_TIP,
-         wxITEM_NORMAL
-         });
+                                         CmdId::CMD_ONLINE_SEARCH_VINTAGES,
+                                         constants::CMD_ONLINE_SEARCH_VINTAGES_LBL,
+                                         constants::CMD_ONLINE_SEARCH_VINTAGES_TIP,
+                                         wxITEM_NORMAL });
 
       popup_menu->AppendSeparator();
       popup_menu->Append(new wxMenuItem{ popup_menu.get(),
-         CmdId::CMD_ONLINE_ADD_TASTING_NOTE,
-         constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
-         constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
-         wxITEM_NORMAL
-         });
+                                         CmdId::CMD_ONLINE_DRINK_WINDOW,
+                                         constants::CMD_ONLINE_DRINK_WINDOW_LBL,
+                                         constants::CMD_ONLINE_DRINK_WINDOW_TIP,
+                                         wxITEM_NORMAL });
+
+      popup_menu->AppendSeparator();
+      popup_menu->Append(new wxMenuItem{ popup_menu.get(),
+                                         CmdId::CMD_ONLINE_ADD_TASTING_NOTE,
+                                         constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
+                                         constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
+                                         wxITEM_NORMAL });
 
       auto dataset = m_event_source->getDataset();
-      if (dataset->getTableId() != TableId::Pending) // could be confusing whether accepting pending or adding new order
+      if (dataset->getTableId() != TableId::Pending)   // could be confusing whether accepting pending or adding new order
       {
          popup_menu->Append(new wxMenuItem{ popup_menu.get(),
-            CmdId::CMD_ONLINE_ADD_TO_CELLAR,
-            constants::CMD_ONLINE_ADD_TO_CELLAR_LBL,
-            constants::CMD_ONLINE_ADD_TO_CELLAR_TIP,
-            wxITEM_NORMAL
-            });
+                                            CmdId::CMD_ONLINE_ADD_TO_CELLAR,
+                                            constants::CMD_ONLINE_ADD_TO_CELLAR_LBL,
+                                            constants::CMD_ONLINE_ADD_TO_CELLAR_TIP,
+                                            wxITEM_NORMAL });
       }
 
-      if (dataset->getTableId() == TableId::Inventory or dataset->hasProperty(CtProp::QtyOnHand))  // can only drink if have available inventory
+      if (dataset->getTableId() == TableId::Inventory or dataset->hasProperty(CtProp::QtyOnHand))   // can only drink if have available inventory
       {
          popup_menu->AppendSeparator();
-         popup_menu->Append(new wxMenuItem{
-            popup_menu.get(),
-            CmdId::CMD_ONLINE_DRINK_REMOVE, 
-            constants::CMD_ONLINE_DRINK_REMOVE_LBL, 
-            constants::CMD_ONLINE_DRINK_REMOVE_LBL,
-            wxITEM_NORMAL
-            });
+         popup_menu->Append(new wxMenuItem{ popup_menu.get(),
+                                            CmdId::CMD_ONLINE_DRINK_REMOVE,
+                                            constants::CMD_ONLINE_DRINK_REMOVE_LBL,
+                                            constants::CMD_ONLINE_DRINK_REMOVE_LBL,
+                                            wxITEM_NORMAL });
       }
-      
+
       // only show these in Pending view for now, might want to reconsider for other views that have pending qtry
-      if (dataset->getTableId() == TableId::Pending)  
+      if (dataset->getTableId() == TableId::Pending)
       {
          popup_menu->AppendSeparator();
-         popup_menu->Append(new wxMenuItem{
-            popup_menu.get(),
-            CmdId::CMD_ONLINE_ACCEPT_PENDING,
-            constants::CMD_ONLINE_ACCEPT_PENDING_LBL,
-            constants::CMD_ONLINE_ACCEPT_PENDING_TIP,
-            wxITEM_NORMAL
-            });
-         popup_menu->Append(new wxMenuItem{
-            popup_menu.get(),
-            CmdId::CMD_ONLINE_EDIT_ORDER,
-            constants::CMD_ONLINE_EDIT_ORDER_LBL,
-            constants::CMD_ONLINE_EDIT_ORDER_LBL,
-            wxITEM_NORMAL
-            });
+         popup_menu->Append(new wxMenuItem{ popup_menu.get(),
+                                            CmdId::CMD_ONLINE_ACCEPT_PENDING,
+                                            constants::CMD_ONLINE_ACCEPT_PENDING_LBL,
+                                            constants::CMD_ONLINE_ACCEPT_PENDING_TIP,
+                                            wxITEM_NORMAL });
+         popup_menu->Append(new wxMenuItem{ popup_menu.get(),
+                                            CmdId::CMD_ONLINE_EDIT_ORDER,
+                                            constants::CMD_ONLINE_EDIT_ORDER_LBL,
+                                            constants::CMD_ONLINE_EDIT_ORDER_LBL,
+                                            wxITEM_NORMAL });
       }
 
       return popup_menu;
    }
 
-   
-   MainFrame::MainFrame() :
-      m_event_source{ DatasetEventSource::create() },
-      m_dataset_events{ m_event_source }
-   {
-   }
+
+   MainFrame::MainFrame() : m_event_source{ DatasetEventSource::create() }, m_dataset_events{ m_event_source }
+   {}
 
 
    void MainFrame::initControls()
    {
       SetTitle(constants::APP_NAME_LONG);
-      SetIcon(wxIcon{constants::RES_NAME_ICON_PRODUCT});
+      SetIcon(wxIcon{ constants::RES_NAME_ICON_PRODUCT });
 
       // We don't actually create the child view until a dataset is opened.
       createMenuBar();
@@ -209,21 +195,21 @@ namespace ctb::app
       m_status_bar = CreateStatusBar();
 
       // Dataset event
-      m_dataset_events.setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event);  });
+      m_dataset_events.setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event); });
 
       // File menu handlers
       //Bind(wxEVT_MENU, &MainFrame::onMenuFilePreferences, this, CmdId::CMD_FILE_SETTINGS);
-      Bind(wxEVT_MENU, &MainFrame::onMenuFileOpen,        this, CmdId::CMD_FILE_OPEN);
-      Bind(wxEVT_MENU, &MainFrame::onMenuFileSave,        this, CmdId::CMD_FILE_SAVE);
-      Bind(wxEVT_MENU, &MainFrame::onMenuFileSyncData,    this, CmdId::CMD_FILE_DOWNLOAD_DATA);
-      Bind(wxEVT_MENU, &MainFrame::onMenuFileSyncData,    this, CmdId::CMD_FILE_DOWNLOAD_DATA);
-      Bind(wxEVT_MENU, &MainFrame::onMenuFileQuit,        this, wxID_EXIT);
+      Bind(wxEVT_MENU, &MainFrame::onMenuFileOpen, this, CmdId::CMD_FILE_OPEN);
+      Bind(wxEVT_MENU, &MainFrame::onMenuFileSave, this, CmdId::CMD_FILE_SAVE);
+      Bind(wxEVT_MENU, &MainFrame::onMenuFileSyncData, this, CmdId::CMD_FILE_DOWNLOAD_DATA);
+      Bind(wxEVT_MENU, &MainFrame::onMenuFileSyncData, this, CmdId::CMD_FILE_DOWNLOAD_DATA);
+      Bind(wxEVT_MENU, &MainFrame::onMenuFileQuit, this, wxID_EXIT);
 
       // Edit menu handlers
-      Bind(wxEVT_MENU,      &MainFrame::onMenuEditFind, this, wxID_FIND);
-      Bind(wxEVT_MENU,      &MainFrame::onMenuEditRefresh, this, CMD_EDIT_REFRESH_DATA);
+      Bind(wxEVT_MENU, &MainFrame::onMenuEditFind, this, wxID_FIND);
+      Bind(wxEVT_MENU, &MainFrame::onMenuEditRefresh, this, CMD_EDIT_REFRESH_DATA);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuEditRefreshUpdateUI, this, CMD_EDIT_REFRESH_DATA);
-      Bind(wxEVT_MENU,      &MainFrame::onMenuEditClearFilters, this, CMD_EDIT_CLEAR_FILTERS);
+      Bind(wxEVT_MENU, &MainFrame::onMenuEditClearFilters, this, CMD_EDIT_CLEAR_FILTERS);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuEditClearFiltersUpdateUI, this, CMD_EDIT_CLEAR_FILTERS);
 
       // Collection menu handlers
@@ -238,32 +224,32 @@ namespace ctb::app
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_TASTING_NOTES);
 
       // Online menu events
-      Bind(wxEVT_MENU, &MainFrame::onMenuOnlineWineDetails,    this, CMD_ONLINE_WINE_DETAILS);
+      Bind(wxEVT_MENU, &MainFrame::onMenuOnlineWineDetails, this, CMD_ONLINE_WINE_DETAILS);
       Bind(wxEVT_MENU, &MainFrame::onMenuOnlineSearchVintages, this, CMD_ONLINE_SEARCH_VINTAGES);
-      Bind(wxEVT_MENU, &MainFrame::onMenuOnlineDrinkWindow,    this, CMD_ONLINE_DRINK_WINDOW);
-      Bind(wxEVT_MENU, &MainFrame::onMenuOnlineAddToCellar,    this, CMD_ONLINE_ADD_TO_CELLAR);
+      Bind(wxEVT_MENU, &MainFrame::onMenuOnlineDrinkWindow, this, CMD_ONLINE_DRINK_WINDOW);
+      Bind(wxEVT_MENU, &MainFrame::onMenuOnlineAddToCellar, this, CMD_ONLINE_ADD_TO_CELLAR);
       Bind(wxEVT_MENU, &MainFrame::onMenuOnlineAddTastingNote, this, CMD_ONLINE_ADD_TASTING_NOTE);
       Bind(wxEVT_MENU, &MainFrame::onMenuOnlineAcceptDelivery, this, CMD_ONLINE_ACCEPT_PENDING);
-      Bind(wxEVT_MENU, &MainFrame::onMenuOnlineEditOrder,      this, CMD_ONLINE_EDIT_ORDER);
-      Bind(wxEVT_MENU, &MainFrame::onMenuOnlineDrinkRemove,    this, CMD_ONLINE_DRINK_REMOVE);
+      Bind(wxEVT_MENU, &MainFrame::onMenuOnlineEditOrder, this, CMD_ONLINE_EDIT_ORDER);
+      Bind(wxEVT_MENU, &MainFrame::onMenuOnlineDrinkRemove, this, CMD_ONLINE_DRINK_REMOVE);
 
       // UI update handlers for online menu commands
-      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineWineSelectionUI,  this, CMD_ONLINE_WINE_DETAILS);
-      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineWineSelectionUI,  this, CMD_ONLINE_SEARCH_VINTAGES);
-      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineWineSelectionUI,  this, CMD_ONLINE_DRINK_WINDOW);
-      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineWineSelectionUI,  this, CMD_ONLINE_ADD_TASTING_NOTE);
-      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineAddToCellarUI,    this, CMD_ONLINE_ADD_TO_CELLAR);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineWineSelectionUI, this, CMD_ONLINE_WINE_DETAILS);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineWineSelectionUI, this, CMD_ONLINE_SEARCH_VINTAGES);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineWineSelectionUI, this, CMD_ONLINE_DRINK_WINDOW);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineWineSelectionUI, this, CMD_ONLINE_ADD_TASTING_NOTE);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineAddToCellarUI, this, CMD_ONLINE_ADD_TO_CELLAR);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineAcceptDeliveryUI, this, CMD_ONLINE_EDIT_ORDER);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineAcceptDeliveryUI, this, CMD_ONLINE_ACCEPT_PENDING);
-      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineDrinkRemoveUI,    this, CMD_ONLINE_DRINK_REMOVE);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuOnlineDrinkRemoveUI, this, CMD_ONLINE_DRINK_REMOVE);
 
       // Toolbar event handlers
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_CANCEL_BTN, &MainFrame::onToolbarSearchCancelBtn, this);
-      m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onToolbarSearchBtn,       this);
-      m_search_ctrl->Bind(wxEVT_TEXT_ENTER,            &MainFrame::onToolbarSearchTextEnter, this);
-      m_search_ctrl->Bind(wxEVT_KEY_DOWN,              &MainFrame::onToolbarSearchKeyDown,   this);
+      m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onToolbarSearchBtn, this);
+      m_search_ctrl->Bind(wxEVT_TEXT_ENTER, &MainFrame::onToolbarSearchTextEnter, this);
+      m_search_ctrl->Bind(wxEVT_KEY_DOWN, &MainFrame::onToolbarSearchKeyDown, this);
 
-      if ( !wxPersistentRegisterAndRestore(this, constants::RES_NAME_MAINFRAME) )
+      if (!wxPersistentRegisterAndRestore(this, constants::RES_NAME_MAINFRAME))
       {
          Center(wxBOTH);
       }
@@ -279,38 +265,24 @@ namespace ctb::app
       // File menu
       auto* menu_file = new wxMenu();
 
-      auto* menu_load_options = new wxMenuItem{
-         menu_file, 
-         CmdId::CMD_FILE_OPEN, 
-         constants::CMD_FILE_OPEN_LBL, 
-         constants::CMD_FILE_OPEN_TIP, 
-         wxITEM_NORMAL
-      };
+      auto* menu_load_options =
+         new wxMenuItem{ menu_file, CmdId::CMD_FILE_OPEN, constants::CMD_FILE_OPEN_LBL, constants::CMD_FILE_OPEN_TIP, wxITEM_NORMAL };
       menu_file->Append(menu_load_options);
 
-      auto* menu_save_options = new wxMenuItem{
-         menu_file, 
-         CmdId::CMD_FILE_SAVE, 
-         constants::CMD_FILE_SAVE_LBL, 
-         constants::CMD_FILE_SAVE_TIP, 
-         wxITEM_NORMAL
-      };
+      auto* menu_save_options =
+         new wxMenuItem{ menu_file, CmdId::CMD_FILE_SAVE, constants::CMD_FILE_SAVE_LBL, constants::CMD_FILE_SAVE_TIP, wxITEM_NORMAL };
       menu_file->Append(menu_save_options);
       menu_file->AppendSeparator();
 
       auto* menu_sync_data = new wxMenuItem{
-         menu_file, 
-         CmdId::CMD_FILE_DOWNLOAD_DATA, 
-         constants::CMD_FILE_DOWNLOAD_DATA_LBL, 
-         constants::CMD_FILE_DOWNLOAD_DATA_TIP, 
-         wxITEM_NORMAL
+         menu_file, CmdId::CMD_FILE_DOWNLOAD_DATA, constants::CMD_FILE_DOWNLOAD_DATA_LBL, constants::CMD_FILE_DOWNLOAD_DATA_TIP, wxITEM_NORMAL
       };
       menu_file->Append(menu_sync_data);
       menu_file->AppendSeparator();
 
       //auto* menu_file_preferences = new wxMenuItem{
-      //   menu_file, 
-      //   CmdId::CMD_FILE_SETTINGS, 
+      //   menu_file,
+      //   CmdId::CMD_FILE_SETTINGS,
       //   constants::CMD_FILE_SETTINGS_LBL,
       //   constants::CMD_FILE_SETTINGS_TIP,
       //   wxITEM_NORMAL
@@ -321,166 +293,107 @@ namespace ctb::app
       auto* menu_file_quit = new wxMenuItem(menu_file, wxID_EXIT);
       menu_file->Append(menu_file_quit);
       m_menu_bar->Append(menu_file, wxGetStockLabel(wxID_FILE));
-   
+
 
       // Edit Menu
-      auto* menu_edit = new wxMenu();
+      auto* menu_edit      = new wxMenu();
       auto* menu_edit_find = new wxMenuItem{ menu_edit, wxID_FIND };
       menu_edit_find->SetBitmap(wxArtProvider::GetBitmapBundle(wxART_FIND, wxART_MENU));
       menu_edit->Append(menu_edit_find);
       menu_edit->AppendSeparator();
 
-      auto* menu_edit_refresh = new wxMenuItem{
-         menu_edit,
-         CMD_EDIT_REFRESH_DATA,
-         CMD_EDIT_REFRESH_DATA_LBL,
-         CMD_EDIT_REFRESH_DATA_TIP
-      };
+      auto* menu_edit_refresh = new wxMenuItem{ menu_edit, CMD_EDIT_REFRESH_DATA, CMD_EDIT_REFRESH_DATA_LBL, CMD_EDIT_REFRESH_DATA_TIP };
       menu_edit->Append(menu_edit_refresh);
       menu_edit->AppendSeparator();
 
-      auto* menu_edit_clear = new wxMenuItem{
-         menu_edit,
-         CMD_EDIT_CLEAR_FILTERS,
-         CMD_EDIT_CLEAR_FILTERS_LBL,
-         CMD_EDIT_CLEAR_FILTERS_TIP
-      };
-      menu_edit->Append(menu_edit_clear);      
+      auto* menu_edit_clear = new wxMenuItem{ menu_edit, CMD_EDIT_CLEAR_FILTERS, CMD_EDIT_CLEAR_FILTERS_LBL, CMD_EDIT_CLEAR_FILTERS_TIP };
+      menu_edit->Append(menu_edit_clear);
       m_menu_bar->Append(menu_edit, wxGetStockLabel(wxID_EDIT));
 
 
       // Collection Menu
       auto* menu_data = new wxMenu();
-      menu_data->Append(new wxMenuItem{
-         menu_data, 
-         CmdId::CMD_COLLECTION_MY_CELLAR, 
-         constants::CMD_COLLECTION_MY_CELLAR_LBL, 
-         constants::CMD_COLLECTION_MY_CELLAR_TIP,
-         wxITEM_NORMAL
-      });
-      menu_data->Append(new wxMenuItem{
-         menu_data,
-         CmdId::CMD_COLLECTION_BOTTLE_INVENTORY,
-         constants::CMD_COLLECTION_BOTTLE_INVENTORY_LBL,
-         constants::CMD_COLLECTION_BOTTLE_INVENTORY_TIP,
-         wxITEM_NORMAL
-         });
-      menu_data->Append(new wxMenuItem{
-         menu_data, 
-         CmdId::CMD_COLLECTION_READY_TO_DRINK, 
-         constants::CMD_COLLECTION_READY_TO_DRINK_LBL, 
-         constants::CMD_COLLECTION_READY_TO_DRINK_TIP,
-         wxITEM_NORMAL
-         });
+      menu_data->Append(new wxMenuItem{ menu_data,
+                                        CmdId::CMD_COLLECTION_MY_CELLAR,
+                                        constants::CMD_COLLECTION_MY_CELLAR_LBL,
+                                        constants::CMD_COLLECTION_MY_CELLAR_TIP,
+                                        wxITEM_NORMAL });
+      menu_data->Append(new wxMenuItem{ menu_data,
+                                        CmdId::CMD_COLLECTION_BOTTLE_INVENTORY,
+                                        constants::CMD_COLLECTION_BOTTLE_INVENTORY_LBL,
+                                        constants::CMD_COLLECTION_BOTTLE_INVENTORY_TIP,
+                                        wxITEM_NORMAL });
+      menu_data->Append(new wxMenuItem{ menu_data,
+                                        CmdId::CMD_COLLECTION_READY_TO_DRINK,
+                                        constants::CMD_COLLECTION_READY_TO_DRINK_LBL,
+                                        constants::CMD_COLLECTION_READY_TO_DRINK_TIP,
+                                        wxITEM_NORMAL });
       menu_data->AppendSeparator();
-      menu_data->Append(new wxMenuItem{
-         menu_data,
-         CmdId::CMD_COLLECTION_PENDING_WINE,
-         constants::CMD_COLLECTION_PENDING_WINE_LBL,
-         constants::CMD_COLLECTION_PENDING_WINE_TIP,
-         wxITEM_NORMAL
-         });
-      menu_data->Append(new wxMenuItem{
-         menu_data,
-         CmdId::CMD_COLLECTION_TAGGED_WINES,
-         constants::CMD_COLLECTION_TAGGED_WINES_LBL,
-         constants::CMD_COLLECTION_TAGGED_WINES_TIP,
-         wxITEM_NORMAL
-         });      
+      menu_data->Append(new wxMenuItem{ menu_data,
+                                        CmdId::CMD_COLLECTION_PENDING_WINE,
+                                        constants::CMD_COLLECTION_PENDING_WINE_LBL,
+                                        constants::CMD_COLLECTION_PENDING_WINE_TIP,
+                                        wxITEM_NORMAL });
+      menu_data->Append(new wxMenuItem{ menu_data,
+                                        CmdId::CMD_COLLECTION_TAGGED_WINES,
+                                        constants::CMD_COLLECTION_TAGGED_WINES_LBL,
+                                        constants::CMD_COLLECTION_TAGGED_WINES_TIP,
+                                        wxITEM_NORMAL });
       menu_data->AppendSeparator();
-      menu_data->Append(new wxMenuItem{
-         menu_data,
-         CmdId::CMD_COLLECTION_TASTING_NOTES,
-         constants::CMD_COLLECTION_TASTING_NOTES_LBL,
-         constants::CMD_COLLECTION_TASTING_NOTES_TIP,
-         wxITEM_NORMAL
-         });
-      menu_data->Append(new wxMenuItem{
-         menu_data,
-         CmdId::CMD_COLLECTION_PRIVATE_NOTES,
-         constants::CMD_COLLECTION_PRIVATE_NOTES_LBL,
-         constants::CMD_COLLECTION_PRIVATE_NOTES_TIP,
-         wxITEM_NORMAL
-         });      
+      menu_data->Append(new wxMenuItem{ menu_data,
+                                        CmdId::CMD_COLLECTION_TASTING_NOTES,
+                                        constants::CMD_COLLECTION_TASTING_NOTES_LBL,
+                                        constants::CMD_COLLECTION_TASTING_NOTES_TIP,
+                                        wxITEM_NORMAL });
+      menu_data->Append(new wxMenuItem{ menu_data,
+                                        CmdId::CMD_COLLECTION_PRIVATE_NOTES,
+                                        constants::CMD_COLLECTION_PRIVATE_NOTES_LBL,
+                                        constants::CMD_COLLECTION_PRIVATE_NOTES_TIP,
+                                        wxITEM_NORMAL });
       menu_data->AppendSeparator();
+      menu_data->Append(new wxMenuItem{ menu_data,
+                                        CmdId::CMD_COLLECTION_PURCHASED_WINE,
+                                        constants::CMD_COLLECTION_PURCHASED_WINE_LBL,
+                                        constants::CMD_COLLECTION_PURCHASED_WINE_TIP,
+                                        wxITEM_NORMAL });
       menu_data->Append(new wxMenuItem{
-         menu_data,
-         CmdId::CMD_COLLECTION_PURCHASED_WINE,
-         constants::CMD_COLLECTION_PURCHASED_WINE_LBL,
-         constants::CMD_COLLECTION_PURCHASED_WINE_TIP,
-         wxITEM_NORMAL
-         });
-      menu_data->Append(new wxMenuItem{
-         menu_data,
-         CmdId::CMD_COLLECTION_CONSUMED,
-         constants::CMD_COLLECTION_CONSUMED_LBL,
-         constants::CMD_COLLECTION_CONSUMED_TIP,
-         wxITEM_NORMAL
-         });
+         menu_data, CmdId::CMD_COLLECTION_CONSUMED, constants::CMD_COLLECTION_CONSUMED_LBL, constants::CMD_COLLECTION_CONSUMED_TIP, wxITEM_NORMAL });
       m_menu_bar->Append(menu_data, constants::LBL_MENU_COLLECTION);
 
       // Wine Menu
       auto* menu_wine = new wxMenu();
       menu_wine->Append(new wxMenuItem{
-         menu_wine, 
-         CmdId::CMD_ONLINE_WINE_DETAILS, 
-         constants::CMD_ONLINE_WINE_DETAILS_LBL, 
-         constants::CMD_ONLINE_WINE_DETAILS_TIP,
-         wxITEM_NORMAL
-      });
-      menu_wine->Append(new wxMenuItem{
-         menu_wine, 
-         CmdId::CMD_ONLINE_SEARCH_VINTAGES, 
-         constants::CMD_ONLINE_SEARCH_VINTAGES_LBL, 
-         constants::CMD_ONLINE_SEARCH_VINTAGES_TIP,
-         wxITEM_NORMAL
-      });
+         menu_wine, CmdId::CMD_ONLINE_WINE_DETAILS, constants::CMD_ONLINE_WINE_DETAILS_LBL, constants::CMD_ONLINE_WINE_DETAILS_TIP, wxITEM_NORMAL });
+      menu_wine->Append(new wxMenuItem{ menu_wine,
+                                        CmdId::CMD_ONLINE_SEARCH_VINTAGES,
+                                        constants::CMD_ONLINE_SEARCH_VINTAGES_LBL,
+                                        constants::CMD_ONLINE_SEARCH_VINTAGES_TIP,
+                                        wxITEM_NORMAL });
       menu_wine->AppendSeparator();
       menu_wine->Append(new wxMenuItem{
-         menu_wine, 
-         CmdId::CMD_ONLINE_DRINK_WINDOW, 
-         constants::CMD_ONLINE_DRINK_WINDOW_LBL, 
-         constants::CMD_ONLINE_DRINK_WINDOW_TIP,
-         wxITEM_NORMAL
-      });
-      menu_wine->Append(new wxMenuItem{
-         menu_wine, 
-         CmdId::CMD_ONLINE_ADD_TO_CELLAR, 
-         constants::CMD_ONLINE_ADD_TO_CELLAR_LBL, 
-         constants::CMD_ONLINE_ADD_TO_CELLAR_TIP,
-         wxITEM_NORMAL
-         });
-      menu_wine->Append(new wxMenuItem{
-         menu_wine, 
-         CmdId::CMD_ONLINE_ADD_TASTING_NOTE, 
-         constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL, 
-         constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
-         wxITEM_NORMAL
-      });
+         menu_wine, CmdId::CMD_ONLINE_DRINK_WINDOW, constants::CMD_ONLINE_DRINK_WINDOW_LBL, constants::CMD_ONLINE_DRINK_WINDOW_TIP, wxITEM_NORMAL });
+      menu_wine->Append(new wxMenuItem{ menu_wine,
+                                        CmdId::CMD_ONLINE_ADD_TO_CELLAR,
+                                        constants::CMD_ONLINE_ADD_TO_CELLAR_LBL,
+                                        constants::CMD_ONLINE_ADD_TO_CELLAR_TIP,
+                                        wxITEM_NORMAL });
+      menu_wine->Append(new wxMenuItem{ menu_wine,
+                                        CmdId::CMD_ONLINE_ADD_TASTING_NOTE,
+                                        constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
+                                        constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
+                                        wxITEM_NORMAL });
 
       menu_wine->AppendSeparator();
+      menu_wine->Append(new wxMenuItem{ menu_wine,
+                                        CmdId::CMD_ONLINE_ACCEPT_PENDING,
+                                        constants::CMD_ONLINE_ACCEPT_PENDING_LBL,
+                                        constants::CMD_ONLINE_ACCEPT_PENDING_TIP,
+                                        wxITEM_NORMAL });
       menu_wine->Append(new wxMenuItem{
-         menu_wine, 
-         CmdId::CMD_ONLINE_ACCEPT_PENDING, 
-         constants::CMD_ONLINE_ACCEPT_PENDING_LBL, 
-         constants::CMD_ONLINE_ACCEPT_PENDING_TIP,
-         wxITEM_NORMAL
-      });
-      menu_wine->Append(new wxMenuItem{
-         menu_wine, 
-         CmdId::CMD_ONLINE_EDIT_ORDER, 
-         constants::CMD_ONLINE_EDIT_ORDER_LBL, 
-         constants::CMD_ONLINE_EDIT_ORDER_LBL,
-         wxITEM_NORMAL
-      });
+         menu_wine, CmdId::CMD_ONLINE_EDIT_ORDER, constants::CMD_ONLINE_EDIT_ORDER_LBL, constants::CMD_ONLINE_EDIT_ORDER_LBL, wxITEM_NORMAL });
       menu_wine->AppendSeparator();
       menu_wine->Append(new wxMenuItem{
-         menu_wine, 
-         CmdId::CMD_ONLINE_DRINK_REMOVE, 
-         constants::CMD_ONLINE_DRINK_REMOVE_LBL, 
-         constants::CMD_ONLINE_DRINK_REMOVE_LBL,
-         wxITEM_NORMAL
-      });
+         menu_wine, CmdId::CMD_ONLINE_DRINK_REMOVE, constants::CMD_ONLINE_DRINK_REMOVE_LBL, constants::CMD_ONLINE_DRINK_REMOVE_LBL, wxITEM_NORMAL });
 
       m_menu_bar->Append(menu_wine, constants::LBL_MENU_WINE);
       SetMenuBar(m_menu_bar);
@@ -489,7 +402,7 @@ namespace ctb::app
 
    void MainFrame::createToolBar()
    {
-      const auto toolbar_size = wxSize{24,24};
+      const auto toolbar_size = wxSize{ 24, 24 };
 
       m_tool_bar = CreateToolBar();
 
@@ -499,11 +412,11 @@ namespace ctb::app
 
       bmp = wxBitmapBundle::FromSVGResource("TOOLBAR_SAVE", toolbar_size);
       assert(bmp.IsOk());
-      m_tool_bar->AddTool(CmdId::CMD_FILE_SAVE, wxEmptyString, bmp, constants::CMD_FILE_SAVE_TIP);      
+      m_tool_bar->AddTool(CmdId::CMD_FILE_SAVE, wxEmptyString, bmp, constants::CMD_FILE_SAVE_TIP);
 
       bmp = wxBitmapBundle::FromSVGResource("TOOLBAR_REFRESH", toolbar_size);
       assert(bmp.IsOk());
-      m_tool_bar->AddTool(CmdId::CMD_EDIT_REFRESH_DATA, wxEmptyString, bmp, constants::CMD_EDIT_REFRESH_DATA_TIP);      
+      m_tool_bar->AddTool(CmdId::CMD_EDIT_REFRESH_DATA, wxEmptyString, bmp, constants::CMD_EDIT_REFRESH_DATA_TIP);
 
       bmp = wxBitmapBundle::FromSVGResource("TOOLBAR_DOWNLOAD", toolbar_size);
       assert(bmp.IsOk());
@@ -525,25 +438,21 @@ namespace ctb::app
 
 
    void MainFrame::onMenuFilePreferences([[maybe_unused]] wxCommandEvent& event)
-   {
-
-   }
+   {}
 
 
    void MainFrame::onMenuFileSave(wxCommandEvent&)
    {
-      try 
+      try
       {
          auto dataset = getDataset();
 
-         wxFileDialog save_dialog{
-            this,
-            constants::FILE_OPEN_COLLECTION_FILTER,
-            wxGetApp().getDataFolder(AppFolder::Favorites).generic_string(),
-            dataset->getCollectionName(),
-            constants::FILE_COLLECTION_CTBC_FILTER,
-            wxFD_SAVE | wxFD_OVERWRITE_PROMPT
-         };
+         wxFileDialog save_dialog{ this,
+                                   constants::FILE_OPEN_COLLECTION_FILTER,
+                                   wxGetApp().getDataFolder(AppFolder::Favorites).generic_string(),
+                                   dataset->getCollectionName(),
+                                   constants::FILE_COLLECTION_CTBC_FILTER,
+                                   wxFD_SAVE | wxFD_OVERWRITE_PROMPT };
 
          if (save_dialog.ShowModal() == wxID_OK)
          {
@@ -556,7 +465,7 @@ namespace ctb::app
             SetTitle(ctb::format("{} - {}", dataset->getCollectionName(), constants::APP_NAME_LONG));
          }
       }
-      catch (...) 
+      catch (...)
       {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
@@ -565,55 +474,48 @@ namespace ctb::app
 
    void MainFrame::onMenuFileOpen(wxCommandEvent&)
    {
-      try 
+      try
       {
          wxFileDialog open_dialog{
-            this,
-            constants::FILE_OPEN_COLLECTION_FILTER,
-            wxGetApp().getDataFolder(AppFolder::Favorites).generic_string(),
-            wxEmptyString,
-            constants::FILE_COLLECTION_CTBC_FILTER,
-            wxFD_OPEN | wxFD_FILE_MUST_EXIST
+            this,          constants::FILE_OPEN_COLLECTION_FILTER, wxGetApp().getDataFolder(AppFolder::Favorites).generic_string(),
+            wxEmptyString, constants::FILE_COLLECTION_CTBC_FILTER, wxFD_OPEN | wxFD_FILE_MUST_EXIST
          };
 
-         if (open_dialog.ShowModal() == wxID_CANCEL)
-            return;
+         if (open_dialog.ShowModal() == wxID_CANCEL) return;
 
          wxBusyCursor busy{};
-         auto path = open_dialog.GetPath().utf8_string();
-         auto options = CtDatasetOptions::retrieveOptions(path);
-         auto dataset = loadDataset(options);
+         auto         path    = open_dialog.GetPath().utf8_string();
+         auto         options = CtDatasetOptions::retrieveOptions(path);
+         auto         dataset = loadDataset(options);
          setDataset(dataset);
       }
-      catch (...) 
+      catch (...)
       {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
 
-   void MainFrame::onMenuFileSyncData([[maybe_unused]] wxCommandEvent& event) 
+   void MainFrame::onMenuFileSyncData([[maybe_unused]] wxCommandEvent& event)
    {
       // TODO: refactor this
       try
       {
 
          TableSyncDialog dlg(this);
-         if (dlg.ShowModal() != wxID_OK)
-            return;
+         if (dlg.ShowModal() != wxID_OK) return;
 
-         wxBusyCursor busy{};
+         wxBusyCursor     busy{};
          ScopedStatusText end_status{ constants::STATUS_DOWNLOAD_COMPLETE, this };
 
          CtCredentialManager cred_mgr{};
-         const auto* cred_name = constants::CELLARTRACKER_DOT_COM;
-         auto prompt_msg = ctb::format(constants::FMT_CREDENTIALDLG_PROMPT_MSG, cred_name);
-         auto cred_result = cred_mgr.loadCredential(cred_name, prompt_msg, true);
+         const auto*         cred_name   = constants::CELLARTRACKER_DOT_COM;
+         auto                prompt_msg  = ctb::format(constants::FMT_CREDENTIALDLG_PROMPT_MSG, cred_name);
+         auto                cred_result = cred_mgr.loadCredential(cred_name, prompt_msg, true);
 
          if (!cred_result)
          {
-            if (cred_result.error().category == Error::Category::OperationCanceled)
-               return;
+            if (cred_result.error().category == Error::Category::OperationCanceled) return;
 
             throw Error{ cred_result.error() };
          }
@@ -621,15 +523,18 @@ namespace ctb::app
          // If cred doesn't work we need to reprompt so udpate prompt message.
          prompt_msg = ctb::format(constants::FMT_CREDENTIALDLG_REPROMPT_MSG, cred_name);
 
-         constexpr auto max_percent = 100;
-         wxProgressDialog progress_dlg{"Download Progress", "Downloading Data Files", max_percent, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL };
+         constexpr auto   max_percent = 100;
+         wxProgressDialog progress_dlg{
+            "Download Progress", "Downloading Data Files", max_percent, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL
+         };
 
-         ProgressCallback progress_callback = [&progress_dlg] ([[maybe_unused]] int64_t downloadTotal, [[maybe_unused]] int64_t downloadNow,
-                                                                     [[maybe_unused]] int64_t uploadTotal, [[maybe_unused]] int64_t uploadNow,
-                                                                     [[maybe_unused]] intptr_t userdata)
-                                                                     {
-                                                                        return progress_dlg.Pulse();
-                                                                     };
+         ProgressCallback progress_callback = [&progress_dlg](
+                                                 [[maybe_unused]] int64_t  downloadTotal,
+                                                 [[maybe_unused]] int64_t  downloadNow,
+                                                 [[maybe_unused]] int64_t  uploadTotal,
+                                                 [[maybe_unused]] int64_t  uploadNow,
+                                                 [[maybe_unused]] intptr_t userdata
+                                              ) { return progress_dlg.Pulse(); };
 
          // For each selected table, download it.
          for (auto tbl : dlg.selectedTables())
@@ -651,7 +556,8 @@ namespace ctb::app
                      // got a new cred, try again
                      result = downloadRawTableData(*cred_result, tbl, DataFormatId::csv, &progress_callback);
                   }
-                  else{
+                  else
+                  {
                      // user canceled login dialog so just exit out
                      end_status.message = constants::ERROR_STR_DOWNLOAD_AUTH_FAILURE;
                      return;
@@ -662,8 +568,9 @@ namespace ctb::app
                   // user hit cancel in progress dilaog, so just exit out.
                   end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
                   return;
-               }               
-               else {
+               }
+               else
+               {
                   // some unknown error happened, let user know before bailing.
                   wxGetApp().displayErrorMessage(result.error());
                   end_status.message = constants::STATUS_DOWNLOAD_FAILED;
@@ -685,10 +592,10 @@ namespace ctb::app
             setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, getTableDescription(tbl));
          }
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
-
    }
 
 
@@ -704,7 +611,8 @@ namespace ctb::app
       {
          event.Enable(m_event_source->hasDataset());
       }
-      catch(...){
+      catch (...)
+      {
          log::exception(packageError());
       }
    }
@@ -718,9 +626,10 @@ namespace ctb::app
          auto&& dataset = getDataset();
          dataset->multivalFilters().clear();
          dataset->propFilters().clear();
-         m_dataset_events.signal_source(DatasetEvent::Id::Filter, false);
+         m_dataset_events.signal_source(DatasetEvent::Id::DatasetFiltered, false);
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -745,10 +654,11 @@ namespace ctb::app
       try
       {
          wxBusyCursor busy{};
-         auto options = CtDatasetOptions::retrieveOptions(m_event_source->getDataset());
+         auto         options = CtDatasetOptions::retrieveOptions(m_event_source->getDataset());
          setDataset(loadDataset(options));
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -760,7 +670,8 @@ namespace ctb::app
       {
          m_search_ctrl->SetFocus();
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -768,7 +679,7 @@ namespace ctb::app
 
    void MainFrame::onMenuCollection([[maybe_unused]] wxCommandEvent& event)
    {
-      wxBusyCursor busy{};
+      wxBusyCursor         busy{};
       wxWindowUpdateLocker lock{ this };
       try
       {
@@ -777,7 +688,8 @@ namespace ctb::app
          CtDatasetOptions::applyDefaultOptions(dataset);
          setDataset(dataset);
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -785,13 +697,15 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineWineDetails(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto wine_id = dataset->getRowProperty(*m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getWineDetailsUrl(wine_id));
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -799,13 +713,15 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineSearchVintages(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
          auto dataset = getDataset();
-         auto wine = dataset->getProperty(m_selected_row, CtProp::WineName).asString();
+         auto wine    = dataset->getRowProperty(*m_selected_row, CtProp::WineName).asString();
          wxLaunchDefaultBrowser(getWineVintagesUrl(wine));
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -813,13 +729,15 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineDrinkWindow(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto wine_id = dataset->getRowProperty(*m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getDrinkWindowUrl(wine_id));
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -827,13 +745,15 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineAddToCellar(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto wine_id = dataset->getRowProperty(*m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getAddToCellarUrl(wine_id));
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -841,13 +761,15 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineAddTastingNote(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto wine_id = dataset->getRowProperty(*m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getAddTastingNoteUrl(wine_id));
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -855,14 +777,16 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineAcceptDelivery(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
-         auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
-         auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asUInt64().value_or(0);
+         auto dataset     = getDataset();
+         auto wine_id     = dataset->getRowProperty(*m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto purchase_id = dataset->getRowProperty(*m_selected_row, CtProp::PendingPurchaseId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getAcceptPendingUrl(wine_id, purchase_id, getCalendarDate()));
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -870,14 +794,16 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineEditOrder(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
-         auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
-         auto purchase_id = dataset->getProperty(m_selected_row, CtProp::PendingPurchaseId).asUInt64().value_or(0);
+         auto dataset     = getDataset();
+         auto wine_id     = dataset->getRowProperty(*m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto purchase_id = dataset->getRowProperty(*m_selected_row, CtProp::PendingPurchaseId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getEditPendingUrl(wine_id, purchase_id));
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -885,13 +811,15 @@ namespace ctb::app
 
    void MainFrame::onMenuOnlineDrinkRemove(wxCommandEvent&)
    {
+      if (!m_selected_row) return;
       try
       {
          auto dataset = getDataset();
-         auto wine_id = dataset->getProperty(m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
+         auto wine_id = dataset->getRowProperty(*m_selected_row, CtProp::iWineId).asUInt64().value_or(0);
          wxLaunchDefaultBrowser(getDrinkRemoveUrl(wine_id));
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -900,14 +828,14 @@ namespace ctb::app
    void MainFrame::onMenuOnlineWineSelectionUI(wxUpdateUIEvent& event)
    {
       // Enable only when a wine row is selected
-      event.Enable(m_selected_row >= 0);
+      event.Enable(m_selected_row.has_value());
    }
 
 
    void MainFrame::onMenuOnlineAddToCellarUI(wxUpdateUIEvent& event)
    {
       auto dataset = getDataset(false);
-      bool enable = (m_selected_row >= 0) and dataset.get() and (dataset->getTableId() != TableId::Pending);
+      bool enable  = m_selected_row and dataset.get() and (dataset->getTableId() != TableId::Pending);
       event.Enable(enable);
    }
 
@@ -915,20 +843,23 @@ namespace ctb::app
    void MainFrame::onMenuOnlineAcceptDeliveryUI(wxUpdateUIEvent& event)
    {
       auto dataset = getDataset(false);
-      bool enable = (m_selected_row >= 0) and dataset.get() and (dataset->getTableId() == TableId::Pending);
+      bool enable  = m_selected_row and dataset.get() and (dataset->getTableId() == TableId::Pending);
       event.Enable(enable);
    }
 
 
    void MainFrame::onMenuOnlineDrinkRemoveUI(wxUpdateUIEvent& event)
    {
-      try 
+      try
       {
-         auto dataset = getDataset(false);
-         bool enable = (m_selected_row >= 0) and dataset.get() and (dataset->getTableId() == TableId::Inventory or dataset->getProperty(m_selected_row, CtProp::QtyOnHand).asInt32().value_or(0) > 0);
+         auto dataset = getDataset();
+         bool enable =
+            dataset.get() and m_selected_row and
+            (dataset->getTableId() == TableId::Inventory or dataset->getRowProperty(*m_selected_row, CtProp::QtyOnHand).asInt32().value_or(0) > 0);
          event.Enable(enable);
       }
-      catch (...) {
+      catch (...)
+      {
          log::exception(packageError());
       }
    }
@@ -940,7 +871,8 @@ namespace ctb::app
       {
          doSearchFilter();
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -952,7 +884,8 @@ namespace ctb::app
       {
          clearSearchFilter();
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -964,19 +897,15 @@ namespace ctb::app
       {
          switch (event.GetKeyCode())
          {
-            case WXK_TAB:
-               m_view->SetFocus();
-               break;
+            case WXK_TAB: m_view->SetFocus(); break;
 
-            case WXK_ESCAPE:
-               clearSearchFilter();
-               break;
+            case WXK_ESCAPE: clearSearchFilter(); break;
 
-            default:
-               event.Skip();
+            default: event.Skip();
          }
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -988,7 +917,8 @@ namespace ctb::app
       {
          doSearchFilter();
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -1001,9 +931,10 @@ namespace ctb::app
       {
          m_search_ctrl->ChangeValue("");
          m_event_source->getDataset()->clearSubStringFilter();
-         m_event_source->signal(DatasetEvent::Id::Filter);
+         m_event_source->signal(DatasetEvent::Id::DatasetFiltered);
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
       updateStatusBarCounts();
@@ -1018,15 +949,17 @@ namespace ctb::app
          auto dataset = m_event_source->getDataset();
          if (dataset->filterBySubstring(m_search_ctrl->GetValue().wx_str()))
          {
-            m_event_source->signal(DatasetEvent::Id::SubStringFilter);
+            m_event_source->signal(DatasetEvent::Id::DatasetSubStringFilter);
          }
-         else {
+         else
+         {
             wxGetApp().displayInfoMessage(constants::INFO_MSG_NO_MATCHING_ROWS);
             m_search_ctrl->SetFocus();
             m_search_ctrl->SelectAll();
          }
       }
-      catch (...) {
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError());
       }
       updateStatusBarCounts();
@@ -1036,8 +969,7 @@ namespace ctb::app
    auto MainFrame::getDataset(bool throw_on_null) -> DatasetPtr
    {
       auto dataset = m_event_source->getDataset();
-      if (nullptr == dataset.get() and throw_on_null)
-         throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
+      if (nullptr == dataset.get() and throw_on_null) throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
       return dataset;
    }
 
@@ -1056,7 +988,7 @@ namespace ctb::app
       if (dataset)
       {
          // our views are dynamic based on the dataset, so we need to make sure that m_event_source has the new
-         // dataset before creating the view, which means we'll set the dataset but defer the Initialized event 
+         // dataset before creating the view, which means we'll set the dataset but defer the Initialized event
          // until after we create thew view so that sub-views and controls have a chance to receive it.
          m_event_source->setDataset(dataset, false);
          m_view = DatasetMultiView::create(this, m_event_source);
@@ -1072,7 +1004,7 @@ namespace ctb::app
 
 
    void MainFrame::updateStatusBarCounts()
-   {     
+   {
       std::string summary{};
       if (m_event_source->hasDataset())
       {
@@ -1084,22 +1016,9 @@ namespace ctb::app
 
    void MainFrame::onDatasetEvent([[maybe_unused]] const DatasetEvent& event)
    {
-      constexpr int none = -1;
-
-      switch (event.event_id)
-      {
-         case DatasetEvent::Id::RowSelected:
-            m_selected_row = event.affected_row.value_or(none);
-            break;
-
-         case DatasetEvent::Id::DatasetRemove:
-            break;
-
-         default:
-            m_selected_row = none;
-      }
+      m_selected_row = event.affected_row;
       updateStatusBarCounts();
    }
 
-} // namespace ctb::app
+}   // namespace ctb::app
 

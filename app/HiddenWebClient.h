@@ -8,7 +8,6 @@
 #include <map>
 
 
-
 namespace ctb::app
 {
    class HiddenWebClient final : public wxFrame
@@ -21,14 +20,16 @@ namespace ctb::app
       // ptr that will cleanly destroy the window when appropriate.
       [[nodiscard]] static auto create() -> std::expected<WebClientPtr, ctb::Error>;
 
-
       // returns false if webview is already busy loading another page...
       auto requestPage(std::string url, PageLoadedCallback callback) -> bool;
 
    private:
-      std::map<std::string, PageLoadedCallback> m_requests{}; // map request URL to callback for when page-load is completed.
+      // map request URL to callback for when page-load is completed.
+      using RequestMap = std::map<std::string, PageLoadedCallback>;
+
+      RequestMap m_requests{};
       wxWebView* m_webview{};
-      bool m_busy_flag{ false }; // webview has IsBusy(), but it's buggy AF and will always return true after first page is loaded.
+      bool       m_busy_flag{ false };   // webview has IsBusy(), but it's buggy AF and will always return true after first page is loaded.
 
       void createWindow();
       void onPageLoaded(wxWebViewEvent& event);
@@ -38,4 +39,4 @@ namespace ctb::app
       void onScriptResult(wxWebViewEvent& event);
    };
 
-} // namespace ctb::app
+}   // namespace ctb::app

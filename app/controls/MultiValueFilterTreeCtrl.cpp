@@ -103,14 +103,14 @@ namespace ctb::app
       {
          switch (event.event_id)
          {
-            case DatasetEvent::Id::Filter:              [[fallthrough]];
+            case DatasetEvent::Id::DatasetFiltered:         [[fallthrough]];
             case DatasetEvent::Id::DatasetInitialize:
-               onDatasetInitialize(*event.dataset.get());
+               onDatasetInitialize(event.dataset);
                break;
 
-            case DatasetEvent::Id::Sort:                [[fallthrough]];
-            case DatasetEvent::Id::SubStringFilter:     [[fallthrough]];
-            case DatasetEvent::Id::RowSelected:         [[fallthrough]];
+            case DatasetEvent::Id::DatasetSorted:           [[fallthrough]];
+            case DatasetEvent::Id::DatasetSubStringFilter:  [[fallthrough]];
+            case DatasetEvent::Id::RowSelected:             [[fallthrough]];
             default:
                break;
             }
@@ -122,7 +122,7 @@ namespace ctb::app
 
 
    /// @brief Event handler called when a new dataset is associated with the event source
-   void MultiValueFilterTreeCtrl::onDatasetInitialize(IDataset& dataset)
+   void MultiValueFilterTreeCtrl::onDatasetInitialize(const IDataset* dataset)
    {
       wxBusyCursor busy{};
       wxWindowUpdateLocker freeze_updates{ this };
@@ -131,7 +131,7 @@ namespace ctb::app
       populateFilterNodes(dataset);
 
       // for active filters, populate their match values, checking as appropriate. the rest will get populated when user expands them.
-      for (const auto& [key, filter] : dataset.multivalFilters().activeFilters())
+      for (const auto& [key, filter] : dataset->multivalFilters().activeFilters())
       {
          if (m_name_nodes.contains(filter.filter_name))
          {
@@ -202,7 +202,7 @@ namespace ctb::app
       {
          auto dataset = getDataset();
          dataset->multivalFilters().clear();
-         getEventHandler().signal_source(DatasetEvent::Id::Filter, true);
+         getEventHandler().signal_source(DatasetEvent::Id::DatasetFiltered, true);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -218,7 +218,7 @@ namespace ctb::app
          auto current_filter = getFilter(item);
          auto dataset = getDataset();
          dataset->multivalFilters().removeFilter(current_filter.prop_id);
-         getEventHandler().signal_source(DatasetEvent::Id::Filter, true);
+         getEventHandler().signal_source(DatasetEvent::Id::DatasetFiltered, true);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -242,7 +242,7 @@ namespace ctb::app
          current_filter.match_values.swap(new_values);
 
          dataset->multivalFilters().replaceFilter(current_filter.prop_id, current_filter);
-         getEventHandler().signal_source(DatasetEvent::Id::Filter, true);
+         getEventHandler().signal_source(DatasetEvent::Id::DatasetFiltered, true);
       }
       catch(...){
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -485,7 +485,7 @@ namespace ctb::app
       if (was_inserted)
       {
          dataset->multivalFilters().replaceFilter(filter.prop_id, filter);
-         getEventHandler().signal_source(DatasetEvent::Id::Filter, false);
+         getEventHandler().signal_source(DatasetEvent::Id::DatasetFiltered, false);
       }
    }
 
@@ -494,7 +494,7 @@ namespace ctb::app
    /// 
    /// Child nodes are not populated, that happens in onNodeExpanding()
    /// 
-   void MultiValueFilterTreeCtrl::populateFilterNodes(IDataset& dataset)
+   void MultiValueFilterTreeCtrl::populateFilterNodes(const IDataset* dataset)
    {
       m_check_counts.clear();
       m_name_nodes.clear();
@@ -502,7 +502,7 @@ namespace ctb::app
       DeleteAllItems();
 
       // get the available filters for this dataset, and add them to the tree.
-      auto filters = dataset.availableMultiValueFilters();
+      auto filters = dataset->availableMultiValueFilters();
       auto root = AddRoot(wxEmptyString);
       for (const auto& filter : filters)
       {
@@ -584,7 +584,7 @@ namespace ctb::app
       if (filter.match_values.erase(getFilterValue(item)))
       {
          dataset->multivalFilters().replaceFilter(filter.prop_id, filter);
-         getEventHandler().signal_source(DatasetEvent::Id::Filter, false); 
+         getEventHandler().signal_source(DatasetEvent::Id::DatasetFiltered, false); 
       }
    }
 

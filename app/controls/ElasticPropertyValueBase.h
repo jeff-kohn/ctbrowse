@@ -30,7 +30,7 @@ namespace ctb::app
       /// derived classes must implement this so that the control knows what to display
       ///
       /// @return formatted display string for the property value
-      virtual auto getDisplayValue(const DatasetPtr& ds, int rec_idx) const -> std::string = 0;
+      virtual auto getDisplayValue(const IDataset* ds) const -> std::string = 0;
 
    private:
       wxString m_display_value{};

@@ -11,10 +11,10 @@
 
 namespace ctb::constants
 {
-   inline constexpr const char* CELLARTRACKER_DOT_COM       = "CellarTracker.com";
-   inline constexpr const char* URL_CT_DOT_COM              = "https://cellartracker.com";
-   inline constexpr const char* URL_CT_LOGIN_FORM           = "https://www.cellartracker.com/password.asp";
-   inline constexpr const char* URL_CT_TABLE_LIST           = "https://www.cellartracker.com/list.asp?Table=List";
+   inline constexpr const char* CELLARTRACKER_DOT_COM = "CellarTracker.com";
+   inline constexpr const char* URL_CT_DOT_COM        = "https://cellartracker.com";
+   inline constexpr const char* URL_CT_LOGIN_FORM     = "https://www.cellartracker.com/password.asp";
+   inline constexpr const char* URL_CT_TABLE_LIST     = "https://www.cellartracker.com/list.asp?Table=List";
 
    inline constexpr const char* FMT_URL_CT_ACCEPT_PENDING   = "https://www.cellartracker.com/purchase.asp?iWine={}&iPurchase={}&DeliveryState=delivered&DeliveryDate={:%F}";
    inline constexpr const char* FMT_URL_CT_ADD_TASTING_NOTE = "https://www.cellartracker.com/editnote.asp?iWine={}";
@@ -26,8 +26,8 @@ namespace ctb::constants
    inline constexpr const char* FMT_URL_CT_VINTAGES         = "https://www.cellartracker.com/list.asp?Table=List&fInStock=0&iUserOverride=0&Wine={}";
    inline constexpr const char* FMT_URL_CT_WINE_DETAILS     = "https://www.cellartracker.com/wine.asp?iWine={}";
 
-   inline constexpr const char* HTML_ELEM_LABEL_PHOTO       = "label_photo";
-   inline constexpr const char* HTML_ATTR_SRC               = "src";
+   inline constexpr const char* HTML_ELEM_LABEL_PHOTO = "label_photo";
+   inline constexpr const char* HTML_ATTR_SRC         = "src";
 
    inline constexpr const char* CELLARTRACKER_LOGON_CAPTION = "Enter login information for CellarTracker.com:";
    inline constexpr const char* CT_PASSWORD                 = "CT_PASSWORD";
@@ -36,30 +36,30 @@ namespace ctb::constants
    inline constexpr int         MAX_ENV_VAR_LENGTH          = 128;
 
    // column labels
-   inline constexpr const char* DISPLAY_COL_AVAILABLE       = "Ready";
-   inline constexpr const char* DISPLAY_COL_BIN             = "Bin";
-   inline constexpr const char* DISPLAY_COL_CONSUME_DATE    = "Consumed On";
-   inline constexpr const char* DISPLAY_COL_CONSUME_REASON  = "Reason";
-   inline constexpr const char* DISPLAY_COL_CONSUME_FROM    = "Consumed From";
-   inline constexpr const char* DISPLAY_COL_CT_SCORE        = "CT Score";
-   inline constexpr const char* DISPLAY_COL_CT_WINDOW       = "CT Window";
-   inline constexpr const char* DISPLAY_COL_DRINK_BY        = "Drink By";
-   inline constexpr const char* DISPLAY_COL_FLAWED          = "Flawed?";
-   inline constexpr const char* DISPLAY_COL_INVENTORY       = "Inventory";
-   inline constexpr const char* DISPLAY_COL_LOCATION        = "Location";
-   inline constexpr const char* DISPLAY_COL_LIKED           = "Liked?";
-   inline constexpr const char* DISPLAY_COL_LOCALE          = "Region and Appellation";
-   inline constexpr const char* DISPLAY_COL_MY_SCORE        = "My Score";
-   inline constexpr const char* DISPLAY_COL_MY_WINDOW       = "My Window";
-   inline constexpr const char* DISPLAY_COL_NOTE            = "Note";
-   inline constexpr const char* DISPLAY_COL_PRICE           = "Price";
-   inline constexpr const char* DISPLAY_COL_PURCH_DATE      = "Date Purchased";
-   inline constexpr const char* DISPLAY_COL_QTY             = "Qty";
-   inline constexpr const char* DISPLAY_COL_REMAINING       = "Bottles Left";
-   inline constexpr const char* DISPLAY_COL_STORE           = "Store";
-   inline constexpr const char* DISPLAY_COL_TASTING_DATE    = "Tasting Date";
-   inline constexpr const char* DISPLAY_COL_TAG_NAME        = "Tag Name";
-   inline constexpr const char* DISPLAY_COL_WINE            = "Wine";
+   inline constexpr const char* DISPLAY_COL_AVAILABLE      = "Ready";
+   inline constexpr const char* DISPLAY_COL_BIN            = "Bin";
+   inline constexpr const char* DISPLAY_COL_CONSUME_DATE   = "Consumed On";
+   inline constexpr const char* DISPLAY_COL_CONSUME_REASON = "Reason";
+   inline constexpr const char* DISPLAY_COL_CONSUME_FROM   = "Consumed From";
+   inline constexpr const char* DISPLAY_COL_CT_SCORE       = "CT Score";
+   inline constexpr const char* DISPLAY_COL_CT_WINDOW      = "CT Window";
+   inline constexpr const char* DISPLAY_COL_DRINK_BY       = "Drink By";
+   inline constexpr const char* DISPLAY_COL_FLAWED         = "Flawed?";
+   inline constexpr const char* DISPLAY_COL_INVENTORY      = "Inventory";
+   inline constexpr const char* DISPLAY_COL_LOCATION       = "Location";
+   inline constexpr const char* DISPLAY_COL_LIKED          = "Liked?";
+   inline constexpr const char* DISPLAY_COL_LOCALE         = "Region and Appellation";
+   inline constexpr const char* DISPLAY_COL_MY_SCORE       = "My Score";
+   inline constexpr const char* DISPLAY_COL_MY_WINDOW      = "My Window";
+   inline constexpr const char* DISPLAY_COL_NOTE           = "Note";
+   inline constexpr const char* DISPLAY_COL_PRICE          = "Price";
+   inline constexpr const char* DISPLAY_COL_PURCH_DATE     = "Date Purchased";
+   inline constexpr const char* DISPLAY_COL_QTY            = "Qty";
+   inline constexpr const char* DISPLAY_COL_REMAINING      = "Bottles Left";
+   inline constexpr const char* DISPLAY_COL_STORE          = "Store";
+   inline constexpr const char* DISPLAY_COL_TASTING_DATE   = "Tasting Date";
+   inline constexpr const char* DISPLAY_COL_TAG_NAME       = "Tag Name";
+   inline constexpr const char* DISPLAY_COL_WINE           = "Wine";
 
    inline constexpr const char* DISPLAY_COL_CURVE_LINEAR        = "Linear";
    inline constexpr const char* DISPLAY_COL_CURVE_BELL          = "Bell";
@@ -69,160 +69,161 @@ namespace ctb::constants
    inline constexpr const char* DISPLAY_COL_CURVE_FAST_MATURING = "Fast";
 
    // filter names
-   inline constexpr const char* FILTER_APPELATION           = "Appellation";
-   inline constexpr const char* FILTER_BIN                  = "Bin";
-   inline constexpr const char* FILTER_BOTTLE_SIZE          = "Size";
-   inline constexpr const char* FILTER_COUNTRY              = "Country";
-   inline constexpr const char* FILTER_CONSUME_YEAR         = "Year Consumed";
-   inline constexpr const char* FILTER_CONSUME_MONTH        = "Month Consumed";
-   inline constexpr const char* FILTER_LOCATION             = "Location";
-   inline constexpr const char* FILTER_ORDER_DATE           = "Order Date";
-   inline constexpr const char* FILTER_PRODUCER             = "Producer";
-   inline constexpr const char* FILTER_REGION               = "Region";
-   inline constexpr const char* FILTER_SUB_REGION           = "Sub-Region";
-   inline constexpr const char* FILTER_CONSUME_REASON       = "Reason";
-   inline constexpr const char* FILTER_STORE                = "Store";
-   inline constexpr const char* FILTER_TASTING_DATE         = "Tasting Date";
-   inline constexpr const char* FILTER_TASTING_FLAWED       = "Flawed Wine";
-   inline constexpr const char* FILTER_TASTING_LIKED        = "I Liked It";
-   inline constexpr const char* FILTER_TAG_NAME             = "Tag/List Name";
-   inline constexpr const char* FILTER_VARIETAL             = "Varietal";
-   inline constexpr const char* FILTER_VINTAGE              = "Vintage";
+   inline constexpr const char* FILTER_APPELATION     = "Appellation";
+   inline constexpr const char* FILTER_BIN            = "Bin";
+   inline constexpr const char* FILTER_BOTTLE_SIZE    = "Size";
+   inline constexpr const char* FILTER_COUNTRY        = "Country";
+   inline constexpr const char* FILTER_CONSUME_YEAR   = "Year Consumed";
+   inline constexpr const char* FILTER_CONSUME_MONTH  = "Month Consumed";
+   inline constexpr const char* FILTER_LOCATION       = "Location";
+   inline constexpr const char* FILTER_ORDER_DATE     = "Order Date";
+   inline constexpr const char* FILTER_PRODUCER       = "Producer";
+   inline constexpr const char* FILTER_REGION         = "Region";
+   inline constexpr const char* FILTER_SUB_REGION     = "Sub-Region";
+   inline constexpr const char* FILTER_CONSUME_REASON = "Reason";
+   inline constexpr const char* FILTER_STORE          = "Store";
+   inline constexpr const char* FILTER_TASTING_DATE   = "Tasting Date";
+   inline constexpr const char* FILTER_TASTING_FLAWED = "Flawed Wine";
+   inline constexpr const char* FILTER_TASTING_LIKED  = "I Liked It";
+   inline constexpr const char* FILTER_TAG_NAME       = "Tag/List Name";
+   inline constexpr const char* FILTER_VARIETAL       = "Varietal";
+   inline constexpr const char* FILTER_VINTAGE        = "Vintage";
 
-   inline constexpr const char* HTTP_PARAM_TABLE            = "Table";
-   inline constexpr const char* HTTP_PARAM_FORMAT           = "Format";
-   inline constexpr int         HTTP_TIMEOUT_SEC            = 30;
-   inline constexpr const char* HTTP_PARAM_KEY_REFERRER     = "Referrer";
-   inline constexpr const char* HTTP_PARAM_VAL_REFERRER     = "/default.asp";
-   inline constexpr const char* HTTP_PARAM_KEY_USER         = "szUser";
-   inline constexpr const char* HTTP_PARAM_KEY_PASSWORD     = "szPassword";
-   inline constexpr const char* HTTP_PARAM_KEY_USE_COOKIE   = "UseCookie";
-   inline constexpr const char* HTTP_PARAM_VAL_USE_COOKIE   = "true";
+   inline constexpr const char* HTTP_PARAM_TABLE          = "Table";
+   inline constexpr const char* HTTP_PARAM_FORMAT         = "Format";
+   inline constexpr int         HTTP_TIMEOUT_SEC          = 30;
+   inline constexpr const char* HTTP_PARAM_KEY_REFERRER   = "Referrer";
+   inline constexpr const char* HTTP_PARAM_VAL_REFERRER   = "/default.asp";
+   inline constexpr const char* HTTP_PARAM_KEY_USER       = "szUser";
+   inline constexpr const char* HTTP_PARAM_KEY_PASSWORD   = "szPassword";
+   inline constexpr const char* HTTP_PARAM_KEY_USE_COOKIE = "UseCookie";
+   inline constexpr const char* HTTP_PARAM_VAL_USE_COOKIE = "true";
 
    // sort option names
-   inline constexpr const char* SORT_OPTION_APPELATION_WINE       = "Appellation, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_LOC_BIN               = "Location, Bin, Wine";
-   inline constexpr const char* SORT_OPTION_CONSUME_DATE          = "Date Consumed";
-   inline constexpr const char* SORT_OPTION_COUNTRY_APPELATION    = "Country, Appellation and Wine";
-   inline constexpr const char* SORT_OPTION_DRINK_BY              = "Drink By Year and Vintage";
-   inline constexpr const char* SORT_OPTION_LOCALE_WINE           = "Country, Region, and Appellation";
-   inline constexpr const char* SORT_OPTION_PRODUCER_WINE_NAME    = "Producer, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_REGION_WINE           = "Region, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_PURCHASE_DATE         = "Order Date, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_TASTING_DATE          = "Tasting Date, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_STORE_NAME            = "Store, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_CURVE_DEFAULT         = "Default Formula";
-   inline constexpr const char* SORT_OPTION_CURVE_LINEAR          = "Linear Formula";
-   inline constexpr const char* SORT_OPTION_CURVE_BELL            = "Bell Curve Formula";
-   inline constexpr const char* SORT_OPTION_CURVE_BELL_EARLY      = "Early Bell Curve Formula";
-   inline constexpr const char* SORT_OPTION_CURVE_BELL_LATE       = "Late Bell Curve Formula";
-   inline constexpr const char* SORT_OPTION_CURVE_FAST_MATURE     = "Fast Maturing Formula";
-   inline constexpr const char* SORT_OPTION_CURVE_EARLY_LATE      = "Early & Late Formula";
-   inline constexpr const char* SORT_OPTION_CURVE_BOTTLES_YEAR    = "Bottles per Year Formula";
-   inline constexpr const char* SORT_OPTION_SCORE_MY              = "My Score";
-   inline constexpr const char* SORT_OPTION_SCORE_CT              = "CellarTracker Score";
-   inline constexpr const char* SORT_OPTION_MY_VALUE              = "My Value";
-   inline constexpr const char* SORT_OPTION_VARIETAL_WINE         = "Varietal, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_TAG_VINTAGE_WINE      = "Tag, Vintage and Wine";
-   inline constexpr const char* SORT_OPTION_TAG_WINE_VINTAGE      = "Tag, Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_VINTAGE_WINE          = "Vintage and Wine";
-   inline constexpr const char* SORT_OPTION_WINE_VINTAGE          = "Wine and Vintage";
-   inline constexpr const char* SORT_OPTION_QTY_TOTAL             = "Bottle Count, Wine Name";
-   
+   inline constexpr const char* SORT_OPTION_APPELATION_WINE    = "Appellation, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_LOC_BIN            = "Location, Bin, Wine";
+   inline constexpr const char* SORT_OPTION_CONSUME_DATE       = "Date Consumed";
+   inline constexpr const char* SORT_OPTION_COUNTRY_APPELATION = "Country, Appellation and Wine";
+   inline constexpr const char* SORT_OPTION_DRINK_BY           = "Drink By Year and Vintage";
+   inline constexpr const char* SORT_OPTION_LOCALE_WINE        = "Country, Region, and Appellation";
+   inline constexpr const char* SORT_OPTION_PRODUCER_WINE_NAME = "Producer, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_REGION_WINE        = "Region, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_PURCHASE_DATE      = "Order Date, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_TASTING_DATE       = "Tasting Date, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_STORE_NAME         = "Store, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_CURVE_DEFAULT      = "Default Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_LINEAR       = "Linear Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_BELL         = "Bell Curve Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_BELL_EARLY   = "Early Bell Curve Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_BELL_LATE    = "Late Bell Curve Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_FAST_MATURE  = "Fast Maturing Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_EARLY_LATE   = "Early & Late Formula";
+   inline constexpr const char* SORT_OPTION_CURVE_BOTTLES_YEAR = "Bottles per Year Formula";
+   inline constexpr const char* SORT_OPTION_SCORE_MY           = "My Score";
+   inline constexpr const char* SORT_OPTION_SCORE_CT           = "CellarTracker Score";
+   inline constexpr const char* SORT_OPTION_MY_VALUE           = "My Value";
+   inline constexpr const char* SORT_OPTION_VARIETAL_WINE      = "Varietal, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_TAG_VINTAGE_WINE   = "Tag, Vintage and Wine";
+   inline constexpr const char* SORT_OPTION_TAG_WINE_VINTAGE   = "Tag, Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_VINTAGE_WINE       = "Vintage and Wine";
+   inline constexpr const char* SORT_OPTION_WINE_VINTAGE       = "Wine and Vintage";
+   inline constexpr const char* SORT_OPTION_QTY_TOTAL          = "Bottle Count, Wine Name";
+
 
    // table names
-   inline constexpr const char* TABLE_NAME_LIST                   = "My Wine Collection";
-   inline constexpr const char* TABLE_NAME_INVENTORY              = "Bottle Inventory";
-   inline constexpr const char* TABLE_NAME_NOTES                  = "Tasting Notes";
-   inline constexpr const char* TABLE_NAME_PRIVATENOTES           = "Private Notes";
-   inline constexpr const char* TABLE_NAME_PURCHASE               = "Wine Purchases";
-   inline constexpr const char* TABLE_NAME_PENDING                = "Pending Deliveries";
-   inline constexpr const char* TABLE_NAME_CONSUMED               = "Wine Consumed";
-   inline constexpr const char* TABLE_NAME_AVAILABILITY           = "Ready to Drink List";
-   inline constexpr const char* TABLE_NAME_TAG                    = "Tagged Wine Lists";
-   inline constexpr const char* TABLE_NAME_PROREVIEW              = "Manually Entered Pro Reviews";
-   inline constexpr const char* TABLE_NAME_BOTTLES                = "Raw Bottle List";
-   inline constexpr const char* TABLE_NAME_FOODTAGS               = "Food Pairing Tags";
+   inline constexpr const char* TABLE_NAME_LIST         = "My Wine Collection";
+   inline constexpr const char* TABLE_NAME_INVENTORY    = "Bottle Inventory";
+   inline constexpr const char* TABLE_NAME_NOTES        = "Tasting Notes";
+   inline constexpr const char* TABLE_NAME_PRIVATENOTES = "Private Notes";
+   inline constexpr const char* TABLE_NAME_PURCHASE     = "Wine Purchases";
+   inline constexpr const char* TABLE_NAME_PENDING      = "Pending Deliveries";
+   inline constexpr const char* TABLE_NAME_CONSUMED     = "Wine Consumed";
+   inline constexpr const char* TABLE_NAME_AVAILABILITY = "Ready to Drink List";
+   inline constexpr const char* TABLE_NAME_TAG          = "Tagged Wine Lists";
+   inline constexpr const char* TABLE_NAME_PROREVIEW    = "Manually Entered Pro Reviews";
+   inline constexpr const char* TABLE_NAME_BOTTLES      = "Raw Bottle List";
+   inline constexpr const char* TABLE_NAME_FOODTAGS     = "Food Pairing Tags";
 
    // CT doesn't return an HTTP response code for invalid logon, it just returns this text instead of the requested file.
    inline constexpr const char* ERR_STR_INVALID_CELLARTRACKER_LOGON = "<html><body>You are currently not logged into CellarTracker.</body></html>";
 
-   inline constexpr const char* ERROR_STR                         = "Error";
-   inline constexpr const char* ERROR_STR_AUTHENTICATION_FAILED   = "Invalid username/password.";
-   inline constexpr const char* ERROR_STR_LABEL_URL_NOT_FOUND     = "Label Image URL not found in HTML.";
-   inline constexpr const char* ERROR_STR_OPERATION_CANCELED      = "Operation Canceled.";
-   inline constexpr const char* ERROR_STR_DIALOG_TRANSFER_FAILED  = "Unexpected error transferring data to/from dialog.";
-   inline constexpr const char* ERROR_STR_DOWNLOAD_AUTH_FAILURE   = "File download canceled, no valid login was provided.";
-   inline constexpr const char* ERROR_STR_FILTER_NOT_FOUND        = "Filter object not found, this is a bug!";
-   inline constexpr const char* ERROR_STR_INVALID_INDEX           = "Invalid index";
-   inline constexpr const char* ERROR_STR_INVALID_ROW_INDEX       = "Invalid row index";
-   inline constexpr const char* ERROR_STR_EDITING_NOT_SUPPORTED   = "Editing data is not supported.";
-   inline constexpr const char* ERROR_STR_NO_DATASET              = "No Dataset Available!";
-   inline constexpr const char* ERROR_STR_NULLPTR_ARG             = "Invalid Parameter (nullptr).";
-   inline constexpr const char* ERROR_STR_INVALID_LABEL_CACHE     = "The label image cache folder must be an valid, existing absolute path (relative path not supported).";
-   inline constexpr const char* ERORR_STR_NO_SECRET_STORE         = "Secret Store not available.";
-   inline constexpr const char* ERROR_STR_UNKNOWN                 = "Unknown Error.";
-   inline constexpr const char* ERROR_STR_UNINITIALIZED_FIELDS    = "Attempt to use field controls before creating and initializing them.";
-   inline constexpr const char* ERROR_VAL                         = "#Err#";
-   inline constexpr const char* FMT_ERROR_CURL_ERROR              = "The operation failed with CURL error {}";
-   inline constexpr const char* FMT_ERROR_FILE_NOT_FOUND          = "File '{}' was not found.";
-   inline constexpr const char* FMT_ERROR_FILE_ALREADY_EXISTS     = "File '{}' already exists and will not be overwritten.";
-   inline constexpr const char* FMT_ERROR_FILE_OPEN_FAILED        = "File '{}' could not be opened.";
-   inline constexpr const char* FMT_ERROR_FILE_READ_FAILED        = "Read operation on file '{}' failed.";
-   inline constexpr const char* FMT_ERROR_FILE_WRITE_FAILED       = "Write operation on file '{}' failed.";
-   inline constexpr const char* FMT_ERROR_FILE_TOO_BIG            = "File '{}'s size of {} bytes exceeded the maximum allowable size of {}.";
-   inline constexpr const char* FMT_ERROR_HTTP_STATUS_CODE        = "The operation failed with HTTP status code {}";
-   inline constexpr const char* FMT_ERORR_NO_CREDENTIAL           = "Credential '{}' was not found or could not be loaded."; 
-   inline constexpr const char* FMT_ERROR_NO_LABEL_CACHE_FOLDER   = "The image cache folder {} does not exist and could not be created.";
-   inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND          = "Folder '{}' does not exist.";
-   inline constexpr const char* FMT_ERROR_PROP_NOT_FOUND          = "Property '{}' was not found.";
-   inline constexpr const char* FMT_ERROR_INVALID_FUTURE          = "Attempt to get value from invalid future.";
+   inline constexpr const char* ERROR_STR                        = "Error";
+   inline constexpr const char* ERROR_STR_AUTHENTICATION_FAILED  = "Invalid username/password.";
+   inline constexpr const char* ERROR_STR_LABEL_URL_NOT_FOUND    = "Label Image URL not found in HTML.";
+   inline constexpr const char* ERROR_STR_OPERATION_CANCELED     = "Operation Canceled.";
+   inline constexpr const char* ERROR_STR_DIALOG_TRANSFER_FAILED = "Unexpected error transferring data to/from dialog.";
+   inline constexpr const char* ERROR_STR_DOWNLOAD_AUTH_FAILURE  = "File download canceled, no valid login was provided.";
+   inline constexpr const char* ERROR_STR_FILTER_NOT_FOUND       = "Filter object not found, this is a bug!";
+   inline constexpr const char* ERROR_STR_INVALID_INDEX          = "Invalid index";
+   inline constexpr const char* ERROR_STR_INVALID_ROW_INDEX      = "Invalid row index";
+   inline constexpr const char* ERROR_STR_EDITING_NOT_SUPPORTED  = "Editing data is not supported.";
+   inline constexpr const char* ERROR_STR_NO_DATASET             = "No Dataset Available!";
+   inline constexpr const char* ERROR_STR_NULLPTR_ARG            = "Invalid Parameter (nullptr).";
+   inline constexpr const char* ERROR_STR_INVALID_LABEL_CACHE    = "The label image cache folder must be an valid, existing absolute path (relative path not supported).";
+   inline constexpr const char* ERORR_STR_NO_SECRET_STORE       = "Secret Store not available.";
+   inline constexpr const char* ERROR_STR_UNKNOWN               = "Unknown Error.";
+   inline constexpr const char* ERROR_STR_UNINITIALIZED_FIELDS  = "Attempt to use field controls before creating and initializing them.";
+   inline constexpr const char* ERROR_VAL                       = "#Err#";
+   inline constexpr const char* FMT_ERROR_CURL_ERROR            = "The operation failed with CURL error {}";
+   inline constexpr const char* FMT_ERROR_FILE_NOT_FOUND        = "File '{}' was not found.";
+   inline constexpr const char* FMT_ERROR_FILE_ALREADY_EXISTS   = "File '{}' already exists and will not be overwritten.";
+   inline constexpr const char* FMT_ERROR_FILE_OPEN_FAILED      = "File '{}' could not be opened.";
+   inline constexpr const char* FMT_ERROR_FILE_READ_FAILED      = "Read operation on file '{}' failed.";
+   inline constexpr const char* FMT_ERROR_FILE_WRITE_FAILED     = "Write operation on file '{}' failed.";
+   inline constexpr const char* FMT_ERROR_FILE_TOO_BIG          = "File '{}'s size of {} bytes exceeded the maximum allowable size of {}.";
+   inline constexpr const char* FMT_ERROR_HTTP_STATUS_CODE      = "The operation failed with HTTP status code {}";
+   inline constexpr const char* FMT_ERORR_NO_CREDENTIAL         = "Credential '{}' was not found or could not be loaded.";
+   inline constexpr const char* FMT_ERROR_NO_LABEL_CACHE_FOLDER = "The image cache folder {} does not exist and could not be created.";
+   inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND        = "Folder '{}' does not exist.";
+   inline constexpr const char* FMT_ERROR_PROP_NOT_FOUND        = "Property '{}' was not found.";
+   inline constexpr const char* FMT_ERROR_INVALID_FUTURE        = "Attempt to get value from invalid future.";
+   inline constexpr const char* FMT_ERROR_EMPTY_DATASET         = "Couldn't create dataset for table '{}', data was empty or invalid.";
 
-   inline constexpr const char* FMT_DEFAULT_FORMAT                = "{}";
-   inline constexpr const char* FMT_NUMBER_CURRENCY               = "${:.2f}";
-   inline constexpr const char* FMT_NUMBER_DECIMAL                = "{:.1f}";
-   inline constexpr const char* FMT_DATE_SHORT                    = "{:%m/%d/%Y}";
-   inline constexpr const char* FMT_ISO_SHORT_DATE_ONLY           = "{:%F}";
-   inline constexpr const char* FMT_NUMBER_INTEGRAL               = "{:.0f}";
-   inline constexpr const char* FMT_PARSE_DATE_SHORT              = "%m/%d/%Y";
-   inline constexpr const char* FMT_PARSE_ISO_DATETIME_LOCAL      = "%FT%T%Ez"; //. These 3 don't have {}'s because they're meant to be used with std::chrono::parse
-   inline constexpr const char* FMT_PARSE_ISO_DATETIME_UTC        = "%FT%T%Z";
-   inline constexpr const char* FMT_PARSE_ISO_DATE_ONLY           = "%F";
+   inline constexpr const char* FMT_DEFAULT_FORMAT           = "{}";
+   inline constexpr const char* FMT_NUMBER_CURRENCY          = "${:.2f}";
+   inline constexpr const char* FMT_NUMBER_DECIMAL           = "{:.1f}";
+   inline constexpr const char* FMT_DATE_SHORT               = "{:%m/%d/%Y}";
+   inline constexpr const char* FMT_ISO_SHORT_DATE_ONLY      = "{:%F}";
+   inline constexpr const char* FMT_NUMBER_INTEGRAL          = "{:.0f}";
+   inline constexpr const char* FMT_PARSE_DATE_SHORT         = "%m/%d/%Y";   // These don't have {}'s because they're meant to be used with std::chrono::parse
+   inline constexpr const char* FMT_PARSE_ISO_DATETIME_LOCAL = "%FT%T%Ez";   //
+   inline constexpr const char* FMT_PARSE_ISO_DATETIME_UTC   = "%FT%T%Z";    //
+   inline constexpr const char* FMT_PARSE_ISO_DATE_ONLY      = "%F";         //
 
-   inline constexpr const char* FMT_SUMMARY_AVAILABILITY          = "{} Wines with {} Bottles Ready to Drink (Default Formula)";
-   inline constexpr const char* FMT_SUMMARY_CONSUMED              = "{} Wines Consumed Since {}.";
-   inline constexpr const char* FMT_SUMMARY_PURCHASED             = "{} Wines, with {} Bottles Purchased and {} Bottles Remaining or Pending.";
-   inline constexpr const char* SUMMARY_EMPTY                     = "No data. Check filter options or download latest CellarTracker data.";
-   inline constexpr const char* FMT_SUMMARY_BOTTLE_INVENTORY      = "{} Wines, with {} Bottles spanning {} vintages.";
-   inline constexpr const char* FMT_SUMMARY_MY_CELLAR             = "{} Wines, with {} Bottles Cellared and {} Pending Delivery";
-   inline constexpr const char* FMT_SUMMARY_PENDING               = "{} Wines Ordered from {} Stores, Totaling {} Bottles.";
-   inline constexpr const char* FMT_SUMMARY_PRIVATE_NOTES         = "{} Private Notes.";
-   inline constexpr const char* FMT_SUMMARY_TAGGED_WINES          = "{} Lists Containing {} Wines.";
-   inline constexpr const char* FMT_SUMMARY_TASTING_NOTES         = "{} Tasting Notes Recorded for {} Wines.";
-   inline constexpr const char* FMT_TASTING_CT_LIKE_SUMMARY       = "{} ({}%)";
-   inline constexpr const char* FMT_TASTING_LIKE_MSG              = "I {} this wine";
-   inline constexpr const char* FMT_TASTING_FEEDBACK_VWS_VOTES    = "{} Views, {} 'Helpful' Votes";
-   inline constexpr const char* FMT_TASTING_FEEDBACK_VWS_COMMENTS = "{} Views, {} comments";
+   inline constexpr const char* FMT_SUMMARY_AVAILABILITY                = "{} Wines with {} Bottles Ready to Drink (Default Formula)";
+   inline constexpr const char* FMT_SUMMARY_CONSUMED                    = "{} Wines Consumed Since {}.";
+   inline constexpr const char* FMT_SUMMARY_PURCHASED                   = "{} Wines, with {} Bottles Purchased and {} Bottles Remaining or Pending.";
+   inline constexpr const char* SUMMARY_EMPTY                           = "No data. Check filter options or download latest CellarTracker data.";
+   inline constexpr const char* FMT_SUMMARY_BOTTLE_INVENTORY            = "{} Wines, with {} Bottles spanning {} vintages.";
+   inline constexpr const char* FMT_SUMMARY_MY_CELLAR                   = "{} Wines, with {} Bottles Cellared and {} Pending Delivery";
+   inline constexpr const char* FMT_SUMMARY_PENDING                     = "{} Wines Ordered from {} Stores, Totaling {} Bottles.";
+   inline constexpr const char* FMT_SUMMARY_PRIVATE_NOTES               = "{} Private Notes.";
+   inline constexpr const char* FMT_SUMMARY_TAGGED_WINES                = "{} Lists Containing {} Wines.";
+   inline constexpr const char* FMT_SUMMARY_TASTING_NOTES               = "{} Tasting Notes Recorded for {} Wines.";
+   inline constexpr const char* FMT_TASTING_CT_LIKE_SUMMARY             = "{} ({}%)";
+   inline constexpr const char* FMT_TASTING_LIKE_MSG                    = "I {} this wine";
+   inline constexpr const char* FMT_TASTING_FEEDBACK_VWS_VOTES          = "{} Views, {} 'Helpful' Votes";
+   inline constexpr const char* FMT_TASTING_FEEDBACK_VWS_COMMENTS       = "{} Views, {} comments";
    inline constexpr const char* FMT_TASTING_FEEDBACK_VWS_COMMENTS_VOTES = "{} Views, {} Comments and {} 'Helpful' Votes";
-   inline constexpr const char* FMT_TASTING_FEEDBACK_VIEWS        = "{} Views";
+   inline constexpr const char* FMT_TASTING_FEEDBACK_VIEWS              = "{} Views";
 
-   inline constexpr const char* STR_LIKE                          = "like";
-   inline constexpr const char* STR_DONT_LIKE                     = "do not like";
-   inline constexpr const char* STR_CRLF                          = "\r\n";
-   inline constexpr const char* STR_FLAWED_WINE                   = "This wine was flawed";
-   inline constexpr const char* STR_UNSPECIFIED                   = "Unspecified";
-   inline constexpr const char* STR_YES                           = "Yes";
-   inline constexpr const char* STR_NO                            = "No";
-
-
-   inline constexpr const char* LBL_SIZE_750ml                    = "750ml";
-   inline constexpr const char* LBL_SIZE_375ml                    = "375ml";
-   inline constexpr const char* LBL_SIZE_MAGNUM                   = "1.5L";
+   inline constexpr const char* STR_LIKE        = "like";
+   inline constexpr const char* STR_DONT_LIKE   = "do not like";
+   inline constexpr const char* STR_CRLF        = "\r\n";
+   inline constexpr const char* STR_FLAWED_WINE = "This wine was flawed";
+   inline constexpr const char* STR_UNSPECIFIED = "Unspecified";
+   inline constexpr const char* STR_YES         = "Yes";
+   inline constexpr const char* STR_NO          = "No";
 
 
-   inline constexpr auto     ONE_MB                               = 1024 * 1024;
-   inline constexpr uint16_t CT_NULL_YEAR                         =        9999;
-   inline constexpr uint16_t CT_NV_YEAR                           =        1001;
+   inline constexpr const char* LBL_SIZE_750ml  = "750ml";
+   inline constexpr const char* LBL_SIZE_375ml  = "375ml";
+   inline constexpr const char* LBL_SIZE_MAGNUM = "1.5L";
 
 
-} // namespace ctb::constants
+   inline constexpr auto     ONE_MB       = 1024 * 1024;
+   inline constexpr uint16_t CT_NULL_YEAR = 9999;
+   inline constexpr uint16_t CT_NV_YEAR   = 1001;
+
+
+}   // namespace ctb::constants

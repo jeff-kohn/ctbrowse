@@ -30,7 +30,7 @@ namespace ctb::log
    {
       std::string path{ source_loc.file_name() };
       auto file_name = viewFilename(path);
-      log::error("{} (in {}:{}) - {}", file_name, source_loc.line(), source_loc.function_name(), e.formattedMesage());
+      log::error("{} (in {}:{}) - {}", file_name, source_loc.line(), source_loc.function_name(), e.formattedMessage());
       log::flush();
    }
 

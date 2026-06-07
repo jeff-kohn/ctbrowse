@@ -82,7 +82,7 @@ namespace ctb::app
          }
          catch (...)
          {
-            log::error("Unabled to save downloaded label image ({} bytes) to {}. {}", file_path.generic_string(), buf.size(), packageError().formattedMesage());
+            log::error("Unabled to save downloaded label image ({} bytes) to {}. {}", file_path.generic_string(), buf.size(), packageError().formattedMessage());
          }
       }
    } // namespace
@@ -160,7 +160,7 @@ namespace ctb::app
       if (!fs::exists(m_cache_folder) )
       {
          // MS in their infinite wisdom, will return false even though the directory was created if the string had a trailing slash.
-         // This is FUCKING STUPID, and we have to work around it. 
+         // So we have to ignore return value and check for an error_code
          std::error_code ms_sucks{};
          fs::create_directories(m_cache_folder, ms_sucks);
          if (ms_sucks)
@@ -253,7 +253,7 @@ namespace ctb::app
             log::info("LabelImageCache::fetchLabelThreadProc({}) terminating early due to cancellation/shutdown", request->wineId());
          }
          else {
-            log::warn("LabelImageCache::fetchLabelThreadProc({}) terminating with exception: {}", request->wineId(), err.formattedMesage());
+            log::warn("LabelImageCache::fetchLabelThreadProc({}) terminating with exception: {}", request->wineId(), err.formattedMessage());
          }
          request->setError(std::make_exception_ptr(err));
       }
@@ -273,8 +273,8 @@ namespace ctb::app
       {
          log::error("LabelImageCache::onPageLoaded called but no matching request was found for wine_id {}", wine_id);
       }
-      else {
-
+      else
+      {
          if (result.has_value())
          {
             log::info("Received web page requested for wine_id {}", wine_id);

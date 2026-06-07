@@ -132,7 +132,7 @@ namespace ctb::app
          }
       }
       catch (...) {
-         log::warn("Couldn't retrieve label cache folder from config. {}", packageError().formattedMesage());
+         log::warn("Couldn't retrieve label cache folder from config. {}", packageError().formattedMessage());
       }
       return getDataFolder(AppFolder::Labels);
    }
@@ -158,7 +158,7 @@ namespace ctb::app
 
    void App::displayErrorMessage(const Error& err, bool log_error, std::source_location source_loc) const
    {
-      displayErrorMessage(err.formattedMesage(), log_error, std::string{ err.categoryName() }, source_loc);
+      displayErrorMessage(err.formattedMessage(), log_error, std::string{ err.categoryName() }, source_loc);
    }
 
 

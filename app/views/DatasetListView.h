@@ -45,7 +45,7 @@ namespace ctb::app
 
       void createWindow(wxWindow* parent);
       void configureColumns();
-      void setDataset(const DatasetPtr& dataset);
+      void setDataset(const IDataset* dataset);
       void selectFirstRow();
 
       void onDatasetEvent(const DatasetEvent& event);

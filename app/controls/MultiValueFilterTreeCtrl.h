@@ -57,7 +57,7 @@ namespace ctb::app
       void createWindow(wxWindow* parent) override;
 
       void onDatasetEvent(const DatasetEvent&);
-      void onDatasetInitialize(IDataset& dataset);
+      void onDatasetInitialize(const IDataset* dataset);
 
       void onCollapseExpandNode(wxCommandEvent& event);
       void onCollapseAllNodes(wxCommandEvent& event);
@@ -86,7 +86,7 @@ namespace ctb::app
       auto getFilter(wxTreeItemId item) noexcept(false) -> CtMultiValueFilter&;
       auto getFilterValue(wxTreeItemId item) -> CtPropertyVal;
       auto getPopupMenu(wxTreeItemId item) const -> wxMenuPtr;
-      void populateFilterNodes(IDataset& dataset);
+      void populateFilterNodes(const IDataset* dataset);
       void populateFilterChildItems(wxTreeItemId filter_node) noexcept(false);
       void setChecked(wxTreeItemId item, bool checked = true);
       void toggleFilterSelection(wxTreeItemId item);

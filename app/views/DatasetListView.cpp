@@ -88,7 +88,7 @@ namespace ctb::app
    }
 
 
-   void DatasetListView::setDataset(const DatasetPtr& dataset)
+   void DatasetListView::setDataset(const IDataset* dataset)
    {
       if (m_model->getDataset())
       {
@@ -116,7 +116,7 @@ namespace ctb::app
 
    void DatasetListView::selectFirstRow()
    {
-      auto dataset = m_model->getDataset();
+      const auto* dataset = m_model->getDataset();
       if (!dataset or dataset->rowCount() == 0)
          return;
 
@@ -137,12 +137,12 @@ namespace ctb::app
             break;
 
          case DatasetEvent::Id::DatasetRemove:
-            setDataset(DatasetPtr{});
+            setDataset(nullptr);
             break;
 
-         case DatasetEvent::Id::Sort:   [[fallthrough]];
-         case DatasetEvent::Id::Filter: [[fallthrough]];
-         case DatasetEvent::Id::SubStringFilter:
+         case DatasetEvent::Id::DatasetSorted:   [[fallthrough]];
+         case DatasetEvent::Id::DatasetFiltered: [[fallthrough]];
+         case DatasetEvent::Id::DatasetSubStringFilter:
             m_model->reQuery();
             selectFirstRow();
             break;

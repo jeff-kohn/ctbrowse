@@ -11,7 +11,7 @@ namespace ctb::app
 
    namespace
    {
-      auto getSortOptionList(const DatasetPtr& dataset) -> wxArrayString
+      auto getSortOptionList(const IDataset* dataset) -> wxArrayString
       {
          return vws::all(dataset->availableSorts())
             | vws::transform([](const IDataset::TableSort& s) {  return wxFromSV(s.sort_name); })
@@ -69,7 +69,7 @@ namespace ctb::app
       opt_descending->Bind(wxEVT_RADIOBUTTON, &SortOptionsPanel::onSortOrderClicked, this);
 
       getEventHandler().addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event);  });
-      getEventHandler().addHandler(DatasetEvent::Id::Sort,              [this](const DatasetEvent& event) { onTableSorted(event);        });
+      getEventHandler().addHandler(DatasetEvent::Id::DatasetSorted,              [this](const DatasetEvent& event) { onTableSorted(event);        });
    }
 
 
@@ -82,7 +82,7 @@ namespace ctb::app
          auto dataset = getEventHandler().getDataset(true);
          m_sort_config.reverse = m_sort_descending;
          dataset->applySort(m_sort_config);
-         getEventHandler().signal_source(DatasetEvent::Id::Sort, false);
+         getEventHandler().signal_source(DatasetEvent::Id::DatasetSorted, false);
       }
       catch (...) {
          wxGetApp().displayErrorMessage(packageError(), true);
@@ -109,7 +109,7 @@ namespace ctb::app
                {
                   // re-fetch sorter based on index. UI and member state will get updated in the dataset event handler.
                   dataset->applySort(sorts[static_cast<size_t>(m_sort_selection)]);
-                  getEventHandler().signal_source(DatasetEvent::Id::Sort, true);
+                  getEventHandler().signal_source(DatasetEvent::Id::DatasetSorted, true);
                }
                else {
                   log::warn("SortOptionsPanel::onSortSelection: invalid sort index selected: {}", m_sort_selection);

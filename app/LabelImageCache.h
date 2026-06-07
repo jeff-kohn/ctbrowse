@@ -104,7 +104,7 @@ namespace ctb::app
       using LabelRequestMap = std::unordered_map<uint64_t, RequestPtr>;
 
       LabelRequestMap              m_requests{};
-      const fs::path               m_cache_folder;    // modifying after construction wouldn't be thread-safe anyways NOLINT cppcoreguidelines-avoid-const-or-ref-data-members
+      const fs::path               m_cache_folder;    // modifying after construction wouldn't be thread-safe anyways 
       std::stop_source             m_cancel_source{}; // For signaling cancellation if we're shutting down.
       wxWeakRef<HiddenWebClient>   m_web_client_ref{};
 

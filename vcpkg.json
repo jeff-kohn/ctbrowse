@@ -5,6 +5,7 @@
   "dependencies": [
     "boost-algorithm",
     "boost-unordered",
+    "concurrencpp",
     "catch2",
     "cpr",
     "enchantum",
