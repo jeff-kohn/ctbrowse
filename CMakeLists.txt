@@ -97,8 +97,8 @@ find_package(cpr CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
-add_subdirectory(lib)
-add_subdirectory(app)
+add_subdirectory(ctBrowse_app)
+add_subdirectory(ctBrowse_lib)
 
 if (CTB_BUILD_TESTS)
       enable_testing()

@@ -18,7 +18,7 @@ create_exe_target(cts_test)
 #      "source/cts_test.cpp"
 #)
 
-target_link_libraries(cts_test
+target_link_libraries(ctb_test
    PRIVATE
       ctBrowse_lib
       Catch2::Catch2WithMain

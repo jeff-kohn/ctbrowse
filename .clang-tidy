@@ -1,23 +1,23 @@
-Checks: "clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,cert-*, bugprone-*, readability-*, \
-  -bugprone-easily-swappable-parameters, \
-  -cppcoreguidelines-avoid-const-or-ref-data-members, \
-  -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access, \
-  -modernize-use-trailing-return-type, \
-  -modernize-use-nodiscard,\
-  -modernize-use-designated-initializers, \
-  -readability-redundant-member-init, \
-  -readability-identifier-length, \
-  -readability-braces-around-statements, \
-  -readability-use-concise-preprocessor-directives, \
-  -readability-else-after-return, \
-  -readability-implicit-bool-conversion, \
-  -readability-else-after-return, \
-  -readability-convert-member-functions-to-static, \
-  -readability-simplify-boolean-expr, \
-  -readability-make-member-function-const, \
-  -readability-use-anyofallof, \
-  -bugprone-throwing-static-initialization,-cert-err58-cpp, \
-  -readability-named-parameter"
+Checks: 'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,cert-*, bugprone-*, readability-*,
+  -bugprone-easily-swappable-parameters,
+  -cppcoreguidelines-avoid-const-or-ref-data-members,
+  -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,
+  -modernize-use-trailing-return-type,
+  -modernize-use-nodiscard,
+  -modernize-use-designated-initializers,
+  -readability-redundant-member-init,
+  -readability-identifier-length,
+  -readability-braces-around-statements,
+  -readability-use-concise-preprocessor-directives,
+  -readability-else-after-return,
+  -readability-implicit-bool-conversion,
+  -readability-else-after-return,
+  -readability-convert-member-functions-to-static,
+  -readability-simplify-boolean-expr,
+  -readability-make-member-function-const,
+  -readability-use-anyofallof,
+  -bugprone-throwing-static-initialization,-cert-err58-cpp,
+  -readability-named-parameter'
 
 
 WarningsAsErrors: ''
@@ -52,6 +52,7 @@ CheckOptions:
   - key: 'readability-redundant-access-specifiers.CheckFirstDeclaration'
     value: 'true'
 
-ExcludeHeaderFilterRegex: '.*((3rdParty|build|Program Files)[/\\].*'
+HeaderFilterRegex:        '.*[/\\][^/\\]*(ctBrowse|ctb)[^/\\]*[/\\].*'
+# ExcludeHeaderFilterRegex: '.*[/\\][^/\\]*(Program Files|vcpkg|3rdParty|build)[^/\\]*[/\\].*'
 # ExcludeHeaderFilterRegex: '.*/(3rdParty|build)/.*'
 ExtraArgsBefore: ['--driver-mode=cl']
