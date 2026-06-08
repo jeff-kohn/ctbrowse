@@ -125,5 +125,5 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
          name: clang_binary
-         path: ${{ github.workspace }}/build/${{ env.PRESET_NAME }}/app/Release/ctBrowse_app.exe
+         path: ${{ github.workspace }}/build/${{ env.PRESET_NAME }}/ctBrowse_app/Release/ctBrowse_app.exe
          retention-days: 30
