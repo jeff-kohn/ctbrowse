@@ -30,7 +30,7 @@ namespace ctb::app
          auto dataset    = source->getDataset();   assert(dataset);
 
          // ordering matters here because it's the same as they'll be displayed
-         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::MyPrice, constants::FMT_NUMBER_CURRENCY, {}), constants::LBL_STORE_NAME);
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::MyPrice, constants::FMT_NUMBER_CURRENCY, {}), constants::LBL_MY_PRICE);
          rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::CtPrice, constants::FMT_NUMBER_CURRENCY, {}), constants::LBL_CT_PRICE);
 
          if (dataset->hasProperty(CtProp::AuctionPrice))
