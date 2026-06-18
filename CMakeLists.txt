@@ -96,6 +96,8 @@ find_package(HtmlParser CONFIG REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(glaze CONFIG)
+find_package(asio CONFIG REQUIRED)
 
 add_subdirectory(ctBrowse_app)
 add_subdirectory(ctBrowse_lib)

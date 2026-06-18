@@ -3,16 +3,21 @@
   "name": "ct-search",
   "version": "0.1.0",
   "dependencies": [
+    "asio",
     "boost-algorithm",
     "boost-unordered",
-    "concurrencpp",
     "catch2",
     "cpr",
     "enchantum",
     "fmt",
     "frozen",
     "htmlparser",
-    "glaze",
+    {
+      "name": "glaze",
+      "features": [
+        "ssl"
+      ]
+    },
     {
       "name": "wxwidgets",
       "features": [
@@ -26,5 +31,5 @@
     "spdlog",
     "webview2"
   ],
-  "builtin-baseline": "7fb558b02523aaa5f1f297e12d695962ce15fc92"
+  "builtin-baseline": "44819aa2a6c10e56065e2b0330e7d6c89d1d2574"
 }

@@ -6,6 +6,7 @@
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 #include "ctb/table_download.h"
+#include "TableDownloader.h"
 #include "ctb/utility.h"
 #include "ctb/utility_http.h"
 #include "external/HttpStatusCodes.h"
@@ -16,68 +17,35 @@
 
 namespace ctb
 {
-   /// @brief  returns true if the request returned a valid response, or an Error if it didn't
-   ///
-   std::expected<bool, ctb::Error> validateCtRequest(cpr::Response& response)
+   namespace
    {
-      // unexpected return value, will be populated below if request failed.
-      Error error{}; 
 
-      if (cpr::status::is_success(response.status_code))
+      auto getDownloader() -> TableDownloader&
       {
-         // our request was successful, but we need to check if the response contains
-         // a file or an error message since CT returns an HTML <body> for some errors
-         if (response.text == constants::ERR_STR_INVALID_CELLARTRACKER_LOGON)
-         {
-            error.error_code = static_cast<int64_t>(HttpStatus::Code::Unauthorized);
-            error.error_message = constants::ERROR_STR_AUTHENTICATION_FAILED;
-            error.category = Error::Category::HttpStatus;
-         }
-         else {
-            return true; // we actually got a file, so return success
-         }
-      }
-      else if (response.error.code != cpr::ErrorCode::OK)
-      {
-         error.error_code = static_cast<int64_t>(response.error.code);
-         error.error_message = ctb::format(constants::FMT_ERROR_CURL_ERROR, error.error_code);
-
-         // use a separate category for cancellation, so the caller can distinguish and avoid showing unnecessary error messages
-         error.category = error.error_code == enum_to_index(cpr::ErrorCode::ABORTED_BY_CALLBACK) ? Error::Category::OperationCanceled
-                                                                                                            : Error::Category::CurlError;
-      }
-      else {
-         error.error_code = static_cast<int64_t>(response.status_code);
-         error.error_message = ctb::format(constants::FMT_ERROR_HTTP_STATUS_CODE, error.error_code);
-         error.category = Error::Category::HttpStatus;
+         static TableDownloader downloader;
+         return downloader;
       }
 
-      return std::unexpected{ error };
-   }
-
-} // namespace ctb
+   }   // namespace
 
 
-namespace ctb
-{
-
-
-   [[nodiscard]] auto downloadRawTableData(const CredentialWrapper& cred, TableId table,  DataFormatId format, ProgressCallback* callback, 
-                                           bool convert_to_utf, uint32_t table_code_page ) -> DownloadResult
+   [[nodiscard]] auto downloadRawTableData(const CredentialWrapper& cred,
+                                           TableId                  table,
+                                           DataFormatId             format,
+                                           ProgressCallback*        callback,
+                                           bool                     convert_to_utf,
+                                           uint32_t                 table_code_page) -> DownloadResult
    {
-      auto table_name = enum_to_string(table);
+      auto table_name  = enum_to_string(table);
       auto data_format = enum_to_string(format);
 
-      cpr::Url url{ ctb::format(constants::FMT_URL_CT_TABLE,
-                                percentEncode(cred.username()),
-                                percentEncode(cred.password()),
-                                data_format, table_name)
+      cpr::Url url{
+         ctb::format(constants::FMT_URL_CT_TABLE, percentEncode(cred.username()), percentEncode(cred.password()), data_format, table_name)
       };
 
-      auto response = callback ? cpr::Get(url, *callback)
-                               : cpr::Get(url);
+      auto response = callback ? cpr::Get(url, *callback) : cpr::Get(url);
 
-      // check the response for success, bail out if we got an error 
+      // check the response for success, bail out if we got an error
       auto request_result = validateResponse(response);
       if (!request_result.has_value())
       {
@@ -95,8 +63,90 @@ namespace ctb
             table_data.data.swap(*utf_text);
          }
       }
-      return table_data;   
+      return table_data;
    }
 
 
-} // namespace ctb
+   /// @brief Retrieve a data table from CT website asynchronously
+   ///
+   /// @param cred     - the username/password to use for the download
+   /// @param table    - the table to retrieve
+   /// @param callback - callback function to receive the result.
+   /// @param format   - the data format to return
+   ///
+   void downloadTableAsync(const CredentialWrapper& cred, ResultCallback callback, TableId table, DataFormatId format)
+   {
+      // this is the lambda that will run on asio thread for the http client callback when the request is finished executing
+      auto process_result = [callback = std::move(callback), table, format](TableDownloader::HttpResult response) mutable
+      {
+         DownloadResult result{};
+         try
+         {
+            if (!response)
+            {
+               auto&& error = response.error();
+               throw ctb::Error{ error.value(), error.message(), Error::Category::HttpStatus };
+            }
+
+            if (response)
+            {
+               if (HttpStatus::isSuccessful(response->status_code))
+               {
+                  // our request was successful, but we need to check if the response contains
+                  // a file or an error message since CT returns an HTML <body> for auth errors
+                  if (response->response_body.starts_with(constants::ERR_STR_INVALID_CELLARTRACKER_LOGON))
+                  {
+                     throw ctb::Error{
+                        HttpStatus::toInt(HttpStatus::Code::Unauthorized),
+                        constants::ERROR_STR_AUTHENTICATION_FAILED,
+                        Error::Category::HttpStatus,
+                     };
+                  }
+                  else
+                  {
+                     // we got a table (or some sort of body), package the result.
+                     result = RawTableData{ .data = std::move(response->response_body), .table_id = table, .data_format = format };
+                  }
+               }
+               else
+               {
+                  // we successfully received a response, but result code didn't indicate success.
+                  auto status_msg = HttpStatus::reasonPhrase(response->status_code);
+
+                  SPDLOG_DEBUG("downloadRawTableDataCallback received unexpected response: {} - {}. Body starts with {}",
+                               response->status_code,
+                               status_msg,
+                               response->response_body.substr(0, 128));   // NOLINT
+
+                  throw ctb::Error{ response->status_code, status_msg, Error::Category::HttpStatus };
+               }
+            }
+            else
+            {
+               auto&& error = response.error();
+               throw ctb::Error{ error.value(), Error::Category::HttpStatus, error.message() };
+            }
+         }
+         catch (ctb::Error& e)
+         {
+            result = std::unexpected{ std::move(e) };
+         }
+
+         // Now we can send our caller their result. note we're still on asio thread here
+         // so make sure no exceptions can escape
+         try
+         {
+            callback(std::move(result));
+         }
+         catch (...)
+         {
+            SPDLOG_DEBUG("Exception was thrown from downloadRawTableData callback: {}", packageError().formattedMessage());
+         }
+      };
+
+      // this is the entry point from caller thread, which creates the async job and immediately returns.
+      getDownloader().downloadTable(cred, table, std::move(process_result));
+   }
+
+
+}   // namespace ctb

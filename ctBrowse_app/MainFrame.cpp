@@ -520,7 +520,7 @@ namespace ctb::app
             throw Error{ cred_result.error() };
          }
 
-         // If cred doesn't work we need to reprompt so udpate prompt message.
+         // If cred doesn't work we need to re-prompt so update prompt message.
          prompt_msg = ctb::format(constants::FMT_CREDENTIALDLG_REPROMPT_MSG, cred_name);
 
          constexpr auto   max_percent = 100;

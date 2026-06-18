@@ -12,14 +12,14 @@
 #include "ctb/ctb.h"
 
 #pragma warning(push)
-#pragma warning(disable: 4365 4464 4702)
+//#pragma warning(disable: 4365 4464 4702)
 #include <external/csv.hpp>
 #pragma warning(pop)
 
-#include <frozen/map.h>
 #include <algorithm>
 #include <expected>
 #include <filesystem>
+#include <frozen/map.h>
 
 #include <string>
 #include <string_view>
@@ -35,56 +35,53 @@ namespace ctb
    ///        they map to the filenames used by CellarTracker.
    enum class TableId
    {
-      List,			   /// Wine Summary (does not include location or bin unless optional parameter Location=1)
-      Inventory,		/// Individual Bottles
-      Notes,			/// Tasting Notes
-      PrivateNotes,	/// Private Notes
-      Purchase,	   /// Purchases
-      Pending,	      /// Pending Purchases(Futures)
-      Consumed,	   /// Consumed Bottles
-      Availability,	/// Ready to Drink(Drinkability) report
-      Tag,	         /// Wishlists
-      ProReview,	   /// Your manually - entered Professional Reviews
-      Bottles,	      /// A special raw view showing all bottles with a BottleState parameter(-1 for pending, 1 for in - stock, 0 for consumed)
-      FoodTags	      /// Your food pairing tags
+      List,           /// Wine Summary (does not include location or bin unless optional parameter Location=1)
+      Inventory,      /// Individual Bottles
+      Notes,          /// Tasting Notes
+      PrivateNotes,   /// Private Notes
+      Purchase,       /// Purchases
+      Pending,        /// Pending Purchases(Futures)
+      Consumed,       /// Consumed Bottles
+      Availability,   /// Ready to Drink(Drinkability) report
+      Tag,            /// Wishlists
+      ProReview,      /// Your manually - entered Professional Reviews
+      Bottles,    /// A special raw view showing all bottles with a BottleState parameter(-1 for pending, 1 for in - stock, 0 for consumed)
+      FoodTags,   /// Your food pairing tags
    };
-
 
 
    /// @brief enum for available data formats
    enum class DataFormatId
    {
-      html,	// default if not specified
+      html,   // default if not specified
       xml,
       tab,
-      csv
+      csv,
    };
 
    /// @brief default table format (and currently the only format we support parsing)
-   inline constexpr auto DEFAULT_TABLE_FORMAT =  DataFormatId::csv;
-
+   inline constexpr auto DEFAULT_TABLE_FORMAT = DataFormatId::csv;
 
 
    /// @brief type alias for a static map of TableId's to display name
-   using TableDescriptionMap = frozen::map<TableId, std::string_view, enum_count<TableId>() >;
+   using TableDescriptionMap = frozen::map<TableId, std::string_view, enum_count<TableId>()>;
+
 
    /// @brief maps TableId to descriptive name.
-   inline constexpr TableDescriptionMap TableDescriptions
-   {
-      { TableId::List,           constants::TABLE_NAME_LIST          }, 
-      { TableId::Inventory,      constants::TABLE_NAME_INVENTORY     },
-      { TableId::Notes,          constants::TABLE_NAME_NOTES         },
-      { TableId::PrivateNotes,   constants::TABLE_NAME_PRIVATENOTES  },
-      { TableId::Purchase,       constants::TABLE_NAME_PURCHASE      },
-      { TableId::Pending,        constants::TABLE_NAME_PENDING       },
-      { TableId::Consumed,       constants::TABLE_NAME_CONSUMED      },
-      { TableId::Availability,   constants::TABLE_NAME_AVAILABILITY  },
-      { TableId::Tag,            constants::TABLE_NAME_TAG           },
-      { TableId::ProReview,      constants::TABLE_NAME_PROREVIEW     },
-      { TableId::Bottles,        constants::TABLE_NAME_BOTTLES       },
-      { TableId::FoodTags,       constants::TABLE_NAME_FOODTAGS      }
+   inline constexpr TableDescriptionMap TableDescriptions{
+      { TableId::List,         constants::TABLE_NAME_LIST         },
+      { TableId::Inventory,    constants::TABLE_NAME_INVENTORY    },
+      { TableId::Notes,        constants::TABLE_NAME_NOTES        },
+      { TableId::PrivateNotes, constants::TABLE_NAME_PRIVATENOTES },
+      { TableId::Purchase,     constants::TABLE_NAME_PURCHASE     },
+      { TableId::Pending,      constants::TABLE_NAME_PENDING      },
+      { TableId::Consumed,     constants::TABLE_NAME_CONSUMED     },
+      { TableId::Availability, constants::TABLE_NAME_AVAILABILITY },
+      { TableId::Tag,          constants::TABLE_NAME_TAG          },
+      { TableId::ProReview,    constants::TABLE_NAME_PROREVIEW    },
+      { TableId::Bottles,      constants::TABLE_NAME_BOTTLES      },
+      { TableId::FoodTags,     constants::TABLE_NAME_FOODTAGS     }
    };
-
 
 
    /// @brief  Returns the user-facing descriptive name for a table, or empty string if not found
@@ -107,7 +104,7 @@ namespace ctb
    }
 
 
-   /// @brief  get the fully qualified path for a table 
+   /// @brief  get the fully qualified path for a table
    ///
    inline auto getTablePath(fs::path data_folder, TableId tbl, DataFormatId fmt = DEFAULT_TABLE_FORMAT) -> fs::path
    {
@@ -136,31 +133,33 @@ namespace ctb
    inline auto getAvailableTables(fs::path data_folder, DataFormatId fmt = DataFormatId::csv) -> std::vector<TableId>
    {
       std::vector<TableId> ids{};
-      rng::for_each(vws::keys(TableDescriptions), [&](TableId tbl)
-         {
-            if (isTableAvailable(data_folder, tbl, fmt))
-               ids.push_back(tbl);
-         });
+      rng::for_each(vws::keys(TableDescriptions),
+                    [&](TableId tbl)
+                    {
+                       if (isTableAvailable(data_folder, tbl, fmt)) ids.push_back(tbl);
+                    });
       return ids;
    }
 
 
    /// @brief   load a table object for the given table from disk.
    /// @returns expected value is the requested table object, unexpected value is Error information if operation failed.
-   /// 
+   ///
    /// Note the lack of a "format" parameter, we currently only support parsing CSV files.
    ///
-   template <typename TableDataT>
+   template<typename TableDataT>
    auto loadTableData(fs::path data_folder, TableId tbl) -> std::expected<TableDataT, Error>
    {
       auto table_path = getTablePath(data_folder, tbl, DataFormatId::csv);
       if (not isTableFileAvailable(table_path))
-         return std::unexpected{ Error{ ERROR_FILE_NOT_FOUND, Error::Category::FileError, constants::FMT_ERROR_FILE_NOT_FOUND, table_path.generic_string() } };
+         return std::unexpected{
+            Error{ ERROR_FILE_NOT_FOUND, Error::Category::FileError, constants::FMT_ERROR_FILE_NOT_FOUND, table_path.generic_string() }
+         };
 
       csv::CSVReader reader{ table_path.generic_string() };
 
       TableDataT data{};
-      for (csv::CSVRow& row : reader)
+      for (csv::CSVRow &row : reader)
       {
          data.emplace_back(row);
       }
@@ -168,4 +167,4 @@ namespace ctb
    }
 
 
-} // namespace ctb
+}   // namespace ctb

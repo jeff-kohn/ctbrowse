@@ -2,7 +2,7 @@
 # depends on being added from it, i.e. the testing is done only from the build
 # tree and is not feasible from an install location
 
-project(ctBrowseTests LANGUAGES CXX)
+project(ctBrowse_tests LANGUAGES CXX)
 
 # ---- Dependencies ----
 
@@ -11,12 +11,12 @@ include(Catch)
 
 # ---- Tests ----
 
-create_exe_target(cts_test)
+create_exe_target(ctb_test)
 
-#target_sources(cts_test
-#   PRIVATE
-#      "source/cts_test.cpp"
-#)
+target_sources(ctb_test
+   PRIVATE
+      "ctb_test.cpp"
+)
 
 target_link_libraries(ctb_test
    PRIVATE
@@ -24,9 +24,5 @@ target_link_libraries(ctb_test
       Catch2::Catch2WithMain
 )
 
-catch_discover_tests(cts_test)
-
-
-# ---- End-of-file commands ----
-
-# add_folders(Test)
+catch_discover_tests(ctb_test)
+add_folders(Test)

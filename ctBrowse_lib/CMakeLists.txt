@@ -14,6 +14,7 @@ target_sources(${TARGET_NAME}
       "../include/ctb/constants.h"
       "../include/ctb/CredentialManager.h"
       "../include/ctb/CredentialWrapper.h"
+      
       "../include/ctb/Error.h"
       "../include/ctb/log.h"
       "../include/ctb/table_data.h"
@@ -70,10 +71,11 @@ target_sources(${TARGET_NAME}
       "log.cpp"
       "ProReviewsCache.cpp"
       "table_download.cpp"
+      "TableDownloader.h"
       "tasks.cpp"
       "utility.cpp"
       "utility_http.cpp"
-)
+ )
 
 target_include_directories(${TARGET_NAME}
    ${warning_guard}
@@ -91,8 +93,10 @@ target_include_directories(${TARGET_NAME}
 # Note that since this target is a 
 target_link_libraries(${TARGET_NAME}
    PUBLIC
+      asio::asio
       cpr::cpr
       fmt::fmt
+      glaze::glaze
       HtmlParser::HtmlParser
       spdlog::spdlog
       "$<$<PLATFORM_ID:Windows>:Credui>"
