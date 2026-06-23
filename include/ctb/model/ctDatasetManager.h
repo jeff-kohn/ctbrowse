@@ -21,7 +21,7 @@ namespace ctb::app
 
       /// @brief default ctor, initializes data folder to "." unless overridden by a call to setDataFolder()
       ctDatasetManager() = default;
-      ~ctDatasetManager() noexcept;
+      ~ctDatasetManager() noexcept = default;
 
       /// @brief construct a CtDatasetLoader specifying the data folder. May throw if folder is invalid and can't be created.
       explicit ctDatasetManager(const fs::path& folder) noexcept(false);
@@ -80,7 +80,7 @@ namespace ctb::app
 
       fs::path            m_data_folder{ constants::CURRENT_DIRECTORY };
       CredentialWrapper   m_cred{};
-      indirect<AsyncImpl> m_impl{};
+      indirect<AsyncImpl> m_impl;
    };
 
 }   // namespace ctb::app

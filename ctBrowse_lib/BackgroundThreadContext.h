@@ -34,8 +34,8 @@ namespace ctb
             // stop the busy work, context will finish any pending task and then shut down.
             m_work_guard.reset();
          }
-         catch (...)
-         {}   // NOLINT
+         catch (...) // NOLINT
+         {}   
       }
 
       // no copy or move

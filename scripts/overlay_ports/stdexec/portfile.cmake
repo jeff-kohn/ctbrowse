@@ -60,8 +60,8 @@ vcpkg_from_github(
 
 vcpkg_find_acquire_program(GIT)
 
-option(STDEXEC_ENABLE_ASIO "Enable ASIO targets" OFF)
-set(STDEXEC_ASIO_IMPLEMENTATION "boost" CACHE STRING "boost")
+option(STDEXEC_ENABLE_ASIO "Enable ASIO targets" ON)
+set(STDEXEC_ASIO_IMPLEMENTATION "standalone" CACHE STRING "standalone")
 
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"

@@ -21,11 +21,11 @@ namespace ctb::app::DatasetDefaultOptions
 
    /// @brief Saves the provided object as the new default for its TableId
    /// @throw ctb::Error if the options object can't be saved to a file.
-   [[nodiscard]] void saveDefaultOptions(const CtDatasetOptions& options) noexcept(false);
+   void saveDefaultOptions(const CtDatasetOptions& options) noexcept(false);
 
 
    /// @brief Apply default options to a dataset
-   [[nodiscard]] void applyDefaultOptions(DatasetPtr& dataset);
+   void applyDefaultOptions(DatasetPtr& dataset);
 
 
 }   // namespace ctb::app::DatasetDefaultOptions

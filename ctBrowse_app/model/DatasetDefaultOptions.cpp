@@ -15,7 +15,7 @@ namespace ctb::app::DatasetDefaultOptions
    }   // namespace
 
 
-   [[nodiscard]] auto DatasetDefaultOptions::retrieveDefaultOptions(TableId table_id) -> std::optional<CtDatasetOptions>
+   auto retrieveDefaultOptions(TableId table_id) -> std::optional<CtDatasetOptions>
    {
       try
       {
@@ -34,7 +34,7 @@ namespace ctb::app::DatasetDefaultOptions
    }
 
 
-   [[nodiscard]] auto DatasetDefaultOptions::retrieveDefaultOptions(const DatasetPtr& dataset) -> CtDatasetOptions
+   auto retrieveDefaultOptions(const DatasetPtr& dataset) -> CtDatasetOptions
    {
       auto table_id = dataset->getTableId();
 
@@ -53,7 +53,7 @@ namespace ctb::app::DatasetDefaultOptions
    }
 
 
-   void DatasetDefaultOptions::applyDefaultOptions(DatasetPtr& dataset)
+   void applyDefaultOptions(DatasetPtr& dataset)
    {
       auto result = retrieveDefaultOptions(dataset->getTableId());
       if (result)
@@ -63,7 +63,7 @@ namespace ctb::app::DatasetDefaultOptions
    }
 
    
-   void DatasetDefaultOptions::saveDefaultOptions(const CtDatasetOptions& options) noexcept(false)
+   void saveDefaultOptions(const CtDatasetOptions& options) noexcept(false)
    {
       CtDatasetOptions::saveOptions(options, getDefaultOptionsPath(options.table_id), true);
    }

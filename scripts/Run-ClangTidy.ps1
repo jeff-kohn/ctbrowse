@@ -31,7 +31,7 @@ try
       $FixArg = ""
    }
    $JobsArg = "-j $Jobs"
-   python "$RunClangTidyPath" -source-filter .*\.cpp -quiet -use-color $JobsArg $FixArg -p $BuildDir
+   python "$RunClangTidyPath" -source-filter .ctBrowse*\.cpp -quiet -use-color $JobsArg $FixArg -p $BuildDir
 }
 finally
 {

@@ -132,8 +132,8 @@ namespace ctb::app
    }
 
 
-   ctDatasetManager::~ctDatasetManager() noexcept
-   {}
+   //ctDatasetManager::~ctDatasetManager() noexcept // NOLINT needs to be here for AsyncImpl definition.
+   //{}
 
 
    auto ctDatasetManager::loadDataset(TableId table_id) -> DatasetPtr
@@ -205,7 +205,7 @@ namespace ctb::app
                             })
 
                        | upon_error(
-                            [](std::exception_ptr ep)
+                            []([[maybe_unused]] std::exception_ptr ep)
                             {
                               SPDLOG_DEBUG(packageError(ep).formattedMessage());
                             });

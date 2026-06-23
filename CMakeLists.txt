@@ -46,13 +46,8 @@ if(PROJECT_IS_TOP_LEVEL)
          $<$<CONFIG:RelWithDebInfo>:/Ob3>
       )
 
-      if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"
-        OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
-            list(APPEND CTB_COMPILE_OPTIONS /std:c++latest) # for new library features 
-      endif()
-
       if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-         list(APPEND CTB_COMPILE_OPTIONS /Zf $<$<CONFIG:Release,ReleaseMinSize,RelWithDebInfo>:/GL>)
+         list(APPEND CTB_COMPILE_OPTIONS /std:c++latest /Zf $<$<CONFIG:Release,ReleaseMinSize,RelWithDebInfo>:/GL>)
       else()
          # for other compilers we're using Ninja so generate compile_commands.json
          set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")

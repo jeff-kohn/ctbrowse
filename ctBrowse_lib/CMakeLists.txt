@@ -9,7 +9,7 @@ add_library(${PROJECT_NAME}::${TARGET_NAME} ALIAS ${TARGET_NAME})
 target_sources(${TARGET_NAME}
    PUBLIC
       "../include/ctb/ctb.h"
-      "../include/ctb/tasks/common_types.h"
+      "../include/ctb/common_types.h"
       "../include/ctb/concepts.h"
       "../include/ctb/constants.h"
       "../include/ctb/CredentialManager.h"
