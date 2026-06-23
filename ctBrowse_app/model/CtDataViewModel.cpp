@@ -1,7 +1,7 @@
+#include "CtDataViewModel.h"
 
 #include <utility>
 
-#include "model/CtDataViewModel.h"
 
 namespace ctb::app
 {

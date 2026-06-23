@@ -143,18 +143,22 @@ namespace ctb::app
       /// @brief Display a message box with an error description.
       ///
       /// If log_error is true, the exception will also be logged. source_loc is only used for logging.
-      void displayErrorMessage(const Error& err, bool log_error = true, std::source_location source_loc = std::source_location::current()) const;
-      void displayErrorMessage(
-         const std::string& msg, bool log_error, const std::string& title = constants::ERROR_STR,
-         std::source_location source_loc = std::source_location::current()
-      ) const;
+      void displayErrorMessage(const Error&         err,
+                               bool                 log_error  = true,
+                               std::source_location source_loc = std::source_location::current()) const;
+
+      void displayErrorMessage(const std::string&   msg,
+                               bool                 log_error,
+                               const std::string&   title      = constants::ERROR_STR,
+                               std::source_location source_loc = std::source_location::current()) const;
 
       /// @brief display a message box with informational text
       void displayInfoMessage(const std::string& msg, const std::string& title = constants::APP_NAME_SHORT) const;
 
       /// @brief display an info message to the user, using format()-style syntax for string building.
       template<typename... Args>
-      void displayFormattedMessage(ctb::format_string<Args...> fmt_str, Args&&... args) const   // NOLINT [cppcoreguidelines-missing-std-forward]
+      void displayFormattedMessage(ctb::format_string<Args...> fmt_str,
+                                   Args&&... args) const   // NOLINT [cppcoreguidelines-missing-std-forward]
       {
          displayInfoMessage(ctb::vformat(fmt_str, ctb::make_format_args(args...)));
       }

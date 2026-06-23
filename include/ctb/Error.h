@@ -126,12 +126,14 @@ namespace ctb
    /// 
    inline auto packageError(std::exception_ptr ep = std::current_exception() ) noexcept -> Error
    {
+      // clang-format off
       try 
       {
          if (ep) std::rethrow_exception(ep);
       }
-      catch (ctb::Error& e)      { return e;                 }
-      catch (std::exception& e)  { return Error{ e.what() }; }
+      catch (ctb::Error& e)      { return e;                   }
+      catch (std::exception& e)  { return Error{ e.what() };   }
+      catch (std::error_code& e) { return Error{ e.message() };}
       catch (...)
       {
          assert("wtf, nonstandard exception caught." and false);

@@ -2,6 +2,7 @@
 
 #include "ctb/ctb.h"
 #include <enchantum/enchantum.hpp>
+#include <utility>
 
 namespace ctb
 {
@@ -21,4 +22,7 @@ namespace ctb
 
    using enchantum::enum_to_index;
    using enchantum::index_to_enum;
+
+   using std::to_underlying;
+
 };   // namespace ctb

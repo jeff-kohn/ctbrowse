@@ -8,7 +8,7 @@
 #pragma once
 
 #include "App.h"
-#include "model/CtDatasetOptions.h"
+#include "ctb/model/CtDatasetOptions.h"
 
 #include <ctb/model/DatasetEventHandler.h>
 

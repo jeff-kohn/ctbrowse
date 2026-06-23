@@ -75,10 +75,10 @@ target_sources(${TARGET_NAME}
      "dialogs/TableSyncDialog.cpp"
      "dialogs/TableSyncDialog.h"
 
-     "model/CtDatasetOptions.cpp"
-     "model/CtDatasetOptions.h"
      "model/CtDataViewModel.cpp"
      "model/CtDataViewModel.h"
+     "model/DatasetDefaultOptions.cpp"
+     "model/DatasetDefaultOptions.h"
      "model/DatasetWindow.h"
 
      "panels/SortOptionsPanel.cpp"
@@ -119,7 +119,7 @@ target_sources(${TARGET_NAME}
      "resources/ctBrowse.manifest"
      "resources/resource.rc"
      ${${PROJECT_NAME}_VERSION_RESOURCE}
-)
+ )
 
 
 if (CTB_USE_PRECOMPILED_HEADERS)

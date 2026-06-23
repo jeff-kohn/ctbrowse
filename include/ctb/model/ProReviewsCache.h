@@ -4,7 +4,6 @@
 #include "ctb/tables/ProReviewsCacheTraits.h"
 
 #include <map>
-#include <span>
 #include <string>
 
 namespace ctb

@@ -10,14 +10,14 @@
 #include "CtCredentialManager.h"
 
 #include "dialogs/TableSyncDialog.h"
-#include "model/CtDatasetOptions.h"
+#include "model/DatasetDefaultOptions.h"
 #include "views/DatasetMultiView.h"
 
 #include "wx_helpers.h"
 
 #include <ctb/model/CtDatasetLoader.h>
 #include <ctb/model/DatasetEventSource.h>
-#include <ctb/table_download.h>
+#include <ctb/download.h>
 #include <ctb/utility.h>
 #include <ctb/utility_chrono.h>
 #include <ctb/utility_http.h>
@@ -685,7 +685,7 @@ namespace ctb::app
       {
          // apply any previously-saved default settings before attaching to source
          auto dataset = loadDataset(eventIdToTableId(event.GetId()));
-         CtDatasetOptions::applyDefaultOptions(dataset);
+         DatasetDefaultOptions::applyDefaultOptions(dataset);
          setDataset(dataset);
       }
       catch (...)

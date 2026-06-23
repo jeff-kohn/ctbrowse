@@ -1,14 +1,13 @@
 #pragma once
-
-#include "App.h"
+#include "ctb/ctb.h"
 
 #include <ctb/interfaces/IDataset.h>
-#include <ctb/table_data.h>
+#include <ctb/tables/table_data.h>
 #include <ctb/tables/CtSchema.h>
 
 #include <optional>
 
-namespace ctb::app
+namespace ctb
 {
    /// @brief This struct represents the various sort/filter options that can be applied to a dataset,
    ///        and can be persisted to and later loaded from disk or elsewhere to save/load settings for a collection/view.
@@ -38,11 +37,6 @@ namespace ctb::app
       /// @return true if options were loaded, false if they weren't (because dataset == nullptr, you dummy)
       auto loadFromDataset(const DatasetPtr& dataset) -> bool;
 
-      /// @brief Apply any saved default CtDatasetOptions to the supplied dataset.
-      ///
-      /// If no saved default is found, dataset will not be modified.
-      static void applyDefaultOptions(DatasetPtr& dataset);
-
       /// @brief Retrieve a CtDatasetOptions initialized from the supplied dataset.
       /// @throw ctb::Error if you pass a nullptr dataset
       static auto retrieveOptions(const DatasetPtr& dataset) noexcept(false) -> CtDatasetOptions;
@@ -51,20 +45,6 @@ namespace ctb::app
       /// @throw ctb::Error if file can't be read and loaded into object
       static auto retrieveOptions(const fs::path& path) noexcept(false) -> CtDatasetOptions;
 
-      /// @brief Retrieve a CtDatasetOptions with default options for the specified TableId, if it exists
-      /// @return the requested options object, or std::nullopt if no default was found.
-      static auto retrieveDefaultOptions(TableId table_id) -> std::optional<CtDatasetOptions>;
-
-      /// @brief Retrieve a CtDatasetOptions with default options for the specified dataset.
-      ///
-      /// If a saved CtDatasetOptions is found, it will be returned to the caller. If no saved default
-      /// is found, the supplied dataset's current settings will be returned.
-      static auto retrieveDefaultOptions(const DatasetPtr& dataset) -> CtDatasetOptions;
-
-
-      /// @brief Saves the provided object as the new default for its TableId
-      /// @throw ctb::Error if the options object can't be saved to a file.
-      static void saveDefaultOptions(const CtDatasetOptions& options) noexcept(false);
 
       /// @brief Save a CtDatasetOptions object to the specified json file
       /// @throw ctb::Error if saving file fails

@@ -29,6 +29,9 @@ namespace ctb
    class CredentialWrapper final
    {
    public:
+      /// @brief default ctor, initializes object with empty username/password.
+      CredentialWrapper() = default;
+
       /// @brief CredentialWrapper constructor.
       CredentialWrapper(std::string_view cred_name, std::string&& username, std::string&& password, bool save_requested = false);
 
@@ -73,8 +76,7 @@ namespace ctb
       /// @brief swap implementation for CredentialWrapper.
       void swap(CredentialWrapper& other) noexcept;
 
-      /// @brief deleted members, this class does not support default construction or copy semantics
-      CredentialWrapper() = delete;
+      // no copy semantics.
       CredentialWrapper(const CredentialWrapper&) = delete;
       CredentialWrapper& operator=(const CredentialWrapper&) = delete;
 
@@ -82,7 +84,7 @@ namespace ctb
       std::string m_cred_name{};
       std::string m_username{};
       std::string m_password{};
-      bool        m_cleared{ false };
+      bool        m_cleared{ true };
       bool        m_save_requested{ false };
    };
 

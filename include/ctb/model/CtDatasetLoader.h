@@ -7,7 +7,7 @@
  *******************************************************************/
 #pragma once
 
-#include "ctb/table_data.h"
+#include "ctb/tables/table_data.h"
 #include "ctb/model/ProReviewsCache.h"
 #include "ctb/interfaces/IDataset.h"
 
@@ -26,7 +26,7 @@ namespace ctb
    class CtDatasetLoader
    {
    public:
-      /// @brief default ctor, initializes data folder to "." unless overriden by a call to setDataFolder()
+      /// @brief default ctor, initializes data folder to "." unless overridden by a call to setDataFolder()
       CtDatasetLoader() = default;
 
       /// @brief construct a CtDatasetLoader specifying the data folder. May throw if folder is invalid.

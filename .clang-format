@@ -66,7 +66,7 @@ AlignConsecutiveTableGenDefinitionColons:
   AlignFunctionPointers: false
   PadOperators: false
 AlignEscapedNewlines: Right
-AlignOperands: Align
+AlignOperands: AlignAfterOperator
 AlignTrailingComments:
   Kind: Always
   OverEmptyLines: 1
@@ -114,13 +114,13 @@ BreakAfterAttributes: Leave
 BreakAfterJavaFieldAnnotations: false
 BreakAfterReturnType: None
 BreakArrays: true
-BreakBeforeBinaryOperators: None
+BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Custom
 BreakBeforeConceptDeclarations: Always
 BreakBeforeInlineASMColon: OnlyMultiline
 BreakBeforeTemplateCloser: true
 BreakBeforeTernaryOperators: true
-BreakBinaryOperations: Never
+BreakBinaryOperations: RespectPrecedence
 BreakConstructorInitializers: BeforeColon
 BreakFunctionDefinitionParameters: false
 BreakInheritanceList: AfterComma
@@ -204,7 +204,7 @@ OneLineFormatOffRegex: NOFORMAT
 PPIndentWidth: -1
 PackConstructorInitializers: CurrentLine
 PenaltyBreakAssignment: 20
-PenaltyBreakBeforeFirstCallParameter: 0
+PenaltyBreakBeforeFirstCallParameter: 100
 PenaltyBreakBeforeMemberAccess: 150
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120

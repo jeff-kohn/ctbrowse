@@ -10,11 +10,9 @@
 #pragma once
 
 #include "ctb/ctb.h"
+#include "ctb/utility.h"
 
-#pragma warning(push)
-//#pragma warning(disable: 4365 4464 4702)
 #include <external/csv.hpp>
-#pragma warning(pop)
 
 #include <algorithm>
 #include <expected>
@@ -81,6 +79,26 @@ namespace ctb
       { TableId::ProReview,    constants::TABLE_NAME_PROREVIEW    },
       { TableId::Bottles,      constants::TABLE_NAME_BOTTLES      },
       { TableId::FoodTags,     constants::TABLE_NAME_FOODTAGS     }
+   };
+
+
+   /// @brief struct that contains the table data (and metadata) for a downloaded CellarTracker table
+   struct RawTableData
+   {
+      std::string  data{};
+      TableId      table_id{};
+      DataFormatId data_format{};
+      TextEncoding encoding{};
+
+      constexpr std::string_view tableName() const noexcept
+      {
+         return enum_to_string(table_id);
+      }
+
+      constexpr std::string_view formatName() const noexcept
+      {
+         return enum_to_string(data_format);
+      }
    };
 
 
@@ -152,12 +170,13 @@ namespace ctb
    {
       auto table_path = getTablePath(data_folder, tbl, DataFormatId::csv);
       if (not isTableFileAvailable(table_path))
+      {
          return std::unexpected{
             Error{ ERROR_FILE_NOT_FOUND, Error::Category::FileError, constants::FMT_ERROR_FILE_NOT_FOUND, table_path.generic_string() }
          };
+      }
 
       csv::CSVReader reader{ table_path.generic_string() };
-
       TableDataT data{};
       for (csv::CSVRow &row : reader)
       {

@@ -1,12 +1,13 @@
 #include "ctb/utility_http.h"
 #include "external/HttpStatusCodes.h"
 
+#include <HtmlParser/Parser.hpp>
+#include <HtmlParser/Query.hpp>
+#include <boost/algorithm/string.hpp>
 #include <cpr/curlholder.h>
 #include <cpr/status_codes.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
-#include <HtmlParser/Parser.hpp>
-#include <HtmlParser/Query.hpp>
 
 namespace ctb
 {
@@ -32,7 +33,7 @@ namespace ctb
       // this just makes sure that curl's global init has been called, we don't actually need a handle
       cpr::CurlHolder holder;
 
-      int outlength{};
+      int   outlength{};
       char* output = curl_easy_unescape(nullptr, text.data(), static_cast<int>(text.length()), &outlength);
       if (output)
       {
@@ -55,27 +56,29 @@ namespace ctb
          // a file or an error message since CT returns an HTML <body> for some errors
          if (response.text == constants::ERR_STR_INVALID_CELLARTRACKER_LOGON)
          {
-            error.error_code = static_cast<int64_t>(HttpStatus::Code::Unauthorized);
+            error.error_code    = static_cast<int64_t>(HttpStatus::Code::Unauthorized);
             error.error_message = constants::ERROR_STR_AUTHENTICATION_FAILED;
-            error.category = Error::Category::HttpStatus;
+            error.category      = Error::Category::HttpStatus;
          }
-         else{
-            return true; // we actually got a file, so return success
+         else
+         {
+            return true;   // we actually got a file, so return success
          }
       }
       else if (response.error.code != cpr::ErrorCode::OK)
       {
-         error.error_code = static_cast<int64_t>(response.error.code);
+         error.error_code    = static_cast<int64_t>(response.error.code);
          error.error_message = ctb::format(constants::FMT_ERROR_CURL_ERROR, error.error_code);
 
          // use a separate category for cancellation, so the caller can distinguish and avoid showing unnecessary error messages
          error.category = error.error_code == enum_to_index(cpr::ErrorCode::ABORTED_BY_CALLBACK) ? Error::Category::OperationCanceled
-            : Error::Category::CurlError;
+                                                                                                 : Error::Category::CurlError;
       }
-      else {
-         error.error_code = static_cast<int64_t>(response.status_code);
+      else
+      {
+         error.error_code    = static_cast<int64_t>(response.status_code);
          error.error_message = ctb::format(constants::FMT_ERROR_HTTP_STATUS_CODE, error.error_code);
-         error.category = Error::Category::HttpStatus;
+         error.category      = Error::Category::HttpStatus;
       }
 
       return std::unexpected{ error };
@@ -84,7 +87,7 @@ namespace ctb
 
    auto viewResponseBytes(cpr::Response& response) -> BufferSpan
    {
-      assert(response.downloaded_bytes == std::ssize(response.text)); // cppcheck-suppress assertWithSideEffect
+      assert(response.downloaded_bytes == std::ssize(response.text));   // cppcheck-suppress assertWithSideEffect
 
       if (response.downloaded_bytes > 0)
       {
@@ -96,13 +99,13 @@ namespace ctb
 
    auto parseLabelUrlFromHtml(const std::string& html) -> std::string
    {
-      try 
+      try
       {
          // parse the HTML to get the URL for the label image.
          HtmlParser::Parser parser;
-         HtmlParser::DOM dom = parser.Parse(html);
-         HtmlParser::Query query(dom.Root());
-         auto images = dom.GetElementById(constants::HTML_ELEM_LABEL_PHOTO);
+         HtmlParser::DOM    dom = parser.Parse(html);
+         HtmlParser::Query  query(dom.Root());
+         auto               images = dom.GetElementById(constants::HTML_ELEM_LABEL_PHOTO);
          if (images and !images->Children.empty())
          {
             return images->Children[0]->GetAttribute(constants::HTML_ATTR_SRC);
@@ -115,4 +118,28 @@ namespace ctb
       return {};
    }
 
-} // namespace ctb
+
+   auto getTextEncodingFromHeader(std::string content_type_header) -> std::optional<TextEncoding>
+   {
+      static constexpr auto CHARSET_KEY = "charset="sv;
+
+      // sanity check
+      if (content_type_header.length() < CHARSET_KEY.length()) return {};
+
+      boost::to_lower(content_type_header);
+      auto params = content_type_header | std::views::split(';');
+      for (const auto& substr : params)
+      {
+         std::string_view param{ substr.data(), substr.size() };
+         if (param.starts_with(CHARSET_KEY))
+         {
+            if (auto loc = param.find('='); loc < param.size())
+            {
+               return charsetToCodepage(param.substr(++loc));
+            }
+         }
+      }
+      return {};
+   }
+
+}   // namespace ctb

@@ -1,6 +1,5 @@
 #pragma once
-
-#include "App.h"
+#include "ctb/ctb.h"
 
 #include <ctb/tables/CtSchema.h>
 #include <ctb/utility_chrono.h>

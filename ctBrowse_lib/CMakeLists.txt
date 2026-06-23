@@ -9,16 +9,19 @@ add_library(${PROJECT_NAME}::${TARGET_NAME} ALIAS ${TARGET_NAME})
 target_sources(${TARGET_NAME}
    PUBLIC
       "../include/ctb/ctb.h"
-      "../include/ctb/common_types.h"
+      "../include/ctb/tasks/common_types.h"
       "../include/ctb/concepts.h"
       "../include/ctb/constants.h"
       "../include/ctb/CredentialManager.h"
       "../include/ctb/CredentialWrapper.h"
+      "../include/ctb/ctb_format.h"
+      "../include/ctb/ctb_functors.h"
+      "../include/ctb/ctb_indirect.h"
+      "../include/ctb/download.h"
+      "../include/ctb/HttpDownloader.h"
       
       "../include/ctb/Error.h"
       "../include/ctb/log.h"
-      "../include/ctb/table_data.h"
-      "../include/ctb/table_download.h"
       "../include/ctb/utility.h"
       "../include/ctb/utility_chrono.h"
       "../include/ctb/utility_http.h"
@@ -31,6 +34,8 @@ target_sources(${TARGET_NAME}
             
       "../include/ctb/model/CtDataset.h"
       "../include/ctb/model/CtDatasetLoader.h"
+      "../include/ctb/model/CtDatasetOptions.h"
+      "../include/ctb/model/ctDatasetManager.h"
       "../include/ctb/model/DatasetEventSource.h"
       "../include/ctb/model/DatasetEventHandler.h"
       "../include/ctb/model/ProReviewsCache.h"
@@ -44,6 +49,7 @@ target_sources(${TARGET_NAME}
       "../include/ctb/tables/ProReviewsCacheTraits.h"
       "../include/ctb/tables/PurchasedWineTraits.h"
       "../include/ctb/tables/ReadyToDrinkTraits.h"
+      "../include/ctb/tables/table_data.h"
       "../include/ctb/tables/TastingNotesTraits.h"
       "../include/ctb/tables/TaggedWinesTraits.h"
       "../include/ctb/tables/WineListTraits.h"
@@ -62,20 +68,24 @@ target_sources(${TARGET_NAME}
 
       "../include/ctb/tasks/PollingTask.h"
       "../include/ctb/tasks/tasks.h"
+      "../include/ctb/tasks/async_tasks.h"
 
    PRIVATE
+      "BackgroundThreadContext.h"
       "CredentialManager.cpp"
       "CredentialWrapper.cpp"
       "CtDatasetLoader.cpp"
+      "CtDatasetOptions.cpp"
       "DatasetEventSource.cpp"
+      "download.cpp"
+      "ctDatasetManager.cpp"
+      "HttpDownloader.cpp"
       "log.cpp"
       "ProReviewsCache.cpp"
-      "table_download.cpp"
-      "TableDownloader.h"
       "tasks.cpp"
       "utility.cpp"
       "utility_http.cpp"
- )
+)
 
 target_include_directories(${TARGET_NAME}
    ${warning_guard}
@@ -99,6 +109,7 @@ target_link_libraries(${TARGET_NAME}
       glaze::glaze
       HtmlParser::HtmlParser
       spdlog::spdlog
+      STDEXEC::stdexec
       "$<$<PLATFORM_ID:Windows>:Credui>"
       "$<$<PLATFORM_ID:Windows>:shlwapi>"
       "$<$<PLATFORM_ID:Windows>:Shell32.lib>"
