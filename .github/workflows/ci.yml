@@ -48,24 +48,6 @@ jobs:
     - name: Report tool versions
       shell: pwsh
       run: |
-        function Show-Version {
-          param(
-            [string]$Label,
-            [string]$Command,
-            [string[]]$Arguments = @('--version')
-          )
-
-          $tool = Get-Command $Command -ErrorAction SilentlyContinue
-          if (-not $tool) {
-            Write-Host "$Label: not found in PATH"
-            return
-          }
-
-          Write-Host "## $Label"
-          & $tool.Source @Arguments
-          Write-Host ""
-        }
-
         Write-Host "## PowerShell"
         $PSVersionTable.PSVersion.ToString()
         Write-Host ""
@@ -78,14 +60,14 @@ jobs:
           Write-Host ""
         }
 
-        Show-Version 'vcpkg' 'vcpkg' @('version')
-        Show-Version 'cmake' 'cmake'
-        Show-Version 'ninja' 'ninja'
-        Show-Version 'git' 'git'
-        Show-Version 'clang' 'clang'
-        Show-Version 'clang-cl' 'clang-cl'
-        Show-Version 'nuget' 'nuget' @('help')
-        Show-Version 'cppcheck' 'cppcheck'
+        if (Get-Command vcpkg -ErrorAction SilentlyContinue) { Write-Host "## vcpkg"; vcpkg version; Write-Host "" } else { Write-Host "## vcpkg`nnot found in PATH`n" }
+        if (Get-Command cmake -ErrorAction SilentlyContinue) { Write-Host "## cmake"; cmake --version; Write-Host "" } else { Write-Host "## cmake`nnot found in PATH`n" }
+        if (Get-Command ninja -ErrorAction SilentlyContinue) { Write-Host "## ninja"; ninja --version; Write-Host "" } else { Write-Host "## ninja`nnot found in PATH`n" }
+        if (Get-Command git -ErrorAction SilentlyContinue) { Write-Host "## git"; git --version; Write-Host "" } else { Write-Host "## git`nnot found in PATH`n" }
+        if (Get-Command clang -ErrorAction SilentlyContinue) { Write-Host "## clang"; clang --version; Write-Host "" } else { Write-Host "## clang`nnot found in PATH`n" }
+        if (Get-Command clang-cl -ErrorAction SilentlyContinue) { Write-Host "## clang-cl"; clang-cl --version; Write-Host "" } else { Write-Host "## clang-cl`nnot found in PATH`n" }
+        if (Get-Command nuget -ErrorAction SilentlyContinue) { Write-Host "## nuget"; nuget help | Select-Object -First 2; Write-Host "" } else { Write-Host "## nuget`nnot found in PATH`n" }
+        if (Get-Command cppcheck -ErrorAction SilentlyContinue) { Write-Host "## cppcheck"; cppcheck --version; Write-Host "" } else { Write-Host "## cppcheck`nnot found in PATH`n" }
 
 
     - name: configure
@@ -142,24 +124,6 @@ jobs:
     - name: Report tool versions
       shell: pwsh
       run: |
-        function Show-Version {
-          param(
-            [string]$Label,
-            [string]$Command,
-            [string[]]$Arguments = @('--version')
-          )
-
-          $tool = Get-Command $Command -ErrorAction SilentlyContinue
-          if (-not $tool) {
-            Write-Host "$Label: not found in PATH"
-            return
-          }
-
-          Write-Host "## $Label"
-          & $tool.Source @Arguments
-          Write-Host ""
-        }
-
         Write-Host "## PowerShell"
         $PSVersionTable.PSVersion.ToString()
         Write-Host ""
@@ -172,14 +136,14 @@ jobs:
           Write-Host ""
         }
 
-        Show-Version 'vcpkg' 'vcpkg' @('version')
-        Show-Version 'cmake' 'cmake'
-        Show-Version 'ninja' 'ninja'
-        Show-Version 'git' 'git'
-        Show-Version 'clang' 'clang'
-        Show-Version 'clang-cl' 'clang-cl'
-        Show-Version 'nuget' 'nuget' @('help')
-        Show-Version 'cppcheck' 'cppcheck'
+        if (Get-Command vcpkg -ErrorAction SilentlyContinue) { Write-Host "## vcpkg"; vcpkg version; Write-Host "" } else { Write-Host "## vcpkg`nnot found in PATH`n" }
+        if (Get-Command cmake -ErrorAction SilentlyContinue) { Write-Host "## cmake"; cmake --version; Write-Host "" } else { Write-Host "## cmake`nnot found in PATH`n" }
+        if (Get-Command ninja -ErrorAction SilentlyContinue) { Write-Host "## ninja"; ninja --version; Write-Host "" } else { Write-Host "## ninja`nnot found in PATH`n" }
+        if (Get-Command git -ErrorAction SilentlyContinue) { Write-Host "## git"; git --version; Write-Host "" } else { Write-Host "## git`nnot found in PATH`n" }
+        if (Get-Command clang -ErrorAction SilentlyContinue) { Write-Host "## clang"; clang --version; Write-Host "" } else { Write-Host "## clang`nnot found in PATH`n" }
+        if (Get-Command clang-cl -ErrorAction SilentlyContinue) { Write-Host "## clang-cl"; clang-cl --version; Write-Host "" } else { Write-Host "## clang-cl`nnot found in PATH`n" }
+        if (Get-Command nuget -ErrorAction SilentlyContinue) { Write-Host "## nuget"; nuget help | Select-Object -First 2; Write-Host "" } else { Write-Host "## nuget`nnot found in PATH`n" }
+        if (Get-Command cppcheck -ErrorAction SilentlyContinue) { Write-Host "## cppcheck"; cppcheck --version; Write-Host "" } else { Write-Host "## cppcheck`nnot found in PATH`n" }
 
     - name: configure
       run: |
