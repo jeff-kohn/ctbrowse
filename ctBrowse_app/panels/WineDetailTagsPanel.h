@@ -3,6 +3,8 @@
 #include "App.h"
 #include "panels/WineDetailBasePanel.h"
 
+#include <wx/stattext.h>
+
 
 namespace ctb::app
 {

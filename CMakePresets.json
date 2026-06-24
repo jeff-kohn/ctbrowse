@@ -91,7 +91,7 @@
       },
       {
          "name": "ci-static-analysis",
-         "displayName": "Static Analysis",
+         "displayName": "Static Analysis (CI)",
          "description": "Preset for clang-tidy and CppCheck project scan",
          "inherits": [ "win-clang" ],
          "cacheVariables": {

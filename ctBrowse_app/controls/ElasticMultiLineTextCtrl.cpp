@@ -1,6 +1,8 @@
 #include "ElasticMultiLineTextCtrl.h"
 
 #include <wx/valgen.h>
+#include <wx/wupdlock.h>
+
 
 namespace ctb::app
 {

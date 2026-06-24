@@ -4,6 +4,8 @@
 #include "controls/ElasticPropertyValueBase.h"
 
 #include <wx/sizer.h>
+#include <wx/stattext.h>
+
 
 namespace ctb::app
 {
@@ -22,8 +24,8 @@ namespace ctb::app
 
          if (!parent_ctrl or !value_ctrl) throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
 
-         m_row_sizer  = new wxGridSizer{ COL_COUNT };                                         // cppcheck-suppress noOperatorEq
-         m_label_ctrl = new wxStaticText{ parent_ctrl, wxID_ANY, wxFromSV(heading_label) };   // cppcheck-suppress noOperatorEq
+         m_row_sizer  = new wxGridSizer{ COL_COUNT };                                         // cppcheck-suppress [noOperatorEq, noCopyConstructor]
+         m_label_ctrl = new wxStaticText{ parent_ctrl, wxID_ANY, wxFromSV(heading_label) };   // cppcheck-suppress [noOperatorEq, noCopyConstructor]
 
          m_row_sizer->Add(m_label_ctrl, wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT).Right());
          m_row_sizer->Add(m_value_ctrl, wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT));

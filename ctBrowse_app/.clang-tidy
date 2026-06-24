@@ -53,6 +53,6 @@ CheckOptions:
   - key: 'readability-redundant-access-specifiers.CheckFirstDeclaration'
     value: 'true'
 
-HeaderFilterRegex:        '.*[/\\][^/\\]*(ctBrowse|ctb)[^/\\]*[/\\].*'
 ExcludeHeaderFilterRegex: '.*/(3rdParty|build)/.*'
+HeaderFilterRegex:        '.*[/\\][^/\\]*(ctBrowse|ctb)[^/\\]*[/\\].*'
 ExtraArgsBefore: ['--driver-mode=cl']

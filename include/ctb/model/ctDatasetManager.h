@@ -16,7 +16,8 @@ namespace ctb::app
    {
    public:
       /// @brief callback type used  for table download requests. Needs to be copyable because downloadTablesAsync
-      ///        needs to copy the callable for each downloadTableAsync() call.
+      ///        needs to copy the callable for each downloadTableAsync() call. The expeced return value is the 
+      ///        FQ path of the file that was downloaded.
       using TableDownloadResultCallback = copyable_function<void(std::expected<std::string, ctb::Error>)>;
 
       /// @brief default ctor, initializes data folder to "." unless overridden by a call to setDataFolder()

@@ -1,39 +1,36 @@
 #pragma once
 
+#include "ctb/HttpDownloader.h"
 #include "ctb/ctb.h"
 #include "ctb/utility.h"
-#include "HttpDownloader.h"
+#include "ctb/utility_http.h"
 
-#include <asio/co_spawn.hpp>
-#include <asio/detached.hpp>
-#include <asio/awaitable.hpp>
-#include <asio/cancellation_signal.hpp>
-#include <asio/bind_cancellation_slot.hpp>
-#include <asio/this_coro.hpp>
+#include <asio/buffer.hpp>
+#include <asio/write.hpp>
+#include <exec/asio/asio_thread_pool.hpp>
+#include <exec/asio/use_sender.hpp>
+#include <exec/start_detached.hpp>
+#include <exec/static_thread_pool.hpp>
+#include <stdexec/execution.hpp>
 
 namespace ctb::tasks
 {
-   using asio::awaitable;
-   using asio::stream_file;
 
-   /// @brief awaitable task for saving a 
-   awaitable<void> save_data_async(std::string filepath, std::string data)
-   {
-      auto executor = co_await asio::this_coro::executor;
+   // keep namespace pollution out of our expressions, especially since stdexec will probably become std::exec
+   using exec::start_detached;
+   using exec::asio::use_sender;
+   using stdexec::continues_on;
+   using stdexec::just;
+   using stdexec::let_error;
+   using stdexec::let_value;
+   using stdexec::then;
+   using stdexec::upon_error;
 
-      // Open file for asynchronous writing
-      asio::stream_file file(executor, filepath, asio::stream_file::write_only | asio::stream_file::create | asio::stream_file::truncate);
 
-      // Asynchronously write the complete buffer to disk.
-      // Moving the data into the coroutine ensures its lifetime matches the async operation.
-      co_await asio::async_write(file, asio::buffer(data), asio::use_awaitable);
-
-      // File is automatically closed when `file` goes out of scope.
-   }
-
-   /// @brief Validates the response received from a cellartracker get request for a table download.
-   /// @throw ctb::Error if the response object indicates any error (either network level or from CT)
-   void validateDownloadTableResponse(const HttpDownloader::HttpResult response) noexcept(false)
+   /// @brief checks an CellarTracker HTTP response for errors and throws them as Error exceptions
+   /// @return the response object from the HttpResult if validation passed
+   /// @throw ctb::Error if validation fails
+   auto validateHttpResponse(const HttpDownloader::HttpResult response) noexcept(false) -> HttpDownloader::HttpResult::value_type
    {
       if (!response)
       {
@@ -66,49 +63,95 @@ namespace ctb::tasks
 
          throw ctb::Error{ response->status_code, status_msg, Error::Category::HttpStatus };
       }
+      return *response;
    }
 
-   
-   /// @brief the result of a download will contain the requested data if successful, or an Error object if unsuccessful.
-   using DownloadResult = std::expected<RawTableData, Error>;
 
-
-
-   RawTableData getTableFromResponse(HttpDownloader::HttpResult response, TableId table_id) noexcept(false)
+   /// @brief  Converts a glz::response into a RawTableData object
+   auto createRawTableFromResponse(HttpDownloader::HttpResult::value_type response, TableId table_id) -> RawTableData
    {
-      DownloadResult result{};
-      try
+      std::string content_type_header{};
+      if (auto it = response.response_headers.find(ctb::headers::CONTENT_TYPE_KEY); it != response.response_headers.end())
       {
-         validateDownloadTableResponse(response);
-         std::string content_type_header{};
-         if (auto it = response->response_headers.find(ctb::headers::CONTENT_TYPE_KEY); it != response->response_headers.end())
-         {
-            content_type_header = it->second;
-         }
-         // we got a table (or some sort of body), package the result.
-         result = RawTableData{ .data        = std::move(response->response_body),
-                                .table_id    = table,
-                                .data_format = DataFormatId::csv,
-                                .encoding    = getTextEncodingFromHeader(content_type_header).value_or(TextEncoding::ANSI) };
+         content_type_header = it->second;
       }
-      catch (ctb::Error& e)
+      // we got a table (or some sort of body), package the result.
+      return RawTableData{ .data        = std::move(response.response_body),
+                           .table_id    = table_id,
+                           .data_format = DataFormatId::csv,
+                           .encoding    = getTextEncodingFromHeader(content_type_header).value_or(TextEncoding::ANSI) };
+   }
+
+
+   /// @brief convert the RawTableData to UTF8 text (if it isn't already)
+   auto convertTableToUtf8(RawTableData table_data) -> RawTableData
+   {
+      // short-circuit check
+      if (table_data.encoding == TextEncoding::UTF8) return table_data;
+
+      auto maybe_utf8_text = toUTF8(table_data.data, table_data.encoding);
+      if (maybe_utf8_text)
       {
-         result = std::unexpected{ std::move(e) };
+         table_data.data.swap(*maybe_utf8_text);
       }
-
-      // Now we can send our caller the table data (or Error object). Note we're still on asio thread here
-      // so make sure no exceptions can escape
-      try
-      {
-         callback(std::move(result));
-      }
-      catch (...)   // NOLINT
-      {
-         SPDLOG_DEBUG("Exception was thrown from downloadRawTableData callback: {}", packageError().formattedMessage());
-      }
-   };
+      return table_data;
+   }
 
 
 
+   template<typename SchedulerT, typename CallbackT>
+   auto safeSuccessCallback(SchedulerT scheduler, CallbackT&& callback) noexcept
+   {
+      return just(std::move(ep))
+           | continues_on(scheduler)
+           | then(
+                [cb_func = std::forward<CallbackT>(callback)](std::exception_ptr ep) mutable noexcept
+                {
+                   auto error = packageError(ep);
+                   SPDLOG_DEBUG(error.formattedMessage());
+                   cb_func(std::unexpected{ std::move(error) });
+                })
+           | upon_error(
+                []([[maybe_unused]] std::exception_ptr ep) noexcept
+                {
+                   try
+                   {
+                      SPDLOG_DEBUG("safeErrorCallback caught a leaKed exception from callback invocation: {}",
+                                   packageError(ep).formattedMessage());
+                   }
+                   catch (...)
+                   {}   // NOLING
+                });
+   }
 
-}
+
+
+   /// @brief Sender that runs on the the specified scheduler and calls the error callback without allowing exceptions to escape.
+   /// @return the sender that can be assigned to a receiver for async execution.
+   template<typename SchedulerT, typename CallbackT>
+   auto safeErrorCallback(SchedulerT scheduler, CallbackT&& callback, std::exception_ptr ep) noexcept
+   {
+      return just(std::move(ep))
+           | continues_on(scheduler)
+           | then(
+                [cb_func = std::forward<CallbackT>(callback)](std::exception_ptr ep) mutable noexcept
+                {
+                   auto error = packageError(ep);
+                   SPDLOG_DEBUG(error.formattedMessage());
+                   cb_func(std::unexpected{ std::move(error) });
+                })
+           | upon_error(
+                []([[maybe_unused]] std::exception_ptr ep) noexcept
+                {
+                   try
+                   {
+                      SPDLOG_DEBUG("safeErrorCallback caught a leaKed exception from callback invocation: {}",
+                                   packageError(ep).formattedMessage());
+                   }
+                   catch (...)
+                   {}   // NOLING
+                });
+   }
+
+
+}   // namespace ctb::tasks
