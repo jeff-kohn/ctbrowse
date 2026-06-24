@@ -45,6 +45,49 @@ jobs:
         nuget setapikey "${{ secrets.GITHUB_TOKEN }}" -Source "${{ env.NUGET_FEED }}"
         dir "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC"
 
+    - name: Report tool versions
+      shell: pwsh
+      run: |
+        function Show-Version {
+          param(
+            [string]$Label,
+            [string]$Command,
+            [string[]]$Arguments = @('--version')
+          )
+
+          $tool = Get-Command $Command -ErrorAction SilentlyContinue
+          if (-not $tool) {
+            Write-Host "$Label: not found in PATH"
+            return
+          }
+
+          Write-Host "## $Label"
+          & $tool.Source @Arguments
+          Write-Host ""
+        }
+
+        Write-Host "## PowerShell"
+        $PSVersionTable.PSVersion.ToString()
+        Write-Host ""
+
+        $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+        if (Test-Path $vswhere) {
+          Write-Host "## Visual Studio"
+          & $vswhere -latest -products * -property displayName
+          & $vswhere -latest -products * -property installationVersion
+          Write-Host ""
+        }
+
+        Show-Version 'vcpkg' 'vcpkg' @('version')
+        Show-Version 'cmake' 'cmake'
+        Show-Version 'ninja' 'ninja'
+        Show-Version 'git' 'git'
+        Show-Version 'clang' 'clang'
+        Show-Version 'clang-cl' 'clang-cl'
+        Show-Version 'nuget' 'nuget' @('help')
+        Show-Version 'cppcheck' 'cppcheck'
+
+
     - name: configure
       run: |
         cmake --version
@@ -95,6 +138,48 @@ jobs:
     - name: Install pre-reqs
       run: |
         winget install CppCheck --verbose --disable-interactivity --source winget --accept-source-agreements --accept-package-agreements
+
+    - name: Report tool versions
+      shell: pwsh
+      run: |
+        function Show-Version {
+          param(
+            [string]$Label,
+            [string]$Command,
+            [string[]]$Arguments = @('--version')
+          )
+
+          $tool = Get-Command $Command -ErrorAction SilentlyContinue
+          if (-not $tool) {
+            Write-Host "$Label: not found in PATH"
+            return
+          }
+
+          Write-Host "## $Label"
+          & $tool.Source @Arguments
+          Write-Host ""
+        }
+
+        Write-Host "## PowerShell"
+        $PSVersionTable.PSVersion.ToString()
+        Write-Host ""
+
+        $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+        if (Test-Path $vswhere) {
+          Write-Host "## Visual Studio"
+          & $vswhere -latest -products * -property displayName
+          & $vswhere -latest -products * -property installationVersion
+          Write-Host ""
+        }
+
+        Show-Version 'vcpkg' 'vcpkg' @('version')
+        Show-Version 'cmake' 'cmake'
+        Show-Version 'ninja' 'ninja'
+        Show-Version 'git' 'git'
+        Show-Version 'clang' 'clang'
+        Show-Version 'clang-cl' 'clang-cl'
+        Show-Version 'nuget' 'nuget' @('help')
+        Show-Version 'cppcheck' 'cppcheck'
 
     - name: configure
       run: |
