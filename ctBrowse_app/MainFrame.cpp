@@ -13,16 +13,13 @@
 #include "model/DatasetDefaultOptions.h"
 #include "views/DatasetMultiView.h"
 
-#include "wx_helpers.h"
-
-#include <ctb/download.h>
-#include <ctb/model/CtDatasetLoader.h>
+//#include <ctb/download.h>
 #include <ctb/model/DatasetEventSource.h>
 #include <ctb/utility.h>
 #include <ctb/utility_chrono.h>
 #include <ctb/utility_http.h>
 
-#include <external/HttpStatusCodes.h>
+#include "wx_helpers.h"
 
 #include <wx/artprov.h>
 #include <wx/bitmap.h>
@@ -33,6 +30,7 @@
 #include <wx/image.h>
 #include <wx/menu.h>
 #include <wx/msgdlg.h>
+#include <wx/notifmsg.h>
 #include <wx/persist/toplevel.h>
 #include <wx/progdlg.h>
 #include <wx/sizer.h>
@@ -109,6 +107,13 @@ namespace ctb::app
          wxGetApp().displayErrorMessage(packageError(), true);
          throw;
       }
+   }
+
+
+   void MainFrame::notifySuccess(std::string_view title, std::string_view message)
+   {
+      wxNotificationMessage notification{ wxFromSV(title), wxFromSV(message), this, wxICON_INFORMATION };
+      notification.Show(wxNotificationMessage::Timeout_Auto);
    }
 
 
@@ -473,83 +478,15 @@ namespace ctb::app
                                                             [this](std::expected<std::string, Error> result)
                                                             {
                                                                CallAfter(
-                                                                  [this, &result]
+                                                                  [this, result = std::move(result)]
                                                                   {
-                                                                     setStatusText("{}",
-                                                                                   result ? *result : result.error().formattedMessage());
+                                                                     auto msg = result ? *result 
+                                                                        : format("Download failed: {}", result.error().formattedMessage());
+                                                                     SetStatusText(msg);
+                                                                     //notifySuccess("Download Complete", msg);
                                                                   });
                                                             });
-         // If cred doesn't work we need to re-prompt so update prompt message.
-         //prompt_msg = ctb::format(constants::FMT_CREDENTIALDLG_REPROMPT_MSG, cred_name);
 
-         //constexpr auto   max_percent = 100;
-         //wxProgressDialog progress_dlg{
-         //   "Download Progress", "Downloading Data Files", max_percent, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL
-         //};
-
-         //ProgressCallback progress_callback = [&progress_dlg](
-         //                                        [[maybe_unused]] int64_t  downloadTotal,
-         //                                        [[maybe_unused]] int64_t  downloadNow,
-         //                                        [[maybe_unused]] int64_t  uploadTotal,
-         //                                        [[maybe_unused]] int64_t  uploadNow,
-         //                                        [[maybe_unused]] intptr_t userdata
-         //                                     ) { return progress_dlg.Pulse(); };
-
-         //// For each selected table, download it.
-         //for (auto tbl : dlg.selectedTables())
-         //{
-         //   setStatusText(constants::FMT_STATUS_FILE_DOWNLOADING, getTableDescription(tbl));
-
-         //   DownloadResult result{};
-         //   result = downloadRawTableData(*cred_result, tbl, DataFormatId::csv, &progress_callback);
-
-         //   while (!result)
-         //   {
-         //      auto error = result.error();
-         //      if (error.error_code == std::to_underlying(HttpStatus::Code::Unauthorized))
-         //      {
-         //         // login failure, need to re-prompt for credentials.
-         //         cred_result = cred_mgr.promptCredential(cred_name, prompt_msg, true);
-         //         if (cred_result)
-         //         {
-         //            // got a new cred, try again
-         //            result = downloadRawTableData(*cred_result, tbl, DataFormatId::csv, &progress_callback);
-         //         }
-         //         else
-         //         {
-         //            // user canceled login dialog so just exit out
-         //            end_status.message = constants::ERROR_STR_DOWNLOAD_AUTH_FAILURE;
-         //            return;
-         //         }
-         //      }
-         //      else if (error.category == Error::Category::OperationCanceled)
-         //      {
-         //         // user hit cancel in progress dilaog, so just exit out.
-         //         end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
-         //         return;
-         //      }
-         //      else
-         //      {
-         //         // some unknown error happened, let user know before bailing.
-         //         wxGetApp().displayErrorMessage(result.error());
-         //         end_status.message = constants::STATUS_DOWNLOAD_FAILED;
-         //         return;
-         //      }
-         //   }
-         //   // did user ask to save cred?
-         //   if (cred_result->saveRequested())
-         //   {
-         //      cred_mgr.saveCredential(*cred_result);
-         //   }
-
-         //   // if we get here we have the data, so save it to file.
-         //   auto folder = wxGetApp().getDataFolder(AppFolder::Tables);
-         //   auto file_path{ folder / result->tableName() };
-         //   file_path.replace_extension(constants::DATA_FILE_EXTENSION);
-         //   saveTextToFile(file_path, result->data, true);
-
-         //   setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, getTableDescription(tbl));
-         //}
       }
       catch (...)
       {

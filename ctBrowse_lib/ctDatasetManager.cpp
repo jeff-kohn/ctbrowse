@@ -52,7 +52,9 @@ namespace ctb::app
    {}
 
    CtDatasetManager::~CtDatasetManager() noexcept
-   {}
+   {
+      m_impl->cpu_pool.request_stop();
+   }
 
 
    CtDatasetManager::CtDatasetManager(const fs::path& table_folder) noexcept(false)
@@ -131,10 +133,11 @@ namespace ctb::app
             // then back again to cpu scheduler for callback notification
             | continues_on(m_impl->cpu_pool.get_scheduler())
             | then(
-               [table_id, target_path, callback]([[maybe_unused]] std::size_t bytes_written) mutable
+               [table_id, callback]([[maybe_unused]] std::size_t bytes_written) mutable
                {
-                  SPDLOG_DEBUG("Successfully saved table {} with {} bytes to {}", enum_to_string(table_id), bytes_written, target_path);
-                  callback(std::move(target_path));
+                  auto msg = format("Successfully downloaded table '{}'.", getTableDescription(table_id));
+                  SPDLOG_DEBUG(msg);
+                  callback(std::move(msg));
                })
 
             // this could be on either scheduler depending on which step threw an exception, so we use a nested error pipeline

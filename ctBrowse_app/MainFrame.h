@@ -12,7 +12,6 @@
 
 
 #include <wx/event.h>
-#include <wx/menu.h>
 #include <wx/frame.h>
 
 #include <memory>
@@ -54,6 +53,8 @@ namespace ctb::app
       {
          SetStatusText(ctb::format(fmt_str, std::forward<Args>(args)...));
       }
+
+      void notifySuccess(std::string_view title, std::string_view message );
 
       /// @brief Type alias for a wxMenu smart ptr 
       using wxMenuPtr = std::unique_ptr<wxMenu>;

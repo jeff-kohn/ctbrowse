@@ -12,6 +12,7 @@
 
 #include <ctb/model/CtDataset.h>
 
+#include <wx/menu.h>
 #include <wx/persist/dataview.h>
 #include <wx/wupdlock.h>
 

@@ -14,7 +14,6 @@
 #include <ctb/model/CtDatasetManager.h>
 #include <ctb/model/ProReviewsCache.h>
 #include <wx/app.h>
-#include <wx/weakref.h>
 #include <wx/windowptr.h>
 
 

@@ -98,34 +98,6 @@ namespace ctb::tasks
    }
 
 
-
-   template<typename SchedulerT, typename CallbackT>
-   auto safeSuccessCallback(SchedulerT scheduler, CallbackT&& callback) noexcept
-   {
-      return just()
-           | continues_on(scheduler)
-           | then(
-                [cb_func = std::forward<CallbackT>(callback)](std::exception_ptr ep) mutable noexcept
-                {
-                   auto error = packageError(ep);
-                   SPDLOG_DEBUG(error.formattedMessage());
-                   cb_func(std::unexpected{ std::move(error) });
-                })
-           | upon_error(
-                []([[maybe_unused]] std::exception_ptr ep) noexcept
-                {
-                   try
-                   {
-                      SPDLOG_DEBUG("safeErrorCallback caught a leaKed exception from callback invocation: {}",
-                                   packageError(ep).formattedMessage());
-                   }
-                   catch (...)
-                   {}   // NOLING
-                });
-   }
-
-
-
    /// @brief Sender that runs on the the specified scheduler and calls the error callback without allowing exceptions to escape.
    /// @return the sender that can be assigned to a receiver for async execution.
    template<typename SchedulerT, typename CallbackT>
