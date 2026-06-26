@@ -51,9 +51,10 @@ try
 {
    Write-Host "Building project for $Preset using repo dir $RepoDir..." -ForegroundColor Cyan
 
-   if ( !(Test-Path "$RepoDir/build/CMakeCache.txt") )
+   $BuildDir = "$RepoDir/build/$Preset"
+   if ( !(Test-Path "$BuildDir/CMakeCache.txt") )
    {
-      Write-Host "`r`nBuild directory not found. Run configure before building.`r`n"
+      Write-Host "`r`nBuild directory $BuildDir not found. Run configure before building.`r`n"
       exit (-1)
    }
 

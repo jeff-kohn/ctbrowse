@@ -59,6 +59,8 @@ namespace ctb::app
       using namespace log;
       auto log_folder = fs::path{ std_paths.GetUserDir(wxStandardPaths::Dir::Dir_Cache).wx_str() } / constants::APP_NAME_LONG;
 
+      m_dataset_mgr.setTableFolder(getDataFolder(AppFolder::Tables));
+
 #if defined(NDEBUG)
       setupDefaultLogger({{ makeFileSink(log_folder,  constants::APP_NAME_SHORT) }});
 #else
@@ -67,7 +69,7 @@ namespace ctb::app
 
       log::info("App startup.");
       wxConfigBase::Set(cfg.release());
-   } // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks) unfortunately no way around it with wxWidgets
+   }   // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks) unfortunately no way around it with wxWidgets
 
 
    bool App::OnInit()

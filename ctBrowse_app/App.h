@@ -11,9 +11,10 @@
 #include "wx_helpers.h"
 
 #include <ctb/log.h>
+#include <ctb/model/CtDatasetManager.h>
 #include <ctb/model/ProReviewsCache.h>
-
 #include <wx/app.h>
+#include <wx/weakref.h>
 #include <wx/windowptr.h>
 
 
@@ -112,6 +113,13 @@ namespace ctb::app
          }
       }
 
+
+      auto getDatasetManager() noexcept -> CtDatasetManager&
+      {
+         return m_dataset_mgr;
+      }
+
+
       /// @brief Retrieve a pointer to main window that doesn't need dynamic_cast (or wx-equivalent).
       /// @return pointer to the main window. Will never be nullptr unless somehow called before OnInit().
       auto getMainWindow() const noexcept -> MainFrame*
@@ -169,8 +177,8 @@ namespace ctb::app
       WebClientPtr                   m_web_client{};
       LabelCachePtr                  m_label_cache{};
       std::optional<ProReviewsCache> m_review_cache{};
-
-      void onMainFrameClosed(wxCloseEvent&);
+      CtDatasetManager               m_dataset_mgr{};
+      void                           onMainFrameClosed(wxCloseEvent&);
    };
 
 }   // namespace ctb::app

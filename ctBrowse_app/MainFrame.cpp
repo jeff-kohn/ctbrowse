@@ -5,8 +5,8 @@
  *
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
-#include "App.h"
 #include "MainFrame.h"
+#include "App.h"
 #include "CtCredentialManager.h"
 
 #include "dialogs/TableSyncDialog.h"
@@ -15,9 +15,9 @@
 
 #include "wx_helpers.h"
 
+#include <ctb/download.h>
 #include <ctb/model/CtDatasetLoader.h>
 #include <ctb/model/DatasetEventSource.h>
-#include <ctb/download.h>
 #include <ctb/utility.h>
 #include <ctb/utility_chrono.h>
 #include <ctb/utility_http.h>
@@ -67,11 +67,16 @@ namespace ctb::app
          }
       }
 
+
       auto loadDataset(TableId table_id) -> DatasetPtr
       {
-         CtDatasetLoader loader{ wxGetApp().getDataFolder(AppFolder::Tables) };
-         return loader.getDataset(table_id);
+         //CtDatasetLoader loader{ wxGetApp().getDataFolder(AppFolder::Tables) };
+         auto dataset = wxGetApp().getDatasetManager().loadDataset(table_id);
+         DatasetDefaultOptions::applyDefaultOptions(dataset);
+         return dataset;
       }
+
+
       /// @brief Load a dataset and apply options
       auto loadDataset(const CtDatasetOptions& options) -> DatasetPtr
       {
@@ -114,66 +119,43 @@ namespace ctb::app
 
       // build our popup menu based first on the universal commands then the property/dataset-specific ones.
       auto popup_menu = std::make_unique<wxMenu>();
-      popup_menu->Append(new wxMenuItem{ popup_menu.get(),
-                                         CmdId::CMD_ONLINE_WINE_DETAILS,
-                                         constants::CMD_ONLINE_VIEW_ON_CT_LBL,
-                                         constants::CMD_ONLINE_VIEW_ON_CT_TIP,
-                                         wxITEM_NORMAL });
+      popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_ONLINE_WINE_DETAILS, constants::CMD_ONLINE_VIEW_ON_CT_LBL,
+                                         constants::CMD_ONLINE_VIEW_ON_CT_TIP, wxITEM_NORMAL });
 
-      popup_menu->Append(new wxMenuItem{ popup_menu.get(),
-                                         CmdId::CMD_ONLINE_SEARCH_VINTAGES,
-                                         constants::CMD_ONLINE_SEARCH_VINTAGES_LBL,
-                                         constants::CMD_ONLINE_SEARCH_VINTAGES_TIP,
-                                         wxITEM_NORMAL });
+      popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_ONLINE_SEARCH_VINTAGES, constants::CMD_ONLINE_SEARCH_VINTAGES_LBL,
+                                         constants::CMD_ONLINE_SEARCH_VINTAGES_TIP, wxITEM_NORMAL });
 
       popup_menu->AppendSeparator();
-      popup_menu->Append(new wxMenuItem{ popup_menu.get(),
-                                         CmdId::CMD_ONLINE_DRINK_WINDOW,
-                                         constants::CMD_ONLINE_DRINK_WINDOW_LBL,
-                                         constants::CMD_ONLINE_DRINK_WINDOW_TIP,
-                                         wxITEM_NORMAL });
+      popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_ONLINE_DRINK_WINDOW, constants::CMD_ONLINE_DRINK_WINDOW_LBL,
+                                         constants::CMD_ONLINE_DRINK_WINDOW_TIP, wxITEM_NORMAL });
 
       popup_menu->AppendSeparator();
-      popup_menu->Append(new wxMenuItem{ popup_menu.get(),
-                                         CmdId::CMD_ONLINE_ADD_TASTING_NOTE,
-                                         constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
-                                         constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
-                                         wxITEM_NORMAL });
+      popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_ONLINE_ADD_TASTING_NOTE, constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
+                                         constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL, wxITEM_NORMAL });
 
       auto dataset = m_event_source->getDataset();
       if (dataset->getTableId() != TableId::Pending)   // could be confusing whether accepting pending or adding new order
       {
-         popup_menu->Append(new wxMenuItem{ popup_menu.get(),
-                                            CmdId::CMD_ONLINE_ADD_TO_CELLAR,
-                                            constants::CMD_ONLINE_ADD_TO_CELLAR_LBL,
-                                            constants::CMD_ONLINE_ADD_TO_CELLAR_TIP,
-                                            wxITEM_NORMAL });
+         popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_ONLINE_ADD_TO_CELLAR, constants::CMD_ONLINE_ADD_TO_CELLAR_LBL,
+                                            constants::CMD_ONLINE_ADD_TO_CELLAR_TIP, wxITEM_NORMAL });
       }
 
-      if (dataset->getTableId() == TableId::Inventory or dataset->hasProperty(CtProp::QtyOnHand))   // can only drink if have available inventory
+      if (dataset->getTableId() == TableId::Inventory
+          or dataset->hasProperty(CtProp::QtyOnHand))   // can only drink if have available inventory
       {
          popup_menu->AppendSeparator();
-         popup_menu->Append(new wxMenuItem{ popup_menu.get(),
-                                            CmdId::CMD_ONLINE_DRINK_REMOVE,
-                                            constants::CMD_ONLINE_DRINK_REMOVE_LBL,
-                                            constants::CMD_ONLINE_DRINK_REMOVE_LBL,
-                                            wxITEM_NORMAL });
+         popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_ONLINE_DRINK_REMOVE, constants::CMD_ONLINE_DRINK_REMOVE_LBL,
+                                            constants::CMD_ONLINE_DRINK_REMOVE_LBL, wxITEM_NORMAL });
       }
 
       // only show these in Pending view for now, might want to reconsider for other views that have pending qtry
       if (dataset->getTableId() == TableId::Pending)
       {
          popup_menu->AppendSeparator();
-         popup_menu->Append(new wxMenuItem{ popup_menu.get(),
-                                            CmdId::CMD_ONLINE_ACCEPT_PENDING,
-                                            constants::CMD_ONLINE_ACCEPT_PENDING_LBL,
-                                            constants::CMD_ONLINE_ACCEPT_PENDING_TIP,
-                                            wxITEM_NORMAL });
-         popup_menu->Append(new wxMenuItem{ popup_menu.get(),
-                                            CmdId::CMD_ONLINE_EDIT_ORDER,
-                                            constants::CMD_ONLINE_EDIT_ORDER_LBL,
-                                            constants::CMD_ONLINE_EDIT_ORDER_LBL,
-                                            wxITEM_NORMAL });
+         popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_ONLINE_ACCEPT_PENDING, constants::CMD_ONLINE_ACCEPT_PENDING_LBL,
+                                            constants::CMD_ONLINE_ACCEPT_PENDING_TIP, wxITEM_NORMAL });
+         popup_menu->Append(new wxMenuItem{ popup_menu.get(), CmdId::CMD_ONLINE_EDIT_ORDER, constants::CMD_ONLINE_EDIT_ORDER_LBL,
+                                            constants::CMD_ONLINE_EDIT_ORDER_LBL, wxITEM_NORMAL });
       }
 
       return popup_menu;
@@ -195,7 +177,11 @@ namespace ctb::app
       m_status_bar = CreateStatusBar();
 
       // Dataset event
-      m_dataset_events.setDefaultHandler([this](const DatasetEvent& event) { onDatasetEvent(event); });
+      m_dataset_events.setDefaultHandler(
+         [this](const DatasetEvent& event)
+         {
+            onDatasetEvent(event);
+         });
 
       // File menu handlers
       //Bind(wxEVT_MENU, &MainFrame::onMenuFilePreferences, this, CmdId::CMD_FILE_SETTINGS);
@@ -274,9 +260,8 @@ namespace ctb::app
       menu_file->Append(menu_save_options);
       menu_file->AppendSeparator();
 
-      auto* menu_sync_data = new wxMenuItem{
-         menu_file, CmdId::CMD_FILE_DOWNLOAD_DATA, constants::CMD_FILE_DOWNLOAD_DATA_LBL, constants::CMD_FILE_DOWNLOAD_DATA_TIP, wxITEM_NORMAL
-      };
+      auto* menu_sync_data = new wxMenuItem{ menu_file, CmdId::CMD_FILE_DOWNLOAD_DATA, constants::CMD_FILE_DOWNLOAD_DATA_LBL,
+                                             constants::CMD_FILE_DOWNLOAD_DATA_TIP, wxITEM_NORMAL };
       menu_file->Append(menu_sync_data);
       menu_file->AppendSeparator();
 
@@ -313,87 +298,51 @@ namespace ctb::app
 
       // Collection Menu
       auto* menu_data = new wxMenu();
-      menu_data->Append(new wxMenuItem{ menu_data,
-                                        CmdId::CMD_COLLECTION_MY_CELLAR,
-                                        constants::CMD_COLLECTION_MY_CELLAR_LBL,
-                                        constants::CMD_COLLECTION_MY_CELLAR_TIP,
-                                        wxITEM_NORMAL });
-      menu_data->Append(new wxMenuItem{ menu_data,
-                                        CmdId::CMD_COLLECTION_BOTTLE_INVENTORY,
-                                        constants::CMD_COLLECTION_BOTTLE_INVENTORY_LBL,
-                                        constants::CMD_COLLECTION_BOTTLE_INVENTORY_TIP,
-                                        wxITEM_NORMAL });
-      menu_data->Append(new wxMenuItem{ menu_data,
-                                        CmdId::CMD_COLLECTION_READY_TO_DRINK,
-                                        constants::CMD_COLLECTION_READY_TO_DRINK_LBL,
-                                        constants::CMD_COLLECTION_READY_TO_DRINK_TIP,
-                                        wxITEM_NORMAL });
+      menu_data->Append(new wxMenuItem{ menu_data, CmdId::CMD_COLLECTION_MY_CELLAR, constants::CMD_COLLECTION_MY_CELLAR_LBL,
+                                        constants::CMD_COLLECTION_MY_CELLAR_TIP, wxITEM_NORMAL });
+      menu_data->Append(new wxMenuItem{ menu_data, CmdId::CMD_COLLECTION_BOTTLE_INVENTORY, constants::CMD_COLLECTION_BOTTLE_INVENTORY_LBL,
+                                        constants::CMD_COLLECTION_BOTTLE_INVENTORY_TIP, wxITEM_NORMAL });
+      menu_data->Append(new wxMenuItem{ menu_data, CmdId::CMD_COLLECTION_READY_TO_DRINK, constants::CMD_COLLECTION_READY_TO_DRINK_LBL,
+                                        constants::CMD_COLLECTION_READY_TO_DRINK_TIP, wxITEM_NORMAL });
       menu_data->AppendSeparator();
-      menu_data->Append(new wxMenuItem{ menu_data,
-                                        CmdId::CMD_COLLECTION_PENDING_WINE,
-                                        constants::CMD_COLLECTION_PENDING_WINE_LBL,
-                                        constants::CMD_COLLECTION_PENDING_WINE_TIP,
-                                        wxITEM_NORMAL });
-      menu_data->Append(new wxMenuItem{ menu_data,
-                                        CmdId::CMD_COLLECTION_TAGGED_WINES,
-                                        constants::CMD_COLLECTION_TAGGED_WINES_LBL,
-                                        constants::CMD_COLLECTION_TAGGED_WINES_TIP,
-                                        wxITEM_NORMAL });
+      menu_data->Append(new wxMenuItem{ menu_data, CmdId::CMD_COLLECTION_PENDING_WINE, constants::CMD_COLLECTION_PENDING_WINE_LBL,
+                                        constants::CMD_COLLECTION_PENDING_WINE_TIP, wxITEM_NORMAL });
+      menu_data->Append(new wxMenuItem{ menu_data, CmdId::CMD_COLLECTION_TAGGED_WINES, constants::CMD_COLLECTION_TAGGED_WINES_LBL,
+                                        constants::CMD_COLLECTION_TAGGED_WINES_TIP, wxITEM_NORMAL });
       menu_data->AppendSeparator();
-      menu_data->Append(new wxMenuItem{ menu_data,
-                                        CmdId::CMD_COLLECTION_TASTING_NOTES,
-                                        constants::CMD_COLLECTION_TASTING_NOTES_LBL,
-                                        constants::CMD_COLLECTION_TASTING_NOTES_TIP,
-                                        wxITEM_NORMAL });
-      menu_data->Append(new wxMenuItem{ menu_data,
-                                        CmdId::CMD_COLLECTION_PRIVATE_NOTES,
-                                        constants::CMD_COLLECTION_PRIVATE_NOTES_LBL,
-                                        constants::CMD_COLLECTION_PRIVATE_NOTES_TIP,
-                                        wxITEM_NORMAL });
+      menu_data->Append(new wxMenuItem{ menu_data, CmdId::CMD_COLLECTION_TASTING_NOTES, constants::CMD_COLLECTION_TASTING_NOTES_LBL,
+                                        constants::CMD_COLLECTION_TASTING_NOTES_TIP, wxITEM_NORMAL });
+      menu_data->Append(new wxMenuItem{ menu_data, CmdId::CMD_COLLECTION_PRIVATE_NOTES, constants::CMD_COLLECTION_PRIVATE_NOTES_LBL,
+                                        constants::CMD_COLLECTION_PRIVATE_NOTES_TIP, wxITEM_NORMAL });
       menu_data->AppendSeparator();
-      menu_data->Append(new wxMenuItem{ menu_data,
-                                        CmdId::CMD_COLLECTION_PURCHASED_WINE,
-                                        constants::CMD_COLLECTION_PURCHASED_WINE_LBL,
-                                        constants::CMD_COLLECTION_PURCHASED_WINE_TIP,
-                                        wxITEM_NORMAL });
-      menu_data->Append(new wxMenuItem{
-         menu_data, CmdId::CMD_COLLECTION_CONSUMED, constants::CMD_COLLECTION_CONSUMED_LBL, constants::CMD_COLLECTION_CONSUMED_TIP, wxITEM_NORMAL });
+      menu_data->Append(new wxMenuItem{ menu_data, CmdId::CMD_COLLECTION_PURCHASED_WINE, constants::CMD_COLLECTION_PURCHASED_WINE_LBL,
+                                        constants::CMD_COLLECTION_PURCHASED_WINE_TIP, wxITEM_NORMAL });
+      menu_data->Append(new wxMenuItem{ menu_data, CmdId::CMD_COLLECTION_CONSUMED, constants::CMD_COLLECTION_CONSUMED_LBL,
+                                        constants::CMD_COLLECTION_CONSUMED_TIP, wxITEM_NORMAL });
       m_menu_bar->Append(menu_data, constants::LBL_MENU_COLLECTION);
 
       // Wine Menu
       auto* menu_wine = new wxMenu();
-      menu_wine->Append(new wxMenuItem{
-         menu_wine, CmdId::CMD_ONLINE_WINE_DETAILS, constants::CMD_ONLINE_WINE_DETAILS_LBL, constants::CMD_ONLINE_WINE_DETAILS_TIP, wxITEM_NORMAL });
-      menu_wine->Append(new wxMenuItem{ menu_wine,
-                                        CmdId::CMD_ONLINE_SEARCH_VINTAGES,
-                                        constants::CMD_ONLINE_SEARCH_VINTAGES_LBL,
-                                        constants::CMD_ONLINE_SEARCH_VINTAGES_TIP,
-                                        wxITEM_NORMAL });
+      menu_wine->Append(new wxMenuItem{ menu_wine, CmdId::CMD_ONLINE_WINE_DETAILS, constants::CMD_ONLINE_WINE_DETAILS_LBL,
+                                        constants::CMD_ONLINE_WINE_DETAILS_TIP, wxITEM_NORMAL });
+      menu_wine->Append(new wxMenuItem{ menu_wine, CmdId::CMD_ONLINE_SEARCH_VINTAGES, constants::CMD_ONLINE_SEARCH_VINTAGES_LBL,
+                                        constants::CMD_ONLINE_SEARCH_VINTAGES_TIP, wxITEM_NORMAL });
       menu_wine->AppendSeparator();
-      menu_wine->Append(new wxMenuItem{
-         menu_wine, CmdId::CMD_ONLINE_DRINK_WINDOW, constants::CMD_ONLINE_DRINK_WINDOW_LBL, constants::CMD_ONLINE_DRINK_WINDOW_TIP, wxITEM_NORMAL });
-      menu_wine->Append(new wxMenuItem{ menu_wine,
-                                        CmdId::CMD_ONLINE_ADD_TO_CELLAR,
-                                        constants::CMD_ONLINE_ADD_TO_CELLAR_LBL,
-                                        constants::CMD_ONLINE_ADD_TO_CELLAR_TIP,
-                                        wxITEM_NORMAL });
-      menu_wine->Append(new wxMenuItem{ menu_wine,
-                                        CmdId::CMD_ONLINE_ADD_TASTING_NOTE,
-                                        constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
-                                        constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
-                                        wxITEM_NORMAL });
+      menu_wine->Append(new wxMenuItem{ menu_wine, CmdId::CMD_ONLINE_DRINK_WINDOW, constants::CMD_ONLINE_DRINK_WINDOW_LBL,
+                                        constants::CMD_ONLINE_DRINK_WINDOW_TIP, wxITEM_NORMAL });
+      menu_wine->Append(new wxMenuItem{ menu_wine, CmdId::CMD_ONLINE_ADD_TO_CELLAR, constants::CMD_ONLINE_ADD_TO_CELLAR_LBL,
+                                        constants::CMD_ONLINE_ADD_TO_CELLAR_TIP, wxITEM_NORMAL });
+      menu_wine->Append(new wxMenuItem{ menu_wine, CmdId::CMD_ONLINE_ADD_TASTING_NOTE, constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL,
+                                        constants::CMD_ONLINE_ADD_TASTING_NOTE_LBL, wxITEM_NORMAL });
 
       menu_wine->AppendSeparator();
-      menu_wine->Append(new wxMenuItem{ menu_wine,
-                                        CmdId::CMD_ONLINE_ACCEPT_PENDING,
-                                        constants::CMD_ONLINE_ACCEPT_PENDING_LBL,
-                                        constants::CMD_ONLINE_ACCEPT_PENDING_TIP,
-                                        wxITEM_NORMAL });
-      menu_wine->Append(new wxMenuItem{
-         menu_wine, CmdId::CMD_ONLINE_EDIT_ORDER, constants::CMD_ONLINE_EDIT_ORDER_LBL, constants::CMD_ONLINE_EDIT_ORDER_LBL, wxITEM_NORMAL });
+      menu_wine->Append(new wxMenuItem{ menu_wine, CmdId::CMD_ONLINE_ACCEPT_PENDING, constants::CMD_ONLINE_ACCEPT_PENDING_LBL,
+                                        constants::CMD_ONLINE_ACCEPT_PENDING_TIP, wxITEM_NORMAL });
+      menu_wine->Append(new wxMenuItem{ menu_wine, CmdId::CMD_ONLINE_EDIT_ORDER, constants::CMD_ONLINE_EDIT_ORDER_LBL,
+                                        constants::CMD_ONLINE_EDIT_ORDER_LBL, wxITEM_NORMAL });
       menu_wine->AppendSeparator();
-      menu_wine->Append(new wxMenuItem{
-         menu_wine, CmdId::CMD_ONLINE_DRINK_REMOVE, constants::CMD_ONLINE_DRINK_REMOVE_LBL, constants::CMD_ONLINE_DRINK_REMOVE_LBL, wxITEM_NORMAL });
+      menu_wine->Append(new wxMenuItem{ menu_wine, CmdId::CMD_ONLINE_DRINK_REMOVE, constants::CMD_ONLINE_DRINK_REMOVE_LBL,
+                                        constants::CMD_ONLINE_DRINK_REMOVE_LBL, wxITEM_NORMAL });
 
       m_menu_bar->Append(menu_wine, constants::LBL_MENU_WINE);
       SetMenuBar(m_menu_bar);
@@ -505,8 +454,8 @@ namespace ctb::app
          TableSyncDialog dlg(this);
          if (dlg.ShowModal() != wxID_OK) return;
 
-         wxBusyCursor     busy{};
-         ScopedStatusText end_status{ constants::STATUS_DOWNLOAD_COMPLETE, this };
+         //wxBusyCursor     busy{};
+         //ScopedStatusText end_status{ constants::STATUS_DOWNLOAD_COMPLETE, this };
 
          CtCredentialManager cred_mgr{};
          const auto*         cred_name   = constants::CELLARTRACKER_DOT_COM;
@@ -516,81 +465,91 @@ namespace ctb::app
          if (!cred_result)
          {
             if (cred_result.error().category == Error::Category::OperationCanceled) return;
-
             throw Error{ cred_result.error() };
          }
 
+
+         wxGetApp().getDatasetManager().downloadTablesAsync(dlg.selectedTables(), *cred_result,
+                                                            [this](std::expected<std::string, Error> result)
+                                                            {
+                                                               CallAfter(
+                                                                  [this, &result]
+                                                                  {
+                                                                     setStatusText("{}",
+                                                                                   result ? *result : result.error().formattedMessage());
+                                                                  });
+                                                            });
          // If cred doesn't work we need to re-prompt so update prompt message.
-         prompt_msg = ctb::format(constants::FMT_CREDENTIALDLG_REPROMPT_MSG, cred_name);
+         //prompt_msg = ctb::format(constants::FMT_CREDENTIALDLG_REPROMPT_MSG, cred_name);
 
-         constexpr auto   max_percent = 100;
-         wxProgressDialog progress_dlg{
-            "Download Progress", "Downloading Data Files", max_percent, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL
-         };
+         //constexpr auto   max_percent = 100;
+         //wxProgressDialog progress_dlg{
+         //   "Download Progress", "Downloading Data Files", max_percent, this, wxPD_CAN_ABORT | wxPD_AUTO_HIDE | wxPD_APP_MODAL
+         //};
 
-         ProgressCallback progress_callback = [&progress_dlg](
-                                                 [[maybe_unused]] int64_t  downloadTotal,
-                                                 [[maybe_unused]] int64_t  downloadNow,
-                                                 [[maybe_unused]] int64_t  uploadTotal,
-                                                 [[maybe_unused]] int64_t  uploadNow,
-                                                 [[maybe_unused]] intptr_t userdata
-                                              ) { return progress_dlg.Pulse(); };
+         //ProgressCallback progress_callback = [&progress_dlg](
+         //                                        [[maybe_unused]] int64_t  downloadTotal,
+         //                                        [[maybe_unused]] int64_t  downloadNow,
+         //                                        [[maybe_unused]] int64_t  uploadTotal,
+         //                                        [[maybe_unused]] int64_t  uploadNow,
+         //                                        [[maybe_unused]] intptr_t userdata
+         //                                     ) { return progress_dlg.Pulse(); };
 
-         // For each selected table, download it.
-         for (auto tbl : dlg.selectedTables())
-         {
-            setStatusText(constants::FMT_STATUS_FILE_DOWNLOADING, getTableDescription(tbl));
+         //// For each selected table, download it.
+         //for (auto tbl : dlg.selectedTables())
+         //{
+         //   setStatusText(constants::FMT_STATUS_FILE_DOWNLOADING, getTableDescription(tbl));
 
-            DownloadResult result{};
-            result = downloadRawTableData(*cred_result, tbl, DataFormatId::csv, &progress_callback);
+         //   DownloadResult result{};
+         //   result = downloadRawTableData(*cred_result, tbl, DataFormatId::csv, &progress_callback);
 
-            while (!result)
-            {
-               auto error = result.error();
-               if (error.error_code == std::to_underlying(HttpStatus::Code::Unauthorized))
-               {
-                  // login failure, need to re-prompt for credentials.
-                  cred_result = cred_mgr.promptCredential(cred_name, prompt_msg, true);
-                  if (cred_result)
-                  {
-                     // got a new cred, try again
-                     result = downloadRawTableData(*cred_result, tbl, DataFormatId::csv, &progress_callback);
-                  }
-                  else
-                  {
-                     // user canceled login dialog so just exit out
-                     end_status.message = constants::ERROR_STR_DOWNLOAD_AUTH_FAILURE;
-                     return;
-                  }
-               }
-               else if (error.category == Error::Category::OperationCanceled)
-               {
-                  // user hit cancel in progress dilaog, so just exit out.
-                  end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
-                  return;
-               }
-               else
-               {
-                  // some unknown error happened, let user know before bailing.
-                  wxGetApp().displayErrorMessage(result.error());
-                  end_status.message = constants::STATUS_DOWNLOAD_FAILED;
-                  return;
-               }
-            }
-            // did user ask to save cred?
-            if (cred_result->saveRequested())
-            {
-               cred_mgr.saveCredential(*cred_result);
-            }
+         //   while (!result)
+         //   {
+         //      auto error = result.error();
+         //      if (error.error_code == std::to_underlying(HttpStatus::Code::Unauthorized))
+         //      {
+         //         // login failure, need to re-prompt for credentials.
+         //         cred_result = cred_mgr.promptCredential(cred_name, prompt_msg, true);
+         //         if (cred_result)
+         //         {
+         //            // got a new cred, try again
+         //            result = downloadRawTableData(*cred_result, tbl, DataFormatId::csv, &progress_callback);
+         //         }
+         //         else
+         //         {
+         //            // user canceled login dialog so just exit out
+         //            end_status.message = constants::ERROR_STR_DOWNLOAD_AUTH_FAILURE;
+         //            return;
+         //         }
+         //      }
+         //      else if (error.category == Error::Category::OperationCanceled)
+         //      {
+         //         // user hit cancel in progress dilaog, so just exit out.
+         //         end_status.message = constants::STATUS_DOWNLOAD_CANCELED;
+         //         return;
+         //      }
+         //      else
+         //      {
+         //         // some unknown error happened, let user know before bailing.
+         //         wxGetApp().displayErrorMessage(result.error());
+         //         end_status.message = constants::STATUS_DOWNLOAD_FAILED;
+         //         return;
+         //      }
+         //   }
+         //   // did user ask to save cred?
+         //   if (cred_result->saveRequested())
+         //   {
+         //      cred_mgr.saveCredential(*cred_result);
+         //   }
 
-            // if we get here we have the data, so save it to file.
-            auto folder = wxGetApp().getDataFolder(AppFolder::Tables);
-            auto file_path{ folder / result->tableName() };
-            file_path.replace_extension(constants::DATA_FILE_EXTENSION);
-            saveTextToFile(file_path, result->data, true);
+         //   // if we get here we have the data, so save it to file.
+         //   auto folder = wxGetApp().getDataFolder(AppFolder::Tables);
+         //   auto file_path{ folder / result->tableName() };
+         //   file_path.replace_extension(constants::DATA_FILE_EXTENSION);
+         //   saveTextToFile(file_path, result->data, true);
 
-            setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, getTableDescription(tbl));
-         }
+         //   setStatusText(constants::FMT_STATUS_FILE_DOWNLOADED, getTableDescription(tbl));
+         //}
       }
       catch (...)
       {
@@ -853,9 +812,10 @@ namespace ctb::app
       try
       {
          auto dataset = getDataset();
-         bool enable =
-            dataset.get() and m_selected_row and
-            (dataset->getTableId() == TableId::Inventory or dataset->getRowProperty(*m_selected_row, CtProp::QtyOnHand).asInt32().value_or(0) > 0);
+         bool enable  = dataset.get()
+                   and m_selected_row
+                   and (dataset->getTableId() == TableId::Inventory
+                        or dataset->getRowProperty(*m_selected_row, CtProp::QtyOnHand).asInt32().value_or(0) > 0);
          event.Enable(enable);
       }
       catch (...)

@@ -130,7 +130,8 @@ namespace ctb
       auto params = content_type_header | std::views::split(';');
       for (const auto& substr : params)
       {
-         std::string_view param{ substr.data(), substr.size() };
+         // NEED TO TRIM SPACES FROM STRING_VIEW
+         auto param = trim(std::string_view{ substr.data(), substr.size() });
          if (param.starts_with(CHARSET_KEY))
          {
             if (auto loc = param.find('='); loc < param.size())

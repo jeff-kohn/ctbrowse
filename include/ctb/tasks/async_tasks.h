@@ -102,7 +102,7 @@ namespace ctb::tasks
    template<typename SchedulerT, typename CallbackT>
    auto safeSuccessCallback(SchedulerT scheduler, CallbackT&& callback) noexcept
    {
-      return just(std::move(ep))
+      return just()
            | continues_on(scheduler)
            | then(
                 [cb_func = std::forward<CallbackT>(callback)](std::exception_ptr ep) mutable noexcept

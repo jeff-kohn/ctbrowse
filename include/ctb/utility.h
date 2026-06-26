@@ -154,4 +154,17 @@ namespace ctb
    /// safe to call if folder already exists.
    auto createFolderPath(const fs::path& folder) noexcept -> bool;
 
+
+   // A modern C++23 trim function for std::string_view
+   [[nodiscard]] constexpr std::string_view trim(std::string_view sv, std::string_view whitespace = " \t\n\r\f\v") noexcept
+   {
+      const auto start = sv.find_first_not_of(whitespace);
+      if (start == std::string_view::npos)
+      {
+         return {};   // Entire string is whitespace
+      }
+
+      const auto end = sv.find_last_not_of(whitespace);
+      return sv.substr(start, end - start + 1);
+   }
 }   // namespace ctb

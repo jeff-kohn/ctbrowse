@@ -1,4 +1,4 @@
-#include "ctb/model/ctDatasetManager.h"
+#include "ctb/model/CtDatasetManager.h"
 
 #include "ctb/HttpDownloader.h"
 #include "ctb/model/CtDataset.h"
@@ -36,8 +36,8 @@ namespace ctb::app
    }   // namespace
 
 
-   // private impl details for ctDatasetManager, to prevent public header dependencies.
-   struct ctDatasetManager::AsyncImpl
+   // private impl details for CtDatasetManager, to prevent public header dependencies.
+   struct CtDatasetManager::AsyncImpl
    {
       static constexpr uint32_t NUM_CPU_THREADS = 2;
       static constexpr uint32_t NUM_IO_THREADS  = 1;
@@ -48,13 +48,20 @@ namespace ctb::app
    };
 
 
-   ctDatasetManager::ctDatasetManager(const fs::path& folder) noexcept(false)
+   CtDatasetManager::CtDatasetManager()
+   {}
+
+   CtDatasetManager::~CtDatasetManager() noexcept
+   {}
+
+
+   CtDatasetManager::CtDatasetManager(const fs::path& table_folder) noexcept(false)
    {
-      setDataFolder(folder);
+      setTableFolder(table_folder);
    }
 
 
-   auto ctDatasetManager::loadDataset(TableId table_id) -> DatasetPtr
+   auto CtDatasetManager::loadDataset(TableId table_id) -> DatasetPtr
    {
       switch (table_id)
       {
@@ -73,7 +80,7 @@ namespace ctb::app
 
 
    /// @brief Load a dataset and apply options
-   auto ctDatasetManager::loadDataset(const CtDatasetOptions& options) -> DatasetPtr
+   auto CtDatasetManager::loadDataset(const CtDatasetOptions& options) -> DatasetPtr
    {
       // load dataset and then apply options.
       auto dataset = loadDataset(options.table_id);
@@ -82,13 +89,13 @@ namespace ctb::app
    }
 
 
-   auto ctDatasetManager::getProReviewsCache() -> std::optional<ProReviewsCache>
+   auto CtDatasetManager::getProReviewsCache() -> std::optional<ProReviewsCache>
    {
       return std::optional<ProReviewsCache>();
    }
 
 
-   void ctDatasetManager::downloadTableAsync(TableId table_id, TableDownloadResultCallback notify_callback)
+   void CtDatasetManager::downloadTableAsync(TableId table_id, const CredentialWrapper& cred, TableDownloadResultCallback notify_callback)
    {
       auto http_pipeline = [this, table_id, callback = std::move(notify_callback)](HttpDownloader::HttpResult result) mutable
       {
@@ -96,7 +103,7 @@ namespace ctb::app
          using namespace ctb::tasks;
 
          // these will go out of scope when the task is started asynchronously, need to movee/copied into lambdas, never capture by reference!
-         auto              target_path = getTablePath(getDataFolder(), table_id).generic_string();
+         auto              target_path = getTablePath(getTableFolder(), table_id).generic_string();
          asio::stream_file file{ m_impl->io_pool.get_executor(), target_path,
                                  asio::stream_file::write_only | asio::stream_file::create | asio::stream_file::truncate };
 
@@ -116,7 +123,7 @@ namespace ctb::app
             // back to I/O scheduler to save the data to disk file.
             | continues_on(m_impl->io_pool.get_scheduler())
             | let_value(
-               [file = std::move(file)](RawTableData table) mutable
+               [file = std::move(file)](RawTableData& table) mutable
                {
                   return asio::async_write(file, asio::buffer(table.data), use_sender);
                })
@@ -143,11 +150,11 @@ namespace ctb::app
       };
 
       // the whole operation starts here with async HTTP client request, which executes the above labmda as completion callback
-      m_impl->http_client.downloadTable(table_id, m_cred, std::move(http_pipeline));
+      m_impl->http_client.downloadTable(table_id, cred, std::move(http_pipeline));
    }
 
 
-   auto ctDatasetManager::setDataFolder(const fs::path& folder) noexcept(false) -> ctDatasetManager&
+   auto CtDatasetManager::setTableFolder(const fs::path& folder) noexcept(false) -> CtDatasetManager&
    {
       if (!fs::exists(folder) and !createFolderPath(folder))
       {
@@ -159,7 +166,7 @@ namespace ctb::app
 
 
    /// @brief returns the location used for loading data files from disk
-   auto ctDatasetManager::getDataFolder() const -> const fs::path&
+   auto CtDatasetManager::getTableFolder() const -> const fs::path&
    {
       return m_data_folder;
    }
