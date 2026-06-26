@@ -8,20 +8,18 @@ namespace ctb::constants
 {
    constexpr auto LABEL_TIMER_RETRY_INTERVAL = 33;
 
-} // namespace ctb::constants
+}   // namespace ctb::constants
 
 
 namespace ctb::app
 {
    auto LabelImageCtrl::create(wxWindow* parent, const DatasetEventSourcePtr& source) -> LabelImageCtrl*
    {
-      return detail::createDatasetWindow<LabelImageCtrl>(parent, source, wxGetApp().getLabelCache() );
+      return detail::createDatasetWindow<LabelImageCtrl>(parent, source, wxGetApp().getLabelCache());
    }
 
 
-   LabelImageCtrl::LabelImageCtrl(const DatasetEventSourcePtr& source, LabelCachePtr cache) :
-      Base { source },
-      m_cache { std::move(cache) }
+   LabelImageCtrl::LabelImageCtrl(const DatasetEventSourcePtr& source, LabelCachePtr cache) : Base{ source }, m_cache{ std::move(cache) }
    {
       assert(m_cache);
    }
@@ -77,13 +75,12 @@ namespace ctb::app
          if (m_image_result)
          {
             auto result = m_image_result->getImage();
-            if (!result)
-               throw Error{ std::move(result.error()) }; 
+            if (!result) throw Error{ std::move(result.error()) };
 
             wxBitmap bmp{ *result };
             SetBitmap(bmp);
             Show();
-            GetParent()->Layout(); // required since the images vary in size
+            GetParent()->Layout();   // required since the images vary in size
             //GetParent()->SendSizeEvent();
          }
       }
@@ -116,7 +113,8 @@ namespace ctb::app
          {
             m_image_result = fetch_result.value();
          }
-         else {
+         else
+         {
             m_image_result = std::nullopt;
             log::exception(fetch_result.error());
          }
@@ -124,4 +122,4 @@ namespace ctb::app
       }
    }
 
-} // namespace ctb::app
+}   // namespace ctb::app

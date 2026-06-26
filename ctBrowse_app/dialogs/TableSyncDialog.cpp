@@ -6,8 +6,8 @@
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 
-#include "App.h"
 #include "dialogs/TableSyncDialog.h"
+#include "App.h"
 #include "CtCredentialManager.h"
 #include "wx_helpers.h"
 
@@ -23,12 +23,12 @@ namespace ctb::app
 {
    inline constexpr auto ENUM_DELIMETER = ';';
 
-   namespace 
+   namespace
    {
 
       /// @brief serialize a range of integer values to a delimited string
-      template<rng::input_range Rng, typename I = rng::range_value_t<Rng> >
-         requires std::is_same_v<std::decay_t<rng::range_value_t<Rng>>, I> and std::is_integral_v<I>
+      template<rng::input_range Rng, typename I = rng::range_value_t<Rng>>
+      requires std::is_same_v<std::decay_t<rng::range_value_t<Rng>>, I> and std::is_integral_v<I>
       std::string serializeIntegrals(Rng rg, char delim = ENUM_DELIMETER)
       {
          std::ostringstream str{};
@@ -38,8 +38,7 @@ namespace ctb::app
          }
          return str.str();
       }
-   } // namespace
-
+   }   // namespace
 
 
    TableSyncDialog::TableSyncDialog(wxWindow* parent)
@@ -50,10 +49,10 @@ namespace ctb::app
 
    bool TableSyncDialog::Create(wxWindow* parent)
    {
-      try{
+      try
+      {
          // give base class a chance set up controls etc
-         if (!wxDialog::Create(parent, wxID_ANY, constants::TITLE_DOWNLOAD_DATA))
-            return false;
+         if (!wxDialog::Create(parent, wxID_ANY, constants::TITLE_DOWNLOAD_DATA)) return false;
 
          createImpl();
 
@@ -84,7 +83,8 @@ namespace ctb::app
          TransferDataToWindow();
          return true;
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
       return false;
@@ -122,13 +122,15 @@ namespace ctb::app
          cfg->Write(wxString{ constants::CONFIG_VALUE_SYNC_ON_STARTUP }, m_startup_sync_val);
          if (m_save_default_val)
          {
-            cfg->Write(wxString{ constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES }, wxString{ serializeIntegrals(vws::all(m_table_selection_val)) });
+            cfg->Write(wxString{ constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES },
+                       wxString{ serializeIntegrals(vws::all(m_table_selection_val)) });
          }
          cfg->Flush();
 
          EndDialog(wxID_OK);
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -143,14 +145,14 @@ namespace ctb::app
    }
 
 
-   void TableSyncDialog::onDeselectAllUpdateUI([[maybe_unused]] wxUpdateUIEvent & event)
+   void TableSyncDialog::onDeselectAllUpdateUI([[maybe_unused]] wxUpdateUIEvent& event)
    {
       // we already check for at least one selection for OK button, so just piggy back.
       onOkUpdateUI(event);
    }
 
 
-   void TableSyncDialog::onSelectAll([[maybe_unused]] wxCommandEvent & event)
+   void TableSyncDialog::onSelectAll([[maybe_unused]] wxCommandEvent& event)
    {
       for (auto idx = 0U; idx < m_table_selection_ctrl->GetCount(); ++idx)
       {
@@ -159,7 +161,7 @@ namespace ctb::app
    }
 
 
-   void TableSyncDialog::onSelectAllUpdateUI(wxUpdateUIEvent & event)
+   void TableSyncDialog::onSelectAllUpdateUI(wxUpdateUIEvent& event)
    {
       event.Enable(checkedTableCount() != m_table_selection_ctrl->GetCount());
    }
@@ -181,12 +183,12 @@ namespace ctb::app
       auto* box_sizer3 = new wxBoxSizer(wxVERTICAL);
 
       auto* static_text2 = new wxStaticText(this, wxID_ANY, "&Tables to Download:");
-      box_sizer3->Add(static_text2, wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
+      box_sizer3->Add(static_text2, wxSizerFlags().Border(wxLEFT | wxRIGHT | wxTOP, wxSizerFlags::GetDefaultBorder()));
 
       m_table_selection_ctrl = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, nullptr, wxLB_EXTENDED);
       m_table_selection_ctrl->SetValidator(wxGenericValidator(&m_table_selection_val));
       m_table_selection_ctrl->SetMinSize(ConvertDialogToPixels(wxSize(constants::pix_112, constants::pix_112)));
-      box_sizer3->Add(m_table_selection_ctrl, wxSizerFlags().Border(wxLEFT|wxTOP|wxBOTTOM, wxSizerFlags::GetDefaultBorder()));
+      box_sizer3->Add(m_table_selection_ctrl, wxSizerFlags().Border(wxLEFT | wxTOP | wxBOTTOM, wxSizerFlags::GetDefaultBorder()));
 
       m_startup_sync_ctrl = new wxCheckBox(this, wxID_ANY, "Sync on &Program Startup");
       m_startup_sync_ctrl->SetValidator(wxGenericValidator(&m_startup_sync_val));
@@ -206,13 +208,13 @@ namespace ctb::app
       box_sizer->Add(m_btn_select_all, wxSizerFlags().Expand().Border(wxTOP, wxSizerFlags::GetDefaultBorder()));
 
       auto* btn_deselect_all = new wxButton(this, wxID_ANY, "&Deselect All");
-      box_sizer->Add(btn_deselect_all, wxSizerFlags().Border(wxTOP|wxBOTTOM, FromDIP(wxSize(4, -1)).x));
+      box_sizer->Add(btn_deselect_all, wxSizerFlags().Border(wxTOP | wxBOTTOM, FromDIP(wxSize(4, -1)).x));
 
       box_sizer2->Add(box_sizer, wxSizerFlags().Border(wxALL));
 
       dlg_sizer->Add(box_sizer2, wxSizerFlags().Expand().Border(wxALL));
 
-      auto* std_buttons = CreateStdDialogButtonSizer(wxOK|wxCANCEL);
+      auto* std_buttons = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
       dlg_sizer->Add(CreateSeparatedSizer(std_buttons), wxSizerFlags().Expand().Border(wxALL));
 
       SetSizerAndFit(dlg_sizer);
@@ -223,7 +225,6 @@ namespace ctb::app
       m_btn_select_all->Bind(wxEVT_BUTTON, &TableSyncDialog::onSelectAll, this);
       btn_deselect_all->Bind(wxEVT_UPDATE_UI, &TableSyncDialog::onDeselectAllUpdateUI, this);
       m_btn_select_all->Bind(wxEVT_UPDATE_UI, &TableSyncDialog::onSelectAllUpdateUI, this);
-
    }
 
-}  // namespace ctb::app
+}   // namespace ctb::app

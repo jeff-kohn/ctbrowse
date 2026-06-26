@@ -21,9 +21,9 @@ namespace ctb::app
       /// @brief creates and initializes a view for showing wine details
       ///
       /// throws a ctb::Error if parent or source = nullptr, or if the window can't be created;
-      /// otherwise returns a non-owning pointer to the window (parent window will manage 
-      /// its lifetime). 
-      /// 
+      /// otherwise returns a non-owning pointer to the window (parent window will manage
+      /// its lifetime).
+      ///
       [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> DetailsViewBase*
       {
          return detail::createDatasetWindow<DetailsViewTaggedWine>(parent, source);
@@ -38,7 +38,7 @@ namespace ctb::app
       // derived classes must implement this to add their view-specific controls
       auto addDatasetSpecificControls(wxBoxSizer* top_sizer, const DatasetEventSourcePtr& source) -> void override
       {
-         const     auto sizer_flags = wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT);
+         const auto sizer_flags = wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT);
 
          top_sizer->AddSpacer(DEFAULT_GROUP_SPACER);
          top_sizer->Add(WineDetailTagsPanel::create(this, source), sizer_flags);
@@ -49,5 +49,5 @@ namespace ctb::app
       }
    };
 
-} // namespace ctb::app
+}   // namespace ctb::app
 

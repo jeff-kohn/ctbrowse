@@ -56,25 +56,25 @@ namespace ctb::app
       void enable(bool enable);
 
       // no copy/move/assign, this class is created on the heap.
-      SpinDoubleFilterCtrl() = delete;
-      SpinDoubleFilterCtrl(const SpinDoubleFilterCtrl&) = delete;
-      SpinDoubleFilterCtrl(SpinDoubleFilterCtrl&&) = delete;
+      SpinDoubleFilterCtrl()                                       = delete;
+      SpinDoubleFilterCtrl(const SpinDoubleFilterCtrl&)            = delete;
+      SpinDoubleFilterCtrl(SpinDoubleFilterCtrl&&)                 = delete;
       SpinDoubleFilterCtrl& operator=(const SpinDoubleFilterCtrl&) = delete;
-      SpinDoubleFilterCtrl& operator=(SpinDoubleFilterCtrl&&) = delete;
-      ~SpinDoubleFilterCtrl() override = default;
+      SpinDoubleFilterCtrl& operator=(SpinDoubleFilterCtrl&&)      = delete;
+      ~SpinDoubleFilterCtrl() override                             = default;
 
    private:
-      PropertyFilter         m_filter{};
-      wxCheckBox*            m_checkbox{};
-      wxSpinCtrlDouble*      m_spin{};
-      SpinParams             m_spin_params{};
+      PropertyFilter    m_filter{};
+      wxCheckBox*       m_checkbox{};
+      wxSpinCtrlDouble* m_spin{};
+      SpinParams        m_spin_params{};
 
       DECLARE_DATASET_WINDOW_FACTORY;
 
-      SpinDoubleFilterCtrl(const DatasetEventSourcePtr& source, PropertyFilter filter, SpinParams params) :
-         Base{ source },
-         m_filter{ std::move(filter) },
-         m_spin_params{ std::move(params) }
+      SpinDoubleFilterCtrl(const DatasetEventSourcePtr& source, PropertyFilter filter, SpinParams params)
+         : Base{ source },
+           m_filter{ std::move(filter) },
+           m_spin_params{ std::move(params) }
       {}
 
       void createWindow(wxWindow* parent) override;
@@ -85,4 +85,4 @@ namespace ctb::app
       void onSpinValueUpdateUI(wxUpdateUIEvent& event);
    };
 
-} // namespace ctb::app
+}   // namespace ctb::app

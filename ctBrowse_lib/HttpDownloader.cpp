@@ -4,8 +4,8 @@
 #include "ctb/utility_http.h"
 
 #include <glaze/net/http_client.hpp>
-#include <openssl/ssl.h>
 #include <memory>
+#include <openssl/ssl.h>
 #include <utility>
 
 namespace ctb
@@ -25,8 +25,8 @@ namespace ctb
          [](auto& ctx)
          {
             constexpr const char* STORE_NAME = "org.openssl.winstore://";
-            if (!SSL_CTX_load_verify_store(ctx.native_handle(), STORE_NAME))  
-               SPDLOG_DEBUG("HttpDownloader failed to load Windows Cert Store for TLS."); 
+            if (!SSL_CTX_load_verify_store(ctx.native_handle(), STORE_NAME))
+               SPDLOG_DEBUG("HttpDownloader failed to load Windows Cert Store for TLS.");
          });
 
       m_client->set_ssl_verify_mode(asio::ssl::verify_peer);
@@ -43,15 +43,15 @@ namespace ctb
    void HttpDownloader::getAsync(std::string_view url, const HttpHeaders& headers, HttpResultCallback callback)
    {
       m_client->get_async(url, headers,
-                         [cbfunc = std::move(callback)](HttpResult result) mutable
-                         {
-                            if (result)   // NOLINT
-                               SPDLOG_DEBUG("HttpDownloader HTTP request returned success. Status: {}", result->status_code);
-                            else
-                               SPDLOG_DEBUG("HttpDownloader HTTP request returned error - {}", result.error().message());
+                          [cbfunc = std::move(callback)](HttpResult result) mutable
+                          {
+                             if (result)   // NOLINT
+                                SPDLOG_DEBUG("HttpDownloader HTTP request returned success. Status: {}", result->status_code);
+                             else
+                                SPDLOG_DEBUG("HttpDownloader HTTP request returned error - {}", result.error().message());
 
-                            cbfunc(std::move(result));
-                         });
+                             cbfunc(std::move(result));
+                          });
    }
 
 

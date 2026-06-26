@@ -31,28 +31,26 @@ namespace ctb
       auto getOrThrow(const fs::path& folder, TableId tbl_id) -> DatasetPtr
       {
          auto result = loadTableData<TableT>(folder, tbl_id);
-         if (!result)
-            throw Error{ result.error() };
+         if (!result) throw Error{ result.error() };
 
-			return CtDataset<TableT>::create(std::move(result.value()));
+         return CtDataset<TableT>::create(std::move(result.value()));
       }
-   }
+   }   // namespace
 
    auto CtDatasetLoader::getDataset(TableId tbl) -> DatasetPtr
    {
       switch (tbl)
       {
-         case TableId::List:          return getOrThrow<WineListTable>(m_data_folder, tbl);
-         case TableId::Pending:       return getOrThrow<PendingWineTable>(m_data_folder, tbl);
-         case TableId::Consumed:      return getOrThrow<ConsumedWineTable>(m_data_folder, tbl);
-         case TableId::Availability:  return getOrThrow<ReadyToDrinkTable>(m_data_folder, tbl);
-         case TableId::Purchase:      return getOrThrow<PurchasedWineTable>(m_data_folder, tbl);
-         case TableId::Tag:           return getOrThrow<TaggedWinesTable>(m_data_folder, tbl);
-         case TableId::Inventory:     return getOrThrow<BottleInventoryTable>(m_data_folder, tbl);
-         case TableId::PrivateNotes:  return getOrThrow<PrivateNotesTable>(m_data_folder, tbl);
-		   case TableId::Notes:         return getOrThrow<TastingNotesTable>(m_data_folder, tbl);
-		   default:
-	         throw Error{"Table not found."};
+         case TableId::List        : return getOrThrow<WineListTable>(m_data_folder, tbl);
+         case TableId::Pending     : return getOrThrow<PendingWineTable>(m_data_folder, tbl);
+         case TableId::Consumed    : return getOrThrow<ConsumedWineTable>(m_data_folder, tbl);
+         case TableId::Availability: return getOrThrow<ReadyToDrinkTable>(m_data_folder, tbl);
+         case TableId::Purchase    : return getOrThrow<PurchasedWineTable>(m_data_folder, tbl);
+         case TableId::Tag         : return getOrThrow<TaggedWinesTable>(m_data_folder, tbl);
+         case TableId::Inventory   : return getOrThrow<BottleInventoryTable>(m_data_folder, tbl);
+         case TableId::PrivateNotes: return getOrThrow<PrivateNotesTable>(m_data_folder, tbl);
+         case TableId::Notes       : return getOrThrow<TastingNotesTable>(m_data_folder, tbl);
+         default                   : throw Error{ "Table not found." };
       };
    }
 
@@ -60,10 +58,9 @@ namespace ctb
    auto CtDatasetLoader::getProReviewsCache() -> std::optional<ProReviewsCache>
    {
       auto result = loadTableData<ProReviewsCacheTable>(m_data_folder, TableId::Availability);
-      if (!result)
-         return {};
+      if (!result) return {};
 
       return ProReviewsCache{ result.value() };
    }
 
-}  // namespace ctb
+}   // namespace ctb

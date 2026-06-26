@@ -15,8 +15,8 @@
 #include "ctb/tables/table_data.h"
 #include "ctb/tasks/async_tasks.h"
 
-#include <exec/static_thread_pool.hpp>
 #include <exception>
+#include <exec/static_thread_pool.hpp>
 
 
 namespace ctb::app
@@ -109,44 +109,43 @@ namespace ctb::app
          asio::stream_file file{ m_impl->io_pool.get_executor(), target_path,
                                  asio::stream_file::write_only | asio::stream_file::create | asio::stream_file::truncate };
 
-         auto process =
-            just(std::move(result))
+         auto process = just(std::move(result))
 
-            // validation/conversion happens on cpu scheduler to keep I/O thread free
-            | continues_on(m_impl->cpu_pool.get_scheduler())
-            | then(validateHttpResponse)
-            | then(
-               [table_id](auto response)
-               {
-                  return createRawTableFromResponse(response, table_id);
-               })
-            | then(convertTableToUtf8)
+                      // validation/conversion happens on cpu scheduler to keep I/O thread free
+                      | continues_on(m_impl->cpu_pool.get_scheduler())
+                      | then(validateHttpResponse)
+                      | then(
+                           [table_id](auto response)
+                           {
+                              return createRawTableFromResponse(response, table_id);
+                           })
+                      | then(convertTableToUtf8)
 
-            // back to I/O scheduler to save the data to disk file.
-            | continues_on(m_impl->io_pool.get_scheduler())
-            | let_value(
-               [file = std::move(file)](RawTableData& table) mutable
-               {
-                  return asio::async_write(file, asio::buffer(table.data), use_sender);
-               })
+                      // back to I/O scheduler to save the data to disk file.
+                      | continues_on(m_impl->io_pool.get_scheduler())
+                      | let_value(
+                           [file = std::move(file)](RawTableData& table) mutable
+                           {
+                              return asio::async_write(file, asio::buffer(table.data), use_sender);
+                           })
 
-            // then back again to cpu scheduler for callback notification
-            | continues_on(m_impl->cpu_pool.get_scheduler())
-            | then(
-               [table_id, callback]([[maybe_unused]] std::size_t bytes_written) mutable
-               {
-                  auto msg = format("Successfully downloaded table '{}'.", getTableDescription(table_id));
-                  SPDLOG_DEBUG(msg);
-                  callback(std::move(msg));
-               })
+                      // then back again to cpu scheduler for callback notification
+                      | continues_on(m_impl->cpu_pool.get_scheduler())
+                      | then(
+                           [table_id, callback]([[maybe_unused]] std::size_t bytes_written) mutable
+                           {
+                              auto msg = format("Successfully downloaded table '{}'.", getTableDescription(table_id));
+                              SPDLOG_DEBUG(msg);
+                              callback(std::move(msg));
+                           })
 
-            // this could be on either scheduler depending on which step threw an exception, so we use a nested error pipeline
-            // to ensure callback safely happens on cpu_pool
-            | let_error(
-               [this, callback](std::exception_ptr ep) mutable noexcept
-               {
-                  return safeErrorCallback(m_impl->cpu_pool.get_scheduler(), callback, ep);
-               });
+                      // this could be on either scheduler depending on which step threw an exception, so we use a nested error pipeline
+                      // to ensure callback safely happens on cpu_pool
+                      | let_error(
+                           [this, callback](std::exception_ptr ep) mutable noexcept
+                           {
+                              return safeErrorCallback(m_impl->cpu_pool.get_scheduler(), callback, ep);
+                           });
 
          // Launch the processing pipeline asynchronously.
          start_detached(std::move(process));

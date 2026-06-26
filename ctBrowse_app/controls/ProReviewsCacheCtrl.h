@@ -26,7 +26,9 @@ namespace ctb::app
    private:
       CacheValueFn m_value_fn{};
 
-      ProReviewsCacheCtrl(const DatasetEventSourcePtr& source, CacheValueFn value_fn) : ElasticPropertyValueBase{ source }, m_value_fn{ std::move(value_fn) }
+      ProReviewsCacheCtrl(const DatasetEventSourcePtr& source, CacheValueFn value_fn)
+         : ElasticPropertyValueBase{ source },
+           m_value_fn{ std::move(value_fn) }
       {}
 
       auto getDisplayValue(const IDataset* ds) const -> std::string override

@@ -13,20 +13,20 @@ namespace ctb
 {
 
    /// @brief static method to create a class instance.
-   [[nodiscard]] 
+   [[nodiscard]]
    auto DatasetEventSource::create() -> DatasetEventSourcePtr
-   { 
-      return DatasetEventSourcePtr{ new DatasetEventSource{} }; 
+   {
+      return DatasetEventSourcePtr{ new DatasetEventSource{} };
    }
 
 
-   auto DatasetEventSource::hasDataset() const  noexcept-> bool
-   { 
-      return m_data != nullptr; 
+   auto DatasetEventSource::hasDataset() const noexcept -> bool
+   {
+      return m_data != nullptr;
    }
 
 
-   auto DatasetEventSource::getDataset() const  noexcept-> DatasetPtr
+   auto DatasetEventSource::getDataset() const noexcept -> DatasetPtr
    {
       return m_data;
    }
@@ -48,7 +48,7 @@ namespace ctb
    }
 
 
-   void DatasetEventSource::attach(IDatasetEventSink* observer)  noexcept
+   void DatasetEventSource::attach(IDatasetEventSink* observer) noexcept
    {
       SPDLOG_DEBUG("DatasetEventSource::attach() called.");
       m_observers.insert(observer);
@@ -72,8 +72,8 @@ namespace ctb
       {
          if (rec_idx) m_data->moveToRow(*rec_idx);
 
-         for (auto* observer : m_observers) 
-         { 
+         for (auto* observer : m_observers)
+         {
             try
             {
                if (observer != event_source)
@@ -81,14 +81,13 @@ namespace ctb
                   observer->notify({ event_id, m_data.get(), rec_idx });
                }
             }
-            catch(...){
+            catch (...)
+            {
                retval = false;
-               SPDLOG_DEBUG(
-                  "DatasetEventSource::signal({}, {}) caught exception from observer. {}", 
-                  event_name, 
-                  rec_idx.value_or(-1),
-                  packageError().formattedMessage()
-               );
+               SPDLOG_DEBUG("DatasetEventSource::signal({}, {}) caught exception from observer. {}",
+                            event_name,
+                            rec_idx.value_or(-1),
+                            packageError().formattedMessage());
             }
          }
       }
@@ -108,9 +107,9 @@ namespace ctb
    }
 
 
-   auto DatasetEventSource::signal(DatasetEvent::Id event, NullableUInt rec_idx) noexcept -> bool 
+   auto DatasetEventSource::signal(DatasetEvent::Id event, NullableUInt rec_idx) noexcept -> bool
    {
       return signal(event, rec_idx, nullptr);
    }
 
-} // namespace ctb
+}   // namespace ctb

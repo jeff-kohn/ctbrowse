@@ -15,7 +15,10 @@
 
 namespace ctb::app
 {
-   [[nodiscard]] auto SpinDoubleFilterCtrl::create(wxWindow* parent, const DatasetEventSourcePtr& source,  const PropertyFilter& filter, const SpinParams& params) -> SpinDoubleFilterCtrl*
+   [[nodiscard]] auto SpinDoubleFilterCtrl::create(wxWindow*                    parent,
+                                                   const DatasetEventSourcePtr& source,
+                                                   const PropertyFilter&        filter,
+                                                   const SpinParams&            params) -> SpinDoubleFilterCtrl*
    {
       return detail::createDatasetWindow<SpinDoubleFilterCtrl>(parent, source, filter, params);
    }
@@ -29,11 +32,11 @@ namespace ctb::app
 
    void SpinDoubleFilterCtrl::enable(bool enable)
    {
-     m_filter.enabled = enable;
+      m_filter.enabled = enable;
    }
 
 
-   void SpinDoubleFilterCtrl::createWindow(wxWindow* parent) 
+   void SpinDoubleFilterCtrl::createWindow(wxWindow* parent)
    {
       if (!Create(parent))
       {
@@ -75,7 +78,8 @@ namespace ctb::app
       {
          m_filter = *filter;
       }
-      else {
+      else
+      {
          // it's possible this filter was cleared/removed from toolbar, which is why it wasn't found.
          m_filter.enabled = false;
       }
@@ -105,12 +109,14 @@ namespace ctb::app
          {
             dataset->propFilters().replaceFilter(m_filter.filter_name, m_filter);
          }
-         else {
+         else
+         {
             dataset->propFilters().removeFilter(m_filter.filter_name);
          }
          getEventHandler().signal_source(DatasetEvent::Id::DatasetFiltered, false);
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -122,7 +128,7 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         auto dataset = getEventHandler().getDataset();
+         auto dataset         = getEventHandler().getDataset();
          m_filter.compare_val = event.GetValue();
          if (m_filter.enabled)
          {
@@ -130,7 +136,8 @@ namespace ctb::app
             getEventHandler().signal_source(DatasetEvent::Id::DatasetFiltered, false);
          }
       }
-      catch(...){
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -140,4 +147,4 @@ namespace ctb::app
       event.Enable(m_filter.enabled);
    }
 
-} // namespace ctb::app
+}   // namespace ctb::app

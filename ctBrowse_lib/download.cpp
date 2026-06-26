@@ -113,8 +113,8 @@ namespace ctb
    ///
    void downloadTableAsync(TableId table, const CredentialWrapper& cred, TableResultCallback callback)
    {
-      if (!callback) return;  
-         
+      if (!callback) return;
+
       // this is the lambda that will run on asio executor for the http client callback when the request is finished executing
       auto process_result = [callback = std::move(callback), table](HttpDownloader::HttpResult response) mutable
       {
@@ -144,7 +144,7 @@ namespace ctb
          {
             callback(std::move(result));
          }
-         catch (...) // NOLINT
+         catch (...)   // NOLINT
          {
             SPDLOG_DEBUG("Exception was thrown from downloadRawTableData callback: {}", packageError().formattedMessage());
          }

@@ -26,22 +26,21 @@ namespace ctb::app
       // base class overrides
       void addDetails(DetailRows& rows, const DatasetEventSourcePtr& source) override
       {
-         auto* top_sizer = GetSizer(); assert(top_sizer);
+         auto* top_sizer = GetSizer();
+         assert(top_sizer);
 
-         rows.emplace_back(
-            top_sizer,
-            PropertyValueCtrl::create(this, source, CtProp::MyScore, constants::FMT_NUMBER_DECIMAL, constants::NO_SCORE),
-            constants::LBL_MY_SCORE
-         );
+         rows.emplace_back(top_sizer,
+                           PropertyValueCtrl::create(this, source, CtProp::MyScore, constants::FMT_NUMBER_DECIMAL, constants::NO_SCORE),
+                           constants::LBL_MY_SCORE);
 
-         rows.emplace_back(
-            top_sizer,
-            PropertyValueCtrl::create(this, source, CtProp::CtScore, constants::FMT_NUMBER_DECIMAL, constants::NO_SCORE),
-            constants::LBL_CT_SCORE
-         );
+         rows.emplace_back(top_sizer,
+                           PropertyValueCtrl::create(this, source, CtProp::CtScore, constants::FMT_NUMBER_DECIMAL, constants::NO_SCORE),
+                           constants::LBL_CT_SCORE);
 
-         rows.emplace_back(top_sizer, ProReviewsCacheCtrl::create(this, source, &ProReviewsCache::getScoreSummary), constants::LBL_PRO_SCORES);
+         rows.emplace_back(top_sizer,
+                           ProReviewsCacheCtrl::create(this, source, &ProReviewsCache::getScoreSummary),
+                           constants::LBL_PRO_SCORES);
       }
    };
 
-}
+}   // namespace ctb::app

@@ -23,9 +23,9 @@ namespace ctb::app
       /// @brief creates and initializes a view for showing wine details
       ///
       /// throws a ctb::Error if parent or source = nullptr, or if the window can't be created;
-      /// otherwise returns a non-owning pointer to the window (parent window will manage 
-      /// its lifetime). 
-      /// 
+      /// otherwise returns a non-owning pointer to the window (parent window will manage
+      /// its lifetime).
+      ///
       [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> DetailsViewBase*
       {
          return detail::createDatasetWindow<DetailsViewBottleInventory>(parent, source);
@@ -51,8 +51,7 @@ namespace ctb::app
          top_sizer->AddSpacer(DEFAULT_HEADING_SPACER);
          top_sizer->Add(LabelImageCtrl::create(this, source), wxSizerFlags().CenterHorizontal().Expand().Shaped());
       }
-
    };
 
-} // namespace ctb::app
+}   // namespace ctb::app
 

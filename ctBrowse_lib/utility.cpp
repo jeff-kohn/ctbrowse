@@ -153,15 +153,15 @@ namespace ctb
       if (!length) return {};
 
       std::vector<wchar_t> wide_buf(static_cast<size_t>(length), '\0');
-      if (!MultiByteToWideChar(
-             code_page, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
+      if (!MultiByteToWideChar(code_page, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, text.c_str(), -1, wide_buf.data(),
+                               static_cast<int>(wide_buf.size())))
       {
          return {};
       }
 
       // Get needed buffer length since some UTF-16 chars may need multiple bytes in UTF-8.
-      length = WideCharToMultiByte(
-         CP_UTF8, WC_COMPOSITECHECK | WC_ERR_INVALID_CHARS | WC_NO_BEST_FIT_CHARS, wide_buf.data(), -1, nullptr, 0, nullptr, nullptr);
+      length = WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK | WC_ERR_INVALID_CHARS | WC_NO_BEST_FIT_CHARS, wide_buf.data(), -1, nullptr,
+                                   0, nullptr, nullptr);
       if (!length) return {};
 
       // Now allocate buffer and make the final call to do the conversion.
@@ -184,8 +184,8 @@ namespace ctb
       if (!length) return result;
 
       std::vector<wchar_t> wide_buf(static_cast<size_t>(length), '\0');
-      if (!MultiByteToWideChar(
-             CP_UTF8, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, utf8_text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
+      if (!MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, utf8_text.c_str(), -1, wide_buf.data(),
+                               static_cast<int>(wide_buf.size())))
          return result;
 
       // Get needed buffer length for the target code page then do the conversion

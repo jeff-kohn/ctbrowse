@@ -13,15 +13,14 @@ namespace ctb::app
 {
 
 
-   CredentialDialog::CredentialDialog(wxWindow* parent, std::string_view credential_name, std::string_view prompt_msg, bool allow_save) : 
-      m_cred_name{ credential_name },
-      m_prompt_msg{ prompt_msg.data(), prompt_msg.size() },
-      m_allow_save{ allow_save }
+   CredentialDialog::CredentialDialog(wxWindow* parent, std::string_view credential_name, std::string_view prompt_msg, bool allow_save)
+      : m_cred_name{ credential_name },
+        m_prompt_msg{ prompt_msg.data(), prompt_msg.size() },
+        m_allow_save{ allow_save }
    {
       auto title = ctb::format(constants::FMT_CREDENTIALDLG_LBL_TITLE, credential_name);
 
-      if (!Create(parent, wxID_ANY, title))
-         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      if (!Create(parent, wxID_ANY, title)) throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
 
       init();
    }
@@ -35,7 +34,7 @@ namespace ctb::app
    CredentialWrapper CredentialDialog::getCredential()
    {
       TransferDataFromWindow();
-      return CredentialWrapper { std::move(m_cred_name), m_username_val.utf8_string(), m_password_val.utf8_string(), m_save_requested };
+      return CredentialWrapper{ std::move(m_cred_name), m_username_val.utf8_string(), m_password_val.utf8_string(), m_save_requested };
    }
 
 
@@ -46,7 +45,7 @@ namespace ctb::app
       dlg_sizer->AddSpacer(wxSizerFlags::GetDefaultBorder());
 
       // prompt message to display above the login form
-      const auto prompt_size = ConvertDialogToPixels(wxSize{155, 155});
+      const auto prompt_size = ConvertDialogToPixels(wxSize{ 155, 155 });
       dlg_sizer->Add(CreateTextSizer(m_prompt_msg, prompt_size.x), wxSizerFlags{}.Border());
 
       // we want labels and text fields in 2x2 grid but use 2 vertical sizers in a horizontal
@@ -55,11 +54,11 @@ namespace ctb::app
 
       // First column is labels
       auto* label_col_sizer = new wxBoxSizer{ wxVERTICAL };
-      
+
       // username
       auto* username_label = new wxStaticText{ this, wxID_ANY, constants::CREDENTIALDLG_LBL_USERNAME };
       label_col_sizer->Add(username_label, wxSizerFlags{}.Border(wxALL));
-      
+
       // password
       auto* password_lbl = new wxStaticText{ this, wxID_ANY, constants::CREDENTIALDLG_LBL_PASSWORD };
       label_col_sizer->Add(password_lbl, wxSizerFlags{}.Border(wxALL));
@@ -68,12 +67,12 @@ namespace ctb::app
 
       // second column is text fields
       auto* text_col_sizer = new wxBoxSizer{ wxVERTICAL };
-      
+
       // username
       auto* username_text = new wxTextCtrl{ this, wxID_ANY, wxEmptyString };
       username_text->SetValidator(wxTextValidator{ wxFILTER_NONE, &m_username_val });
       text_col_sizer->Add(username_text, wxSizerFlags{}.Border(wxALL));
-      
+
       // password
       auto* password_text = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
       password_text->SetValidator(wxTextValidator{ wxFILTER_NONE, &m_password_val });
@@ -88,11 +87,11 @@ namespace ctb::app
       }
 
       form_sizer->Add(text_col_sizer, wxSizerFlags{});
-      auto* stdBtn = CreateStdDialogButtonSizer(wxOK|wxCANCEL);
+      auto* stdBtn = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
       dlg_sizer->Add(CreateSeparatedSizer(stdBtn), wxSizerFlags{}.Expand().Border(wxALL));
 
       SetSizerAndFit(dlg_sizer);
       Centre(wxBOTH);
       username_text->SetFocus();
    }
-} // namespace ctb::app
+}   // namespace ctb::app

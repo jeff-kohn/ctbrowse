@@ -18,14 +18,16 @@ namespace ctb::app
       static constexpr auto COL_COUNT = 2;
 
       WineDetailPanelRow(wxSizer* parent_sizer, ElasticPropertyValueBase* value_ctrl, std::string_view heading_label)
-         : m_parent_sizer{ parent_sizer }, m_value_ctrl{ value_ctrl }
+         : m_parent_sizer{ parent_sizer },
+           m_value_ctrl{ value_ctrl }
       {
          auto* parent_ctrl = value_ctrl ? value_ctrl->GetParent() : nullptr;
 
          if (!parent_ctrl or !value_ctrl) throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
 
-         m_row_sizer  = new wxGridSizer{ COL_COUNT };                                         // cppcheck-suppress [noOperatorEq, noCopyConstructor]
-         m_label_ctrl = new wxStaticText{ parent_ctrl, wxID_ANY, wxFromSV(heading_label) };   // cppcheck-suppress [noOperatorEq, noCopyConstructor]
+         m_row_sizer = new wxGridSizer{ COL_COUNT };                              // cppcheck-suppress [noOperatorEq, noCopyConstructor]
+         m_label_ctrl =
+            new wxStaticText{ parent_ctrl, wxID_ANY, wxFromSV(heading_label) };   // cppcheck-suppress [noOperatorEq, noCopyConstructor]
 
          m_row_sizer->Add(m_label_ctrl, wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT).Right());
          m_row_sizer->Add(m_value_ctrl, wxSizerFlags{}.Expand().Border(wxLEFT | wxRIGHT));

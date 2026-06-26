@@ -14,40 +14,39 @@ namespace ctb::app
 {
    /// custom TreeView control that displays a list MultiValueFilters and their match values, so that filters
    /// can be configured by checking/unchecking the relevant filter values.
-   /// 
+   ///
    /// This class is an event sink for IDatasetEventSource and automatically handles updates from other views
-   /// as well as notifying other views about changes made. 
+   /// as well as notifying other views about changes made.
    class MultiValueFilterTreeCtrl final : public DatasetWindow<wxTreeCtrl>
    {
    public:
       using Base = DatasetWindow<wxTreeCtrl>;
 
       /// @brief static factory method to create an initialize an instance of the GridPanelsView class
-      /// 
-      /// throws a ctb::Error if the window can't be created; otherwise returns a non-owning pointer 
+      ///
+      /// throws a ctb::Error if the window can't be created; otherwise returns a non-owning pointer
       /// to the window (parent owns/manages lifetime).
-      /// 
-      [[nodiscard]] static 
-      auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> MultiValueFilterTreeCtrl*;
+      ///
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> MultiValueFilterTreeCtrl*;
 
       // no copy/move/assign, this class is created on the heap.
-      MultiValueFilterTreeCtrl() = delete;
-      MultiValueFilterTreeCtrl(const MultiValueFilterTreeCtrl&) = delete;
-      MultiValueFilterTreeCtrl(MultiValueFilterTreeCtrl&&) = delete;
+      MultiValueFilterTreeCtrl()                                           = delete;
+      MultiValueFilterTreeCtrl(const MultiValueFilterTreeCtrl&)            = delete;
+      MultiValueFilterTreeCtrl(MultiValueFilterTreeCtrl&&)                 = delete;
       MultiValueFilterTreeCtrl& operator=(const MultiValueFilterTreeCtrl&) = delete;
-      MultiValueFilterTreeCtrl& operator=(MultiValueFilterTreeCtrl&&) = delete;
-      ~MultiValueFilterTreeCtrl() override = default;
+      MultiValueFilterTreeCtrl& operator=(MultiValueFilterTreeCtrl&&)      = delete;
+      ~MultiValueFilterTreeCtrl() override                                 = default;
 
    private:
-      using NodeFilterMap = std::map<wxTreeItemId, CtMultiValueFilter>;  // maps tree node to corresponding filter 
-      using NameNodeMap   = std::map<std::string,  wxTreeItemId>;        // map filter name (must be unique) to tree node
-      using CheckCountMap = std::map<wxTreeItemId, size_t>;              // used to track number of checked value nodes a given parent/filter node has 
-      using wxMenuPtr     = std::unique_ptr<wxMenu>;                     // type alias for a wxMenu smart ptr 
+      using NodeFilterMap = std::map<wxTreeItemId, CtMultiValueFilter>;   // maps tree node to corresponding filter
+      using NameNodeMap   = std::map<std::string, wxTreeItemId>;          // map filter name (must be unique) to tree node
+      using CheckCountMap = std::map<wxTreeItemId, size_t>;   // used to track number of checked value nodes a given parent/filter node has
+      using wxMenuPtr     = std::unique_ptr<wxMenu>;          // type alias for a wxMenu smart ptr
 
-      CheckCountMap         m_check_counts{};   // for keeping track of number of values selected for a filter/node.
-      NameNodeMap           m_name_nodes{};
-      NodeFilterMap         m_node_filters{}; 
-      wxWithImages::Images  m_images{};
+      CheckCountMap        m_check_counts{};                  // for keeping track of number of values selected for a filter/node.
+      NameNodeMap          m_name_nodes{};
+      NodeFilterMap        m_node_filters{};
+      wxWithImages::Images m_images{};
 
       DECLARE_DATASET_WINDOW_FACTORY;
 
@@ -68,7 +67,7 @@ namespace ctb::app
       void onToggleChecked(wxCommandEvent& event);
       void onNodeExpanding(wxTreeEvent& event);
       void onNodePopupMenu(wxTreeEvent& event);
-      void onTreePopupMenu(wxContextMenuEvent& event); // when right-clicking in client area and not a node.
+      void onTreePopupMenu(wxContextMenuEvent& event);   // when right-clicking in client area and not a node.
       void onNodeLeftClick(wxMouseEvent& event);
 
       void onCollapseAllNodesUpdateUI(wxUpdateUIEvent& event);
@@ -81,7 +80,7 @@ namespace ctb::app
 
       void clearCheckCounts(wxTreeItemId filter_node);
       void removeFilter(wxTreeItemId item) noexcept(false);
-      void enableFilterMatchValue(wxTreeItemId item) noexcept(false) ;
+      void enableFilterMatchValue(wxTreeItemId item) noexcept(false);
 
       auto getFilter(wxTreeItemId item) noexcept(false) -> CtMultiValueFilter&;
       auto getFilterValue(wxTreeItemId item) -> CtPropertyVal;
@@ -94,4 +93,4 @@ namespace ctb::app
    };
 
 
-} // namespace ctb::app
+}   // namespace ctb::app

@@ -29,7 +29,9 @@ namespace ctb::app
       DECLARE_DATASET_WINDOW_FACTORY;
 
       DrinkWindowCtrl(const DatasetEventSourcePtr& source, CtProp begin_prop, CtProp end_prop)
-         : ElasticPropertyValueBase{ source }, m_begin_prop{ begin_prop }, m_end_prop{ end_prop }
+         : ElasticPropertyValueBase{ source },
+           m_begin_prop{ begin_prop },
+           m_end_prop{ end_prop }
       {}
 
       auto getDisplayValue(const IDataset* ds) const -> std::string override
@@ -44,7 +46,6 @@ namespace ctb::app
          }
          return value;
       }
-
    };
 
 }   // namespace ctb::app

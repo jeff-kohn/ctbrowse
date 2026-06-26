@@ -22,8 +22,7 @@ namespace ctb::app
    // NOLINTNEXTLINE(performance-unnecessary-value-param)
    auto HiddenWebClient::requestPage(std::string url, PageLoadedCallback callback) -> bool
    {
-      if (m_busy_flag)
-         return false;
+      if (m_busy_flag) return false;
 
       m_busy_flag = true;
       m_requests.try_emplace(url, std::move(callback));
@@ -58,7 +57,7 @@ namespace ctb::app
       log::info("HiddenWebClient::onPageLoaded - URL: '{}'", wxViewString(event.GetURL()));
 
       m_busy_flag = false;
-      auto url = event.GetURL().utf8_string();
+      auto url    = event.GetURL().utf8_string();
       if (auto it = m_requests.find(url); it != m_requests.end())
       {
          it->second(m_webview->GetPageSource().utf8_string());
@@ -77,7 +76,8 @@ namespace ctb::app
          log::info("wxWebView::OnNavigating: Veto navigation for '{}', page already loaded", wxViewString(event.GetURL()));
          event.Veto();
       }
-      else {
+      else
+      {
          log::info("wxWebView::OnNavigating: URL: '{}', Target: '{}'", wxViewString(event.GetURL()), wxViewString(event.GetTarget()));
       }
    }
@@ -90,22 +90,22 @@ namespace ctb::app
    void HiddenWebClient::onError(wxWebViewEvent& event)
    {
       log::info("HiddenWebClient::onError - URL: '{}', Target: '{}', Is error: {}, Is main frame: {}, Navigation action: {}, Message: '{}'",
-         wxViewString(event.GetURL()),
-         wxViewString(event.GetTarget()),
-         event.IsError(),
-         event.IsTargetMainFrame(),
-         static_cast<int>(event.GetNavigationAction()),
-         wxViewString(event.GetString()));
+                wxViewString(event.GetURL()),
+                wxViewString(event.GetTarget()),
+                event.IsError(),
+                event.IsTargetMainFrame(),
+                static_cast<int>(event.GetNavigationAction()),
+                wxViewString(event.GetString()));
 
       if (auto it = m_requests.find(event.GetURL().utf8_string()); it != m_requests.end())
       {
-         it->second(
-            std::unexpected
-            {
-               ctb::Error{ Error::Category::GenericError, "WebClient backend encoutered error attempting to load page {}. {}", it->first, wxViewString(event.GetString()) }
-            });
+         it->second(std::unexpected{
+            ctb::Error{ Error::Category::GenericError, "WebClient backend encoutered error attempting to load page {}. {}", it->first,
+                       wxViewString(event.GetString()) }
+         });
       }
-      else {
+      else
+      {
          assert(false);
          log::error("HiddenWebClient::onError called for URL with no callback/request object!");
       }
@@ -121,6 +121,6 @@ namespace ctb::app
          event.IsTargetMainFrame(),
          static_cast<int>(event.GetNavigationAction()),
          wxViewString(event.GetString()));
-   }   
-} // namespace ctb::app
+   }
+}   // namespace ctb::app
 

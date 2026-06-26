@@ -9,8 +9,8 @@ namespace ctb::app::DatasetDefaultOptions
       {
          // At the moment this is the only dependency preventing this class from being moved to the lib in
          // the future if we decide that's desirable.
-         return ctb::format(
-            "{}/{}.{}", wxGetApp().getDataFolder(AppFolder::Defaults).generic_string(), getTableDescription(table_id), "ctbc");
+         return ctb::format("{}/{}.{}", wxGetApp().getDataFolder(AppFolder::Defaults).generic_string(), getTableDescription(table_id),
+                            "ctbc");
       }
    }   // namespace
 
@@ -27,8 +27,8 @@ namespace ctb::app::DatasetDefaultOptions
       }
       catch (...)
       {
-         log::info(
-            "Saved default for Dataset '{}' could not be loaded ({}).", getTableDescription(table_id), packageError().formattedMessage());
+         log::info("Saved default for Dataset '{}' could not be loaded ({}).", getTableDescription(table_id),
+                   packageError().formattedMessage());
       }
       return {};
    }
@@ -62,11 +62,11 @@ namespace ctb::app::DatasetDefaultOptions
       }
    }
 
-   
+
    void saveDefaultOptions(const CtDatasetOptions& options) noexcept(false)
    {
       CtDatasetOptions::saveOptions(options, getDefaultOptionsPath(options.table_id), true);
    }
 
 
-}   // namespace ctb::app
+}   // namespace ctb::app::DatasetDefaultOptions

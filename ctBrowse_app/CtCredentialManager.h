@@ -13,7 +13,7 @@ namespace ctb::app
       static constexpr const char* CRED_SERVICE_BASE = constants::APP_NAME_SHORT;
 
       auto credentialExists(std::string_view cred_name) -> bool;
-      
+
       [[nodiscard]] auto loadCredential(std::string_view cred_name) -> CredentialResult;
       [[nodiscard]] auto saveCredential(CredentialWrapper& cred) -> bool;
    };
@@ -29,5 +29,5 @@ namespace ctb::app
    /// @brief wxWidgets-derived instantiation of CredentialManager that provides secure secret
    ///        storage and interactive logon prompting.
    ///
-   using CtCredentialManager =  CredentialManager<CtCredentialPromptFunc, CtCredentialPersist>;
-}
+   using CtCredentialManager = CredentialManager<CtCredentialPromptFunc, CtCredentialPersist>;
+}   // namespace ctb::app

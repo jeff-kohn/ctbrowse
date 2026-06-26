@@ -12,15 +12,15 @@
 #include "LabelImageCache.h"
 #include "MainFrame.h"
 
-#include <ctb/utility_http.h>
 #include <ctb/model/CtDatasetLoader.h>
 #include <ctb/tasks/tasks.h>
+#include <ctb/utility_http.h>
 
 #include <cpr/cpr.h>
 #include <wx/fileconf.h>
 #include <wx/msgdlg.h>
-#include <wx/stdpaths.h>
 #include <wx/secretstore.h>
+#include <wx/stdpaths.h>
 #include <wx/xrc/xmlres.h>
 
 
@@ -32,9 +32,9 @@
 namespace ctb::app
 {
 
-   App::App() 
+   App::App()
    {
-      static_cast<void>(setlocale(LC_ALL, ".UTF8")); 
+      static_cast<void>(setlocale(LC_ALL, ".UTF8"));
 
       SetAppName(constants::APP_NAME_LONG);
       SetAppDisplayName(constants::APP_NAME_LONG);
@@ -44,16 +44,16 @@ namespace ctb::app
       auto& std_paths = wxStandardPaths::Get();
       std_paths.SetFileLayout(wxStandardPaths::FileLayout::FileLayout_XDG);
 
-      // wxFileConfig doesn't actually create the folder for the config file on Windows, 
+      // wxFileConfig doesn't actually create the folder for the config file on Windows,
       // so create it first in case it doesn't exist.
       m_user_data_folder = fs::path{ std_paths.GetUserDataDir().wx_str() };
       fs::create_directories(m_user_data_folder);
 
       // Set up config object to use file even on windows (registry is yuck)
-      auto cfg = std::make_unique<wxFileConfig>(constants::APP_NAME_LONG, 
-                                                wxEmptyString, 
-                                                wxEmptyString,  
-                                                wxEmptyString,  
+      auto cfg = std::make_unique<wxFileConfig>(constants::APP_NAME_LONG,
+                                                wxEmptyString,
+                                                wxEmptyString,
+                                                wxEmptyString,
                                                 wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_SUBDIR);
 
       using namespace log;
@@ -62,9 +62,9 @@ namespace ctb::app
       m_dataset_mgr.setTableFolder(getDataFolder(AppFolder::Tables));
 
 #if defined(NDEBUG)
-      setupDefaultLogger({{ makeFileSink(log_folder,  constants::APP_NAME_SHORT) }});
+      setupDefaultLogger({ { makeFileSink(log_folder, constants::APP_NAME_SHORT) } });
 #else
-      setupDefaultLogger({ { makeFileSink(log_folder,  constants::APP_NAME_SHORT) }, { makeDebuggerSink() } });
+      setupDefaultLogger({ { makeFileSink(log_folder, constants::APP_NAME_SHORT) }, { makeDebuggerSink() } });
 #endif
 
       log::info("App startup.");
@@ -76,8 +76,7 @@ namespace ctb::app
    {
       try
       {
-         if (!wxApp::OnInit())
-            return false;
+         if (!wxApp::OnInit()) return false;
 
          m_main_frame = MainFrame::create();
          m_main_frame->Show();
@@ -102,15 +101,15 @@ namespace ctb::app
          displayErrorMessage(packageError());
       }
       return false;
-   } 
+   }
 
-   
+
    int App::OnExit()
    {
       log::warn("App shutting down.");
       log::flush();
       log::shutdown();
-      
+
 #ifdef _DEBUG
       // to prevent the tzdb allocations from being reported as memory leaks
       std::chrono::get_tzdb_list().~tzdb_list();
@@ -120,10 +119,9 @@ namespace ctb::app
    }
 
 
-
    auto App::getLabelCacheFolder() noexcept -> fs::path
    {
-      try 
+      try
       {
          auto cfg = getConfig(constants::CONFIG_PATH_PREFERENCES);
          auto val = cfg->Read(constants::CONFIG_VALUE_LABEL_CACHE_DIR, wxEmptyString).ToStdString();
@@ -133,27 +131,28 @@ namespace ctb::app
             return fs::path{ val };
          }
       }
-      catch (...) {
+      catch (...)
+      {
          log::warn("Couldn't retrieve label cache folder from config. {}", packageError().formattedMessage());
       }
       return getDataFolder(AppFolder::Labels);
    }
-   
+
    void App::setLabelCacheFolder(const fs::path& cache_folder)
    {
       auto new_cache = std::make_shared<LabelImageCache>(cache_folder);
-      m_label_cache = new_cache;
+      m_label_cache  = new_cache;
    }
 
 
    ScopedConfigPath App::getConfig(std::string_view initial_path) noexcept(false)
    {
-      auto *config = wxConfigBase::Get(false);
+      auto* config = wxConfigBase::Get(false);
       if (nullptr == config)
       {
          throw Error{ constants::ERROR_STR_NO_CONFIG_STORE };
       }
-      config->SetPath(wxFromSV(initial_path)); 
+      config->SetPath(wxFromSV(initial_path));
       return ScopedConfigPath(*config);
    }
 
@@ -181,7 +180,7 @@ namespace ctb::app
 
    void App::onMainFrameClosed(wxCloseEvent& event)
    {
-      // Need to destroy the webclient (hidden) window to prevent app from remaining in memory and prevent callback to 
+      // Need to destroy the webclient (hidden) window to prevent app from remaining in memory and prevent callback to
       // label cache after it shuts down (in App dtor).
       m_web_client.reset();
 
@@ -190,7 +189,7 @@ namespace ctb::app
    }
 
 
-}  // namespace ctb::app
+}   // namespace ctb::app
 
 
 // this needs to be outside the namespace for Linux but not Windows, go figure

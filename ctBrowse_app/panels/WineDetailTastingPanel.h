@@ -3,8 +3,8 @@
 #include "App.h"
 #include "panels/WineDetailBasePanel.h"
 
-#include <wx/panel.h>
 #include <deque>
+#include <wx/panel.h>
 
 
 class wxTextCtrl;
@@ -22,8 +22,8 @@ namespace ctb::app
       }
 
    private:
-      wxString            m_title{ constants::LBL_TASTING_NOTE };
-      wxString            m_feedback_summary{};
+      wxString m_title{ constants::LBL_TASTING_NOTE };
+      wxString m_feedback_summary{};
 
       DECLARE_DATASET_WINDOW_FACTORY;
 
@@ -35,4 +35,4 @@ namespace ctb::app
    };
 
 
-}
+}   // namespace ctb::app

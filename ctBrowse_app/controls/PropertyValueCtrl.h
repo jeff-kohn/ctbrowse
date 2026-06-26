@@ -72,4 +72,4 @@ namespace ctb::app
       }
    };
 
-}
+}   // namespace ctb::app

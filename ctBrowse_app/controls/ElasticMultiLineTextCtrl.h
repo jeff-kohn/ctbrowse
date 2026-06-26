@@ -36,7 +36,9 @@ namespace ctb::app
       wxAlignment m_align_flag{};
 
       ElasticMultiLineTextCtrl(const DatasetEventSourcePtr& source, CtProp bound_prop, wxAlignment align = wxALIGN_LEFT)
-         : Base{ source }, m_prop(bound_prop), m_align_flag{ align }
+         : Base{ source },
+           m_prop(bound_prop),
+           m_align_flag{ align }
       {}
 
       DECLARE_DATASET_WINDOW_FACTORY;

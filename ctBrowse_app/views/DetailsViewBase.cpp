@@ -13,22 +13,20 @@
 #include "panels/WineDetailTastingPanel.h"
 #include "panels/WineDetailValuePanel.h"
 
+#include <ctb/tasks/tasks.h>
 #include <ctb/utility_chrono.h>
 #include <ctb/utility_http.h>
-#include <ctb/tasks/tasks.h>
 
-#include <wx/commandlinkbutton.h>
 #include <wx/collpane.h>
+#include <wx/commandlinkbutton.h>
 #include <wx/gdicmn.h>
-#include <wx/hyperlink.h>
 #include <wx/generic/statbmpg.h>
+#include <wx/hyperlink.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 #include <wx/valgen.h>
 #include <wx/wupdlock.h>
-
-
 
 
 namespace ctb::app
@@ -85,9 +83,9 @@ namespace ctb::app
    // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
    void DetailsViewBase::onCommand(wxCommandEvent& event)
    {
-      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, event.GetId() }); 
+      wxQueueEvent(wxGetApp().GetTopWindow(), new wxCommandEvent{ wxEVT_MENU, event.GetId() });
    }
    // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
 
-} // namespace ctb::app
+}   // namespace ctb::app

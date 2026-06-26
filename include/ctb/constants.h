@@ -9,6 +9,7 @@
 
 #include <cstdint>
 
+// clang-format off
 namespace ctb::constants
 {
    inline constexpr const char* CELLARTRACKER_DOT_COM = "CellarTracker.com";
@@ -227,3 +228,4 @@ namespace ctb::constants
 
 
 }   // namespace ctb::constants
+// clang-format on

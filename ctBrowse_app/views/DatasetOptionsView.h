@@ -41,20 +41,20 @@ namespace ctb::app
       ///
       /// throws a ctb::Error if source == nullptr, or if the window can't be created;
       /// otherwise returns a non-owning pointer to the window
-      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) noexcept(false) -> DatasetOptionsView* ;
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) noexcept(false) -> DatasetOptionsView*;
 
 
       // no copy/move/assign, this class is created on the heap.
-      DatasetOptionsView(const DatasetOptionsView&) = delete;
-      DatasetOptionsView(DatasetOptionsView&&) = delete;
+      DatasetOptionsView(const DatasetOptionsView&)            = delete;
+      DatasetOptionsView(DatasetOptionsView&&)                 = delete;
       DatasetOptionsView& operator=(const DatasetOptionsView&) = delete;
-      DatasetOptionsView& operator=(DatasetOptionsView&&) = delete;
-      ~DatasetOptionsView() override = default;
-      
+      DatasetOptionsView& operator=(DatasetOptionsView&&)      = delete;
+      ~DatasetOptionsView() override                           = default;
+
    private:
-      DatasetEventHandler       m_dataset_events; 
+      DatasetEventHandler       m_dataset_events;
       MultiValueFilterTreeCtrl* m_filter_tree{};
-      StringSet                 m_supported_filters{};        // set of filter names that we have controls for
+      StringSet                 m_supported_filters{};   // set of filter names that we have controls for
       wxStaticText*             m_dataset_title{};
 
       // window creation
@@ -69,4 +69,4 @@ namespace ctb::app
       explicit DatasetOptionsView(const DatasetEventSourcePtr& source);
    };
 
-} // namespace ctb::app
+}   // namespace ctb::app

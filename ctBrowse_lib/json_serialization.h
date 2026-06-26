@@ -66,18 +66,18 @@ namespace ctb::detail
 {
    struct PropertyValJson
    {
-      ctb::PropType prop_type{ PropType::String };
+      ctb::PropType              prop_type{ PropType::String };
       std::optional<std::string> value{};
    };
-}
+}   // namespace ctb::detail
 
 namespace glz
 {
    /// @brief json serialization support for std::chrono::year_month_day
-   template <>
+   template<>
    struct from<JSON, std::chrono::year_month_day>
    {
-      template <auto Opts>
+      template<auto Opts>
       static void op(std::chrono::year_month_day& value, is_context auto&& ctx, auto&&... args)
       {
          std::string date_str{};
@@ -91,10 +91,10 @@ namespace glz
    };
 
    /// @brief json serialization support for std::chrono::year_month_day
-   template <>
+   template<>
    struct to<JSON, std::chrono::year_month_day>
    {
-      template <auto Opts>
+      template<auto Opts>
       static void op(const std::chrono::year_month_day& value, auto&&... args)
       {
          serialize<JSON>::template op<Opts>(ctb::toIsoDate(value), args...);
@@ -103,10 +103,10 @@ namespace glz
 
 
    /// @brief json serialization support for CtPropertyVal
-   template <>
+   template<>
    struct from<JSON, ctb::CtPropertyVal>
    {
-      template <auto Opts>
+      template<auto Opts>
       static void op(ctb::CtPropertyVal& value, is_context auto&& ctx, auto&&... args)
       {
          using namespace ctb;
@@ -116,13 +116,13 @@ namespace glz
          if (ctx.error != error_code::none)
          {
             value.setNull();
-			   return;
+            return;
          }
 
          if (not json_val.value.has_value())
          {
-			   json_val.prop_type = PropType::Null;
-		   }
+            json_val.prop_type = PropType::Null;
+         }
 
          switch (json_val.prop_type)
          {

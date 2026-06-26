@@ -21,7 +21,7 @@ namespace ctb::app
 
    [[nodiscard]] DatasetListView* DatasetListView::create(wxWindow* parent, const DatasetEventSourcePtr& source)
    {
-      if (!parent )
+      if (!parent)
       {
          assert("parent window cannot == nullptr");
          throw Error{ Error::Category::ArgumentError, constants::ERROR_STR_NULLPTR_ARG };
@@ -34,10 +34,8 @@ namespace ctb::app
 
       std::unique_ptr<DatasetListView> wnd{ new DatasetListView{ source } };
       wnd->createWindow(parent);
-      return wnd.release(); // parent window owns child, so we don't need to manage ownership/lifetime
+      return wnd.release();   // parent window owns child, so we don't need to manage ownership/lifetime
    }
-
-
 
 
    void DatasetListView::createWindow(wxWindow* parent)
@@ -73,17 +71,17 @@ namespace ctb::app
       try
       {
          ClearColumns();
-     
+
          auto cols = m_model->getDataset()->availableListColumns();
          for (const auto&& [idx, col] : vws::enumerate(cols))
          {
-            AppendTextColumn(col.display_name.c_str(), 
-               static_cast<uint32_t>(idx), wxDATAVIEW_CELL_INERT, 
-               wxCOL_WIDTH_AUTOSIZE, static_cast<wxAlignment>(col.col_align));
+            AppendTextColumn(col.display_name.c_str(), static_cast<uint32_t>(idx), wxDATAVIEW_CELL_INERT, wxCOL_WIDTH_AUTOSIZE,
+                             static_cast<wxAlignment>(col.col_align));
          }
          wxPersistentRegisterAndRestore(this, wxFromSV(m_model->getDataset()->getTableName()));
       }
-      catch (...) {
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError());
       }
    }
@@ -109,7 +107,8 @@ namespace ctb::app
          m_model->reQuery();
          selectFirstRow();
       }
-      else {
+      else
+      {
          m_model->reQuery();
       }
    }
@@ -118,8 +117,7 @@ namespace ctb::app
    void DatasetListView::selectFirstRow()
    {
       const auto* dataset = m_model->getDataset();
-      if (!dataset or dataset->rowCount() == 0)
-         return;
+      if (!dataset or dataset->rowCount() == 0) return;
 
       auto item = m_model->GetItem(0);
       Select(item);
@@ -133,41 +131,35 @@ namespace ctb::app
    {
       switch (event.event_id)
       {
-         case DatasetEvent::Id::DatasetInitialize:
-            setDataset(event.dataset);
-            break;
+         case DatasetEvent::Id::DatasetInitialize: setDataset(event.dataset); break;
 
-         case DatasetEvent::Id::DatasetRemove:
-            setDataset(nullptr);
-            break;
+         case DatasetEvent::Id::DatasetRemove: setDataset(nullptr); break;
 
-         case DatasetEvent::Id::DatasetSorted:   [[fallthrough]];
+         case DatasetEvent::Id::DatasetSorted  : [[fallthrough]];
          case DatasetEvent::Id::DatasetFiltered: [[fallthrough]];
          case DatasetEvent::Id::DatasetSubStringFilter:
             m_model->reQuery();
             selectFirstRow();
             break;
 
-         case DatasetEvent::Id::RowSelected:
-            break;
+         case DatasetEvent::Id::RowSelected: break;
 
-         default:
-            assert("Unexpected event type" and false);
+         default: assert("Unexpected event type" and false);
       }
    }
 
 
    void DatasetListView::onSelectionChanged(wxDataViewEvent& event)
    {
-      try 
+      try
       {
          if (!m_dataset_events.hasDataset()) return;
 
          auto row = static_cast<int>(m_model->GetRow(event.GetItem()));
-         if (row >= 0)
-            m_dataset_events.signal_source(DatasetEvent::Id::RowSelected, false, row);
+         if (row >= 0) m_dataset_events.signal_source(DatasetEvent::Id::RowSelected, false, row);
       }
-      catch (...) {
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError());
       }
    }
@@ -177,13 +169,13 @@ namespace ctb::app
    {
       try
       {
-         if (!m_dataset_events.hasDataset())
-            event.Skip();
+         if (!m_dataset_events.hasDataset()) event.Skip();
 
          auto popup = getWinePopup();
          PopupMenu(popup.get());
       }
-      catch (...) {
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError());
       }
    }
@@ -195,17 +187,18 @@ namespace ctb::app
       {
          if (event.GetItem().IsOk() and m_dataset_events.hasDataset())
          {
-			   QueueEvent(new wxCommandEvent{ wxEVT_COMMAND_MENU_SELECTED, CMD_ONLINE_WINE_DETAILS });
+            QueueEvent(new wxCommandEvent{ wxEVT_COMMAND_MENU_SELECTED, CMD_ONLINE_WINE_DETAILS });
          }
-         else {
+         else
+         {
             event.Skip();
          }
       }
-      catch (...) {
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError());
       }
-
    }
 
 
-} // namespace ctb::app
+}   // namespace ctb::app

@@ -11,29 +11,30 @@ namespace ctb
 
    auto CtDatasetOptions::applyToDataset(DatasetPtr& dataset) const -> bool
    {
-      if (nullptr == dataset)
-         return false;
+      if (nullptr == dataset) return false;
 
       ScopedDatasetFreeze freeze{ dataset };
 
       bool all_good = true;
 
       auto failed = [&all_good](const std::string_view msg)
-         {
-            all_good = false;
-            log::warn(msg);
-            assert(false);
-         };
+      {
+         all_good = false;
+         log::warn(msg);
+         assert(false);
+      };
 
       // warn if table-id doesn't match, but we can still try to apply other settings.
       if (table_id != dataset->getTableId())
       {
-         failed(ctb::format("Dataset Options for '{}' being applied to dataset '{}', this is probably a bug or an invalid options file.", table_id, dataset->getTableId()));
+         failed(ctb::format("Dataset Options for '{}' being applied to dataset '{}', this is probably a bug or an invalid options file.",
+                            table_id,
+                            dataset->getTableId()));
       }
 
       dataset->setCollectionName(collection_name);
 
-      // make sure the saved sort's primary property is one supported by the dataset 
+      // make sure the saved sort's primary property is one supported by the dataset
       if (!active_sort.sort_props.empty() && dataset->hasProperty(active_sort.sort_props[0]))
       {
          dataset->applySort(active_sort);
@@ -61,7 +62,7 @@ namespace ctb
       if (dataset->multivalFilters().size() < multival_filters.size() or dataset->propFilters().size() < prop_filters.size())
       {
          // probably dupe key in hand-edited file, not really sure how else this could happen.
-         failed("One or more filters in the Dataset Options could not be applied to the Dataset"); 
+         failed("One or more filters in the Dataset Options could not be applied to the Dataset");
       }
 
       return all_good;
@@ -102,15 +103,16 @@ namespace ctb
       CtDatasetOptions result{};
 
       std::string buffer{};
-      auto ec = glz::read_file_json(result, path.generic_string(), buffer);
-      if (ec)
-         throw Error{ glz::format_error(ec, buffer), Error::Category::ParseError };
+      auto        ec = glz::read_file_json(result, path.generic_string(), buffer);
+      if (ec) throw Error{ glz::format_error(ec, buffer), Error::Category::ParseError };
 
       return result;
    }
 
 
-   /* static */ void CtDatasetOptions::saveOptions(const CtDatasetOptions& options, const fs::path& json_path, bool overwrite) noexcept(false)
+   /* static */ void CtDatasetOptions::saveOptions(const CtDatasetOptions& options,
+                                                   const fs::path&         json_path,
+                                                   bool                    overwrite) noexcept(false)
    {
       if (fs::exists(json_path) and !overwrite)
          throw Error{ ERROR_FILE_EXISTS, Error::Category::FileError, constants::FMT_ERROR_FILE_ALREADY_EXISTS, json_path.generic_string() };

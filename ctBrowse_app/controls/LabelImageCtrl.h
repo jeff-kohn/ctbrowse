@@ -25,9 +25,9 @@ namespace ctb::app
    private:
       using MaybeImageTask = std::optional<wxImageTask>;
 
-      LabelCachePtr          m_cache{};
-      MaybeImageTask         m_image_result{};
-      wxTimer                m_label_timer{};
+      LabelCachePtr  m_cache{};
+      MaybeImageTask m_image_result{};
+      wxTimer        m_label_timer{};
 
       DECLARE_DATASET_WINDOW_FACTORY;
 
@@ -41,4 +41,4 @@ namespace ctb::app
    };
 
 
-} // namespace ctb::app
+}   // namespace ctb::app

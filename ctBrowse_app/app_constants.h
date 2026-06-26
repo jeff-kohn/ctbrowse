@@ -1,5 +1,6 @@
 #pragma once
 
+// clang-format on
 namespace ctb::constants
 {
    inline constexpr const char* APP_NAME_LONG                     = "ctBrowse for Windows";
@@ -215,3 +216,5 @@ namespace ctb::constants
 
 
 }  // namespace ctb::constants
+
+// clang-format off

@@ -35,12 +35,14 @@ namespace ctb::app
          {
             dataset->propFilters().replaceFilter(m_filter.filter_name, m_filter);
          }
-         else {
+         else
+         {
             dataset->propFilters().removeFilter(m_filter.filter_name);
          }
          getEventHandler().signal_source(DatasetEvent::Id::DatasetFiltered, false);
       }
-      catch (...) {
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -56,10 +58,10 @@ namespace ctb::app
    void CheckBoxFilterCtrl::onDatasetFilter(const DatasetEvent& event)
    {
       assert(event.dataset);
-      
-      // cppcheck-suppress [shadowFunction] 
+
+      // cppcheck-suppress [shadowFunction]
       auto filter = event.dataset->propFilters().getFilter(m_filter.filter_name);
       enable(filter.has_value() ? true : false);
    }
 
-} // namespace ctb::app
+}   // namespace ctb::app

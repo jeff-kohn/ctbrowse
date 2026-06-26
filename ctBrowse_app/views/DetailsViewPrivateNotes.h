@@ -21,9 +21,9 @@ namespace ctb::app
       /// @brief creates and initializes a view for showing wine details
       ///
       /// throws a ctb::Error if parent or source = nullptr, or if the window can't be created;
-      /// otherwise returns a non-owning pointer to the window (parent window will manage 
-      /// its lifetime). 
-      /// 
+      /// otherwise returns a non-owning pointer to the window (parent window will manage
+      /// its lifetime).
+      ///
       [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> DetailsViewBase*
       {
          return detail::createDatasetWindow<DetailsViewPrivateNotes>(parent, source);
@@ -49,5 +49,5 @@ namespace ctb::app
       }
    };
 
-} // namespace ctb::app
+}   // namespace ctb::app
 

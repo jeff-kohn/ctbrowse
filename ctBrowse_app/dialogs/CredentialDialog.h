@@ -15,10 +15,10 @@ namespace ctb::app
 
       CredentialWrapper getCredential();
 
-      CredentialDialog() = delete;
-      CredentialDialog(CredentialDialog&) = delete;
-      CredentialDialog(CredentialDialog&&) = delete;
-      CredentialDialog& operator=(CredentialDialog&) = delete;
+      CredentialDialog()                              = delete;
+      CredentialDialog(CredentialDialog&)             = delete;
+      CredentialDialog(CredentialDialog&&)            = delete;
+      CredentialDialog& operator=(CredentialDialog&)  = delete;
       CredentialDialog& operator=(CredentialDialog&&) = delete;
 
    private:
@@ -35,7 +35,5 @@ namespace ctb::app
 
    // functor that can be used with CredentialManager class for prompting user using CredentialDialog.
    struct CredentialPrompt
-   {
-
-   };
-}
+   {};
+}   // namespace ctb::app

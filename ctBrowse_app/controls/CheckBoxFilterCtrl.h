@@ -46,4 +46,4 @@ namespace ctb::app
       void onDatasetFilter(const DatasetEvent& event);
    };
 
-};
+};   // namespace ctb::app

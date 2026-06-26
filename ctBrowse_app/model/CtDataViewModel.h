@@ -33,7 +33,7 @@ namespace ctb::app
       using base::GetRow;
 
    private:
-      const IDataset*  m_dataset{};
+      const IDataset* m_dataset{};
 
       explicit CtDataViewModel(const IDataset* dataset = nullptr) : m_dataset{ dataset }
       {}
@@ -50,4 +50,4 @@ namespace ctb::app
 
    using DataViewModelPtr = CtDataViewModel::ModelPtr;
 
-} // namespace ctb::app
+}   // namespace ctb::app

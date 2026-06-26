@@ -3,9 +3,9 @@
 #include "App.h"
 
 #include "controls/DrinkWindowCtrl.h"
-#include "controls/PropertyValueCtrl.h"
-#include "controls/ProReviewsCacheCtrl.h"
 #include "controls/ElasticMultiLineTextCtrl.h"
+#include "controls/ProReviewsCacheCtrl.h"
+#include "controls/PropertyValueCtrl.h"
 #include "panels/WineDetailBasePanel.h"
 
 #include <wx/stattext.h>
@@ -64,7 +64,8 @@ namespace ctb::app
          }
          // clang-format on
 
-         rows.emplace_back(top_sizer, ProReviewsCacheCtrl::create(this, source, &ProReviewsCache::getDrinkWindowSummary), constants::LBL_DRINK_WINDOW_PRO);
+         rows.emplace_back(top_sizer, ProReviewsCacheCtrl::create(this, source, &ProReviewsCache::getDrinkWindowSummary),
+                           constants::LBL_DRINK_WINDOW_PRO);
       }
    };
 

@@ -2,8 +2,8 @@
 
 #include <wx/choice.h>
 #include <wx/radiobut.h>
-#include <wx/statbox.h>
 #include <wx/sizer.h>
+#include <wx/statbox.h>
 #include <wx/valgen.h>
 
 namespace ctb::app
@@ -28,7 +28,7 @@ namespace ctb::app
    void SortOptionsPanel::createWindow(wxWindow* parent)
    {
       using namespace ctb::constants;
-      
+
       if (!Create(parent))
       {
          throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
@@ -79,12 +79,13 @@ namespace ctb::app
       {
          TransferDataFromWindow();
 
-         auto dataset = getEventHandler().getDataset(true);
+         auto dataset          = getEventHandler().getDataset(true);
          m_sort_config.reverse = m_sort_descending;
          dataset->applySort(m_sort_config);
          getEventHandler().signal_source(DatasetEvent::Id::DatasetSorted, false);
       }
-      catch (...) {
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -97,26 +98,28 @@ namespace ctb::app
          // event could get generated even if they didn't change the selection, don't waste our time.
          auto old_index = m_sort_selection;
          TransferDataFromWindow();
-         if (old_index == m_sort_selection)
-            return;
+         if (old_index == m_sort_selection) return;
 
          // let the combo close its list before we reload the dataset
-         CallAfter([this]()
+         CallAfter(
+            [this]()
             {
                auto dataset = getEventHandler().getDataset(true);
-               auto sorts = dataset->availableSorts();
+               auto sorts   = dataset->availableSorts();
                if (m_sort_selection <= std::ssize(sorts))
                {
                   // re-fetch sorter based on index. UI and member state will get updated in the dataset event handler.
                   dataset->applySort(sorts[static_cast<size_t>(m_sort_selection)]);
                   getEventHandler().signal_source(DatasetEvent::Id::DatasetSorted, true);
                }
-               else {
+               else
+               {
                   log::warn("SortOptionsPanel::onSortSelection: invalid sort index selected: {}", m_sort_selection);
                }
             });
       }
-      catch (...) {
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
@@ -125,10 +128,10 @@ namespace ctb::app
    void SortOptionsPanel::onDatasetInitialize(const DatasetEvent& event)
    {
       assert(event.dataset);
-    
+
       m_sort_combo->Clear();
       m_sort_combo->Append(getSortOptionList(event.dataset));
-      onTableSorted(event); // a bit hacky but techincally correct.
+      onTableSorted(event);   // a bit hacky but techincally correct.
    }
 
    void SortOptionsPanel::onTableSorted(const DatasetEvent& event)
@@ -137,9 +140,9 @@ namespace ctb::app
       try
       {
          const auto& dataset = event.dataset;
-         m_sort_config = dataset->activeSort();
-         m_sort_ascending = (m_sort_config.reverse == false);
-         m_sort_descending = m_sort_config.reverse;
+         m_sort_config       = dataset->activeSort();
+         m_sort_ascending    = (m_sort_config.reverse == false);
+         m_sort_descending   = m_sort_config.reverse;
 
          for (const auto&& [idx, sort] : vws::enumerate(dataset->availableSorts()))
          {
@@ -150,9 +153,10 @@ namespace ctb::app
          }
          TransferDataToWindow();
       }
-      catch (...) {
+      catch (...)
+      {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
    }
 
-} // namespace ctb::app
+}   // namespace ctb::app

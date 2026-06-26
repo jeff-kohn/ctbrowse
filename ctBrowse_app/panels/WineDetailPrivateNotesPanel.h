@@ -24,13 +24,14 @@ namespace ctb::app
       WineDetailPrivateNotesPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source }
       {}
 
-      void addDetails([[maybe_unused]] DetailRows& rows, const DatasetEventSourcePtr& source) override   // we don't add any detail rows in this panel.
+      void addDetails([[maybe_unused]] DetailRows& rows,
+                      const DatasetEventSourcePtr& source) override   // we don't add any detail rows in this panel.
       {
          auto* top_sizer = GetSizer();
          assert(top_sizer);
 
          top_sizer->Add(ElasticMultiLineTextCtrl::create(this, source, CtProp::PrivateNote), wxSizerFlags{ 2 }.Expand().TripleBorder());
-      } 
+      }
    };
 
-}
+}   // namespace ctb::app

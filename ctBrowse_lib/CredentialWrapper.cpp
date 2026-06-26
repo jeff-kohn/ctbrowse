@@ -17,11 +17,11 @@
 namespace ctb
 {
 
-   CredentialWrapper::CredentialWrapper(std::string_view cred_name, std::string&& username, std::string&& password, bool save_requested) :
-      m_cred_name{ cred_name },
-      m_username{ std::move(username) },
-      m_password{ std::move(password) },
-      m_save_requested{ save_requested }
+   CredentialWrapper::CredentialWrapper(std::string_view cred_name, std::string&& username, std::string&& password, bool save_requested)
+      : m_cred_name{ cred_name },
+        m_username{ std::move(username) },
+        m_password{ std::move(password) },
+        m_save_requested{ save_requested }
    {}
 
 
@@ -52,7 +52,7 @@ namespace ctb
 
 
    /// @brief Name used to identify this credential when persisting to/from storage.
-   /// 
+   ///
    auto CredentialWrapper::credentialName() const -> const std::string&
    {
       return m_cred_name;
@@ -62,7 +62,7 @@ namespace ctb
    /// @brief Returns temporary view of credential username
    ///
    /// the returned view is only valid until clear() or this object's destructor is called
-   /// 
+   ///
    auto CredentialWrapper::username() const -> std::string_view
    {
       return m_username;
@@ -72,7 +72,7 @@ namespace ctb
    /// @brief Returns temporary view of credential password
    ///
    /// the returned view is only valid until clear() or this object's destructor is called
-   /// 
+   ///
    auto CredentialWrapper::password() const -> std::string_view
    {
       return m_password;
@@ -106,5 +106,4 @@ namespace ctb
    }
 
 
-
-}  // namespace ctb
+}   // namespace ctb

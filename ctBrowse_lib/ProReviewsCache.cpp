@@ -1,7 +1,7 @@
 #include "ctb/model/ProReviewsCache.h"
 
-#include <string_view>
 #include <sstream>
+#include <string_view>
 
 namespace ctb
 {
@@ -43,7 +43,7 @@ namespace ctb
       auto result = ostr.str();
       if (result.size() > delim_ct)
       {
-         result.erase(result.end() - delim_ct, result.end()); // remove the final ", "
+         result.erase(result.end() - delim_ct, result.end());   // remove the final ", "
       }
       return result;
    }
@@ -52,7 +52,7 @@ namespace ctb
    auto ProReviewsCache::getDrinkWindowSummary(uint64_t wine_id) const -> std::string
    {
       static constexpr auto delim_ct = 2;
-      std::ostringstream ostr{};
+      std::ostringstream    ostr{};
 
       auto windows = getDrinkWindows(wine_id);
       for (const auto& window : windows)
@@ -63,13 +63,13 @@ namespace ctb
       auto result = ostr.str();
       if (result.size() > delim_ct)
       {
-         result.erase(result.end() - delim_ct, result.end()); // remove the final ", "
+         result.erase(result.end() - delim_ct, result.end());   // remove the final ", "
       }
       return result;
    }
 
 #pragma warning(push)
-#pragma warning(disable: 4702) // stupid MSVC
+#pragma warning(disable : 4702)   // stupid MSVC
 
    auto ProReviewsCache::getCtDrinkWindow(uint64_t wine_id) const -> std::string
    {
@@ -79,7 +79,6 @@ namespace ctb
          return detail::getDrinkWindow(window.ct_drink_begin, window.ct_drink_end);
       }
       return {};
-
    }
 
 #pragma warning(pop)

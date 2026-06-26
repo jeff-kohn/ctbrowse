@@ -1,7 +1,7 @@
 #include "WineDetailBasePanel.h"
 
-#include <wx/stattext.h>
 #include <wx/sizer.h>
+#include <wx/stattext.h>
 #include <wx/wupdlock.h>
 
 namespace ctb::app
@@ -31,8 +31,8 @@ namespace ctb::app
    {
       rng::for_each(m_rows, &WineDetailPanelRow::updateVisibility);
 
-      InvalidateBestSize();     // force recalc since rows may have been shown/hidden
-      PostSizeEventToParent();  // So parent can re-layout all the panels.
+      InvalidateBestSize();      // force recalc since rows may have been shown/hidden
+      PostSizeEventToParent();   // So parent can re-layout all the panels.
    }
 
 

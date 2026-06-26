@@ -254,8 +254,8 @@ namespace ctb::app
          }
          else
          {
-            log::warn(
-               "LabelImageCache::fetchLabelThreadProc({}) terminating with exception: {}", request->wineId(), err.formattedMessage());
+            log::warn("LabelImageCache::fetchLabelThreadProc({}) terminating with exception: {}", request->wineId(),
+                      err.formattedMessage());
          }
          request->setError(std::make_exception_ptr(err));
       }

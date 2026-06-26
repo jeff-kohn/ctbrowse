@@ -7,9 +7,10 @@
 namespace ctb::app
 {
 
-   [[nodiscard]] auto
-   ElasticMultiLineTextCtrl::create(wxWindow* parent, const DatasetEventSourcePtr& source, CtProp bound_prop, wxAlignment align)
-      -> ElasticMultiLineTextCtrl*
+   [[nodiscard]] auto ElasticMultiLineTextCtrl::create(wxWindow*                    parent,
+                                                       const DatasetEventSourcePtr& source,
+                                                       CtProp                       bound_prop,
+                                                       wxAlignment                  align) -> ElasticMultiLineTextCtrl*
    {
       return detail::createDatasetWindow<ElasticMultiLineTextCtrl>(parent, source, bound_prop, align);
    }
@@ -60,7 +61,7 @@ namespace ctb::app
       assert(event.dataset);
       if (!event.affected_row.has_value()) return;
 
-      auto val = event.dataset->getProperty(m_prop);
+      auto val        = event.dataset->getProperty(m_prop);
       m_display_value = val.hasString() ? wxFromSV(val.asStringView()) : val.asString();
       TransferDataToWindow();
 
@@ -73,14 +74,14 @@ namespace ctb::app
    auto ElasticMultiLineTextCtrl::calcTextSize() -> wxSize
    {
       // calculate how wide our note control can be and still fit in panel, allowing for sizer borders.
-      constexpr auto margin = 30;
-      const auto max_width  = GetClientSize().GetWidth() - margin;
+      constexpr auto margin    = 30;
+      const auto     max_width = GetClientSize().GetWidth() - margin;
 
       // Calculate height based on number of lines
-      auto num_lines    = GetNumberOfLines();
-      auto line_height  = GetCharHeight();
+      auto num_lines   = GetNumberOfLines();
+      auto line_height = GetCharHeight();
 
       return wxSize{ max_width, num_lines * line_height };
    }
-}
+}   // namespace ctb::app
 

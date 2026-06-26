@@ -1,4 +1,6 @@
 #include "views/DatasetMultiView.h"
+#include "views/DatasetListView.h"
+#include "views/DatasetOptionsView.h"
 #include "views/DetailsViewBottleInventory.h"
 #include "views/DetailsViewConsumedWine.h"
 #include "views/DetailsViewMyCellar.h"
@@ -8,8 +10,6 @@
 #include "views/DetailsViewReadyToDrink.h"
 #include "views/DetailsViewTaggedWine.h"
 #include "views/DetailsViewTastingNotes.h"
-#include "views/DatasetListView.h"
-#include "views/DatasetOptionsView.h"
 
 #include <wx/persist/splitter.h>
 
@@ -36,9 +36,10 @@ namespace ctb::app
 
          std::unique_ptr<DatasetMultiView> wnd{ new DatasetMultiView{} };
          wnd->createWindow(parent, source);
-         return wnd.release(); // if we get here parent owns it, so return non-owning*
+         return wnd.release();   // if we get here parent owns it, so return non-owning*
       }
-      catch (...){
+      catch (...)
+      {
          log::exception(packageError());
          throw;
       }
@@ -48,23 +49,22 @@ namespace ctb::app
    namespace
    {
       using DetailsViewFactory = std::function<DetailsViewBase*(wxWindow* parent, const DatasetEventSourcePtr& source)>;
-   
+
       // NOLINTNEXTLINE(bugprone-throwing-static-initialization, cert-err58-cpp)
-      const auto details_view_map = std::map<TableId, DetailsViewFactory>
-      {
-         { TableId::List,         &DetailsViewMyCellar::create          } ,
-         { TableId::Pending,      &DetailsViewPending::create           } ,
-         { TableId::Availability, &DetailsViewReadyToDrink::create      } ,
-         { TableId::Tag,          &DetailsViewTaggedWine::create        } ,
-         { TableId::Consumed,     &DetailsViewConsumedWine::create      } ,
-         { TableId::Purchase,     &DetailsViewPurchasedWine::create     } ,
-         { TableId::Notes,        &DetailsViewTastingNotes::create      } ,
-         { TableId::Inventory,    &DetailsViewBottleInventory::create   } ,
-         { TableId::PrivateNotes, &DetailsViewPrivateNotes::create      } ,
+      const auto details_view_map = std::map<TableId, DetailsViewFactory>{
+         { TableId::List,         &DetailsViewMyCellar::create        },
+         { TableId::Pending,      &DetailsViewPending::create         },
+         { TableId::Availability, &DetailsViewReadyToDrink::create    },
+         { TableId::Tag,          &DetailsViewTaggedWine::create      },
+         { TableId::Consumed,     &DetailsViewConsumedWine::create    },
+         { TableId::Purchase,     &DetailsViewPurchasedWine::create   },
+         { TableId::Notes,        &DetailsViewTastingNotes::create    },
+         { TableId::Inventory,    &DetailsViewBottleInventory::create },
+         { TableId::PrivateNotes, &DetailsViewPrivateNotes::create    },
       };
 
 
-      /// @brief Creates and returns the appropriate DetailsViewBase-derived window object for the event source's dataset 
+      /// @brief Creates and returns the appropriate DetailsViewBase-derived window object for the event source's dataset
       /// @return A non-owning pointer to the newly created details view for the dataset.
       /// @throw ctb::Error if any required parameters are null or there is no factory for the dataset type.
       auto createDetailsView(wxWindow* parent, const DatasetEventSourcePtr& source) -> DetailsViewBase*
@@ -75,7 +75,7 @@ namespace ctb::app
          }
 
          const auto table_id = source->getDataset()->getTableId();
-         const auto it = details_view_map.find(table_id);
+         const auto it       = details_view_map.find(table_id);
          if (it != details_view_map.end())
          {
             return it->second(parent, source);
@@ -86,14 +86,14 @@ namespace ctb::app
          }
       }
 
-   } // namespace
+   }   // namespace
 
-   
+
    void DatasetMultiView::createWindow(wxWindow* parent, const DatasetEventSourcePtr& event_source)
    {
-      constexpr auto LEFT_SPLITTER_GRAVITY = 0.25;
+      constexpr auto LEFT_SPLITTER_GRAVITY  = 0.25;
       constexpr auto RIGHT_SPLITTER_GRAVITY = 0.75;
-      constexpr auto MIN_PANE_SIZE = 100;
+      constexpr auto MIN_PANE_SIZE          = 100;
 
       if (!Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME))
       {
@@ -107,13 +107,13 @@ namespace ctb::app
       SetSashGravity(LEFT_SPLITTER_GRAVITY);
 
       // this splitter window contains options panel and right/nested splitter
-      m_options_panel = DatasetOptionsView::create(this, event_source);
+      m_options_panel  = DatasetOptionsView::create(this, event_source);
       m_right_splitter = new wxSplitterWindow{ this };
       SplitVertically(m_options_panel, m_right_splitter);
       wxPersistentRegisterAndRestore(this, "DatasetMultiView");
 
       // nested splitter contains grid and details
-      m_listView = DatasetListView::create(m_right_splitter, event_source);
+      m_listView      = DatasetListView::create(m_right_splitter, event_source);
       m_details_panel = createDetailsView(m_right_splitter, event_source);
       m_right_splitter->SplitVertically(m_listView, m_details_panel);
       m_right_splitter->SetMinimumPaneSize(MIN_PANE_SIZE);

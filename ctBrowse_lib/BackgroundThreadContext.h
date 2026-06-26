@@ -1,8 +1,8 @@
 #pragma once
 
 #include <asio/any_io_executor.hpp>
-#include <asio/io_context.hpp>
 #include <asio/executor_work_guard.hpp>
+#include <asio/io_context.hpp>
 
 
 namespace ctb
@@ -34,8 +34,8 @@ namespace ctb
             // stop the busy work, context will finish any pending task and then shut down.
             m_work_guard.reset();
          }
-         catch (...) // NOLINT
-         {}   
+         catch (...)   // NOLINT
+         {}
       }
 
       // no copy or move
