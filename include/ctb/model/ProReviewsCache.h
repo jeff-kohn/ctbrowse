@@ -11,7 +11,7 @@ namespace ctb
    struct ProScore
    {
       uint64_t      wine_id{};
-      CtPropertyVal pro_id{};         // 2-3 letter code used for abbreviated scores e.g. JD90
+      CtPropertyVal pro_id{};   // 2-3 letter code used for abbreviated scores e.g. JD90
       CtPropertyVal score_text{};
       CtPropertyVal score_numeric{};
    };
@@ -19,7 +19,7 @@ namespace ctb
    struct ProDrinkWindow
    {
       uint64_t      wine_id{};
-      CtPropertyVal pro_id{};         
+      CtPropertyVal pro_id{};
       CtPropertyVal pro_drink_begin{};
       CtPropertyVal pro_drink_end{};
       CtPropertyVal ct_drink_begin{};
@@ -29,7 +29,6 @@ namespace ctb
    class ProReviewsCache
    {
    public:
-      
       ProReviewsCache(const ProReviewsCacheTable& tbl)
       {
          processDataset(tbl);
@@ -72,4 +71,4 @@ namespace ctb
       lhs.swap(rhs);
    }
 
-} // namespace ctb
+}   // namespace ctb

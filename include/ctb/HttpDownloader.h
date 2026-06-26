@@ -25,10 +25,10 @@ namespace ctb
    /// @brief Asynchronously downloads files (table data, image labels) from CT website
    ///
    /// This class can run on a caller-provided asio executor, or if one is not provided
-   /// a private executor running on a background thread will be used. Instances of this 
-   /// object must outlive the HTTP requests they execute, because they are stateful 
+   /// a private executor running on a background thread will be used. Instances of this
+   /// object must outlive the HTTP requests they execute, because they are stateful
    /// even when using an externally-provided executor.
-   /// 
+   ///
    class HttpDownloader
    {
    public:
@@ -54,7 +54,6 @@ namespace ctb
       /// @param callback - callback to receive the result when it's ready. Will be called from background
       ///                   asio io_context thread.
       void downloadTable(TableId table, const CredentialWrapper& cred, HttpResultCallback callback);
-
 
 
       ~HttpDownloader();

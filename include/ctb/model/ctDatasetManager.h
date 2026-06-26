@@ -16,13 +16,13 @@ namespace ctb::app
    {
    public:
       /// @brief callback type used  for table download requests. Needs to be copyable because downloadTablesAsync
-      ///        needs to copy the callable for each downloadTableAsync() call. The expeced return value is the 
+      ///        needs to copy the callable for each downloadTableAsync() call. The expeced return value is the
       ///        FQ path of the file that was downloaded.
       using TableDownloadResultCallback = copyable_function<void(std::expected<std::string, ctb::Error>)>;
 
       /// @brief default ctor, initializes data folder to "." unless overridden by a call to setTableFolder()
-      CtDatasetManager(); // = default;
-      ~CtDatasetManager() noexcept ; //= default;
+      CtDatasetManager();             // = default;
+      ~CtDatasetManager() noexcept;   //= default;
 
       /// @brief construct a CtDatasetLoader specifying the data folder. May throw if folder is invalid and can't be created.
       explicit CtDatasetManager(const fs::path& table_folder) noexcept(false);
@@ -57,7 +57,7 @@ namespace ctb::app
 
       /// @brief Download multiple tables from CellarTracker.com in the background and save it to the data folder,
       ///        overwriting existing files.
-      template<rng::input_range RngT> //requires std::same_as<std::remove_cvref<rng::range_value_t<RngT>>, TableId>
+      template<rng::input_range RngT>   //requires std::same_as<std::remove_cvref<rng::range_value_t<RngT>>, TableId>
       void downloadTablesAsync(const RngT& tables, const CredentialWrapper& cred, TableDownloadResultCallback notify_callback)
       {
          for (auto tbl_id : tables)

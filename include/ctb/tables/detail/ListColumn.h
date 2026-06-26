@@ -28,9 +28,9 @@ namespace ctb::detail
       /// in the lib so just use the value directly.
       enum class Align : uint16_t
       {
-         Left     = 0x0000,
-         Right    = 0x0200,
-         Center   = 0x0900
+         Left   = 0x0000,
+         Right  = 0x0200,
+         Center = 0x0900,
       };
 
       /// @brief enum to specify the format the value will be displayed in
@@ -45,34 +45,38 @@ namespace ctb::detail
       };
 
       /// @brief The property identifer for this ListColumn
-      Prop prop_id{};                  
+      Prop prop_id{};
 
-      /// @brief Title to use for the column's header 
+      /// @brief Title to use for the column's header
       std::string display_name{};
 
-      /// @brief The format to use when displaying the value 
-      Format format{ Format::String };    
-      
+      /// @brief The format to use when displaying the value
+      Format format{ Format::String };
+
       /// @brief How the column's values should be aligned
-      Align col_align{ Align::Left };    
+      Align col_align{ Align::Left };
 
       /// @brief How the column header should be aligned
-      Align header_align{ Align::Left }; 
+      Align header_align{ Align::Left };
 
       /// @brief for numeric fields, how many decimal places
       uint16_t decimal_places{ 1 };
 
       /// @brief construct a column to display the specified property as a string
-      ListColumn(Prop prop_id, std::string_view col_name) : prop_id{ prop_id },  display_name{ col_name }
+      ListColumn(Prop prop_id, std::string_view col_name) : prop_id{ prop_id }, display_name{ col_name }
       {}
 
       /// @brief construct a column to display the specified property in the requested format
-      ListColumn(Prop prop_id, Format fmt, std::string_view col_name, uint16_t decimal_places = 0) :  prop_id{ prop_id },  display_name{ col_name }, format{ fmt }, decimal_places{ decimal_places }
+      ListColumn(Prop prop_id, Format fmt, std::string_view col_name, uint16_t decimal_places = 0)
+         : prop_id{ prop_id },
+           display_name{ col_name },
+           format{ fmt },
+           decimal_places{ decimal_places }
       {
          switch (format)
          {
-            case Format::Currency:  [[fallthrough]];
-            case Format::Decimal:   [[fallthrough]];
+            case Format::Currency: [[fallthrough]];
+            case Format::Decimal : [[fallthrough]];
             case Format::Number:
                col_align    = Align::Right;
                header_align = Align::Center;
@@ -87,19 +91,18 @@ namespace ctb::detail
             case Format::Boolean:
                col_align    = Align::Center;
                header_align = Align::Center;
-					break;
+               break;
 
-            default:
-               assert("Missing enum value, this is a bug" and false);
+            default: assert("Missing enum value, this is a bug" and false);
          }
       }
 
-      ListColumn(Prop prop_id, Format fmt, std::string_view col_name, Align col_align, Align head_align) : 
-         prop_id{ prop_id },  
-         display_name{ col_name }, 
-         format{ fmt }, 
-         col_align{ col_align },
-         header_align{ head_align }
+      ListColumn(Prop prop_id, Format fmt, std::string_view col_name, Align col_align, Align head_align)
+         : prop_id{ prop_id },
+           display_name{ col_name },
+           format{ fmt },
+           col_align{ col_align },
+           header_align{ head_align }
       {}
 
       /// @brief get the display text for a property value, which may include special formatting

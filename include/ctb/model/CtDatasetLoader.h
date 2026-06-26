@@ -7,9 +7,9 @@
  *******************************************************************/
 #pragma once
 
-#include "ctb/tables/table_data.h"
-#include "ctb/model/ProReviewsCache.h"
 #include "ctb/interfaces/IDataset.h"
+#include "ctb/model/ProReviewsCache.h"
+#include "ctb/tables/table_data.h"
 
 #include <filesystem>
 #include <memory>
@@ -63,9 +63,8 @@ namespace ctb
       auto getProReviewsCache() -> std::optional<ProReviewsCache>;
 
    private:
-      fs::path m_data_folder{constants::CURRENT_DIRECTORY};
+      fs::path m_data_folder{ constants::CURRENT_DIRECTORY };
    };
 
 
-
-} // namespace ctb
+}   // namespace ctb

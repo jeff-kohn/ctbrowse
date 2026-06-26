@@ -14,7 +14,6 @@
 #include <string_view>
 
 
-
 namespace ctb
 {
    /// @brief Encapsulates a username and password credential
@@ -45,28 +44,28 @@ namespace ctb
       ~CredentialWrapper() noexcept;
 
       /// @brief Checks whether the current credential should be saved.
-      /// 
+      ///
       /// Note that this class doesn't directly support persistence, it's up to the caller
       /// to decide if/how/where to save it, usually after verifying that it's a valid credential.
-      /// 
+      ///
       /// @return true if the credential should be saved, false if not.
-      /// 
+      ///
       auto saveRequested() const -> bool;
 
       /// @brief Name used to identify this credential when persisting to/from storage.
-      /// 
+      ///
       auto credentialName() const -> const std::string&;
 
       /// @brief Returns temporary view of credential username
       ///
       /// the returned view is only valid until clear() or this object's destructor is called
-      /// 
+      ///
       auto username() const -> std::string_view;
 
       /// @brief Returns temporary view of credential password
       ///
       /// the returned view is only valid until clear() or this object's destructor is called
-      /// 
+      ///
       auto password() const -> std::string_view;
 
       /// @brief Clears the credential values from this object
@@ -77,7 +76,7 @@ namespace ctb
       void swap(CredentialWrapper& other) noexcept;
 
       // no copy semantics.
-      CredentialWrapper(const CredentialWrapper&) = delete;
+      CredentialWrapper(const CredentialWrapper&)            = delete;
       CredentialWrapper& operator=(const CredentialWrapper&) = delete;
 
    private:
@@ -89,7 +88,7 @@ namespace ctb
    };
 
 
-   /// @brief standalone swap implementation for move semantics 
+   /// @brief standalone swap implementation for move semantics
    inline void swap(CredentialWrapper& left, CredentialWrapper& right) noexcept
    {
       left.swap(right);
@@ -101,6 +100,4 @@ namespace ctb
    using CredentialResult = std::expected<CredentialWrapper, ctb::Error>;
 
 
-
-
-} // namespace ctb
+}   // namespace ctb

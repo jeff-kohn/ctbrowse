@@ -15,9 +15,9 @@
 namespace ctb
 {
 
-   /// @brief a functor object that is overloaded for multiple types 
+   /// @brief a functor object that is overloaded for multiple types
    ///
-   template <typename... Ts>
+   template<typename... Ts>
    struct Overloaded : Ts...
    {
       using Ts::operator()...;
@@ -27,18 +27,17 @@ namespace ctb
 
    /// @brief  user-friendly version of from_chars that works with string_view and string
    /// @return an optional containing the requested value if successful, or an empty optional otherwise.
-   /// 
+   ///
    template<typename T>
    std::optional<T> from_str(std::string_view str)
    {
-      T val{};
-      auto result = std::from_chars(str.data(), str.data() + str.size(), val); // NOLINT [cppcoreguidelines-pro-bounds-pointer-arithmetic]
+      T    val{};
+      auto result = std::from_chars(str.data(), str.data() + str.size(), val);   // NOLINT [cppcoreguidelines-pro-bounds-pointer-arithmetic]
 
 
-      if (result.ec != std::errc())
-         return std::nullopt;  // there was an error, so return null
+      if (result.ec != std::errc()) return std::nullopt;   // there was an error, so return null
 
       return val;
    }
-   
-} // namespace ctb
+
+}   // namespace ctb

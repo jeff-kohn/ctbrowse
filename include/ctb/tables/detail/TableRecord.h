@@ -9,11 +9,11 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/utility_chrono.h"
 #include "ctb/tables/detail/FieldSchema.h"
+#include "ctb/utility_chrono.h"
 
-#include <external/csv.hpp>
 #include <cassert>
+#include <external/csv.hpp>
 
 
 namespace ctb::detail
@@ -21,24 +21,24 @@ namespace ctb::detail
 
 
    /// @brief base class providing common functionality for our table record objects
-   /// 
+   ///
    /// this class provides support for parsing CSV records into C++ objects. The derived class
    /// must meet the requirements of the RecordTraitsType concept.
-   /// 
-   /// it may seem a little odd to use a template param and deducing this for CRTP, but the 
+   ///
+   /// it may seem a little odd to use a template param and deducing this for CRTP, but the
    /// template param gives us access to types from the derived class from outside function
    /// bodies (e.g. member variables).
-   /// 
+   ///
    template<RecordTraitsType RecordTraitsT, PropertyMapType PropertyMapT>
    class TableRecord
    {
    public:
-      using Traits        = RecordTraitsT;
-      using Prop          = Traits::Prop;
-      using PropType      = detail::PropType;
-      using PropertyMap   = PropertyMapT;
-      using PropertyVal   = PropertyMap::mapped_type; 
-      using RowType       = csv::CSVRow;
+      using Traits      = RecordTraitsT;
+      using Prop        = Traits::Prop;
+      using PropType    = detail::PropType;
+      using PropertyMap = PropertyMapT;
+      using PropertyVal = PropertyMap::mapped_type;
+      using RowType     = csv::CSVRow;
 
       /// @brief Construct a TableRecord from a RowType
       explicit TableRecord(const RowType& row)
@@ -50,12 +50,12 @@ namespace ctb::detail
       explicit TableRecord(PropertyMap props) : m_props{ std::move(props) }
       {}
 
-      TableRecord() = default;
-      TableRecord(const TableRecord&) = default;
-      TableRecord(TableRecord&&) = default;
-      TableRecord& operator=(TableRecord&&) = default;
+      TableRecord()                              = default;
+      TableRecord(const TableRecord&)            = default;
+      TableRecord(TableRecord&&)                 = default;
+      TableRecord& operator=(TableRecord&&)      = default;
       TableRecord& operator=(const TableRecord&) = delete;
-      ~TableRecord() = default;
+      ~TableRecord()                             = default;
 
       /// @brief parse a CSVRow into TableProperties for each property in m_props
       ///
@@ -86,20 +86,20 @@ namespace ctb::detail
 
       /// @brief Indicates whether the requested property is available in this record
       /// @return true if the property exists, false if not
-      /// 
+      ///
       auto hasProperty(Prop prop_id) const -> bool
       {
          return m_props.contains(prop_id);
       }
 
       /// @brief Get the property value corresponding to the property identifier
-      /// 
-      /// If you need to distinguish between null and missing properties, you should 
+      ///
+      /// If you need to distinguish between null and missing properties, you should
       /// check hasProperty() first.
-      /// 
+      ///
       /// @return the requested property value if found, or a null property value if not
       ///
-      auto getProperty(Prop prop_id) const -> const PropertyVal& 
+      auto getProperty(Prop prop_id) const -> const PropertyVal&
       {
          static constexpr auto null_prop = PropertyVal{};
 
@@ -108,19 +108,19 @@ namespace ctb::detail
       }
 
       /// @brief Get the property value corresponding to the property identifier
-      /// 
-      /// If you need to distinguish between null and missing properties, you should 
+      ///
+      /// If you need to distinguish between null and missing properties, you should
       /// check hasProperty() first.
-      /// 
+      ///
       /// @return the requested property value if found, or a null property value if not
       ///
-      auto operator[](Prop prop_id) const -> const PropertyVal& 
+      auto operator[](Prop prop_id) const -> const PropertyVal&
       {
          return getProperty(prop_id);
       }
 
       /// @brief  Gets a reference to the map of all properties for this record.
-      /// 
+      ///
       auto getProperties() const -> const PropertyMap&
       {
          return m_props;
@@ -128,67 +128,64 @@ namespace ctb::detail
 
 
    private:
-      PropertyMap m_props{ Traits::Schema.size()};
+      PropertyMap m_props{ Traits::Schema.size() };
 
       // @brief converts a CSVField into a PropertyValue
       PropertyVal fieldToProperty(csv::CSVField& fld, PropType prop_type)
       {
-         if (fld.is_null())
-            return {};
+         if (fld.is_null()) return {};
 
          switch (prop_type)
          {
-            case PropType::String:
-               return PropertyVal{ fld.get<std::string>() };
+            case PropType::String: return PropertyVal{ fld.get<std::string>() };
 
-            case PropType::UInt16:
-               return fld.is_int() ? PropertyVal{ fld.get<uint16_t>() } : PropertyVal{};
+            case PropType::UInt16: return fld.is_int() ? PropertyVal{ fld.get<uint16_t>() } : PropertyVal{};
 
-            case PropType::UInt64:
-               return fld.is_int() ? PropertyVal{ fld.get<uint64_t>() } : PropertyVal{};
+            case PropType::UInt64: return fld.is_int() ? PropertyVal{ fld.get<uint64_t>() } : PropertyVal{};
 
             case PropType::Double:
-            {
-               long double val{};
-               if (fld.try_parse_decimal(val))
                {
-                  return PropertyVal{ static_cast<double>(val) };
-               }
-               else {
-                  auto str_val = fld.get<std::string_view>();
-                  if (auto dash_pos = str_val.find_last_of('-'); dash_pos <  str_val.size())
+                  long double val{};
+                  if (fld.try_parse_decimal(val))
                   {
-                     // score field may have a range like 91-92, we'll try taking the higher number.
-                     return PropertyVal::template parse<double>(str_val.substr(dash_pos + 1));
+                     return PropertyVal{ static_cast<double>(val) };
                   }
-                  SPDLOG_DEBUG("PropertyValue::fieldToProperty - Unable to parse value '{}' as a double", fld.get<std::string_view>());
-                  return {};
+                  else
+                  {
+                     auto str_val = fld.get<std::string_view>();
+                     if (auto dash_pos = str_val.find_last_of('-'); dash_pos < str_val.size())
+                     {
+                        // score field may have a range like 91-92, we'll try taking the higher number.
+                        return PropertyVal::template parse<double>(str_val.substr(dash_pos + 1));
+                     }
+                     SPDLOG_DEBUG("PropertyValue::fieldToProperty - Unable to parse value '{}' as a double", fld.get<std::string_view>());
+                     return {};
+                  }
                }
-            }
             case PropType::Date:
-            {
-               auto result = parseDate(fld.get<std::string_view>(), constants::FMT_PARSE_DATE_SHORT);
-               if (result) 
                {
-                  return PropertyVal{ *result };
+                  auto result = parseDate(fld.get<std::string_view>(), constants::FMT_PARSE_DATE_SHORT);
+                  if (result)
+                  {
+                     return PropertyVal{ *result };
+                  }
+                  else
+                  {
+                     SPDLOG_DEBUG("PropertyValue::fieldToProperty - Unable to parse value '{}' as a date", fld.get<std::string_view>());
+                     return PropertyVal{};
+                  }
                }
-               else {
-                  SPDLOG_DEBUG("PropertyValue::fieldToProperty - Unable to parse value '{}' as a date", fld.get<std::string_view>());
-                  return PropertyVal{};
-               }
-            }
             case PropType::Boolean:
-            {
-               auto str = fld.get<std::string_view>();
-               return PropertyVal::template parse<bool>(str);
-            }
+               {
+                  auto str = fld.get<std::string_view>();
+                  return PropertyVal::template parse<bool>(str);
+               }
             default:
                assert(false and "PropType enum contains unexpected value, this is a bug!");
                throw Error{ "PropType enum contains unexpected value, this is a bug!" };
          }
-
       }
    };
 
 
-} // namespace ctb::detail
+}   // namespace ctb::detail

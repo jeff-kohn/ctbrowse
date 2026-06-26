@@ -13,45 +13,45 @@
 namespace ctb::detail
 {
    /// @brief class to manage a set of property filters applied to a dataset
-   /// 
+   ///
    /// Filters are uniquely identified by their key. There are constrained overloads that allow
    /// using a string_view as lookup for string key when appropriate.
-   ///  
+   ///
    /// For a dataset record to be a match, it must match each filter contained in the collection.
    template<typename FilterT, typename KeyT, EnumType PropT, PropertyMapType PropMapT>
-   class FilterManager  
+   class FilterManager
    {
    public:
-      using Key              = KeyT;
-      using Prop             = PropT;
-      using PropertyMap      = PropMapT;
-      using PropertyVal      = PropertyMap::mapped_type;
-      using Filter           = FilterT;
-      using MaybeFilter      = std::optional<Filter>;
-      using FilterMap        = std::map<Key, Filter, std::less<>>;
-      using ChangeCallback   = std::function<void(void)>;
-      
+      using Key            = KeyT;
+      using Prop           = PropT;
+      using PropertyMap    = PropMapT;
+      using PropertyVal    = PropertyMap::mapped_type;
+      using Filter         = FilterT;
+      using MaybeFilter    = std::optional<Filter>;
+      using FilterMap      = std::map<Key, Filter, std::less<>>;
+      using ChangeCallback = std::function<void(void)>;
+
 
       /// @brief Adds a filter to the collection if it does not already exist.
       /// @return true if the filter was successfully added; false if a filter with the same filter_name already exists.
-	   auto addFilter(const Key& key, Filter filter) -> bool
+      auto addFilter(const Key& key, Filter filter) -> bool
       {
          if (m_filters.try_emplace(std::move(key), std::move(filter)).second)
          {
             notifyChange();
             return true;
-         }  
+         }
          return false;
       }
 
       /// @brief Replace an existing filter, or add it if it does not already exist.
-	   void replaceFilter(const Key& key, Filter filter)
+      void replaceFilter(const Key& key, Filter filter)
       {
          m_filters[key] = std::move(filter);
          notifyChange();
       }
 
-      template<rng::input_range Rng> //requires std::same_as<rng::range_value_t<Rng>, FilterMap::value_type>
+      template<rng::input_range Rng>   //requires std::same_as<rng::range_value_t<Rng>, FilterMap::value_type>
       void assignFilters(Rng&& rng)
       {
          m_filters.clear();
@@ -64,7 +64,7 @@ namespace ctb::detail
       /// @return true if removed, false if not found.
       auto removeFilter(const Key& key) -> bool
       {
-         if ( m_filters.erase(key))
+         if (m_filters.erase(key))
          {
             notifyChange();
             return true;
@@ -82,19 +82,18 @@ namespace ctb::detail
             notifyChange();
             return true;
          }
-         return false;      
+         return false;
       }
 
       /// @brief Remove all filters from this object
       /// @return true if at least one filter was removed, false if there were no filters
       auto clear() -> bool
       {
-        if (empty())
-           return false;
+         if (empty()) return false;
 
-        m_filters.clear();
-        notifyChange();
-        return true;
+         m_filters.clear();
+         notifyChange();
+         return true;
       }
 
       /// @brief Checks if a filter with the specified filter_name exists.
@@ -142,14 +141,14 @@ namespace ctb::detail
       }
 
       /// @brief Retrieve a view on all active filters.
-      /// 
+      ///
       /// Note returned view contains map elements e.g. pair<key, val>
-      /// 
+      ///
       /// @return A view representing all active filters (could be empty)
       auto activeFilters() const
       {
          return vws::all(m_filters);
-      } 
+      }
 
       /// @brief returns true if the record is a match 
       auto operator()(const PropertyMap& rec) const -> bool
@@ -175,12 +174,12 @@ namespace ctb::detail
       FilterManager(ChangeCallback callback) noexcept(false) : m_callback{ std::move(callback) }
       {}
 
-      FilterManager() noexcept                        = default;
-      FilterManager(const FilterManager&)             = default;
-      FilterManager(FilterManager&&)                  = default;
-      FilterManager& operator=(const FilterManager&)  = default;
-      FilterManager& operator=(FilterManager&&)       = default;
-      ~FilterManager() noexcept                       = default;
+      FilterManager() noexcept                       = default;
+      FilterManager(const FilterManager&)            = default;
+      FilterManager(FilterManager&&)                 = default;
+      FilterManager& operator=(const FilterManager&) = default;
+      FilterManager& operator=(FilterManager&&)      = default;
+      ~FilterManager() noexcept                      = default;
 
 
    private:
@@ -189,10 +188,9 @@ namespace ctb::detail
 
       void notifyChange()
       {
-         if (m_callback)
-            m_callback();
+         if (m_callback) m_callback();
       }
    };
 
 
-} // namespace ctb::detail
+}   // namespace ctb::detail

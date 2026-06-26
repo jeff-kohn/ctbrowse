@@ -2,8 +2,8 @@
 #include "ctb/ctb.h"
 
 #include <ctb/interfaces/IDataset.h>
-#include <ctb/tables/table_data.h>
 #include <ctb/tables/CtSchema.h>
+#include <ctb/tables/table_data.h>
 
 #include <optional>
 
@@ -27,7 +27,7 @@ namespace ctb
       std::vector<CtMultiValueFilter> multival_filters{};
 
       /// @brief vector of property filters to apply to the dataset
-      std::vector<CtPropertyFilter>   prop_filters{};
+      std::vector<CtPropertyFilter> prop_filters{};
 
       /// @brief Apply options from this object to the provided Dataset
       /// @return true if all options were successfully applied, false if one or more could not be applied.
@@ -49,10 +49,7 @@ namespace ctb
       /// @brief Save a CtDatasetOptions object to the specified json file
       /// @throw ctb::Error if saving file fails
       static void saveOptions(const CtDatasetOptions& options, const fs::path& json_path, bool overwrite) noexcept(false);
-
    };
 
 
-
-
-} // namespace ctb::app
+}   // namespace ctb

@@ -44,9 +44,9 @@ namespace ctb
    [[nodiscard]] auto downloadRawTableData(const CredentialWrapper& cred,
                                            TableId                  table,
                                            DataFormatId             format,
-                                           ProgressCallback*        callback        = nullptr,
-                                           bool                     convert_to_utf  = true,
-                                           uint32_t                 table_code_page = std::to_underlying(TextEncoding::WINDOWS_1252)) -> DownloadResult;
+                                           ProgressCallback*        callback       = nullptr,
+                                           bool                     convert_to_utf = true,
+                                           uint32_t table_code_page = std::to_underlying(TextEncoding::WINDOWS_1252)) -> DownloadResult;
 
 
    /// @brief for async download, the result will be provided through a callback.
