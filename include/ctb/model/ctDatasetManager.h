@@ -47,7 +47,7 @@ namespace ctb::app
 
 
       /// @brief Retrieves the pro reviews cache.
-      auto getProReviewsCache() -> std::optional<ProReviewsCache>;
+      auto getProReviewsCache() -> ProReviewsCache&;
 
 
       /// @brief Download the specified table from CellarTracker.com in the background and save it to the data
@@ -75,6 +75,7 @@ namespace ctb::app
    private:
       struct AsyncImpl;
 
+      std::optional<ProReviewsCache> m_pro_cache{};
       fs::path            m_data_folder{ constants::CURRENT_DIRECTORY };
       indirect<AsyncImpl> m_impl;
    };

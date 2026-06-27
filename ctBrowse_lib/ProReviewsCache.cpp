@@ -73,7 +73,6 @@ namespace ctb
 
    auto ProReviewsCache::getCtDrinkWindow(uint64_t wine_id) const -> std::string
    {
-
       for (auto window : getDrinkWindows(wine_id))
       {
          return detail::getDrinkWindow(window.ct_drink_begin, window.ct_drink_end);
@@ -83,7 +82,7 @@ namespace ctb
 
 #pragma warning(pop)
 
-   void ProReviewsCache::processDataset(const ProReviewsCacheTable& tbl)
+   void ProReviewsCache::loadCache(const ProReviewsCacheTable& tbl)
    {
       for (auto&& rec : tbl)
       {

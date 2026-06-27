@@ -7,26 +7,17 @@
  *********************************************************************/
 
 #include "App.h"
-#include "CtCredentialManager.h"
 #include "HiddenWebClient.h"
 #include "LabelImageCache.h"
 #include "MainFrame.h"
 
-#include <ctb/model/CtDatasetLoader.h>
-#include <ctb/tasks/tasks.h>
-#include <ctb/utility_http.h>
-
-#include <cpr/cpr.h>
 #include <wx/fileconf.h>
 #include <wx/msgdlg.h>
-#include <wx/secretstore.h>
 #include <wx/stdpaths.h>
 #include <wx/xrc/xmlres.h>
 
-
 #include <chrono>
 #include <filesystem>
-#include <thread>
 
 
 namespace ctb::app
@@ -92,8 +83,6 @@ namespace ctb::app
             displayErrorMessage(packageError());
          }
 
-         CtDatasetLoader loader{ getDataFolder(AppFolder::Tables) };
-         m_review_cache = loader.getProReviewsCache();
          CallAfter([this]{wxPostEvent(m_main_frame, wxMenuEvent{ wxEVT_MENU, CmdId::CMD_COLLECTION_MY_CELLAR }); });
          return true;
       }

@@ -17,7 +17,6 @@ target_sources(${TARGET_NAME}
       "../include/ctb/ctb_format.h"
       "../include/ctb/ctb_functors.h"
       "../include/ctb/ctb_indirect.h"
-      "../include/ctb/download.h"
       "../include/ctb/HttpDownloader.h"
       
       "../include/ctb/Error.h"
@@ -33,7 +32,6 @@ target_sources(${TARGET_NAME}
       "../include/ctb/interfaces/IDatasetEventSource.h"
             
       "../include/ctb/model/CtDataset.h"
-      "../include/ctb/model/CtDatasetLoader.h"
       "../include/ctb/model/CtDatasetOptions.h"
       "../include/ctb/model/CtDatasetManager.h"
       "../include/ctb/model/DatasetEventSource.h"
@@ -74,10 +72,10 @@ target_sources(${TARGET_NAME}
       "BackgroundThreadContext.h"
       "CredentialManager.cpp"
       "CredentialWrapper.cpp"
-      "CtDatasetLoader.cpp"
+      
       "CtDatasetOptions.cpp"
       "DatasetEventSource.cpp"
-      "download.cpp"
+      
       "CtDatasetManager.cpp"
       "HttpDownloader.cpp"
       "log.cpp"

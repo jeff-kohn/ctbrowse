@@ -91,9 +91,13 @@ namespace ctb::app
    }
 
 
-   auto CtDatasetManager::getProReviewsCache() -> std::optional<ProReviewsCache>
+   auto CtDatasetManager::getProReviewsCache() -> ProReviewsCache&
    {
-      return std::optional<ProReviewsCache>();
+      if (!m_pro_cache)
+      {
+         m_pro_cache = loadTableData<ProReviewsCacheTable>(m_data_folder, TableId::Availability).value_or({});
+      }
+      return m_pro_cache.value();
    }
 
 

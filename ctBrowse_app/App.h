@@ -12,7 +12,6 @@
 
 #include <ctb/log.h>
 #include <ctb/model/CtDatasetManager.h>
-#include <ctb/model/ProReviewsCache.h>
 #include <wx/app.h>
 #include <wx/windowptr.h>
 
@@ -134,11 +133,6 @@ namespace ctb::app
       auto getLabelCache() noexcept -> LabelCachePtr
       {
          return m_label_cache;
-      }
-
-      auto getProReviewsCache() const -> const std::optional<ProReviewsCache>&
-      {
-         return m_review_cache;
       }
 
       /// @brief Get the current config object.

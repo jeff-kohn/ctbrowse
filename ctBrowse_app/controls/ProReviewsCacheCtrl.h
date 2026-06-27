@@ -15,9 +15,9 @@ namespace ctb::app
       using CacheValueFn = std::string (ProReviewsCache::*)(uint64_t) const;
 
       /// @brief static factory method for creating ProReviewsCacheCtrl objects
-      /// @param parent the parent window for the control, must be non-null
-      /// @param source the dataset event source to bind the control to, must be non-null
-      /// @param bound_prop the property id to bind the control to
+      /// @param parent     - the parent window for the control, must be non-null
+      /// @param source     - the dataset event source to bind the control to, must be non-null
+      /// @param bound_prop - the property id to bind the control to
       /// @return non-owning pointer to the newly created window.
       [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source, CacheValueFn value_fn) -> ProReviewsCacheCtrl*
       {
@@ -35,12 +35,10 @@ namespace ctb::app
       {
          std::string value{};
 
-         auto cache = wxGetApp().getProReviewsCache();
-         if (cache)
-         {
-            auto wine_id = ds->getProperty(CtProp::iWineId).asUInt64().value_or(0);
-            value        = (*cache.*m_value_fn)(wine_id);
-         }
+         auto& cache   = wxGetApp().getDatasetManager().getProReviewsCache();
+         auto  wine_id = ds->getProperty(CtProp::iWineId).asUInt64().value_or(0);
+         value         = (cache.*m_value_fn)(wine_id);
+
          return value;
       }
 

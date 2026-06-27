@@ -31,7 +31,7 @@ namespace ctb
    public:
       ProReviewsCache(const ProReviewsCacheTable& tbl)
       {
-         processDataset(tbl);
+         loadCache(tbl);
       }
 
       auto getScores(uint64_t wine_id) const
@@ -59,11 +59,14 @@ namespace ctb
 
       auto getCtDrinkWindow(uint64_t wine_id) const -> std::string;
 
+
+      /// @brief Load cache data from the supplied table, replacing any existing data.
+      /// @param tbl 
+      void loadCache(const ProReviewsCacheTable& tbl);
+
    private:
       std::multimap<uint64_t, ProScore>       m_scores{};
       std::multimap<uint64_t, ProDrinkWindow> m_drink_windows{};
-
-      void processDataset(const ProReviewsCacheTable& tbl);
    };
 
    inline void swap(ProReviewsCache& lhs, ProReviewsCache& rhs) noexcept

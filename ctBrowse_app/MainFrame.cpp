@@ -13,7 +13,6 @@
 #include "model/DatasetDefaultOptions.h"
 #include "views/DatasetMultiView.h"
 
-//#include <ctb/download.h>
 #include <ctb/model/DatasetEventSource.h>
 #include <ctb/utility.h>
 #include <ctb/utility_chrono.h>
