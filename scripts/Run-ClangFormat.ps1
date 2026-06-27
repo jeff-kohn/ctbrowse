@@ -36,7 +36,7 @@
 [CmdletBinding()]
 param(
     [string]$ClangFormatPath = "$env:ProgramFiles\LLVM\bin\clang-format.exe",
-    [string[]]$Folders = @("include", "lib", "app"),
+    [string[]]$Folders = @("include", "ctBrowse_lib", "ctBrowse_app"),
     [switch]$DryRun,
     [switch]$Fix
 )

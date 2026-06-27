@@ -8,7 +8,7 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/table_data.h"
+#include "ctb/tables/table_data.h"
 #include "ctb/tables/CtSchema.h"
 #include "ctb/tables/detail/field_helpers.h"
 

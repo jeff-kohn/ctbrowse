@@ -19,7 +19,6 @@
 #include <variant>
 
 
-
 namespace ctb::detail
 {
 
@@ -27,36 +26,37 @@ namespace ctb::detail
    ///
    /// this class is a lightweight wrapper around std::variant that is easier to use and provides a built-in
    /// concept of 'null' so that we don't have to handle a mix of normal and std::optional<> types.
-   /// 
+   ///
    /// We use std::monostate to indicate null, but callers don't need to bother with that, just use
    /// setNull()/isNull() before trying to get a non-string value out of this object. This class doesn't
    /// differentiate between Null and "" for string properties, because there's no way to distinguish them
-   /// as distinct values in CSV. 
-   /// 
-   /// Note that while it's possible to put std::optional<> types into this class, there's not much 
+   /// as distinct values in CSV.
+   ///
+   /// Note that while it's possible to put std::optional<> types into this class, there's not much
    /// point since it has built-in support for null/empty in the variant.
-   /// 
+   ///
    /// Default-constructed instances of this object will always have a 'null' value.
-   /// 
+   ///
    template<typename... Args>
    struct PropertyValue
    {
       using ValueType = std::variant<std::monostate, Args...>;
 
       /// @brief Create a PropertyValue from a string_view by converting it to the specified type.
-      /// 
+      ///
       /// @param text_value - The string_view to be converted and used to construct the PropertyValue.
-      /// @return An PropertyValue containing the converted value if the conversion succeeds, or an empty 
+      /// @return An PropertyValue containing the converted value if the conversion succeeds, or an empty
       ///  PropertyValue otherwise.
-		template<ArithmeticType ValT> requires std::convertible_to<ValT, ValueType> 
+      template<ArithmeticType ValT> requires std::convertible_to<ValT, ValueType>
       [[nodiscard]] static auto parse(std::string_view text_value) -> PropertyValue
       {
-         auto val = from_str<ValT>(text_value); 
+         auto val = from_str<ValT>(text_value);
          if (val)
          {
             return PropertyValue{ *val };
          }
-         else {
+         else
+         {
             return PropertyValue{};
          }
       }
@@ -71,9 +71,9 @@ namespace ctb::detail
       }
 
       /// @brief Create a PropertyValue from a string_view by parsing it as a bool
-      /// @return a PropertyValue containing the parsed bool, or a null PropertyValue if 
+      /// @return a PropertyValue containing the parsed bool, or a null PropertyValue if
       ///  the string couldn't parsed
-		template<BooleanType ValT> 
+      template<BooleanType ValT>
       [[nodiscard]] static auto parse(std::string_view bool_str) -> PropertyValue
       {
          auto val = textToBool(bool_str);
@@ -101,24 +101,24 @@ namespace ctb::detail
       }
 
       /// @brief sets the contained value of this object to represent 'null' (e.g. std::monostate)
-      /// 
+      ///
       void setNull()
       {
          m_val = std::monostate{};
       }
 
       /// @brief Get a numeric value out of the property
-      /// 
+      ///
       /// If the property contains a string, parsing will be attempted. For anything else, the result
       /// will be a static_cast to T if possible, or std::nullopt if not.
-      /// 
+      ///
       /// @returns an optional containing the result if successful, std::nullopt if not.
-      /// 
+      ///
       /// Note: compile error in this function means the type you're casting to isn't compatible with any
       /// of the overloads, either use a different type or add a new overload to asT for the needed type.
-      template<ArithmeticType T> 
+      template<ArithmeticType T>
       constexpr auto as() const -> std::optional<T>
-      { 
+      {
          using std::chrono::year_month_day;
          using MaybeT = std::optional<T>; 
 
@@ -134,10 +134,10 @@ namespace ctb::detail
       }
 
       /// @brief Extract date value from the property object, if possible
-      /// 
-      /// The object must contain a year_month_date, or a string that can be parsed as a date. 
+      ///
+      /// The object must contain a year_month_date, or a string that can be parsed as a date.
       /// All other data types will result in empty return value.
-      /// 
+      ///
       /// @return A valid year_month_date, or std::nullopt if the value is not compatible
       auto asDate() const -> NullableDate
       {
@@ -160,8 +160,8 @@ namespace ctb::detail
       }
 
       /// @brief get a string value out of the property
-      /// 
-      /// @return the requested value, or an empty string if no value is available (e.g. null) 
+      ///
+      /// @return the requested value, or an empty string if no value is available (e.g. null)
       auto asString() const -> std::string
       {
          if (hasString())
@@ -175,11 +175,11 @@ namespace ctb::detail
 
       /// @brief get a formatted string value out of the property.
       /// @param fmt_str format string to use for formatting the value. Must contain exactly 1 {} placeholder
-      /// @return the requested value, or an empty string if isNull(). 
-      /// 
+      /// @return the requested value, or an empty string if isNull().
+      ///
       /// Note that if the property isNull(), the fmt_str will not be used - you will always get an empty string
-      /// 
-      auto asString(std::string_view fmt_str) const -> std::string 
+      ///
+      auto asString(std::string_view fmt_str) const -> std::string
       {
          using std::chrono::year_month_day;
          using namespace constants;
@@ -203,8 +203,8 @@ namespace ctb::detail
 
       /// @brief return string_view to the internal string property
       /// @return the requested string_view, or an empty one if this property doesn't contain a string.
-      /// 
-      /// this method does not convert other types to string_view, because that would require a view on a temporary. 
+      ///
+      /// this method does not convert other types to string_view, because that would require a view on a temporary.
       /// if the contained property is not a valid string, you'll get an empty string_view back.
       auto asStringView() const -> std::string_view
       {
@@ -217,46 +217,46 @@ namespace ctb::detail
 
       /// @brief indicates whether this property contains a std::string
       /// @return true if the property type is std::string, false if it's anything else
-      /// 
+      ///
       /// this can be useful in determining whether you want to call asString() or asStringView()
       /// since the former will convert numbers to string and the latter will not.
-      /// 
+      ///
       constexpr auto hasString() const -> bool
       {
          return std::holds_alternative<std::string>(m_val);
       }
 
       /// @brief convenience function getting value as int32_t
-      /// 
+      ///
       /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
-      /// 
+      ///
       auto asInt32() const -> NullableInt
       {
          return as<int32_t>();
       }
 
       /// @brief convenience function getting value as uint16_t
-      /// 
+      ///
       /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
-      /// 
+      ///
       auto asUInt16() const -> NullableShort
       {
          return as<uint16_t>();
       }
 
       /// @brief convenience function getting value as uint64_t
-      /// 
+      ///
       /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
-      /// 
+      ///
       auto asUInt64() const -> NullableSize_t
       {
          return as<uint64_t>();
       }
 
       /// @brief convenience function getting value as double
-      /// 
+      ///
       /// just calls as<>(), but the syntax for doing that outside of this class is ugly due to dependent name BS so wrap it here.
-      /// 
+      ///
       auto asDouble() const -> NullableDouble
       {
          return as<double>();
@@ -283,35 +283,35 @@ namespace ctb::detail
       }
 
       /// @brief allows for comparison of PropertyValue objects, as well as putting them in ordered containers
-      [[nodiscard]] auto operator<=>(const PropertyValue& prop) const 
+      [[nodiscard]] auto operator<=>(const PropertyValue& prop) const
       {
          return m_val <=> prop.m_val;
       }
       auto operator==(const PropertyValue& prop) const -> bool = default;
-            
+
 
       // NOLINTBEGIN cppcoreguidelines-c-copy-assignment-signature
 
       /// @brief allow assigning values, not just TableProperties
       template<typename Self, std::convertible_to<ValueType> T>
-      auto&& operator=(this Self&& self, T&& t)  
+      auto&& operator=(this Self&& self, T&& t)
 
       {
-         self.m_val = std::forward<T>(t);         
+         self.m_val = std::forward<T>(t);
          return std::forward<Self>(self);
       }
       // NOLINTEND cppcoreguidelines-c-copy-assignment-signature
 
-      constexpr PropertyValue() noexcept = default;
-      ~PropertyValue() noexcept = default;
-      constexpr PropertyValue(const PropertyValue&) = default;
-      constexpr PropertyValue(PropertyValue&&) = default;
+      constexpr PropertyValue() noexcept                       = default;
+      ~PropertyValue() noexcept                                = default;
+      constexpr PropertyValue(const PropertyValue&)            = default;
+      constexpr PropertyValue(PropertyValue&&)                 = default;
       constexpr PropertyValue& operator=(const PropertyValue&) = default;
-      constexpr PropertyValue& operator=(PropertyValue&&) = default;
-   
+      constexpr PropertyValue& operator=(PropertyValue&&)      = default;
+
    private:
       ValueType m_val{};
    };
 
 
-}  // namespace ctb::detail
+}   // namespace ctb::detail

@@ -1,0 +1,162 @@
+#include "SortOptionsPanel.h"
+
+#include <wx/choice.h>
+#include <wx/radiobut.h>
+#include <wx/sizer.h>
+#include <wx/statbox.h>
+#include <wx/valgen.h>
+
+namespace ctb::app
+{
+
+   namespace
+   {
+      auto getSortOptionList(const IDataset* dataset) -> wxArrayString
+      {
+         return vws::all(dataset->availableSorts())
+            | vws::transform([](const IDataset::TableSort& s) {  return wxFromSV(s.sort_name); })
+            | rng::to<wxArrayString>();
+      }
+   }
+
+   auto SortOptionsPanel::create(wxWindow* parent, const DatasetEventSourcePtr& source) -> SortOptionsPanel*
+   {
+      return detail::createDatasetWindow<SortOptionsPanel>(parent, source);
+   }
+
+
+   void SortOptionsPanel::createWindow(wxWindow* parent)
+   {
+      using namespace ctb::constants;
+
+      if (!Create(parent))
+      {
+         throw Error{ Error::Category::UiError, constants::ERROR_WINDOW_CREATION_FAILED };
+      }
+
+      // sort options box
+      auto* sort_options_box = new wxStaticBoxSizer(wxVERTICAL, this, LBL_SORT_OPTIONS);
+      SetSizer(sort_options_box);
+
+      // sort fields combo
+      m_sort_combo = new wxChoice(sort_options_box->GetStaticBox(), wxID_ANY);
+      m_sort_combo->SetFocus();
+      m_sort_combo->SetValidator(wxGenericValidator(&m_sort_selection));
+      sort_options_box->Add(m_sort_combo, wxSizerFlags{}.Expand().Border(wxALL));
+
+      // ascending sort order radio. 
+      auto *opt_ascending = new wxRadioButton{
+         sort_options_box->GetStaticBox(),
+         wxID_ANY,
+         LBL_SORT_ASCENDING,
+         wxDefaultPosition,
+         wxDefaultSize,
+         wxRB_GROUP
+      };
+      opt_ascending->SetValue(true);
+      opt_ascending->SetValidator(wxGenericValidator{ &m_sort_ascending });
+      sort_options_box->Add(opt_ascending, wxSizerFlags{}.Expand().Border(wxALL));
+
+      // descending sort order radio. Since the radio buttons aren't in a group box, the validator treats them as individual bools
+      // so we have a separate flag for the descending radio that we have to manually keep in sync (see onTableSorted)
+      auto *opt_descending = new wxRadioButton{ sort_options_box->GetStaticBox(), wxID_ANY, LBL_SORT_DESCENDING };
+      opt_descending->SetValidator(wxGenericValidator{ &m_sort_descending });
+      sort_options_box->Add(opt_descending, wxSizerFlags{ 1 }.Expand().Border(wxALL));
+
+      // event bindings.
+      m_sort_combo->Bind(wxEVT_CHOICE, &SortOptionsPanel::onSortSelection, this);
+      opt_ascending->Bind(wxEVT_RADIOBUTTON, &SortOptionsPanel::onSortOrderClicked, this);
+      opt_descending->Bind(wxEVT_RADIOBUTTON, &SortOptionsPanel::onSortOrderClicked, this);
+
+      getEventHandler().addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event);  });
+      getEventHandler().addHandler(DatasetEvent::Id::DatasetSorted,              [this](const DatasetEvent& event) { onTableSorted(event);        });
+   }
+
+
+   void SortOptionsPanel::onSortOrderClicked([[maybe_unused]] wxCommandEvent& event)
+   {
+      try
+      {
+         TransferDataFromWindow();
+
+         auto dataset          = getEventHandler().getDataset(true);
+         m_sort_config.reverse = m_sort_descending;
+         dataset->applySort(m_sort_config);
+         getEventHandler().signal_source(DatasetEvent::Id::DatasetSorted, false);
+      }
+      catch (...)
+      {
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void SortOptionsPanel::onSortSelection([[maybe_unused]] wxCommandEvent& event)
+   {
+      try
+      {
+         // event could get generated even if they didn't change the selection, don't waste our time.
+         auto old_index = m_sort_selection;
+         TransferDataFromWindow();
+         if (old_index == m_sort_selection) return;
+
+         // let the combo close its list before we reload the dataset
+         CallAfter(
+            [this]()
+            {
+               auto dataset = getEventHandler().getDataset(true);
+               auto sorts   = dataset->availableSorts();
+               if (m_sort_selection <= std::ssize(sorts))
+               {
+                  // re-fetch sorter based on index. UI and member state will get updated in the dataset event handler.
+                  dataset->applySort(sorts[static_cast<size_t>(m_sort_selection)]);
+                  getEventHandler().signal_source(DatasetEvent::Id::DatasetSorted, true);
+               }
+               else
+               {
+                  log::warn("SortOptionsPanel::onSortSelection: invalid sort index selected: {}", m_sort_selection);
+               }
+            });
+      }
+      catch (...)
+      {
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+
+   void SortOptionsPanel::onDatasetInitialize(const DatasetEvent& event)
+   {
+      assert(event.dataset);
+
+      m_sort_combo->Clear();
+      m_sort_combo->Append(getSortOptionList(event.dataset));
+      onTableSorted(event);   // a bit hacky but techincally correct.
+   }
+
+   void SortOptionsPanel::onTableSorted(const DatasetEvent& event)
+   {
+      assert(event.dataset);
+      try
+      {
+         const auto& dataset = event.dataset;
+         m_sort_config       = dataset->activeSort();
+         m_sort_ascending    = (m_sort_config.reverse == false);
+         m_sort_descending   = m_sort_config.reverse;
+
+         for (const auto&& [idx, sort] : vws::enumerate(dataset->availableSorts()))
+         {
+            if (m_sort_config.sort_name == sort.sort_name)
+            {
+               m_sort_selection = static_cast<int>(idx);
+            }
+         }
+         TransferDataToWindow();
+      }
+      catch (...)
+      {
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+}   // namespace ctb::app

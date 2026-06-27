@@ -409,3 +409,5 @@ compile_commands.json
 *05928
 
 *.wxui
+
+CMakeUserPresets.json

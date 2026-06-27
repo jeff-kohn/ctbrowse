@@ -8,15 +8,15 @@
 #pragma once
 
 #include "ctb/constants.h"
-#include "ctb/ctb_format.h"
 #include "ctb/ctb_enum.h"
+#include "ctb/ctb_format.h"
 
 #include <exception>
 #include <string>
 #include <string_view>
 
 
-#ifdef __WIN32 
+#ifdef __WIN32
    #undef Error
 #endif
 
@@ -26,7 +26,7 @@ namespace ctb
    ///
    /// This exception class supports error categories, numeric error codes and error text.  A default-constructed
    /// instance of this class will have a Category of Success with an error code of 0.
-   /// 
+   ///
    class Error final : public std::exception
    {
    public:
@@ -44,7 +44,7 @@ namespace ctb
          OperationCanceled,
          ParseError,
          NotSupported,
-         UiError
+         UiError,
       };
 
       /// @brief numeric error code, 0 indicates success, -1 indicates general/unknown failure, other numbers can
@@ -65,7 +65,7 @@ namespace ctb
 
       /// @brief formattedMessage()
       /// @return a formatted error message combining the properties of this object.
-      /// 
+      ///
       const std::string& formattedMessage() const
       {
          return error_message;
@@ -80,58 +80,62 @@ namespace ctb
       }
 
       /// @brief construct an Error with numeric error code, textual error message, and category
-      Error(int64_t code, std::string error_message, Category category = Category::GenericError) noexcept :
-         error_code{ code },
-         error_message{ std::move(error_message) },
-         category{ category }
+      Error(int64_t code, std::string error_message, Category category = Category::GenericError) noexcept
+         : error_code{ code },
+           error_message{ std::move(error_message) },
+           category{ category }
       {}
 
       /// @brief construct an Error with message and optional category
-      explicit Error(std::string error_message, Category category = Category::GenericError) noexcept :
-         error_code{ ERROR_CODE_GENERAL_FAILURE },
-         error_message{ std::move(error_message) },
-         category{ category }
+      explicit Error(std::string error_message, Category category = Category::GenericError) noexcept
+         : error_code{ ERROR_CODE_GENERAL_FAILURE },
+           error_message{ std::move(error_message) },
+           category{ category }
       {}
 
       /// @brief construct an error with the given category and formatted message
-      template <typename... T>
-      Error(Category category, std::string_view fmt, T&&... args) :              // NOLINT [cppcoreguidelines-missing-std-forward]
+      template<typename... T>
+      Error(Category category, std::string_view fmt, T&&... args)
+         :   // NOLINT [cppcoreguidelines-missing-std-forward]
 
-         error_code{ ERROR_CODE_GENERAL_FAILURE },
-         error_message{ ctb::vformat(fmt, ctb::make_format_args(args...)) }, 
-         category{ category }
+           error_code{ ERROR_CODE_GENERAL_FAILURE },
+           error_message{ ctb::vformat(fmt, ctb::make_format_args(args...)) },
+           category{ category }
       {}
 
       /// @brief construct an error with the given error code, category and formatted message
-      template <typename... T>
-      Error(int64_t code, Category category, std::string_view fmt, T&&... args) :   // NOLINT [cppcoreguidelines-missing-std-forward]
-         error_code{ code },
-         error_message{ ctb::vformat(fmt, ctb::make_format_args(args...)) },
-         category{ category }
+      template<typename... T>
+      Error(int64_t code, Category category, std::string_view fmt, T&&... args)
+         :   // NOLINT [cppcoreguidelines-missing-std-forward]
+           error_code{ code },
+           error_message{ ctb::vformat(fmt, ctb::make_format_args(args...)) },
+           category{ category }
       {}
 
-      Error() = default;
-      Error(const Error&) = default;
-      Error(Error&&) = default;
+      Error()                        = default;
+      Error(const Error&)            = default;
+      Error(Error&&)                 = default;
       Error& operator=(const Error&) = default;
-      Error& operator=(Error&&) = default;
-      ~Error() override = default;
+      Error& operator=(Error&&)      = default;
+      ~Error() override              = default;
    };
 
 
    /// @brief translate an exception_ptr to a ctb::Error
-   /// 
+   ///
    /// useful for code that wants to handle all exceptions with a
    /// catch(...) and return them as an unexpected{ Error{} }
-   /// 
-   inline auto packageError(std::exception_ptr ep = std::current_exception() ) noexcept -> Error
+   ///
+   inline auto packageError(std::exception_ptr ep = std::current_exception()) noexcept -> Error
    {
+      // clang-format off
       try 
       {
          if (ep) std::rethrow_exception(ep);
       }
-      catch (ctb::Error& e)      { return e;                 }
-      catch (std::exception& e)  { return Error{ e.what() }; }
+      catch (ctb::Error& e)      { return e;                   }
+      catch (std::exception& e)  { return Error{ e.what() };   }
+      catch (std::error_code& e) { return Error{ e.message() };}
       catch (...)
       {
          assert("wtf, nonstandard exception caught." and false);

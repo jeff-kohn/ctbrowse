@@ -1,0 +1,73 @@
+#pragma once
+
+#include "App.h"
+
+#include "controls/DrinkWindowCtrl.h"
+#include "controls/ElasticMultiLineTextCtrl.h"
+#include "controls/ProReviewsCacheCtrl.h"
+#include "controls/PropertyValueCtrl.h"
+#include "panels/WineDetailBasePanel.h"
+
+#include <wx/stattext.h>
+
+namespace ctb::app
+{
+
+   /// @brief A panel class that displays details about a wine, handling dataset events and rendering relevant fields.
+   ///
+   class WineDetailMainPanel final : public WineDetailBasePanel
+   {
+   public:
+      static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailMainPanel*
+      {
+         return detail::createDatasetWindow<WineDetailMainPanel>(parent, source);
+      }
+
+   private:
+      wxString                  m_wine_title{};
+      ElasticMultiLineTextCtrl* m_wine_ctrl{};
+
+      DECLARE_DATASET_WINDOW_FACTORY;
+
+      WineDetailMainPanel(const DatasetEventSourcePtr& source) : WineDetailBasePanel{ source }
+      {}
+
+      // base class overrides
+      void addDetails(DetailRows& rows, const DatasetEventSourcePtr& source) override
+      {
+         // clang-format off
+         auto* top_sizer = GetSizer();             assert(top_sizer);
+         auto dataset    = source->getDataset();   assert(dataset);
+
+         m_wine_ctrl = ElasticMultiLineTextCtrl::create(this, source, CtProp::WineName, wxAlignment::wxALIGN_CENTER);
+         m_wine_ctrl->SetFont(GetFont().MakeLarger().MakeBold());
+         m_wine_ctrl->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT));
+
+         top_sizer->Insert(0, m_wine_ctrl, wxSizerFlags{}.Border().Expand());
+
+         // ordering matters here because it's the same as they'll be displayed
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::Vintage    ), constants::LBL_VINTAGE     );
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::Varietal   ), constants::LBL_VARIETAL    );
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::Country    ), constants::LBL_COUNTRY     );
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::Region     ), constants::LBL_REGION      );
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::SubRegion  ), constants::LBL_SUB_REGION  );
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::Appellation), constants::LBL_APPELLATION );
+
+         if (dataset->hasProperty(CtProp::CtBeginConsume))
+         {
+            rows.emplace_back(top_sizer, DrinkWindowCtrl::create(this, source, CtProp::BeginConsume,   CtProp::EndConsume   ), constants::LBL_DRINK_WINDOW_MY);
+            rows.emplace_back(top_sizer, DrinkWindowCtrl::create(this, source, CtProp::CtBeginConsume, CtProp::CtEndConsume ), constants::LBL_DRINK_WINDOW_CT);
+         }
+         else
+         {
+            rows.emplace_back(top_sizer, DrinkWindowCtrl::create(this, source, CtProp::BeginConsume, CtProp::EndConsume), constants::LBL_DRINK_WINDOW);
+         }
+         // clang-format on
+
+         rows.emplace_back(top_sizer, ProReviewsCacheCtrl::create(this, source, &ProReviewsCache::getDrinkWindowSummary),
+                           constants::LBL_DRINK_WINDOW_PRO);
+      }
+   };
+
+
+}   // namespace ctb::app

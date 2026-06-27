@@ -45,6 +45,31 @@ jobs:
         nuget setapikey "${{ secrets.GITHUB_TOKEN }}" -Source "${{ env.NUGET_FEED }}"
         dir "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC"
 
+    - name: Report tool versions
+      shell: pwsh
+      run: |
+        Write-Host "## PowerShell"
+        $PSVersionTable.PSVersion.ToString()
+        Write-Host ""
+
+        $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+        if (Test-Path $vswhere) {
+          Write-Host "## Visual Studio"
+          & $vswhere -latest -products * -property displayName
+          & $vswhere -latest -products * -property installationVersion
+          Write-Host ""
+        }
+
+        if (Get-Command vcpkg -ErrorAction SilentlyContinue) { Write-Host "## vcpkg"; vcpkg version; Write-Host "" } else { Write-Host "## vcpkg`nnot found in PATH`n" }
+        if (Get-Command cmake -ErrorAction SilentlyContinue) { Write-Host "## cmake"; cmake --version; Write-Host "" } else { Write-Host "## cmake`nnot found in PATH`n" }
+        if (Get-Command ninja -ErrorAction SilentlyContinue) { Write-Host "## ninja"; ninja --version; Write-Host "" } else { Write-Host "## ninja`nnot found in PATH`n" }
+        if (Get-Command git -ErrorAction SilentlyContinue) { Write-Host "## git"; git --version; Write-Host "" } else { Write-Host "## git`nnot found in PATH`n" }
+        if (Get-Command clang -ErrorAction SilentlyContinue) { Write-Host "## clang"; clang --version; Write-Host "" } else { Write-Host "## clang`nnot found in PATH`n" }
+        if (Get-Command clang-cl -ErrorAction SilentlyContinue) { Write-Host "## clang-cl"; clang-cl --version; Write-Host "" } else { Write-Host "## clang-cl`nnot found in PATH`n" }
+        if (Get-Command nuget -ErrorAction SilentlyContinue) { Write-Host "## nuget"; nuget help | Select-Object -First 2; Write-Host "" } else { Write-Host "## nuget`nnot found in PATH`n" }
+        if (Get-Command cppcheck -ErrorAction SilentlyContinue) { Write-Host "## cppcheck"; cppcheck --version; Write-Host "" } else { Write-Host "## cppcheck`nnot found in PATH`n" }
+
+
     - name: configure
       run: |
         cmake --version
@@ -69,7 +94,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
          name: msvc_binary
-         path: ${{ github.workspace }}/build/${{ env.CONFIGURE_PRESET }}/app/Release/ctBrowse_app.exe
+         path: ${{ github.workspace }}/build/${{ env.CONFIGURE_PRESET }}/CtBrowse_app/Release/ctBrowse_app.exe
          retention-days: 30
 
   clang_build:
@@ -95,6 +120,30 @@ jobs:
     - name: Install pre-reqs
       run: |
         winget install CppCheck --verbose --disable-interactivity --source winget --accept-source-agreements --accept-package-agreements
+
+    - name: Report tool versions
+      shell: pwsh
+      run: |
+        Write-Host "## PowerShell"
+        $PSVersionTable.PSVersion.ToString()
+        Write-Host ""
+
+        $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+        if (Test-Path $vswhere) {
+          Write-Host "## Visual Studio"
+          & $vswhere -latest -products * -property displayName
+          & $vswhere -latest -products * -property installationVersion
+          Write-Host ""
+        }
+
+        if (Get-Command vcpkg -ErrorAction SilentlyContinue) { Write-Host "## vcpkg"; vcpkg version; Write-Host "" } else { Write-Host "## vcpkg`nnot found in PATH`n" }
+        if (Get-Command cmake -ErrorAction SilentlyContinue) { Write-Host "## cmake"; cmake --version; Write-Host "" } else { Write-Host "## cmake`nnot found in PATH`n" }
+        if (Get-Command ninja -ErrorAction SilentlyContinue) { Write-Host "## ninja"; ninja --version; Write-Host "" } else { Write-Host "## ninja`nnot found in PATH`n" }
+        if (Get-Command git -ErrorAction SilentlyContinue) { Write-Host "## git"; git --version; Write-Host "" } else { Write-Host "## git`nnot found in PATH`n" }
+        if (Get-Command clang -ErrorAction SilentlyContinue) { Write-Host "## clang"; clang --version; Write-Host "" } else { Write-Host "## clang`nnot found in PATH`n" }
+        if (Get-Command clang-cl -ErrorAction SilentlyContinue) { Write-Host "## clang-cl"; clang-cl --version; Write-Host "" } else { Write-Host "## clang-cl`nnot found in PATH`n" }
+        if (Get-Command nuget -ErrorAction SilentlyContinue) { Write-Host "## nuget"; nuget help | Select-Object -First 2; Write-Host "" } else { Write-Host "## nuget`nnot found in PATH`n" }
+        if (Get-Command cppcheck -ErrorAction SilentlyContinue) { Write-Host "## cppcheck"; cppcheck --version; Write-Host "" } else { Write-Host "## cppcheck`nnot found in PATH`n" }
 
     - name: configure
       run: |
@@ -125,5 +174,5 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
          name: clang_binary
-         path: ${{ github.workspace }}/build/${{ env.PRESET_NAME }}/app/Release/ctBrowse_app.exe
+         path: ${{ github.workspace }}/build/${{ env.PRESET_NAME }}/ctBrowse_app/Release/ctBrowse_app.exe
          retention-days: 30
