@@ -36,7 +36,7 @@ namespace ctb::detail
       /// @return true if the filter was successfully added; false if a filter with the same filter_name already exists.
       auto addFilter(const Key& key, Filter filter) -> bool
       {
-         if (m_filters.try_emplace(std::move(key), std::move(filter)).second)
+         if (m_filters.try_emplace(key, std::move(filter)).second)
          {
             notifyChange();
             return true;

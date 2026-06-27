@@ -83,7 +83,7 @@ namespace ctb
       std::string m_cred_name{};
       std::string m_username{};
       std::string m_password{};
-      bool        m_cleared{ true };
+      bool        m_cleared{ false };
       bool        m_save_requested{ false };
    };
 

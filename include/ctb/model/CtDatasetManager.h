@@ -16,7 +16,7 @@ namespace ctb::app
    {
    public:
       /// @brief callback type used  for table download requests. Needs to be copyable because downloadTablesAsync
-      ///        needs to copy the callable for each downloadTableAsync() call. The expeced return value is the
+      ///        needs to copy the callable for each downloadTableAsync() call. The expected return value is the
       ///        FQ path of the file that was downloaded.
       using TableDownloadResultCallback = copyable_function<void(std::expected<std::string, ctb::Error>)>;
 
@@ -65,6 +65,8 @@ namespace ctb::app
             downloadTableAsync(tbl_id, cred, notify_callback);
          }
       }
+
+
 
 
       CtDatasetManager(CtDatasetManager&&)                 = default;

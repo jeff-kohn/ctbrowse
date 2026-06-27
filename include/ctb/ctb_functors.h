@@ -1,4 +1,4 @@
-
+#pragma once
 #include <external/copyable_function.hpp>
 #include <external/function_ref.hpp>
 
