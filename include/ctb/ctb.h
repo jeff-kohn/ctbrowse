@@ -7,6 +7,7 @@
  * @copyright  Copyright © 2025 Jeff Kohn. All rights reserved.
  *********************************************************************/
 #pragma once
+
 #include "ctb/Error.h"
 #include "ctb/common_types.h"
 #include "ctb/concepts.h"

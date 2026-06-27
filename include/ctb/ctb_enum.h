@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ctb/ctb.h"
+#include <ctb/concepts.h>
 #include <enchantum/enchantum.hpp>
 #include <utility>
 
