@@ -18,7 +18,7 @@ namespace ctb
    /// @brief Scoped RAII wrapper for subscribing/unsubscribing event handlers for a data source
    ///
    /// DatasetEventHandler is meant to be used as a member in another class that wants to handle DatasetEvents.
-   /// 
+   ///
    /// This class is pretty basic and is meant to be used by a single class, since it only supports
    /// one handler per event-type plus an optional default handler that will be called for events with
    /// no event-specific handler. This means if you can't have a base class and derived class(es) handling

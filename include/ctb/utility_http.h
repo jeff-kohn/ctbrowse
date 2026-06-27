@@ -10,8 +10,9 @@
 #include "ctb/ctb.h"
 #include "ctb/utility.h"
 
-#include <cpr/response.h>
 #include <cpr/cprtypes.h>
+#include <cpr/response.h>
+#include <external/HttpStatusCodes.h>
 #include <fmt/chrono.h>
 
 #include <expected>
@@ -20,13 +21,14 @@
 
 namespace ctb
 {
+   // clang-format off
    namespace headers
    {
       inline constexpr const char* USERAGENT_KEY          = "user-agent";
       inline constexpr const char* USERAGENT_VAL          = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36";
-      inline constexpr const char* CONTENT_TYPE_KEY       = "Content-Type";
+      inline constexpr const char* CONTENT_TYPE_KEY       = "content-type";
       inline constexpr const char* CONTENT_TYPE_JPEG      = "image/jpeg";
-      inline constexpr const char* CONTENT_TYPE_UTF8      = "text/plain;Charset=UTF-8";
+      inline constexpr const char* CONTENT_TYPE_UTF8      = "text/plain;charset=utf-8";
 
 
       inline constexpr const char* ACCEPT_KEY             = "accept";
@@ -78,18 +80,19 @@ namespace ctb
       inline constexpr const char* ELEM_LABEL_PHOTO       = "label_photo";
       inline constexpr const char* ATTR_SRC               = "src";
 
-
    } // namespace headers
+   // clang-format on
+
 
    /// @brief  percent-encode a string to make it compatible with HTTP requests
    /// @return the encoded string, or a copy of the original text if the encoding failed
-   /// 
+   ///
    auto percentEncode(std::string_view text) noexcept -> std::string;
 
 
    /// @brief decode a percent-encoded string
    /// @return the decoded string, or a copy of the original text if the decoding failed
-   /// 
+   ///
    auto percentDecode(std::string_view text) noexcept -> std::string;
 
 
@@ -98,100 +101,99 @@ namespace ctb
    /// the bool will always be true, ctb::Error will be returned otherwise. So you can use
    /// operator bool() in a conditional to evaluate to success/failure if you don't
    /// care about retrieving the exact exception details.
-   /// 
+   ///
    auto validateResponse(const cpr::Response& response) noexcept -> std::expected<bool, ctb::Error>;
 
 
    /// @brief Validates the supplied task result, and throws if validation fails
-   /// 
+   ///
    /// You can pass this function an l-value or r-value and it will do the right
    /// thing to "pass through" the response to the return value without modifying
    /// or copying it.
-   /// 
-   /// @return either a reference to or moved-to copy of response, depending 
+   ///
+   /// @return either a reference to or moved-to copy of response, depending
    ///         on whether response is an l-value or r-value.
    /// @throws ctb::Error if validation fails
-   /// 
-   template<typename Resp> requires std::same_as<std::decay_t<Resp>, cpr::Response> 
+   ///
+   template<typename Resp> requires std::same_as<std::decay_t<Resp>, cpr::Response>
    auto validateOrThrow(Resp&& response) noexcept(false) -> Resp
    {
       auto result = validateResponse(response);
-      if (!result)
-         throw Error{ result.error() };
+      if (!result) throw Error{ result.error() };
 
       return std::forward<Resp>(response);
    }
 
 
-   /// @brief Retrieves view of HTTP response's content as a byte span 
-   /// 
+   /// @brief Retrieves view of HTTP response's content as a byte span
+   ///
    /// Note that returned value is a view into the supplied Response.
-   /// This function only accepts l-value reference to avoid returning 
+   /// This function only accepts l-value reference to avoid returning
    /// dangling views to temporaries
-   /// 
-   /// @return a span<byte> over the response's test; empty if the response 
+   ///
+   /// @return a span<byte> over the response's test; empty if the response
    ///         doesn't contain any data
-   /// 
+   ///
    auto viewResponseBytes(cpr::Response& response) -> BufferSpan;
 
 
    /// @brief parses an HTML fragment looking for the element containing the label_photo URL
    ///
    /// @return the requested URL if found, empty string otherwise.
-   /// 
+   ///
    auto parseLabelUrlFromHtml(const std::string& html) -> std::string;
 
 
    /// @brief get default headers to use for HTTP requests to CellarTracker.com
-   /// 
+   ///
    inline auto getPageRequestHeaders(const std::string& referer = constants::URL_CT_DOT_COM) noexcept -> cpr::Header
    {
       using namespace headers;
 
-      return cpr::Header{ 
-         { ACCEPT_KEY,          ACCEPT_HTML            },
-         { ACCEPT_LANG_KEY,     ACCEPT_LANG_VAL        },
-         { CACHE_CONTROL_KEY,   VALUE_NONE             },
-         { PRAGMA_KEY,          VALUE_NONE             },
-         { PRIORITY_KEY,        PRIORITY_VAL           },
-         { REFERRER,            referer                },
-         { SEC_UA_KEY,          SEC_UA_VAL             },
-         { SEC_UA_PLATFORM_KEY, SEC_UA_PLATFORM_VAL    },
-         { SEC_UA_MOBILE_KEY,   SEC_UA_MOBILE_VAL      },
-         { SEC_FETCH_DEST_KEY,  FETCH_DEST_DOC         },
-         { SEC_FETCH_MODE_KEY,  FETCH_MODE_NAV         },
-         { SEC_FETCH_SITE_KEY,  SAME_ORIGIN            },
-         { SEC_FETCH_USER_KEY,  SEC_FETCH_USER_VAL     },
-         { USERAGENT_KEY,       USERAGENT_VAL          }
+      return cpr::Header{
+         { ACCEPT_KEY,          ACCEPT_HTML         },
+         { ACCEPT_LANG_KEY,     ACCEPT_LANG_VAL     },
+         { CACHE_CONTROL_KEY,   VALUE_NONE          },
+         { PRAGMA_KEY,          VALUE_NONE          },
+         { PRIORITY_KEY,        PRIORITY_VAL        },
+         { REFERRER,            referer             },
+         { SEC_UA_KEY,          SEC_UA_VAL          },
+         { SEC_UA_PLATFORM_KEY, SEC_UA_PLATFORM_VAL },
+         { SEC_UA_MOBILE_KEY,   SEC_UA_MOBILE_VAL   },
+         { SEC_FETCH_DEST_KEY,  FETCH_DEST_DOC      },
+         { SEC_FETCH_MODE_KEY,  FETCH_MODE_NAV      },
+         { SEC_FETCH_SITE_KEY,  SAME_ORIGIN         },
+         { SEC_FETCH_USER_KEY,  SEC_FETCH_USER_VAL  },
+         { USERAGENT_KEY,       USERAGENT_VAL       }
       };
    }
 
    /// @brief get default headers to use for HTTP requests to CellarTracker.com
-   /// 
+   ///
    inline auto getImageRequestHeaders(const std::string& referer = constants::URL_CT_DOT_COM) noexcept -> cpr::Header
    {
       using namespace headers;
 
-      return cpr::Header{ 
-         { ACCEPT_KEY,          ACCEPT_IMG             },
-         { ACCEPT_LANG_KEY,     ACCEPT_LANG_VAL        },
-         { CACHE_CONTROL_KEY,   VALUE_NONE             },
-         { PRAGMA_KEY,          VALUE_NONE             },
-         { PRIORITY_KEY,        PRIORITY_VAL           },
-         { REFERRER,            referer                },
-         { SEC_UA_KEY,          SEC_UA_VAL             },
-         { SEC_UA_PLATFORM_KEY, SEC_UA_PLATFORM_VAL    },
-         { SEC_UA_MOBILE_KEY,   SEC_UA_MOBILE_VAL      },
-         { SEC_FETCH_DEST_KEY,  FETCH_DEST_IMG         },
-         { SEC_FETCH_MODE_KEY,  FETCH_MODE_NOCORS      },
-         { SEC_FETCH_SITE_KEY,  CROSS_SITE             },
-         { SEC_FETCH_USER_KEY,  SEC_FETCH_USER_VAL     },
-         { USERAGENT_KEY,       USERAGENT_VAL          }
+      return cpr::Header{
+         { ACCEPT_KEY,          ACCEPT_IMG          },
+         { ACCEPT_LANG_KEY,     ACCEPT_LANG_VAL     },
+         { CACHE_CONTROL_KEY,   VALUE_NONE          },
+         { PRAGMA_KEY,          VALUE_NONE          },
+         { PRIORITY_KEY,        PRIORITY_VAL        },
+         { REFERRER,            referer             },
+         { SEC_UA_KEY,          SEC_UA_VAL          },
+         { SEC_UA_PLATFORM_KEY, SEC_UA_PLATFORM_VAL },
+         { SEC_UA_MOBILE_KEY,   SEC_UA_MOBILE_VAL   },
+         { SEC_FETCH_DEST_KEY,  FETCH_DEST_IMG      },
+         { SEC_FETCH_MODE_KEY,  FETCH_MODE_NOCORS   },
+         { SEC_FETCH_SITE_KEY,  CROSS_SITE          },
+         { SEC_FETCH_USER_KEY,  SEC_FETCH_USER_VAL  },
+         { USERAGENT_KEY,       USERAGENT_VAL       }
       };
    }
 
 
-   /// @brief get the CT URL for a Wine given it's iWineID 
+   /// @brief get the CT URL for a Wine given it's iWineID
    ///
    /// Works with both string and numeric form of wine ID
    inline auto getWineDetailsUrl(uint64_t wine_id) noexcept -> std::string
@@ -199,19 +201,22 @@ namespace ctb
       return ctb::format(constants::FMT_URL_CT_WINE_DETAILS, wine_id);
    }
 
+
    /// @brief get the CT URL for a Wine given it's iWineID
    inline auto getWineVintagesUrl(const std::string& wine) noexcept -> std::string
    {
-      // CT can't handle UTF-8 strings, but browser assumes query parameters in URL's are UTF-8, 
+      // CT can't handle UTF-8 strings, but browser assumes query parameters in URL's are UTF-8,
       // so convert to code page CT expects and then url-encode it so it doesn't get mangled
-      auto wine_param = fromUTF8(wine, CP_WINDOWS_1252).value_or(wine);
+      auto wine_param = fromUTF8(wine, TextEncoding::WINDOWS_1252).value_or(wine);
       return ctb::format(constants::FMT_URL_CT_VINTAGES, percentEncode(wine_param));
    }
+
 
    inline auto getDrinkWindowUrl(uint64_t wine_id) -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_DRINK_WINDOW, wine_id);
    }
+
 
    /// @brief get the CT URL for accepting a pending delivery
    inline auto getAcceptPendingUrl(uint64_t wine_id, uint64_t purch_id, const std::chrono::year_month_day& delivery_date) noexcept -> std::string
@@ -219,21 +224,25 @@ namespace ctb
       return ctb::format(constants::FMT_URL_CT_ACCEPT_PENDING, wine_id, purch_id, delivery_date);
    }
 
+
    /// @brief get the CT URL for editing a pending order
    inline auto getEditPendingUrl(uint64_t wine_id, uint64_t purchase_id) noexcept -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_EDIT_ORDER, wine_id, purchase_id);
    }
 
+
    inline auto getDrinkRemoveUrl(uint64_t wine_id) -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_DRINK_REMOVE, wine_id);
    }
 
+
    inline auto getAddToCellarUrl(uint64_t wine_id) -> std::string
    {
       return ctb::format(constants::FMT_URL_CT_ADD_TO_CELLAR, wine_id);
    }
+
 
    inline auto getAddTastingNoteUrl(uint64_t wine_id) -> std::string
    {
@@ -241,4 +250,8 @@ namespace ctb
    }
 
 
-} // namespace ctb
+
+   auto getTextEncodingFromHeader(std::string content_type_header) -> std::optional<TextEncoding>;
+
+
+}   // namespace ctb

@@ -9,8 +9,8 @@
 #pragma once
 
 #include "ctb/ctb.h"
-#include "ctb/utility_http.h"
 #include "ctb/tasks/PollingTask.h"
+#include "ctb/utility_http.h"
 
 #include <cpr/api.h>
 #include <cpr/cprtypes.h>
@@ -25,16 +25,15 @@ namespace ctb::tasks
 
 
    /// @brief helper function, throws exception if stop_token.stop_requested() == true
-   /// 
+   ///
    /// @throws ctb::Error if stop_token if stop has been request
-   /// 
+   ///
    inline void checkStopToken(const std::stop_token& token) noexcept(false)
    {
-      if (token.stop_requested())
-         throw Error{ constants::ERROR_STR_OPERATION_CANCELED, Error::Category::OperationCanceled };
+      if (token.stop_requested()) throw Error{ constants::ERROR_STR_OPERATION_CANCELED, Error::Category::OperationCanceled };
    }
 
-   
+
    /// @brief Task type use for LoadFile, SaveFile, LabelDownload tasks which all return file bytes.
    ///
    using FetchFileTask = PollingTask<Buffer>;
@@ -44,10 +43,10 @@ namespace ctb::tasks
    /// @param token - cancellation support
    /// @return  the requested file bytes
    /// @throws ctb::Error if the operation fails
-   /// 
+   ///
    auto runLoadFileTask(fs::path file, std::stop_token token = {}) noexcept(false) -> FetchFileTask::ReturnType;
-   
-   
+
+
    /// @brief  result type and task type for HTTP Request task
    ///
    using HttpRequestResult = cpr::Response;
@@ -60,9 +59,9 @@ namespace ctb::tasks
    /// @param args - variadic args to pass to the cpr request
    /// @return the HTTP response returned by the request
    /// @throws ctb::Error if the operation fails
-   /// 
+   ///
    template<typename... CprArgs>
-   auto runHttpGetTask(std::string url, std::stop_token token, CprArgs...args) noexcept(false) -> HttpRequestTask::ReturnType
+   auto runHttpGetTask(std::string url, std::stop_token token, CprArgs... args) noexcept(false) -> HttpRequestTask::ReturnType
    {
       checkStopToken(token);
       return validateOrThrow(cpr::Get(cpr::Url{ url }, args...));
@@ -70,15 +69,15 @@ namespace ctb::tasks
 
 
    /// @brief Runs a task to download a label image from CT website.
-   /// 
-   /// This task downloads the wine details page, parses it to find the img url, and 
+   ///
+   /// This task downloads the wine details page, parses it to find the img url, and
    /// then downloads the image and loads the image bytes into a buffer.
-   /// 
+   ///
    /// @param wine_id - id of the wine to download image for
    /// @param token - cancellation support
    /// @return a buffer containing the requested image's bytes
    /// @throws ctb::Error if file couldn't be downloaded.
-   /// 
+   ///
    auto runLabelDownloadTask(uint64_t wine_id, std::stop_token token = {}) noexcept(false) -> FetchFileTask::ReturnType;
 
-} // namespace ctb::tasks
+}   // namespace ctb::tasks

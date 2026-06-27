@@ -1,3 +1,4 @@
+// IWYU pragma: always_keep
 /*********************************************************************
  * @file       ctb.h
  *
@@ -7,12 +8,14 @@
  *********************************************************************/
 #pragma once
 
-#include "ctb/constants.h"
-#include "ctb/concepts.h"
-#include "ctb/common_types.h"
-#include "ctb/ctb_format.h"
-#include "ctb/ctb_enum.h"
 #include "ctb/Error.h"
+#include "ctb/common_types.h"
+#include "ctb/concepts.h"
+#include "ctb/constants.h"
+#include "ctb/ctb_enum.h"
+#include "ctb/ctb_format.h"
+#include "ctb/ctb_functors.h"
+#include "ctb/ctb_indirect.h"
 #include "ctb/log.h"
 
 namespace ctb

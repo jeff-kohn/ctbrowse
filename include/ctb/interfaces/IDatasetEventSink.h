@@ -15,13 +15,13 @@ namespace ctb
 {
    /// @brief listener interface for classes that want to receive notification events about a dataset.
    ///
-   struct IDatasetEventSink               // NOLINT [cppcoreguidelines-special-member-functions]
+   struct IDatasetEventSink   // NOLINT [cppcoreguidelines-special-member-functions]
    {
       /// @brief called to notify the sink that a dataset event has occurred.
       ///
       /// The supplied pointer will remain valid until a subsequent event
       /// notification of type DatasetInitialize is received.
-      /// 
+      ///
       /// Event is passed by value because it can't be const-ref and we want to be able to pass
       /// temporaries. Also makes clear that changes to the event itself don't
       /// propagate back to caller.
@@ -32,4 +32,4 @@ namespace ctb
       virtual ~IDatasetEventSink() noexcept = default;
    };
 
-} // namespace ctb
+}   // namespace ctb

@@ -23,9 +23,9 @@ namespace ctb::detail
       using PropertyMap = PropMapT;
       using Prop        = PropT;
 
-      std::vector<Prop>   sort_props{};      // properties to use for sorting, in order they will be checked.
-      std::string         sort_name{};       // for display purposes in selection lists etc
-      bool                reverse{ false };  // set to true to sort in reverse order
+      std::vector<Prop> sort_props{};       // properties to use for sorting, in order they will be checked.
+      std::string       sort_name{};        // for display purposes in selection lists etc
+      bool              reverse{ false };   // set to true to sort in reverse order
 
       /// @brief function operator that does the comparison.
       auto operator()(const PropertyMap& r1, const PropertyMap& r2) const -> bool
@@ -34,11 +34,11 @@ namespace ctb::detail
 
          for (auto prop : sort_props)
          {
-            auto it1 = r1.find(prop);
-            const auto& p1 = (it1 == r1.end()) ? null_prop : it1->second;
+            auto        it1 = r1.find(prop);
+            const auto& p1  = (it1 == r1.end()) ? null_prop : it1->second;
 
-            auto it2 = r2.find(prop);
-            const auto& p2 = (it2 == r2.end()) ? null_prop : it2->second;
+            auto        it2 = r2.find(prop);
+            const auto& p2  = (it2 == r2.end()) ? null_prop : it2->second;
 
             auto cmp = p1 <=> p2;
             if (cmp < 0)
@@ -50,7 +50,7 @@ namespace ctb::detail
                return reverse ? true : false;
             }
          }
-         return false; // all props equal
+         return false;   // all props equal
       }
 
       auto operator==(const TableSorter& other) const -> bool
@@ -60,4 +60,4 @@ namespace ctb::detail
    };
 
 
-}  // namespace ctb::detail
+}   // namespace ctb::detail

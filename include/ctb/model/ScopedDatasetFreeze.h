@@ -17,11 +17,12 @@ namespace ctb
 
       ~ScopedDatasetFreeze() noexcept
       {
-         try 
+         try
          {
             unfreeze();
          }
-         catch (...) {
+         catch (...)
+         {
             SPDLOG_DEBUG("ScopedDatasetFreeze destructor caught unexpected exception. {}", packageError().formattedMessage());
          }
       }
@@ -45,13 +46,13 @@ namespace ctb
       }
 
       // there's really no good reason to copy or move these objects
-      ScopedDatasetFreeze() = delete;
-      ScopedDatasetFreeze(const ScopedDatasetFreeze&) = delete;
-      ScopedDatasetFreeze(ScopedDatasetFreeze&&) = delete;
+      ScopedDatasetFreeze()                                      = delete;
+      ScopedDatasetFreeze(const ScopedDatasetFreeze&)            = delete;
+      ScopedDatasetFreeze(ScopedDatasetFreeze&&)                 = delete;
       ScopedDatasetFreeze& operator=(const ScopedDatasetFreeze&) = delete;
-      ScopedDatasetFreeze& operator=(ScopedDatasetFreeze&&) = delete;
+      ScopedDatasetFreeze& operator=(ScopedDatasetFreeze&&)      = delete;
 
    private:
       DatasetPtr m_dataset{};
    };
-} // namespace ctb
+}   // namespace ctb

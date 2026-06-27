@@ -21,7 +21,7 @@ namespace ctb::detail
       Greater,
       GreaterEqual,
       Less,
-      LessEqual
+      LessEqual,
    };
 
    /// @brief wraps a binary predicate so that it can be serialized, since std::function<> can't be directly serialized
@@ -48,27 +48,16 @@ namespace ctb::detail
       /// @brief Sets the comparison type for this filter predicate
       void setPredicateType(const PredicateType& predicate_type)
       {
-         m_predicate_type = predicate_type;  // Store the new predicate type
+         m_predicate_type = predicate_type;   // Store the new predicate type
 
-         switch (predicate_type)  // Use the input parameter
+         switch (predicate_type)              // Use the input parameter
          {
-            case PredicateType::Equal:
-               m_compare_func = std::equal_to<PropertyVal>{};
-               break;
-            case PredicateType::Greater:
-               m_compare_func = std::greater<PropertyVal>{};
-               break;
-            case PredicateType::GreaterEqual:
-               m_compare_func = std::greater_equal<PropertyVal>{};
-               break;
-            case PredicateType::Less:
-               m_compare_func = std::less<PropertyVal>{};
-               break;
-            case PredicateType::LessEqual:
-               m_compare_func = std::less_equal<PropertyVal>{};
-               break;
-            default:
-               assert(false);
+            case PredicateType::Equal       : m_compare_func = std::equal_to<PropertyVal>{}; break;
+            case PredicateType::Greater     : m_compare_func = std::greater<PropertyVal>{}; break;
+            case PredicateType::GreaterEqual: m_compare_func = std::greater_equal<PropertyVal>{}; break;
+            case PredicateType::Less        : m_compare_func = std::less<PropertyVal>{}; break;
+            case PredicateType::LessEqual   : m_compare_func = std::less_equal<PropertyVal>{}; break;
+            default                         : assert(false);
          }
       }
 
@@ -77,18 +66,18 @@ namespace ctb::detail
          return m_compare_func(p1, p2);
       }
 
-      PropertyFilterPredicate() = default;
-      ~PropertyFilterPredicate() noexcept = default;
-      PropertyFilterPredicate(const PropertyFilterPredicate&) = default;
-      PropertyFilterPredicate(PropertyFilterPredicate&&) = default;
+      PropertyFilterPredicate()                                          = default;
+      ~PropertyFilterPredicate() noexcept                                = default;
+      PropertyFilterPredicate(const PropertyFilterPredicate&)            = default;
+      PropertyFilterPredicate(PropertyFilterPredicate&&)                 = default;
       PropertyFilterPredicate& operator=(const PropertyFilterPredicate&) = default;
-      PropertyFilterPredicate& operator=(PropertyFilterPredicate&&) = default;
+      PropertyFilterPredicate& operator=(PropertyFilterPredicate&&)      = default;
 
    private:
       PredicateType   m_predicate_type{ PredicateType::Equal };
       CompareFunction m_compare_func{};
    };
 
-} // namespace ctb::detail
+}   // namespace ctb::detail
 
 

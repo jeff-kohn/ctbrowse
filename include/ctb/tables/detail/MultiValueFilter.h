@@ -15,17 +15,17 @@ namespace ctb::detail
 
    /// @brief template class that implements filter logic that selects records if a property matches
    /// any one of a set of match values.
-   /// 
-   /// Note that no type-coercion is used when comparing variants. The match_values should have the 
+   ///
+   /// Note that no type-coercion is used when comparing variants. The match_values should have the
    /// same variant type as the table property that is being filtered.
-   /// 
+   ///
    template<EnumType PropT, PropertyMapType PropMapT>
    struct MultiValueFilter
    {
-      using Prop         = PropT;
-      using PropertyMap  = PropMapT;
-      using PropertyVal  = PropertyMap::mapped_type;
-      using MatchValues  = std::set<PropertyVal>;
+      using Prop        = PropT;
+      using PropertyMap = PropMapT;
+      using PropertyVal = PropertyMap::mapped_type;
+      using MatchValues = std::set<PropertyVal>;
 
       /// @brief Property that we're filtering against
       Prop prop_id{};
@@ -46,16 +46,14 @@ namespace ctb::detail
       /// @brief returns true if the specified record is a match or we have no match values to check.
       auto operator()(const PropertyMap& rec) const noexcept -> bool
       {
-         if (match_values.empty() or !enabled)
-            return true;
+         if (match_values.empty() or !enabled) return true;
 
          auto it = rec.find(prop_id);
-         if (it == rec.end())
-            return false;
+         if (it == rec.end()) return false;
 
-        return match_values.find(it->second) != match_values.end();
+         return match_values.find(it->second) != match_values.end();
       }
    };
 
 
-} // namespace ctb::detail
+}   // namespace ctb::detail

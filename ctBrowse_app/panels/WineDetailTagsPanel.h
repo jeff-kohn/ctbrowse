@@ -1,0 +1,43 @@
+#pragma once
+
+#include "App.h"
+#include "panels/WineDetailBasePanel.h"
+
+#include <wx/stattext.h>
+
+
+namespace ctb::app
+{
+   /// @brief A wxPanel-derived class that displays details about a wine, handling dataset events and rendering relevant fields.
+   ///
+   class WineDetailTagsPanel final : public WineDetailBasePanel
+   {
+   public:
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source) -> WineDetailTagsPanel*
+      {
+         return detail::createDatasetWindow<WineDetailTagsPanel>(parent, source);
+      }
+
+   private:
+      wxString      m_tag_note{};
+      wxStaticText* m_tag_note_ctrl{};
+
+      DECLARE_DATASET_WINDOW_FACTORY;
+
+      WineDetailTagsPanel(const DatasetEventSourcePtr& event_source) : WineDetailBasePanel{ event_source }
+      {}
+
+      void addDetails(DetailRows& rows, const DatasetEventSourcePtr& source) override
+      {
+         auto* top_sizer = GetSizer(); assert(top_sizer);
+
+         rows.emplace_back(top_sizer, PropertyValueCtrl::create(this, source, CtProp::TagName), constants::LBL_TAG_NAME);
+         rows.emplace_back(
+            top_sizer,
+            PropertyValueCtrl::create(this, source, CtProp::TagMaxPrice, constants::FMT_NUMBER_CURRENCY, {}),
+            constants::LBL_MAX_PRICE
+         );
+         top_sizer->Add(ElasticMultiLineTextCtrl::create(this, source, CtProp::TagWineNote), wxSizerFlags{ 1 }.Border().Expand());
+      }
+   };
+}

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <fmt/format.h>
 #include <enchantum/fmt_format.hpp>
+#include <fmt/format.h>
 
 
 namespace ctb
@@ -14,4 +14,4 @@ namespace ctb
    using fmt::make_format_args;
    using fmt::vformat;
 
-} // namespace ctb
+}   // namespace ctb
