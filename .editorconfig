@@ -1,15 +1,80 @@
 # top-most EditorConfig file
 root = true
 
-# Settings for every file
-[**/*.txt]
-insert_final_newline = true
+# Default settings for all files
+[*]
 charset = utf-8
-indent_style = space
-indent_size = 3
+end_of_line = lf
+insert_final_newline = true
 trim_trailing_whitespace = true
 
-[**/*.{yaml,yml,json}]
+# C++ source files
+[*.{c,cc,cpp,cxx,h,hh,hpp,hxx,ixx,cppm}]
 charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 3
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+# CMake files
+[{CMakeLists.txt,*.cmake}]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 3
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+# Configuration files (JSON, YAML)
+[*.{json,yaml,yml}]
+charset = utf-8
+end_of_line = lf
+indent_style = space
 indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+# Markdown and documentation
+[*.{md,txt}]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 3
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# XML files (including wxWidgets .wxui)
+[*.{xml,wxui}]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+# Shell scripts (PowerShell and Bash)
+[*.{ps1,sh}]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+# Patch files
+[*.{patch,diff}]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = false
+
+# Windows batch files (CRLF only)
+[*.{bat,cmd}]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
 trim_trailing_whitespace = true

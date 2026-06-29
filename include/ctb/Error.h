@@ -33,7 +33,7 @@ namespace ctb
       static constexpr int64_t ERROR_CODE_GENERAL_FAILURE = -1;
 
       /// @brief enum for categorizing errors. may be useful for determining context for error_code value.
-      enum class Category
+      enum class Category : uint8_t
       {
          ArgumentError,
          CurlError,

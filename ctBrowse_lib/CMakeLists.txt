@@ -70,19 +70,21 @@ target_sources(${TARGET_NAME}
 
    PRIVATE
       "BackgroundThreadContext.h"
+      "CdpBrowserClient.cpp"
+      "CdpBrowserClient.h"
       "CredentialManager.cpp"
       "CredentialWrapper.cpp"
-      
+      "CtDatasetManager.cpp"
       "CtDatasetOptions.cpp"
       "DatasetEventSource.cpp"
-      
-      "CtDatasetManager.cpp"
       "HttpDownloader.cpp"
       "log.cpp"
       "ProReviewsCache.cpp"
       "tasks.cpp"
       "utility.cpp"
       "utility_http.cpp"
+      "utility_win32.cpp"
+      "utility_win32.h"
 )
 
 target_include_directories(${TARGET_NAME}
