@@ -58,7 +58,7 @@ namespace ctb
          {
             error.error_code    = static_cast<int64_t>(HttpStatus::Code::Unauthorized);
             error.error_message = constants::ERROR_STR_AUTHENTICATION_FAILED;
-            error.category      = Error::Category::HttpStatus;
+            error.category      = Error::Category::NetworkError;
          }
          else
          {
@@ -72,13 +72,13 @@ namespace ctb
 
          // use a separate category for cancellation, so the caller can distinguish and avoid showing unnecessary error messages
          error.category = error.error_code == enum_to_index(cpr::ErrorCode::ABORTED_BY_CALLBACK) ? Error::Category::OperationCanceled
-                                                                                                 : Error::Category::CurlError;
+                                                                                                 : Error::Category::NetworkError;
       }
       else
       {
          error.error_code    = static_cast<int64_t>(response.status_code);
          error.error_message = ctb::format(constants::FMT_ERROR_HTTP_STATUS_CODE, error.error_code);
-         error.category      = Error::Category::HttpStatus;
+         error.category      = Error::Category::NetworkError;
       }
 
       return std::unexpected{ error };

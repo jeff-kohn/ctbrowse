@@ -57,7 +57,7 @@ namespace ctb
       ///         if data is empty().
       static auto create(DataTable data) -> DatasetPtr
       {
-         if (data.empty()) throw Error{ Error::Category::DataError, constants::FMT_ERROR_EMPTY_DATASET, Traits::getTableName() };
+         if (data.empty()) throw Error{ Error::Category::DatasetError, constants::FMT_ERROR_EMPTY_DATASET, Traits::getTableName() };
 
          return DatasetPtr{ static_cast<IDataset*>(new CtDataset{ std::move(data) }) };
       }

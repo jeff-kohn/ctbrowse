@@ -35,7 +35,7 @@ namespace ctb::tasks
       if (!response)
       {
          auto&& error = response.error();
-         throw ctb::Error{ error.value(), error.message(), Error::Category::HttpStatus };
+         throw ctb::Error{ error.value(), error.message(), Error::Category::NetworkError };
       }
 
       if (HttpStatus::isSuccessful(response->status_code))
@@ -47,7 +47,7 @@ namespace ctb::tasks
             throw ctb::Error{
                HttpStatus::toInt(HttpStatus::Code::Unauthorized),
                constants::ERROR_STR_AUTHENTICATION_FAILED,
-               Error::Category::HttpStatus,
+               Error::Category::NetworkError,
             };
          }
       }
@@ -61,7 +61,7 @@ namespace ctb::tasks
                       status_msg,
                       response->response_body.substr(0, 128));   // NOLINT
 
-         throw ctb::Error{ response->status_code, status_msg, Error::Category::HttpStatus };
+         throw ctb::Error{ response->status_code, status_msg, Error::Category::NetworkError };
       }
       return *response;
    }

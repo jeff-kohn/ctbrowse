@@ -1,39 +1,53 @@
 #pragma once
 #include "ctb/ctb.h"
+#include "ctb/utility.h"
 
 #include <expected>
 #include <memory>
+#include <string_view>
 
 #include <windows.h>
 
-namespace ctb
+namespace ctb::win32
 {
-   namespace detail
+   /// @brief RAII type for HANDLE's that should be freed by calling ::CloseHandle
+   struct CloseHandleFunc
    {
-      struct CloseHandleFunc
+      void operator()(HANDLE handle) const noexcept
       {
-         void operator()(HANDLE handle) const noexcept
+         if (handle && handle != INVALID_HANDLE_VALUE)
          {
-            if (handle && handle != INVALID_HANDLE_VALUE)
-            {
-               CloseHandle(handle);
-            }
+            CloseHandle(handle);
          }
-      };
-
-      using UniqueHandlePtr = std::unique_ptr<void, CloseHandleFunc>;
-
-   }   // namespace detail
-
-
-   struct ProcJobInfo
-   {
-      using HandlePtr = detail::UniqueHandlePtr;
-
-      HandlePtr process_handle{ INVALID_HANDLE_VALUE };
-      DWORD     process_id{ 0 };
+      }
    };
 
-   [[nodiscard]] auto createProcessJob(std::string command_line) -> std::expected<ProcJobInfo, ctb::Error>;
+   using UniqueHandlePtr = std::unique_ptr<void, CloseHandleFunc>;
 
-}   // namespace ctb
+
+   /// @brief struct containing handles to a process and its owning job object.
+   struct ProcessJobHandles
+   {
+      using HandlePtr = UniqueHandlePtr;
+
+      HandlePtr process_handle{ INVALID_HANDLE_VALUE };
+      HandlePtr job_handle{ INVALID_HANDLE_VALUE };
+      HandlePtr thread_handle{ INVALID_HANDLE_VALUE };
+
+      auto is_valid() const -> bool
+      {
+         return process_handle
+            and process_handle.get() != INVALID_HANDLE_VALUE
+            and job_handle
+            and job_handle.get() != INVALID_HANDLE_VALUE
+            and thread_handle
+            and thread_handle.get() != INVALID_HANDLE_VALUE;
+      }
+   };
+
+   /// @brief Create a suspended process within a
+   /// @param command_line
+   /// @return
+   [[nodiscard]] auto createProcessJob(const fs::path& exe_path, std::string_view args) -> std::expected<ProcessJobHandles, ctb::Error>;
+
+}   // namespace ctb::win32

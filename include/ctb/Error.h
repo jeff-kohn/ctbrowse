@@ -36,14 +36,13 @@ namespace ctb
       enum class Category : uint8_t
       {
          ArgumentError,
-         CurlError,
-         DataError,
+         DatasetError,
          FileError,
-         GenericError,
-         HttpStatus,
+         GeneralError,
+         NetworkError,
+         NotSupported,
          OperationCanceled,
          ParseError,
-         NotSupported,
          UiError,
       };
 
@@ -55,7 +54,7 @@ namespace ctb
       std::string error_message{};
 
       /// @brief the category of error this object represents
-      Category category{ Category::GenericError };
+      Category category{ Category::GeneralError };
 
       /// @brief  the textual name of the Error::Category
       std::string_view categoryName() const
@@ -80,14 +79,14 @@ namespace ctb
       }
 
       /// @brief construct an Error with numeric error code, textual error message, and category
-      Error(int64_t code, std::string error_message, Category category = Category::GenericError) noexcept
+      Error(int64_t code, std::string error_message, Category category = Category::GeneralError) noexcept
          : error_code{ code },
            error_message{ std::move(error_message) },
            category{ category }
       {}
 
       /// @brief construct an Error with message and optional category
-      explicit Error(std::string error_message, Category category = Category::GenericError) noexcept
+      explicit Error(std::string error_message, Category category = Category::GeneralError) noexcept
          : error_code{ ERROR_CODE_GENERAL_FAILURE },
            error_message{ std::move(error_message) },
            category{ category }

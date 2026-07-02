@@ -4,10 +4,16 @@
 #include "utility_win32.h"
 
 #include <atomic>
-#include <glaze/net/websocket_client.hpp>
+
+namespace glz
+{
+   class websocket_client;
+}
 
 namespace ctb
 {
+   using BrowserClientPtr = std::shared_ptr<glz::websocket_client>;
+
    enum class CdpStatus
    {
       Stopped = 0,
@@ -16,16 +22,31 @@ namespace ctb
       Stopping,
    };
 
-   class CdpBrowserClient
+   class HeadlessBrowserSession
    {
    public:
-      // launches the headless browser, sets up initial sesssion
+
+      auto healthy() const -> bool;
+
+   private:
+      std::string m_session_id{};
+      BrowserClientPtr m_browser;
+   };
+
+
+
+
+   class HeadlessBrowserManager
+   {
+   public:
+      HeadlessBrowserManager();
+
+      // launches the headless browser, sets up initial session
       void start();
 
    private:
-      std::atomic<CdpStatus>         m_status{ CdpStatus::Stopped };
-      glz::websocket_client          m_browser;
-      CreateProcessResult::HandlePtr m_edge_handle{};
+      //std::atomic<CdpStatus> m_status{ CdpStatus::Stopped };
+      BrowserClientPtr m_browser;
    };
 
 

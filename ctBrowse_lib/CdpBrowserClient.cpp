@@ -1,20 +1,26 @@
 #include "CdpBrowserClient.h"
+#include "ctb/utility.h"
+#include "utility_win32.h"
+
+#include <glaze/net/websocket_client.hpp>
+
+#include <string_view>
 
 
 namespace ctb
 {
-   constexpr auto EDGE_PATH = R"(C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe)";
-   constexpr auto FMT_EDGE_ARGS = " --remote-debugging -port=9222 --disable-gpu --user-data-dir=\"{}\"";
+   constexpr auto EDGE_PATH = R"(C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe)"sv;
+   constexpr auto EDGE_ARGS = "--headless --no-first-run --no-default-browser-check --disable-sync "
+                              "--remote-debugging-port=9222 --disable-gpu "
+                              "--user-data-dir=\"%LOCALAPPDATA%\\ctBrowse for Windows\\EBWebView\""sv;
 
+   HeadlessBrowserManager::HeadlessBrowserManager() : m_browser{ std::make_shared<glz::websocket_client>() }
+   {}
 
-   void CdpBrowserClient::start()
+   void HeadlessBrowserManager::start()
    {
-      m_status.store(CdpStatus::Starting);
+      //m_status.store(CdpStatus::Starting);
 
-      // launch the browser process.
-      auto proc_result = createProcess(format("{} {}", EDGE_PATH, EDGE_ARGS));
-      if (!proc_result) throw proc_result.error();
-
-      m_edge_handle.swap(proc_result->process_handle);
+      auto proc_handles = win32::createProcessJob(EDGE_PATH, expandEnvironmentVars(EDGE_ARGS));
    }
-}
+}   // namespace ctb

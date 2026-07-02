@@ -1,4 +1,4 @@
-﻿/*********************************************************************
+/*********************************************************************
  * @file       LabelImageCache.cpp
  *
  * @brief      implementation for the LabelImageCache class
@@ -205,7 +205,7 @@ namespace ctb::app
          // couldn't submit the request, so remove it from the map and return an error.
          m_requests.erase(request_iter);
          return unexpected{
-            Error{ Error::Category::GenericError, constants::FMT_ERROR_STR_WEB_CLIENT_REQUEST_REJECTED, url }
+            Error{ Error::Category::GeneralError, constants::FMT_ERROR_STR_WEB_CLIENT_REQUEST_REJECTED, url }
          };
       }
    }

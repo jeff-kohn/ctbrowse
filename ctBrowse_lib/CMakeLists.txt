@@ -69,14 +69,14 @@ target_sources(${TARGET_NAME}
       "../include/ctb/tasks/async_tasks.h"
 
    PRIVATE
+      "auto_handle.h"
       "BackgroundThreadContext.h"
-      "CdpBrowserClient.cpp"
-      "CdpBrowserClient.h"
       "CredentialManager.cpp"
       "CredentialWrapper.cpp"
       "CtDatasetManager.cpp"
       "CtDatasetOptions.cpp"
       "DatasetEventSource.cpp"
+      "HeadlessWebClient.h"
       "HttpDownloader.cpp"
       "log.cpp"
       "ProReviewsCache.cpp"

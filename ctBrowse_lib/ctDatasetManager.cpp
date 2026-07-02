@@ -164,7 +164,7 @@ namespace ctb::app
    {
       if (!fs::exists(folder) and !createFolderPath(folder))
       {
-         throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DataError, constants::FMT_ERROR_PATH_NOT_FOUND, folder.generic_string() };
+         throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_PATH_NOT_FOUND, folder.generic_string() };
       }
       m_data_folder = folder;
       return *this;

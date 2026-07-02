@@ -11,7 +11,7 @@ namespace ctb::app
    {
       if (!wxWebView::IsBackendAvailable(wxWebViewBackendEdge)) // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
       {
-         return std::unexpected{ ctb::Error{ Error::Category::GenericError, constants::ERROR_STR_NO_WEBVIEW } };
+         return std::unexpected{ ctb::Error{ Error::Category::GeneralError, constants::ERROR_STR_NO_WEBVIEW } };
       }
 
       WebClientPtr wnd{ new HiddenWebClient{} };
@@ -100,7 +100,7 @@ namespace ctb::app
       if (auto it = m_requests.find(event.GetURL().utf8_string()); it != m_requests.end())
       {
          it->second(std::unexpected{
-            ctb::Error{ Error::Category::GenericError, "WebClient backend encoutered error attempting to load page {}. {}", it->first,
+            ctb::Error{ Error::Category::GeneralError, "WebClient backend encoutered error attempting to load page {}. {}", it->first,
                        wxViewString(event.GetString()) }
          });
       }
