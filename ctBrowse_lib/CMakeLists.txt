@@ -69,23 +69,24 @@ target_sources(${TARGET_NAME}
       "../include/ctb/tasks/async_tasks.h"
 
    PRIVATE
-      "auto_handle.h"
       "BackgroundThreadContext.h"
       "CredentialManager.cpp"
       "CredentialWrapper.cpp"
       "CtDatasetManager.cpp"
       "CtDatasetOptions.cpp"
       "DatasetEventSource.cpp"
+      "HeadlessWebClient.cpp"
       "HeadlessWebClient.h"
       "HttpDownloader.cpp"
       "log.cpp"
       "ProReviewsCache.cpp"
+      "ScopedHandle.h"
       "tasks.cpp"
       "utility.cpp"
       "utility_http.cpp"
       "utility_win32.cpp"
       "utility_win32.h"
-)
+ )
 
 target_include_directories(${TARGET_NAME}
    ${warning_guard}

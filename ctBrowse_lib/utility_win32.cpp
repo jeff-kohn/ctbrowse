@@ -1,5 +1,4 @@
 #include "utility_win32.h"
-#include "auto_handle.h"
 #include "ctb/utility.h"
 
 #include <fmt/std.h>
@@ -22,7 +21,7 @@ namespace ctb::win32
       }
    };
 
-   using LocalFreeStr = detail::auto_handle<LPSTR, LocalFreeStrFunc>;
+   using LocalFreeStr = detail::ScopedHandle<LPSTR, LocalFreeStrFunc>;
 
 
    ctb::Error getLastError()
@@ -56,7 +55,7 @@ namespace ctb::win32
    {
       using HandlePtr = ProcessJobHandles::HandlePtr;
 
-      // first create a job object and configure it to terminate its processes when the handle is close
+      // first create a job object and configure it to terminate its processes when the handle is closed
       HandlePtr job_handle{ ::CreateJobObject(nullptr, nullptr) };
       if (!job_handle)
       {
@@ -90,7 +89,7 @@ namespace ctb::win32
          return std::unexpected{ getLastError() };
       }
 
-      // Create the return value, then add the process to the job and resume its thread before returning.
+      // add the handles to the return value, then add the process to the job and resume its thread before returning.
       ProcessJobHandles proc_info{ .process_handle = HandlePtr{ pi.hProcess },
                                    .job_handle     = std::move(job_handle),
                                    .thread_handle  = HandlePtr{ pi.hThread } };

@@ -30,7 +30,7 @@ namespace ctb::tasks
    /// @brief checks an CellarTracker HTTP response for errors and throws them as Error exceptions
    /// @return the response object from the HttpResult if validation passed
    /// @throw ctb::Error if validation fails
-   auto validateHttpResponse(const HttpDownloader::HttpResult response) noexcept(false) -> HttpDownloader::HttpResult::value_type
+   inline auto validateHttpResponse(const HttpDownloader::HttpResult response) noexcept(false) -> HttpDownloader::HttpResult::value_type
    {
       if (!response)
       {
@@ -68,7 +68,7 @@ namespace ctb::tasks
 
 
    /// @brief  Converts a glz::response into a RawTableData object
-   auto createRawTableFromResponse(HttpDownloader::HttpResult::value_type response, TableId table_id) -> RawTableData
+   inline auto createRawTableFromResponse(HttpDownloader::HttpResult::value_type response, TableId table_id) -> RawTableData
    {
       std::string content_type_header{};
       if (auto it = response.response_headers.find(ctb::headers::CONTENT_TYPE_KEY); it != response.response_headers.end())
@@ -84,7 +84,7 @@ namespace ctb::tasks
 
 
    /// @brief convert the RawTableData to UTF8 text (if it isn't already)
-   auto convertTableToUtf8(RawTableData table_data) -> RawTableData
+   inline auto convertTableToUtf8(RawTableData table_data) -> RawTableData
    {
       // short-circuit check
       if (table_data.encoding == TextEncoding::UTF8) return table_data;
@@ -101,7 +101,7 @@ namespace ctb::tasks
    /// @brief Sender that runs on the the specified scheduler and calls the error callback without allowing exceptions to escape.
    /// @return the sender that can be assigned to a receiver for async execution.
    template<typename SchedulerT, typename CallbackT>
-   auto safeErrorCallback(SchedulerT scheduler, CallbackT&& callback, std::exception_ptr ep) noexcept
+   inline auto safeErrorCallback(SchedulerT scheduler, CallbackT&& callback, std::exception_ptr ep) noexcept
    {
       return just(std::move(ep))
            | continues_on(scheduler)

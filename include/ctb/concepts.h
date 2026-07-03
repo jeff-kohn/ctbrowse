@@ -22,60 +22,54 @@ namespace ctb
    /// This is of limited use, but it can eliminate an overload if you need
    /// to create a std::string from either a std::string&& or a std::string_view
    /// using forwarding references
-   template <typename T>
-   concept StringOrStringViewType = std::same_as<std::remove_cvref_t<T>, std::string> 
-                                 or std::same_as<std::remove_cvref_t<T>, std::string_view>;
+   template<typename T>
+   concept StringOrStringViewType =
+      std::same_as<std::remove_cvref_t<T>, std::string> or std::same_as<std::remove_cvref_t<T>, std::string_view>;
 
 
    /// @brief Concept for a type that can be used as a table property in a table record.
    ///
-   /// concept is modeled after interface of ctb::PropertyValue template, but any type 
+   /// concept is modeled after interface of ctb::PropertyValue template, but any type
    /// with compatible interface could be used.
-   /// 
-   template <typename T>
-   concept PropertyValueType = std::is_default_constructible_v<T> 
-                               and std::is_move_constructible_v<T>
-                               and requires (T t, T::ValueType v)
-   {
+   ///
+   template<typename T>
+   concept PropertyValueType = std::is_default_constructible_v<T> and std::is_move_constructible_v<T> and requires(T t, T::ValueType v) {
       t = T{ v };
       t.setNull();
 
-      { t.isNull()         } -> std::same_as<bool>;
-      { t.hasString()      } -> std::same_as<bool>;
-      { t.asString()       } -> std::same_as<std::string>;
-      { t.asStringView()   } -> std::same_as<std::string_view>;
+      { t.isNull() } -> std::same_as<bool>;
+      { t.hasString() } -> std::same_as<bool>;
+      { t.asString() } -> std::same_as<std::string>;
+      { t.asStringView() } -> std::same_as<std::string_view>;
 
-      { t.asInt32().value_or(0)    } -> std::same_as<int32_t>;
-      { t.asUInt16().value_or(0)   } -> std::same_as<uint16_t>;
-      { t.asUInt64().value_or(0)   } -> std::same_as<uint64_t>;
+      { t.asInt32().value_or(0) } -> std::same_as<int32_t>;
+      { t.asUInt16().value_or(0) } -> std::same_as<uint16_t>;
+      { t.asUInt64().value_or(0) } -> std::same_as<uint64_t>;
       { t.asDouble().value_or(0.0) } -> std::same_as<double>;
    };
 
 
-   template <typename T>
-   concept PropertyMapType = std::is_enum_v<typename T::key_type> 
-                             and PropertyValueType<typename T::mapped_type>
-                             and requires (T t, T::key_type key)
-   {
-      { t.begin()       } -> std::same_as<typename T::iterator>;
-      { t.end()         } -> std::same_as<typename T::iterator>;
-      { t.find(key)     } -> std::same_as<typename T::iterator>;
-      { t.contains(key) } -> std::same_as<bool>;
-      { t[key]          } -> std::assignable_from<typename T::mapped_type>;
-   };
+   template<typename T>
+   concept PropertyMapType =
+      std::is_enum_v<typename T::key_type> and PropertyValueType<typename T::mapped_type> and requires(T t, T::key_type key) {
+         { t.begin() } -> std::same_as<typename T::iterator>;
+         { t.end() } -> std::same_as<typename T::iterator>;
+         { t.find(key) } -> std::same_as<typename T::iterator>;
+         { t.contains(key) } -> std::same_as<bool>;
+         { t[key] } -> std::assignable_from<typename T::mapped_type>;
+      };
 
 
    /// @brief Concept for a traits type defining the schema for a TableRecordType instantiation
    ///
-   template <typename T> 
-   concept RecordTraitsType = requires (T::Prop pid, T::PropertyMap props)
-   {
+   template<typename T>
+   concept RecordTraitsType = requires(T::Prop pid, T::PropertyMap props) {
       { T::Schema.find(pid)->second } -> std::same_as<const typename T::FieldSchema&>;
-      { T::DefaultListColumns[0]    } -> std::same_as<const typename T::ListColumn&>;
-      { T::AvailableSorts[0]        } -> std::same_as<const typename T::TableSort&>;
-      { T::MultiValueFilters[0]     } -> std::same_as<const typename T::MultiValueFilter&>;
-      { T::getTableName()           } -> std::same_as<std::string_view>;
-      { T::hasProperty(pid)         } -> std::same_as<bool>;
+      { T::DefaultListColumns[0] } -> std::same_as<const typename T::ListColumn&>;
+      { T::AvailableSorts[0] } -> std::same_as<const typename T::TableSort&>;
+      { T::MultiValueFilters[0] } -> std::same_as<const typename T::MultiValueFilter&>;
+      { T::getTableName() } -> std::same_as<std::string_view>;
+      { T::hasProperty(pid) } -> std::same_as<bool>;
 
       T::getTableId();
       T::onRecordParse(props);
@@ -84,60 +78,66 @@ namespace ctb
 
    /// @brief Concept for a record object representing a row in a CT table (CSV file)
    ///
-   template <typename T> 
-   concept TableRecordType = requires (T t, 
-      T::Prop pid, 
-      T::PropertyVal prop, 
-      T::RowType row, 
-      std::string_view sv)
-   {
-     t.parseRow(row);
-     t.hasProperty(pid);
-     t.getProperty(T::Prop::iWineId);
-     prop = t[pid];
-     t.getProperties();
+   template<typename T>
+   concept TableRecordType = requires(T t, T::Prop pid, T::PropertyVal prop, T::RowType row, std::string_view sv) {
+      t.parseRow(row);
+      t.hasProperty(pid);
+      t.getProperty(T::Prop::iWineId);
+      prop = t[pid];
+      t.getProperties();
    };
 
 
-   template <typename T>
-   concept DataTableType = rng::random_access_range<T> and requires (T t, T::value_type::Prop pid)
-   {
-      { t.size()   } -> std::same_as<size_t>;
-      { t[0]       } -> std::same_as<typename T::value_type&>;
-      { t[0][pid]  } -> std::same_as<const typename T::value_type::PropertyVal&>; 
+   template<typename T>
+   concept DataTableType = rng::random_access_range<T> and requires(T t, T::value_type::Prop pid) {
+      { t.size() } -> std::same_as<size_t>;
+      { t[0] } -> std::same_as<typename T::value_type&>;
+      { t[0][pid] } -> std::same_as<const typename T::value_type::PropertyVal&>;
    };
 
 
    /// @brief Concept for a type that implements the interface of std::optional
    ///
-   template<typename T> 
-   concept NullableType = requires (T t, T::value_type v1, T::value_type v2)
-   {
+   template<typename T>
+   concept NullableType = requires(T t, typename std::remove_cvref_t<T>::value_type v1, typename std::remove_cvref_t<T>::value_type v2) {
+      { t.has_value() } -> std::same_as<bool>;
+      { t.value() } -> std::same_as<typename std::remove_cvref_t<T>::value_type&>;
+
       v1 = t ? *t : v2;
       v1 = t.has_value() ? t.value() : v2;
       v1 = t.value_or(v2);
    };
 
-  
-   /// @brief Concept for a type that is either a boolean. As dumb as that sounds, it's needed if you 
-	///  want to overload on bool vs other integral types, since bool is considered an integral type
+
+   /// @brief Concept for a type that is either a boolean. As dumb as that sounds, it's needed if you
+   ///  want to overload on bool vs other integral types, since bool is considered an integral type
    ///
-   template <typename T>
+   template<typename T>
    concept BooleanType = std::same_as<bool, std::decay_t<T>>;
 
-   template <typename T>
-	concept IntegralType = std::integral<T> and !BooleanType<T>;
+   template<typename T>
+   concept IntegralType = std::integral<T> and !BooleanType<T>;
 
    /// @brief Concept for a type that is either integral (but not bool) or floating point.
    ///
-   template <typename T>
-	concept ArithmeticType = IntegralType<T> or std::floating_point<T>;
+   template<typename T>
+   concept ArithmeticType = IntegralType<T> or std::floating_point<T>;
 
 
-   /// @brief Concept for an enum type. 
+   /// @brief Concept for an enum type.
    ///
-   template <typename T>
+   template<typename T>
    concept EnumType = std::is_scoped_enum_v<T>;
 
 
-} // namespace ctb
+   /// @brief Concept for an expected type
+   //
+   template<typename T>
+   concept ExpectedType = requires(T t) {
+      { t.has_value() } -> std::same_as<bool>;
+      { t.value() } -> std::same_as<typename std::remove_cvref_t<T>::value_type&>;
+      { t.error() } -> std::same_as<typename std::remove_cvref_t<T>::error_type&>;
+   };
+
+
+}   // namespace ctb

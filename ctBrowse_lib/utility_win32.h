@@ -1,6 +1,7 @@
 #pragma once
 #include "ctb/ctb.h"
 #include "ctb/utility.h"
+#include "ScopedHandle.h"
 
 #include <expected>
 #include <memory>
@@ -22,7 +23,7 @@ namespace ctb::win32
       }
    };
 
-   using UniqueHandlePtr = std::unique_ptr<void, CloseHandleFunc>;
+   using UniqueHandlePtr = detail::ScopedHandle<HANDLE, CloseHandleFunc>;
 
 
    /// @brief struct containing handles to a process and its owning job object.
@@ -36,7 +37,7 @@ namespace ctb::win32
 
       auto is_valid() const -> bool
       {
-         return process_handle
+         return process_handle.get()
             and process_handle.get() != INVALID_HANDLE_VALUE
             and job_handle
             and job_handle.get() != INVALID_HANDLE_VALUE
@@ -45,7 +46,7 @@ namespace ctb::win32
       }
    };
 
-   /// @brief Create a suspended process within a
+   /// @brief Create a suspended process within a system job
    /// @param command_line
    /// @return
    [[nodiscard]] auto createProcessJob(const fs::path& exe_path, std::string_view args) -> std::expected<ProcessJobHandles, ctb::Error>;
