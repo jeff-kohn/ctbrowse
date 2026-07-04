@@ -1,6 +1,9 @@
 #include "../ctBrowse_lib/HeadlessWebClient.h"
-#include <catch2/catch_test_macros.hpp>
+
+#include <asio/executor_work_guard.hpp>
 #include <asio/io_context.hpp>
+#include <catch2/catch_test_macros.hpp>
+
 
 namespace ctb::tests
 {
@@ -8,10 +11,22 @@ namespace ctb::tests
 
    TEST_CASE("Launch Headless Browser", "[CdpBrowser]")
    {
-      web::HeadlessWebClient browser{std::make_shared<asio::io_context>(1)};
-      //HeadlessBrowserManager browser{};
-      // 
+      using std::jthread;
+      using namespace asio;
+      using namespace web;
+      using WorkGuard = asio::executor_work_guard<asio::io_context::executor_type>;
+
+      auto      ctx = std::make_shared<asio::io_context>(1);
+      WorkGuard m_work_guard{ make_work_guard(*ctx) };
+      jthread   thread{ [&ctx] { ctx->run(); } };
+
+      HeadlessWebClient browser{ctx};
       browser.start();
+
+      while (browser.status() != HeadlessWebClient::Status::Ready)
+      {
+         std::this_thread::sleep_for(100ms);
+      }
    }
 
 }   // namespace ctb::tests

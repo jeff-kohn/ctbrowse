@@ -1,6 +1,6 @@
 #pragma once
-#include "ctb/HttpDownloader.h"
 #include "ctb/ctb.h"
+#include "ctb/HttpDownloader.h"
 #include "utility_win32.h"
 
 #include <asio/any_completion_handler.hpp>
@@ -8,16 +8,17 @@
 #include <glaze/net/websocket_client.hpp>
 
 #include <atomic>
+#include <chrono>
 #include <expected>
+#include <functional>
 #include <string>
 #include <string_view>
 #include <thread>
 #include <unordered_map>
 
+
 namespace ctb::web
 {
-
-
    using NullableString    = std::optional<std::string>;
    using StringMap         = std::map<std::string, std::string>;
    using NullableStringMap = std::optional<StringMap>;
@@ -31,20 +32,11 @@ namespace ctb::web
       NullableStringMap params;
    };
 
-   struct PageLoadedEvent
+   struct BrowserEvent
    {
       std::string       method;
       NullableString    sessionId;
       NullableStringMap params;
-   };
-
-   enum class ClientStatus : uint8_t
-   {
-      Unknown,
-      Starting,
-      Ready,
-      ShuttingDown,
-      Stopped,
    };
 
 
@@ -55,27 +47,43 @@ namespace ctb::web
    class HeadlessWebClient
    {
    public:
-      static constexpr int32_t          DEFAULT_WS_PORT   = 9222;
-      static constexpr std::string_view DEFAULT_DATA_DIR  = R"(%LOCALAPPDATA%\ctBrowse for Windows\WebView)"sv;
-      static constexpr std::string_view DEFAULT_EDGE_PATH = R"(C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe)"sv;
+      static constexpr int32_t            DEFAULT_WS_PORT   = 9222;
+      static constexpr const char* const  DEFAULT_DATA_DIR  = R"(%LOCALAPPDATA%\ctBrowse for Windows\WebView)";
+      static constexpr const char* const  DEFAULT_EDGE_PATH = R"(C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe)";
+
+      enum class Status : uint8_t
+      {
+         Unknown,
+         Starting,
+         Ready,
+         ShuttingDown,
+         Stopped,
+      };
 
       using ContextPtr = std::shared_ptr<asio::io_context>;
       using TextResult = std::expected<std::string, ctb::Error>;
       using WsClient   = glz::websocket_client;
 
+
+      /// @brief Initialize a HeadlessWebClient to run on the specified io_context
+      /// @param io_ctx - thread-locked io_context
+      ///
+      /// This class does not protect its internal implementation from concurrent access since
+      /// it is meant to run on a single-threaded context.
       HeadlessWebClient(ContextPtr io_ctx);
+
 
       /// @brief start the browser process.
       ///
       /// Launches the headless browser, retrieves the WS endpoint via HTTP get and establishes initial WS connection.
       /// This method is safe to call from any thread, but should only be called once. Calling it again will throw an exception
-      void start(std::string_view browser_path = DEFAULT_EDGE_PATH,
-                 std::string_view data_dir     = DEFAULT_DATA_DIR,
+      void start(std::string browser_path = DEFAULT_EDGE_PATH,
+                 std::string data_dir     = DEFAULT_DATA_DIR,
                  int32_t          port         = DEFAULT_WS_PORT) noexcept(false);
 
 
       /// @brief Returns the current status of the web client.
-      auto clientStatus() const -> ClientStatus
+      auto status() const -> Status
       {
          return m_client_status.load();
       }
@@ -121,17 +129,20 @@ namespace ctb::web
    private:
       using RequestMap = std::unordered_map<int, asio::any_completion_handler<void(std::string)>>;
 
-      alignas(std::hardware_destructive_interference_size)
-         std::atomic<ClientStatus> m_client_status{ ClientStatus::Stopped };
+      alignas(std::hardware_destructive_interference_size) std::atomic<Status> m_client_status{ Status::Stopped };
 
       ContextPtr               m_ctx;
       win32::ProcessJobHandles m_browser_handles{};
       HttpDownloader           m_http_client;
-      int                      m_next_id{};
+      int                      m_next_id{ 1 };
       RequestMap               m_pending_requests{};
       WsClient                 m_ws_client;
 
       void setupHandlers();
+
+      void attemptWebsocketConnect(std::string url, uint8_t retries, std::chrono::milliseconds retry_delay = 10ms);
+
+      void runWithDelay(std::chrono::milliseconds delay, std::move_only_function<void()> func);
 
       void setup_websocket_handlers()
       {
@@ -178,7 +189,7 @@ namespace ctb::web
          //      }
          //   });
       }
-      void getUrl();
+
       void handleConnectionClosed();
 
       int extract_id_from_json(std::string_view msg)

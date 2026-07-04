@@ -63,7 +63,7 @@ namespace ctb::win32
       }
 
       JOBOBJECT_EXTENDED_LIMIT_INFORMATION jobLimits{};
-      jobLimits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+      jobLimits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE | JOB_OBJECT_LIMIT_BREAKAWAY_OK;
       if (!::SetInformationJobObject(job_handle.get(), JobObjectExtendedLimitInformation, &jobLimits, sizeof(jobLimits)))
       {
          return std::unexpected{ getLastError() };
