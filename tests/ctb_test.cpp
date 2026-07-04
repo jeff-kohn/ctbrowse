@@ -18,15 +18,25 @@ namespace ctb::tests
 
       auto      ctx = std::make_shared<asio::io_context>(1);
       WorkGuard m_work_guard{ make_work_guard(*ctx) };
-      jthread   thread{ [&ctx] { ctx->run(); } };
+      jthread   thread{ [&ctx]
+                        {
+                         ctx->run();
+                      } };
 
-      HeadlessWebClient browser{ctx};
+      HeadlessWebClient browser{ ctx };
       browser.start();
-
       while (browser.status() != HeadlessWebClient::Status::Ready)
       {
          std::this_thread::sleep_for(100ms);
       }
+
+      browser.stop();
+      while (browser.status() != HeadlessWebClient::Status::Stopped)
+      {
+         std::this_thread::sleep_for(100ms);
+      }
+
+      m_work_guard.reset();
    }
 
 }   // namespace ctb::tests

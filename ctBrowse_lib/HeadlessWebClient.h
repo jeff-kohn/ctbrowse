@@ -23,7 +23,7 @@ namespace ctb::web
    using StringMap         = std::map<std::string, std::string>;
    using NullableStringMap = std::optional<StringMap>;
 
-
+   // Message that browser will send for command replies and other events.
    struct BrowserMessage
    {
       std::string       method;
@@ -31,13 +31,6 @@ namespace ctb::web
       NullableString    sessionId;
       NullableStringMap params;
    };
-
-   //struct BrowserEvent
-   //{
-   //   std::string       method;
-   //   NullableString    sessionId;
-   //   NullableStringMap params;
-   //};
 
 
    /// @brief Provides an async websocket interface for orchestrating a headless browser instance via Chrome Devtools Protocol.
@@ -65,6 +58,23 @@ namespace ctb::web
       using WsClient   = glz::websocket_client;
 
 
+      // RAII object that will tear down a browser tab/session on destruction.
+      class TargetSession
+      {
+      public:
+         auto sessionId() const -> const std::string& { return m_session_id; }
+
+
+         ~TargetSession() noexcept;
+
+      private:
+         std::string        m_session_id;
+         HeadlessWebClient& m_web_client;
+
+         TargetSession(HeadlessWebClient& client, std::string_view session_id);
+      };
+
+
       /// @brief Initialize a HeadlessWebClient to run on the specified io_context
       /// @param io_ctx - thread-locked io_context
       ///
@@ -81,6 +91,7 @@ namespace ctb::web
                  std::string data_dir     = DEFAULT_DATA_DIR,
                  int32_t     port         = DEFAULT_WS_PORT) noexcept(false);
 
+      void stop();
 
       /// @brief Returns the current status of the web client.
       auto status() const -> Status
@@ -88,26 +99,21 @@ namespace ctb::web
          return m_client_status.load();
       }
 
-      // ------------------------------------------------------------------------
-      // THE BRIDGE: This function turns a WebSocket request into a stdexec Sender
-      // ------------------------------------------------------------------------
-      //template<typename CompletionToken>
-      //auto async_send_command(const std::string& method, const std::string& params_json, CompletionToken&& token)
-      //{
-      //   // 1. Generate a unique ID for this specific request
-      //   int request_id = next_id_.fetch_add(1, std::memory_order_relaxed);
+      auto createSessionAsync() -> asio::awaitable<TargetSession>;
 
-      //   // 2. Use Asio's async_initiate to bridge custom logic into a CompletionToken (like use_sender)
-      //   // The signature void(std::string) defines what the resulting Sender will emit (the JSON string)
-      //   return asio::async_initiate<CompletionToken, void(std::string)>(
-      //      [this](auto handler, int id, std::string method, std::string params)
+
+      auto sendCommandAsync(std::string session_id, std::string command, StringMap parameters) -> asio::awaitable<BrowserMessage>;
+
+
+      //template<typename CompletionToken>
+      //auto sendCommand()
+      //{
+      //   int request_id = m_next_id.fetch_add(1, std::memory_order_relaxed);
+
+      //   return asio::async_initiate<CompletionToken, void(BrowserMessage)>(
+      //      [this](auto handler, BrowserMessage msg)
       //      {
-      //         // A. Store the handler in our correlator map
-      //         {
-      //            std::lock_guard<std::mutex> lock(map_mutex_);
-      //            // asio::any_completion_handler type-erases the complex stdexec receiver state
-      //            pending_requests_[id] = std::move(handler);
-      //         }
+      //         m_pending_requests[id] = std::move(handler);
 
       //         // B. Format the JSON request (Using glaze)
       //         // Note: In production, you'd serialize the CdpCommand struct properly.
@@ -129,15 +135,17 @@ namespace ctb::web
    private:
       using RequestMap = std::unordered_map<int, asio::any_completion_handler<void(std::string)>>;
 
+      static inline constexpr glz::opts JSON_OPTS{ .skip_null_members = true };
+
       alignas(std::hardware_destructive_interference_size) std::atomic<Status> m_client_status{ Status::Stopped };
 
       ContextPtr               m_ctx;
       win32::ProcessJobHandles m_browser_handles{};
       HttpDownloader           m_http_client;
-      int                      m_next_id{ 1 };
       RequestMap               m_pending_requests{};
       WsClient                 m_ws_client;
 
+      alignas(std::hardware_destructive_interference_size) std::atomic_int m_next_id{ 1 };
 
       // Event handling setup
       void setupHandlers();
@@ -148,6 +156,8 @@ namespace ctb::web
 
       void attemptWebsocketConnect(std::string url, uint8_t retries, std::chrono::milliseconds retry_delay = 10ms);
       void runWithDelay(std::chrono::milliseconds delay, std::move_only_function<void()> func);
+      auto getNextId() -> int { return m_next_id.fetch_add(1, std::memory_order_relaxed);}
+      auto sendCommandAsync(std::string command, StringMap parameters) -> asio::awaitable<BrowserMessage>;
 
       //void setup_websocket_handlers()
       //{

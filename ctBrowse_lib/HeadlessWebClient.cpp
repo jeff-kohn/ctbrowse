@@ -13,14 +13,10 @@ namespace ctb::web
    constexpr auto MAX_CONNECT_RETRIES = 10;
    constexpr auto FMT_EDGE_HTTP_URL   = "http://127.0.0.1:{}/json/version";
    constexpr auto FMT_EDGE_ARGS       = "--headless=new --remote-debugging-address=127.0.0.1 "
-                                        "--no-first-run --no-default-browser-check --disable-sync "
                                         "--remote-debugging-port={} --disable-gpu "
+                                        "--no-first-run --no-default-browser-check --disable-sync "
                                         "--user-data-dir=\"{}\""sv;
 
-   struct BrowserInfoMsg
-   {
-      std::string Browser;
-   };
 
    HeadlessWebClient::HeadlessWebClient(ContextPtr io_ctx) : m_ctx{ io_ctx }, m_ws_client{ io_ctx }
    {
@@ -58,6 +54,19 @@ namespace ctb::web
       auto url = ctb::format(FMT_EDGE_HTTP_URL, port);
       attemptWebsocketConnect(url, MAX_CONNECT_RETRIES);
    }
+
+
+   void HeadlessWebClient::stop()
+   {
+      m_client_status.store(Status::ShuttingDown);
+      m_ws_client.close();
+   }
+
+   /*auto HeadlessWebClient::createSession() -> asio::awaitable<std::string>
+   {
+      
+   }*/
+
 
    void HeadlessWebClient::attemptWebsocketConnect(std::string url, uint8_t retries, std::chrono::milliseconds retry_delay)
    {
