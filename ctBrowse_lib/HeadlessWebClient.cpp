@@ -20,12 +20,11 @@ namespace ctb::web
    struct BrowserInfoMsg
    {
       std::string Browser;
-
    };
 
    HeadlessWebClient::HeadlessWebClient(ContextPtr io_ctx) : m_ctx{ io_ctx }, m_ws_client{ io_ctx }
    {
-      //setupHandlers();
+      setupHandlers();
    }
 
 
@@ -102,11 +101,57 @@ namespace ctb::web
       m_http_client.getAsync(url, {}, std::move(callback));
    }
 
+
+   void HeadlessWebClient::setupHandlers()
+   {
+      m_ws_client.on_open(std::bind_front(&HeadlessWebClient::onOpen, this));
+      m_ws_client.on_close(std::bind_front(&HeadlessWebClient::onClose, this));
+      m_ws_client.on_message(std::bind_front(&HeadlessWebClient::onMessage, this));
+      m_ws_client.on_error(std::bind_front(&HeadlessWebClient::onError, this));
+   }
+
+
+   void HeadlessWebClient::onOpen()
+   {
+      SPDLOG_DEBUG("HeadlessWebClient::onOpen - websocket connection established.");
+      m_client_status.store(Status::Ready);
+   }
+
+
+   void HeadlessWebClient::onClose(glz::ws_close_code code, std::string_view reason)
+   {
+      SPDLOG_DEBUG("HeadlessWebClient::onClose - code: {}, reason: '{}'", static_cast<uint16_t>(code), reason);
+      m_client_status.store(Status::Stopped);
+      m_browser_handles = {};   // will kill the process.
+   }
+
+
+   void HeadlessWebClient::onMessage(std::string_view message, glz::ws_opcode opcode)
+   {
+
+      if (opcode == glz::ws_opcode::text)
+      {
+         BrowserMessage msg{};
+         auto ec = glz::read_json(msg, message);
+      }
+      else
+      {
+         SPDLOG_DEBUG("Unexpected opcode received in HeadlessClient::onMessage. Opcode: {}. Message: {}", enum_to_string(opcode), message);
+      }
+   }
+
+
+   void HeadlessWebClient::onError(std::error_code ec)
+   {
+      SPDLOG_DEBUG("HeadlessWebClient::onError - {} ({})", ec.message(), ec.value());
+   }
+
+
    void HeadlessWebClient::runWithDelay(std::chrono::milliseconds delay, std::move_only_function<void()> func)
    {
       asio::co_spawn(
          *m_ctx,
-         [this, func = std::move(func), delay]() mutable -> asio::awaitable<void> 
+         [this, func = std::move(func), delay]() mutable -> asio::awaitable<void>
          {
             // The timer is a local variable inside the coroutine!
             asio::steady_timer timer(*m_ctx, delay);

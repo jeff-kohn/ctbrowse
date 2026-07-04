@@ -1,6 +1,6 @@
 #pragma once
-#include "ctb/ctb.h"
 #include "ctb/HttpDownloader.h"
+#include "ctb/ctb.h"
 #include "utility_win32.h"
 
 #include <asio/any_completion_handler.hpp>
@@ -24,7 +24,7 @@ namespace ctb::web
    using NullableStringMap = std::optional<StringMap>;
 
 
-   struct BrowserCommand
+   struct BrowserMessage
    {
       std::string       method;
       NullableInt       id;
@@ -32,12 +32,12 @@ namespace ctb::web
       NullableStringMap params;
    };
 
-   struct BrowserEvent
-   {
-      std::string       method;
-      NullableString    sessionId;
-      NullableStringMap params;
-   };
+   //struct BrowserEvent
+   //{
+   //   std::string       method;
+   //   NullableString    sessionId;
+   //   NullableStringMap params;
+   //};
 
 
    /// @brief Provides an async websocket interface for orchestrating a headless browser instance via Chrome Devtools Protocol.
@@ -47,9 +47,9 @@ namespace ctb::web
    class HeadlessWebClient
    {
    public:
-      static constexpr int32_t            DEFAULT_WS_PORT   = 9222;
-      static constexpr const char* const  DEFAULT_DATA_DIR  = R"(%LOCALAPPDATA%\ctBrowse for Windows\WebView)";
-      static constexpr const char* const  DEFAULT_EDGE_PATH = R"(C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe)";
+      static constexpr int32_t           DEFAULT_WS_PORT   = 9222;
+      static constexpr const char* const DEFAULT_DATA_DIR  = R"(%LOCALAPPDATA%\ctBrowse for Windows\WebView)";
+      static constexpr const char* const DEFAULT_EDGE_PATH = R"(C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe)";
 
       enum class Status : uint8_t
       {
@@ -79,7 +79,7 @@ namespace ctb::web
       /// This method is safe to call from any thread, but should only be called once. Calling it again will throw an exception
       void start(std::string browser_path = DEFAULT_EDGE_PATH,
                  std::string data_dir     = DEFAULT_DATA_DIR,
-                 int32_t          port         = DEFAULT_WS_PORT) noexcept(false);
+                 int32_t     port         = DEFAULT_WS_PORT) noexcept(false);
 
 
       /// @brief Returns the current status of the web client.
@@ -138,72 +138,61 @@ namespace ctb::web
       RequestMap               m_pending_requests{};
       WsClient                 m_ws_client;
 
+
+      // Event handling setup
       void setupHandlers();
+      void onOpen();
+      void onClose(glz::ws_close_code code, std::string_view reason);
+      void onMessage(std::string_view, glz::ws_opcode);
+      void onError(std::error_code);
 
       void attemptWebsocketConnect(std::string url, uint8_t retries, std::chrono::milliseconds retry_delay = 10ms);
-
       void runWithDelay(std::chrono::milliseconds delay, std::move_only_function<void()> func);
 
-      void setup_websocket_handlers()
-      {
-         //ws_client_.on_message(
-         //   [this](std::string_view message, glz::ws_opcode opcode)
-         //   {
-         //      if (opcode != glz::ws_opcode::text) return;
+      //void setup_websocket_handlers()
+      //{
+      //ws_client_.on_message(
+      //   [this](std::string_view message, glz::ws_opcode opcode)
+      //   {
+      //      if (opcode != glz::ws_opcode::text) return;
 
-         //      // 1. Quick and dirty parse to find the "id" (Use glz::read_json in production)
-         //      // Assuming we parsed the JSON and extracted the ID and Result/Error
-         //      int id = extract_id_from_json(message);
+      //      // 1. Quick and dirty parse to find the "id" (Use glz::read_json in production)
+      //      // Assuming we parsed the JSON and extracted the ID and Result/Error
+      //      int id = extract_id_from_json(message);
 
-         //      if (id > 0)
-         //      {
-         //         // 2. This is a RESPONSE to a command we sent.
-         //         asio::any_completion_handler<void(std::string)> handler;
-         //         {
-         //            std::lock_guard<std::mutex> lock(map_mutex_);
-         //            auto                        it = pending_requests_.find(id);
-         //            if (it != pending_requests_.end())
-         //            {
-         //               handler = std::move(it->second);
-         //               pending_requests_.erase(it);
-         //            }
-         //         }
+      //      if (id > 0)
+      //      {
+      //         // 2. This is a RESPONSE to a command we sent.
+      //         asio::any_completion_handler<void(std::string)> handler;
+      //         {
+      //            std::lock_guard<std::mutex> lock(map_mutex_);
+      //            auto                        it = pending_requests_.find(id);
+      //            if (it != pending_requests_.end())
+      //            {
+      //               handler = std::move(it->second);
+      //               pending_requests_.erase(it);
+      //            }
+      //         }
 
-         //         // 3. Fulfill the Sender!
-         //         if (handler)
-         //         {
-         //            // We post this back to the io_context to ensure the pipeline resumes
-         //            // cleanly without blocking the websocket's read loop.
-         //            asio::post(*io_ctx_,
-         //                       [h = std::move(handler), msg = std::string(message)]() mutable
-         //                       {
-         //                          h(std::move(msg));   // This triggers stdexec::set_value!
-         //                       });
-         //         }
-         //      }
-         //      else
-         //      {
-         //         // 3. This is an unprompted EVENT (e.g., Page.loadEventFired)
-         //         // Dispatch this to an Observer pattern / Event Bus
-         //         handle_unprompted_event(message);
-         //      }
-         //   });
-      }
-
-      void handleConnectionClosed();
-
-      int extract_id_from_json(std::string_view msg)
-      {
-         // Stub: Use Glaze to parse the JSON and return the "id" integer.
-         // Return 0 if "id" is missing (meaning it's an event).
-         return 0;
-      }
-
-      void handle_unprompted_event(std::string_view msg)
-      {
-         // Here you would check if msg contains "Page.loadEventFired"
-         // and notify whatever system is waiting for page loads.
-      }
+      //         // 3. Fulfill the Sender!
+      //         if (handler)
+      //         {
+      //            // We post this back to the io_context to ensure the pipeline resumes
+      //            // cleanly without blocking the websocket's read loop.
+      //            asio::post(*io_ctx_,
+      //                       [h = std::move(handler), msg = std::string(message)]() mutable
+      //                       {
+      //                          h(std::move(msg));   // This triggers stdexec::set_value!
+      //                       });
+      //         }
+      //      }
+      //      else
+      //      {
+      //         // 3. This is an unprompted EVENT (e.g., Page.loadEventFired)
+      //         // Dispatch this to an Observer pattern / Event Bus
+      //         handle_unprompted_event(message);
+      //      }
+      //   });
 
 
       //auto my_pipeline = ex::just()
