@@ -59,7 +59,7 @@ namespace ctb::webclient
 
       /// @brief start the browser process.
       ///
-      /// Launches the headless browser, retrieves the WS endpoint via HTTP get and establishes initial WS connection.
+      /// Launches the headless browser, retrieves the WS endpoint via HTTP GET, and establishes initial WS connection.
       /// This method is safe to call from any thread, but should only be called once. Calling it again will throw an exception
       void start(std::string browser_path = DEFAULT_EDGE_PATH,
                  std::string data_dir     = DEFAULT_DATA_DIR,
@@ -67,18 +67,20 @@ namespace ctb::webclient
 
 
       /// @brief stop accepting requests and attempt to shut down the websocket and browser connection cleanly.
+      ///
+      /// start() can safely be called once the stop operation is complete and status() returns Status::Stopped.
       void stop();
 
 
       /// @brief Returns the current status of the web client.
-      auto status() const -> Status;
+      Status status() const;
 
 
       /// @brief - RAII object that will tear down a browser tab/session on destruction.
       class TargetSession
       {
       public:
-         auto sessionId() const -> const std::string&
+         const std::string& sessionId() const
          {
             return m_session_id;
          }
@@ -102,7 +104,7 @@ namespace ctb::webclient
 
 
       /// @brief creates a new target and session in the browser and returns the session so it can be used for additional commands on that target.
-      [[nodiscard]] auto coroCreateSession() noexcept(false) -> asio::awaitable<TargetSession>;
+      [[nodiscard]] asio::awaitable<TargetSession> coroCreateSession() noexcept(false);
 
 
       /// @brief close/destroy the specified session as a fire-and-forget async call
@@ -114,12 +116,13 @@ namespace ctb::webclient
       /// @param command    - the command name
       /// @param parameters - any parameters the command requires
       /// @return - asio awaitable
-      /// @throw
-      [[nodiscard]] auto coroSendCommand(std::string command, StringMap parameters, MaybeString session_id) noexcept(false) -> asio::awaitable<BrowserMessage>;
+      [[nodiscard]] asio::awaitable<BrowserMessage> coroSendCommand(std::string command,
+                                                                    JsonPropMap parameters,
+                                                                    MaybeString session_id) noexcept(false);
 
 
       /// @brief Fire-and-forget alternative to coroSendCommand()
-      void postCommand(std::string command, StringMap parameters, MaybeString session_id) noexcept;
+      void postCommand(std::string command, JsonPropMap parameters, MaybeString session_id) noexcept;
 
 
    private:
@@ -147,6 +150,10 @@ namespace ctb::webclient
       // private implementation
       void attemptWebsocketConnect(std::string url, uint8_t retries, std::chrono::milliseconds retry_delay = 10ms);
 
+      [[nodiscard]] asio::awaitable<BrowserMessage> coroSendCommand(std::string command,
+                                                                    std::string param_json,
+                                                                    MaybeString session_id) noexcept(false);
+
       /// @brief runs a callable on the io_context as a fire-and-forget operation with a timed delay
       /// @param delay - timer value to use for delay before execution
       /// @param func  - the callable to execute
@@ -154,32 +161,30 @@ namespace ctb::webclient
 
       /// @brief handles messages sent from the browser in response to a command by routing them back to the appropriate completion handler
       void dispatchMessage(BrowserMessage response);
-
    };
 
 
+   //auto my_pipeline = ex::just()
+   //                 // 1. Hop to the IO thread
+   //                 | ex::transfer(io_pool.get_scheduler())
 
-      //auto my_pipeline = ex::just()
-      //                 // 1. Hop to the IO thread
-      //                 | ex::transfer(io_pool.get_scheduler())
+   //                 // 2. Send the CDP Command and suspend the pipeline until the websocket replies
+   //                 | ex::let_value(
+   //                      [&cdp]()
+   //                      {
+   //                         return cdp.async_send_command("Page.navigate", R"({"url":"https://example.com"})", asioexec::use_sender);
+   //                      })
 
-      //                 // 2. Send the CDP Command and suspend the pipeline until the websocket replies
-      //                 | ex::let_value(
-      //                      [&cdp]()
-      //                      {
-      //                         return cdp.async_send_command("Page.navigate", R"({"url":"https://example.com"})", asioexec::use_sender);
-      //                      })
+   //                 // 3. Hop to the CPU thread to parse the heavy JSON response
+   //                 | ex::transfer(cpu_pool.get_scheduler())
+   //                 | ex::then(
+   //                      [](std::string cdp_response)
+   //                      {
+   //                         // Parse the resulting frameId or error...
+   //                         return parse_navigation_result(cdp_response);
+   //                      });
 
-      //                 // 3. Hop to the CPU thread to parse the heavy JSON response
-      //                 | ex::transfer(cpu_pool.get_scheduler())
-      //                 | ex::then(
-      //                      [](std::string cdp_response)
-      //                      {
-      //                         // Parse the resulting frameId or error...
-      //                         return parse_navigation_result(cdp_response);
-      //                      });
-
-      //ex::start_detached(std::move(my_pipeline));
+   //ex::start_detached(std::move(my_pipeline));
 
 
 }   // namespace ctb::webclient

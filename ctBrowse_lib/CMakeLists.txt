@@ -75,6 +75,7 @@ target_sources(${TARGET_NAME}
       "CredentialWrapper.cpp"
       "CtDatasetManager.cpp"
       "CtDatasetOptions.cpp"
+      "DatasetEventSource.cpp"
       "HeadlessWebClient.cpp"
       "HeadlessWebClient.h"
       "HttpDownloader.cpp"

@@ -41,11 +41,16 @@ namespace ctb::tests
 
       // Blocks this (non-coroutine) thread until the coroutine completes;
       // rethrows any exception the coroutine threw.
+      try
       {
          auto maybe_session = fut.get();
          REQUIRE(maybe_session.get() != nullptr);
          auto session = std::move(*maybe_session);
          std::println("Created browser session with id {}", session.sessionId());
+      }
+      catch(...)
+      {
+         std::println("coroCreateSession() returned error: {}", packageError().formattedMessage());
       }
 
       browser.stop();

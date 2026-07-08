@@ -14,7 +14,6 @@
 #include "views/DatasetMultiView.h"
 
 #include <ctb/model/DatasetEventSource.h>
-#include <ctb/utility.h>
 #include <ctb/utility_chrono.h>
 #include <ctb/utility_http.h>
 
@@ -28,10 +27,8 @@
 #include <wx/icon.h>
 #include <wx/image.h>
 #include <wx/menu.h>
-#include <wx/msgdlg.h>
 #include <wx/notifmsg.h>
 #include <wx/persist/toplevel.h>
-#include <wx/progdlg.h>
 #include <wx/sizer.h>
 #include <wx/srchctrl.h>
 #include <wx/statusbr.h>
@@ -67,7 +64,6 @@ namespace ctb::app
 
       auto loadDataset(TableId table_id) -> DatasetPtr
       {
-         //CtDatasetLoader loader{ wxGetApp().getDataFolder(AppFolder::Tables) };
          auto dataset = wxGetApp().getDatasetManager().loadDataset(table_id);
          DatasetDefaultOptions::applyDefaultOptions(dataset);
          return dataset;

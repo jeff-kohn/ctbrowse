@@ -13,11 +13,13 @@ namespace ctb::webclient
       inline constexpr const char* CREATE_TARGET = "Target.createTarget";
       inline constexpr const char* CLOSE_TARGET  = "Target.closeTarget";
       inline constexpr const char* ATTACH_TARGET = "Target.attachToTarget";
+      inline constexpr const char* CLOSE_BROWSER = "Browser.close";
    }   // namespace commands
 
    namespace params
    {
       inline constexpr const char* ABOUT_BLANK  = "about:blank";
+      inline constexpr const char* FLATTEN      = "flatten";
       inline constexpr const char* SESSION_ID   = "sessionId";
       inline constexpr const char* TARGET_ID    = "targetId";
       inline constexpr const char* TARGET_URL   = "url";
@@ -26,18 +28,19 @@ namespace ctb::webclient
    }   // namespace params
 
 
-   using MaybeJson      = std::optional<glz::raw_json>;
-   using StringMap      = std::map<std::string, std::string>;
-   using MaybeStringMap = std::optional<StringMap>;
+   using MaybeJson = std::optional<glz::raw_json>;
+   //using StringMap      = std::map<std::string, std::string>;
+   using JsonProp    = std::variant<std::string, int, bool>;
+   using JsonPropMap = std::map<std::string, JsonProp>;
 
 
    /// @brief struct defining the message that is sent to the webclient for commands
    struct BrowserCommand
    {
-      std::string    method{};
-      NullableInt    id{};
-      MaybeString    sessionId{};
-      MaybeStringMap params{};
+      std::string method{};
+      NullableInt id{};
+      MaybeString sessionId{};
+      JsonPropMap params{};
    };
 
 

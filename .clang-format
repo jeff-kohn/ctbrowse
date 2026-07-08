@@ -112,7 +112,7 @@ BracedInitializerIndentWidth: -1
 BreakAdjacentStringLiterals: true
 BreakAfterAttributes: Leave
 BreakAfterJavaFieldAnnotations: false
-BreakAfterReturnType: None
+BreakAfterReturnType: Automatic
 BreakArrays: true
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Custom
