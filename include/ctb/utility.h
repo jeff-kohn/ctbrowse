@@ -18,6 +18,12 @@ namespace ctb
    namespace fs = std::filesystem;
 
 
+   // can be used with monadic fns
+   inline auto to_unsigned(int32_t val) -> uint32_t
+   {
+      return static_cast<uint32_t>(val);
+   }
+
    /// @brief read a binary file (up to max_size bytes in size) into a char buffer
    ///
    /// @throws ctb::Error, possibly other std::exception-derived if file can't be read or is larger than max_size

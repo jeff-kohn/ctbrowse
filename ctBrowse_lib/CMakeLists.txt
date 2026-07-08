@@ -68,13 +68,13 @@ target_sources(${TARGET_NAME}
       "../include/ctb/tasks/tasks.h"
       "../include/ctb/tasks/async_tasks.h"
 
+
    PRIVATE
       "BackgroundThreadContext.h"
       "CredentialManager.cpp"
       "CredentialWrapper.cpp"
       "CtDatasetManager.cpp"
       "CtDatasetOptions.cpp"
-      "DatasetEventSource.cpp"
       "HeadlessWebClient.cpp"
       "HeadlessWebClient.h"
       "HttpDownloader.cpp"
@@ -86,6 +86,7 @@ target_sources(${TARGET_NAME}
       "utility_http.cpp"
       "utility_win32.cpp"
       "utility_win32.h"
+      "webclient_schema.h"
  )
 
 target_include_directories(${TARGET_NAME}

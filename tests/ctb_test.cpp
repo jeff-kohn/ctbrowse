@@ -3,7 +3,7 @@
 #include <asio/executor_work_guard.hpp>
 #include <asio/io_context.hpp>
 #include <catch2/catch_test_macros.hpp>
-
+#include <print>
 
 namespace ctb::tests
 {
@@ -13,7 +13,7 @@ namespace ctb::tests
    {
       using std::jthread;
       using namespace asio;
-      using namespace web;
+      using namespace webclient;
       using WorkGuard = asio::executor_work_guard<asio::io_context::executor_type>;
 
       auto      ctx = std::make_shared<asio::io_context>(1);
@@ -30,6 +30,24 @@ namespace ctb::tests
          std::this_thread::sleep_for(100ms);
       }
 
+      auto fut = asio::co_spawn(
+         *ctx,
+         [&browser]() -> asio::awaitable<std::unique_ptr<HeadlessWebClient::TargetSession>>
+         {
+            auto val = co_await browser.coroCreateSession();
+            co_return std::make_unique<HeadlessWebClient::TargetSession>(std::move(val));
+         },
+         asio::use_future);
+
+      // Blocks this (non-coroutine) thread until the coroutine completes;
+      // rethrows any exception the coroutine threw.
+      {
+         auto maybe_session = fut.get();
+         REQUIRE(maybe_session.get() != nullptr);
+         auto session = std::move(*maybe_session);
+         std::println("Created browser session with id {}", session.sessionId());
+      }
+
       browser.stop();
       while (browser.status() != HeadlessWebClient::Status::Stopped)
       {
@@ -38,5 +56,6 @@ namespace ctb::tests
 
       m_work_guard.reset();
    }
+
 
 }   // namespace ctb::tests

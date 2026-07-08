@@ -1,7 +1,9 @@
 #pragma once
-#include "ctb/HttpDownloader.h"
 #include "ctb/ctb.h"
 #include "utility_win32.h"
+#include "webclient_schema.h"
+
+#include "ctb/HttpDownloader.h"
 
 #include <asio/any_completion_handler.hpp>
 #include <asio/io_context.hpp>
@@ -9,40 +11,33 @@
 
 #include <atomic>
 #include <chrono>
-#include <expected>
 #include <functional>
 #include <string>
 #include <string_view>
-#include <thread>
 #include <unordered_map>
+#include <utility>
 
 
-namespace ctb::web
+namespace ctb::webclient
 {
-   using NullableString    = std::optional<std::string>;
-   using StringMap         = std::map<std::string, std::string>;
-   using NullableStringMap = std::optional<StringMap>;
-
-   // Message that browser will send for command replies and other events.
-   struct BrowserMessage
-   {
-      std::string       method;
-      NullableInt       id;
-      NullableString    sessionId;
-      NullableStringMap params;
-   };
 
 
    /// @brief Provides an async websocket interface for orchestrating a headless browser instance via Chrome Devtools Protocol.
    ///
    /// This class is meant to be thread-locked to a single ASIO thread for asynchronous operation, and does not protect data members
    /// from concurrent access.
+   ///
+   /// This class uses and returns stdexec-compatible asio coroutines that can be used from other coroutines or stdexec pipelines.
+   /// The coroutine interface works better with the event-based websocket used for talking to the browser.
    class HeadlessWebClient
    {
    public:
       static constexpr int32_t           DEFAULT_WS_PORT   = 9222;
       static constexpr const char* const DEFAULT_DATA_DIR  = R"(%LOCALAPPDATA%\ctBrowse for Windows\WebView)";
       static constexpr const char* const DEFAULT_EDGE_PATH = R"(C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe)";
+
+      using ContextPtr = std::shared_ptr<asio::io_context>;
+      using WsClient   = glz::websocket_client;
 
       enum class Status : uint8_t
       {
@@ -51,27 +46,6 @@ namespace ctb::web
          Ready,
          ShuttingDown,
          Stopped,
-      };
-
-      using ContextPtr = std::shared_ptr<asio::io_context>;
-      using TextResult = std::expected<std::string, ctb::Error>;
-      using WsClient   = glz::websocket_client;
-
-
-      // RAII object that will tear down a browser tab/session on destruction.
-      class TargetSession
-      {
-      public:
-         auto sessionId() const -> const std::string& { return m_session_id; }
-
-
-         ~TargetSession() noexcept;
-
-      private:
-         std::string        m_session_id;
-         HeadlessWebClient& m_web_client;
-
-         TargetSession(HeadlessWebClient& client, std::string_view session_id);
       };
 
 
@@ -91,49 +65,66 @@ namespace ctb::web
                  std::string data_dir     = DEFAULT_DATA_DIR,
                  int32_t     port         = DEFAULT_WS_PORT) noexcept(false);
 
+
+      /// @brief stop accepting requests and attempt to shut down the websocket and browser connection cleanly.
       void stop();
 
+
       /// @brief Returns the current status of the web client.
-      auto status() const -> Status
+      auto status() const -> Status;
+
+
+      /// @brief - RAII object that will tear down a browser tab/session on destruction.
+      class TargetSession
       {
-         return m_client_status.load();
-      }
+      public:
+         auto sessionId() const -> const std::string&
+         {
+            return m_session_id;
+         }
 
-      auto createSessionAsync() -> asio::awaitable<TargetSession>;
+         ~TargetSession() noexcept;
+         TargetSession(TargetSession&&) noexcept;
+         TargetSession()                                = delete;
+         TargetSession& operator=(TargetSession&&)      = delete;
+         TargetSession& operator=(const TargetSession&) = delete;
+         TargetSession(const TargetSession&)            = delete;
+
+      private:
+         friend class HeadlessWebClient;
+
+         std::string        m_session_id;
+         HeadlessWebClient* m_web_client{};
+
+         TargetSession(HeadlessWebClient& client, std::string session_id) : m_session_id{ std::move(session_id) }, m_web_client{ &client }
+         {}
+      };
 
 
-      auto sendCommandAsync(std::string session_id, std::string command, StringMap parameters) -> asio::awaitable<BrowserMessage>;
+      /// @brief creates a new target and session in the browser and returns the session so it can be used for additional commands on that target.
+      [[nodiscard]] auto coroCreateSession() noexcept(false) -> asio::awaitable<TargetSession>;
 
 
-      //template<typename CompletionToken>
-      //auto sendCommand()
-      //{
-      //   int request_id = m_next_id.fetch_add(1, std::memory_order_relaxed);
+      /// @brief close/destroy the specified session as a fire-and-forget async call
+      void postCloseSession(std::string session_id) noexcept;
 
-      //   return asio::async_initiate<CompletionToken, void(BrowserMessage)>(
-      //      [this](auto handler, BrowserMessage msg)
-      //      {
-      //         m_pending_requests[id] = std::move(handler);
 
-      //         // B. Format the JSON request (Using glaze)
-      //         // Note: In production, you'd serialize the CdpCommand struct properly.
-      //         std::string payload = R"({"id":)" + std::to_string(id) + R"(,"method":")" + method + R"(")";
-      //         if (!params.empty())
-      //         {
-      //            payload += R"(,"params":)" + params;
-      //         }
-      //         payload += "}";
+      /// @brief coroutine to send a command to the browser
+      /// @param session_id - the session/target to use
+      /// @param command    - the command name
+      /// @param parameters - any parameters the command requires
+      /// @return - asio awaitable
+      /// @throw
+      [[nodiscard]] auto coroSendCommand(std::string command, StringMap parameters, MaybeString session_id) noexcept(false) -> asio::awaitable<BrowserMessage>;
 
-      //         // C. Send it out over the wire
-      //         // (ws_client_.send is thread-safe via its internal mutex)
-      //         ws_client_.send(payload);
-      //      },
-      //      token, request_id, method, params_json   // These arguments are forwarded into the lambda above
-      //   );
-      //}
+
+      /// @brief Fire-and-forget alternative to coroSendCommand()
+      void postCommand(std::string command, StringMap parameters, MaybeString session_id) noexcept;
+
 
    private:
-      using RequestMap = std::unordered_map<int, asio::any_completion_handler<void(std::string)>>;
+      // map browser command-id to completion handlerso
+      using RequestMap = std::unordered_map<uint32_t, asio::any_completion_handler<void(BrowserMessage)>>;
 
       static inline constexpr glz::opts JSON_OPTS{ .skip_null_members = true };
 
@@ -142,67 +133,30 @@ namespace ctb::web
       ContextPtr               m_ctx;
       win32::ProcessJobHandles m_browser_handles{};
       HttpDownloader           m_http_client;
+      uint32_t                 m_next_id{ 1 };
       RequestMap               m_pending_requests{};
       WsClient                 m_ws_client;
 
-      alignas(std::hardware_destructive_interference_size) std::atomic_int m_next_id{ 1 };
-
       // Event handling setup
       void setupHandlers();
-      void onOpen();
-      void onClose(glz::ws_close_code code, std::string_view reason);
-      void onMessage(std::string_view, glz::ws_opcode);
-      void onError(std::error_code);
+      void onWebSocketOpen();
+      void onWebSocketClose(glz::ws_close_code code, std::string_view reason);
+      void onWebSocketMessage(std::string_view msg_text, glz::ws_opcode opcode);
+      void onWebSocketError(std::error_code);
 
+      // private implementation
       void attemptWebsocketConnect(std::string url, uint8_t retries, std::chrono::milliseconds retry_delay = 10ms);
-      void runWithDelay(std::chrono::milliseconds delay, std::move_only_function<void()> func);
-      auto getNextId() -> int { return m_next_id.fetch_add(1, std::memory_order_relaxed);}
-      auto sendCommandAsync(std::string command, StringMap parameters) -> asio::awaitable<BrowserMessage>;
 
-      //void setup_websocket_handlers()
-      //{
-      //ws_client_.on_message(
-      //   [this](std::string_view message, glz::ws_opcode opcode)
-      //   {
-      //      if (opcode != glz::ws_opcode::text) return;
+      /// @brief runs a callable on the io_context as a fire-and-forget operation with a timed delay
+      /// @param delay - timer value to use for delay before execution
+      /// @param func  - the callable to execute
+      void delayedExec(std::chrono::milliseconds delay, std::move_only_function<void()> func);
 
-      //      // 1. Quick and dirty parse to find the "id" (Use glz::read_json in production)
-      //      // Assuming we parsed the JSON and extracted the ID and Result/Error
-      //      int id = extract_id_from_json(message);
+      /// @brief handles messages sent from the browser in response to a command by routing them back to the appropriate completion handler
+      void dispatchMessage(BrowserMessage response);
 
-      //      if (id > 0)
-      //      {
-      //         // 2. This is a RESPONSE to a command we sent.
-      //         asio::any_completion_handler<void(std::string)> handler;
-      //         {
-      //            std::lock_guard<std::mutex> lock(map_mutex_);
-      //            auto                        it = pending_requests_.find(id);
-      //            if (it != pending_requests_.end())
-      //            {
-      //               handler = std::move(it->second);
-      //               pending_requests_.erase(it);
-      //            }
-      //         }
+   };
 
-      //         // 3. Fulfill the Sender!
-      //         if (handler)
-      //         {
-      //            // We post this back to the io_context to ensure the pipeline resumes
-      //            // cleanly without blocking the websocket's read loop.
-      //            asio::post(*io_ctx_,
-      //                       [h = std::move(handler), msg = std::string(message)]() mutable
-      //                       {
-      //                          h(std::move(msg));   // This triggers stdexec::set_value!
-      //                       });
-      //         }
-      //      }
-      //      else
-      //      {
-      //         // 3. This is an unprompted EVENT (e.g., Page.loadEventFired)
-      //         // Dispatch this to an Observer pattern / Event Bus
-      //         handle_unprompted_event(message);
-      //      }
-      //   });
 
 
       //auto my_pipeline = ex::just()
@@ -226,6 +180,6 @@ namespace ctb::web
       //                      });
 
       //ex::start_detached(std::move(my_pipeline));
-   };
 
-}   // namespace ctb::web
+
+}   // namespace ctb::webclient
