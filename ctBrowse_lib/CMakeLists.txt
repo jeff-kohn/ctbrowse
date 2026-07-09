@@ -17,7 +17,6 @@ target_sources(${TARGET_NAME}
       "../include/ctb/ctb_format.h"
       "../include/ctb/ctb_functors.h"
       "../include/ctb/ctb_indirect.h"
-      "../include/ctb/HttpDownloader.h"
       
       "../include/ctb/Error.h"
       "../include/ctb/log.h"
@@ -66,19 +65,22 @@ target_sources(${TARGET_NAME}
 
       "../include/ctb/tasks/PollingTask.h"
       "../include/ctb/tasks/tasks.h"
-      "../include/ctb/tasks/async_tasks.h"
 
 
    PRIVATE
-      "BackgroundThreadContext.h"
+      "AsioThreadScheduler.h"
+      "async_tasks.h"
+      "CellarTrackerBrowser.cpp"
+      "CellarTrackerBrowser.h"
       "CredentialManager.cpp"
       "CredentialWrapper.cpp"
       "CtDatasetManager.cpp"
       "CtDatasetOptions.cpp"
       "DatasetEventSource.cpp"
-      "HeadlessWebClient.cpp"
-      "HeadlessWebClient.h"
+      "HeadlessBrowser.cpp"
+      "HeadlessBrowser.h"
       "HttpDownloader.cpp"
+      "HttpDownloader.h"
       "log.cpp"
       "ProReviewsCache.cpp"
       "ScopedHandle.h"
@@ -88,7 +90,7 @@ target_sources(${TARGET_NAME}
       "utility_win32.cpp"
       "utility_win32.h"
       "webclient_schema.h"
- )
+  "CellarTrackerBrowser.h")
 
 target_include_directories(${TARGET_NAME}
    ${warning_guard}

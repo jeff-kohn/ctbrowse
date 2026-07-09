@@ -20,7 +20,8 @@ namespace glz
 namespace ctb
 {
 
-   class BackgroundThreadContext;
+   class AsioThreadScheduler;
+
 
    /// @brief Asynchronously downloads files (table data, image labels) from CT website
    ///
@@ -65,7 +66,7 @@ namespace ctb
    private:
       // We may or may not run our own io_context in background thread depending on whether
       // this object was initialized with an external executor or not.
-      using ContextPtr = std::unique_ptr<BackgroundThreadContext>;
+      using ContextPtr = std::unique_ptr<AsioThreadScheduler>;
       ContextPtr m_ctx{};
 
       // needs to be declared after m_ctx because of init order.

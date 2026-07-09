@@ -1,6 +1,5 @@
 #pragma once
-
-#include "ctb/HttpDownloader.h"
+#include "HttpDownloader.h"
 #include "ctb/ctb.h"
 #include "ctb/utility.h"
 #include "ctb/utility_http.h"
@@ -25,6 +24,7 @@ namespace ctb::tasks
    using stdexec::let_value;
    using stdexec::then;
    using stdexec::upon_error;
+   using std::move;
 
 
    /// @brief checks an CellarTracker HTTP response for errors and throws them as Error exceptions
@@ -76,7 +76,7 @@ namespace ctb::tasks
          content_type_header = it->second;
       }
       // we got a table (or some sort of body), package the result.
-      return RawTableData{ .data        = std::move(response.response_body),
+      return RawTableData{ .data        = move(response.response_body),
                            .table_id    = table_id,
                            .data_format = DataFormatId::csv,
                            .encoding    = getTextEncodingFromHeader(content_type_header).value_or(TextEncoding::ANSI) };
@@ -103,14 +103,14 @@ namespace ctb::tasks
    template<typename SchedulerT, typename CallbackT>
    inline auto safeErrorCallback(SchedulerT scheduler, CallbackT&& callback, std::exception_ptr ep) noexcept
    {
-      return just(std::move(ep))
+      return just(move(ep))
            | continues_on(scheduler)
            | then(
                 [cb_func = std::forward<CallbackT>(callback)](std::exception_ptr ep) mutable noexcept
                 {
                    auto error = packageError(ep);
                    SPDLOG_DEBUG(error.formattedMessage());
-                   cb_func(std::unexpected{ std::move(error) });
+                   cb_func(std::unexpected{ move(error) });
                 })
            | upon_error(
                 []([[maybe_unused]] std::exception_ptr ep) noexcept
@@ -124,6 +124,24 @@ namespace ctb::tasks
                    {}   // NOLING
                 });
    }
+
+   
+   inline std::string buildLabelFilename(uint64_t wine_id) 
+   {
+      // we may want to support multiple images per wine in the future, but for now there will just be the one.
+      constexpr auto image_num = 1;
+      return ctb::format(constants::FMT_LABEL_IMAGE_FILENAME, wine_id, image_num);
+   }
+
+   inline auto buildLabelPath(const fs::path& cache_folder, uint64_t wine_id) -> fs::path
+   {
+      return cache_folder / buildLabelFilename(wine_id);
+   }
+    
+
+
+
+
 
 
 }   // namespace ctb::tasks

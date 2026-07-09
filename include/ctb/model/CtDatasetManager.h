@@ -5,7 +5,7 @@
 #include "ctb/model/CtDatasetOptions.h"
 #include "ctb/model/ProReviewsCache.h"
 
-  
+
 namespace ctb::app
 {
 
@@ -15,20 +15,21 @@ namespace ctb::app
    class CtDatasetManager
    {
    public:
-      /// @brief callback type used  for table download requests. Needs to be copyable because downloadTablesAsync
-      ///        needs to copy the callable for each downloadTableAsync() call. The expected return value is the
-      ///        FQ path of the file that was downloaded.
-      using TableDownloadResultCallback = copyable_function<void(std::expected<std::string, ctb::Error>)>;
+      // Used for downloading table files, expected value is the contents of the file
+      using TableResult         = std::expected<std::string, ctb::Error>;
+      using TableResultCallback = copyable_function<void(TableResult)>;
 
-      /// @brief default ctor, initializes data folder to "." unless overridden by a call to setTableFolder()
-      CtDatasetManager();             // = default;
+      // used for loading (or downloading) images, expected value is the image bytes.
+      using ImageResult         = std::expected<Buffer, ctb::Error>;
+      using ImageResultCallback = copyable_function<void(ImageResult)>;
+
       ~CtDatasetManager() noexcept;   //= default;
 
       /// @brief construct a CtDatasetLoader specifying the data folder. May throw if folder is invalid and can't be created.
       explicit CtDatasetManager(const fs::path& table_folder) noexcept(false);
 
 
-      /// @brief specify the location for data files
+      /// @brief specify the location for table files
       ///
       /// @throws ctb::Error if the folder doesn't exist and can't be created.
       auto setTableFolder(const fs::path& folder) noexcept(false) -> CtDatasetManager&;
@@ -36,6 +37,16 @@ namespace ctb::app
 
       /// @brief returns the location used for loading data files from disk
       auto getTableFolder() const -> const fs::path&;
+
+
+      /// @brief specify the location for label images
+      ///
+      /// @throws ctb::Error if the folder doesn't exist and can't be created.
+      auto setLabelImageFolder(const fs::path& folder) noexcept(false) -> CtDatasetManager&;
+
+
+      /// @brief returns the location used for loading label images from disk
+      auto getLabelImageFolder() const -> const fs::path&;
 
 
       /// @brief Load a dataset with default options
@@ -52,23 +63,25 @@ namespace ctb::app
 
       /// @brief Download the specified table from CellarTracker.com in the background and save it to the data
       ///        folder, overwriting existing file.
-      void downloadTableAsync(TableId table_id, const CredentialWrapper& cred, TableDownloadResultCallback notify_callback);
+      void downloadTableAsync(TableId table_id, const CredentialWrapper& cred, TableResultCallback notify_callback);
 
 
       /// @brief Download multiple tables from CellarTracker.com in the background and save it to the data folder,
       ///        overwriting existing files.
-      template<rng::input_range RngT>   //requires std::same_as<std::remove_cvref<rng::range_value_t<RngT>>, TableId>
-      void downloadTablesAsync(const RngT& tables, const CredentialWrapper& cred, TableDownloadResultCallback notify_callback)
+      template<rng::input_range RngT> requires std::same_as<rng::range_value_t<RngT>, TableId>
+      void downloadTablesAsync(const RngT& tables, const CredentialWrapper& cred, TableResultCallback result_callback)
       {
          for (auto tbl_id : tables)
          {
-            downloadTableAsync(tbl_id, cred, notify_callback);
+            downloadTableAsync(tbl_id, cred, result_callback);
          }
       }
 
 
+      void retrieveLabelImageAsync(uint64_t wine_id, ImageResultCallback result_callback);
 
 
+      CtDatasetManager();
       CtDatasetManager(CtDatasetManager&&)                 = default;
       CtDatasetManager& operator=(CtDatasetManager&&)      = delete;
       CtDatasetManager(const CtDatasetManager&)            = delete;
@@ -78,8 +91,9 @@ namespace ctb::app
       struct AsyncImpl;
 
       std::optional<ProReviewsCache> m_pro_cache{};
-      fs::path            m_data_folder{ constants::CURRENT_DIRECTORY };
-      indirect<AsyncImpl> m_impl;
+      fs::path                       m_table_folder{ constants::CURRENT_DIRECTORY };
+      fs::path                       m_label_folder{ ctb::format("{}/Labels", constants::CURRENT_DIRECTORY) };
+      indirect<AsyncImpl>            m_impl;
    };
 
 }   // namespace ctb::app

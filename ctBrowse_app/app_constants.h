@@ -101,7 +101,6 @@ namespace ctb::constants
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADED          = "Successfully downloaded file '{}'.";
    inline constexpr const char* FMT_STATUS_FILE_DOWNLOADING         = "Downloading file '{}'...";
    inline constexpr const char* FMT_TITLE_TYPED_ERROR               = "{} Error";
-   inline constexpr const char* FMT_LABEL_IMAGE_FILENAME            = "{}-{}.jpg";
                                                                     
    inline constexpr const char* INFO_MSG_NO_MATCHING_ROWS           = "No rows matched the search text.";
    inline constexpr const char* ERROR_USER_CANCELED                 = "User canceled operation.";

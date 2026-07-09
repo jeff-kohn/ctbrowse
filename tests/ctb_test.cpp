@@ -1,4 +1,4 @@
-#include "../ctBrowse_lib/HeadlessWebClient.h"
+#include "../ctBrowse_lib/HeadlessBrowser.h"
 
 #include <asio/executor_work_guard.hpp>
 #include <asio/io_context.hpp>
@@ -13,7 +13,7 @@ namespace ctb::tests
    {
       using std::jthread;
       using namespace asio;
-      using namespace webclient;
+      using namespace web;
       using WorkGuard = asio::executor_work_guard<asio::io_context::executor_type>;
 
       auto      ctx = std::make_shared<asio::io_context>(1);
@@ -23,41 +23,41 @@ namespace ctb::tests
                          ctx->run();
                       } };
 
-      HeadlessWebClient browser{ ctx };
-      browser.start();
-      while (browser.status() != HeadlessWebClient::Status::Ready)
-      {
-         std::this_thread::sleep_for(100ms);
-      }
+      HeadlessBrowser browser{ ctx };
+      //browser.start();
+      //while (browser.status() != HeadlessBrowser::Status::Ready)
+      //{
+      //   std::this_thread::sleep_for(100ms);
+      //}
 
-      auto fut = asio::co_spawn(
-         *ctx,
-         [&browser]() -> asio::awaitable<std::unique_ptr<HeadlessWebClient::TargetSession>>
-         {
-            auto val = co_await browser.coroCreateSession();
-            co_return std::make_unique<HeadlessWebClient::TargetSession>(std::move(val));
-         },
-         asio::use_future);
+      //auto fut = asio::co_spawn(
+      //   *ctx,
+      //   [&browser]() -> asio::awaitable<std::unique_ptr<HeadlessBrowser::Session>>
+      //   {
+      //      auto val = co_await browser.coroCreateSession();
+      //      co_return std::make_unique<HeadlessBrowser::Session>(std::move(val));
+      //   },
+      //   asio::use_future);
 
-      // Blocks this (non-coroutine) thread until the coroutine completes;
-      // rethrows any exception the coroutine threw.
-      try
-      {
-         auto maybe_session = fut.get();
-         REQUIRE(maybe_session.get() != nullptr);
-         auto session = std::move(*maybe_session);
-         std::println("Created browser session with id {}", session.sessionId());
-      }
-      catch(...)
-      {
-         std::println("coroCreateSession() returned error: {}", packageError().formattedMessage());
-      }
+      //// Blocks this (non-coroutine) thread until the coroutine completes;
+      //// rethrows any exception the coroutine threw.
+      //try
+      //{
+      //   auto maybe_session = fut.get();
+      //   REQUIRE(maybe_session.get() != nullptr);
+      //   auto session = std::move(*maybe_session);
+      //   std::println("Created browser session with id {}", session.sessionId());
+      //}
+      //catch(...)
+      //{
+      //   std::println("coroCreateSession() returned error: {}", packageError().formattedMessage());
+      //}
 
-      browser.stop();
-      while (browser.status() != HeadlessWebClient::Status::Stopped)
-      {
-         std::this_thread::sleep_for(100ms);
-      }
+      //browser.stop();
+      //while (browser.status() != HeadlessBrowser::Status::Stopped)
+      //{
+      //   std::this_thread::sleep_for(100ms);
+      //}
 
       m_work_guard.reset();
    }

@@ -1,5 +1,5 @@
-#include "ctb/HttpDownloader.h"
-#include "BackgroundThreadContext.h"
+#include "HttpDownloader.h"
+#include "AsioThreadScheduler.h"
 
 #include "ctb/utility_http.h"
 
@@ -17,7 +17,7 @@ namespace ctb
    /// @param executor - if supplied, will be used to run HTTP requests. Otherwise a private
    ///                   executor running on a background thread will be used.
    HttpDownloader::HttpDownloader(any_io_executor executor)
-      : m_ctx{ executor ? nullptr : std::make_unique<BackgroundThreadContext>() },
+      : m_ctx{ executor ? nullptr : std::make_unique<AsioThreadScheduler>() },
         m_client{ std::in_place, executor ? executor : m_ctx->get_executor() }
    {
       // configure http client to use TLS with Windows cert store for verification.

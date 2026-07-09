@@ -51,6 +51,7 @@ namespace ctb::app
       auto log_folder = fs::path{ std_paths.GetUserDir(wxStandardPaths::Dir::Dir_Cache).wx_str() } / constants::APP_NAME_LONG;
 
       m_dataset_mgr.setTableFolder(getDataFolder(AppFolder::Tables));
+      m_dataset_mgr.setLabelImageFolder(getDataFolder(AppFolder::Labels));
 
 #if defined(NDEBUG)
       setupDefaultLogger({ { makeFileSink(log_folder, constants::APP_NAME_SHORT) } });

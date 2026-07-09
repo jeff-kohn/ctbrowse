@@ -26,6 +26,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_URL_CT_TABLE            = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
    inline constexpr const char* FMT_URL_CT_VINTAGES         = "https://www.cellartracker.com/list.asp?Table=List&fInStock=0&iUserOverride=0&Wine={}";
    inline constexpr const char* FMT_URL_CT_WINE_DETAILS     = "https://www.cellartracker.com/wine.asp?iWine={}";
+   inline constexpr const char* FMT_LABEL_IMAGE_FILENAME    = "{}-{}.jpg";
 
    inline constexpr const char* HTML_ELEM_LABEL_PHOTO = "label_photo";
    inline constexpr const char* HTML_ATTR_SRC         = "src";

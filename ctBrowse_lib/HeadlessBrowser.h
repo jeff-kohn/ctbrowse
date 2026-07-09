@@ -1,4 +1,5 @@
 #pragma once
+
 #include "ctb/ctb.h"
 #include "utility_win32.h"
 #include "webclient_schema.h"
@@ -29,13 +30,9 @@ namespace ctb::web
    ///
    /// This class uses and returns stdexec-compatible asio coroutines that can be used from other coroutines or stdexec pipelines.
    /// The coroutine interface works better with the event-based websocket used for talking to the browser.
-   class HeadlessWebClient
+   class HeadlessBrowser
    {
    public:
-      static constexpr int32_t           DEFAULT_WS_PORT   = 9222;
-      static constexpr const char* const DEFAULT_DATA_DIR  = R"(%LOCALAPPDATA%\ctBrowse for Windows\WebView)";
-      static constexpr const char* const DEFAULT_EDGE_PATH = R"(C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe)";
-
       using ContextPtr = std::shared_ptr<asio::io_context>;
       using WsClient   = glz::websocket_client;
 
@@ -49,21 +46,19 @@ namespace ctb::web
       };
 
 
-      /// @brief Initialize a HeadlessWebClient to run on the specified io_context
+      /// @brief Initialize a HeadlessBrowser to run on the specified io_context
       /// @param io_ctx - thread-locked io_context
       ///
       /// This class does not protect its internal implementation from concurrent access since
       /// it is meant to run on a single-threaded context.
-      HeadlessWebClient(ContextPtr io_ctx);
+      HeadlessBrowser(ContextPtr io_ctx);
 
 
       /// @brief start the browser process.
       ///
       /// Launches the headless browser, retrieves the WS endpoint via HTTP GET, and establishes initial WS connection.
       /// This method is safe to call from any thread, but should only be called once. Calling it again will throw an exception
-      void start(std::string browser_path = DEFAULT_EDGE_PATH,
-                 std::string data_dir     = DEFAULT_DATA_DIR,
-                 int32_t     port         = DEFAULT_WS_PORT) noexcept(false);
+      void start(std::string browser_path, std::string data_dir, int32_t port) noexcept(false);
 
 
       /// @brief stop accepting requests and attempt to shut down the websocket and browser connection cleanly.
@@ -87,19 +82,17 @@ namespace ctb::web
 
          ~Session() noexcept;
          Session(Session&&) noexcept;
-         Session()                                = delete;
+         Session()                          = delete;
          Session& operator=(Session&&)      = delete;
          Session& operator=(const Session&) = delete;
          Session(const Session&)            = delete;
 
       private:
-         friend class HeadlessWebClient;
+         friend class HeadlessBrowser;
+         Session(HeadlessBrowser& browser, std::string session_id);
 
-         std::string        m_session_id;
-         HeadlessWebClient* m_web_client{};
-
-         Session(HeadlessWebClient& client, std::string session_id) : m_session_id{ std::move(session_id) }, m_web_client{ &client }
-         {}
+         std::string      m_session_id;
+         HeadlessBrowser* m_browser{};
       };
 
 
@@ -110,11 +103,6 @@ namespace ctb::web
       /// @brief close/destroy the specified session as a fire-and-forget async call
       void postCloseSession(std::string session_id) noexcept;
 
-
-      [[nodiscard]] asio::awaitable<Buffer> coroDownloadImage() noexcept(false)
-      {
-         throw "Not Implemented!";
-      }
 
       /// @brief coroutine to send a command to the browser
       /// @param session_id - the session/target to use
@@ -131,21 +119,23 @@ namespace ctb::web
 
 
    private:
-      // map browser command-id to completion handlerso
-      using RequestMap = std::unordered_map<uint32_t, asio::any_completion_handler<void(BrowserMessage)>>;
+      // map browser command-id to completion handlers
+      using CompletionHandler = asio::any_completion_handler<void(BrowserMessage)>;
+      using HandlerMap        = std::unordered_map<uint32_t, CompletionHandler>;
 
       static inline constexpr glz::opts JSON_OPTS{ .skip_null_members = true };
 
-      alignas(std::hardware_destructive_interference_size) std::atomic<Status> m_client_status{ Status::Stopped };
+      alignas(std::hardware_destructive_interference_size) std::atomic<Status> m_status{ Status::Stopped };
 
-      ContextPtr               m_ctx;
       win32::ProcessJobHandles m_browser_handles{};
+      ContextPtr               m_ctx;
       HttpDownloader           m_http_client;
       uint32_t                 m_next_id{ 1 };
-      RequestMap               m_pending_requests{};
+      HandlerMap               m_command_handlers{}; // for responses from WS commands
+      HandlerMap               m_event_handlers{};   // for events fired
       WsClient                 m_ws_client;
 
-      // Event handling setup
+      // WS event handling
       void setupHandlers();
       void onWebSocketOpen();
       void onWebSocketClose(glz::ws_close_code code, std::string_view reason);
@@ -155,11 +145,10 @@ namespace ctb::web
       // private implementation
       void attemptWebsocketConnect(std::string url, uint8_t retries, std::chrono::milliseconds retry_delay = 10ms);
 
-
       // sub-coroutines called by the public methods.
-      [[nodiscard]] asio::awaitable<std::string>   coroCreateTarget() noexcept(false);
-      [[nodiscard]] asio::awaitable<Session> coroAttachTarget(std::string target_id) noexcept(false);
-      [[nodiscard]] asio::awaitable<void>          coroEnablePage(std::string session_id) noexcept(false);
+      [[nodiscard]] asio::awaitable<std::string> coroCreateTarget() noexcept(false);
+      [[nodiscard]] asio::awaitable<Session>     coroAttachTarget(std::string target_id) noexcept(false);
+      [[nodiscard]] asio::awaitable<void>        coroEnablePage(std::string session_id) noexcept(false);
 
       /// @brief runs a callable on the io_context as a fire-and-forget operation with a timed delay
       /// @param delay - timer value to use for delay before execution
@@ -171,27 +160,5 @@ namespace ctb::web
    };
 
 
-   //auto my_pipeline = ex::just()
-   //                 // 1. Hop to the IO thread
-   //                 | ex::transfer(io_pool.get_scheduler())
+}   // namespace ctb::web
 
-   //                 // 2. Send the CDP Command and suspend the pipeline until the websocket replies
-   //                 | ex::let_value(
-   //                      [&cdp]()
-   //                      {
-   //                         return cdp.async_send_command("Page.navigate", R"({"url":"https://example.com"})", asioexec::use_sender);
-   //                      })
-
-   //                 // 3. Hop to the CPU thread to parse the heavy JSON response
-   //                 | ex::transfer(cpu_pool.get_scheduler())
-   //                 | ex::then(
-   //                      [](std::string cdp_response)
-   //                      {
-   //                         // Parse the resulting frameId or error...
-   //                         return parse_navigation_result(cdp_response);
-   //                      });
-
-   //ex::start_detached(std::move(my_pipeline));
-
-
-}   // namespace ctb::webclient

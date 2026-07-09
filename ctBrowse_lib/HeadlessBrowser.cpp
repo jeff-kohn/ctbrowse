@@ -1,6 +1,6 @@
-#include "HeadlessWebClient.h"
+#include "HeadlessBrowser.h"
+
 #include "async_tasks.h"
-#include "webclient_schema.h"
 #include "ctb/utility_templates.h"
 
 
@@ -31,49 +31,55 @@ namespace ctb::web
             throw Error{ Error::Category::NetworkError, "{} failed. ({})", command_name, response.error->str };
          }
       }
-   }
+   }   // namespace
 
-   HeadlessWebClient::Session::~Session() noexcept
+
+   HeadlessBrowser::Session::Session(HeadlessBrowser& browser, std::string session_id)
+      : m_session_id{ std::move(session_id) },
+        m_browser{ &browser }
+   {}
+
+
+   HeadlessBrowser::Session::~Session() noexcept
    {
       try
       {
          // this object may not be valid if it was moved-from
-         if (m_web_client)
+         if (m_browser)
          {
-            m_web_client->postCloseSession(std::move(m_session_id));
+            m_browser->postCloseSession(std::move(m_session_id));
          }
       }
       catch (...)
       {
-         SPDLOG_DEBUG("HeadlessWebClient::Session::~Session caught exception closing session. {}",
-                      packageError().formattedMessage());
+         SPDLOG_DEBUG("HeadlessBrowser::Session::~Session caught exception closing session. {}", packageError().formattedMessage());
       }
    }
 
 
-   HeadlessWebClient::Session::Session(Session&& other) noexcept
-      : m_session_id{ std::move(other.m_session_id) },
-        m_web_client{ other.m_web_client }
+   HeadlessBrowser::Session::Session(Session&& other) noexcept : m_session_id{ std::move(other.m_session_id) }, m_browser{ other.m_browser }
    {
-      other.m_web_client = nullptr;
+      other.m_browser = nullptr;
    }
 
 
-   HeadlessWebClient::HeadlessWebClient(ContextPtr io_ctx) : m_ctx{ io_ctx }, m_ws_client{ io_ctx }
+   HeadlessBrowser::HeadlessBrowser(ContextPtr io_ctx) : m_ctx{ io_ctx }, m_ws_client{ io_ctx }
    {
       setupHandlers();
    }
 
 
-   void HeadlessWebClient::start(std::string browser_path, std::string data_dir, int32_t port) noexcept(false)
+   void HeadlessBrowser::start(std::string browser_path, std::string data_dir, int32_t port) noexcept(false)
    {
+      if (m_status != Status::Stopped)
+      {
+         throw ctb::Error{ Error::Category::GeneralError, "HeadlessBrowser status is '{}', start() is not a valid operation.",
+                           enum_to_string(m_status.load()) };
+      }
+
       tryExpandEnvironmentVars(browser_path);
       tryExpandEnvironmentVars(data_dir);
-      if (m_client_status != Status::Stopped)
-      {
-         throw ctb::Error{ Error::Category::GeneralError, "HeadlessWebClient status is '{}', start() is not a valid operation.",
-                           enum_to_string(m_client_status.load()) };
-      }
+
       if (!fs::exists(browser_path))
       {
          throw ctb::Error{ Error::Category::FileError, "Couldn't launch headless web client, path \"{}\" does not exist.", browser_path };
@@ -83,13 +89,13 @@ namespace ctb::web
          if (!createFolderPath(data_dir))
          {
             throw Error{ Error::Category::GeneralError,
-                         "Couldn't launch headless web client, data dir \"{}\" does not exist and could not be created.", data_dir };
+                         "Couldn't launch headless web browser, data dir \"{}\" does not exist and could not be created.", data_dir };
          }
       }
 
       // First we need to launch the browser process.
       m_browser_handles = getValueOrThrow(win32::createProcessJob(browser_path, ctb::format(FMT_EDGE_ARGS, port, data_dir)));
-      m_client_status.store(Status::Starting);
+      m_status.store(Status::Starting);
 
       // Establish the websocket connection
       auto url = ctb::format(FMT_EDGE_HTTP_URL, port);
@@ -97,34 +103,34 @@ namespace ctb::web
    }
 
 
-   void HeadlessWebClient::stop()
+   void HeadlessBrowser::stop()
    {
-      m_client_status.store(Status::ShuttingDown);
+      m_status.store(Status::ShuttingDown);
       postCommand(commands::CLOSE_BROWSER, {}, {});
       m_ws_client.close();
    }
 
 
-   HeadlessWebClient::Status HeadlessWebClient::status() const
+   HeadlessBrowser::Status HeadlessBrowser::status() const
    {
-      return m_client_status.load();
+      return m_status.load();
    }
 
 
-   asio::awaitable<HeadlessWebClient::Session> HeadlessWebClient::coroCreateSession() noexcept(false)
+   asio::awaitable<HeadlessBrowser::Session> HeadlessBrowser::coroCreateSession() noexcept(false)
    {
       // make sure we're on the io thread.
       co_await asio::dispatch(*m_ctx, asio::use_awaitable);
 
       std::string target_id = co_await coroCreateTarget();
-      auto session = co_await coroAttachTarget(target_id);
+      auto        session   = co_await coroAttachTarget(target_id);
       co_await coroEnablePage(session.sessionId());
 
       co_return session;
    }
 
 
-   void HeadlessWebClient::postCloseSession(std::string session_id) noexcept
+   void HeadlessBrowser::postCloseSession(std::string session_id) noexcept
    {
       // clang-format off
       postCommand(commands::CLOSE_TARGET, { { params::TARGET_ID, std::move(session_id) } }, {});
@@ -132,9 +138,9 @@ namespace ctb::web
    }
 
 
-   [[nodiscard]] asio::awaitable<BrowserMessage> HeadlessWebClient::coroSendCommand(std::string command,
-                                                                                    JsonPropMap parameters,
-                                                                                    MaybeString session_id) noexcept(false)
+   [[nodiscard]] asio::awaitable<BrowserMessage> HeadlessBrowser::coroSendCommand(std::string command,
+                                                                                  JsonPropMap parameters,
+                                                                                  MaybeString session_id) noexcept(false)
    {
       return asio::async_initiate<decltype(asio::use_awaitable), void(BrowserMessage)>(
          [this](auto handler, std::string command, JsonPropMap parameters, MaybeString session_id)
@@ -145,7 +151,7 @@ namespace ctb::web
                                 .params    = std::move(parameters) };
 
             // map the completion handler to id so that we can look it up and complete it when the browser message comes back
-            m_pending_requests[msg.id.transform(to_unsigned).value_or(0U)] = std::move(handler);
+            m_command_handlers[msg.id.transform(to_unsigned).value_or(0U)] = std::move(handler);
 
             // serialize and send the message. response will come via on_message()
             auto json = write_json(msg);
@@ -155,7 +161,7 @@ namespace ctb::web
    }
 
 
-   void HeadlessWebClient::postCommand(std::string command, JsonPropMap parameters, MaybeString session_id) noexcept
+   void HeadlessBrowser::postCommand(std::string command, JsonPropMap parameters, MaybeString session_id) noexcept
    {
       try
       {
@@ -169,43 +175,43 @@ namespace ctb::web
                }
                catch (...)
                {
-                  SPDLOG_DEBUG("HeadlessWebClient::postCommand failed: {}", packageError().formattedMessage());
+                  SPDLOG_DEBUG("HeadlessBrowser::postCommand failed: {}", packageError().formattedMessage());
                }
             },
             asio::detached);
       }
       catch (...)   // NOLINT
       {
-         SPDLOG_DEBUG("HeadlessWebClient::postCommand failed: {}", packageError().formattedMessage());
+         SPDLOG_DEBUG("HeadlessBrowser::postCommand failed: {}", packageError().formattedMessage());
       }
    }
 
 
-   void HeadlessWebClient::setupHandlers()
+   void HeadlessBrowser::setupHandlers()
    {
-      m_ws_client.on_open(std::bind_front(&HeadlessWebClient::onWebSocketOpen, this));
-      m_ws_client.on_close(std::bind_front(&HeadlessWebClient::onWebSocketClose, this));
-      m_ws_client.on_message(std::bind_front(&HeadlessWebClient::onWebSocketMessage, this));
-      m_ws_client.on_error(std::bind_front(&HeadlessWebClient::onWebSocketError, this));
+      m_ws_client.on_open(std::bind_front(&HeadlessBrowser::onWebSocketOpen, this));
+      m_ws_client.on_close(std::bind_front(&HeadlessBrowser::onWebSocketClose, this));
+      m_ws_client.on_message(std::bind_front(&HeadlessBrowser::onWebSocketMessage, this));
+      m_ws_client.on_error(std::bind_front(&HeadlessBrowser::onWebSocketError, this));
    }
 
 
-   void HeadlessWebClient::onWebSocketOpen()
+   void HeadlessBrowser::onWebSocketOpen()
    {
-      SPDLOG_DEBUG("HeadlessWebClient::onOpen - websocket connection established.");
-      m_client_status.store(Status::Ready);
+      SPDLOG_DEBUG("HeadlessBrowser::onOpen - websocket connection established.");
+      m_status.store(Status::Ready);
    }
 
 
-   void HeadlessWebClient::onWebSocketClose(glz::ws_close_code code, std::string_view reason)
+   void HeadlessBrowser::onWebSocketClose(glz::ws_close_code code, std::string_view reason)
    {
-      SPDLOG_DEBUG("HeadlessWebClient::onClose - code: {}, reason: '{}'", static_cast<uint16_t>(code), reason);
-      m_client_status.store(Status::Stopped);
+      SPDLOG_DEBUG("HeadlessBrowser::onClose - code: {}, reason: '{}'", static_cast<uint16_t>(code), reason);
+      m_status.store(Status::Stopped);
       m_browser_handles = {};   // kill the browser process.
    }
 
 
-   void HeadlessWebClient::onWebSocketMessage(std::string_view msg_text, glz::ws_opcode opcode)
+   void HeadlessBrowser::onWebSocketMessage(std::string_view msg_text, glz::ws_opcode opcode)
    {
       if (opcode == glz::ws_opcode::text)
       {
@@ -217,26 +223,27 @@ namespace ctb::web
          }
          else
          {
-            SPDLOG_DEBUG("Headless web client message parse error: {}. Message: {}", glz::format_error(ec), msg_text);
+            SPDLOG_DEBUG("HeadlessBrowser message parse error: {}. Message: {}", glz::format_error(ec), msg_text);
             assert(false);
          }
       }
       else
       {
-         SPDLOG_DEBUG("Unexpected opcode received in HeadlessClient::onMessage. Opcode: {}. Message: {}", enum_to_string(opcode), msg_text);
+         SPDLOG_DEBUG(
+            "Unexpected opcode received in HeadlessBrowser::onMessage. Opcode: {}. Message: {}", enum_to_string(opcode), msg_text);
          assert(false);
       }
    }
 
 
-   void HeadlessWebClient::onWebSocketError(std::error_code ec)
+   void HeadlessBrowser::onWebSocketError(std::error_code ec)
    {
-      SPDLOG_DEBUG("HeadlessWebClient::onError - {} ({})", ec.message(), ec.value());
+      SPDLOG_DEBUG("HeadlessBrowser::onError - {} ({})", ec.message(), ec.value());
       assert(false);
    }
 
 
-   void HeadlessWebClient::attemptWebsocketConnect(std::string url, uint8_t retries, std::chrono::milliseconds retry_delay)
+   void HeadlessBrowser::attemptWebsocketConnect(std::string url, uint8_t retries, std::chrono::milliseconds retry_delay)
    {
       // We need to use an HTTP GET to retrieve the WS endpoint and connect. This callback will run
       // on the io_context's thread.
@@ -257,9 +264,9 @@ namespace ctb::web
             auto error = packageError();
             if (retries == 0)
             {
-               m_client_status.store(Status::Stopped);
+               m_status.store(Status::Stopped);
                m_browser_handles = {};
-               SPDLOG_DEBUG("HeadlessWebClient couldn't establish connection with browser. {}", error.formattedMessage());
+               SPDLOG_DEBUG("HeadlessBrowser couldn't establish connection with browser. {}", error.formattedMessage());
             }
             else
             {
@@ -276,12 +283,13 @@ namespace ctb::web
       m_http_client.getAsync(url, {}, std::move(callback));
    }
 
-   // clang-format off
 
-   [[nodiscard]] asio::awaitable<std::string> HeadlessWebClient::coroCreateTarget() noexcept(false)
+   [[nodiscard]] asio::awaitable<std::string> HeadlessBrowser::coroCreateTarget() noexcept(false)
    {
+      // clang-format off
       auto response = co_await coroSendCommand(commands::CREATE_TARGET, JsonPropMap{ { params::TARGET_URL, params::ABOUT_BLANK } }, {});
       throwIfError(commands::CREATE_TARGET, response);
+      // clang-format on
 
       auto result = read_json<CreateTargetResult>(response.result->str);
       SPDLOG_DEBUG("{} received targetId '{}'", commands::CREATE_TARGET, result.targetId);
@@ -290,10 +298,8 @@ namespace ctb::web
    }
 
 
-   [[nodiscard]] asio::awaitable<HeadlessWebClient::Session> HeadlessWebClient::coroAttachTarget(std::string target_id) noexcept(false)
+   [[nodiscard]] asio::awaitable<HeadlessBrowser::Session> HeadlessBrowser::coroAttachTarget(std::string target_id) noexcept(false)
    {
-      // clang-format on
-
       JsonPropMap params{
          { params::TARGET_ID, target_id },
          { params::FLATTEN,   true      }
@@ -309,15 +315,15 @@ namespace ctb::web
    }
 
 
-   [[nodiscard]] asio::awaitable<void> HeadlessWebClient::coroEnablePage(std::string session_id) noexcept(false)
+   [[nodiscard]] asio::awaitable<void> HeadlessBrowser::coroEnablePage(std::string session_id) noexcept(false)
    {
-      auto response = co_await coroSendCommand(commands::ENABLE_PAGE_EVENTS, {} , session_id);
+      auto response = co_await coroSendCommand(commands::ENABLE_PAGE_EVENTS, {}, session_id);
       throwIfError(commands::ENABLE_PAGE_EVENTS, response);
       co_return;
    }
 
 
-   void HeadlessWebClient::delayedExec(std::chrono::milliseconds delay, std::move_only_function<void()> func)
+   void HeadlessBrowser::delayedExec(std::chrono::milliseconds delay, std::move_only_function<void()> func)
    {
       asio::co_spawn(
          *m_ctx,
@@ -331,16 +337,16 @@ namespace ctb::web
    }
 
 
-   void HeadlessWebClient::dispatchMessage(BrowserMessage msg)
+   void HeadlessBrowser::dispatchMessage(BrowserMessage msg)
    {
       uint32_t id = static_cast<uint32_t>(msg.id.value_or(0));
       if (id > 0)
       {
          // this is a command response.
-         if (auto it = m_pending_requests.find(id); it != m_pending_requests.end())
+         if (auto it = m_command_handlers.find(id); it != m_command_handlers.end())
          {
             auto handler = std::move(it->second);
-            m_pending_requests.erase(it);
+            m_command_handlers.erase(it);
             if (handler)
             {
                // call completion handler from new async operation so that we can
@@ -354,7 +360,7 @@ namespace ctb::web
             else
             {
                SPDLOG_DEBUG(
-                  "HeadlessWebClient - completion handler for command id {} was not in a valid state, async operation cannot be completed.",
+                  "HeadlessBrowser - completion handler for command id {} was not in a valid state, async operation cannot be completed.",
                   id);
             }
          }
@@ -366,6 +372,6 @@ namespace ctb::web
       }
    }
 
-}   // namespace ctb::webclient
+}   // namespace ctb::web
 
 

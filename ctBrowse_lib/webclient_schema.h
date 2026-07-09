@@ -5,15 +5,16 @@
 
 #include <map>
 
-namespace ctb::webclient
+namespace ctb::web
 {
 
    namespace commands
    {
-      inline constexpr const char* CREATE_TARGET = "Target.createTarget";
-      inline constexpr const char* CLOSE_TARGET  = "Target.closeTarget";
-      inline constexpr const char* ATTACH_TARGET = "Target.attachToTarget";
-      inline constexpr const char* CLOSE_BROWSER = "Browser.close";
+      inline constexpr const char* ATTACH_TARGET      = "Target.attachToTarget";
+      inline constexpr const char* CLOSE_BROWSER      = "Browser.close";
+      inline constexpr const char* CLOSE_TARGET       = "Target.closeTarget";
+      inline constexpr const char* CREATE_TARGET      = "Target.createTarget";
+      inline constexpr const char* ENABLE_PAGE_EVENTS = "Page.enable";
    }   // namespace commands
 
    namespace params
@@ -28,13 +29,12 @@ namespace ctb::webclient
    }   // namespace params
 
 
-   using MaybeJson = std::optional<glz::raw_json>;
-   //using StringMap      = std::map<std::string, std::string>;
-   using JsonProp    = std::variant<std::string, int, bool>;
+   using MaybeJson   = std::optional<glz::raw_json>;
+   using JsonProp    = std::variant<int, std::string, bool>;
    using JsonPropMap = std::map<std::string, JsonProp>;
 
 
-   /// @brief struct defining the message that is sent to the webclient for commands
+   /// @brief struct defining the message that is sent to the browser for commands
    struct BrowserCommand
    {
       std::string method{};
@@ -44,6 +44,7 @@ namespace ctb::webclient
    };
 
 
+   /// @brief message that the browser returns to client.
    struct BrowserMessage
    {
       NullableInt id{};          // Present on Command Responses
@@ -62,9 +63,10 @@ namespace ctb::webclient
       std::string targetId{};
    };
 
+
    struct AttachTargetResult
    {
       std::string sessionId{};
    };
 
-}   // namespace ctb::webclient
+}   // namespace ctb::web
