@@ -3,7 +3,7 @@
 
 #include <asio/io_context.hpp>
 #include <asio/awaitable.hpp>
-
+#include <exec/task.hpp>
 
 namespace ctb::web
 {
@@ -36,7 +36,7 @@ namespace ctb::web
       };
 
 
-      /// @brief Initialize a CallarTrackerBrowser to run on the specified io_context
+      /// @brief Initialize a CellarTrackerBrowser to run on the specified io_context
       /// @param io_ctx - thread-locked io_context
       ///
       /// This class does not protect its internal implementation from concurrent access since
@@ -64,10 +64,14 @@ namespace ctb::web
 
 
       /// @brief coroutine to download a label image from CT
-      [[nodiscard]] asio::awaitable<Buffer> coroDownloadLabel(int64_t wine_id) noexcept(false);
+      [[nodiscard]] exec::task<Buffer> sndDownloadLabel(uint64_t wine_id) noexcept(false);
+
+      // needed in CPP for PIMPL
+      ~CallarTrackerBrowser();
 
    private:
       indirect<HeadlessBrowser> m_browser;
    };
 
 }   // namespace ctb::webclient
+

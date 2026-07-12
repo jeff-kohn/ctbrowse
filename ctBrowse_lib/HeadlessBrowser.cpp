@@ -1,6 +1,6 @@
 #include "HeadlessBrowser.h"
+#include "senders.h"
 
-#include "async_tasks.h"
 #include "ctb/utility_templates.h"
 
 
@@ -62,6 +62,21 @@ namespace ctb::web
       other.m_browser = nullptr;
    }
 
+   HeadlessBrowser::Session& HeadlessBrowser::Session::operator=(Session&& other)
+   {
+      if (this != &other)
+      {
+         if (m_browser)
+         {
+            m_browser->postCloseSession(std::move(m_session_id));
+         }
+         m_session_id    = std::move(other.m_session_id);
+         m_browser       = other.m_browser;
+         other.m_browser = nullptr;
+      }
+      return *this;
+   }
+
 
    HeadlessBrowser::HeadlessBrowser(ContextPtr io_ctx) : m_ctx{ io_ctx }, m_ws_client{ io_ctx }
    {
@@ -117,7 +132,7 @@ namespace ctb::web
    }
 
 
-   asio::awaitable<HeadlessBrowser::Session> HeadlessBrowser::coroCreateSession() noexcept(false)
+   asio::awaitable<HeadlessBrowser::MaybeSession> HeadlessBrowser::coroCreateSession() noexcept(false)
    {
       // make sure we're on the io thread.
       co_await asio::dispatch(*m_ctx, asio::use_awaitable);
@@ -127,6 +142,15 @@ namespace ctb::web
       co_await coroEnablePage(session.sessionId());
 
       co_return session;
+   }
+
+
+   asio::awaitable<std::string> HeadlessBrowser::coroNavigate(std::string session_id, std::string url)
+   {
+      // make sure we're on the io thread.
+      co_await asio::dispatch(*m_ctx, asio::use_awaitable);
+
+      co_return std::string{};
    }
 
 

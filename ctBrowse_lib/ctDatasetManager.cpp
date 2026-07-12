@@ -1,9 +1,9 @@
 #include "ctb/model/CtDatasetManager.h"
 
-#include "AsioThreadScheduler.h"
-#include "HeadlessBrowser.h"
+#include "CellarTrackerBrowser.h"
 #include "HttpDownloader.h"
-#include "async_tasks.h"
+#include "IoManager.h"
+#include "senders.h"
 
 #include "ctb/model/CtDataset.h"
 #include "ctb/model/ProReviewsCache.h"
@@ -34,7 +34,7 @@ namespace ctb::app
    {
 
 #ifndef ERROR_FILE_NOT_FOUND
-      constexpr long FILE_NOT_FOUND = 2L;
+      constexpr long ERROR_FILE_NOT_FOUND = 2L;
 #endif   // !ERROR_FILE_NOT_FOUND
 
 
@@ -58,10 +58,10 @@ namespace ctb::app
       static constexpr uint32_t NUM_IO_THREADS  = 1;
 
       // ordering is important here not only for initialization but also teardown
-      AsioThreadScheduler      io_pool{};
-      exec::static_thread_pool cpu_pool{ NUM_CPU_THREADS };
-      HttpDownloader           http_client{ io_pool.get_executor() };
-      web::HeadlessBrowser     m_web_client{ io_pool.get_context() };
+      web::IoManager            io_pool{};
+      exec::static_thread_pool  cpu_pool{ NUM_CPU_THREADS };
+      HttpDownloader            http_client{ io_pool.get_executor() };
+      web::CallarTrackerBrowser browser{ io_pool.get_context() };
    };
 
 
@@ -124,14 +124,7 @@ namespace ctb::app
 
       auto http_pipeline = [this, table_id, callback = move(result_callback)](HttpDownloader::HttpResult result) mutable
       {
-         // these will go out of scope when the task is started asynchronously, need to move/copy into lambdas, never capture by reference!
-         auto              target_path = getTablePath(getTableFolder(), table_id).generic_string();
-         asio::stream_file file{ m_impl->io_pool.get_executor(), target_path,
-                                 asio::stream_file::write_only | asio::stream_file::create | asio::stream_file::truncate };
-
          auto process = just(move(result))
-
-                      // validation/conversion happens on cpu scheduler to keep I/O thread free
                       | continues_on(m_impl->cpu_pool.get_scheduler())
                       | then(validateHttpResponse)
                       | then(
@@ -141,18 +134,16 @@ namespace ctb::app
                            })
                       | then(convertTableToUtf8)
 
-                      // back to I/O scheduler to save the data to disk file.
                       | continues_on(m_impl->io_pool.get_scheduler())
                       | let_value(
-                           [file = move(file)](RawTableData& table) mutable
+                           [this](RawTableData& table) mutable
                            {
-                              return asio::async_write(file, asio::buffer(table.data), use_sender);
+                              return m_impl->io_pool.sndWriteFile(getTablePath(getTableFolder(), table.table_id), table.data);
                            })
 
-                      // then back again to cpu scheduler for callback notification
                       | continues_on(m_impl->cpu_pool.get_scheduler())
                       | then(
-                           [table_id, callback]([[maybe_unused]] std::size_t bytes_written) mutable
+                           [table_id, callback]([[maybe_unused]] web::IoManager::WriteFileResult bytes_written) mutable
                            {
                               auto msg = format("Successfully downloaded table '{}'.", getTableDescription(table_id));
                               SPDLOG_DEBUG(msg);
@@ -178,18 +169,52 @@ namespace ctb::app
 
    void CtDatasetManager::retrieveLabelImageAsync(uint64_t wine_id, ImageResultCallback result_callback)
    {
-      //      auto attemptLocalRead = std::bind_front(&AsyncImpl::coroReadFile, &(*m_impl));
+      auto* io_ptr = &(m_impl->io_pool);
 
-      auto downloadIfMissing = [this, wine_id](ImageResult& image_result)
+      auto attemptLocalRead = std::bind_front(&web::IoManager::sndReadFile, io_ptr);
+
+      auto downloadIfMissing = [this, wine_id](web::IoManager::ReadFileResult& cache_file) -> exec::task<ImageResult>
       {
-         //if (image_result)
-         //{
-         //   co_return move(image_result);
-         //}
-         //auto session = co_await m_impl->m_web_client.coroDownloadImage();
+         Buffer image_bytes{};
+         if (cache_file)
+         {
+            image_bytes.swap(*cache_file);
+         }
+         else
+         {
+            SPDLOG_DEBUG("Label image for wine id '{}' not found in local cache, attempting download from CT.com", wine_id);
+            //image_bytes        = co_await m_impl->browser.sndDownloadLabel(wine_id);
+            auto bytes_written = co_await m_impl->io_pool.sndWriteFile(buildLabelPath(getLabelImageFolder(), wine_id), image_bytes);
+         }
+         co_return image_bytes;
       };
+      //| stopped_as_error(std::make_exception_ptr(Error{ constants::STATUS_DOWNLOAD_CANCELED, Error::Category::OperationCanceled }))
 
-      //auto pipeline = just(buildLabelPath(getLabelImageFolder(), wine_id)) | let_value(attemptLocalRead) | let_value(downloadIfMissing);
+      auto pipeline = just(buildLabelPath(getLabelImageFolder(), wine_id))
+                    | continues_on(m_impl->io_pool.get_scheduler())
+                    | let_value(attemptLocalRead)
+                    | let_value(downloadIfMissing)
+                    | continues_on(m_impl->cpu_pool.get_scheduler())
+                    | then(
+                         [result_callback](ImageResult result)
+                         {
+                            result_callback(move(result));
+                         })
+                    | let_stopped(
+                         [this, result_callback]() mutable noexcept
+                         {
+                            return safeErrorCallback(
+                               m_impl->cpu_pool.get_scheduler(),
+                               result_callback,
+                               std::make_exception_ptr(Error{ constants::STATUS_DOWNLOAD_CANCELED, Error::Category::OperationCanceled }));
+                         })
+                    | let_error(
+                         [this, result_callback](std::exception_ptr ep) mutable noexcept
+                         {
+                            return safeErrorCallback(m_impl->cpu_pool.get_scheduler(), result_callback, ep);
+                         });
+
+      start_detached(move(pipeline));
    }
 
 

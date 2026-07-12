@@ -131,6 +131,10 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE       = "Wine and Vintage";
    inline constexpr const char* SORT_OPTION_QTY_TOTAL          = "Bottle Count, Wine Name";
 
+   inline constexpr const char* STATUS_DOWNLOAD_CANCELED          = "Download operation canceled.";
+   inline constexpr const char* STATUS_DOWNLOAD_COMPLETE          = "Download operation completed.";
+   inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
+   inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
 
    // table names
    inline constexpr const char* TABLE_NAME_LIST         = "My Wine Collection";

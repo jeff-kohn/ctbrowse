@@ -68,8 +68,8 @@ target_sources(${TARGET_NAME}
 
 
    PRIVATE
-      "AsioThreadScheduler.h"
-      "async_tasks.h"
+      "AsioPipelineScheduler.h"
+      "senders.h"
       "CellarTrackerBrowser.cpp"
       "CellarTrackerBrowser.h"
       "CredentialManager.cpp"
@@ -81,6 +81,8 @@ target_sources(${TARGET_NAME}
       "HeadlessBrowser.h"
       "HttpDownloader.cpp"
       "HttpDownloader.h"
+      "IoManager.cpp"
+      "IoManager.h"
       "log.cpp"
       "ProReviewsCache.cpp"
       "ScopedHandle.h"
@@ -90,7 +92,7 @@ target_sources(${TARGET_NAME}
       "utility_win32.cpp"
       "utility_win32.h"
       "webclient_schema.h"
-  "CellarTrackerBrowser.h")
+  "CellarTrackerBrowser.h" "AsioPipelineScheduler.h" "IoManager.cpp")
 
 target_include_directories(${TARGET_NAME}
    ${warning_guard}

@@ -80,10 +80,11 @@ namespace ctb::web
             return m_session_id;
          }
 
-         ~Session() noexcept;
          Session(Session&&) noexcept;
+         Session& operator=(Session&&);
+         ~Session() noexcept;
+
          Session()                          = delete;
-         Session& operator=(Session&&)      = delete;
          Session& operator=(const Session&) = delete;
          Session(const Session&)            = delete;
 
@@ -96,8 +97,20 @@ namespace ctb::web
       };
 
 
+      // result to for coroCreateSession. Solves the problem of Session object not having default init or copy semantics. since ASIO/stdexec
+      // async plumbing requires default-init in some paths for a result.
+      using MaybeSession = std::optional<Session>;
+
       /// @brief creates a new target and session in the browser and returns the session so it can be used for additional commands on that target.
-      [[nodiscard]] asio::awaitable<Session> coroCreateSession() noexcept(false);
+      [[nodiscard]] asio::awaitable<MaybeSession> coroCreateSession() noexcept(false);
+
+
+      /// @brief Navigate to a web page and return once it is loaded.
+      /// @param session_id - target session to use
+      /// @param url  - url to navigate to
+      /// @return  - the final URL that was loaded.
+      /// @throw - ctb::Error if navigation or other error occurs
+      [[nodiscard]] asio::awaitable<std::string> coroNavigate(std::string session_id, std::string url);
 
 
       /// @brief close/destroy the specified session as a fire-and-forget async call
@@ -113,10 +126,16 @@ namespace ctb::web
                                                                     JsonPropMap parameters,
                                                                     MaybeString session_id) noexcept(false);
 
-
       /// @brief Fire-and-forget alternative to coroSendCommand()
       void postCommand(std::string command, JsonPropMap parameters, MaybeString session_id) noexcept;
 
+
+      /// @brief retreive an executor for the ASIO context this object is using.
+      ///        can be used for co_spawn etc.
+      auto getExecutor() const
+      {
+         return m_ctx->get_executor();
+      }
 
    private:
       // map browser command-id to completion handlers

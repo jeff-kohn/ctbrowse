@@ -8,7 +8,12 @@
 
 namespace ctb::app
 {
+   struct TableDownloadNotification
+   {
+      TableId table_id{};
+      size_t  file_size{};
 
+   };
    /// @brief High-level class that simplifies downloading tables, loading them from disk into dataset, downloading
    ///        label images, getting cache tables, etc.Uses async I/O for downloading files and saving them to disk.
    ///
@@ -17,11 +22,11 @@ namespace ctb::app
    public:
       // Used for downloading table files, expected value is the contents of the file
       using TableResult         = std::expected<std::string, ctb::Error>;
-      using TableResultCallback = copyable_function<void(TableResult)>;
+      using TableResultCallback = copyable_function<void(TableResult) const>;
 
       // used for loading (or downloading) images, expected value is the image bytes.
       using ImageResult         = std::expected<Buffer, ctb::Error>;
-      using ImageResultCallback = copyable_function<void(ImageResult)>;
+      using ImageResultCallback = copyable_function<void(ImageResult) const>;
 
       ~CtDatasetManager() noexcept;   //= default;
 

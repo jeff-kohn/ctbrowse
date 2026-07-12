@@ -185,11 +185,6 @@ namespace ctb::constants
    inline constexpr const char* RES_NAME_TREE_FILTER_IMG          = "TREE_FILTER_IMG";
    inline constexpr const char* RES_NAME_TREE_UNCHECKED_IMG       = "TREE_UNCHECKED_IMG";
 
-   inline constexpr const char* STATUS_DOWNLOAD_CANCELED          = "Download operation canceled.";
-   inline constexpr const char* STATUS_DOWNLOAD_COMPLETE          = "Download operation completed.";
-   inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
-   inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
-
    inline constexpr int  WX_UNSPECIFIED_VALUE                     = -1;
    inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = true;
 

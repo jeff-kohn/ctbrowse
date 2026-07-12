@@ -15,8 +15,6 @@
 
 namespace ctb
 {
-   namespace fs = std::filesystem;
-
 
    // can be used with monadic fns
    inline auto to_unsigned(int32_t val) -> uint32_t

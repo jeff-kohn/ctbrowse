@@ -21,4 +21,5 @@
 namespace ctb
 {
    using namespace std::literals;
+   namespace fs = ctb::log::fs;
 }

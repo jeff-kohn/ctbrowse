@@ -10,6 +10,7 @@
 #include <exec/asio/use_sender.hpp>
 #include <exec/start_detached.hpp>
 #include <exec/static_thread_pool.hpp>
+#include <exec/task.hpp>
 #include <stdexec/execution.hpp>
 
 namespace ctb::tasks
@@ -22,6 +23,8 @@ namespace ctb::tasks
    using stdexec::just;
    using stdexec::let_error;
    using stdexec::let_value;
+   using stdexec::let_stopped;
+   using stdexec::stopped_as_error;
    using stdexec::then;
    using stdexec::upon_error;
    using std::move;
@@ -98,7 +101,8 @@ namespace ctb::tasks
    }
 
 
-   /// @brief Sender that runs on the the specified scheduler and calls the error callback without allowing exceptions to escape.
+   /// @brief Sender that runs on the the specified scheduler and calls the error callback without allowing
+   ///        exceptions to escape.
    /// @return the sender that can be assigned to a receiver for async execution.
    template<typename SchedulerT, typename CallbackT>
    inline auto safeErrorCallback(SchedulerT scheduler, CallbackT&& callback, std::exception_ptr ep) noexcept
@@ -106,7 +110,7 @@ namespace ctb::tasks
       return just(move(ep))
            | continues_on(scheduler)
            | then(
-                [cb_func = std::forward<CallbackT>(callback)](std::exception_ptr ep) mutable noexcept
+                [cb_func = std::forward<CallbackT>(callback)](std::exception_ptr ep) mutable
                 {
                    auto error = packageError(ep);
                    SPDLOG_DEBUG(error.formattedMessage());
@@ -121,7 +125,7 @@ namespace ctb::tasks
                                    packageError(ep).formattedMessage());
                    }
                    catch (...)
-                   {}   // NOLING
+                   {}   // NOLINT
                 });
    }
 
@@ -133,6 +137,7 @@ namespace ctb::tasks
       return ctb::format(constants::FMT_LABEL_IMAGE_FILENAME, wine_id, image_num);
    }
 
+
    inline auto buildLabelPath(const fs::path& cache_folder, uint64_t wine_id) -> fs::path
    {
       return cache_folder / buildLabelFilename(wine_id);
@@ -140,7 +145,23 @@ namespace ctb::tasks
     
 
 
-
+   /// @brief Spawns a plain asio::awaitable<T> coroutine on the given executor and bridges it back into an
+   ///        exec::task<T>, suitable for use from stdexec-based code (e.g. co_await from another exec::task).
+   ///
+   /// asio::co_spawn's completion handler reports exceptions as a value parameter (void(exception_ptr, T))
+   /// rather than through stdexec's error channel, so exec::asio::use_sender surfaces it as a
+   /// std::tuple<exception_ptr, T>. This helper unwraps that tuple and rethrows so callers get an ordinary T
+   /// (or a thrown exception), just like any other awaited call.
+   template<typename T, typename Executor>
+   [[nodiscard]] exec::task<T> asioAwait(Executor exec, asio::awaitable<T> awaitable)
+   {
+      auto [eptr, value] = co_await asio::co_spawn(std::move(exec), std::move(awaitable), exec::asio::use_sender);
+      if (eptr)
+      {
+         std::rethrow_exception(eptr);
+      }
+      co_return std::move(value);
+   }
 
 
 

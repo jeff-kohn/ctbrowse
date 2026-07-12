@@ -21,8 +21,6 @@
 
 namespace ctb::tasks
 {
-   namespace fs = std::filesystem;
-
 
    /// @brief helper function, throws exception if stop_token.stop_requested() == true
    ///
