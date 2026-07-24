@@ -79,7 +79,7 @@ namespace ctb::constants
    inline constexpr auto LOGLEVEL_GLOBAL   = log::level_enum::debug;
    inline constexpr auto LOGLEVEL_FILE     = log::level_enum::debug;
    inline constexpr auto LOGLEVEL_CONSOLE  = log::level_enum::info;
-   inline constexpr auto LOGLEVEL_DEBUGGER = log::level_enum::info;
+   inline constexpr auto LOGLEVEL_DEBUGGER = log::level_enum::debug;
 #else
    inline constexpr auto LOGLEVEL_GLOBAL   = log::level_enum::info;
    inline constexpr auto LOGLEVEL_FILE     = log::level_enum::warn;

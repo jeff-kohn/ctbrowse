@@ -12,7 +12,7 @@
 #include <memory>
 
 
-namespace ctb::web
+namespace ctb
 {
 
    /// @brief Class for running ASIO network/IO tasks on a background thread. Uses a jthread to

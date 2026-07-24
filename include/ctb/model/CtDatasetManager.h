@@ -5,7 +5,6 @@
 #include "ctb/model/CtDatasetOptions.h"
 #include "ctb/model/ProReviewsCache.h"
 
-
 namespace ctb::app
 {
    struct TableDownloadNotification
@@ -14,6 +13,19 @@ namespace ctb::app
       size_t  file_size{};
 
    };
+
+   using MaybePath = std::optional<fs::path>;
+
+   
+   struct ImageFileContents
+   {
+      uint64_t    wine_id{};     // wine_id the image is for
+      Buffer      data{};        // binary contents of the file
+      fs::path    file_path{};   // path the file was loaded from, or path it should be saved to if image was downloaded
+      MaybeString url{};         // will only have a value if this file was downlaoded and should be saved. If empty file was read from disk
+   };
+
+
    /// @brief High-level class that simplifies downloading tables, loading them from disk into dataset, downloading
    ///        label images, getting cache tables, etc.Uses async I/O for downloading files and saving them to disk.
    ///
@@ -25,7 +37,7 @@ namespace ctb::app
       using TableResultCallback = copyable_function<void(TableResult) const>;
 
       // used for loading (or downloading) images, expected value is the image bytes.
-      using ImageResult         = std::expected<Buffer, ctb::Error>;
+      using ImageResult         = std::expected<ImageFileContents, ctb::Error>;
       using ImageResultCallback = copyable_function<void(ImageResult) const>;
 
       ~CtDatasetManager() noexcept;   //= default;
@@ -95,10 +107,8 @@ namespace ctb::app
    private:
       struct AsyncImpl;
 
-      std::optional<ProReviewsCache> m_pro_cache{};
-      fs::path                       m_table_folder{ constants::CURRENT_DIRECTORY };
-      fs::path                       m_label_folder{ ctb::format("{}/Labels", constants::CURRENT_DIRECTORY) };
       indirect<AsyncImpl>            m_impl;
+      std::optional<ProReviewsCache> m_pro_cache{};
    };
 
 }   // namespace ctb::app

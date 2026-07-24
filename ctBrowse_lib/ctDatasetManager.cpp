@@ -57,12 +57,51 @@ namespace ctb::app
       static constexpr uint32_t NUM_CPU_THREADS = 2;
       static constexpr uint32_t NUM_IO_THREADS  = 1;
 
+      AsyncImpl() = default;   // todo need to start browser, which means we need browser data dir.
+
       // ordering is important here not only for initialization but also teardown
-      web::IoManager            io_pool{};
-      exec::static_thread_pool  cpu_pool{ NUM_CPU_THREADS };
-      HttpDownloader            http_client{ io_pool.get_executor() };
-      web::CallarTrackerBrowser browser{ io_pool.get_context() };
+      fs::path                 label_folder{ ctb::format("{}/Labels", constants::CURRENT_DIRECTORY) };
+      fs::path                 table_folder{ constants::CURRENT_DIRECTORY };
+      IoManager                io_pool{};
+      exec::static_thread_pool cpu_pool{ NUM_CPU_THREADS };
+      HttpDownloader           http_client{ io_pool.get_executor() };
+      CellarTrackerBrowser     browser{ io_pool.get_context() };
+
+      /// @brief Get the file contents for the specified wine label.
+      exec::task<ImageFileContents> sndGetLabelImage(uint64_t wine_id) noexcept(false);
    };
+
+
+   /// @brief Retrieve the requested label image
+   ///
+   /// The file will be read from disk if it exists on cache, otherwise it will be
+   /// downloaded from CellarTracker.com
+   /// @param wine_id -  the id of the wine to retrieve an image for
+   /// @return - struct containing the image file's contents as well as some metadata
+   /// @throw - ctb::Error if file couldn't be read from disk or downloaded
+   exec::task<ImageFileContents> CtDatasetManager::AsyncImpl::sndGetLabelImage(uint64_t wine_id) noexcept(false)
+   {
+      ImageFileContents retval{ .wine_id = wine_id };
+
+      // try to read the file locally first.
+      auto local_path         = buildLabelPath(label_folder, wine_id);
+      auto local_cache_result = co_await io_pool.sndReadFile(local_path);
+      if (local_cache_result)
+      {
+         retval.file_path = std::move(local_path);
+         retval.data      = std::move(*local_cache_result);
+
+         co_return retval;
+      }
+      SPDLOG_DEBUG("CtDatasetManager::AsyncImpl::sndGetLabelImage couldn't read local file '{}', will attempt to download label.",
+                   local_path);
+
+      // stdexec::on is roundtrip scheduler, this will get executed on cpu_pool and then continue on the original scheduler.
+      HttpFileContents file_contents = co_await browser.downloadLabel(wine_id);
+      retval.data = co_await stdexec::on(cpu_pool.get_scheduler(), just(move(file_contents)) | then(decodeResourceContents));
+
+      co_return retval;
+   }
 
 
    CtDatasetManager::CtDatasetManager()
@@ -85,15 +124,15 @@ namespace ctb::app
    {
       switch (table_id)
       {
-         case TableId::List        : return getDatasetOrThrow<WineListTable>(m_table_folder, table_id);
-         case TableId::Pending     : return getDatasetOrThrow<PendingWineTable>(m_table_folder, table_id);
-         case TableId::Consumed    : return getDatasetOrThrow<ConsumedWineTable>(m_table_folder, table_id);
-         case TableId::Availability: return getDatasetOrThrow<ReadyToDrinkTable>(m_table_folder, table_id);
-         case TableId::Purchase    : return getDatasetOrThrow<PurchasedWineTable>(m_table_folder, table_id);
-         case TableId::Tag         : return getDatasetOrThrow<TaggedWinesTable>(m_table_folder, table_id);
-         case TableId::Inventory   : return getDatasetOrThrow<BottleInventoryTable>(m_table_folder, table_id);
-         case TableId::PrivateNotes: return getDatasetOrThrow<PrivateNotesTable>(m_table_folder, table_id);
-         case TableId::Notes       : return getDatasetOrThrow<TastingNotesTable>(m_table_folder, table_id);
+         case TableId::List        : return getDatasetOrThrow<WineListTable>(m_impl->table_folder, table_id);
+         case TableId::Pending     : return getDatasetOrThrow<PendingWineTable>(m_impl->table_folder, table_id);
+         case TableId::Consumed    : return getDatasetOrThrow<ConsumedWineTable>(m_impl->table_folder, table_id);
+         case TableId::Availability: return getDatasetOrThrow<ReadyToDrinkTable>(m_impl->table_folder, table_id);
+         case TableId::Purchase    : return getDatasetOrThrow<PurchasedWineTable>(m_impl->table_folder, table_id);
+         case TableId::Tag         : return getDatasetOrThrow<TaggedWinesTable>(m_impl->table_folder, table_id);
+         case TableId::Inventory   : return getDatasetOrThrow<BottleInventoryTable>(m_impl->table_folder, table_id);
+         case TableId::PrivateNotes: return getDatasetOrThrow<PrivateNotesTable>(m_impl->table_folder, table_id);
+         case TableId::Notes       : return getDatasetOrThrow<TastingNotesTable>(m_impl->table_folder, table_id);
          default                   : throw Error{ "Table not found." };
       };
    }
@@ -113,7 +152,7 @@ namespace ctb::app
    {
       if (!m_pro_cache)
       {
-         m_pro_cache = loadTableData<ProReviewsCacheTable>(m_table_folder, TableId::Availability).value_or({});
+         m_pro_cache = loadTableData<ProReviewsCacheTable>(m_impl->table_folder, TableId::Availability).value_or({});
       }
       return m_pro_cache.value();
    }
@@ -143,7 +182,7 @@ namespace ctb::app
 
                       | continues_on(m_impl->cpu_pool.get_scheduler())
                       | then(
-                           [table_id, callback]([[maybe_unused]] web::IoManager::WriteFileResult bytes_written) mutable
+                           [table_id, callback]([[maybe_unused]] IoManager::WriteFileResult bytes_written) mutable
                            {
                               auto msg = format("Successfully downloaded table '{}'.", getTableDescription(table_id));
                               SPDLOG_DEBUG(msg);
@@ -169,50 +208,33 @@ namespace ctb::app
 
    void CtDatasetManager::retrieveLabelImageAsync(uint64_t wine_id, ImageResultCallback result_callback)
    {
-      auto* io_ptr = &(m_impl->io_pool);
+      auto getImageContents = std::bind_front(&AsyncImpl::sndGetLabelImage, &(*m_impl));
 
-      auto attemptLocalRead = std::bind_front(&web::IoManager::sndReadFile, io_ptr);
-
-      auto downloadIfMissing = [this, wine_id](web::IoManager::ReadFileResult& cache_file) -> exec::task<ImageResult>
+      auto saveIfNeeded = [this](ImageFileContents image_contents) -> exec::task<ImageFileContents>
       {
-         Buffer image_bytes{};
-         if (cache_file)
+         // if url is present, we downloaded the file so go ahead and save it (overwrite would be unlikely but OK)
+         if (image_contents.url.has_value())
          {
-            image_bytes.swap(*cache_file);
+            auto [[maybe_unused]] bytes_written = co_await m_impl->io_pool.sndWriteFile(image_contents.file_path, image_contents.data);
+            SPDLOG_DEBUG("CtDatasetManager::retrieveLabelImageAsync - saved {} bytes to '{}'", bytes_written, image_contents.file_path);
          }
-         else
-         {
-            SPDLOG_DEBUG("Label image for wine id '{}' not found in local cache, attempting download from CT.com", wine_id);
-            //image_bytes        = co_await m_impl->browser.sndDownloadLabel(wine_id);
-            auto bytes_written = co_await m_impl->io_pool.sndWriteFile(buildLabelPath(getLabelImageFolder(), wine_id), image_bytes);
-         }
-         co_return image_bytes;
+         // just forward the data to the next sender
+         co_return image_contents;
       };
-      //| stopped_as_error(std::make_exception_ptr(Error{ constants::STATUS_DOWNLOAD_CANCELED, Error::Category::OperationCanceled }))
 
-      auto pipeline = just(buildLabelPath(getLabelImageFolder(), wine_id))
+      auto errorCallback = [this, result_callback](std::exception_ptr ep) mutable noexcept
+      {
+         return safeErrorCallback(m_impl->cpu_pool.get_scheduler(), result_callback, ep);
+      };
+
+      auto pipeline = just(wine_id)
                     | continues_on(m_impl->io_pool.get_scheduler())
-                    | let_value(attemptLocalRead)
-                    | let_value(downloadIfMissing)
+                    | let_value(getImageContents)
+                    | let_value(saveIfNeeded)
                     | continues_on(m_impl->cpu_pool.get_scheduler())
-                    | then(
-                         [result_callback](ImageResult result)
-                         {
-                            result_callback(move(result));
-                         })
-                    | let_stopped(
-                         [this, result_callback]() mutable noexcept
-                         {
-                            return safeErrorCallback(
-                               m_impl->cpu_pool.get_scheduler(),
-                               result_callback,
-                               std::make_exception_ptr(Error{ constants::STATUS_DOWNLOAD_CANCELED, Error::Category::OperationCanceled }));
-                         })
-                    | let_error(
-                         [this, result_callback](std::exception_ptr ep) mutable noexcept
-                         {
-                            return safeErrorCallback(m_impl->cpu_pool.get_scheduler(), result_callback, ep);
-                         });
+                    | then(result_callback)
+                    | stopped_as_error(std::make_exception_ptr(Error{ constants::STATUS_DOWNLOAD_CANCELED, Error::Category::OperationCanceled }))
+                    | let_error(errorCallback);
 
       start_detached(move(pipeline));
    }
@@ -224,7 +246,7 @@ namespace ctb::app
       {
          throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_PATH_NOT_FOUND, folder.generic_string() };
       }
-      m_table_folder = folder;
+      m_impl->table_folder = folder;
       return *this;
    }
 
@@ -232,7 +254,7 @@ namespace ctb::app
    /// @brief returns the location used for loading data files from disk
    auto CtDatasetManager::getTableFolder() const -> const fs::path&
    {
-      return m_table_folder;
+      return m_impl->table_folder;
    }
 
 
@@ -242,14 +264,14 @@ namespace ctb::app
       {
          throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_PATH_NOT_FOUND, folder.generic_string() };
       }
-      m_label_folder = folder;
+      m_impl->label_folder = folder;
       return *this;
    }
 
 
    auto CtDatasetManager::getLabelImageFolder() const -> const fs::path&
    {
-      return m_label_folder;
+      return m_impl->label_folder;
    }
 
 

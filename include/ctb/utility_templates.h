@@ -55,4 +55,18 @@ namespace ctb
    }
 
 
+   // convert a variant into its text representation. As long as all the types
+   // contained in the variant are formattable,
+   template<typename... Args>
+   std::string asString(const std::variant<Args...>& vt)
+   {
+      return std::visit(
+         [](auto&& arg)
+         {
+            return ctb::format("{}", arg);
+         },
+         vt);
+   }
+
+
 }   // namespace ctb

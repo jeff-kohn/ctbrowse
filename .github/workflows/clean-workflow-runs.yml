@@ -12,14 +12,29 @@ jobs:
       contents: read
 
     steps:
-      - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
+      - name: Delete workflow clean runs
+        uses: Mattraks/delete-workflow-runs@v2.1.0
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
-          retain_days: 7
+          keep_minimum_runs: 0
+          delete_workflow_pattern: clean
+
+      - name: Delete failed/canceled runs
+        uses: Mattraks/delete-workflow-runs@v2.1.0
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          delete_run_by_conclusion_pattern: 'cancelled,failure'
+
+      - name: Delete old build runs
+        uses: Mattraks/delete-workflow-runs@vv2.1.0
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
           keep_minimum_runs: 1
-          delete_workflow_pattern: ci|clean
+          retain_days: 30
+          delete_workflow_pattern: ci
 
   get-packages:
     name: Get Packages
@@ -64,4 +79,4 @@ jobs:
           token: ${{ secrets.VCPKG_CACHE_TOKEN }}
           package-name: ${{ matrix.package }}
           package-type: nuget
-          min-versions-to-keep: 5
+          min-versions-to-keep: 3

@@ -171,4 +171,8 @@ namespace ctb
       const auto end = sv.find_last_not_of(whitespace);
       return sv.substr(start, end - start + 1);
    }
+
+
+   [[nodiscard]] Buffer base64Decode(std::string_view encoded_str);
+
 }   // namespace ctb

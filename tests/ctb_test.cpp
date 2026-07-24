@@ -1,4 +1,6 @@
-#include "../ctBrowse_lib/HeadlessBrowser.h"
+#include "../ctBrowse_lib/CellarTrackerBrowser.h"
+#include "../ctBrowse_lib/senders.h"
+#include "../ctBrowse_lib/IoManager.h"
 
 #include <asio/executor_work_guard.hpp>
 #include <asio/io_context.hpp>
@@ -7,59 +9,48 @@
 
 namespace ctb::tests
 {
-   //setupDefaultLogger({ { makeFileSink(log_folder, constants::APP_NAME_SHORT) }, { makeDebuggerSink() } });
+   using namespace ctb::tasks;
+
+   IoManager io_mgr{};
 
    TEST_CASE("Launch Headless Browser", "[CdpBrowser]")
    {
-      using std::jthread;
-      using namespace asio;
-      using namespace web;
-      using WorkGuard = asio::executor_work_guard<asio::io_context::executor_type>;
+      try
+      {
+         log::setupDefaultLogger({ { log::makeDebuggerSink() }, { log::makeConsoleSink(log::level_enum::debug) } });
 
-      auto      ctx = std::make_shared<asio::io_context>(1);
-      WorkGuard m_work_guard{ make_work_guard(*ctx) };
-      jthread   thread{ [&ctx]
-                        {
-                         ctx->run();
-                      } };
+         CellarTrackerBrowser browser{ io_mgr.get_context() };
 
-      HeadlessBrowser browser{ ctx };
-      //browser.start();
-      //while (browser.status() != HeadlessBrowser::Status::Ready)
-      //{
-      //   std::this_thread::sleep_for(100ms);
-      //}
+         browser.start();
+         while (browser.status() != CellarTrackerBrowser::Status::Ready)
+         {
+            std::this_thread::sleep_for(100ms);
+         }
 
-      //auto fut = asio::co_spawn(
-      //   *ctx,
-      //   [&browser]() -> asio::awaitable<std::unique_ptr<HeadlessBrowser::Session>>
-      //   {
-      //      auto val = co_await browser.coroCreateSession();
-      //      co_return std::make_unique<HeadlessBrowser::Session>(std::move(val));
-      //   },
-      //   asio::use_future);
+         int64_t wine_id = 4659587;
 
-      //// Blocks this (non-coroutine) thread until the coroutine completes;
-      //// rethrows any exception the coroutine threw.
-      //try
-      //{
-      //   auto maybe_session = fut.get();
-      //   REQUIRE(maybe_session.get() != nullptr);
-      //   auto session = std::move(*maybe_session);
-      //   std::println("Created browser session with id {}", session.sessionId());
-      //}
-      //catch(...)
-      //{
-      //   std::println("coroCreateSession() returned error: {}", packageError().formattedMessage());
-      //}
+         auto pipeline = just(wine_id)
+                       | let_value(std::bind_front(&CellarTrackerBrowser::downloadLabel, &browser))
+                       | then(tasks::decodeResourceContents)
+                       | then(
+                            [](Buffer buf) -> Buffer
+                            {
+                               std::println("Received {} bytes for wine label.", buf.size());
+                               return buf;
+                            });
 
-      //browser.stop();
-      //while (browser.status() != HeadlessBrowser::Status::Stopped)
-      //{
-      //   std::this_thread::sleep_for(100ms);
-      //}
+         auto buffer = stdexec::sync_wait(pipeline);
 
-      m_work_guard.reset();
+         browser.stop();
+         while (browser.status() != CellarTrackerBrowser::Status::Stopped)
+         {
+            std::this_thread::sleep_for(100ms);
+         }
+      }
+      catch (...)
+      {
+         log::exception(packageError());
+      }
    }
 
 

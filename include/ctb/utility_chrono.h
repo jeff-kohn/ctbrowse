@@ -22,6 +22,39 @@ namespace ctb
    namespace chrono = std::chrono;
 
 
+   namespace detail
+   {
+      using chrono::duration;
+
+      template<class T>
+      struct is_duration : std::false_type
+      {};
+
+      template<class RepT, class PeriodT>
+      struct is_duration<duration<RepT, PeriodT>> : std::true_type
+      {};
+
+      template<class RepT, class PeriodT>
+      struct is_duration<const duration<RepT, PeriodT>> : std::true_type
+      {};
+
+      template<class RepT, class PeriodT>
+      struct is_duration<volatile duration<RepT, PeriodT>> : std::true_type
+      {};
+
+      template<class RepT, class PeriodT>
+      struct is_duration<const volatile duration<RepT, PeriodT>> : std::true_type
+      {};
+
+   }   // namespace detail
+
+
+
+   /// @brief Concept requiring a type to be a chrono::duration
+   template<typename T>
+   concept DurationType = detail::is_duration<T>::value;
+
+
    /// @brief Parse an ISO date-time string and return it as a UTC timepoint. 
    /// 
    /// Values returned from this function will always be UTC, even if the string

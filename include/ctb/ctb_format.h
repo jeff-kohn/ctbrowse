@@ -14,4 +14,7 @@ namespace ctb
    using fmt::make_format_args;
    using fmt::vformat;
 
+   using fmt::formatter;
+   using fmt::format_parse_context;
+   using fmt::format_context;
 }   // namespace ctb

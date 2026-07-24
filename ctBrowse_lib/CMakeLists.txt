@@ -69,7 +69,7 @@ target_sources(${TARGET_NAME}
 
    PRIVATE
       "AsioPipelineScheduler.h"
-      "senders.h"
+      "BrowserEvents.h"
       "CellarTrackerBrowser.cpp"
       "CellarTrackerBrowser.h"
       "CredentialManager.cpp"
@@ -86,13 +86,14 @@ target_sources(${TARGET_NAME}
       "log.cpp"
       "ProReviewsCache.cpp"
       "ScopedHandle.h"
+      "senders.h"
       "tasks.cpp"
       "utility.cpp"
       "utility_http.cpp"
       "utility_win32.cpp"
       "utility_win32.h"
       "webclient_schema.h"
-  "CellarTrackerBrowser.h" "AsioPipelineScheduler.h" "IoManager.cpp")
+)
 
 target_include_directories(${TARGET_NAME}
    ${warning_guard}

@@ -7,6 +7,28 @@
 #include <glaze/glaze.hpp>
 #include <optional>
 
+namespace fmt
+{
+
+   template<>
+   struct formatter<glz::raw_json>
+   {
+      // no format-spec parsing needed, just consume to the closing brace
+      constexpr auto parse(format_parse_context& ctx)
+      {
+         return ctx.begin();
+      }
+
+      auto format(const glz::raw_json& value, format_context& ctx) const
+      {
+         // value.str holds the raw (already-serialized) JSON text
+         std::string pretty = glz::prettify_json(value.str);
+         return fmt::format_to(ctx.out(), "{}", pretty);
+      }
+   };
+
+}   // namespace ctb
+
 
 /// @brief json serialization support for CtPropFilterPredicate
 template <>

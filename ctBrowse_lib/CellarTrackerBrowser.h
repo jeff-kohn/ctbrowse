@@ -1,13 +1,14 @@
 #pragma once
 #include "ctb/ctb.h"
-
+#include "senders.h"
 #include <asio/io_context.hpp>
-#include <asio/awaitable.hpp>
 #include <exec/task.hpp>
 
-namespace ctb::web
+namespace ctb
 {
    class HeadlessBrowser;
+
+
 
 
    /// @brief Provides an async websocket interface for orchestrating a headless browser instance via Chrome Devtools Protocol.
@@ -17,7 +18,7 @@ namespace ctb::web
    ///
    /// This class uses and returns stdexec-compatible asio coroutines that can be used from other coroutines or stdexec pipelines.
    /// The coroutine interface works better with the event-based websocket used for talking to the browser.
-   class CallarTrackerBrowser
+   class CellarTrackerBrowser
    {
    public:
       static constexpr int32_t           DEFAULT_WS_PORT   = 9222;
@@ -41,7 +42,7 @@ namespace ctb::web
       ///
       /// This class does not protect its internal implementation from concurrent access since
       /// it is meant to run on a single-threaded context.
-      CallarTrackerBrowser(ContextPtr io_ctx);
+      CellarTrackerBrowser(ContextPtr io_ctx);
 
 
       /// @brief start the browser process.
@@ -63,15 +64,19 @@ namespace ctb::web
       auto status() const -> Status;
 
 
-      /// @brief coroutine to download a label image from CT
-      [[nodiscard]] exec::task<Buffer> sndDownloadLabel(uint64_t wine_id) noexcept(false);
+      /// @brief stdexec sender to download a label image from CT
+      [[nodiscard]] tasks::AnySender<tasks::HttpFileContents> downloadLabel(uint64_t wine_id) noexcept(false);
 
       // needed in CPP for PIMPL
-      ~CallarTrackerBrowser();
+      ~CellarTrackerBrowser();
 
    private:
       indirect<HeadlessBrowser> m_browser;
+
+      // private coroXXX methods are ASIO coroutines. Public methods that return stedexec senders
+      // should only co_await these from inside an asSender() invocation, otherwise bad things can happen
+      asio::awaitable<std::string> coroGetLabelImageUrl(const std::string& session_id) noexcept(false);
    };
 
-}   // namespace ctb::webclient
+}   // namespace ctb
 

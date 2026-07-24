@@ -1,42 +1,80 @@
 #include "HeadlessBrowser.h"
+#include "json_serialization.h"
 #include "senders.h"
 
 #include "ctb/utility_templates.h"
 
-
+#include <asio/experimental/awaitable_operators.hpp>
 #include <fmt/chrono.h>
 #include <fmt/ranges.h>
+#include <glaze/format/format_to.hpp>
 #include <glaze/glaze_exceptions.hpp>
 #include <string_view>
 
 
-namespace ctb::web
+namespace ctb
 {
-   using glz::ex::read_json;
-   using glz::ex::write_json;
+   // easier to use exceptions than constantly checking error codes when we're writing coroutines
+   using std::move;
+   using std::string;
+   using std::string_view;
+
 
    constexpr auto MAX_CONNECT_RETRIES = 10;
    constexpr auto FMT_EDGE_HTTP_URL   = "http://127.0.0.1:{}/json/version";
-   constexpr auto FMT_EDGE_ARGS       = "--headless=new --remote-debugging-address=127.0.0.1 "
-                                        "--remote-debugging-port={} --disable-gpu "
-                                        "--no-first-run --no-default-browser-check --disable-sync "
-                                        "--user-data-dir=\"{}\""sv;
+   //constexpr auto FMT_EDGE_ARGS       = "--headless=new --remote-debugging-address=127.0.0.1 "
+   //                                     "--remote-debugging-port={} --disable-gpu "
+   //                                     "--no-first-run --no-default-browser-check --disable-sync "
+   //                                     "--user-data-dir=\"{}\""sv;
 
+   constexpr auto FMT_EDGE_ARGS = "--headless=new "
+                                  "--remote-debugging-address=127.0.0.1 "
+                                  "--no-first-run --no-default-browser-check --disable-sync "
+                                  "--disable-blink-features=AutomationControlled "
+                                  "--window-size=1720,1010 "
+                                  "--remote-debugging-port={} "
+                                  "--user-data-dir=\"{}\""sv;
    namespace
    {
-      inline void throwIfError(std::string_view command_name, const BrowserMessage& response)
+      inline void throwIfError(string_view command_name, const BrowserMessage& response) noexcept(false)
       {
          if (response.error)
          {
             throw Error{ Error::Category::NetworkError, "{} failed. ({})", command_name, response.error->str };
          }
       }
+
+
+      // retrieves the result member as a JsonPropMap. If the prop map contains an "error" param it will
+      // be throw as an Error.
+      inline JsonPropMap getResultFromResponse(const BrowserMessage& msg) noexcept(false)
+      {
+         JsonPropMap results{};
+         if (msg.result)
+         {
+            results = glz::ex::read_json<JsonPropMap>(msg.result->str);
+            if (auto it = results.find(params::ERROR_TEXT); it != results.end())
+            {
+               throw ctb::Error{ asString(it->second), Error::Category::NetworkError };
+            }
+         }
+         return results;
+      }
+
+      template<typename T>
+      T getResultAs(const BrowserMessage& msg) noexcept(false)
+      {
+         if (msg.result)
+         {
+            return glz::ex::read_json<T>(msg.result->str);
+         }
+         throw Error{ "HeadlessBrowser couldn't parse empty result." };
+      }
+
    }   // namespace
 
 
-   HeadlessBrowser::Session::Session(HeadlessBrowser& browser, std::string session_id)
-      : m_session_id{ std::move(session_id) },
-        m_browser{ &browser }
+   HeadlessBrowser::Session::Session(HeadlessBrowser& browser, string session_id) : m_session_id{ move(session_id) }, m_browser{ &browser }
    {}
 
 
@@ -47,7 +85,7 @@ namespace ctb::web
          // this object may not be valid if it was moved-from
          if (m_browser)
          {
-            m_browser->postCloseSession(std::move(m_session_id));
+            m_browser->postCloseSession(move(m_session_id));
          }
       }
       catch (...)
@@ -57,10 +95,11 @@ namespace ctb::web
    }
 
 
-   HeadlessBrowser::Session::Session(Session&& other) noexcept : m_session_id{ std::move(other.m_session_id) }, m_browser{ other.m_browser }
+   HeadlessBrowser::Session::Session(Session&& other) noexcept : m_session_id{ move(other.m_session_id) }, m_browser{ other.m_browser }
    {
       other.m_browser = nullptr;
    }
+
 
    HeadlessBrowser::Session& HeadlessBrowser::Session::operator=(Session&& other)
    {
@@ -68,9 +107,9 @@ namespace ctb::web
       {
          if (m_browser)
          {
-            m_browser->postCloseSession(std::move(m_session_id));
+            m_browser->postCloseSession(move(m_session_id));
          }
-         m_session_id    = std::move(other.m_session_id);
+         m_session_id    = move(other.m_session_id);
          m_browser       = other.m_browser;
          other.m_browser = nullptr;
       }
@@ -84,7 +123,7 @@ namespace ctb::web
    }
 
 
-   void HeadlessBrowser::start(std::string browser_path, std::string data_dir, int32_t port) noexcept(false)
+   void HeadlessBrowser::start(string browser_path, string data_dir, int32_t port) noexcept(false)
    {
       if (m_status != Status::Stopped)
       {
@@ -137,65 +176,177 @@ namespace ctb::web
       // make sure we're on the io thread.
       co_await asio::dispatch(*m_ctx, asio::use_awaitable);
 
-      std::string target_id = co_await coroCreateTarget();
-      auto        session   = co_await coroAttachTarget(target_id);
-      co_await coroEnablePage(session.sessionId());
-
+      string target_id = co_await coroCreateTarget();
+      auto   session   = co_await coroAttachTarget(target_id);
       co_return session;
    }
 
 
-   asio::awaitable<std::string> HeadlessBrowser::coroNavigate(std::string session_id, std::string url)
+   asio::awaitable<GetResourceResult> HeadlessBrowser::coroGetResource(const std::string& session_id,
+                                                                       const std::string& frame_id,
+                                                                       const std::string& url) noexcept(false)
    {
-      // make sure we're on the io thread.
       co_await asio::dispatch(*m_ctx, asio::use_awaitable);
 
-      co_return std::string{};
+      JsonPropMap params{
+         { params::FRAME_ID,   frame_id },
+         { params::TARGET_URL, url      }
+      };
+
+      auto response = co_await coroSendCommand(commands::GET_RESOURCE_CONTENT, move(params), session_id);
+      throwIfError(commands::GET_RESOURCE_CONTENT, response);
+
+      co_return getResultAs<GetResourceResult>(response);
    }
 
 
-   void HeadlessBrowser::postCloseSession(std::string session_id) noexcept
+   asio::awaitable<NavigateResult> HeadlessBrowser::coroNavigate(string session_id, string url) noexcept(false)
+   {
+      using namespace asio::experimental::awaitable_operators;
+
+      co_await asio::dispatch(*m_ctx, asio::use_awaitable);
+
+      JsonPropMap stealth_params{
+         { params::SOURCE, std::string{ params::STEALTH_NAVIGATOR } }
+      };
+      auto result = co_await coroSendCommand(commands::ADD_NEW_DOC_SCRIPT, stealth_params, session_id);
+      result      = co_await coroSendCommand(commands::SET_USER_AGENT, params::USER_AGENT_PARAMS, session_id);
+
+      subscribeEvents(session_id, std::array{ events::PAGE_LOAD, events::PAGE_FRAME_NAVIGATED, events::PAGE_DOM_LOADED });
+      co_await coroEnablePageEvents(session_id);
+
+      // send the navigate command
+      JsonPropMap params{
+         { params::TARGET_URL, url }
+      };
+      auto nav_response = co_await coroSendCommand(commands::NAVIGATE_TO_URL, move(params), session_id);
+      throwIfError("HeadlessBrowser::coroNavigate", nav_response);
+      auto nav_result = getResultFromResponse(nav_response);
+
+
+      // now wait for the events to fire that signify page has loaded enough for us to query the DOM.
+      // PAGE_LOAD isn't sufficient because initial HTML may just be a small stub that run JS
+      // to populate the page, we ne need PAGE_DOM_LOADED to signify that DOM tree has been build. We also
+      // use the PAGE_FRAME_NAVIGATED event to get the frame_id which is needed for retrieving resources
+      // through the DOM.
+      NavigateResult retval{ .session_id = session_id, .frame_id = asString(nav_result[params::FRAME_ID]) };
+      bool           page_loaded = false;
+      bool           dom_loaded  = false;
+
+      while (retval.url.empty() || !page_loaded || !dom_loaded)
+      {
+         auto event_msg = co_await coroAwaitEvent(session_id);
+         if (!event_msg.method.has_value()) throw Error{ "HeadlessBrowser received invalid event message." };
+
+         if (event_msg.method.value() == events::PAGE_FRAME_NAVIGATED)
+         {
+            auto fid       = glz::get_as_json<string_view, "/frame/id">(event_msg.params->str);
+            auto frame_url = glz::get_as_json<string_view, "/frame/url">(event_msg.params->str);
+            if (fid and retval.frame_id == *fid)
+            {
+               retval.url = frame_url.value_or("");
+               if (retval.url != url)
+               {
+                  throw ctb::Error{ Error::Category::NetworkError, "Page.navigate command for {} returned unexpected result", url };
+               }
+            }
+         }
+         else if (event_msg.method.value() == events::PAGE_DOM_LOADED)
+         {
+            dom_loaded = true;
+            SPDLOG_DEBUG("Page.domContentEventFired event received for url {}", retval.url);
+         }
+         else
+         {
+            // PAGE_LOAD
+            page_loaded = true;
+            SPDLOG_DEBUG("Page.loadEventFired event received for url {}", retval.url);
+         }
+      }
+
+      co_return retval;
+   }
+
+
+   asio::awaitable<HeadlessBrowser::EvalReturnValue> HeadlessBrowser::coroRuntimeEval(string session_id, string expression) noexcept
+   {
+      co_await asio::dispatch(*m_ctx, asio::use_awaitable);
+
+      JsonPropMap params{
+         { params::RETURN_BY_VAL, true             },
+         { params::EXPRESSION,    move(expression) }
+      };
+
+      auto response = co_await coroSendCommand(commands::RUNTIME_EVAL, move(params), session_id);
+      throwIfError(commands::RUNTIME_EVAL, response);
+
+      auto eval_result = getResultAs<RuntimeEvalResult>(response);
+      if (eval_result.result.value.starts_with("ERROR"))
+      {
+         co_return std::unexpected{
+            Error{ eval_result.result.value, Error::Category::NetworkError }
+         };
+      }
+      co_return eval_result;
+   }
+
+
+   void HeadlessBrowser::postCloseSession(string session_id) noexcept
    {
       // clang-format off
-      postCommand(commands::CLOSE_TARGET, { { params::TARGET_ID, std::move(session_id) } }, {});
+      delayedExec(0ms, [this, session_id]
+         {
+            m_event_handlers.erase(session_id);
+            postCommand(commands::CLOSE_TARGET, { { params::TARGET_ID, move(session_id) } }, {});
+         });
       // clang-format on
    }
 
 
-   [[nodiscard]] asio::awaitable<BrowserMessage> HeadlessBrowser::coroSendCommand(std::string command,
-                                                                                  JsonPropMap parameters,
-                                                                                  MaybeString session_id) noexcept(false)
+   asio::awaitable<BrowserMessage> HeadlessBrowser::coroSendCommand(string      command,
+                                                                    JsonPropMap parameters,
+                                                                    MaybeString session_id) noexcept(false)
    {
-      return asio::async_initiate<decltype(asio::use_awaitable), void(BrowserMessage)>(
-         [this](auto handler, std::string command, JsonPropMap parameters, MaybeString session_id)
-         {
-            BrowserCommand msg{ .method    = std::move(command),
-                                .id        = m_next_id++,
-                                .sessionId = std::move(session_id),
-                                .params    = std::move(parameters) };
-
-            // map the completion handler to id so that we can look it up and complete it when the browser message comes back
-            m_command_handlers[msg.id.transform(to_unsigned).value_or(0U)] = std::move(handler);
-
-            // serialize and send the message. response will come via on_message()
-            auto json = write_json(msg);
-            m_ws_client.send(json);
-         },
-         asio::use_awaitable, std::move(command), std::move(parameters), std::move(session_id));
+      return coroSendCommand(move(command), glz::raw_json(glz::ex::write_json(parameters)), move(session_id));
    }
 
 
-   void HeadlessBrowser::postCommand(std::string command, JsonPropMap parameters, MaybeString session_id) noexcept
+   asio::awaitable<BrowserMessage> HeadlessBrowser::coroSendCommand(string        command,
+                                                                    glz::raw_json parameters,
+                                                                    MaybeString   session_id) noexcept(false)
+   {
+      co_await asio::dispatch(*m_ctx, asio::use_awaitable);
+
+      co_return co_await asio::async_initiate<decltype(asio::use_awaitable), void(BrowserMessage)>(
+         [this](auto handler, string command, glz::raw_json parameters, MaybeString session_id)
+         {
+            BrowserCommand msg{ .id = m_next_id++, .method = move(command), .sessionId = move(session_id), .params = move(parameters) };
+
+            // map the completion handler to id so that we can look it up and complete it when the browser message comes back
+            m_command_handlers[msg.id.transform(to_unsigned).value_or(0U)] = move(handler);
+
+            // serialize and send the message. response will come via on_message()
+            auto json = glz::ex::write_json(msg);
+            m_ws_client.send(json);
+         },
+         asio::use_awaitable,
+         move(command),
+         move(parameters),
+         move(session_id));
+   }
+
+
+   void HeadlessBrowser::postCommand(string command, JsonPropMap parameters, MaybeString session_id) noexcept
    {
       try
       {
          asio::co_spawn(
             *m_ctx,
-            [this, cmd = std::move(command), params = std::move(parameters), id = std::move(session_id)] -> asio::awaitable<void>
+            [this, cmd = move(command), params = move(parameters), id = move(session_id)] -> asio::awaitable<void>
             {
                try
                {
-                  (void)co_await coroSendCommand(std::move(cmd), std::move(params), std::move(id));
+                  (void)co_await coroSendCommand(move(cmd), move(params), move(id));
                }
                catch (...)
                {
@@ -208,6 +359,26 @@ namespace ctb::web
       {
          SPDLOG_DEBUG("HeadlessBrowser::postCommand failed: {}", packageError().formattedMessage());
       }
+   }
+
+
+   void HeadlessBrowser::subscribeEvent(const string& session_id, const string& event_name)
+   {
+      coExec(
+         [this, session_id, event_name] mutable
+         {
+            getOrCreateEventHandler(session_id)->subscribeEvent(move(event_name));
+         });
+   }
+
+
+   void HeadlessBrowser::unSubscribeEvent(const string& session_id, const string& event_name)
+   {
+      coExec(
+         [this, session_id, event_name] mutable
+         {
+            getOrCreateEventHandler(session_id)->unSubscribeEvent(move(event_name));
+         });
    }
 
 
@@ -227,7 +398,7 @@ namespace ctb::web
    }
 
 
-   void HeadlessBrowser::onWebSocketClose(glz::ws_close_code code, std::string_view reason)
+   void HeadlessBrowser::onWebSocketClose(glz::ws_close_code code, string_view reason)
    {
       SPDLOG_DEBUG("HeadlessBrowser::onClose - code: {}, reason: '{}'", static_cast<uint16_t>(code), reason);
       m_status.store(Status::Stopped);
@@ -235,7 +406,7 @@ namespace ctb::web
    }
 
 
-   void HeadlessBrowser::onWebSocketMessage(std::string_view msg_text, glz::ws_opcode opcode)
+   void HeadlessBrowser::onWebSocketMessage(string_view msg_text, glz::ws_opcode opcode)
    {
       if (opcode == glz::ws_opcode::text)
       {
@@ -253,8 +424,9 @@ namespace ctb::web
       }
       else
       {
-         SPDLOG_DEBUG(
-            "Unexpected opcode received in HeadlessBrowser::onMessage. Opcode: {}. Message: {}", enum_to_string(opcode), msg_text);
+         SPDLOG_DEBUG("Unexpected opcode received in HeadlessBrowser::onMessage. Opcode: {}. Message: {}",
+                      enum_to_string(opcode),
+                      msg_text);
          assert(false);
       }
    }
@@ -267,7 +439,23 @@ namespace ctb::web
    }
 
 
-   void HeadlessBrowser::attemptWebsocketConnect(std::string url, uint8_t retries, std::chrono::milliseconds retry_delay)
+   BrowserEventsPtr& HeadlessBrowser::getOrCreateEventHandler(string_view session_id)
+   {
+      if (auto it = m_event_handlers.find(session_id); it != m_event_handlers.end())
+      {
+         return it->second;
+      }
+      // clang-format off
+
+      return m_event_handlers.try_emplace(
+         string{ session_id },
+         std::make_shared<BrowserEvents>(m_ctx->get_executor(),
+         string{ session_id })).first->second;
+
+   }   // clang-format on
+
+
+   void HeadlessBrowser::attemptWebsocketConnect(string url, uint8_t retries, std::chrono::milliseconds retry_delay)
    {
       // We need to use an HTTP GET to retrieve the WS endpoint and connect. This callback will run
       // on the io_context's thread.
@@ -278,9 +466,9 @@ namespace ctb::web
             auto response = tasks::validateHttpResponse(result).response_body;
             SPDLOG_DEBUG("Got HTTP GET response from browser: {}", response);
             JsonPropMap props{};
-            read_json(props, response);
+            glz::ex::read_json(props, response);
 
-            auto ws_url = std::get<std::string>(props[params::WS_DEBUG_URL]);
+            auto ws_url = std::get<string>(props[params::WS_DEBUG_URL]);
             m_ws_client.connect(ws_url);
          }
          catch (...)
@@ -296,54 +484,85 @@ namespace ctb::web
             {
                SPDLOG_DEBUG("Browser not ready, retrying in {}... ({} retries left)", retry_delay, retries);
                delayedExec(retry_delay,
-                           [this, url = std::move(url), retries, retry_delay]() mutable
+                           [this, url = move(url), retries, retry_delay]() mutable
                            {
-                              attemptWebsocketConnect(std::move(url), retries - 1U, retry_delay * 2);
+                              attemptWebsocketConnect(move(url), retries - 1U, retry_delay * 2);
                            });
             }
          }
       };
 
-      m_http_client.getAsync(url, {}, std::move(callback));
+      m_http_client.getAsync(url, {}, move(callback));
    }
 
 
-   [[nodiscard]] asio::awaitable<std::string> HeadlessBrowser::coroCreateTarget() noexcept(false)
+   asio::awaitable<string> HeadlessBrowser::coroCreateTarget() noexcept(false)
    {
       // clang-format off
-      auto response = co_await coroSendCommand(commands::CREATE_TARGET, JsonPropMap{ { params::TARGET_URL, params::ABOUT_BLANK } }, {});
+      auto response = co_await coroSendCommand(commands::CREATE_TARGET, JsonPropMap{ { params::TARGET_URL, std::string{ params::ABOUT_BLANK } } }, {});
       throwIfError(commands::CREATE_TARGET, response);
       // clang-format on
 
-      auto result = read_json<CreateTargetResult>(response.result->str);
+      auto result = glz::ex::read_json<CreateTargetResult>(response.result->str);
       SPDLOG_DEBUG("{} received targetId '{}'", commands::CREATE_TARGET, result.targetId);
 
       co_return result.targetId;
    }
 
 
-   [[nodiscard]] asio::awaitable<HeadlessBrowser::Session> HeadlessBrowser::coroAttachTarget(std::string target_id) noexcept(false)
+   asio::awaitable<HeadlessBrowser::Session> HeadlessBrowser::coroAttachTarget(string target_id) noexcept(false)
    {
       JsonPropMap params{
          { params::TARGET_ID, target_id },
          { params::FLATTEN,   true      }
       };
 
-      auto response = co_await coroSendCommand(commands::ATTACH_TARGET, std::move(params), {});
+      auto response = co_await coroSendCommand(commands::ATTACH_TARGET, move(params), {});
       throwIfError(commands::ATTACH_TARGET, response);
 
-      auto result = read_json<AttachTargetResult>(response.result->str);
+      auto result = glz::ex::read_json<AttachTargetResult>(response.result->str);
       SPDLOG_DEBUG("{} received targetId '{}'", commands::ATTACH_TARGET, result.sessionId);
 
-      co_return Session{ *this, std::move(result.sessionId) };
+      co_return Session{ *this, move(result.sessionId) };
    }
 
 
-   [[nodiscard]] asio::awaitable<void> HeadlessBrowser::coroEnablePage(std::string session_id) noexcept(false)
+   asio::awaitable<void> HeadlessBrowser::coroEnablePageEvents(string session_id) noexcept(false)
    {
-      auto response = co_await coroSendCommand(commands::ENABLE_PAGE_EVENTS, {}, session_id);
+      auto response = co_await coroSendCommand(commands::ENABLE_PAGE_EVENTS, JsonPropMap{}, session_id);
       throwIfError(commands::ENABLE_PAGE_EVENTS, response);
       co_return;
+   }
+
+
+   asio::awaitable<void> HeadlessBrowser::coroEnableNetworkEvents(string session_id) noexcept(false)
+   {
+      auto response = co_await coroSendCommand(commands::ENABLE_NETWORK_EVENTS, JsonPropMap{}, session_id);
+      throwIfError(commands::ENABLE_NETWORK_EVENTS, response);
+      co_return;
+   }
+
+
+   asio::awaitable<BrowserMessage> HeadlessBrowser::coroAwaitEvent(string_view session_id) noexcept(false)
+   {
+      if (auto it = m_event_handlers.find(session_id); it != m_event_handlers.end())
+      {
+         co_return co_await it->second->coroAwaitEvent();
+      }
+      throw ctb::Error{};
+   }
+
+
+   void HeadlessBrowser::coExec(std::move_only_function<void()> func)
+   {
+      asio::co_spawn(
+         *m_ctx,
+         [this, func = move(func)]() mutable -> asio::awaitable<void>
+         {
+            func();
+            co_return;
+         },
+         asio::detached);
    }
 
 
@@ -351,7 +570,7 @@ namespace ctb::web
    {
       asio::co_spawn(
          *m_ctx,
-         [this, func = std::move(func), delay]() mutable -> asio::awaitable<void>
+         [this, func = move(func), delay]() mutable -> asio::awaitable<void>
          {
             asio::steady_timer timer(*m_ctx, delay);
             co_await timer.async_wait(asio::use_awaitable);
@@ -369,16 +588,15 @@ namespace ctb::web
          // this is a command response.
          if (auto it = m_command_handlers.find(id); it != m_command_handlers.end())
          {
-            auto handler = std::move(it->second);
+            auto handler = move(it->second);
             m_command_handlers.erase(it);
             if (handler)
             {
-               // call completion handler from new async operation so that we can
-               // unblock the websocket
+               // call completion handler from new async operation so that we can unblock the websocket
                asio::post(*m_ctx,
-                          [h = std::move(handler), msg = std::move(msg)]() mutable
+                          [h = move(handler), msg = move(msg)]() mutable
                           {
-                             h(std::move(msg));
+                             h(move(msg));
                           });
             }
             else
@@ -391,11 +609,18 @@ namespace ctb::web
       }
       else
       {
-         // It's a browser event. Figure out what to do with these. Probably a PageEventHandlers map that correlates session id with handler.
-         SPDLOG_DEBUG("Browser event received method {} and params {}", msg.method.value_or(""), msg.params->str);
+         // This is a browser event. Push it to the appropriate handling channel if we have one, discard otherwise.
+         if (msg.sessionId.has_value())
+         {
+            if (auto it = m_event_handlers.find(msg.sessionId.value()); it != m_event_handlers.end())
+            {
+               it->second->postEvent(move(msg));
+            }
+         }
+         else
+            SPDLOG_DEBUG("HeadlessBrowser::DispatchMessage received event {} with no registered handlers.", msg.method.value_or(""));
       }
    }
-
-}   // namespace ctb::web
+}   // namespace ctb
 
 

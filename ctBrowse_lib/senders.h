@@ -19,15 +19,16 @@ namespace ctb::tasks
    // keep namespace pollution out of our expressions, especially since stdexec will probably become std::exec
    using exec::start_detached;
    using exec::asio::use_sender;
+   using std::move;
    using stdexec::continues_on;
    using stdexec::just;
    using stdexec::let_error;
-   using stdexec::let_value;
    using stdexec::let_stopped;
+   using stdexec::let_value;
+   using stdexec::starts_on;
    using stdexec::stopped_as_error;
    using stdexec::then;
    using stdexec::upon_error;
-   using std::move;
 
 
    /// @brief checks an CellarTracker HTTP response for errors and throws them as Error exceptions
@@ -96,14 +97,15 @@ namespace ctb::tasks
       if (maybe_utf8_text)
       {
          table_data.data.swap(*maybe_utf8_text);
+         table_data.encoding = TextEncoding::UTF8;
       }
       return table_data;
    }
 
 
-   /// @brief Sender that runs on the the specified scheduler and calls the error callback without allowing
-   ///        exceptions to escape.
-   /// @return the sender that can be assigned to a receiver for async execution.
+   /// @brief Creates a Sender that that will run on the the specified scheduler and calls the supplied callback
+   ///        without allowing  exceptions to escape.
+   /// @return Sender that can be assigned to a receiver for async execution.
    template<typename SchedulerT, typename CallbackT>
    inline auto safeErrorCallback(SchedulerT scheduler, CallbackT&& callback, std::exception_ptr ep) noexcept
    {
@@ -129,8 +131,8 @@ namespace ctb::tasks
                 });
    }
 
-   
-   inline std::string buildLabelFilename(uint64_t wine_id) 
+
+   inline std::string buildLabelFilename(uint64_t wine_id)
    {
       // we may want to support multiple images per wine in the future, but for now there will just be the one.
       constexpr auto image_num = 1;
@@ -142,27 +144,59 @@ namespace ctb::tasks
    {
       return cache_folder / buildLabelFilename(wine_id);
    }
-    
 
 
-   /// @brief Spawns a plain asio::awaitable<T> coroutine on the given executor and bridges it back into an
-   ///        exec::task<T>, suitable for use from stdexec-based code (e.g. co_await from another exec::task).
-   ///
-   /// asio::co_spawn's completion handler reports exceptions as a value parameter (void(exception_ptr, T))
-   /// rather than through stdexec's error channel, so exec::asio::use_sender surfaces it as a
-   /// std::tuple<exception_ptr, T>. This helper unwraps that tuple and rethrows so callers get an ordinary T
-   /// (or a thrown exception), just like any other awaited call.
-   template<typename T, typename Executor>
-   [[nodiscard]] exec::task<T> asioAwait(Executor exec, asio::awaitable<T> awaitable)
+   // clang-format off
+
+   template<typename ReturnTypeT>
+   using AnySender = exec::any_sender<exec::any_receiver<
+      stdexec::completion_signatures<stdexec::set_value_t(ReturnTypeT),
+      stdexec::set_error_t(std::exception_ptr),
+      stdexec::set_stopped_t()> >>;
+
+   // clang-format on
+
+
+   /// @brief Runs an ASIO coroutine and converts the result into a sender for use with stdexec pipelines
+   template<typename ReturnTypeT, typename ExecutorT, typename CallableT>
+   [[nodiscard]] AnySender<ReturnTypeT> asSender(ExecutorT exec, CallableT coro_func)
    {
-      auto [eptr, value] = co_await asio::co_spawn(std::move(exec), std::move(awaitable), exec::asio::use_sender);
-      if (eptr)
-      {
-         std::rethrow_exception(eptr);
-      }
-      co_return std::move(value);
+      return asio::co_spawn(std::move(exec), std::move(coro_func), exec::asio::use_sender)
+           | stdexec::let_value(
+                [](std::exception_ptr ep, ReturnTypeT value) -> AnySender<ReturnTypeT>
+                {
+                   if (ep)
+                   {
+                      return stdexec::just_error(std::move(ep));
+                   }
+                   return stdexec::just(std::move(value));
+                });
    }
 
 
+   
+   /// @brief  Represents the contents of a file retrieved from the headless browser's cache.
+   //
+   struct HttpFileContents
+   {
+      std::string original_url{};
+      std::string content{};
+      bool        base64_encoded{ true };
+   };
+
+
+   /// @brief Retrieve the contents of a resource returned by Page.getResourceContent CDP command.
+   ///
+   /// File will be decoded if it's base64-encoded, otherwise the contents will be transferred
+   /// directly to the return value.
+   inline [[nodiscard]] Buffer decodeResourceContents(const HttpFileContents& file_contents)
+   {
+      if (file_contents.base64_encoded)
+      {
+         return base64Decode(file_contents.content);
+      }
+      auto* data_ptr = reinterpret_cast<const std::byte*>(file_contents.content.data());
+      return Buffer{ data_ptr, data_ptr + file_contents.content.size() };
+   }
 
 }   // namespace ctb::tasks

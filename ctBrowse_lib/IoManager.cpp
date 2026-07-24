@@ -1,7 +1,7 @@
 #include "IoManager.h"
 
 
-namespace ctb::web
+namespace ctb
 {
 
    asio::any_io_executor IoManager::get_executor() const
