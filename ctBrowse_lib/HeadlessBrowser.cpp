@@ -138,13 +138,10 @@ namespace ctb
       {
          throw ctb::Error{ Error::Category::FileError, "Couldn't launch headless web client, path \"{}\" does not exist.", browser_path };
       }
-      if (!fs::exists(data_dir))
+      if (!fs::exists(data_dir) and !createFolderPath(data_dir))
       {
-         if (!createFolderPath(data_dir))
-         {
-            throw Error{ Error::Category::GeneralError,
-                         "Couldn't launch headless web browser, data dir \"{}\" does not exist and could not be created.", data_dir };
-         }
+         throw Error{ Error::Category::GeneralError,
+                        "Couldn't launch headless web browser, data dir \"{}\" does not exist and could not be created.", data_dir };
       }
 
       // First we need to launch the browser process.

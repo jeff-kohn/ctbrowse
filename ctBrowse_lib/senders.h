@@ -104,8 +104,7 @@ namespace ctb::tasks
 
 
    /// @brief Creates a Sender that that will run on the the specified scheduler and calls the supplied callback
-   ///        without allowing  exceptions to escape.
-   /// @return Sender that can be assigned to a receiver for async execution.
+   ///        without allowing exceptions to escape.
    template<typename SchedulerT, typename CallbackT>
    inline auto safeErrorCallback(SchedulerT scheduler, CallbackT&& callback, std::exception_ptr ep) noexcept
    {

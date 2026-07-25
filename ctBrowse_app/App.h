@@ -11,7 +11,7 @@
 #include "wx_helpers.h"
 
 #include <ctb/log.h>
-#include <ctb/model/CtDatasetManager.h>
+#include <ctb/model/CtDatasetMgr.h>
 #include <wx/app.h>
 #include <wx/windowptr.h>
 
@@ -110,7 +110,7 @@ namespace ctb::app
       }
 
 
-      auto getDatasetManager() noexcept -> CtDatasetManager&
+      auto getDatasetManager() noexcept -> CtDatasetMgr&
       {
          return m_dataset_mgr;
       }
@@ -168,7 +168,7 @@ namespace ctb::app
       WebClientPtr                   m_web_client{};
       LabelCachePtr                  m_label_cache{};
       std::optional<ProReviewsCache> m_review_cache{};
-      CtDatasetManager               m_dataset_mgr{};
+      CtDatasetMgr                   m_dataset_mgr{};
       void                           onMainFrameClosed(wxCloseEvent&);
    };
 

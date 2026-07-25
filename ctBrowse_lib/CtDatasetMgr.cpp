@@ -1,4 +1,4 @@
-#include "ctb/model/CtDatasetManager.h"
+#include "ctb/model/CtDatasetMgr.h"
 
 #include "CellarTrackerBrowser.h"
 #include "HttpDownloader.h"
@@ -26,7 +26,7 @@
 
 #include <exception>
 
-namespace ctb::app
+namespace ctb
 {
    using namespace ctb::tasks;
 
@@ -51,8 +51,8 @@ namespace ctb::app
    }   // namespace
 
 
-   // private impl details for CtDatasetManager, to prevent public header dependencies.
-   struct CtDatasetManager::AsyncImpl
+   // private impl details for CtDatasetMgr, to prevent public header dependencies.
+   struct CtDatasetMgr::AsyncImpl
    {
       static constexpr uint32_t NUM_CPU_THREADS = 2;
       static constexpr uint32_t NUM_IO_THREADS  = 1;
@@ -79,7 +79,7 @@ namespace ctb::app
    /// @param wine_id -  the id of the wine to retrieve an image for
    /// @return - struct containing the image file's contents as well as some metadata
    /// @throw - ctb::Error if file couldn't be read from disk or downloaded
-   exec::task<ImageFileContents> CtDatasetManager::AsyncImpl::sndGetLabelImage(uint64_t wine_id) noexcept(false)
+   exec::task<ImageFileContents> CtDatasetMgr::AsyncImpl::sndGetLabelImage(uint64_t wine_id) noexcept(false)
    {
       ImageFileContents retval{ .wine_id = wine_id };
 
@@ -93,34 +93,39 @@ namespace ctb::app
 
          co_return retval;
       }
-      SPDLOG_DEBUG("CtDatasetManager::AsyncImpl::sndGetLabelImage couldn't read local file '{}', will attempt to download label.",
-                   local_path);
 
-      // stdexec::on is roundtrip scheduler, this will get executed on cpu_pool and then continue on the original scheduler.
+      SPDLOG_DEBUG("CtDatasetMgr::AsyncImpl::sndGetLabelImage couldn't read local file '{}', will attempt to download label.", local_path);
       HttpFileContents file_contents = co_await browser.downloadLabel(wine_id);
+
+      // stdexec::on is a roundtrip scheduler, this will get executed on cpu_pool and then continue on our original scheduler.
       retval.data = co_await stdexec::on(cpu_pool.get_scheduler(), just(move(file_contents)) | then(decodeResourceContents));
 
       co_return retval;
    }
 
 
-   CtDatasetManager::CtDatasetManager()
+   CtDatasetMgr::CtDatasetMgr()
    {}
 
 
-   CtDatasetManager::~CtDatasetManager() noexcept
+   CtDatasetMgr::~CtDatasetMgr() noexcept
    {
       m_impl->cpu_pool.request_stop();
    }
 
 
-   CtDatasetManager::CtDatasetManager(const fs::path& table_folder) noexcept(false)
+   ctb::CtDatasetMgr::CtDatasetMgr(const DatasetMgrOptions opts) noexcept(false)
    {
-      setTableFolder(table_folder);
+      if (!opts.browser_path.empty())
+      {
+         m_impl->browser.start(opts.browser_path, opts.browser_data_dir, opts.browser_ws_port);
+      }
+      setTableFolder(opts.table_folder);
+      setLabelImageFolder(opts.label_folder);
    }
 
 
-   auto CtDatasetManager::loadDataset(TableId table_id) -> DatasetPtr
+   auto CtDatasetMgr::loadDataset(TableId table_id) -> DatasetPtr
    {
       switch (table_id)
       {
@@ -139,7 +144,7 @@ namespace ctb::app
 
 
    /// @brief Load a dataset and apply options
-   auto CtDatasetManager::loadDataset(const CtDatasetOptions& options) -> DatasetPtr
+   auto CtDatasetMgr::loadDataset(const CtDatasetOptions& options) -> DatasetPtr
    {
       // load dataset and then apply options.
       auto dataset = loadDataset(options.table_id);
@@ -148,7 +153,7 @@ namespace ctb::app
    }
 
 
-   auto CtDatasetManager::getProReviewsCache() -> ProReviewsCache&
+   auto CtDatasetMgr::getProReviewsCache() -> ProReviewsCache&
    {
       if (!m_pro_cache)
       {
@@ -158,7 +163,7 @@ namespace ctb::app
    }
 
 
-   void CtDatasetManager::downloadTableAsync(TableId table_id, const CredentialWrapper& cred, TableResultCallback result_callback)
+   void CtDatasetMgr::downloadTableAsync(TableId table_id, const CredentialWrapper& cred, TableResultCallback result_callback)
    {
 
       auto http_pipeline = [this, table_id, callback = move(result_callback)](HttpDownloader::HttpResult result) mutable
@@ -206,7 +211,7 @@ namespace ctb::app
    }
 
 
-   void CtDatasetManager::retrieveLabelImageAsync(uint64_t wine_id, ImageResultCallback result_callback)
+   void CtDatasetMgr::retrieveLabelImageAsync(uint64_t wine_id, ImageResultCallback result_callback)
    {
       auto getImageContents = std::bind_front(&AsyncImpl::sndGetLabelImage, &(*m_impl));
 
@@ -216,49 +221,45 @@ namespace ctb::app
          if (image_contents.url.has_value())
          {
             auto [[maybe_unused]] bytes_written = co_await m_impl->io_pool.sndWriteFile(image_contents.file_path, image_contents.data);
-            SPDLOG_DEBUG("CtDatasetManager::retrieveLabelImageAsync - saved {} bytes to '{}'", bytes_written, image_contents.file_path);
+            SPDLOG_DEBUG("CtDatasetMgr::retrieveLabelImageAsync - saved {} bytes to '{}'", bytes_written, image_contents.file_path);
          }
          // just forward the data to the next sender
          co_return image_contents;
       };
 
-      auto errorCallback = [this, result_callback](std::exception_ptr ep) mutable noexcept
+      auto errorCallback = [this, result_callback](std::exception_ptr ep) noexcept
       {
          return safeErrorCallback(m_impl->cpu_pool.get_scheduler(), result_callback, ep);
       };
 
-      auto pipeline = just(wine_id)
-                    | continues_on(m_impl->io_pool.get_scheduler())
-                    | let_value(getImageContents)
-                    | let_value(saveIfNeeded)
-                    | continues_on(m_impl->cpu_pool.get_scheduler())
-                    | then(result_callback)
-                    | stopped_as_error(std::make_exception_ptr(Error{ constants::STATUS_DOWNLOAD_CANCELED, Error::Category::OperationCanceled }))
-                    | let_error(errorCallback);
+      auto pipeline =
+         just(wine_id)
+         | continues_on(m_impl->io_pool.get_scheduler())
+         | let_value(getImageContents)
+         | let_value(saveIfNeeded)
+         | continues_on(m_impl->cpu_pool.get_scheduler())
+         | then(result_callback)
+         | stopped_as_error(std::make_exception_ptr(Error{ constants::STATUS_DOWNLOAD_CANCELED, Error::Category::OperationCanceled }))
+         | let_error(errorCallback);
 
       start_detached(move(pipeline));
    }
 
 
-   auto CtDatasetManager::setTableFolder(const fs::path& folder) noexcept(false) -> CtDatasetManager&
+   auto CtDatasetMgr::setTableFolder(const std::string& folder) noexcept(false) -> CtDatasetMgr&
    {
-      if (!fs::exists(folder) and !createFolderPath(folder))
+      fs::path folder_path{ expandEnvironmentVars(folder) };
+      if (!fs::exists(folder_path) and !createFolderPath(folder_path))
       {
-         throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_PATH_NOT_FOUND, folder.generic_string() };
+         throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_PATH_NOT_FOUND,
+                      folder_path.generic_string() };
       }
-      m_impl->table_folder = folder;
+      m_impl->label_folder = folder_path;
       return *this;
    }
 
 
-   /// @brief returns the location used for loading data files from disk
-   auto CtDatasetManager::getTableFolder() const -> const fs::path&
-   {
-      return m_impl->table_folder;
-   }
-
-
-   auto CtDatasetManager::setLabelImageFolder(const fs::path& folder) noexcept(false) -> CtDatasetManager&
+   auto CtDatasetMgr::setTableFolder(const fs::path& folder) noexcept(false) -> CtDatasetMgr&
    {
       if (!fs::exists(folder) and !createFolderPath(folder))
       {
@@ -269,10 +270,41 @@ namespace ctb::app
    }
 
 
-   auto CtDatasetManager::getLabelImageFolder() const -> const fs::path&
+   auto CtDatasetMgr::getTableFolder() const -> const fs::path&
+   {
+      return m_impl->table_folder;
+   }
+
+
+   auto CtDatasetMgr::setLabelImageFolder(const std::string& folder) noexcept(false) -> CtDatasetMgr&
+   {
+      fs::path folder_path{ expandEnvironmentVars(folder) };
+      if (!fs::exists(folder_path) and !createFolderPath(folder_path))
+      {
+         throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_NO_LABEL_CACHE_FOLDER,
+                      folder_path.generic_string() };
+      }
+      m_impl->label_folder = folder_path;
+      return *this;
+   }
+
+
+   auto CtDatasetMgr::setLabelImageFolder(const fs::path& folder) noexcept(false) -> CtDatasetMgr&
+   {
+      if (!fs::exists(folder) and !createFolderPath(folder))
+      {
+         throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_NO_LABEL_CACHE_FOLDER,
+                      folder.generic_string() };
+      }
+      m_impl->label_folder = folder;
+      return *this;
+   }
+
+
+   auto CtDatasetMgr::getLabelImageFolder() const -> const fs::path&
    {
       return m_impl->label_folder;
    }
 
 
-}   // namespace ctb::app
+}   // namespace ctb

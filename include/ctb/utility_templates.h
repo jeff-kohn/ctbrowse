@@ -11,6 +11,7 @@
 
 #include <charconv>
 #include <optional>
+#include <variant>
 
 namespace ctb
 {

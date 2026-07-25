@@ -9,8 +9,6 @@ namespace ctb
    class HeadlessBrowser;
 
 
-
-
    /// @brief Provides an async websocket interface for orchestrating a headless browser instance via Chrome Devtools Protocol.
    ///
    /// This class is meant to be thread-locked to a single ASIO thread for asynchronous operation, and does not protect data members

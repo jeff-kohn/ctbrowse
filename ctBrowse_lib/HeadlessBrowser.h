@@ -181,13 +181,15 @@ namespace ctb
 
       alignas(std::hardware_destructive_interference_size) std::atomic<Status> m_status{ Status::Stopped };
 
-      win32::ProcessJobHandles m_browser_handles{};
+      // ordering matters for this first group
       ContextPtr               m_ctx;
-      HttpDownloader           m_http_client;
-      uint32_t                 m_next_id{ 1 };
+      WsClient                 m_ws_client;
+      win32::ProcessJobHandles m_browser_handles{};
+
       CmdHandlerMap            m_command_handlers{};   // for responses from WS commands
       EventHandlerMap          m_event_handlers{};     // for events fired
-      WsClient                 m_ws_client;
+      HttpDownloader           m_http_client;
+      uint32_t                 m_next_id{ 1 };
 
       // WS event handling
       void setupHandlers();

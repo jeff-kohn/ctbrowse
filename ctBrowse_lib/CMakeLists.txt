@@ -32,7 +32,7 @@ target_sources(${TARGET_NAME}
             
       "../include/ctb/model/CtDataset.h"
       "../include/ctb/model/CtDatasetOptions.h"
-      "../include/ctb/model/CtDatasetManager.h"
+      "../include/ctb/model/CtDatasetMgr.h"
       "../include/ctb/model/DatasetEventSource.h"
       "../include/ctb/model/DatasetEventHandler.h"
       "../include/ctb/model/ProReviewsCache.h"
@@ -74,7 +74,7 @@ target_sources(${TARGET_NAME}
       "CellarTrackerBrowser.h"
       "CredentialManager.cpp"
       "CredentialWrapper.cpp"
-      "CtDatasetManager.cpp"
+      "CtDatasetMgr.cpp"
       "CtDatasetOptions.cpp"
       "DatasetEventSource.cpp"
       "HeadlessBrowser.cpp"
