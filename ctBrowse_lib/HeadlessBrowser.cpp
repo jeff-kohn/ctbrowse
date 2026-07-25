@@ -123,6 +123,19 @@ namespace ctb
    }
 
 
+   HeadlessBrowser::~HeadlessBrowser() noexcept
+   {
+      try
+      {
+         stop();
+      }
+      catch (...)
+      {
+         SPDLOG_DEBUG("HeadlessBrowser caught exception shutting down: {}", packageError().formattedMessage());
+      }
+   }
+
+
    void HeadlessBrowser::start(string browser_path, string data_dir, int32_t port) noexcept(false)
    {
       if (m_status != Status::Stopped)
@@ -156,6 +169,8 @@ namespace ctb
 
    void HeadlessBrowser::stop()
    {
+      if (m_status.load() == Status::ShuttingDown or m_status.load() == Status::Stopped) return;
+         
       m_status.store(Status::ShuttingDown);
       postCommand(commands::CLOSE_BROWSER, {}, {});
       m_ws_client.close();
@@ -460,7 +475,7 @@ namespace ctb
       {
          try
          {
-            auto response = tasks::validateHttpResponse(result).response_body;
+            auto response = senders::validateHttpResponse(result).response_body;
             SPDLOG_DEBUG("Got HTTP GET response from browser: {}", response);
             JsonPropMap props{};
             glz::ex::read_json(props, response);

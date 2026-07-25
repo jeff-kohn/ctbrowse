@@ -447,15 +447,10 @@ namespace ctb::app
 
    void MainFrame::onMenuFileSyncData([[maybe_unused]] wxCommandEvent& event)
    {
-      // TODO: refactor this
       try
       {
-
          TableSyncDialog dlg(this);
          if (dlg.ShowModal() != wxID_OK) return;
-
-         //wxBusyCursor     busy{};
-         //ScopedStatusText end_status{ constants::STATUS_DOWNLOAD_COMPLETE, this };
 
          CtCredentialManager cred_mgr{};
          const auto*         cred_name   = constants::CELLARTRACKER_DOT_COM;
@@ -470,15 +465,19 @@ namespace ctb::app
 
 
          wxGetApp().getDatasetManager().downloadTablesAsync(dlg.selectedTables(), *cred_result,
-                                                            [this](std::expected<std::string, Error> result)
+                                                            [this](TableResult result)
                                                             {
                                                                CallAfter(
                                                                   [this, result = std::move(result)]
                                                                   {
-                                                                     auto msg = result ? *result 
-                                                                        : format("Download failed: {}", result.error().formattedMessage());
-                                                                     SetStatusText(msg);
-                                                                     //notifySuccess("Download Complete", msg);
+                                                                     if (result)
+                                                                     {
+                                                                        SetStatusText(format(""));
+                                                                     }
+                                                                     else
+                                                                     {
+                                                                        SetStatusText(result.error().formattedMessage());
+                                                                     }
                                                                   });
                                                             });
 

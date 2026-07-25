@@ -2,7 +2,6 @@
 #include "HeadlessBrowser.h"
 #include "ctb/utility_chrono.h"
 #include "ctb/utility_http.h"
-#include "senders.h"
 
 #include <asio/dispatch.hpp>
 #include <asio/this_coro.hpp>
@@ -12,7 +11,7 @@
 
 namespace ctb
 {
-   using namespace tasks;
+   using namespace senders;
 
 
    CellarTrackerBrowser::~CellarTrackerBrowser()
@@ -65,7 +64,7 @@ namespace ctb
       };
 
       // execute the lambda coro and return its result as a sender
-      return tasks::asSender<HttpFileContents>(m_browser->getExecutor(), asio_coro);
+      return senders::asSender<HttpFileContents>(m_browser->getExecutor(), asio_coro);
    }
 
 

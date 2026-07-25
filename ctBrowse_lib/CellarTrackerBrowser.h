@@ -63,7 +63,7 @@ namespace ctb
 
 
       /// @brief stdexec sender to download a label image from CT
-      [[nodiscard]] tasks::AnySender<tasks::HttpFileContents> downloadLabel(uint64_t wine_id) noexcept(false);
+      [[nodiscard]] senders::AnySender<senders::HttpFileContents> downloadLabel(uint64_t wine_id) noexcept(false);
 
       // needed in CPP for PIMPL
       ~CellarTrackerBrowser();

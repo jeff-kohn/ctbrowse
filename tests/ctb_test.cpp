@@ -1,6 +1,7 @@
 #include "../ctBrowse_lib/CellarTrackerBrowser.h"
 #include "../ctBrowse_lib/senders.h"
 #include "../ctBrowse_lib/IoManager.h"
+#include <ctb/model/CtDatasetMgr.h>
 
 #include <asio/executor_work_guard.hpp>
 #include <asio/io_context.hpp>
@@ -9,9 +10,10 @@
 
 namespace ctb::tests
 {
-   using namespace ctb::tasks;
+   using namespace ctb::senders;
 
    IoManager io_mgr{};
+   //CtDatasetMgr g_dataset_mgr{ DatasetMgrOptions{} };
 
    TEST_CASE("Launch Headless Browser", "[CdpBrowser]")
    {
@@ -31,7 +33,7 @@ namespace ctb::tests
 
          auto pipeline = just(wine_id)
                        | let_value(std::bind_front(&CellarTrackerBrowser::downloadLabel, &browser))
-                       | then(tasks::decodeResourceContents)
+                       | then(senders::decodeResourceContents)
                        | then(
                             [](Buffer buf) -> Buffer
                             {

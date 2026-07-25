@@ -1,5 +1,6 @@
 #pragma once
 #include "ctb/ctb.h"
+#include "ctb/model/DatasetMgrAsyncCallbacks.h"
 
 #include "ctb/CredentialWrapper.h"
 #include "ctb/model/CtDatasetOptions.h"
@@ -7,7 +8,6 @@
 
 namespace ctb
 {
-
 
    // options struct for dataset mgr. the path strings will have any embedded enviroment variables expanded before use
    struct DatasetMgrOptions
@@ -39,42 +39,19 @@ namespace ctb
       int32_t     browser_ws_port{ DEFAULT_BROWSER_WS_PORT };
    };
 
-
-   /// @brief notification message that gets sent via callback after table download
-   struct TableDownloadNotification
-   {
-      TableId table_id{};
-      size_t  file_size{};
-   };
-
-
-   /// @brief struct containing file info and data for a wine label
-   struct ImageFileContents
-   {
-      uint64_t    wine_id{};     // wine_id the image is for
-      Buffer      data{};        // binary contents of the file
-      fs::path    file_path{};   // path the file was loaded from, or path it should be saved to if image was downloaded
-      MaybeString url{};         // will only have a value if this file was downlaoded and should be saved. If empty file was read from disk
-   };
+   // for PIMPL
+   struct DatasetMgrAsyncImpl;
 
 
    /// @brief High-level class that simplifies downloading tables, loading them from disk into dataset, downloading
    ///        label images, getting cache tables, etc. Uses async I/O for downloading files and saving them to disk.
    ///
-   /// Note:  To get image download functionality must construct instances of this class with a DatasetMgrOptions
+   /// Note:  To get image download functionality you must construct instances of this class with a DatasetMgrOptions
    ///        containing a valid browser_path. The headless browser used for downloading images will not be started
    ///        if you default-construct an instance of this class or if you pass an empty string for browser_path. 
    class CtDatasetMgr
    {
    public:
-      // Used for downloading table files, expected value is the contents of the file
-      using TableResult         = std::expected<std::string, ctb::Error>;
-      using TableResultCallback = copyable_function<void(TableResult) const>;
-
-      // used for loading (or downloading) images, expected value is the image bytes.
-      using ImageResult         = std::expected<ImageFileContents, ctb::Error>;
-      using ImageResultCallback = copyable_function<void(ImageResult) const>;
-
       ~CtDatasetMgr() noexcept;   //= default;
 
       /// @brief construct a CtDatasetLoader specifying the data folder. May throw if folder is invalid and can't be created.
@@ -153,9 +130,8 @@ namespace ctb
       CtDatasetMgr& operator=(const CtDatasetMgr&) = delete;
 
    private:
-      struct AsyncImpl;
 
-      indirect<AsyncImpl>            m_impl;
+      indirect<DatasetMgrAsyncImpl>     m_impl;
       std::optional<ProReviewsCache> m_pro_cache{};
    };
 

@@ -13,7 +13,8 @@
 #include <exec/task.hpp>
 #include <stdexec/execution.hpp>
 
-namespace ctb::tasks
+
+namespace ctb::senders
 {
 
    // keep namespace pollution out of our expressions, especially since stdexec will probably become std::exec

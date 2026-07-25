@@ -58,6 +58,7 @@ namespace ctb
       /// This class does not protect its internal implementation from concurrent access since
       /// it is meant to run on a single-threaded context.
       HeadlessBrowser(ContextPtr io_ctx);
+      ~HeadlessBrowser() noexcept;
 
 
       /// @brief start the browser process.
