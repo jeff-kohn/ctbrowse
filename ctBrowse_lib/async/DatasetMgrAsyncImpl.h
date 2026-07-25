@@ -4,10 +4,10 @@
 #include "ctb/model/DatasetMgrAsyncCallbacks.h"
 #include "ctb/tables/table_data.h"
 
-#include "CellarTrackerBrowser.h"
-#include "HttpDownloader.h"
-#include "IoManager.h"
-//#include "senders.h"
+#include "async/HttpDownloader.h"
+#include "async/IoManager.h"
+#include "browser/CellarTrackerBrowser.h"
+
 
 namespace ctb
 {

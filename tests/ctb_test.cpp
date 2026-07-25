@@ -1,6 +1,7 @@
-#include "../ctBrowse_lib/CellarTrackerBrowser.h"
-#include "../ctBrowse_lib/senders.h"
-#include "../ctBrowse_lib/IoManager.h"
+#include "../ctBrowse_lib/async/IoManager.h"
+#include "../ctBrowse_lib/async/senders.h"
+#include "../ctBrowse_lib/browser/CellarTrackerBrowser.h"
+
 #include <ctb/model/CtDatasetMgr.h>
 
 #include <asio/executor_work_guard.hpp>

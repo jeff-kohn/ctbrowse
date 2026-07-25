@@ -69,33 +69,35 @@ target_sources(${TARGET_NAME}
 
 
    PRIVATE
-      "AsioPipelineScheduler.h"
-      "BrowserEvents.h"
-      "CellarTrackerBrowser.cpp"
-      "CellarTrackerBrowser.h"
       "CredentialManager.cpp"
       "CredentialWrapper.cpp"
       "CtDatasetMgr.cpp"
       "CtDatasetOptions.cpp"
-      "DatasetMgrAsyncImpl.cpp"
-      "DatasetMgrAsyncImpl.h"
       "DatasetEventSource.cpp"
-      "HeadlessBrowser.cpp"
-      "HeadlessBrowser.h"
-      "HttpDownloader.cpp"
-      "HttpDownloader.h"
-      "IoManager.cpp"
-      "IoManager.h"
       "log.cpp"
       "ProReviewsCache.cpp"
       "ScopedHandle.h"
-      "senders.h"
       "tasks.cpp"
       "utility.cpp"
       "utility_http.cpp"
       "utility_win32.cpp"
       "utility_win32.h"
-      "webclient_schema.h"
+
+      "browser/BrowserEvents.h"
+      "browser/CellarTrackerBrowser.cpp"
+      "browser/CellarTrackerBrowser.h"
+      "browser/HeadlessBrowser.cpp"
+      "browser/HeadlessBrowser.h"
+      "browser/webclient_schema.h"
+
+      "async/AsioPipelineScheduler.h"
+      "async/DatasetMgrAsyncImpl.cpp"
+      "async/DatasetMgrAsyncImpl.h"
+      "async/HttpDownloader.cpp"
+      "async/HttpDownloader.h"
+      "async/IoManager.cpp"
+      "async/IoManager.h"
+      "async/senders.h"
 )
 
 target_include_directories(${TARGET_NAME}
@@ -103,6 +105,8 @@ target_include_directories(${TARGET_NAME}
 	PUBLIC
 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>"
 		"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+   PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_include_directories(${TARGET_NAME}

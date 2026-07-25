@@ -1,10 +1,10 @@
 #pragma once
 
-#include "BrowserEvents.h"
-#include "HttpDownloader.h"
 #include "ctb/ctb.h"
 #include "utility_win32.h"
-#include "webclient_schema.h"
+#include "async/HttpDownloader.h"
+#include "browser/BrowserEvents.h"
+#include "browser/webclient_schema.h"
 
 #include <asio/any_completion_handler.hpp>
 #include <asio/io_context.hpp>
