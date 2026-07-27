@@ -235,6 +235,8 @@ namespace ctb::app
       m_search_ctrl->Bind(wxEVT_TEXT_ENTER, &MainFrame::onToolbarSearchTextEnter, this);
       m_search_ctrl->Bind(wxEVT_KEY_DOWN, &MainFrame::onToolbarSearchKeyDown, this);
 
+      Bind(wxEVT_CLOSE_WINDOW, &MainFrame::onCloseWindow, this);
+
       if (!wxPersistentRegisterAndRestore(this, constants::RES_NAME_MAINFRAME))
       {
          Center(wxBOTH);
@@ -812,6 +814,12 @@ namespace ctb::app
       {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
+   }
+
+   void MainFrame::onCloseWindow(wxCloseEvent& event)
+   {
+      wxGetApp().fireShutdown();
+      event.Skip();
    }
 
 

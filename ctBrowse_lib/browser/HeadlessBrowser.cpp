@@ -412,7 +412,6 @@ namespace ctb
 
    void HeadlessBrowser::onWebSocketClose(glz::ws_close_code code, string_view reason)
    {
-      SPDLOG_DEBUG("HeadlessBrowser::onClose - code: {}, reason: '{}'", static_cast<uint16_t>(code), reason);
       m_status.store(Status::Stopped);
       m_browser_handles = {};   // kill the browser process.
    }

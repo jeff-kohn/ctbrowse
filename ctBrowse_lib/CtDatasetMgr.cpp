@@ -59,30 +59,34 @@ namespace ctb
    }
 
 
-   ctb::CtDatasetMgr::CtDatasetMgr(const DatasetMgrOptions opts) noexcept(false)
-   {
-      if (!opts.browser_path.empty())
-      {
-         m_impl->browser.start(opts.browser_path, opts.browser_data_dir, opts.browser_ws_port);
-      }
-      setTableFolder(opts.table_folder);
-      setLabelImageFolder(opts.label_folder);
-   }
+   ctb::CtDatasetMgr::CtDatasetMgr(const DatasetMgrOptions& opts) noexcept(false)
+   {}
 
+   CtDatasetMgr::CtDatasetMgr(const DatasetMgrOptions& opts, stdexec::inplace_stop_token shutdown_token) noexcept(false)
+   {}
+
+   void CtDatasetMgr::init(const DatasetMgrOptions& opts, std::optional<stdexec::inplace_stop_token> shutdown_token)
+   {
+      if (!opts.browser_path.empty()) m_impl->browser.start(opts.browser_path, opts.browser_data_dir, opts.browser_ws_port);
+      if (!opts.table_folder.empty()) setTableFolder(opts.table_folder);
+      if (!opts.label_folder.empty()) setLabelImageFolder(opts.label_folder);
+
+      if (shutdown_token) m_shutdown_token = std::move(*shutdown_token);
+   }
 
    auto CtDatasetMgr::loadDataset(TableId table_id) -> DatasetPtr
    {
       switch (table_id)
       {
-         case TableId::List        : return getDatasetOrThrow<WineListTable>(m_impl->table_folder, table_id);
-         case TableId::Pending     : return getDatasetOrThrow<PendingWineTable>(m_impl->table_folder, table_id);
-         case TableId::Consumed    : return getDatasetOrThrow<ConsumedWineTable>(m_impl->table_folder, table_id);
-         case TableId::Availability: return getDatasetOrThrow<ReadyToDrinkTable>(m_impl->table_folder, table_id);
-         case TableId::Purchase    : return getDatasetOrThrow<PurchasedWineTable>(m_impl->table_folder, table_id);
-         case TableId::Tag         : return getDatasetOrThrow<TaggedWinesTable>(m_impl->table_folder, table_id);
-         case TableId::Inventory   : return getDatasetOrThrow<BottleInventoryTable>(m_impl->table_folder, table_id);
-         case TableId::PrivateNotes: return getDatasetOrThrow<PrivateNotesTable>(m_impl->table_folder, table_id);
-         case TableId::Notes       : return getDatasetOrThrow<TastingNotesTable>(m_impl->table_folder, table_id);
+         case TableId::List        : return getDatasetOrThrow<WineListTable>(getTableFolder(), table_id);
+         case TableId::Pending     : return getDatasetOrThrow<PendingWineTable>(getTableFolder(), table_id);
+         case TableId::Consumed    : return getDatasetOrThrow<ConsumedWineTable>(getTableFolder(), table_id);
+         case TableId::Availability: return getDatasetOrThrow<ReadyToDrinkTable>(getTableFolder(), table_id);
+         case TableId::Purchase    : return getDatasetOrThrow<PurchasedWineTable>(getTableFolder(), table_id);
+         case TableId::Tag         : return getDatasetOrThrow<TaggedWinesTable>(getTableFolder(), table_id);
+         case TableId::Inventory   : return getDatasetOrThrow<BottleInventoryTable>(getTableFolder(), table_id);
+         case TableId::PrivateNotes: return getDatasetOrThrow<PrivateNotesTable>(getTableFolder(), table_id);
+         case TableId::Notes       : return getDatasetOrThrow<TastingNotesTable>(getTableFolder(), table_id);
          default                   : throw Error{ "Table not found." };
       };
    }
@@ -102,7 +106,7 @@ namespace ctb
    {
       if (!m_pro_cache)
       {
-         m_pro_cache = loadTableData<ProReviewsCacheTable>(m_impl->table_folder, TableId::Availability).value_or({});
+         m_pro_cache = loadTableData<ProReviewsCacheTable>(getTableFolder(), TableId::Availability).value_or({});
       }
       return m_pro_cache.value();
    }
@@ -110,13 +114,13 @@ namespace ctb
 
    void CtDatasetMgr::downloadTableAsync(TableId table_id, const CredentialWrapper& cred, TableResultCallback result_callback)
    {
-      m_impl->downloadTableAsync(table_id, cred, move(result_callback));
+      if (!shutdownRequested()) m_impl->downloadTableAsync(table_id, cred, move(result_callback), m_shutdown_token);
    }
 
 
    void CtDatasetMgr::retrieveLabelImageAsync(uint64_t wine_id, ImageResultCallback result_callback)
    {
-      m_impl->retrieveLabelImageAsync(wine_id, move(result_callback));
+      if (!shutdownRequested()) m_impl->retrieveLabelImageAsync(wine_id, move(result_callback), m_shutdown_token);
    }
 
 
@@ -139,7 +143,7 @@ namespace ctb
       {
          throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_PATH_NOT_FOUND, folder.generic_string() };
       }
-      m_impl->label_folder = folder;
+      m_impl->table_folder = folder;
       return *this;
    }
 

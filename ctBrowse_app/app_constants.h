@@ -78,12 +78,14 @@ namespace ctb::constants
    inline constexpr const char* CMD_FILTER_TREE_INVERT_LBL          = "&Invert Selection";
    inline constexpr const char* CMD_FILTER_TREE_INVERT_TIP          = "Invert the filter values selected for this filter.";
 
+   inline constexpr const char* CONFIG_PATH_DATA_FOLDERS            = "/Preferences/DataFolders";
+   inline constexpr const char* CONFIG_VALUE_LABEL_CACHE_DIR        = "LabelCacheDir";
+
    inline constexpr const char* CONFIG_PATH_PREFERENCES             = "/Preferences";
-   inline constexpr const char* CONFIG_PATH_PREFERENCE_DATASYNC     = "/Preferences/DataSync";
-                                                                    
+   inline constexpr const char* CONFIG_PATH_PREFERENCE_DATASYNC     = "/Preferences/DataSync";                                                                
    inline constexpr const char* CONFIG_VALUE_DEFAULT_SYNC_TABLES    = "DefaultSyncTables";
    inline constexpr const char* CONFIG_VALUE_SYNC_ON_STARTUP        = "SyncOnStartup";
-   inline constexpr const char* CONFIG_VALUE_LABEL_CACHE_DIR        = "LabelCacheDir";
+
    inline constexpr const char* CONFIG_PATH_GRID_OPTIONS            = "/Preferences/GridOptions";
    inline constexpr const char* CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY  = "DefaultInStockOnly";
                                                                     

@@ -6,6 +6,9 @@
 #include "ctb/model/CtDatasetOptions.h"
 #include "ctb/model/ProReviewsCache.h"
 
+#include <stdexec/stop_token.hpp>
+
+
 namespace ctb
 {
 
@@ -36,7 +39,7 @@ namespace ctb
 
       /// @brief port # to use for local websocket communications with headless browser. Ignored
       ///        browser_path.empty()
-      int32_t     browser_ws_port{ DEFAULT_BROWSER_WS_PORT };
+      int32_t browser_ws_port{ DEFAULT_BROWSER_WS_PORT };
    };
 
    // for PIMPL
@@ -48,14 +51,15 @@ namespace ctb
    ///
    /// Note:  To get image download functionality you must construct instances of this class with a DatasetMgrOptions
    ///        containing a valid browser_path. The headless browser used for downloading images will not be started
-   ///        if you default-construct an instance of this class or if you pass an empty string for browser_path. 
+   ///        if you default-construct an instance of this class or if you pass an empty string for browser_path.
    class CtDatasetMgr
    {
    public:
       ~CtDatasetMgr() noexcept;   //= default;
 
-      /// @brief construct a CtDatasetLoader specifying the data folder. May throw if folder is invalid and can't be created.
-      explicit CtDatasetMgr(const DatasetMgrOptions opts) noexcept(false);
+      /// @brief construct a CtDatasetLoader using the specified options. May
+      explicit CtDatasetMgr(const DatasetMgrOptions& opts) noexcept(false);
+      CtDatasetMgr(const DatasetMgrOptions& opts, stdexec::inplace_stop_token shutdown_token) noexcept(false);
 
 
       /// @brief Specify the location for table files. Environment variables will be expanded
@@ -130,8 +134,14 @@ namespace ctb
       CtDatasetMgr& operator=(const CtDatasetMgr&) = delete;
 
    private:
+      void init(const DatasetMgrOptions& opts, std::optional<stdexec::inplace_stop_token> shutdown_token);
+      bool shutdownRequested() const
+      {
+         return m_shutdown_token.stop_requested();
+      }
 
-      indirect<DatasetMgrAsyncImpl>     m_impl;
+      indirect<DatasetMgrAsyncImpl>  m_impl;
+      stdexec::inplace_stop_token        m_shutdown_token{};
       std::optional<ProReviewsCache> m_pro_cache{};
    };
 

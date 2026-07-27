@@ -13,7 +13,6 @@
 #include "panels/WineDetailTastingPanel.h"
 #include "panels/WineDetailValuePanel.h"
 
-#include <ctb/tasks/tasks.h>
 #include <ctb/utility_chrono.h>
 #include <ctb/utility_http.h>
 

@@ -30,7 +30,7 @@ namespace ctb::senders
    using stdexec::stopped_as_error;
    using stdexec::then;
    using stdexec::upon_error;
-
+   using stdexec::write_env;
 
    /// @brief checks an CellarTracker HTTP response for errors and throws them as Error exceptions
    /// @return the response object from the HttpResult if validation passed

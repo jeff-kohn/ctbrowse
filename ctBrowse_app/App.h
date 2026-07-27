@@ -15,17 +15,13 @@
 #include <wx/app.h>
 #include <wx/windowptr.h>
 
+#include <stdexec/stop_token.hpp>
 
 namespace ctb::app
 {
    /// @brief forward declare top-level window class so we don't have to add header dependency
    ///
    class MainFrame;
-   class LabelImageCache;
-   class HiddenWebClient;
-
-   using LabelCachePtr = std::shared_ptr<LabelImageCache>;
-   using WebClientPtr  = wxWindowPtr<HiddenWebClient>;
 
    // we don't use enum class because then every time we need to pass an ID to wxObject,
    // we'd have to cast or use std::to_underlying and that's just an ugly waste of time
@@ -90,31 +86,12 @@ namespace ctb::app
       auto OnExit() -> int override;
 
       /// @brief  returns the path where the application stores data files.
-      auto getDataFolder(AppFolder folder) const noexcept -> fs::path
-      {
-         if (folder == AppFolder::Root) return m_user_data_folder;
-
-         std::string path{};
-         try
-         {
-            path = ctb::format("{}/{}", m_user_data_folder.generic_string(), enum_to_string(folder));
-            fs::create_directories(path);
-            return fs::path{ path };
-         }
-         catch (...)
-         {
-            displayFormattedMessage("Data folder '{}' does not exist and could not be created.", path);
-            assert(false);
-            return {};
-         }
-      }
-
+      auto getDataFolder(AppFolder folder) const noexcept -> fs::path;
 
       auto getDatasetManager() noexcept -> CtDatasetMgr&
       {
          return m_dataset_mgr;
       }
-
 
       /// @brief Retrieve a pointer to main window that doesn't need dynamic_cast (or wx-equivalent).
       /// @return pointer to the main window. Will never be nullptr unless somehow called before OnInit().
@@ -123,21 +100,12 @@ namespace ctb::app
          return m_main_frame;
       }
 
-      /// @brief labelCacheFolder()
-      /// @return the fully qualified path to the folder where label images are cached
-      auto getLabelCacheFolder() noexcept -> fs::path;
-      void setLabelCacheFolder(const fs::path& cache_folder);
-
-      auto getLabelCache() noexcept -> LabelCachePtr
-      {
-         return m_label_cache;
-      }
 
       /// @brief Get the current config object.
       ///
       /// Calling this will throw an exception if there's no default config. AFAIK the wxWidgets config store is
       /// not thread-safe since multiple calls to SetPath() would be problematic. This should only be used from UI thread.
-      auto getConfig(std::string_view initial_path = ScopedConfigPath::CONFIG_ROOT) noexcept(false) -> ScopedConfigPath;
+      auto getConfig(std::string_view initial_path = ScopedConfigPath::CONFIG_ROOT) const noexcept(false) -> ScopedConfigPath;
 
       /// @brief Display a message box with an error description.
       ///
@@ -159,14 +127,16 @@ namespace ctb::app
       void displayFormattedMessage(ctb::format_string<Args...> fmt_str,
                                    Args&&... args) const   // NOLINT [cppcoreguidelines-missing-std-forward]
       {
-         displayInfoMessage(ctb::vformat(fmt_str, ctb::make_format_args(args...)));
+         displayInfoMessage(ctb::format(fmt_str, std::forward<Args>(args)...));
+       //  displayInfoMessage(ctb::vformat(fmt_str, ctb::make_format_args(args...)));
       }
 
+      void fireShutdown();
+
    private:
+      stdexec::inplace_stop_source   m_shutdown_source{};
       MainFrame*                     m_main_frame{};
       fs::path                       m_user_data_folder{};
-      WebClientPtr                   m_web_client{};
-      LabelCachePtr                  m_label_cache{};
       std::optional<ProReviewsCache> m_review_cache{};
       CtDatasetMgr                   m_dataset_mgr{};
       void                           onMainFrameClosed(wxCloseEvent&);

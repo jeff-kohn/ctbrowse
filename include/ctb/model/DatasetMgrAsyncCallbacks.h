@@ -25,7 +25,7 @@ namespace ctb
    struct ImageFileContents
    {
       uint64_t    wine_id{};     // wine_id the image is for
-      Buffer      data{};        // binary contents of the file
+      Buffer      contents{};    // binary contents of the file
       fs::path    file_path{};   // path the file was loaded from, or path it should be saved to if image was downloaded
       MaybeString url{};         // will only have a value if this file was downlaoded and should be saved. If empty file was read from disk
    };
@@ -33,7 +33,6 @@ namespace ctb
    // used for loading (or downloading) images, expected value is the image bytes.
    using ImageResult         = std::expected<ImageFileContents, ctb::Error>;
    using ImageResultCallback = copyable_function<void(ImageResult) const>;
-
 
 
 }   // namespace ctb

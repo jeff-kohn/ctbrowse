@@ -64,10 +64,6 @@ target_sources(${TARGET_NAME}
       "../include/ctb/tables/detail/TableRecord.h"
       "../include/ctb/tables/detail/TableSorter.h"
 
-      "../include/ctb/tasks/PollingTask.h"
-      "../include/ctb/tasks/tasks.h"
-
-
    PRIVATE
       "CredentialManager.cpp"
       "CredentialWrapper.cpp"
@@ -77,7 +73,6 @@ target_sources(${TARGET_NAME}
       "log.cpp"
       "ProReviewsCache.cpp"
       "ScopedHandle.h"
-      "tasks.cpp"
       "utility.cpp"
       "utility_http.cpp"
       "utility_win32.cpp"
