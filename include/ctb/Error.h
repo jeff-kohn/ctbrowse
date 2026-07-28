@@ -94,17 +94,15 @@ namespace ctb
 
       /// @brief construct an error with the given category and formatted message
       template<typename... T>
-      Error(Category category, std::string_view fmt, T&&... args)
-         :   // NOLINT [cppcoreguidelines-missing-std-forward]
-
-           error_code{ ERROR_CODE_GENERAL_FAILURE },
+      Error(Category category, std::string_view fmt, const T&... args)  
+         : error_code{ ERROR_CODE_GENERAL_FAILURE },
            error_message{ ctb::vformat(fmt, ctb::make_format_args(args...)) },
            category{ category }
       {}
 
       /// @brief construct an error with the given error code, category and formatted message
       template<typename... T>
-      Error(int64_t code, Category category, std::string_view fmt, T&&... args)
+      Error(int64_t code, Category category, std::string_view fmt, const T&... args)
          :   // NOLINT [cppcoreguidelines-missing-std-forward]
            error_code{ code },
            error_message{ ctb::vformat(fmt, ctb::make_format_args(args...)) },

@@ -31,6 +31,8 @@ namespace ctb::senders
    using stdexec::then;
    using stdexec::upon_error;
    using stdexec::write_env;
+   using stdexec::inplace_stop_source;
+   using stdexec::inplace_stop_token;
 
    /// @brief checks an CellarTracker HTTP response for errors and throws them as Error exceptions
    /// @return the response object from the HttpResult if validation passed
@@ -189,7 +191,7 @@ namespace ctb::senders
    ///
    /// File will be decoded if it's base64-encoded, otherwise the contents will be transferred
    /// directly to the return value.
-   inline [[nodiscard]] Buffer decodeResourceContents(const HttpFileContents& file_contents)
+   [[nodiscard]] inline Buffer decodeResourceContents(const HttpFileContents& file_contents)
    {
       if (file_contents.base64_encoded)
       {

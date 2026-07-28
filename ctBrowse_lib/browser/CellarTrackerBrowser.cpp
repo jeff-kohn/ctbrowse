@@ -107,6 +107,7 @@ namespace ctb
             throw std::move(retval.error());
          }
       }
+      std::unreachable();
    }
 
 

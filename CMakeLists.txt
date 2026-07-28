@@ -49,6 +49,7 @@ if(PROJECT_IS_TOP_LEVEL)
       if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
          list(APPEND CTB_COMPILE_OPTIONS /std:c++latest /Zf $<$<CONFIG:Release,ReleaseMinSize,RelWithDebInfo>:/GL>)
       else()
+         list(APPEND CTB_COMPILE_OPTIONS -Wno-unqualified-std-cast-call)
          # for other compilers we're using Ninja so generate compile_commands.json
          set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
       endif()

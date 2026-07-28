@@ -11,6 +11,7 @@
 
 namespace ctb
 {
+   using MaybeStopToken = std::optional<stdexec::inplace_stop_token>;
 
    // options struct for dataset mgr. the path strings will have any embedded enviroment variables expanded before use
    struct DatasetMgrOptions
@@ -57,9 +58,8 @@ namespace ctb
    public:
       ~CtDatasetMgr() noexcept;   //= default;
 
-      /// @brief construct a CtDatasetLoader using the specified options. May
-      explicit CtDatasetMgr(const DatasetMgrOptions& opts) noexcept(false);
-      CtDatasetMgr(const DatasetMgrOptions& opts, stdexec::inplace_stop_token shutdown_token) noexcept(false);
+      /// @brief construct a CtDatasetLoader using the specified options. 
+      CtDatasetMgr(const DatasetMgrOptions& opts, MaybeStopToken shutdown_token = {}) noexcept(false);
 
 
       /// @brief Specify the location for table files. Environment variables will be expanded
@@ -134,7 +134,7 @@ namespace ctb
       CtDatasetMgr& operator=(const CtDatasetMgr&) = delete;
 
    private:
-      void init(const DatasetMgrOptions& opts, std::optional<stdexec::inplace_stop_token> shutdown_token);
+      void init(const DatasetMgrOptions& opts, MaybeStopToken shutdown_token);
       bool shutdownRequested() const
       {
          return m_shutdown_token.stop_requested();

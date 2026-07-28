@@ -113,7 +113,7 @@ namespace ctb
          // if url is present, we downloaded the file so go ahead and save it (overwrite would be unlikely but OK)
          if (image_contents.url.has_value())
          {
-            auto [[maybe_unused]] bytes_written = co_await io_pool.sndWriteFile(image_contents.file_path, image_contents.contents);
+            [[maybe_unused]] auto bytes_written = co_await io_pool.sndWriteFile(image_contents.file_path, image_contents.contents);
             SPDLOG_DEBUG("CtDatasetMgr::retrieveLabelImageAsync - saved {} bytes to '{}'", bytes_written, image_contents.file_path);
          }
          // just forward the data to the next sender

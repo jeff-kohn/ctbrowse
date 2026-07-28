@@ -99,7 +99,7 @@ namespace ctb
    /// @brief Concept for a type that implements the interface of std::optional
    ///
    template<typename T>
-   concept NullableType = requires(T t, typename std::remove_cvref_t<T>::value_type v1, typename std::remove_cvref_t<T>::value_type v2) {
+   concept NullableType = requires(T t, std::remove_cvref_t<T>::value_type v1, std::remove_cvref_t<T>::value_type v2) {
       { t.has_value() } -> std::same_as<bool>;
       { t.value() } -> std::same_as<typename std::remove_cvref_t<T>::value_type&>;
 

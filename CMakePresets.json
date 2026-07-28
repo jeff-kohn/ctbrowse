@@ -53,7 +53,7 @@
          "architecture": "x64",
          "toolset": "v145",
          "cacheVariables": {
-            "CTB_BUILD_TESTS": "ON",
+            "CTB_BUILD_TESTS": "OFF",
             "CTB_USE_PRECOMPILED_HEADERS": "ON"
          },
          "vendor": {

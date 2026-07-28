@@ -59,13 +59,12 @@ namespace ctb
    }
 
 
-   ctb::CtDatasetMgr::CtDatasetMgr(const DatasetMgrOptions& opts) noexcept(false)
-   {}
+   CtDatasetMgr::CtDatasetMgr(const DatasetMgrOptions& opts, MaybeStopToken shutdown_token) noexcept(false)
+   {
+      init(opts, shutdown_token);
+   }
 
-   CtDatasetMgr::CtDatasetMgr(const DatasetMgrOptions& opts, stdexec::inplace_stop_token shutdown_token) noexcept(false)
-   {}
-
-   void CtDatasetMgr::init(const DatasetMgrOptions& opts, std::optional<stdexec::inplace_stop_token> shutdown_token)
+   void CtDatasetMgr::init(const DatasetMgrOptions& opts, MaybeStopToken shutdown_token)
    {
       if (!opts.browser_path.empty()) m_impl->browser.start(opts.browser_path, opts.browser_data_dir, opts.browser_ws_port);
       if (!opts.table_folder.empty()) setTableFolder(opts.table_folder);

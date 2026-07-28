@@ -410,7 +410,7 @@ namespace ctb
    }
 
 
-   void HeadlessBrowser::onWebSocketClose(glz::ws_close_code code, string_view reason)
+   void HeadlessBrowser::onWebSocketClose([[maybe_unused]] glz::ws_close_code code, [[maybe_unused]] string_view reason)
    {
       m_status.store(Status::Stopped);
       m_browser_handles = {};   // kill the browser process.
@@ -568,7 +568,7 @@ namespace ctb
    {
       asio::co_spawn(
          *m_ctx,
-         [this, func = move(func)]() mutable -> asio::awaitable<void>
+         [func = move(func)]() mutable -> asio::awaitable<void>
          {
             func();
             co_return;

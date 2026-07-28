@@ -104,8 +104,8 @@ namespace ctb
       using UnorderedStrings = std::unordered_set<std::string>;
 
       indirect<EventChannel> m_channel;
-      UnorderedStrings       m_subscribed_events{};
       std::string            m_session_id{};
+      UnorderedStrings       m_subscribed_events{};
    };
 
 
