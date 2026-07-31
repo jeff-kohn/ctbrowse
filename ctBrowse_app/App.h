@@ -9,6 +9,7 @@
 
 #include "app_constants.h"
 #include "wx_helpers.h"
+#include "CtCredentialManager.h"
 
 #include <ctb/log.h>
 #include <ctb/model/CtDatasetMgr.h>
@@ -140,6 +141,11 @@ namespace ctb::app
       std::optional<ProReviewsCache> m_review_cache{};
       CtDatasetMgr                   m_dataset_mgr{};
       void                           onMainFrameClosed(wxCloseEvent&);
+
+      /// @brief this gets called after logging, config store, secret store, etc have been set up and will
+      ///        configure the dataset manager service including async background service for downloads.
+      void configureDatasetMgr();
+         
    };
 
 }   // namespace ctb::app

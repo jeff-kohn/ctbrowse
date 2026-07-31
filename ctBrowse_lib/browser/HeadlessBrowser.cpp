@@ -27,7 +27,7 @@ namespace ctb
    //                                     "--no-first-run --no-default-browser-check --disable-sync "
    //                                     "--user-data-dir=\"{}\""sv;
 
-   constexpr auto FMT_EDGE_ARGS = "--headless=new "
+   constexpr auto FMT_EDGE_ARGS = //"--headless=new "
                                   "--remote-debugging-address=127.0.0.1 "
                                   "--no-first-run --no-default-browser-check --disable-sync "
                                   "--disable-blink-features=AutomationControlled "
@@ -218,14 +218,14 @@ namespace ctb
 
       co_await asio::dispatch(*m_ctx, asio::use_awaitable);
 
-      JsonPropMap stealth_params{
-         { params::SOURCE, std::string{ params::STEALTH_NAVIGATOR } }
-      };
-      auto result = co_await coroSendCommand(commands::ADD_NEW_DOC_SCRIPT, stealth_params, session_id);
-      result      = co_await coroSendCommand(commands::SET_USER_AGENT, params::USER_AGENT_PARAMS, session_id);
-
       subscribeEvents(session_id, std::array{ events::PAGE_LOAD, events::PAGE_FRAME_NAVIGATED, events::PAGE_DOM_LOADED });
       co_await coroEnablePageEvents(session_id);
+
+      JsonPropMap stealth_params{
+         { params::SOURCE, std::string{ params::STEALTH_NAVIGATOR_NEW_DOC_SCRIPT } }
+      };
+      auto result = co_await coroSendCommand(commands::ADD_NEW_DOC_SCRIPT, stealth_params, session_id);
+      result      = co_await coroSendCommand(commands::SET_USER_AGENT, params::SET_USER_AGENT_PARAMS, session_id);
 
       // send the navigate command
       JsonPropMap params{
@@ -248,7 +248,7 @@ namespace ctb
       while (retval.url.empty() || !page_loaded || !dom_loaded)
       {
          auto event_msg = co_await coroAwaitEvent(session_id);
-         if (!event_msg.method.has_value()) throw Error{ "HeadlessBrowser received invalid event message." };
+         if (!event_msg.method.has_value() or !event_msg.params.has_value()) throw Error{ "HeadlessBrowser received invalid event message." };
 
          if (event_msg.method.value() == events::PAGE_FRAME_NAVIGATED)
          {
@@ -305,13 +305,20 @@ namespace ctb
 
    void HeadlessBrowser::postCloseSession(string session_id) noexcept
    {
-      // clang-format off
+      try
+      {
+         // clang-format off
       delayedExec(0ms, [this, session_id]
          {
             m_event_handlers.erase(session_id);
             postCommand(commands::CLOSE_TARGET, { { params::TARGET_ID, move(session_id) } }, {});
          });
-      // clang-format on
+         // clang-format on
+      }
+      catch (...)   // NOLINT
+      {
+         SPDLOG_DEBUG("HeadlessBrowser caught an exception posting close-session command: {}", packageError().formattedMessage());
+      }
    }
 
 
@@ -354,7 +361,7 @@ namespace ctb
       {
          asio::co_spawn(
             *m_ctx,
-            [this, cmd = move(command), params = move(parameters), id = move(session_id)] -> asio::awaitable<void>
+            [this, cmd = move(command), params = move(parameters), id = move(session_id)] -> asio::awaitable<void> // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
             {
                try
                {
@@ -446,7 +453,6 @@ namespace ctb
    void HeadlessBrowser::onWebSocketError(std::error_code ec)
    {
       SPDLOG_DEBUG("HeadlessBrowser::onError - {} ({})", ec.message(), ec.value());
-      assert(false);
    }
 
 

@@ -9,13 +9,13 @@ namespace ctb::app
 {
    namespace
    {
-      [[nodiscard]] auto buildCredServiceName(const std::string_view cred_name) -> std::string
+      auto buildCredServiceName(const std::string_view cred_name) -> std::string
       {
          return ctb::format("{}/{}", CtCredentialPersist::CRED_SERVICE_BASE, cred_name);
       }
    }
 
-   [[nodiscard]] auto CtCredentialPersist::credentialExists(std::string_view cred_name) -> bool
+   auto CtCredentialPersist::credentialExists(std::string_view cred_name) -> bool
    {
       // no query capability in wxSecretStore so we have to try and load it.
       auto result = loadCredential(cred_name);
@@ -23,7 +23,7 @@ namespace ctb::app
    }
 
 
-   [[nodiscard]] auto CtCredentialPersist::loadCredential(std::string_view cred_name) -> CredentialResult
+   auto CtCredentialPersist::loadCredential(std::string_view cred_name) -> CredentialResult
    {
       using std::unexpected;
 
@@ -46,7 +46,7 @@ namespace ctb::app
    }
 
 
-   [[nodiscard]] auto CtCredentialPersist::saveCredential(CredentialWrapper& cred) -> bool
+   auto CtCredentialPersist::saveCredential(CredentialWrapper& cred) -> bool
    {
       auto secret_store = wxSecretStore::GetDefault();
       auto username = cred.username();
@@ -57,7 +57,7 @@ namespace ctb::app
    }
 
 
-   [[nodiscard]] auto CtCredentialPromptFunc::operator()(const std::string& cred_name, std::string_view prompt_message, bool allow_save) -> CredentialResult
+   auto CtCredentialPromptFunc::operator()(const std::string& cred_name, std::string_view prompt_message, bool allow_save) -> CredentialResult
    {
       try 
       {

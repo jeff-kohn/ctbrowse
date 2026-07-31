@@ -11,6 +11,13 @@ namespace ctb
 {
    using namespace senders;
 
+
+   inline auto injectCancelToken(DatasetMgrAsyncImpl::CancelToken& cancel_token)
+   {
+      return stdexec::write_env(stdexec::prop(stdexec::get_stop_token, cancel_token));
+   }
+
+
    /// @brief Retrieve the requested label image
    ///
    /// The file will be read from disk if it exists on cache, otherwise it will be
@@ -30,14 +37,14 @@ namespace ctb
       auto local_cache_result = co_await io_pool.sndReadFile(local_path);
       if (local_cache_result)
       {
-         retval.file_path = std::move(local_path);
-         retval.contents  = std::move(*local_cache_result);
+         retval.file_path = move(local_path);
+         retval.contents  = move(*local_cache_result);
 
          co_return retval;
       }
 
       SPDLOG_DEBUG("CtDatasetMgr::AsyncImpl::sndGetLabelImage couldn't read local file '{}', will attempt to download label.", local_path);
-      HttpFileContents file_contents = co_await browser.downloadLabel(wine_id);
+      HttpFileContents file_contents = co_await browser.sndDownloadLabel(wine_id);
 
       // stdexec::on is a roundtrip scheduler, this will get executed on cpu_pool and then continue on our original scheduler.
       retval.contents = co_await stdexec::on(cpu_pool.get_scheduler(), just(move(file_contents)) | then(decodeResourceContents));
@@ -45,14 +52,13 @@ namespace ctb
       co_return retval;
    }
 
-
    void DatasetMgrAsyncImpl::downloadTableAsync(TableId                     table_id,
                                                 const CredentialWrapper&    cred,
                                                 TableResultCallback         result_callback,
                                                 stdexec::inplace_stop_token cancel_token)
    {
 
-      auto http_pipeline = [this, table_id, callback = move(result_callback), cancel_token = std::move(cancel_token)](
+      auto http_pipeline = [this, table_id, callback = move(result_callback), cancel_token = move(cancel_token)](
                               HttpDownloader::HttpResult result) mutable
       {
          auto process = just(move(result))
@@ -85,10 +91,11 @@ namespace ctb
                       | let_error(
                            [this, callback](std::exception_ptr ep) mutable noexcept
                            {
-                              return safeErrorCallback(cpu_pool.get_scheduler(), callback, ep);
+                              return safeErrorCallback(callback, ep);
                            })
 
-                      | stdexec::write_env(stdexec::prop(stdexec::get_stop_token, move(cancel_token)));
+                     | injectCancelToken(cancel_token);
+
 
          // Launch the processing pipeline asynchronously.
          start_detached(move(process));
@@ -108,7 +115,7 @@ namespace ctb
          return sndGetLabelImage(wine_id, cancel_token);
       };
 
-      auto saveIfNeeded = [this](ImageFileContents image_contents) -> exec::task<ImageFileContents>
+      auto saveIfNeeded = [this](ImageFileContents& image_contents) mutable -> exec::task<ImageFileContents>
       {
          // if url is present, we downloaded the file so go ahead and save it (overwrite would be unlikely but OK)
          if (image_contents.url.has_value())
@@ -116,13 +123,13 @@ namespace ctb
             [[maybe_unused]] auto bytes_written = co_await io_pool.sndWriteFile(image_contents.file_path, image_contents.contents);
             SPDLOG_DEBUG("CtDatasetMgr::retrieveLabelImageAsync - saved {} bytes to '{}'", bytes_written, image_contents.file_path);
          }
-         // just forward the data to the next sender
-         co_return image_contents;
+         // forward the data to the next sender
+         co_return move(image_contents);
       };
 
-      auto errorCallback = [this, result_callback](std::exception_ptr ep) noexcept
+      auto errorCallback = [this, result_callback](std::exception_ptr& ep) mutable noexcept
       {
-         return safeErrorCallback(cpu_pool.get_scheduler(), result_callback, ep);
+         return safeErrorCallback(move(result_callback), move(ep));
       };
 
       auto pipeline =
@@ -134,10 +141,36 @@ namespace ctb
          | then(result_callback)
          | stopped_as_error(std::make_exception_ptr(Error{ constants::STATUS_DOWNLOAD_CANCELED, Error::Category::OperationCanceled }))
          | let_error(errorCallback)
-         | stdexec::write_env(stdexec::prop(stdexec::get_stop_token, cancel_token));
+         | injectCancelToken(cancel_token);
 
       start_detached(move(pipeline));
    }
 
 
+   void DatasetMgrAsyncImpl::checkBrowserLoginAsync(CredentialWrapper cred, LoginResultCallback result_callback, CancelToken cancel_token)
+   {
+      auto doLogin = [this](CredentialWrapper& cred)
+      {
+         return browser.sndAttemptLogin(move(cred));
+      };
+      auto errorCallback = [this, result_callback](std::exception_ptr& ep) noexcept
+      {
+         return safeErrorCallback(move(result_callback), move(ep));
+      };
+
+      auto pipeline =
+         just(move(cred))
+         | continues_on(io_pool.get_scheduler())
+         | let_value(doLogin)
+         | continues_on(cpu_pool.get_scheduler())
+         | then(result_callback)
+         | stopped_as_error(std::make_exception_ptr(Error{ constants::STATUS_DOWNLOAD_CANCELED, Error::Category::OperationCanceled }))
+         | let_error(errorCallback)
+         | injectCancelToken(cancel_token);
+
+      start_detached(move(pipeline));
+   }
+
 }   // namespace ctb
+
+

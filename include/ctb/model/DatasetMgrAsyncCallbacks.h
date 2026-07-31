@@ -35,4 +35,11 @@ namespace ctb
    using ImageResultCallback = copyable_function<void(ImageResult) const>;
 
 
+   /// @brief Used for logging into CT.com website.  If first = true, user is logged in and string contains the user name.
+   ///        If false, user is notlogged in or status could not be determined.
+   using LoginStatus         = std::pair<bool, std::string>;
+   using LoginResult         = std::expected<LoginStatus, ctb::Error>;
+   using LoginResultCallback = copyable_function<void(LoginResult result)>;
+
+
 }   // namespace ctb

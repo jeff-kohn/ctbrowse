@@ -25,7 +25,7 @@ jobs:
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
-          delete_run_by_conclusion_pattern: 'cancelled,failure'
+          delete_run_by_conclusion_pattern: 'Unsuccessful'
 
       - name: Delete old build runs
         uses: Mattraks/delete-workflow-runs@v2.1.0

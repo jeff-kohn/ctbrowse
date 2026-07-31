@@ -4,6 +4,7 @@
 #include <glaze/json/raw_string.hpp>
 
 #include <map>
+#include <string_view>
 
 namespace ctb
 {
@@ -38,14 +39,14 @@ namespace ctb
       inline constexpr const char* WS_DEBUG_URL  = "webSocketDebuggerUrl";
       inline constexpr const char* SOURCE        = "source";
 
-      inline constexpr const char* STEALTH_NAVIGATOR =
+      inline constexpr const char* STEALTH_NAVIGATOR_NEW_DOC_SCRIPT =
          "Object.defineProperty(navigator, 'webdriver', {get: () => false}); window.chrome = { runtime: {} };"
          "Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3]});"
          "Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});"
          "Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });"
          "Object.defineProperty(navigator, 'deviceMemory', { get : () = > 8 });";
 
-      inline constexpr const char* USER_AGENT_PARAMS = R"({
+      inline constexpr const char* SET_USER_AGENT_PARAMS = R"({
           "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
           "acceptLanguage": "en-US,en;q=0.9",
           "platform": "Win32",
@@ -63,6 +64,44 @@ namespace ctb
             ]
           }
       })";
+
+
+      /// @brief Format string for JS expression to determine whether current browser session is logged into CT.
+      ///        need to insert values to use for logged in, logged_out, and unkown
+      inline constexpr std::string_view FMT_CHECK_LOGIN_STATUS_JS =
+         R"((() => {{ 
+            let lightbox = document.getElementById('lightbox');
+            if (lightbox && lightbox.getAttribute('data-username')) {{
+                return "{}:" + lightbox.getAttribute('data-username');
+            }}
+            if (document.querySelector('input[type="password"]') || window.location.href.includes('login')) {{
+                return "{}";
+            }}
+            return "{}";
+        }})())";
+
+
+      /// @brief Format string for JS expression to populate the login form inputs.
+      inline constexpr std::string_view FMT_FILL_LOGIN_FORM_JS =
+         R"((() => {{ 
+            let userField = document.querySelector('input[name="user"], input[name="username"], input[type="email"]');
+            let passField = document.querySelector('input[name="password"], input[type="password"]');
+            if (!userField || !passField) return 'ERROR: login inputs not found';
+            userField.value = '{}';
+            userField.dispatchEvent(new Event('input', {{ bubbles: true }}));
+            passField.value = '{}';
+            passField.dispatchEvent(new Event('input', {{ bubbles: true }}));
+            return 'SUCCESS';
+        }})())";
+
+      /// @brief JavaScript expression to click the submit button
+      inline constexpr std::string_view SUBMIT_LOGIN_FORM_EXPRESSION =
+         R"((() => {{ 
+            let btn = document.querySelector('button[type="submit"], input[type="submit"], form button, .btn-primary');
+            if (!btn) return 'ERROR: submit button not found';
+            btn.click();
+            return 'SUCCESS';
+        }})())";
 
 
    }   // namespace params

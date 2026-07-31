@@ -179,11 +179,14 @@ namespace ctb::constants
    inline constexpr const char* FMT_ERROR_FILE_TOO_BIG          = "File '{}'s size of {} bytes exceeded the maximum allowable size of {}.";
    inline constexpr const char* FMT_ERROR_HTTP_STATUS_CODE      = "The operation failed with HTTP status code {}";
    inline constexpr const char* FMT_ERORR_NO_CREDENTIAL         = "Credential '{}' was not found or could not be loaded.";
-   inline constexpr const char* FMT_ERROR_NO_LABEL_CACHE_FOLDER = "The image cache folder {} does not exist and could not be created.";
+   inline constexpr const char* FMT_ERROR_NO_LABEL_CACHE_FOLDER = "The image cache folder [{}] does not exist and could not be created.";
+   inline constexpr const char* FMT_ERROR_NO_TABLES_FOLDER      = "The Tables folder [{}] does not exist and could not be created.";
    inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND        = "Folder '{}' does not exist.";
    inline constexpr const char* FMT_ERROR_PROP_NOT_FOUND        = "Property '{}' was not found.";
    inline constexpr const char* FMT_ERROR_INVALID_FUTURE        = "Attempt to get value from invalid future.";
    inline constexpr const char* FMT_ERROR_EMPTY_DATASET         = "Couldn't create dataset for table '{}', data was empty or invalid.";
+
+   inline constexpr const char* FMT_ERROR_HEADLESS_BROWSER_INVALID_STATUS = "Headless Browser cannot accept requests. Current value: {}";
 
    inline constexpr const char* FMT_DEFAULT_FORMAT           = "{}";
    inline constexpr const char* FMT_NUMBER_CURRENCY          = "${:.2f}";

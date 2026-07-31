@@ -33,7 +33,7 @@ namespace ctb::tests
          int64_t wine_id = 4659587;
 
          auto pipeline = just(wine_id)
-                       | let_value(std::bind_front(&CellarTrackerBrowser::downloadLabel, &browser))
+                       | let_value(std::bind_front(&CellarTrackerBrowser::sndDownloadLabel, &browser))
                        | then(senders::decodeResourceContents)
                        | then(
                             [](Buffer buf) -> Buffer

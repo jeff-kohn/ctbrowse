@@ -79,15 +79,17 @@ namespace ctb::constants
    inline constexpr const char* CMD_FILTER_TREE_INVERT_TIP          = "Invert the filter values selected for this filter.";
 
    inline constexpr const char* CONFIG_PATH_DATA_FOLDERS            = "/Preferences/DataFolders";
-   inline constexpr const char* CONFIG_VALUE_LABEL_CACHE_DIR        = "LabelCacheDir";
+   inline constexpr const char* CONFIG_VAL_LABEL_CACHE_DIR          = "LabelCacheDir";
 
    inline constexpr const char* CONFIG_PATH_PREFERENCES             = "/Preferences";
+   inline constexpr const char* CONFIG_VAL_USE_HEADLESS_BROWSER     = "UseHeadlessBrowser";
+
    inline constexpr const char* CONFIG_PATH_PREFERENCE_DATASYNC     = "/Preferences/DataSync";                                                                
-   inline constexpr const char* CONFIG_VALUE_DEFAULT_SYNC_TABLES    = "DefaultSyncTables";
-   inline constexpr const char* CONFIG_VALUE_SYNC_ON_STARTUP        = "SyncOnStartup";
+   inline constexpr const char* CONFIG_VAL_DEFAULT_SYNC_TABLES      = "DefaultSyncTables";
+   inline constexpr const char* CONFIG_VAL_SYNC_ON_STARTUP          = "SyncOnStartup";
 
    inline constexpr const char* CONFIG_PATH_GRID_OPTIONS            = "/Preferences/GridOptions";
-   inline constexpr const char* CONFIG_VALUE_DEFAULT_IN_STOCK_ONLY  = "DefaultInStockOnly";
+   inline constexpr const char* CONFIG_VAL_DEFAULT_IN_STOCK_ONLY    = "DefaultInStockOnly";
                                                                     
    inline constexpr const char* ERROR_WINDOW_CREATION_FAILED        = "Window creation failed. You may need to restart the app.";
 
@@ -188,7 +190,7 @@ namespace ctb::constants
    inline constexpr const char* RES_NAME_TREE_UNCHECKED_IMG       = "TREE_UNCHECKED_IMG";
 
    inline constexpr int  WX_UNSPECIFIED_VALUE                     = -1;
-   inline constexpr bool CONFIG_VALUE_IN_STOCK_FILTER_DEFAULT     = true;
+   inline constexpr bool CONFIG_VAL_IN_STOCK_FILTER_DEFAULT     = true;
 
    // app-specific error messages.
    inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN     = "Label cache object is shutting down.";

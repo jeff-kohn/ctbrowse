@@ -43,6 +43,7 @@ namespace ctb
       int32_t browser_ws_port{ DEFAULT_BROWSER_WS_PORT };
    };
 
+
    // for PIMPL
    struct DatasetMgrAsyncImpl;
 
@@ -58,7 +59,7 @@ namespace ctb
    public:
       ~CtDatasetMgr() noexcept;   //= default;
 
-      /// @brief construct a CtDatasetLoader using the specified options. 
+      /// @brief construct a CtDatasetLoader using the specified options.
       CtDatasetMgr(const DatasetMgrOptions& opts, MaybeStopToken shutdown_token = {}) noexcept(false);
 
 
@@ -127,6 +128,15 @@ namespace ctb
       void retrieveLabelImageAsync(uint64_t wine_id, ImageResultCallback result_callback);
 
 
+      /// @brief Navigates to CT.com and logs in with the supplied credentials if browser isn't already logged into CT
+      /// @param cred - creds to use
+      void checkBrowserLoginAsync(CredentialWrapper cred, LoginResultCallback result_callback);
+
+
+      /// @brief post-construction initialization
+      void init(const DatasetMgrOptions& opts, MaybeStopToken shutdown_token);
+
+      // default ctor doesn't start the CellarTrackerBrowser service, would need to call init() later.
       CtDatasetMgr();
       CtDatasetMgr(CtDatasetMgr&&)                 = default;
       CtDatasetMgr& operator=(CtDatasetMgr&&)      = delete;
@@ -134,14 +144,13 @@ namespace ctb
       CtDatasetMgr& operator=(const CtDatasetMgr&) = delete;
 
    private:
-      void init(const DatasetMgrOptions& opts, MaybeStopToken shutdown_token);
       bool shutdownRequested() const
       {
          return m_shutdown_token.stop_requested();
       }
 
       indirect<DatasetMgrAsyncImpl>  m_impl;
-      stdexec::inplace_stop_token        m_shutdown_token{};
+      stdexec::inplace_stop_token    m_shutdown_token{};
       std::optional<ProReviewsCache> m_pro_cache{};
    };
 

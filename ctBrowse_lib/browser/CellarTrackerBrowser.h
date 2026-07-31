@@ -1,13 +1,16 @@
 #pragma once
 #include "ctb/ctb.h"
+#include "ctb/utility_chrono.h"
 #include "../async/senders.h"
+
 #include <asio/io_context.hpp>
 #include <exec/task.hpp>
+
 
 namespace ctb
 {
    class HeadlessBrowser;
-
+   struct RuntimeEvalResult;
 
    /// @brief Provides an async websocket interface for orchestrating a headless browser instance via Chrome Devtools Protocol.
    ///
@@ -63,17 +66,45 @@ namespace ctb
 
 
       /// @brief stdexec sender to download a label image from CT
-      [[nodiscard]] senders::AnySender<senders::HttpFileContents> downloadLabel(uint64_t wine_id) noexcept(false);
+      [[nodiscard]] senders::AnySender<senders::HttpFileContents> sndDownloadLabel(uint64_t wine_id) noexcept(false);
+
+
+      /// @brief result type for the sndAttemptLogin sender, expected return value is the login name if successful
+      using LoginStatus = std::pair<bool, std::string>;
+      using LoginResult = std::expected<LoginStatus, ctb::Error>;
+
+      /// @brief Check if browser profile is logged into CT website, and if not attempt to login using the supplied credentials.
+      [[nodiscard]] senders::AnySender<LoginResult> sndAttemptLogin(CredentialWrapper&& cred) noexcept;
 
       // needed in CPP for PIMPL
       ~CellarTrackerBrowser();
 
    private:
+      static inline constexpr uint16_t JS_EVAL_RETRY_COUNT          = 4u;
+      static inline constexpr double   JS_EVAL_RETRY_BACKOFF_FACTOR = 1.5;
+      static inline constexpr auto     JS_RETRY_INITIAL_DELAY       = 100ms;
+
       indirect<HeadlessBrowser> m_browser;
 
+
       // private coroXXX methods are ASIO coroutines. Public methods that return stedexec senders
-      // should only co_await these from inside an asSender() invocation, otherwise bad things can happen
-      asio::awaitable<std::string> coroGetLabelImageUrl(const std::string& session_id) noexcept(false);
+      // should only co_await these from inside an asSender() invocation, otherwise bad things can
+      // happen if an exception escapes the ASIO coroutine.
+      asio::awaitable<std::string> coroGetLabelImageUrl(std::string session_id) noexcept(false);
+
+      asio::awaitable<LoginStatus> coroCheckLoginStatus(const std::string& session_id);
+
+      asio::awaitable<RuntimeEvalResult> coroEvalWithRetry(std::string session_id, std::string source_js) noexcept(false);
+
+      template<DurationType DurationT>
+      asio::awaitable<RuntimeEvalResult> coroEvalWithRetry(std::string session_id,
+                                                           std::string source_js,
+                                                           uint16_t    num_retries,
+                                                           DurationT   retry_delay,
+                                                           double      backoff_factor) noexcept(false);
+
+      // will throw an exception if called when status() returns anything but Ready
+      void checkStatus() noexcept(false);
    };
 
 }   // namespace ctb

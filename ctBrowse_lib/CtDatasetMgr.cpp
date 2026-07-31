@@ -64,6 +64,7 @@ namespace ctb
       init(opts, shutdown_token);
    }
 
+
    void CtDatasetMgr::init(const DatasetMgrOptions& opts, MaybeStopToken shutdown_token)
    {
       if (!opts.browser_path.empty()) m_impl->browser.start(opts.browser_path, opts.browser_data_dir, opts.browser_ws_port);
@@ -72,6 +73,7 @@ namespace ctb
 
       if (shutdown_token) m_shutdown_token = std::move(*shutdown_token);
    }
+
 
    auto CtDatasetMgr::loadDataset(TableId table_id) -> DatasetPtr
    {
@@ -111,18 +113,6 @@ namespace ctb
    }
 
 
-   void CtDatasetMgr::downloadTableAsync(TableId table_id, const CredentialWrapper& cred, TableResultCallback result_callback)
-   {
-      if (!shutdownRequested()) m_impl->downloadTableAsync(table_id, cred, move(result_callback), m_shutdown_token);
-   }
-
-
-   void CtDatasetMgr::retrieveLabelImageAsync(uint64_t wine_id, ImageResultCallback result_callback)
-   {
-      if (!shutdownRequested()) m_impl->retrieveLabelImageAsync(wine_id, move(result_callback), m_shutdown_token);
-   }
-
-
    auto CtDatasetMgr::setTableFolder(const std::string& folder) noexcept(false) -> CtDatasetMgr&
    {
       fs::path folder_path{ expandEnvironmentVars(folder) };
@@ -158,7 +148,7 @@ namespace ctb
       fs::path folder_path{ expandEnvironmentVars(folder) };
       if (!fs::exists(folder_path) and !createFolderPath(folder_path))
       {
-         throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_NO_LABEL_CACHE_FOLDER,
+         throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_NO_TABLES_FOLDER,
                       folder_path.generic_string() };
       }
       m_impl->label_folder = folder_path;
@@ -184,4 +174,24 @@ namespace ctb
    }
 
 
+   void CtDatasetMgr::downloadTableAsync(TableId table_id, const CredentialWrapper& cred, TableResultCallback result_callback)
+   {
+      if (!shutdownRequested()) m_impl->downloadTableAsync(table_id, cred, move(result_callback), m_shutdown_token);
+   }
+
+
+   void CtDatasetMgr::retrieveLabelImageAsync(uint64_t wine_id, ImageResultCallback result_callback)
+   {
+      if (!shutdownRequested()) m_impl->retrieveLabelImageAsync(wine_id, move(result_callback), m_shutdown_token);
+   }
+
+
+   void CtDatasetMgr::checkBrowserLoginAsync(CredentialWrapper cred, LoginResultCallback result_callback)
+   {
+      if (!shutdownRequested()) m_impl->checkBrowserLoginAsync(move(cred), move(result_callback), m_shutdown_token);
+   }
+
+
+
 }   // namespace ctb
+

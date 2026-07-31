@@ -18,6 +18,8 @@ namespace ctb::senders
 {
 
    // keep namespace pollution out of our expressions, especially since stdexec will probably become std::exec
+   using asio::use_awaitable;
+   using exec::asio::use_sender;
    using exec::start_detached;
    using exec::asio::use_sender;
    using std::move;
@@ -33,6 +35,7 @@ namespace ctb::senders
    using stdexec::write_env;
    using stdexec::inplace_stop_source;
    using stdexec::inplace_stop_token;
+
 
    /// @brief checks an CellarTracker HTTP response for errors and throws them as Error exceptions
    /// @return the response object from the HttpResult if validation passed
@@ -197,7 +200,7 @@ namespace ctb::senders
       {
          return base64Decode(file_contents.content);
       }
-      auto* data_ptr = reinterpret_cast<const std::byte*>(file_contents.content.data());
+      const auto* data_ptr = reinterpret_cast<const std::byte*>(file_contents.content.data());  // NOLINT [cppcoreguidelines-pro-type-reinterpret-cast]
       return Buffer{ data_ptr, data_ptr + file_contents.content.size() };
    }
 

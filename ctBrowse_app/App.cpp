@@ -21,7 +21,7 @@
 namespace ctb::app
 {
 
-   App::App() : m_dataset_mgr{ DatasetMgrOptions{}, m_shutdown_source.get_token() }   // uses default browser path and browser data dir.
+   App::App()
    {
       try
       {
@@ -59,9 +59,7 @@ namespace ctb::app
          log::info("App startup.");
          wxConfigBase::Set(cfg.release());
 
-         m_dataset_mgr.setTableFolder(getDataFolder(AppFolder::Tables));
-         m_dataset_mgr.setLabelImageFolder(getDataFolder(AppFolder::Labels));
-
+         configureDatasetMgr();
       }
       catch (...)
       {
@@ -176,6 +174,51 @@ namespace ctb::app
       m_shutdown_source.request_stop();
    }
 
+   void App::configureDatasetMgr()
+   {
+      try
+      {
+         // currently we have a default-constructed DatasetManager without the browser running. Check if we should
+         // run the browser, also set the table/image folders.
+         DatasetMgrOptions opts{};
+
+         auto config = getConfig(constants::CONFIG_PATH_PREFERENCES);
+         if (!config->ReadBool(constants::CONFIG_VAL_USE_HEADLESS_BROWSER, true))
+         {
+            opts.browser_path.clear();   // this will keep browser from being loaded.
+
+            // todo: in future use preferences to store custom paths for browser and its data dir, port as well.
+            // for now the defaults are fine, will be easy to update later.
+         }
+         m_dataset_mgr.setTableFolder(getDataFolder(AppFolder::Tables));
+         m_dataset_mgr.setLabelImageFolder(getDataFolder(AppFolder::Labels));
+
+         // initiate login verification if we have a credential.
+         CtCredentialPersist cred_store{};
+         if (auto cred = cred_store.loadCredential(constants::CELLARTRACKER_DOT_COM))
+         {
+            m_dataset_mgr.checkBrowserLoginAsync(
+               std::move(*cred),
+               [](LoginResult result)
+               {
+                  if (result && result->first)
+                  {
+                     log::info("Headless Browser CT session verified for user {}", result->second);
+                  }
+                  else
+                  {
+                     std::string msg = result ? "Page loaded but couldn't log in" : result.error().formattedMessage();
+                     log::warn("Headless Browser not logged in. {}", msg);
+                  }
+               });
+         }
+      }
+      catch (...)   // NOLINT
+      {
+         log::warn("An exception was caught while initializing the dataset manager.");
+         log::exception(packageError());
+      }
+   }
 
 
 }   // namespace ctb::app
