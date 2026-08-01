@@ -74,7 +74,10 @@ namespace ctb
    }   // namespace
 
 
-   HeadlessBrowser::Session::Session(HeadlessBrowser& browser, string session_id) : m_session_id{ move(session_id) }, m_browser{ &browser }
+   HeadlessBrowser::Session::Session(HeadlessBrowser& browser, string session_id, std::string target_id)
+      : m_browser{ &browser },
+        m_session_id{ move(session_id) },
+        m_target_id{ move(target_id) }
    {}
 
 
@@ -85,7 +88,7 @@ namespace ctb
          // this object may not be valid if it was moved-from
          if (m_browser)
          {
-            m_browser->postCloseSession(move(m_session_id));
+            m_browser->postCloseSession(move(m_target_id));
          }
       }
       catch (...)
@@ -95,7 +98,10 @@ namespace ctb
    }
 
 
-   HeadlessBrowser::Session::Session(Session&& other) noexcept : m_session_id{ move(other.m_session_id) }, m_browser{ other.m_browser }
+   HeadlessBrowser::Session::Session(Session&& other) noexcept
+      : m_browser{ other.m_browser },
+        m_session_id{ move(other.m_session_id) },
+        m_target_id{ move(other.m_target_id) }
    {
       other.m_browser = nullptr;
    }
@@ -259,7 +265,7 @@ namespace ctb
                retval.url = frame_url.value_or("");
                if (retval.url != url)
                {
-                  throw ctb::Error{ Error::Category::NetworkError, "Page.navigate command for {} returned unexpected result", url };
+                  SPDLOG_DEBUG("Warning: Page.navigate navigated to url ({}) that doesn't match original requested url ({})", retval.url, url);
                }
             }
          }
@@ -540,7 +546,7 @@ namespace ctb
       auto result = glz::ex::read_json<AttachTargetResult>(response.result->str);
       SPDLOG_DEBUG("{} received targetId '{}'", commands::ATTACH_TARGET, result.sessionId);
 
-      co_return Session{ *this, move(result.sessionId) };
+      co_return Session{ *this, move(result.sessionId), move(target_id) };
    }
 
 

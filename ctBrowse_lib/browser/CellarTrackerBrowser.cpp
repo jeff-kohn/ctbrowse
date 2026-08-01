@@ -5,8 +5,10 @@
 
 #include <asio/dispatch.hpp>
 #include <asio/this_coro.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <exec/asio/use_sender.hpp>
 #include <fmt/chrono.h>
+
 #include <utility>
 
 namespace ctb
@@ -167,13 +169,26 @@ namespace ctb
             throw ctb::Error{ Error::Category::NetworkError, "Couldn't get browser session to CT login" };
          }
 
-         // navigate to CT.com and check login status
-         [[maybe_unused]] auto nav_result = co_await m_browser->coroNavigate(session->sessionId(), constants::CELLARTRACKER_DOT_COM);
+         // navigate to login page. If we're already logged in it will redirect to main page, if not we can fill
+         // form and submit.
+         static constexpr auto DEFAULT_PAGE = "default.asp"sv;
+         static constexpr auto LOGIN_PAGE   = "password.asp"sv;
+         static constexpr auto CT_LOGIN_URL = "https://www.cellartracker.com/password.asp"sv;
 
-         auto login_result = co_await coroCheckLoginStatus(session->sessionId());
-         if (login_result.first)
+         auto nav_result   = co_await m_browser->coroNavigate(session->sessionId(), std::string{ CT_LOGIN_URL });
+         boost::to_lower(nav_result.url);
+         auto trimmed_url = trim_back_view(nav_result.url, "/");
+         if (trimmed_url.ends_with(DEFAULT_PAGE))
          {
-            co_return login_result;
+            // If we get redirected to default.asp it should mean we're already logged in.
+            co_return co_await coroCheckLoginStatus(session->sessionId());
+         }
+
+         if (!trimmed_url.ends_with(LOGIN_PAGE))
+         {
+            // If we're on any other page than password.asp, bail the fuck out
+            SPDLOG_DEBUG("CellarTrackerBrowser couldn't navigate to login page, redirected to {}", nav_result.url);
+            co_return LoginStatus{ false, "" };
          }
 
          // OK so we need to login. Start by filling the form fields and clicking submit
@@ -182,6 +197,7 @@ namespace ctb
          const auto fill_login_form_js = format(params::FMT_FILL_LOGIN_FORM_JS, cred.username(), cred.password());
          auto       eval_result        = co_await coroEvalWithRetry(session->sessionId(), fill_login_form_js, 0, 0ms, 0);
 
+         // TODO  check error parsing
          eval_result = co_await coroEvalWithRetry(session->sessionId(), std::string{ params::SUBMIT_LOGIN_FORM_EXPRESSION }, 0, 0ms, 0);
 
          // Now check again and return final result.

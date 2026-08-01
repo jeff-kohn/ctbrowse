@@ -16,7 +16,7 @@
 
 #include <chrono>
 #include <filesystem>
-
+#include <future>
 
 namespace ctb::app
 {
@@ -190,6 +190,7 @@ namespace ctb::app
             // todo: in future use preferences to store custom paths for browser and its data dir, port as well.
             // for now the defaults are fine, will be easy to update later.
          }
+         m_dataset_mgr.init(opts, m_shutdown_source.get_token());
          m_dataset_mgr.setTableFolder(getDataFolder(AppFolder::Tables));
          m_dataset_mgr.setLabelImageFolder(getDataFolder(AppFolder::Labels));
 
@@ -197,20 +198,26 @@ namespace ctb::app
          CtCredentialPersist cred_store{};
          if (auto cred = cred_store.loadCredential(constants::CELLARTRACKER_DOT_COM))
          {
-            m_dataset_mgr.checkBrowserLoginAsync(
-               std::move(*cred),
-               [](LoginResult result)
+            std::jthread{
+               [this, cred = std::move(cred)] mutable -> void
                {
-                  if (result && result->first)
-                  {
-                     log::info("Headless Browser CT session verified for user {}", result->second);
-                  }
-                  else
-                  {
-                     std::string msg = result ? "Page loaded but couldn't log in" : result.error().formattedMessage();
-                     log::warn("Headless Browser not logged in. {}", msg);
-                  }
-               });
+                  std::this_thread::sleep_for(1000ms);
+                  m_dataset_mgr.checkBrowserLoginAsync(std::move(*cred),
+                                                       [](LoginResult result)
+                                                       {
+                                                          if (result && result->first)
+                                                          {
+                                                             log::info("Headless Browser CT session verified for user {}", result->second);
+                                                          }
+                                                          else
+                                                          {
+                                                             std::string msg = result ? "Page loaded but couldn't log in"
+                                                                                      : result.error().formattedMessage();
+                                                             log::warn("Headless Browser not logged in. {}", msg);
+                                                          }
+                                                       });
+               }
+            }.detach();
          }
       }
       catch (...)   // NOLINT

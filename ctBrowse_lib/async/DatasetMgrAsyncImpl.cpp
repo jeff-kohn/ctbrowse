@@ -47,6 +47,7 @@ namespace ctb
       HttpFileContents file_contents = co_await browser.sndDownloadLabel(wine_id);
 
       // stdexec::on is a roundtrip scheduler, this will get executed on cpu_pool and then continue on our original scheduler.
+      retval.url      = file_contents.original_url;
       retval.contents = co_await stdexec::on(cpu_pool.get_scheduler(), just(move(file_contents)) | then(decodeResourceContents));
 
       co_return retval;
@@ -121,6 +122,8 @@ namespace ctb
          if (image_contents.url.has_value())
          {
             [[maybe_unused]] auto bytes_written = co_await io_pool.sndWriteFile(image_contents.file_path, image_contents.contents);
+
+            if (!bytes_written) throw move(bytes_written.error());
             SPDLOG_DEBUG("CtDatasetMgr::retrieveLabelImageAsync - saved {} bytes to '{}'", bytes_written, image_contents.file_path);
          }
          // forward the data to the next sender

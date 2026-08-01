@@ -97,10 +97,11 @@ namespace ctb
 
       private:
          friend class HeadlessBrowser;
-         Session(HeadlessBrowser& browser, std::string session_id);
+         Session(HeadlessBrowser& browser, std::string session_id, std::string target_id);
 
-         std::string      m_session_id;
          HeadlessBrowser* m_browser{};
+         std::string      m_session_id{};
+         std::string      m_target_id{};
       };
 
 

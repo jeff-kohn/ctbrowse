@@ -84,8 +84,8 @@ namespace ctb
       /// @brief Format string for JS expression to populate the login form inputs.
       inline constexpr std::string_view FMT_FILL_LOGIN_FORM_JS =
          R"((() => {{ 
-            let userField = document.querySelector('input[name="user"], input[name="username"], input[type="email"]');
-            let passField = document.querySelector('input[name="password"], input[type="password"]');
+            let userField = document.querySelector('input[name="szUser"], input[id="handle"]');
+            let passField = document.querySelector('input[name="szPassword"], input[id="password"]');
             if (!userField || !passField) return 'ERROR: login inputs not found';
             userField.value = '{}';
             userField.dispatchEvent(new Event('input', {{ bubbles: true }}));
@@ -96,13 +96,21 @@ namespace ctb
 
       /// @brief JavaScript expression to click the submit button
       inline constexpr std::string_view SUBMIT_LOGIN_FORM_EXPRESSION =
-         R"((() => {{ 
-            let btn = document.querySelector('button[type="submit"], input[type="submit"], form button, .btn-primary');
-            if (!btn) return 'ERROR: submit button not found';
-            btn.click();
-            return 'SUCCESS';
-        }})())";
-
+         R"((() => { 
+            // Specifically target the sign in button by its exact ID
+            let btn = document.getElementById('sign_in');
+            if (btn) {
+                btn.click();
+                return 'SUCCESS';
+            }
+            // Fallback: If button is missing, find the specific login form and submit it programmatically
+            let form = document.querySelector('form[name="login"]');
+            if (form) {
+                form.submit();
+                return 'SUCCESS_FORM_SUBMIT';
+            }
+            return 'ERROR: submit button and form not found';
+        })())";
 
    }   // namespace params
 

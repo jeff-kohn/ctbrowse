@@ -13,7 +13,7 @@
 namespace ctb::constants
 {
    inline constexpr const char* CELLARTRACKER_DOT_COM = "CellarTracker.com";
-   inline constexpr const char* URL_CT_DOT_COM        = "https://cellartracker.com";
+   inline constexpr const char* URL_CT_DOT_COM        = "https://www.cellartracker.com";
    inline constexpr const char* URL_CT_LOGIN_FORM     = "https://www.cellartracker.com/password.asp";
    inline constexpr const char* URL_CT_TABLE_LIST     = "https://www.cellartracker.com/list.asp?Table=List";
 
@@ -186,7 +186,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_ERROR_INVALID_FUTURE        = "Attempt to get value from invalid future.";
    inline constexpr const char* FMT_ERROR_EMPTY_DATASET         = "Couldn't create dataset for table '{}', data was empty or invalid.";
 
-   inline constexpr const char* FMT_ERROR_HEADLESS_BROWSER_INVALID_STATUS = "Headless Browser cannot accept requests. Current value: {}";
+   inline constexpr const char* FMT_ERROR_HEADLESS_BROWSER_INVALID_STATUS = "Headless Browser cannot accept requests. Current status: {}";
 
    inline constexpr const char* FMT_DEFAULT_FORMAT           = "{}";
    inline constexpr const char* FMT_NUMBER_CURRENCY          = "${:.2f}";
