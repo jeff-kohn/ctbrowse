@@ -70,6 +70,28 @@ namespace ctb
       ///        need to insert values to use for logged in, logged_out, and unkown
       inline constexpr std::string_view FMT_CHECK_LOGIN_STATUS_JS =
          R"((() => {{ 
+            // Check for logged-in specific elements
+            if (document.querySelector('.welcome_options')) {{
+                let welcomeTag = document.querySelector('h1.welcome');
+                let username = welcomeTag ? welcomeTag.innerText.replace('Welcome ', '') : 'User';
+                return "{}:" + username;
+            }}
+            
+            // Check for logged-out specific elements
+            let spans = document.querySelectorAll('button span');
+            let hasSignInBtn = Array.from(spans).some(span => span.innerText.trim() === 'Sign In');
+            let hasPasswordField = document.querySelector('input[type="password"]');
+            let isLoginPage = window.location.href.includes('password.asp') || window.location.href.includes('login');
+            
+            if (hasSignInBtn || hasPasswordField || isLoginPage) {{
+                return "{}";
+            }}
+            
+            return "{}";
+        }})())";
+
+         
+/* R"((() => {{ 
             let lightbox = document.getElementById('lightbox');
             if (lightbox && lightbox.getAttribute('data-username')) {{
                 return "{}:" + lightbox.getAttribute('data-username');
@@ -78,7 +100,7 @@ namespace ctb
                 return "{}";
             }}
             return "{}";
-        }})())";
+        }})())";*/
 
 
       /// @brief Format string for JS expression to populate the login form inputs.

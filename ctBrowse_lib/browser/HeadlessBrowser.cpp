@@ -22,12 +22,8 @@ namespace ctb
 
    constexpr auto MAX_CONNECT_RETRIES = 10;
    constexpr auto FMT_EDGE_HTTP_URL   = "http://127.0.0.1:{}/json/version";
-   //constexpr auto FMT_EDGE_ARGS       = "--headless=new --remote-debugging-address=127.0.0.1 "
-   //                                     "--remote-debugging-port={} --disable-gpu "
-   //                                     "--no-first-run --no-default-browser-check --disable-sync "
-   //                                     "--user-data-dir=\"{}\""sv;
 
-   constexpr auto FMT_EDGE_ARGS = //"--headless=new "
+   constexpr auto FMT_EDGE_ARGS = "--headless=new "
                                   "--remote-debugging-address=127.0.0.1 "
                                   "--no-first-run --no-default-browser-check --disable-sync "
                                   "--disable-blink-features=AutomationControlled "
@@ -66,7 +62,13 @@ namespace ctb
       {
          if (msg.result)
          {
-            return glz::ex::read_json<T>(msg.result->str);
+            T    t{};
+            auto ec = glz::read_json(t, msg.result->str);
+            if (ec)
+            {
+               throw Error{ Error::Category::ParseError, "Couldn't parse result from headless browser command response: {}", glz::format_error(ec) };
+            }
+            return t;
          }
          throw Error{ "HeadlessBrowser couldn't parse empty result." };
       }

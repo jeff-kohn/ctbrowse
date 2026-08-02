@@ -48,6 +48,7 @@ namespace ctb
 
       // stdexec::on is a roundtrip scheduler, this will get executed on cpu_pool and then continue on our original scheduler.
       retval.url      = file_contents.original_url;
+      retval.file_path = local_path;
       retval.contents = co_await stdexec::on(cpu_pool.get_scheduler(), just(move(file_contents)) | then(decodeResourceContents));
 
       co_return retval;
@@ -124,7 +125,7 @@ namespace ctb
             [[maybe_unused]] auto bytes_written = co_await io_pool.sndWriteFile(image_contents.file_path, image_contents.contents);
 
             if (!bytes_written) throw move(bytes_written.error());
-            SPDLOG_DEBUG("CtDatasetMgr::retrieveLabelImageAsync - saved {} bytes to '{}'", bytes_written, image_contents.file_path);
+            SPDLOG_DEBUG("CtDatasetMgr::retrieveLabelImageAsync - saved {} bytes to '{}'", bytes_written.value(), image_contents.file_path);
          }
          // forward the data to the next sender
          co_return move(image_contents);

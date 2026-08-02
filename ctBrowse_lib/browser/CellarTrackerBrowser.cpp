@@ -194,11 +194,13 @@ namespace ctb
          // OK so we need to login. Start by filling the form fields and clicking submit
          // We disable retries since we're interacting with previously loaded page, but still use coroEvelWithRetry()
          // because it unwraps the expected<> and throws on error for us, which is preferred here.
+         SPDLOG_DEBUG("Attempting to fill login form fields...");
          const auto fill_login_form_js = format(params::FMT_FILL_LOGIN_FORM_JS, cred.username(), cred.password());
-         auto       eval_result        = co_await coroEvalWithRetry(session->sessionId(), fill_login_form_js, 0, 0ms, 0);
+         auto       eval_result        = co_await coroEvalWithRetry(session->sessionId(), fill_login_form_js);
 
          // TODO  check error parsing
-         eval_result = co_await coroEvalWithRetry(session->sessionId(), std::string{ params::SUBMIT_LOGIN_FORM_EXPRESSION }, 0, 0ms, 0);
+         SPDLOG_DEBUG("Attempting to submit login form...");
+         eval_result = co_await coroEvalWithRetry(session->sessionId(), std::string{ params::SUBMIT_LOGIN_FORM_EXPRESSION });
 
          // Now check again and return final result.
          co_return co_await coroCheckLoginStatus(session->sessionId());
