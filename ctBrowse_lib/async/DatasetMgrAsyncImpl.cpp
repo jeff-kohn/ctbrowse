@@ -47,9 +47,9 @@ namespace ctb
       HttpFileContents file_contents = co_await browser.sndDownloadLabel(wine_id);
 
       // stdexec::on is a roundtrip scheduler, this will get executed on cpu_pool and then continue on our original scheduler.
-      retval.url      = file_contents.original_url;
+      retval.url       = file_contents.original_url;
       retval.file_path = local_path;
-      retval.contents = co_await stdexec::on(cpu_pool.get_scheduler(), just(move(file_contents)) | then(decodeResourceContents));
+      retval.contents  = co_await stdexec::on(cpu_pool.get_scheduler(), just(move(file_contents)) | then(decodeResourceContents));
 
       co_return retval;
    }
@@ -60,8 +60,8 @@ namespace ctb
                                                 stdexec::inplace_stop_token cancel_token)
    {
 
-      auto http_pipeline = [this, table_id, callback = move(result_callback), cancel_token = move(cancel_token)](
-                              HttpDownloader::HttpResult result) mutable
+      auto http_pipeline =
+         [this, table_id, callback = move(result_callback), cancel_token = move(cancel_token)](HttpDownloader::HttpResult result) mutable
       {
          auto process = just(move(result))
                       | continues_on(cpu_pool.get_scheduler())
@@ -77,7 +77,8 @@ namespace ctb
                       | let_value(
                            [this](RawTableData& table) mutable
                            {
-                              return io_pool.sndWriteFile(getTablePath(table_folder, table.table_id), table.data);
+                              std::string table_path = getTablePath(table_folder, table.table_id).generic_string();
+                              return io_pool.sndWriteFile(move(table_path), table.data);
                            })
 
                       | continues_on(cpu_pool.get_scheduler())
@@ -96,7 +97,7 @@ namespace ctb
                               return safeErrorCallback(callback, ep);
                            })
 
-                     | injectCancelToken(cancel_token);
+                      | injectCancelToken(cancel_token);
 
 
          // Launch the processing pipeline asynchronously.
@@ -122,7 +123,7 @@ namespace ctb
          // if url is present, we downloaded the file so go ahead and save it (overwrite would be unlikely but OK)
          if (image_contents.url.has_value())
          {
-            [[maybe_unused]] auto bytes_written = co_await io_pool.sndWriteFile(image_contents.file_path, image_contents.contents);
+            auto bytes_written = co_await io_pool.sndWriteFile(image_contents.file_path.generic_string(), image_contents.contents);
 
             if (!bytes_written) throw move(bytes_written.error());
             SPDLOG_DEBUG("CtDatasetMgr::retrieveLabelImageAsync - saved {} bytes to '{}'", bytes_written.value(), image_contents.file_path);

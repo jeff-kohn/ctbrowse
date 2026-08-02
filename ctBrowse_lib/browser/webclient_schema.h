@@ -38,6 +38,7 @@ namespace ctb
       inline constexpr const char* TARGET_URL    = "url";
       inline constexpr const char* WS_DEBUG_URL  = "webSocketDebuggerUrl";
       inline constexpr const char* SOURCE        = "source";
+      inline constexpr const char* JS_ERROR_VAL  = "ERROR";
 
       inline constexpr const char* STEALTH_NAVIGATOR_NEW_DOC_SCRIPT =
          "Object.defineProperty(navigator, 'webdriver', {get: () => false}); window.chrome = { runtime: {} };"
@@ -87,7 +88,7 @@ namespace ctb
                 return "{}";
             }}
             
-            return "{}";
+            return "ERROR: Could not determine logon status, page may not have finished loading.";
         }})())";
 
          

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ctb/ctb.h"
 #include "AsioPipelineScheduler.h"
+#include "ctb/ctb.h"
 
 #include <asio/any_io_executor.hpp>
 #include <asio/executor_work_guard.hpp>
@@ -50,7 +50,7 @@ namespace ctb
       /// @brief stdexec sender to read a file into a buffer.
       /// @param file_path - path the file to load
       /// @return  sender to retrieve the result asynchronously
-      [[nodiscard]] exec::task<ReadFileResult> sndReadFile(const fs::path& file_path) const noexcept;
+      [[nodiscard]] exec::task<ReadFileResult> sndReadFile(fs::path file_path) const noexcept;
 
 
       /// @brief return type for sndWriteFile, expected value is bytes written
@@ -58,11 +58,11 @@ namespace ctb
 
       /// @brief asynchronously write a file to disk.
       template<rng::range RngT>
-      [[nodiscard]] exec::task<WriteFileResult> sndWriteFile(const fs::path& file_path, const RngT& buf) const noexcept
+      [[nodiscard]] exec::task<WriteFileResult> sndWriteFile(std::string file_path, const RngT& buf) const noexcept
       {
          try
          {
-            asio::stream_file file{ get_executor(), file_path.generic_string(),
+            asio::stream_file file{ get_executor(), file_path,
                                     asio::stream_file::write_only | asio::stream_file::create | asio::stream_file::truncate };
             co_return co_await asio::async_write(file, asio::buffer(buf), exec::asio::use_sender);
          }

@@ -22,10 +22,10 @@ namespace ctb
    }
 
 
-   exec::task<IoManager::ReadFileResult> IoManager::sndReadFile(const fs::path& file_path) const noexcept
+   exec::task<IoManager::ReadFileResult> IoManager::sndReadFile(fs::path file_path) const noexcept
    {
       try
-      {
+      { 
          if (!fs::exists(file_path))
          {
             co_return std::unexpected{
