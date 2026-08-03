@@ -56,12 +56,12 @@ namespace ctb
 
    void DatasetMgrAsyncImpl::downloadTableAsync(TableId                     table_id,
                                                 const CredentialWrapper&    cred,
-                                                TableResultCallback         result_callback,
+                                                TableResultCallback         notify_callback,
                                                 stdexec::inplace_stop_token cancel_token)
    {
 
       auto http_pipeline =
-         [this, table_id, callback = move(result_callback), cancel_token = move(cancel_token)](HttpDownloader::HttpResult result) mutable
+         [this, table_id, callback = move(notify_callback), cancel_token = move(cancel_token)](HttpDownloader::HttpResult result) mutable
       {
          auto process = just(move(result))
                       | continues_on(cpu_pool.get_scheduler())
@@ -118,7 +118,8 @@ namespace ctb
          return sndGetLabelImage(wine_id, cancel_token);
       };
 
-      auto saveIfNeeded = [this](ImageFileContents& image_contents) mutable -> exec::task<ImageFileContents>
+      // NOLINTNEXTLINE [cppcoreguidelines-avoid-reference-coroutine-parameters]	because it's safe with let_value()
+      auto saveIfNeeded = [this](ImageFileContents& image_contents) mutable -> exec::task<ImageFileContents> 
       {
          // if url is present, we downloaded the file so go ahead and save it (overwrite would be unlikely but OK)
          if (image_contents.url.has_value())
@@ -167,8 +168,8 @@ namespace ctb
          just(move(cred))
          | continues_on(io_pool.get_scheduler())
          | let_value(doLogin)
-         | continues_on(cpu_pool.get_scheduler())
-         | then(result_callback)
+         | continues_on(cpu_pool.get_scheduler()) 
+         | then(result_callback)                   // NOLINT [clang-analyzer-cplusplus.NewDeleteLeaks]
          | stopped_as_error(std::make_exception_ptr(Error{ constants::STATUS_DOWNLOAD_CANCELED, Error::Category::OperationCanceled }))
          | let_error(errorCallback)
          | injectCancelToken(cancel_token);

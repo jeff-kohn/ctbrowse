@@ -51,8 +51,15 @@ namespace ctb
 
    IoManager::~IoManager()
    {
-      m_work_guard.reset();
-      if (m_ctx and !m_ctx->stopped()) m_ctx->stop();
+      try
+      {
+         m_work_guard.reset();
+         if (m_ctx and !m_ctx->stopped()) m_ctx->stop();
+      }
+      catch (...) // NOLINT
+      {
+         SPDLOG_DEBUG("IoManager destructor caught an unhandled exception from asio: {}", packageError().formattedMessage());
+      }
    }
 
 }   // namespace ctb

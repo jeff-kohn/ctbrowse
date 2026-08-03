@@ -35,7 +35,7 @@ namespace ctb
 
    // needs to be here so impl members are complete types, only forward declared in header.
    HttpDownloader::~HttpDownloader()
-   {}
+   = default;
 
 
    /// @brief get an HTTP request asynchronously

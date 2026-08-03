@@ -9,21 +9,20 @@
 #include <exec/asio/asio_thread_pool.hpp>
 #include <exec/asio/use_sender.hpp>
 #include <exec/start_detached.hpp>
-#include <exec/static_thread_pool.hpp>
 #include <exec/task.hpp>
 #include <stdexec/execution.hpp>
-
 
 namespace ctb::senders
 {
 
    // keep namespace pollution out of our expressions, especially since stdexec will probably become std::exec
    using asio::use_awaitable;
-   using exec::asio::use_sender;
    using exec::start_detached;
    using exec::asio::use_sender;
    using std::move;
    using stdexec::continues_on;
+   using stdexec::inplace_stop_source;
+   using stdexec::inplace_stop_token;
    using stdexec::just;
    using stdexec::let_error;
    using stdexec::let_stopped;
@@ -33,8 +32,6 @@ namespace ctb::senders
    using stdexec::then;
    using stdexec::upon_error;
    using stdexec::write_env;
-   using stdexec::inplace_stop_source;
-   using stdexec::inplace_stop_token;
 
 
    /// @brief checks an CellarTracker HTTP response for errors and throws them as Error exceptions
@@ -131,8 +128,8 @@ namespace ctb::senders
                       SPDLOG_DEBUG("safeErrorCallback caught a leaKed exception from callback invocation: {}",
                                    packageError(ep).formattedMessage());
                    }
-                   catch (...)
-                   {}   // NOLINT
+                   catch (...) // NOLINT [bugprone-empty-catch] 
+                   {}   
                 });
    }
 
@@ -179,7 +176,6 @@ namespace ctb::senders
    }
 
 
-   
    /// @brief  Represents the contents of a file retrieved from the headless browser's cache.
    //
    struct HttpFileContents
@@ -200,8 +196,9 @@ namespace ctb::senders
       {
          return base64Decode(file_contents.content);
       }
-      const auto* data_ptr = reinterpret_cast<const std::byte*>(file_contents.content.data());  // NOLINT [cppcoreguidelines-pro-type-reinterpret-cast]
-      return Buffer{ data_ptr, data_ptr + file_contents.content.size() };
+      const auto* data_ptr =
+         reinterpret_cast<const std::byte*>(file_contents.content.data());   // NOLINT [cppcoreguidelines-pro-type-reinterpret-cast]
+      return Buffer{ data_ptr, data_ptr + file_contents.content.size() };    // NOLINT [cppcoreguidelines-pro-bounds-pointer-arithmetic]
    }
 
-}   // namespace ctb::tasks
+}   // namespace ctb::senders

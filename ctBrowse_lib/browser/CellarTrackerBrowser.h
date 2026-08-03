@@ -19,7 +19,7 @@ namespace ctb
    ///
    /// This class uses and returns stdexec-compatible asio coroutines that can be used from other coroutines or stdexec pipelines.
    /// The coroutine interface works better with the event-based websocket used for talking to the browser.
-   class CellarTrackerBrowser
+   class CellarTrackerBrowser    // NOLINT [cppcoreguidelines-special-member-functions]
    {
    public:
       static constexpr int32_t           DEFAULT_WS_PORT   = 9222;
@@ -80,9 +80,9 @@ namespace ctb
       ~CellarTrackerBrowser();
 
    private:
-      static inline constexpr uint16_t JS_EVAL_RETRY_COUNT          = 4u;
-      static inline constexpr double   JS_EVAL_RETRY_BACKOFF_FACTOR = 1.5;
-      static inline constexpr auto     JS_RETRY_INITIAL_DELAY       = 100ms;
+      static constexpr uint16_t JS_EVAL_RETRY_COUNT          = 4U;
+      static constexpr double   JS_EVAL_RETRY_BACKOFF_FACTOR = 1.5;
+      static constexpr auto     JS_RETRY_INITIAL_DELAY       = 100ms;
 
       indirect<HeadlessBrowser> m_browser;
 
@@ -92,7 +92,7 @@ namespace ctb
       // happen if an exception escapes the ASIO coroutine.
       asio::awaitable<std::string> coroGetLabelImageUrl(std::string session_id) noexcept(false);
 
-      asio::awaitable<LoginStatus> coroCheckLoginStatus(const std::string& session_id);
+      asio::awaitable<LoginStatus> coroCheckLoginStatus(std::string session_id);
 
       asio::awaitable<RuntimeEvalResult> coroEvalWithRetry(std::string session_id, std::string source_js) noexcept(false);
 

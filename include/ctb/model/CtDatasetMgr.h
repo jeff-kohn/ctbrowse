@@ -16,9 +16,9 @@ namespace ctb
    // options struct for dataset mgr. the path strings will have any embedded enviroment variables expanded before use
    struct DatasetMgrOptions
    {
-      static inline constexpr int32_t           DEFAULT_BROWSER_WS_PORT   = 9222;
-      static inline constexpr const char* const DEFAULT_BROWSER_DATA_PATH = R"(%LOCALAPPDATA%\ctBrowse for Windows\WebView)";
-      static inline constexpr const char* const DEFAULT_BROWSER_EXE_PATH  = R"(%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe)";
+      static constexpr int32_t           DEFAULT_BROWSER_WS_PORT   = 9222;
+      static constexpr const char* const DEFAULT_BROWSER_DATA_PATH = R"(%LOCALAPPDATA%\ctBrowse for Windows\WebView)";
+      static constexpr const char* const DEFAULT_BROWSER_EXE_PATH  = R"(%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe)";
 
       /// @brief Folder where table files downloaded from CT will be read/written from/to. ENV
       ///        vars will be expanded. Passing an invalid path will throw an exception.

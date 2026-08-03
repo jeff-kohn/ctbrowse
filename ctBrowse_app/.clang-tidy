@@ -15,6 +15,7 @@ Checks: "clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,cer
   -readability-else-after-return, \
   -readability-convert-member-functions-to-static, \
   -readability-simplify-boolean-expr, \
+  -readability-static-accessed-through-instance,
   -readability-make-member-function-const, \
   -readability-use-anyofallof, \
   -bugprone-throwing-static-initialization,-cert-err58-cpp, \  

@@ -19,7 +19,7 @@ namespace ctb::detail
    {
    public:
       ScopedHandle(const ScopedHandle&) = delete;
-      explicit ScopedHandle(HandleT h = NULL) noexcept : m_handle(h)   // nullptr causes compile issues for some handle types that aren't actually pointers.
+      explicit ScopedHandle(HandleT h = NULL) noexcept : m_handle(h)   // NOLINT [modernize-use-nullptr] nullptr causes compile issues for some handle types that aren't actually pointers.
       {}
 
       ScopedHandle(ScopedHandle&& other) noexcept
@@ -54,7 +54,7 @@ namespace ctb::detail
          {
             if (m_handle != NULL) m_free_func(m_handle);
          }
-         catch (...)   // NOTLINT (bugprone-empty-catch) since this gets called from dtor
+         catch (...)   // NOLINT
          {}
          m_handle = h;
       }
@@ -84,7 +84,7 @@ namespace ctb::detail
 
       explicit operator bool() const noexcept
       {
-         return get() != NULL;
+         return get() != NULL; // NOLINT [modernize-use-nullptr] 
       }
 
    private:
@@ -93,7 +93,7 @@ namespace ctb::detail
    };
 
    template<typename HandleT, typename FreeFuncT>
-   inline void swap(ScopedHandle<HandleT, FreeFuncT>& lhs, ScopedHandle<HandleT, FreeFuncT>& rhs)
+   inline void swap(ScopedHandle<HandleT, FreeFuncT>& lhs, ScopedHandle<HandleT, FreeFuncT>& rhs) noexcept
    {
       lhs.swap(rhs);
    }

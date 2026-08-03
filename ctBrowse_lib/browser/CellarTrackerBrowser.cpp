@@ -21,8 +21,7 @@ namespace ctb
          ctb::Error{ Error::Category::GeneralError, constants::FMT_ERROR_HEADLESS_BROWSER_INVALID_STATUS, status }));
    }
 
-   CellarTrackerBrowser::~CellarTrackerBrowser()
-   {}
+   CellarTrackerBrowser::~CellarTrackerBrowser() = default;
 
 
    CellarTrackerBrowser::CellarTrackerBrowser(ContextPtr io_ctx) : m_browser{ std::in_place, std::move(io_ctx) }
@@ -54,7 +53,8 @@ namespace ctb
 
       // this lambda can directly await ASIO coroutines without having to mess with co_spawn and manually unwrapping
       // its return value.
-      auto asio_coro = [this, wine_id]() -> asio::awaitable<HttpFileContents>
+      // NOLINTNEXTLINE [cppcoreguidelines-avoid-capturing-lambda-coroutines] this ptr is safe here
+      auto asio_coro = [this, wine_id]() -> asio::awaitable<HttpFileContents>   
       {
          auto session = co_await m_browser->coroCreateSession();
          if (!session)
@@ -104,7 +104,7 @@ namespace ctb
          SPDLOG_DEBUG("coroRuntimeEval returned an error on try {}, retrying in {}", retry, retry_delay);
          asio::steady_timer timer{ m_browser->getExecutor(), retry_delay };
          co_await timer.async_wait(use_awaitable);
-         retry_delay = DurationT(static_cast<typename DurationT::rep>(retry_delay.count() * backoff_factor));
+         retry_delay = DurationT(static_cast<DurationT::rep>(retry_delay.count() * backoff_factor));
       }
       std::unreachable();
    }
@@ -122,9 +122,9 @@ namespace ctb
 
    namespace
    {
-      static constexpr auto LOGGED_IN_STR  = "logged_in:"sv;   // actual return value will be "logged_in:username"
-      static constexpr auto LOGGED_OUT_STR = "logged_out"sv;
-      static constexpr auto UNKNOWN_STR    = "unknown"sv;
+      constexpr auto LOGGED_IN_STR  = "logged_in:"sv;   // actual return value will be "logged_in:username"
+      constexpr auto LOGGED_OUT_STR = "logged_out"sv;
+      constexpr auto UNKNOWN_STR    = "unknown"sv;
 
       bool loggedIn(const RuntimeEvalResult& result)
       {
@@ -140,7 +140,7 @@ namespace ctb
    }   // namespace
 
 
-   asio::awaitable<CellarTrackerBrowser::LoginStatus> CellarTrackerBrowser::coroCheckLoginStatus(const std::string& session_id)
+   asio::awaitable<CellarTrackerBrowser::LoginStatus> CellarTrackerBrowser::coroCheckLoginStatus(std::string session_id)
    {
       const auto check_login_status_js = format(params::FMT_CHECK_LOGIN_STATUS_JS, LOGGED_IN_STR, LOGGED_OUT_STR, UNKNOWN_STR);
 
@@ -161,49 +161,59 @@ namespace ctb
    {
       if (status() != Status::Ready) return sndNotReadyError(status());
 
-      auto asio_coro = [this, cred = move(cred)] mutable -> asio::awaitable<LoginResult>
+      auto asio_coro =
+         [this, cred = move(cred)] mutable -> asio::awaitable<LoginResult>   // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
       {
-         auto session = co_await m_browser->coroCreateSession();
-         if (!session)
+         try
          {
-            throw ctb::Error{ Error::Category::NetworkError, "Couldn't get browser session to CT login" };
-         }
+            auto session = co_await m_browser->coroCreateSession();
+            if (!session)
+            {
+               co_return std::unexpected{
+                  Error{ Error::Category::NetworkError, "Couldn't get browser session to CT login" }
+               };
+            }
 
-         // navigate to login page. If we're already logged in it will redirect to main page, if not we can fill
-         // form and submit.
-         static constexpr auto DEFAULT_PAGE = "default.asp"sv;
-         static constexpr auto LOGIN_PAGE   = "password.asp"sv;
-         static constexpr auto CT_LOGIN_URL = "https://www.cellartracker.com/password.asp"sv;
+            // navigate to login page. If we're already logged in it will redirect to main page, if not we can fill
+            // form and submit.
+            static constexpr auto DEFAULT_PAGE = "default.asp"sv;
+            static constexpr auto LOGIN_PAGE   = "password.asp"sv;
+            static constexpr auto CT_LOGIN_URL = "https://www.cellartracker.com/password.asp"sv;
 
-         auto nav_result   = co_await m_browser->coroNavigate(session->sessionId(), std::string{ CT_LOGIN_URL });
-         boost::to_lower(nav_result.url);
-         auto trimmed_url = trim_back_view(nav_result.url, "/");
-         if (trimmed_url.ends_with(DEFAULT_PAGE))
-         {
-            // If we get redirected to default.asp it should mean we're already logged in.
+            auto nav_result = co_await m_browser->coroNavigate(session->sessionId(), std::string{ CT_LOGIN_URL });
+            boost::to_lower(nav_result.url);
+            auto trimmed_url = trim_back_view(nav_result.url, "/");
+            if (trimmed_url.ends_with(DEFAULT_PAGE))
+            {
+               // If we get redirected to default.asp it should mean we're already logged in.
+               co_return co_await coroCheckLoginStatus(session->sessionId());
+            }
+
+            if (!trimmed_url.ends_with(LOGIN_PAGE))
+            {
+               // If we're on any other page than password.asp, bail the fuck out
+               SPDLOG_DEBUG("CellarTrackerBrowser couldn't navigate to login page, redirected to {}", nav_result.url);
+               co_return LoginStatus{ false, "" };
+            }
+
+            // OK so we need to login. Start by filling the form fields and clicking submit
+            // We disable retries since we're interacting with previously loaded page, but still use coroEvelWithRetry()
+            // because it unwraps the expected<> and throws on error for us, which is preferred here.
+            SPDLOG_DEBUG("Attempting to fill login form fields...");
+            const auto fill_login_form_js = format(params::FMT_FILL_LOGIN_FORM_JS, cred.username(), cred.password());
+            auto       eval_result        = co_await coroEvalWithRetry(session->sessionId(), fill_login_form_js);
+
+            // TODO  check error parsing
+            SPDLOG_DEBUG("Attempting to submit login form...");
+            eval_result = co_await coroEvalWithRetry(session->sessionId(), std::string{ params::SUBMIT_LOGIN_FORM_EXPRESSION });
+
+            // Now check again and return final result.
             co_return co_await coroCheckLoginStatus(session->sessionId());
          }
-
-         if (!trimmed_url.ends_with(LOGIN_PAGE))
+         catch (...)
          {
-            // If we're on any other page than password.asp, bail the fuck out
-            SPDLOG_DEBUG("CellarTrackerBrowser couldn't navigate to login page, redirected to {}", nav_result.url);
-            co_return LoginStatus{ false, "" };
+            co_return std::unexpected{ packageError() };
          }
-
-         // OK so we need to login. Start by filling the form fields and clicking submit
-         // We disable retries since we're interacting with previously loaded page, but still use coroEvelWithRetry()
-         // because it unwraps the expected<> and throws on error for us, which is preferred here.
-         SPDLOG_DEBUG("Attempting to fill login form fields...");
-         const auto fill_login_form_js = format(params::FMT_FILL_LOGIN_FORM_JS, cred.username(), cred.password());
-         auto       eval_result        = co_await coroEvalWithRetry(session->sessionId(), fill_login_form_js);
-
-         // TODO  check error parsing
-         SPDLOG_DEBUG("Attempting to submit login form...");
-         eval_result = co_await coroEvalWithRetry(session->sessionId(), std::string{ params::SUBMIT_LOGIN_FORM_EXPRESSION });
-
-         // Now check again and return final result.
-         co_return co_await coroCheckLoginStatus(session->sessionId());
       };
 
       // execute the lambda coro and return its result as a sender
@@ -219,8 +229,8 @@ namespace ctb
                if (el.tagName.toLowerCase() === 'a') return el.href; let img = el.querySelector('img');
                if (img) return img.src; return 'ERROR: no image source found in element'; })())";
 
-      constexpr auto RETRY_COUNT    = 4u;
-      auto           retry_interval = 500ms;
+      constexpr auto RETRY_COUNT    = 4U;
+      auto           retry_interval = 500ms;   // NOLINT [cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers]
 
       // page load is heavily async due to javascript and WAF, so we need to retry if we initially get error
       // due to page still loading.

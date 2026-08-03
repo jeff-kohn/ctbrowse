@@ -57,14 +57,17 @@ namespace ctb
       using WriteFileResult = std::expected<size_t, Error>;
 
       /// @brief asynchronously write a file to disk.
+      ///        Note that the buf param is a universal/forwarding ref, which could bind to a reference if you're not careful.
+      ///        This is fine if the reference is coming from let_value() or a local var inside a coroutine that co_awaits.
+      ///        For other scenarios such as passing a function parameter that is a reference, extra care should be taken.
       template<rng::range RngT>
-      [[nodiscard]] exec::task<WriteFileResult> sndWriteFile(std::string file_path, const RngT& buf) const noexcept
+      [[nodiscard]] exec::task<WriteFileResult> sndWriteFile(std::string file_path, RngT&& buf) const noexcept // NOLINT [cppcoreguidelines-avoid-reference-coroutine-parameters]
       {
          try
          {
             asio::stream_file file{ get_executor(), file_path,
                                     asio::stream_file::write_only | asio::stream_file::create | asio::stream_file::truncate };
-            co_return co_await asio::async_write(file, asio::buffer(buf), exec::asio::use_sender);
+            co_return co_await asio::async_write(file, asio::buffer(std::forward<RngT>(buf)), exec::asio::use_sender);
          }
          catch (...)
          {

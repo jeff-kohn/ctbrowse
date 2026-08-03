@@ -36,7 +36,7 @@ namespace ctb
    /// Most of the public methods will throw an exception on failure and are marked as noexcept(false). If a method returns an expected<>
    /// for retry loops where failure is not unexpected, it will be marked as noexcept().
    ///
-   class HeadlessBrowser
+   class HeadlessBrowser   // NOLINT [cppcoreguidelines-special-member-functions]
    {
    public:
       using ContextPtr = std::shared_ptr<asio::io_context>;
@@ -88,7 +88,7 @@ namespace ctb
          }
 
          Session(Session&&) noexcept;
-         Session& operator=(Session&&);
+         Session& operator=(Session&&) noexcept;
          ~Session() noexcept;
 
          Session()                          = delete;
@@ -119,9 +119,9 @@ namespace ctb
       /// @param url 
       /// @return the requested resource's contents, which may or may not be base64-encoded.
       /// @throw ctb::Error if the contents could not be retrieved.
-      [[nodiscard]] asio::awaitable<GetResourceResult> coroGetResource(const std::string& session_id,
-                                                                       const std::string& frame_id,
-                                                                       const std::string& url) noexcept(false);
+      [[nodiscard]] asio::awaitable<GetResourceResult> coroGetResource(std::string session_id,
+                                                                       std::string frame_id,
+                                                                       std::string url) noexcept(false);
 
       /// @brief Navigate to a web page and return once it is loaded.
       /// @param session_id - target session to use
@@ -179,7 +179,7 @@ namespace ctb
       using CmdHandlerMap     = std::unordered_map<uint32_t, CompletionHandler>;        // map command id to completion handler
       using EventHandlerMap   = std::map<std::string, BrowserEventsPtr, std::less<>>;   // map session id to event channel
 
-      static inline constexpr glz::opts JSON_OPTS{ .skip_null_members = true };
+      static constexpr glz::opts JSON_OPTS{ .skip_null_members = true };
 
       alignas(std::hardware_destructive_interference_size) std::atomic<Status> m_status{ Status::Stopped };
 
@@ -210,10 +210,10 @@ namespace ctb
       // private implementation
       BrowserEventsPtr& getOrCreateEventHandler(std::string_view session_id);
 
-      void attemptWebsocketConnect(std::string url, uint8_t retries, std::chrono::milliseconds retry_delay = 10ms);
+      void attemptWebsocketConnect(std::string url, uint8_t retries, std::chrono::milliseconds retry_delay = 10ms); // NOLINT [cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers]	
       void coExec(std::move_only_function<void()> func);
       void delayedExec(std::chrono::milliseconds delay, std::move_only_function<void()> func);
-      void dispatchMessage(BrowserMessage response);
+      void dispatchMessage(BrowserMessage msg);
       void subscribeEvent(const std::string& session_id, const std::string& event_name);
       void unSubscribeEvent(const std::string& session_id, const std::string& event_name);
       void unSubscribeAllEvents(const std::string& session_id);

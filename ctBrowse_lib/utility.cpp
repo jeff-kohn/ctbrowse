@@ -281,9 +281,11 @@ namespace ctb
 
 #pragma warning(pop)
 
+   // NOLINTBEGIN [cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers]
+
    [[nodiscard]] Buffer base64Decode(std::string_view encoded_str)
    {
-      static constexpr size_t DECODE_TABLE_SIZE = 256u;
+      static constexpr size_t DECODE_TABLE_SIZE = 256U;
 
       using DecodeTable = std::array<int, DECODE_TABLE_SIZE>;
 
@@ -293,7 +295,7 @@ namespace ctb
 
          DecodeTable table{};
          table.fill(-1);
-         for (auto i = 0u; i < 64; ++i)
+         for (auto i = 0U; i < 64; ++i)
          {
             table[static_cast<size_t>(chars[i])] = static_cast<int>(i);
          }
@@ -332,5 +334,5 @@ namespace ctb
       return output;
    }
 
-
+   // NOLINTEND [cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers]
 }   // namespace ctb

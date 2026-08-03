@@ -50,7 +50,7 @@ namespace ctb
 
 
    CtDatasetMgr::CtDatasetMgr()
-   {}
+   = default;
 
 
    CtDatasetMgr::~CtDatasetMgr() noexcept
@@ -174,9 +174,9 @@ namespace ctb
    }
 
 
-   void CtDatasetMgr::downloadTableAsync(TableId table_id, const CredentialWrapper& cred, TableResultCallback result_callback)
+   void CtDatasetMgr::downloadTableAsync(TableId table_id, const CredentialWrapper& cred, TableResultCallback notify_callback)
    {
-      if (!shutdownRequested()) m_impl->downloadTableAsync(table_id, cred, move(result_callback), m_shutdown_token);
+      if (!shutdownRequested()) m_impl->downloadTableAsync(table_id, cred, move(notify_callback), m_shutdown_token);
    }
 
 

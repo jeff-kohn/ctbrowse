@@ -109,7 +109,7 @@ namespace ctb
    }
 
 
-   HeadlessBrowser::Session& HeadlessBrowser::Session::operator=(Session&& other)
+   HeadlessBrowser::Session& HeadlessBrowser::Session::operator=(Session&& other) noexcept
    {
       if (this != &other)
       {
@@ -202,9 +202,9 @@ namespace ctb
    }
 
 
-   asio::awaitable<GetResourceResult> HeadlessBrowser::coroGetResource(const std::string& session_id,
-                                                                       const std::string& frame_id,
-                                                                       const std::string& url) noexcept(false)
+   asio::awaitable<GetResourceResult> HeadlessBrowser::coroGetResource(std::string session_id,
+                                                                       std::string frame_id,
+                                                                       std::string url) noexcept(false)
    {
       co_await asio::dispatch(*m_ctx, asio::use_awaitable);
 
@@ -458,7 +458,7 @@ namespace ctb
    }
 
 
-   void HeadlessBrowser::onWebSocketError(std::error_code ec)
+   void HeadlessBrowser::onWebSocketError([[maybe_unused]] std::error_code ec)
    {
       SPDLOG_DEBUG("HeadlessBrowser::onError - {} ({})", ec.message(), ec.value());
    }
@@ -528,7 +528,7 @@ namespace ctb
       throwIfError(commands::CREATE_TARGET, response);
       // clang-format on
 
-      auto result = glz::ex::read_json<CreateTargetResult>(response.result->str);
+      auto result = glz::ex::read_json<CreateTargetResult>(response.result.value_or({}).str);
       SPDLOG_DEBUG("{} received targetId '{}'", commands::CREATE_TARGET, result.targetId);
 
       co_return result.targetId;
@@ -545,7 +545,7 @@ namespace ctb
       auto response = co_await coroSendCommand(commands::ATTACH_TARGET, move(params), {});
       throwIfError(commands::ATTACH_TARGET, response);
 
-      auto result = glz::ex::read_json<AttachTargetResult>(response.result->str);
+      auto result = glz::ex::read_json<AttachTargetResult>(response.result.value_or({}).str);
       SPDLOG_DEBUG("{} received targetId '{}'", commands::ATTACH_TARGET, result.sessionId);
 
       co_return Session{ *this, move(result.sessionId), move(target_id) };
@@ -582,7 +582,7 @@ namespace ctb
    {
       asio::co_spawn(
          *m_ctx,
-         [func = move(func)]() mutable -> asio::awaitable<void>
+         [func = move(func)]() mutable -> asio::awaitable<void> // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
          {
             func();
             co_return;
@@ -595,7 +595,7 @@ namespace ctb
    {
       asio::co_spawn(
          *m_ctx,
-         [this, func = move(func), delay]() mutable -> asio::awaitable<void>
+         [this, func = move(func), delay]() mutable -> asio::awaitable<void> // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
          {
             asio::steady_timer timer(*m_ctx, delay);
             co_await timer.async_wait(asio::use_awaitable);
@@ -643,7 +643,9 @@ namespace ctb
             }
          }
          else
+         {
             SPDLOG_DEBUG("HeadlessBrowser::DispatchMessage received event {} with no registered handlers.", msg.method.value_or(""));
+         }
       }
    }
 }   // namespace ctb

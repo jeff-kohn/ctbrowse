@@ -48,7 +48,7 @@ namespace ctb
    template<ExpectedType ExpectedT>
    auto getValueOrThrow(ExpectedT&& expected_value) noexcept(false)
    {
-      using error_type = typename std::remove_cvref_t<ExpectedT>::error_type;
+      using error_type = std::remove_cvref_t<ExpectedT>::error_type;
 
       if (expected_value) return std::forward<ExpectedT>(expected_value).value();
 

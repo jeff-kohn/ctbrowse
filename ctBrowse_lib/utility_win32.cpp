@@ -32,7 +32,7 @@ namespace ctb::win32
                          nullptr,
                          error,
                          MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                         reinterpret_cast<LPSTR>(&buffer),
+                         reinterpret_cast<LPSTR>(&buffer),           // NOLINT [cppcoreguidelines-pro-type-reinterpret-cast]
                          0,
                          nullptr))
       {
