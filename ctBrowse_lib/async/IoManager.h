@@ -67,7 +67,7 @@ namespace ctb
          {
             asio::stream_file file{ get_executor(), file_path,
                                     asio::stream_file::write_only | asio::stream_file::create | asio::stream_file::truncate };
-            co_return co_await asio::async_write(file, asio::buffer(std::forward<RngT>(buf)), exec::asio::use_sender);
+            co_return co_await asio::async_write(file, asio::buffer(std::forward<RngT>(buf)), exec::asio::use_sender);   // NOLINT(clang-analyzer-core.StackAddressEscape) false positive in exec::asio::use_sender internals
          }
          catch (...)
          {

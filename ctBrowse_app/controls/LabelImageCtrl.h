@@ -28,7 +28,7 @@ namespace ctb::app
       class FetchLabelCallback
       {
       public:
-         FetchLabelCallback(wxWeakRef<LabelImageCtrl> notification_wnd) : m_wnd(notification_wnd)
+         FetchLabelCallback(const wxWeakRef<LabelImageCtrl>& notification_wnd) : m_wnd(notification_wnd)
          {}
 
          void operator()(ImageResult result) const;

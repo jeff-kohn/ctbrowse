@@ -290,7 +290,7 @@ namespace ctb
 
    asio::awaitable<HeadlessBrowser::EvalReturnValue> HeadlessBrowser::coroRuntimeEval(string session_id, string expression) noexcept
    {
-      co_await asio::dispatch(*m_ctx, asio::use_awaitable);
+      co_await asio::dispatch(*m_ctx, asio::use_awaitable);   // NOLINT(clang-analyzer-core.NullDereference) false positive in asio::awaitable coroutine frame internals
 
       JsonPropMap params{
          { params::RETURN_BY_VAL, true             },

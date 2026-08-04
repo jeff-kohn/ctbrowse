@@ -98,7 +98,7 @@ namespace ctb
             SPDLOG_DEBUG("coroRuntimeEval still returned an error after {} tries, throwing an exception ({})",
                          retry,
                          retval.error().formattedMessage());
-            throw move(retval.error());
+            throw Error(retval.error());
          }
 
          SPDLOG_DEBUG("coroRuntimeEval returned an error on try {}, retrying in {}", retry, retry_delay);
@@ -257,7 +257,7 @@ namespace ctb
 
             auto html_result = co_await m_browser->coroRuntimeEval(session_id, "document.documentElement.outerHTML");
             SPDLOG_DEBUG("Page.navigate result: \r\n{}", html_result ? html_result->result.value : html_result.error().formattedMessage());
-            throw std::move(retval.error());
+            throw Error{ retval.error() };
          }
       }
       std::unreachable();

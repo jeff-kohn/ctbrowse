@@ -17,7 +17,7 @@ namespace ctb::app
             if (!wnd) return;
             try
             {
-               if (!result) throw std::move(result.error());
+               if (!result) throw Error{ result.error() };
 
                wxMemoryInputStream byte_stream(result->contents.data(), result->contents.size());
                wxImage             label_img{};

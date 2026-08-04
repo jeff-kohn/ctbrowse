@@ -18,7 +18,7 @@ namespace ctb
 
    AsioPipelineScheduler IoManager::get_scheduler() const
    {
-      return AsioPipelineScheduler{ get_executor() };
+      return AsioPipelineScheduler{ get_executor() };   // NOLINT(clang-analyzer-core.StackAddressEscape) false positive, any_io_executor is stored by value
    }
 
 
@@ -38,7 +38,7 @@ namespace ctb
          auto   file_size = file.size();
          Buffer buf(file_size);
 
-         co_await asio::async_read(file, asio::buffer(buf), exec::asio::use_sender);
+         co_await asio::async_read(file, asio::buffer(buf), exec::asio::use_sender);   // NOLINT(clang-analyzer-core.StackAddressEscape) false positive in exec::asio::use_sender internals
          co_return buf;
       }
       catch (...)

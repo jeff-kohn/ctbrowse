@@ -117,7 +117,7 @@ namespace ctb
       fs::create_directories(folder, ms_sucks);
       if (ms_sucks)
       {
-         SPDLOG_DEBUG("createFolderPath() failed for '{}'. {}", folder.generic_string(), ms_sucks.message());
+         SPDLOG_DEBUG("createFolderPath() failed. {}", ms_sucks.message());
          return false;
       }
       return true;
