@@ -112,7 +112,7 @@ BracedInitializerIndentWidth: -1
 BreakAdjacentStringLiterals: true
 BreakAfterAttributes: Leave
 BreakAfterJavaFieldAnnotations: false
-BreakAfterReturnType: None
+BreakAfterReturnType: Automatic
 BreakArrays: true
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Custom
@@ -204,7 +204,7 @@ OneLineFormatOffRegex: NOFORMAT
 PPIndentWidth: -1
 PackConstructorInitializers: CurrentLine
 PenaltyBreakAssignment: 20
-PenaltyBreakBeforeFirstCallParameter: 100
+PenaltyBreakBeforeFirstCallParameter: 0
 PenaltyBreakBeforeMemberAccess: 150
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
@@ -214,7 +214,7 @@ PenaltyBreakString: 1000
 PenaltyBreakTemplateDeclaration: 10
 PenaltyExcessCharacter: 1000000
 PenaltyIndentedWhitespace: 0
-PenaltyReturnTypeOnItsOwnLine: 160
+PenaltyReturnTypeOnItsOwnLine: 100
 PointerAlignment: Right
 QualifierAlignment: Leave
 ReferenceAlignment: Pointer

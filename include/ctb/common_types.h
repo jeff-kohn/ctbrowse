@@ -1,4 +1,4 @@
-﻿/*******************************************************************
+/*******************************************************************
  * @file common_types.h
  *
  * @brief Header file for
@@ -33,4 +33,5 @@ namespace ctb
 
    using Buffer         = std::vector<std::byte>;
    using BufferSpan     = std::span<std::byte>;
+
 } // namespace ctb

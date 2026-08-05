@@ -8,7 +8,7 @@
 
 #include "dialogs/TableSyncDialog.h"
 #include "App.h"
-#include "CtCredentialManager.h"
+//#include "CtCredentialManager.h"
 #include "wx_helpers.h"
 
 #include <wx/button.h>
@@ -69,7 +69,7 @@ namespace ctb::app
 
          // default-selected tables are stored as a string of enum values (e.g int values not names)
          // delimited by ENUM_DELIMTER. The default value is the table enum value 0 (List)
-         m_table_selection_val = std::string_view{ cfg->Read(constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES, "0").wx_str() } 
+         m_table_selection_val = std::string_view{ cfg->Read(constants::CONFIG_VAL_DEFAULT_SYNC_TABLES, "0").wx_str() } 
             | vws::split(ENUM_DELIMETER)                                                                                 // split by token ';'
             | vws::transform([] (auto subrange) { return std::string_view(subrange.begin(), subrange.end()); })          // convert subranges to string_view's
             | vws::transform([] (std::string_view sv) { return from_str<int>(sv); })                                     // convert string view to from_chars() result
@@ -78,7 +78,7 @@ namespace ctb::app
             | rng::to<wxArrayInt>();                                                                                     // convert to array
 
          // whether the "Sync on Startup" box should be checked.
-         m_startup_sync_val = cfg->ReadBool(constants::CONFIG_VALUE_SYNC_ON_STARTUP, false);
+         m_startup_sync_val = cfg->ReadBool(constants::CONFIG_VAL_SYNC_ON_STARTUP, false);
 
          TransferDataToWindow();
          return true;
@@ -119,10 +119,10 @@ namespace ctb::app
 
          // Save relevant settings to config
          auto cfg = wxGetApp().getConfig(constants::CONFIG_PATH_PREFERENCE_DATASYNC);
-         cfg->Write(wxString{ constants::CONFIG_VALUE_SYNC_ON_STARTUP }, m_startup_sync_val);
+         cfg->Write(wxString{ constants::CONFIG_VAL_SYNC_ON_STARTUP }, m_startup_sync_val);
          if (m_save_default_val)
          {
-            cfg->Write(wxString{ constants::CONFIG_VALUE_DEFAULT_SYNC_TABLES },
+            cfg->Write(wxString{ constants::CONFIG_VAL_DEFAULT_SYNC_TABLES },
                        wxString{ serializeIntegrals(vws::all(m_table_selection_val)) });
          }
          cfg->Flush();

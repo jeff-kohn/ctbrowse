@@ -58,7 +58,7 @@ namespace ctb
          {
             error.error_code    = static_cast<int64_t>(HttpStatus::Code::Unauthorized);
             error.error_message = constants::ERROR_STR_AUTHENTICATION_FAILED;
-            error.category      = Error::Category::HttpStatus;
+            error.category      = Error::Category::NetworkError;
          }
          else
          {
@@ -72,13 +72,13 @@ namespace ctb
 
          // use a separate category for cancellation, so the caller can distinguish and avoid showing unnecessary error messages
          error.category = error.error_code == enum_to_index(cpr::ErrorCode::ABORTED_BY_CALLBACK) ? Error::Category::OperationCanceled
-                                                                                                 : Error::Category::CurlError;
+                                                                                                 : Error::Category::NetworkError;
       }
       else
       {
          error.error_code    = static_cast<int64_t>(response.status_code);
          error.error_message = ctb::format(constants::FMT_ERROR_HTTP_STATUS_CODE, error.error_code);
-         error.category      = Error::Category::HttpStatus;
+         error.category      = Error::Category::NetworkError;
       }
 
       return std::unexpected{ error };
@@ -130,8 +130,7 @@ namespace ctb
       auto params = content_type_header | std::views::split(';');
       for (const auto& substr : params)
       {
-         // NEED TO TRIM SPACES FROM STRING_VIEW
-         auto param = trim(std::string_view{ substr.data(), substr.size() });
+         auto param = trim_view(std::string_view{ substr.data(), substr.size() });
          if (param.starts_with(CHARSET_KEY))
          {
             if (auto loc = param.find('='); loc < param.size())

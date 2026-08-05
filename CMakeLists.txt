@@ -49,6 +49,7 @@ if(PROJECT_IS_TOP_LEVEL)
       if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
          list(APPEND CTB_COMPILE_OPTIONS /std:c++latest /Zf $<$<CONFIG:Release,ReleaseMinSize,RelWithDebInfo>:/GL>)
       else()
+         list(APPEND CTB_COMPILE_OPTIONS -Wno-unqualified-std-cast-call)
          # for other compilers we're using Ninja so generate compile_commands.json
          set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
       endif()
@@ -71,7 +72,7 @@ if(PROJECT_IS_TOP_LEVEL)
 
       set(CTB_WARNING_FLAGS
          /W4 /WX
-         $<$<CXX_COMPILER_ID:MSVC>:/w14165 /w14186 /w14263 /w14265 /w14296 /w14311 /w14545 /w14546 /w14547 /w14549 /w14555 /w14640 /w14826 /w14905 /w14906 /w14928 /w24826 /w34265 /w34287 /w34619 /w34640 /w44242 /w44254 /w44263 /w44296 /w44365 /w44388 /w44464 /w45038 /wd4100 /external:anglebrackets /external:W0>
+         $<$<CXX_COMPILER_ID:MSVC>:/w14165 /w14186 /w14263 /w14265 /w14296 /w14311 /w14545 /w14546 /w14547 /w14549 /w14555 /w14640 /w14826 /w14905 /w14906 /w14928 /w24826 /w34265 /w34287 /w34619 /w34640 /w44242 /w44254 /w44263 /w44296 /w44365 /w44388 /w45038 /wd4100 /wd4714 /external:anglebrackets /external:W0>
       )
    endif()
 

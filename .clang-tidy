@@ -1,5 +1,6 @@
-Checks: 'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,cert-*, bugprone-*, readability-*,
+Checks: 'clang-diagnostic-*,cppcoreguidelines-*,modernize-*,cert-*, bugprone-*, readability-*,
   -bugprone-easily-swappable-parameters,
+  -clang-analyzer-optin.core.EnumCastOutOfRange, 
   -cppcoreguidelines-avoid-const-or-ref-data-members,
   -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,
   -modernize-use-trailing-return-type,
@@ -14,11 +15,11 @@ Checks: 'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,cer
   -readability-else-after-return,
   -readability-convert-member-functions-to-static,
   -readability-simplify-boolean-expr,
+  -readability-static-accessed-through-instance,
   -readability-make-member-function-const,
   -readability-use-anyofallof,
   -bugprone-throwing-static-initialization,-cert-err58-cpp,
   -readability-named-parameter'
-
 
 WarningsAsErrors: ''
 
@@ -52,6 +53,6 @@ CheckOptions:
   - key: 'readability-redundant-access-specifiers.CheckFirstDeclaration'
     value: 'true'
 
-ExcludeHeaderFilterRegex: '.*/(3rdParty|build)/.*'
+ExcludeHeaderFilterRegex: '.*[/\\](3rdParty|build|vcpkg_installed)[/\\].*'
 HeaderFilterRegex:        '.*[/\\][^/\\]*(ctBrowse|ctb)[^/\\]*[/\\].*'
 ExtraArgsBefore: ['--driver-mode=cl']

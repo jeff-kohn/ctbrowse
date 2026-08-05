@@ -64,7 +64,7 @@ namespace ctb
       {
          if (hasDataset() == false and throw_if_null)
          {
-            throw Error{ constants::ERROR_STR_NO_DATASET, Error::Category::DataError };
+            throw Error{ constants::ERROR_STR_NO_DATASET, Error::Category::DatasetError };
          }
 
          return m_source->getDataset();

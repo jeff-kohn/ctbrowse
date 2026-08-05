@@ -38,12 +38,12 @@ namespace ctb::app
          );
          rows.emplace_back(
             top_sizer,
-            PropertyValueCtrl::create(this, source, CtProp::PendingOrderDate, constants::FMT_NUMBER_CURRENCY, {}),
+            PropertyValueCtrl::create(this, source, CtProp::PendingOrderDate, constants::FMT_DATE_SHORT, {}),
             constants::LBL_ORDER_DATE
          );
          rows.emplace_back(
             top_sizer,
-            PropertyValueCtrl::create(this, source, CtProp::PendingDeliveryDate, constants::FMT_NUMBER_CURRENCY, {}),
+            PropertyValueCtrl::create(this, source, CtProp::PendingDeliveryDate, constants::FMT_DATE_SHORT, {}),
             constants::LBL_DELIVERY_DATE
          );
 

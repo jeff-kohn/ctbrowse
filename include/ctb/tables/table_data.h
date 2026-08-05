@@ -26,8 +26,6 @@
 
 namespace ctb
 {
-   namespace fs = std::filesystem;
-
 
    /// @brief enum for the data tables available from CT website. The enum names are important because
    ///        they map to the filenames used by CellarTracker.

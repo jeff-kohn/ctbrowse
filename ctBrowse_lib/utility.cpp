@@ -117,7 +117,7 @@ namespace ctb
       fs::create_directories(folder, ms_sucks);
       if (ms_sucks)
       {
-         SPDLOG_DEBUG("createFolderPath() failed for '{}'. {}", folder.generic_string(), ms_sucks.message());
+         SPDLOG_DEBUG("createFolderPath() failed. {}", ms_sucks.message());
          return false;
       }
       return true;
@@ -130,7 +130,7 @@ namespace ctb
    {
       constexpr int padding = 2;   //The API requires a buffer equal to string length + '\0' + 1
 
-      // Find out how big of a string we need to accommodate.
+      // Find out how big of a string we need to accommodate. If bufsize isn't bigger, there's nothing to expand so bail
       auto bufsize = ExpandEnvironmentStrings(text.c_str(), nullptr, 0);
       if (0 == bufsize or bufsize <= text.length() + padding) return false;
 
@@ -153,15 +153,15 @@ namespace ctb
       if (!length) return {};
 
       std::vector<wchar_t> wide_buf(static_cast<size_t>(length), '\0');
-      if (!MultiByteToWideChar(code_page, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, text.c_str(), -1, wide_buf.data(),
-                               static_cast<int>(wide_buf.size())))
+      if (!MultiByteToWideChar(
+             code_page, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
       {
          return {};
       }
 
       // Get needed buffer length since some UTF-16 chars may need multiple bytes in UTF-8.
-      length = WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK | WC_ERR_INVALID_CHARS | WC_NO_BEST_FIT_CHARS, wide_buf.data(), -1, nullptr,
-                                   0, nullptr, nullptr);
+      length = WideCharToMultiByte(
+         CP_UTF8, WC_COMPOSITECHECK | WC_ERR_INVALID_CHARS | WC_NO_BEST_FIT_CHARS, wide_buf.data(), -1, nullptr, 0, nullptr, nullptr);
       if (!length) return {};
 
       // Now allocate buffer and make the final call to do the conversion.
@@ -184,8 +184,8 @@ namespace ctb
       if (!length) return result;
 
       std::vector<wchar_t> wide_buf(static_cast<size_t>(length), '\0');
-      if (!MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, utf8_text.c_str(), -1, wide_buf.data(),
-                               static_cast<int>(wide_buf.size())))
+      if (!MultiByteToWideChar(
+             CP_UTF8, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, utf8_text.c_str(), -1, wide_buf.data(), static_cast<int>(wide_buf.size())))
          return result;
 
       // Get needed buffer length for the target code page then do the conversion
@@ -264,13 +264,13 @@ namespace ctb
       if (codepage == TextEncoding::UTF8) return "utf-8";
 
       // just do a manual search, there aren't that many and it's a cheap comparison.
-      auto matches = codepage_map |
-                     vws::filter(
+      auto matches = codepage_map
+                   | vws::filter(
                         [codepage](const auto& elem)
                         {
                            return codepage == elem.second;
-                        }) |
-                     vws::keys;
+                        })
+                   | vws::keys;
 
       for (auto match : matches)
       {
@@ -281,4 +281,58 @@ namespace ctb
 
 #pragma warning(pop)
 
+   // NOLINTBEGIN [cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers]
+
+   [[nodiscard]] Buffer base64Decode(std::string_view encoded_str)
+   {
+      static constexpr size_t DECODE_TABLE_SIZE = 256U;
+
+      using DecodeTable = std::array<int, DECODE_TABLE_SIZE>;
+
+      static constexpr auto decode_table = [] -> DecodeTable
+      {
+         constexpr auto chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"sv;
+
+         DecodeTable table{};
+         table.fill(-1);
+         for (auto i = 0U; i < 64; ++i)
+         {
+            table[static_cast<size_t>(chars[i])] = static_cast<int>(i);
+         }
+         return table;
+      }();
+
+      // Strip padding
+      while (!encoded_str.empty() && encoded_str.back() == '=')
+      {
+         encoded_str.remove_suffix(1);
+      }
+
+      if (encoded_str.empty()) return {};
+
+      Buffer output;
+      output.reserve((encoded_str.size() * 3) / 4);
+
+      int val  = 0;
+      int valb = -8;
+
+      for (char ch : encoded_str)
+      {
+         auto uch     = static_cast<unsigned char>(ch);  
+         int  decoded = decode_table[uch];
+         if (decoded == -1) continue;   // Safely skip newlines or invalid chars
+
+         val   = (val << 6) + decoded;
+         valb += 6;
+
+         if (valb >= 0)
+         {
+            output.push_back(static_cast<std::byte>((val >> valb) & 0xFF));
+            valb -= 8;
+         }
+      }
+      return output;
+   }
+
+   // NOLINTEND [cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers]
 }   // namespace ctb

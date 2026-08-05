@@ -13,7 +13,7 @@
 namespace ctb::constants
 {
    inline constexpr const char* CELLARTRACKER_DOT_COM = "CellarTracker.com";
-   inline constexpr const char* URL_CT_DOT_COM        = "https://cellartracker.com";
+   inline constexpr const char* URL_CT_DOT_COM        = "https://www.cellartracker.com";
    inline constexpr const char* URL_CT_LOGIN_FORM     = "https://www.cellartracker.com/password.asp";
    inline constexpr const char* URL_CT_TABLE_LIST     = "https://www.cellartracker.com/list.asp?Table=List";
 
@@ -26,6 +26,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_URL_CT_TABLE            = "https://www.cellartracker.com/xlquery.asp?User={}&Password={}&Format={}&Table={}";
    inline constexpr const char* FMT_URL_CT_VINTAGES         = "https://www.cellartracker.com/list.asp?Table=List&fInStock=0&iUserOverride=0&Wine={}";
    inline constexpr const char* FMT_URL_CT_WINE_DETAILS     = "https://www.cellartracker.com/wine.asp?iWine={}";
+   inline constexpr const char* FMT_LABEL_IMAGE_FILENAME    = "{}-{}.jpg";
 
    inline constexpr const char* HTML_ELEM_LABEL_PHOTO = "label_photo";
    inline constexpr const char* HTML_ATTR_SRC         = "src";
@@ -130,6 +131,10 @@ namespace ctb::constants
    inline constexpr const char* SORT_OPTION_WINE_VINTAGE       = "Wine and Vintage";
    inline constexpr const char* SORT_OPTION_QTY_TOTAL          = "Bottle Count, Wine Name";
 
+   inline constexpr const char* STATUS_DOWNLOAD_CANCELED          = "Download operation canceled.";
+   inline constexpr const char* STATUS_DOWNLOAD_COMPLETE          = "Download operation completed.";
+   inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
+   inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
 
    // table names
    inline constexpr const char* TABLE_NAME_LIST         = "My Wine Collection";
@@ -174,11 +179,14 @@ namespace ctb::constants
    inline constexpr const char* FMT_ERROR_FILE_TOO_BIG          = "File '{}'s size of {} bytes exceeded the maximum allowable size of {}.";
    inline constexpr const char* FMT_ERROR_HTTP_STATUS_CODE      = "The operation failed with HTTP status code {}";
    inline constexpr const char* FMT_ERORR_NO_CREDENTIAL         = "Credential '{}' was not found or could not be loaded.";
-   inline constexpr const char* FMT_ERROR_NO_LABEL_CACHE_FOLDER = "The image cache folder {} does not exist and could not be created.";
+   inline constexpr const char* FMT_ERROR_NO_LABEL_CACHE_FOLDER = "The image cache folder [{}] does not exist and could not be created.";
+   inline constexpr const char* FMT_ERROR_NO_TABLES_FOLDER      = "The Tables folder [{}] does not exist and could not be created.";
    inline constexpr const char* FMT_ERROR_PATH_NOT_FOUND        = "Folder '{}' does not exist.";
    inline constexpr const char* FMT_ERROR_PROP_NOT_FOUND        = "Property '{}' was not found.";
    inline constexpr const char* FMT_ERROR_INVALID_FUTURE        = "Attempt to get value from invalid future.";
    inline constexpr const char* FMT_ERROR_EMPTY_DATASET         = "Couldn't create dataset for table '{}', data was empty or invalid.";
+
+   inline constexpr const char* FMT_ERROR_HEADLESS_BROWSER_INVALID_STATUS = "Headless Browser cannot accept requests. Current status: {}";
 
    inline constexpr const char* FMT_DEFAULT_FORMAT           = "{}";
    inline constexpr const char* FMT_NUMBER_CURRENCY          = "${:.2f}";

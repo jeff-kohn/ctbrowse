@@ -11,6 +11,7 @@
 
 #include <charconv>
 #include <optional>
+#include <variant>
 
 namespace ctb
 {
@@ -39,5 +40,34 @@ namespace ctb
 
       return val;
    }
+
+
+   /// @brief Convenience wrapper to either return the value from an expected, or throw its error type if it doesn't have a value.
+   /// @return value_type from the expected, if present
+   /// @throw error_type from the expected, if present
+   template<ExpectedType ExpectedT>
+   auto getValueOrThrow(ExpectedT&& expected_value) noexcept(false)
+   {
+      using error_type = std::remove_cvref_t<ExpectedT>::error_type;
+
+      if (expected_value) return std::forward<ExpectedT>(expected_value).value();
+
+      throw error_type{ std::forward<ExpectedT>(expected_value).error() };
+   }
+
+
+   // convert a variant into its text representation. As long as all the types
+   // contained in the variant are formattable,
+   template<typename... Args>
+   std::string asString(const std::variant<Args...>& vt)
+   {
+      return std::visit(
+         [](auto&& arg)
+         {
+            return ctb::format("{}", arg);
+         },
+         vt);
+   }
+
 
 }   // namespace ctb

@@ -17,7 +17,6 @@ target_sources(${TARGET_NAME}
       "../include/ctb/ctb_format.h"
       "../include/ctb/ctb_functors.h"
       "../include/ctb/ctb_indirect.h"
-      "../include/ctb/HttpDownloader.h"
       
       "../include/ctb/Error.h"
       "../include/ctb/log.h"
@@ -33,7 +32,8 @@ target_sources(${TARGET_NAME}
             
       "../include/ctb/model/CtDataset.h"
       "../include/ctb/model/CtDatasetOptions.h"
-      "../include/ctb/model/CtDatasetManager.h"
+      "../include/ctb/model/CtDatasetMgr.h"
+      "../include/ctb/model/DatasetMgrAsyncCallbacks.h"
       "../include/ctb/model/DatasetEventSource.h"
       "../include/ctb/model/DatasetEventHandler.h"
       "../include/ctb/model/ProReviewsCache.h"
@@ -64,25 +64,35 @@ target_sources(${TARGET_NAME}
       "../include/ctb/tables/detail/TableRecord.h"
       "../include/ctb/tables/detail/TableSorter.h"
 
-      "../include/ctb/tasks/PollingTask.h"
-      "../include/ctb/tasks/tasks.h"
-      "../include/ctb/tasks/async_tasks.h"
-
    PRIVATE
-      "BackgroundThreadContext.h"
       "CredentialManager.cpp"
       "CredentialWrapper.cpp"
-      
+      "CtDatasetMgr.cpp"
       "CtDatasetOptions.cpp"
       "DatasetEventSource.cpp"
-      
-      "CtDatasetManager.cpp"
-      "HttpDownloader.cpp"
       "log.cpp"
       "ProReviewsCache.cpp"
-      "tasks.cpp"
+      "ScopedHandle.h"
       "utility.cpp"
       "utility_http.cpp"
+      "utility_win32.cpp"
+      "utility_win32.h"
+
+      "browser/BrowserEvents.h"
+      "browser/CellarTrackerBrowser.cpp"
+      "browser/CellarTrackerBrowser.h"
+      "browser/HeadlessBrowser.cpp"
+      "browser/HeadlessBrowser.h"
+      "browser/webclient_schema.h"
+
+      "async/AsioPipelineScheduler.h"
+      "async/DatasetMgrAsyncImpl.cpp"
+      "async/DatasetMgrAsyncImpl.h"
+      "async/HttpDownloader.cpp"
+      "async/HttpDownloader.h"
+      "async/IoManager.cpp"
+      "async/IoManager.h"
+      "async/senders.h"
 )
 
 target_include_directories(${TARGET_NAME}
@@ -90,6 +100,8 @@ target_include_directories(${TARGET_NAME}
 	PUBLIC
 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>"
 		"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+   PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_include_directories(${TARGET_NAME}

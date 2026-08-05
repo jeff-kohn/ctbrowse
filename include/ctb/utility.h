@@ -15,8 +15,12 @@
 
 namespace ctb
 {
-   namespace fs = std::filesystem;
 
+   // can be used with monadic fns
+   inline auto to_unsigned(int32_t val) -> uint32_t
+   {
+      return static_cast<uint32_t>(val);
+   }
 
    /// @brief read a binary file (up to max_size bytes in size) into a char buffer
    ///
@@ -155,8 +159,10 @@ namespace ctb
    auto createFolderPath(const fs::path& folder) noexcept -> bool;
 
 
-   // A modern C++23 trim function for std::string_view
-   [[nodiscard]] constexpr std::string_view trim(std::string_view sv, std::string_view whitespace = " \t\n\r\f\v") noexcept
+   /// @brief get a trimmed view of a string.
+   ///
+   /// @return a string_view over the original input that has the specified characters trimmed from its front/back.
+   [[nodiscard]] constexpr std::string_view trim_view(std::string_view sv, std::string_view whitespace = " \t\n\r\f\v") noexcept
    {
       const auto start = sv.find_first_not_of(whitespace);
       if (start == std::string_view::npos)
@@ -167,4 +173,17 @@ namespace ctb
       const auto end = sv.find_last_not_of(whitespace);
       return sv.substr(start, end - start + 1);
    }
+
+
+   /// @brief get a trimmed view of a string.
+   ///
+   /// @return a string_view over the original input that has the specified characters trimmed from its back.
+   [[nodiscard]] constexpr std::string_view trim_back_view(std::string_view sv, std::string_view whitespace = " \t\n\r\f\v") noexcept
+   {
+      const auto end = sv.find_last_not_of(whitespace);
+      if (end == std::string_view::npos) return {};
+      return sv.substr(0, end + 1);
+   }
+   [[nodiscard]] Buffer base64Decode(std::string_view encoded_str);
+
 }   // namespace ctb

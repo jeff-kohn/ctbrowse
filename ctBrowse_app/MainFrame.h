@@ -119,6 +119,9 @@ namespace ctb::app
       void onToolbarSearchKeyDown(wxKeyEvent& event);
       void onToolbarSearchTextEnter(wxCommandEvent& event);
 
+      // WM_CLOSE handler
+      void onCloseWindow(wxCloseEvent&);
+
       // implementation details
       void clearSearchFilter();
       void doSearchFilter();

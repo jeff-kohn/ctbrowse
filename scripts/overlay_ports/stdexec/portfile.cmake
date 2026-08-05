@@ -4,12 +4,9 @@ endif()
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO NVIDIA/stdexec
-    REF fee4d651494014610a277540f209cae56011e47f
-    SHA512 8b7cbd5e8254e54e374cb06cb031935cdbc9a2a466d4cb612cf2981ea0fc4d4228a8736cdbe95835e027b8d6eb071efc2aff4b09e791ed08d14e5af227105b7c
+    REF 71995800efe9c3c06a6f3980b01daa2216b6cce3
+    SHA512 9a878ada055a105e12cca26a06c3197552183bd0c9498ddb51fdf6576f873b70563c145037dd1ee817eb7418fdd8cd7fb7d4830b643dde9aaf65556317edadec
     HEAD_REF main
-    PATCHES
-        fix-version.patch
-        fix-clangd-helper-file-basedir.patch
 )
 
 vcpkg_from_github(

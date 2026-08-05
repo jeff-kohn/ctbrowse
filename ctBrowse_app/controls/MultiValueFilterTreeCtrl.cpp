@@ -272,7 +272,7 @@ namespace ctb::app
          if (!isItemFilterNode(filter_node))
          {
             assert("Something got corrupted, should never get invalid node item here" and false);
-            throw Error{ constants::ERROR_STR_UNKNOWN, Error::Category::GenericError };
+            throw Error{ constants::ERROR_STR_UNKNOWN, Error::Category::GeneralError };
          }
 
          // if the node already has a list of available filter values as children, we need to clear and repopulate it 
@@ -372,7 +372,7 @@ namespace ctb::app
             return it->second;
          }
       }
-      throw Error{ constants::ERROR_STR_FILTER_NOT_FOUND, Error::Category::DataError };
+      throw Error{ constants::ERROR_STR_FILTER_NOT_FOUND, Error::Category::DatasetError };
    }
 
 

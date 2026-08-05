@@ -14,7 +14,6 @@
 #include "views/DatasetMultiView.h"
 
 #include <ctb/model/DatasetEventSource.h>
-#include <ctb/utility.h>
 #include <ctb/utility_chrono.h>
 #include <ctb/utility_http.h>
 
@@ -28,10 +27,8 @@
 #include <wx/icon.h>
 #include <wx/image.h>
 #include <wx/menu.h>
-#include <wx/msgdlg.h>
 #include <wx/notifmsg.h>
 #include <wx/persist/toplevel.h>
-#include <wx/progdlg.h>
 #include <wx/sizer.h>
 #include <wx/srchctrl.h>
 #include <wx/statusbr.h>
@@ -67,7 +64,6 @@ namespace ctb::app
 
       auto loadDataset(TableId table_id) -> DatasetPtr
       {
-         //CtDatasetLoader loader{ wxGetApp().getDataFolder(AppFolder::Tables) };
          auto dataset = wxGetApp().getDatasetManager().loadDataset(table_id);
          DatasetDefaultOptions::applyDefaultOptions(dataset);
          return dataset;
@@ -238,6 +234,8 @@ namespace ctb::app
       m_search_ctrl->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, &MainFrame::onToolbarSearchBtn, this);
       m_search_ctrl->Bind(wxEVT_TEXT_ENTER, &MainFrame::onToolbarSearchTextEnter, this);
       m_search_ctrl->Bind(wxEVT_KEY_DOWN, &MainFrame::onToolbarSearchKeyDown, this);
+
+      Bind(wxEVT_CLOSE_WINDOW, &MainFrame::onCloseWindow, this);
 
       if (!wxPersistentRegisterAndRestore(this, constants::RES_NAME_MAINFRAME))
       {
@@ -451,15 +449,10 @@ namespace ctb::app
 
    void MainFrame::onMenuFileSyncData([[maybe_unused]] wxCommandEvent& event)
    {
-      // TODO: refactor this
       try
       {
-
          TableSyncDialog dlg(this);
          if (dlg.ShowModal() != wxID_OK) return;
-
-         //wxBusyCursor     busy{};
-         //ScopedStatusText end_status{ constants::STATUS_DOWNLOAD_COMPLETE, this };
 
          CtCredentialManager cred_mgr{};
          const auto*         cred_name   = constants::CELLARTRACKER_DOT_COM;
@@ -474,15 +467,19 @@ namespace ctb::app
 
 
          wxGetApp().getDatasetManager().downloadTablesAsync(dlg.selectedTables(), *cred_result,
-                                                            [this](std::expected<std::string, Error> result)
+                                                            [this](TableResult result)
                                                             {
                                                                CallAfter(
                                                                   [this, result = std::move(result)]
                                                                   {
-                                                                     auto msg = result ? *result 
-                                                                        : format("Download failed: {}", result.error().formattedMessage());
-                                                                     SetStatusText(msg);
-                                                                     //notifySuccess("Download Complete", msg);
+                                                                     if (result)
+                                                                     {
+                                                                        SetStatusText(format(""));
+                                                                     }
+                                                                     else
+                                                                     {
+                                                                        SetStatusText(result.error().formattedMessage());
+                                                                     }
                                                                   });
                                                             });
 
@@ -817,6 +814,12 @@ namespace ctb::app
       {
          wxGetApp().displayErrorMessage(packageError(), true);
       }
+   }
+
+   void MainFrame::onCloseWindow(wxCloseEvent& event)
+   {
+      wxGetApp().fireShutdown();
+      event.Skip();
    }
 
 
