@@ -121,8 +121,8 @@ namespace ctb::app
 
          // but check to make sure user hasn't overridden it.
          auto cfg = getConfig(constants::CONFIG_PATH_DATA_FOLDERS);
-         auto val = cfg->Read(wxFromSV(folder_name), path).ToStdString();
-         tryExpandEnvironmentVars(val);
+         path = cfg->Read(wxFromSV(folder_name), path).ToStdString();
+         tryExpandEnvironmentVars(path);
 
          fs::create_directories(path);
          return fs::path{ path };

@@ -181,6 +181,7 @@ namespace ctb
    [[nodiscard]] constexpr std::string_view trim_back_view(std::string_view sv, std::string_view whitespace = " \t\n\r\f\v") noexcept
    {
       const auto end = sv.find_last_not_of(whitespace);
+      if (end == std::string_view::npos) return {};
       return sv.substr(0, end + 1);
    }
    [[nodiscard]] Buffer base64Decode(std::string_view encoded_str);

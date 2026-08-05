@@ -45,7 +45,7 @@ namespace ctb
          "Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3]});"
          "Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});"
          "Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });"
-         "Object.defineProperty(navigator, 'deviceMemory', { get : () = > 8 });";
+         "Object.defineProperty(navigator, 'deviceMemory', { get : () => 16 });";
 
       inline constexpr const char* SET_USER_AGENT_PARAMS = R"({
           "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",

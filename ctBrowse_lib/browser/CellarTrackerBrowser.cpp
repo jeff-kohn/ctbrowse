@@ -124,7 +124,6 @@ namespace ctb
    {
       constexpr auto LOGGED_IN_STR  = "logged_in:"sv;   // actual return value will be "logged_in:username"
       constexpr auto LOGGED_OUT_STR = "logged_out"sv;
-      constexpr auto UNKNOWN_STR    = "unknown"sv;
 
       bool loggedIn(const RuntimeEvalResult& result)
       {
@@ -142,7 +141,7 @@ namespace ctb
 
    asio::awaitable<CellarTrackerBrowser::LoginStatus> CellarTrackerBrowser::coroCheckLoginStatus(std::string session_id)
    {
-      const auto check_login_status_js = format(params::FMT_CHECK_LOGIN_STATUS_JS, LOGGED_IN_STR, LOGGED_OUT_STR, UNKNOWN_STR);
+      const auto check_login_status_js = format(params::FMT_CHECK_LOGIN_STATUS_JS, LOGGED_IN_STR, LOGGED_OUT_STR);
 
       auto eval_result = co_await coroEvalWithRetry(session_id, check_login_status_js);
       if (loggedIn(eval_result))

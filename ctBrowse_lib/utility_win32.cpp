@@ -28,7 +28,7 @@ namespace ctb::win32
    {
       auto  error  = ::GetLastError();
       LPSTR buffer = nullptr;
-      if (!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+      if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
                          nullptr,
                          error,
                          MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
@@ -44,10 +44,8 @@ namespace ctb::win32
          }
          return ctb::Error{ error, Error::Category::GeneralError, "{}", std::string{ err_msg } };
       }
-      else
-      {
-         return ctb::Error{ error, Error::Category::GeneralError, "System error {} occurred.", error };
-      }
+
+      return ctb::Error{ error, Error::Category::GeneralError, "System error {} occurred.", error };
    }
 
 
