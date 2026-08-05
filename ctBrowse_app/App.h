@@ -16,7 +16,6 @@
 #include <wx/app.h>
 #include <wx/windowptr.h>
 
-#include <stdexec/stop_token.hpp>
 
 namespace ctb::app
 {
@@ -135,7 +134,6 @@ namespace ctb::app
       void fireShutdown();
 
    private:
-      stdexec::inplace_stop_source   m_shutdown_source{};
       MainFrame*                     m_main_frame{};
       fs::path                       m_user_data_folder{};
       std::optional<ProReviewsCache> m_review_cache{};

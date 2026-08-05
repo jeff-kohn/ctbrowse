@@ -130,7 +130,7 @@ namespace ctb
    {
       constexpr int padding = 2;   //The API requires a buffer equal to string length + '\0' + 1
 
-      // Find out how big of a string we need to accommodate.
+      // Find out how big of a string we need to accommodate. If bufsize isn't bigger, there's nothing to expand so bail
       auto bufsize = ExpandEnvironmentStrings(text.c_str(), nullptr, 0);
       if (0 == bufsize or bufsize <= text.length() + padding) return false;
 

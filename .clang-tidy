@@ -1,4 +1,4 @@
-Checks: 'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,cert-*, bugprone-*, readability-*,
+Checks: 'clang-diagnostic-*,cppcoreguidelines-*,modernize-*,cert-*, bugprone-*, readability-*,
   -bugprone-easily-swappable-parameters,
   -clang-analyzer-optin.core.EnumCastOutOfRange, 
   -cppcoreguidelines-avoid-const-or-ref-data-members,

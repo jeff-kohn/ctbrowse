@@ -13,7 +13,7 @@ namespace ctb
 {
    using MaybeStopToken = std::optional<stdexec::inplace_stop_token>;
 
-   // options struct for dataset mgr. the path strings will have any embedded enviroment variables expanded before use
+   // options struct for dataset mgr. the path strings will have any embedded environment variables expanded before use
    struct DatasetMgrOptions
    {
       static constexpr int32_t           DEFAULT_BROWSER_WS_PORT   = 9222;
@@ -35,17 +35,17 @@ namespace ctb
 
       /// @brief Path of the data folder to use for headless page loads to download images.
       ///        ENV vars will be expanded. Ignored if browser_path.empty(). If path doesn't
-      ///        exist and cannot be created, and exception will be thrown
+      ///        exist and cannot be created, an exception will be thrown
       std::string browser_data_dir{ DEFAULT_BROWSER_DATA_PATH };
 
-      /// @brief port # to use for local websocket communications with headless browser. Ignored
+      /// @brief port # to use for local websocket communications with headless browser. Ignored if
       ///        browser_path.empty()
       int32_t browser_ws_port{ DEFAULT_BROWSER_WS_PORT };
    };
 
 
    // for PIMPL
-   struct DatasetMgrAsyncImpl;
+   class DatasetMgrAsyncImpl;
 
 
    /// @brief High-level class that simplifies downloading tables, loading them from disk into dataset, downloading
@@ -60,13 +60,18 @@ namespace ctb
       ~CtDatasetMgr() noexcept;   //= default;
 
       /// @brief construct a CtDatasetLoader using the specified options.
-      CtDatasetMgr(const DatasetMgrOptions& opts, MaybeStopToken shutdown_token = {}) noexcept(false);
+      CtDatasetMgr(const DatasetMgrOptions& opts) noexcept(false);
+
+
+      /// @brief post-construction initialization
+      void init(const DatasetMgrOptions& opts);
 
 
       /// @brief Specify the location for table files. Environment variables will be expanded
       ///
       /// @throws ctb::Error if the folder doesn't exist and can't be created.
       auto setTableFolder(const std::string& folder) noexcept(false) -> CtDatasetMgr&;
+
 
       /// @brief Specify the location for table files. Environment variables will NOT be expanded
       ///
@@ -75,7 +80,7 @@ namespace ctb
 
 
       /// @brief returns the location used for loading data files from disk
-      auto getTableFolder() const -> const fs::path&;
+      auto getTableFolder() const -> const std::string&;
 
 
       /// @brief specify the location for label images. Environment variables will be expanded
@@ -89,8 +94,9 @@ namespace ctb
       /// @throws ctb::Error if the folder doesn't exist and can't be created.
       auto setLabelImageFolder(const fs::path& folder) noexcept(false) -> CtDatasetMgr&;
 
+
       /// @brief returns the location used for loading label images from disk
-      auto getLabelImageFolder() const -> const fs::path&;
+      auto getLabelImageFolder() const -> const std::string&;
 
 
       /// @brief Load a dataset with default options
@@ -133,8 +139,11 @@ namespace ctb
       void checkBrowserLoginAsync(CredentialWrapper cred, LoginResultCallback result_callback);
 
 
-      /// @brief post-construction initialization
-      void init(const DatasetMgrOptions& opts, MaybeStopToken shutdown_token);
+      /// @brief Begins shutdown of async IO manager in the background. Can be called during app exit to make teardown more efficient
+      bool requestShutdown();
+
+      /// @return - true if shutdown is been requested, false otherwise. 
+      bool shutdownRequested() const;
 
       // default ctor doesn't start the CellarTrackerBrowser service, would need to call init() later.
       CtDatasetMgr();
@@ -144,13 +153,7 @@ namespace ctb
       CtDatasetMgr& operator=(const CtDatasetMgr&) = delete;
 
    private:
-      bool shutdownRequested() const
-      {
-         return m_shutdown_token.stop_requested();
-      }
-
       indirect<DatasetMgrAsyncImpl>  m_impl;
-      stdexec::inplace_stop_token    m_shutdown_token{};
       std::optional<ProReviewsCache> m_pro_cache{};
    };
 

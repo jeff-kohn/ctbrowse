@@ -1,7 +1,6 @@
 #include "ctb/model/CtDatasetMgr.h"
 
 #include "async/DatasetMgrAsyncImpl.h"
-
 #include "ctb/model/CtDataset.h"
 #include "ctb/model/ProReviewsCache.h"
 #include "ctb/tables/BottleInventoryTraits.h"
@@ -49,29 +48,90 @@ namespace ctb
    }   // namespace
 
 
-   CtDatasetMgr::CtDatasetMgr()
-   = default;
+   CtDatasetMgr::CtDatasetMgr() = default;
 
 
    CtDatasetMgr::~CtDatasetMgr() noexcept
    {
-      m_impl->cpu_pool.request_stop();
+      try
+      {
+         m_impl->requestShutdown();
+      }
+      catch (...) // NOLINT
+      {}   
    }
 
 
-   CtDatasetMgr::CtDatasetMgr(const DatasetMgrOptions& opts, MaybeStopToken shutdown_token) noexcept(false)
+   CtDatasetMgr::CtDatasetMgr(const DatasetMgrOptions& opts) noexcept(false)
    {
-      init(opts, shutdown_token);
+      init(opts);
    }
 
 
-   void CtDatasetMgr::init(const DatasetMgrOptions& opts, MaybeStopToken shutdown_token)
+   void CtDatasetMgr::init(const DatasetMgrOptions& opts)
    {
-      if (!opts.browser_path.empty()) m_impl->browser.start(opts.browser_path, opts.browser_data_dir, opts.browser_ws_port);
+      if (!opts.browser_path.empty()) m_impl->startBrowser(opts.browser_path, opts.browser_data_dir, opts.browser_ws_port);
       if (!opts.table_folder.empty()) setTableFolder(opts.table_folder);
       if (!opts.label_folder.empty()) setLabelImageFolder(opts.label_folder);
+   }
 
-      if (shutdown_token) m_shutdown_token = std::move(*shutdown_token);
+
+   auto CtDatasetMgr::setTableFolder(const std::string& folder) noexcept(false) -> CtDatasetMgr&
+   {
+      fs::path folder_path{ expandEnvironmentVars(folder) };
+      return setTableFolder(fs::path{ folder_path });
+   }
+
+
+   auto CtDatasetMgr::setTableFolder(const fs::path& folder) noexcept(false) -> CtDatasetMgr&
+   {
+      if (!fs::exists(folder) and !createFolderPath(folder))
+      {
+         throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_PATH_NOT_FOUND, folder.generic_string() };
+      }
+      m_impl->setTableFolder(folder.generic_string());
+      return *this;
+   }
+
+
+   auto CtDatasetMgr::getTableFolder() const -> const std::string&
+   {
+      return m_impl->getTableFolder();
+   }
+
+
+   auto CtDatasetMgr::setLabelImageFolder(const std::string& folder) noexcept(false) -> CtDatasetMgr&
+   {
+      return setLabelImageFolder(fs::path{ expandEnvironmentVars(folder) });
+   }
+
+
+   auto CtDatasetMgr::setLabelImageFolder(const fs::path& folder) noexcept(false) -> CtDatasetMgr&
+   {
+      if (!fs::exists(folder) and !createFolderPath(folder))
+      {
+         throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_NO_LABEL_CACHE_FOLDER,
+                      folder.generic_string() };
+      }
+      m_impl->setLabelImageFolder(folder.generic_string());
+      return *this;
+   }
+
+
+   auto CtDatasetMgr::getLabelImageFolder() const -> const std::string&
+   {
+      return m_impl->getLabelImageFolder();
+   }
+
+   bool CtDatasetMgr::requestShutdown()
+   {
+      return m_impl->requestShutdown();
+   }
+
+
+   bool CtDatasetMgr::shutdownRequested() const
+   {
+      return m_impl->shutdownRequested();
    }
 
 
@@ -113,84 +173,22 @@ namespace ctb
    }
 
 
-   auto CtDatasetMgr::setTableFolder(const std::string& folder) noexcept(false) -> CtDatasetMgr&
-   {
-      fs::path folder_path{ expandEnvironmentVars(folder) };
-      if (!fs::exists(folder_path) and !createFolderPath(folder_path))
-      {
-         throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_PATH_NOT_FOUND,
-                      folder_path.generic_string() };
-      }
-      m_impl->label_folder = folder_path;
-      return *this;
-   }
-
-
-   auto CtDatasetMgr::setTableFolder(const fs::path& folder) noexcept(false) -> CtDatasetMgr&
-   {
-      if (!fs::exists(folder) and !createFolderPath(folder))
-      {
-         throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_PATH_NOT_FOUND, folder.generic_string() };
-      }
-      m_impl->table_folder = folder;
-      return *this;
-   }
-
-
-   auto CtDatasetMgr::getTableFolder() const -> const fs::path&
-   {
-      return m_impl->table_folder;
-   }
-
-
-   auto CtDatasetMgr::setLabelImageFolder(const std::string& folder) noexcept(false) -> CtDatasetMgr&
-   {
-      fs::path folder_path{ expandEnvironmentVars(folder) };
-      if (!fs::exists(folder_path) and !createFolderPath(folder_path))
-      {
-         throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_NO_TABLES_FOLDER,
-                      folder_path.generic_string() };
-      }
-      m_impl->label_folder = folder_path;
-      return *this;
-   }
-
-
-   auto CtDatasetMgr::setLabelImageFolder(const fs::path& folder) noexcept(false) -> CtDatasetMgr&
-   {
-      if (!fs::exists(folder) and !createFolderPath(folder))
-      {
-         throw Error{ ERROR_PATH_NOT_FOUND, Error::Category::DatasetError, constants::FMT_ERROR_NO_LABEL_CACHE_FOLDER,
-                      folder.generic_string() };
-      }
-      m_impl->label_folder = folder;
-      return *this;
-   }
-
-
-   auto CtDatasetMgr::getLabelImageFolder() const -> const fs::path&
-   {
-      return m_impl->label_folder;
-   }
-
-
    void CtDatasetMgr::downloadTableAsync(TableId table_id, const CredentialWrapper& cred, TableResultCallback notify_callback)
    {
-      if (!shutdownRequested()) m_impl->downloadTableAsync(table_id, cred, move(notify_callback), m_shutdown_token);
+      if (!shutdownRequested()) m_impl->downloadTableAsync(table_id, cred, move(notify_callback));
    }
 
 
    void CtDatasetMgr::retrieveLabelImageAsync(uint64_t wine_id, ImageResultCallback result_callback)
    {
-      if (!shutdownRequested()) m_impl->retrieveLabelImageAsync(wine_id, move(result_callback), m_shutdown_token);
+      if (!shutdownRequested()) m_impl->retrieveLabelImageAsync(wine_id, move(result_callback));
    }
 
 
    void CtDatasetMgr::checkBrowserLoginAsync(CredentialWrapper cred, LoginResultCallback result_callback)
    {
-      if (!shutdownRequested()) m_impl->checkBrowserLoginAsync(move(cred), move(result_callback), m_shutdown_token);
+      if (!shutdownRequested()) m_impl->checkBrowserLoginAsync(move(cred), move(result_callback));
    }
-
 
 
 }   // namespace ctb

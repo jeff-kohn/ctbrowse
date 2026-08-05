@@ -502,7 +502,7 @@ namespace ctb
             if (retries == 0)
             {
                m_status.store(Status::Stopped);
-               m_browser_handles = {};
+               m_browser_handles = {}; // kills edge if process hung
                SPDLOG_DEBUG("HeadlessBrowser couldn't establish connection with browser. {}", error.formattedMessage());
             }
             else

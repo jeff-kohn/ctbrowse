@@ -171,7 +171,7 @@ namespace ctb::app
 
    void App::fireShutdown()
    {
-      m_shutdown_source.request_stop();
+      m_dataset_mgr.requestShutdown();
    }
 
    void App::configureDatasetMgr()
@@ -190,7 +190,7 @@ namespace ctb::app
             // todo: in future use preferences to store custom paths for browser and its data dir, port as well.
             // for now the defaults are fine, will be easy to update later.
          }
-         m_dataset_mgr.init(opts, m_shutdown_source.get_token());
+         m_dataset_mgr.init(opts);
          m_dataset_mgr.setTableFolder(getDataFolder(AppFolder::Tables));
          m_dataset_mgr.setLabelImageFolder(getDataFolder(AppFolder::Labels));
 
