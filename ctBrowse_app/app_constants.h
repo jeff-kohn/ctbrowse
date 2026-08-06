@@ -102,8 +102,8 @@ namespace ctb::constants
                                                                     
    inline constexpr const char* FMT_DEFAULT_OPTIONS_SAVED_MSG       = "New default options saved for collection '{}'";
    inline constexpr const char* FMT_LBL_FILTERS_SELECTED            = "{}  ({} selected)";
-   inline constexpr const char* FMT_STATUS_FILE_DOWNLOADED          = "Successfully downloaded file '{}'.";
-   inline constexpr const char* FMT_STATUS_FILE_DOWNLOADING         = "Downloading file '{}'...";
+   inline constexpr const char* FMT_STATUS_TABLE_DOWNLOADED         = "Successfully downloaded '{}'.";
+   inline constexpr const char* FMT_STATUS_TABLE_DOWNLOADING        = "Downloading file '{}'...";
    inline constexpr const char* FMT_TITLE_TYPED_ERROR               = "{} Error";
                                                                     
    inline constexpr const char* INFO_MSG_NO_MATCHING_ROWS           = "No rows matched the search text.";

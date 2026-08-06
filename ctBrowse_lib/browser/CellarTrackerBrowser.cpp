@@ -14,6 +14,7 @@
 namespace ctb
 {
    using namespace senders;
+   using namespace asio;
 
    inline auto sndNotReadyError(CellarTrackerBrowser::Status status)
    {
@@ -54,7 +55,7 @@ namespace ctb
       // this lambda can directly await ASIO coroutines without having to mess with co_spawn and manually unwrapping
       // its return value.
       // NOLINTNEXTLINE [cppcoreguidelines-avoid-capturing-lambda-coroutines] this ptr is safe here
-      auto asio_coro = [this, wine_id]() -> asio::awaitable<HttpFileContents>   
+      auto asio_coro = [this, wine_id]() -> awaitable<HttpFileContents>
       {
          auto session = co_await m_browser->coroCreateSession();
          if (!session)
@@ -77,11 +78,11 @@ namespace ctb
 
 
    template<DurationType DurationT>
-   asio::awaitable<RuntimeEvalResult> CellarTrackerBrowser::coroEvalWithRetry(std::string session_id,
-                                                                              std::string source_js,
-                                                                              uint16_t    num_retries,
-                                                                              DurationT   retry_delay,
-                                                                              double      backoff_factor) noexcept(false)
+   awaitable<CellarTrackerBrowser::ExpectedEvalResult> CellarTrackerBrowser::coroEvalWithRetry(std::string session_id,
+                                                                                               std::string source_js,
+                                                                                               uint16_t    num_retries,
+                                                                                               DurationT   retry_delay,
+                                                                                               double      backoff_factor) noexcept
    {
       for (uint16_t retry = 0;; ++retry)
       {
@@ -95,14 +96,23 @@ namespace ctb
 
          if (retry >= num_retries)
          {
+
+#ifdef BROWSER_DEBUG
+
+            auto html_result = co_await m_browser->coroRuntimeEval(session_id, "document.documentElement.outerHTML");
+            SPDLOG_DEBUG("Page.navigate result: \r\n{}", html_result ? html_result->result.value : html_result.error().formattedMessage());
+
+#endif
+
             SPDLOG_DEBUG("coroRuntimeEval still returned an error after {} tries, throwing an exception ({})",
                          retry,
                          retval.error().formattedMessage());
-            throw Error(retval.error());
+
+            co_return std::unexpected{ Error{ std::move(retval.error()) } };
          }
 
          SPDLOG_DEBUG("coroRuntimeEval returned an error on try {}, retrying in {}", retry, retry_delay);
-         asio::steady_timer timer{ m_browser->getExecutor(), retry_delay };
+         steady_timer timer{ m_browser->getExecutor(), retry_delay };
          co_await timer.async_wait(use_awaitable);
          retry_delay = DurationT(static_cast<DurationT::rep>(retry_delay.count() * backoff_factor));
       }
@@ -110,19 +120,23 @@ namespace ctb
    }
 
 
-   asio::awaitable<RuntimeEvalResult> CellarTrackerBrowser::coroEvalWithRetry(std::string session_id, std::string source_js) noexcept(false)
+   awaitable<RuntimeEvalResult> CellarTrackerBrowser::coroEvalWithRetry(std::string session_id, std::string source_js) noexcept(false)
    {
-      co_return co_await coroEvalWithRetry(move(session_id),
-                                           move(source_js),
-                                           JS_EVAL_RETRY_COUNT,
-                                           JS_RETRY_INITIAL_DELAY,
-                                           JS_EVAL_RETRY_BACKOFF_FACTOR);
+      auto result = co_await coroEvalWithRetry(move(session_id),
+                                               move(source_js),
+                                               JS_EVAL_RETRY_COUNT,
+                                               JS_RETRY_INITIAL_DELAY,
+                                               JS_EVAL_RETRY_BACKOFF_FACTOR);
+
+      if (result) co_return move(result.value());
+
+      throw ctb::Error{ move(result.error()) };
    }
 
 
    namespace
    {
-      constexpr auto LOGGED_IN_STR  = "logged_in:"sv;   // actual return value will be "logged_in:username"
+      constexpr auto LOGGED_IN_STR  = "logged_in:"sv;   // actual return value will be "logged_in:welcome <username>"
       constexpr auto LOGGED_OUT_STR = "logged_out"sv;
 
       bool loggedIn(const RuntimeEvalResult& result)
@@ -139,20 +153,27 @@ namespace ctb
    }   // namespace
 
 
-   asio::awaitable<CellarTrackerBrowser::LoginStatus> CellarTrackerBrowser::coroCheckLoginStatus(std::string session_id)
+   awaitable<CellarTrackerBrowser::LoginResult> CellarTrackerBrowser::coroCheckLoginStatus(std::string session_id) noexcept
    {
-      const auto check_login_status_js = format(params::FMT_CHECK_LOGIN_STATUS_JS, LOGGED_IN_STR, LOGGED_OUT_STR);
-
-      auto eval_result = co_await coroEvalWithRetry(session_id, check_login_status_js);
-      if (loggedIn(eval_result))
+      try
       {
-         co_return LoginStatus{ true, getLoginName(eval_result) };
+         const auto check_login_status_js = format(params::FMT_CHECK_LOGIN_STATUS_JS, LOGGED_IN_STR, LOGGED_OUT_STR);
+
+         auto eval_result = co_await coroEvalWithRetry(session_id, check_login_status_js);
+         if (loggedIn(eval_result))
+         {
+            co_return LoginStatus{ true, getLoginName(eval_result) };
+         }
+
+         SPDLOG_DEBUG("CellarTrackerBrowser::coroCheckLoginStatus received response of type {} with value {}", eval_result.result.type,
+                      eval_result.result.value);
+
+         co_return LoginStatus{ false, {} };
       }
-
-      SPDLOG_DEBUG("CellarTrackerBrowser::coroCheckLoginStatus received response of type {} with value {}", eval_result.result.type,
-                   eval_result.result.value);
-
-      co_return LoginStatus{ false, {} };
+      catch (...)
+      {
+         co_return std::unexpected{ packageError() };
+      }
    }
 
 
@@ -161,7 +182,7 @@ namespace ctb
       if (status() != Status::Ready) return sndNotReadyError(status());
 
       auto asio_coro =
-         [this, cred = move(cred)] mutable -> asio::awaitable<LoginResult>   // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
+         [this, cred = move(cred)] mutable -> awaitable<LoginResult>   // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
       {
          try
          {
@@ -173,34 +194,39 @@ namespace ctb
                };
             }
 
-            // navigate to login page. If we're already logged in it will redirect to main page, if not we can fill
-            // form and submit.
-            static constexpr auto DEFAULT_PAGE = "default.asp"sv;
-            static constexpr auto LOGIN_PAGE   = "password.asp"sv;
-            static constexpr auto CT_LOGIN_URL = "https://www.cellartracker.com/password.asp"sv;
+            // navigate to login page. If we're already logged in it will redirect to main page
+            static constexpr auto CT_LOGIN_URL   = "https://www.cellartracker.com/password.asp"sv;
+            static constexpr auto CT_DEFAULT_URL = "https://www.cellartracker.com/default.asp"sv;
 
             auto nav_result = co_await m_browser->coroNavigate(session->sessionId(), std::string{ CT_LOGIN_URL });
             boost::to_lower(nav_result.url);
             auto trimmed_url = trim_back_view(nav_result.url, "/");
-            if (trimmed_url.ends_with(DEFAULT_PAGE))
+            if (trimmed_url != CT_DEFAULT_URL and trimmed_url != CT_LOGIN_URL)
             {
-               // If we get redirected to default.asp it should mean we're already logged in.
-               co_return co_await coroCheckLoginStatus(session->sessionId());
-            }
-
-            if (!trimmed_url.ends_with(LOGIN_PAGE))
-            {
-               // If we're on any other page than password.asp, bail the fuck out
                SPDLOG_DEBUG("CellarTrackerBrowser couldn't navigate to login page, redirected to {}", nav_result.url);
                co_return LoginStatus{ false, "" };
             }
 
-            // OK so we need to login. Start by filling the form fields and clicking submit
-            // We disable retries since we're interacting with previously loaded page, but still use coroEvelWithRetry()
-            // because it unwraps the expected<> and throws on error for us, which is preferred here.
+            const auto fill_form_js = format(params::FMT_FILL_LOGIN_FORM_JS, cred.username(), cred.password());
+
             SPDLOG_DEBUG("Attempting to fill login form fields...");
-            const auto fill_login_form_js = format(params::FMT_FILL_LOGIN_FORM_JS, cred.username(), cred.password());
-            auto       eval_result        = co_await coroEvalWithRetry(session->sessionId(), fill_login_form_js);
+            auto eval_result = co_await coroEvalWithRetry(session->sessionId(), fill_form_js, JS_EVAL_RETRY_COUNT, 50ms, JS_EVAL_RETRY_BACKOFF_FACTOR);
+            if (!eval_result)
+            {
+               // filling login form will fail if we're already logged in. Try checking login status.
+               // have to do this here instead of above catch block because of co_await
+               auto login_status = co_await coroCheckLoginStatus(session->sessionId());
+               if (login_status.has_value() and login_status->first)
+               {
+                  // we're logged in.
+                  co_return login_status;
+               }
+               else
+               {
+                  co_return std::unexpected{ std::move(eval_result.error()) };
+               }
+            }
+
 
             // TODO  check error parsing
             SPDLOG_DEBUG("Attempting to submit login form...");
@@ -220,7 +246,7 @@ namespace ctb
    }
 
 
-   asio::awaitable<std::string> CellarTrackerBrowser::coroGetLabelImageUrl(std::string session_id) noexcept(false)
+   awaitable<std::string> CellarTrackerBrowser::coroGetLabelImageUrl(std::string session_id) noexcept(false)
    {
       static const std::string expression =
          R"((() => { let el = document.getElementById('label_photo') || document.querySelector('.label_photo');
@@ -228,38 +254,10 @@ namespace ctb
                if (el.tagName.toLowerCase() === 'a') return el.href; let img = el.querySelector('img');
                if (img) return img.src; return 'ERROR: no image source found in element'; })())";
 
-      constexpr auto RETRY_COUNT    = 4U;
-      auto           retry_interval = 500ms;   // NOLINT [cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers]
 
-      // page load is heavily async due to javascript and WAF, so we need to retry if we initially get error
-      // due to page still loading.
-      for (int i = RETRY_COUNT; i > 0; i--)
-      {
-         auto retval = co_await m_browser->coroRuntimeEval(session_id, expression);
-
-         if (retval)
-         {
-            SPDLOG_DEBUG("HeadlessBrowser::coroRuntimeEval returned label URL '{}'", retval.value().result.value);
-            co_return retval->result.value;
-         }
-         if (i > 1)
-         {
-            SPDLOG_DEBUG("HeadlessBrowser::coroRuntimeEval returned an error on try {}, retrying in {}", RETRY_COUNT - i, retry_interval);
-            asio::steady_timer timer{ m_browser->getExecutor(), retry_interval };
-            co_await timer.async_wait(asio::use_awaitable);
-            retry_interval *= 2;
-         }
-         else
-         {
-            SPDLOG_DEBUG("coroRuntimeEval still returned an error after {} tries, throwing an error ({})", RETRY_COUNT,
-                         retval.error().formattedMessage());
-
-            auto html_result = co_await m_browser->coroRuntimeEval(session_id, "document.documentElement.outerHTML");
-            SPDLOG_DEBUG("Page.navigate result: \r\n{}", html_result ? html_result->result.value : html_result.error().formattedMessage());
-            throw Error{ retval.error() };
-         }
-      }
-      std::unreachable();
+      auto retval = co_await coroEvalWithRetry(session_id, expression);
+      SPDLOG_DEBUG("HeadlessBrowser::coroRuntimeEval returned label URL '{}'", retval.result.value);
+      co_return retval.result.value;
    }
 
 

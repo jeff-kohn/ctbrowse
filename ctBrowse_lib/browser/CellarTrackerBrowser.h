@@ -92,16 +92,21 @@ namespace ctb
       // happen if an exception escapes the ASIO coroutine.
       asio::awaitable<std::string> coroGetLabelImageUrl(std::string session_id) noexcept(false);
 
-      asio::awaitable<LoginStatus> coroCheckLoginStatus(std::string session_id);
+      asio::awaitable<LoginResult> coroCheckLoginStatus(std::string session_id) noexcept;
 
       asio::awaitable<RuntimeEvalResult> coroEvalWithRetry(std::string session_id, std::string source_js) noexcept(false);
 
+      /// @brief non-throwing version of coroEvalWithRetry returns an expected.
+      using ExpectedEvalResult = std::expected<RuntimeEvalResult, ctb::Error>;
+
+      /// @brief non-throwing version of coroEvalWithRetry, also supports overriding retry params
+      /// @return expected value is RuntimeEvalResult, unexpected/error value is ctb::Error
       template<DurationType DurationT>
-      asio::awaitable<RuntimeEvalResult> coroEvalWithRetry(std::string session_id,
+      asio::awaitable<ExpectedEvalResult> coroEvalWithRetry(std::string session_id,
                                                            std::string source_js,
                                                            uint16_t    num_retries,
                                                            DurationT   retry_delay,
-                                                           double      backoff_factor) noexcept(false);
+                                                           double      backoff_factor) noexcept;
 
       // will throw an exception if called when status() returns anything but Ready
       void checkStatus() noexcept(false);
