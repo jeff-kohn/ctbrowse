@@ -164,7 +164,8 @@ namespace ctb
             co_return LoginStatus{ true, getLoginName(eval_result) };
          }
 
-         SPDLOG_DEBUG("CellarTrackerBrowser::coroCheckLoginStatus received response of type {} with value {}", eval_result.result.type,
+         SPDLOG_DEBUG("CellarTrackerBrowser::coroCheckLoginStatus received response of type {} with value {}",
+                      eval_result.result.type,
                       eval_result.result.value);
 
          co_return LoginStatus{ false, {} };
@@ -180,8 +181,8 @@ namespace ctb
    {
       if (status() != Status::Ready) return sndNotReadyError(status());
 
-      auto asio_coro =
-         [this, cred = move(cred)] mutable -> awaitable<LoginResult>   // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
+      // NOLINTNEXTLINE [cppcoreguidelines-avoid-capturing-lambda-coroutines]
+      auto asio_coro = [this, cred = move(cred)] mutable -> awaitable<LoginResult>
       {
          try
          {
@@ -209,11 +210,12 @@ namespace ctb
             const auto fill_form_js = format(params::FMT_FILL_LOGIN_FORM_JS, cred.username(), cred.password());
 
             SPDLOG_DEBUG("Attempting to fill login form fields...");
-            auto eval_result = co_await coroEvalWithRetry(session->sessionId(), fill_form_js, JS_EVAL_RETRY_COUNT, 50ms, JS_EVAL_RETRY_BACKOFF_FACTOR);
+            auto eval_result =
+               co_await coroEvalWithRetry(session->sessionId(), fill_form_js, JS_EVAL_RETRY_COUNT, 50ms, JS_EVAL_RETRY_BACKOFF_FACTOR);
             if (!eval_result)
             {
-               // filling login form will fail if we're already logged in. Try checking login status.
-               // have to do this here instead of above catch block because of co_await
+               // filling login form will fail if we're already logged in. Try checking login status since we may
+               // have been redirected to default.asp even if reported URL from page event was for password.asp
                auto login_status = co_await coroCheckLoginStatus(session->sessionId());
                if (login_status.has_value() and login_status->first)
                {

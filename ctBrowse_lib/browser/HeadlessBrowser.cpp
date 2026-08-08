@@ -23,13 +23,13 @@ namespace ctb
    constexpr auto MAX_CONNECT_RETRIES = 10;
    constexpr auto FMT_EDGE_HTTP_URL   = "http://127.0.0.1:{}/json/version";
 
-   constexpr auto FMT_EDGE_ARGS =   "--headless=new "
-      "--remote-debugging-address=127.0.0.1 "
-      "--no-first-run --no-default-browser-check --disable-sync "
-      "--disable-blink-features=AutomationControlled "
-      "--window-size=1720,1010 "
-      "--remote-debugging-port={} "
-      "--user-data-dir=\"{}\""sv;
+   constexpr auto FMT_EDGE_ARGS = "--headless=new "
+                                  "--remote-debugging-address=127.0.0.1 "
+                                  "--no-first-run --no-default-browser-check --disable-sync "
+                                  "--disable-blink-features=AutomationControlled "
+                                  "--window-size=1720,1010 "
+                                  "--remote-debugging-port={} "
+                                  "--user-data-dir=\"{}\""sv;
    namespace
    {
       inline void throwIfError(string_view command_name, const BrowserMessage& response) noexcept(false)
@@ -293,9 +293,7 @@ namespace ctb
 
    asio::awaitable<HeadlessBrowser::EvalReturnValue> HeadlessBrowser::coroRuntimeEval(string session_id, string expression) noexcept
    {
-      co_await asio::dispatch(
-         *m_ctx,
-         asio::use_awaitable);   // NOLINT(clang-analyzer-core.NullDereference) false positive in asio::awaitable coroutine frame internals
+      co_await asio::dispatch( *m_ctx, asio::use_awaitable);
 
       JsonPropMap params{
          { params::RETURN_BY_VAL, true             },
