@@ -81,7 +81,7 @@ namespace ctb
 
    private:
       static constexpr uint16_t JS_EVAL_RETRY_COUNT          = 4U;
-      static constexpr double   JS_EVAL_RETRY_BACKOFF_FACTOR = 1.5;
+      static constexpr double   JS_EVAL_RETRY_BACKOFF_FACTOR = 2.0;
       static constexpr auto     JS_RETRY_INITIAL_DELAY       = 100ms;
 
       indirect<HeadlessBrowser> m_browser;

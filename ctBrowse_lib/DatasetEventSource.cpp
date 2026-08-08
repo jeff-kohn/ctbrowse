@@ -50,14 +50,14 @@ namespace ctb
 
    void DatasetEventSource::attach(IDatasetEventSink* observer) noexcept
    {
-      SPDLOG_DEBUG("DatasetEventSource::attach() called.");
+      SPDLOG_TRACE("DatasetEventSource::attach() called.");
       m_observers.insert(observer);
    }
 
 
    void DatasetEventSource::detach(IDatasetEventSink* observer) noexcept
    {
-      SPDLOG_DEBUG("DatasetEventSource::detach() called.");
+      SPDLOG_TRACE("DatasetEventSource::detach() called.");
       m_observers.erase(observer);
    }
 
@@ -65,7 +65,7 @@ namespace ctb
    auto DatasetEventSource::signal(DatasetEvent::Id event_id, NullableUInt rec_idx, IDatasetEventSink* event_source) noexcept -> bool
    {
       [[maybe_unused]] auto event_name = enum_to_string(event_id);
-      SPDLOG_DEBUG("DatasetEventSource::signal({},{}) called", event_name, static_cast<int>(rec_idx.value_or(-1)));
+      SPDLOG_TRACE("DatasetEventSource::signal({},{}) called", event_name, static_cast<int>(rec_idx.value_or(-1)));
 
       bool retval{ true };
       if (m_data)

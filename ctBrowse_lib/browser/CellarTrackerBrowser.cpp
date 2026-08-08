@@ -97,11 +97,10 @@ namespace ctb
          if (retry >= num_retries)
          {
 
-#ifdef BROWSER_DEBUG
+#if SPDLOG_ACTIVE_LEVEL == SPDLOG_LEVEL_TRACE
 
             auto html_result = co_await m_browser->coroRuntimeEval(session_id, "document.documentElement.outerHTML");
-            SPDLOG_DEBUG("Page.navigate result: \r\n{}", html_result ? html_result->result.value : html_result.error().formattedMessage());
-
+            SPDLOG_TRACE("document.documentElement.outerHTML: \r\n{}", html_result ? html_result->result.value : html_result.error().formattedMessage());
 #endif
 
             SPDLOG_DEBUG("coroRuntimeEval still returned an error after {} tries, throwing an exception ({})",

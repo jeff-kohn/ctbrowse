@@ -10,12 +10,14 @@
 
 #include "ctb/Error.h"
 
-// default active level is Info, which means in release builds all
-// logging done with SPDLOG_DEBUG() will be omitted at compile time but
-// included for debug builds.
-#if !defined(NDEBUG)
-   #define SPDLOG_ACTIVE_LEVEL 1   // SPDLOG_LEVEL_DEBUG NOLINT cppcoreguidelines-macro-usage
+
+// NOLINTBEGIN cppcoreguidelines-macro-usage
+#if defined(NDEBUG)
+   #define SPDLOG_ACTIVE_LEVEL 2   // SPDLOG_LEVEL_INFO   
+#else
+   #define SPDLOG_ACTIVE_LEVEL 0   // SPDLOG_LEVEL_TRACE
 #endif
+// NOLINTEND cppcoreguidelines-macro-usage
 
 #include <spdlog/async.h>
 #include <spdlog/sinks/msvc_sink.h>
@@ -76,8 +78,8 @@ namespace ctb::constants
    inline constexpr const char* LOG_PATTERN_FILE     = "[%Y-%m-%d %H:%M:%S.%e][TID %t][%^%l%$] %v";
 
 #if !defined(NDEBUG)
-   inline constexpr auto LOGLEVEL_GLOBAL   = log::level_enum::debug;
-   inline constexpr auto LOGLEVEL_FILE     = log::level_enum::debug;
+   inline constexpr auto LOGLEVEL_GLOBAL   = log::level_enum::trace;
+   inline constexpr auto LOGLEVEL_FILE     = log::level_enum::trace;
    inline constexpr auto LOGLEVEL_CONSOLE  = log::level_enum::info;
    inline constexpr auto LOGLEVEL_DEBUGGER = log::level_enum::debug;
 #else

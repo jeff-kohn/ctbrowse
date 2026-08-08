@@ -114,10 +114,8 @@ target_include_directories(${TARGET_NAME}
 target_link_libraries(${TARGET_NAME}
    PUBLIC
       asio::asio
-      cpr::cpr
       fmt::fmt
       glaze::glaze
-      HtmlParser::HtmlParser
       spdlog::spdlog
       STDEXEC::stdexec
       "$<$<PLATFORM_ID:Windows>:Credui>"
@@ -131,13 +129,10 @@ if (CTB_USE_PRECOMPILED_HEADERS)
          <algorithm>
          <array>
          <boost/algorithm/string/predicate.hpp>
+         <boost/range/as_literal.hpp>
          <boost/unordered/unordered_flat_map.hpp>
          <chrono>
          <concepts>
-         <cpr/api.h>
-         <cpr/cprtypes.h>
-         <cpr/cprtypes.h>
-         <cpr/response.h>
          <enchantum/enchantum.hpp>
          <enchantum/fmt_format.hpp>
          <exception>

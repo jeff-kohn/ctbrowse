@@ -1,5 +1,3 @@
-
-find_package(unofficial-webview2 CONFIG REQUIRED)
 find_package(wxWidgets CONFIG REQUIRED)
 
 set(TARGET_NAME ctBrowse_app)
@@ -36,7 +34,6 @@ target_link_libraries(${TARGET_NAME}
    PRIVATE
       ctBrowse::ctBrowse_lib
       wxWidgets::wxWidgets
-      unofficial::webview2::webview2
 )
 
 target_sources(${TARGET_NAME}
@@ -124,6 +121,7 @@ if (CTB_USE_PRECOMPILED_HEADERS)
          <algorithm>
          <array>
          <boost/algorithm/string/predicate.hpp>
+         <boost/range/as_literal.hpp>
          <boost/unordered/unordered_flat_map.hpp>
          <chrono>
          <concepts>
@@ -161,6 +159,7 @@ if (CTB_USE_PRECOMPILED_HEADERS)
          <wx/textctrl.h>
          <wx/valgen.h>
          <wx/window.h>
+         <wx/windowptr.h>
          <wx/wupdlock.h>
          <wx/xrc/xmlres.h>
    )
