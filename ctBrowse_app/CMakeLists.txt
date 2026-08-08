@@ -162,6 +162,7 @@ if (CTB_USE_PRECOMPILED_HEADERS)
          <wx/windowptr.h>
          <wx/wupdlock.h>
          <wx/xrc/xmlres.h>
+         <ctb/ctb.h>
    )
    message(STATUS "precompiled header support enabled for ${TARGET_NAME}")
 endif()
