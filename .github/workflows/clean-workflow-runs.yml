@@ -17,7 +17,8 @@ jobs:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
           keep_minimum_runs: 0
-          delete_workflow_pattern: 'clean-workflow-runs|Running Copilot Code Review'
+          delete_workflow_pattern: 'Delete old workflow runs|Copilot' # despite official docs saying otherwise, only name matching works, not filename matching
+          retain_days: 0
 
       - name: Delete failed/canceled runs from CI
         uses: Mattraks/delete-workflow-runs@v2.1.0
