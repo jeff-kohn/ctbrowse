@@ -3,9 +3,12 @@
 #include "App.h"
 #include "controls/ElasticPropertyValueBase.h"
 
+#include <ctb/model/ProReviewsCache.h>
+
 
 namespace ctb::app
 {
+
 
    /// @brief This class binds a property value control to one of the getXXX() methods in the ProReviewsCache class.
    ///
@@ -19,28 +22,14 @@ namespace ctb::app
       /// @param source     - the dataset event source to bind the control to, must be non-null
       /// @param bound_prop - the property id to bind the control to
       /// @return non-owning pointer to the newly created window.
-      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source, CacheValueFn value_fn) -> ProReviewsCacheCtrl*
-      {
-         return detail::createDatasetWindow<ProReviewsCacheCtrl>(parent, source, value_fn);
-      }
+      [[nodiscard]] static auto create(wxWindow* parent, const DatasetEventSourcePtr& source, CacheValueFn value_fn) -> ProReviewsCacheCtrl*;
+
    private:
       CacheValueFn m_value_fn{};
 
-      ProReviewsCacheCtrl(const DatasetEventSourcePtr& source, CacheValueFn value_fn)
-         : ElasticPropertyValueBase{ source },
-           m_value_fn{ std::move(value_fn) }
-      {}
+      ProReviewsCacheCtrl(const DatasetEventSourcePtr& source, CacheValueFn value_fn);
 
-      auto getDisplayValue(const IDataset* ds) const -> std::string override
-      {
-         std::string value{};
-
-         auto& cache   = wxGetApp().getDatasetManager().getProReviewsCache();
-         auto  wine_id = ds->getProperty(CtProp::iWineId).asUInt64().value_or(0);
-         value         = (cache.*m_value_fn)(wine_id);
-
-         return value;
-      }
+      auto getDisplayValue(const IDataset* ds) const -> std::string override;
 
       DECLARE_DATASET_WINDOW_FACTORY;
    };

@@ -4,7 +4,7 @@
 #include "model/DatasetWindow.h"
 
 #include <ctb/model/DatasetEventHandler.h>
-
+#include <ctb\model\DatasetMgrAsyncCallbacks.h>
 #include <wx/generic/statbmpg.h>
 #include <wx/timer.h>
 #include <wx/weakref.h>

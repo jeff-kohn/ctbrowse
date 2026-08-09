@@ -12,7 +12,6 @@
 #include "CtCredentialManager.h"
 
 #include <ctb/log.h>
-#include <ctb/model/CtDatasetMgr.h>
 #include <wx/app.h>
 #include <wx/windowptr.h>
 #include <external/indirect.h>
@@ -82,6 +81,7 @@ namespace ctb::app
    {
    public:
       App();
+      ~App();
 
       /// @brief called by the framework on app startup, this is the place for program initialization
       ///
@@ -142,8 +142,7 @@ namespace ctb::app
    private:
       MainFrame*                     m_main_frame{};
       fs::path                       m_user_data_folder{};
-      std::optional<ProReviewsCache> m_review_cache{};
-      indirect<CtDatasetMgr>         m_dataset_mgr{};
+      indirect<CtDatasetMgr>         m_dataset_mgr;
       void                           onMainFrameClosed(wxCloseEvent&);
 
       /// @brief this gets called after logging, config store, secret store, etc have been set up and will

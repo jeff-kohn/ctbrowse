@@ -17,6 +17,7 @@
 #include <string>
 #include <string_view>
 
+
 namespace ctb
 {
    // clang-format off
@@ -92,14 +93,6 @@ namespace ctb
    /// @return the decoded string, or a copy of the original text if the decoding failed
    ///
    auto percentDecode(std::string_view text) noexcept -> std::string;
-
-
-   /// @brief parses an HTML fragment looking for the element containing the label_photo URL
-   ///
-   /// @return the requested URL if found, empty string otherwise.
-   ///
-   auto parseLabelUrlFromHtml(const std::string& html) -> std::string;
-
 
 
    /// @brief get the CT URL for a Wine given it's iWineID

@@ -59,6 +59,7 @@ target_sources(${TARGET_NAME}
      "controls/MultiValueFilterTreeCtrl.cpp"
      "controls/MultiValueFilterTreeCtrl.h"
      "controls/PropertyValueCtrl.h"
+     "controls/ProReviewsCacheCtrl.cpp"
      "controls/ProReviewsCacheCtrl.h"
      "controls/SpinDoubleFilterCtrl.cpp"
      "controls/SpinDoubleFilterCtrl.h"

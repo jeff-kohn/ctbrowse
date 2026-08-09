@@ -23,6 +23,9 @@
 namespace ctb::app
 {
 
+   App::~App() = default;   // needed for indirect<> pimpl
+
+
    App::App()
    {
       try

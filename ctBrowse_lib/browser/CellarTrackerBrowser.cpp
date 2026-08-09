@@ -97,7 +97,7 @@ namespace ctb
          if (retry >= num_retries)
          {
 
-            SPDLOG_DEBUG("coroRuntimeEval still returned an error after {} tries, throwing an exception ({})",
+            SPDLOG_DEBUG("coroRuntimeEval still returned an error after {} tries, returning error ({})",
                          retry,
                          retval.error().formattedMessage());
             co_await traceHtml(session_id);

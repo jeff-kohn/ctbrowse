@@ -14,6 +14,7 @@
 #include "views/DatasetMultiView.h"
 
 #include <ctb/model/DatasetEventSource.h>
+#include <ctb/model/CtDatasetMgr.h>
 #include <ctb/utility_chrono.h>
 #include <ctb/utility_http.h>
 

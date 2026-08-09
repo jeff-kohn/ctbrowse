@@ -230,9 +230,9 @@ namespace ctb
       subscribeEvents(session_id, std::array{ events::PAGE_LOAD, events::PAGE_FRAME_NAVIGATED, events::PAGE_DOM_LOADED });
       co_await coroEnablePageEvents(session_id);
 
-      JsonPropMap stealth_params{
-         { params::SOURCE, std::string{ params::STEALTH_NAVIGATOR_NEW_DOC_SCRIPT } }
-      };
+      //JsonPropMap stealth_params{
+      //   { params::SOURCE, std::string{ params::STEALTH_NAVIGATOR_NEW_DOC_SCRIPT } }
+      //};
       //auto result = co_await coroSendCommand(commands::ADD_NEW_DOC_SCRIPT, stealth_params, session_id);
       auto result = co_await coroSendCommand(commands::SET_USER_AGENT, params::SET_USER_AGENT_PARAMS, session_id);
 
