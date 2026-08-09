@@ -19,13 +19,15 @@ jobs:
           keep_minimum_runs: 0
           delete_workflow_pattern: 'clean-workflow-runs|Running Copilot Code Review'
 
-      - name: Delete failed/canceled runs
+      - name: Delete failed/canceled runs from CI
         uses: Mattraks/delete-workflow-runs@v2.1.0
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
+          delete_workflow_pattern: 'Continuous Integration'
           delete_run_by_conclusion_pattern: 'action_required,cancelled,failure,skipped'
-          delete_workflow_pattern: '*'  # Target ALL workflows
+          keep_minimum_runs: 0
+          retain_days: 0
 
       - name: Delete old build runs
         uses: Mattraks/delete-workflow-runs@v2.1.0
@@ -34,7 +36,7 @@ jobs:
           repository: ${{ github.repository }}
           keep_minimum_runs: 1
           retain_days: 30
-          delete_workflow_pattern: 'ci'
+          delete_workflow_pattern: 'Continuous Integration'
 
   get-packages:
     name: Get Packages
