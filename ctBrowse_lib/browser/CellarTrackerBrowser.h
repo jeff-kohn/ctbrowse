@@ -69,7 +69,8 @@ namespace ctb
       [[nodiscard]] senders::AnySender<senders::HttpFileContents> sndDownloadLabel(uint64_t wine_id) noexcept(false);
 
 
-      /// @brief result type for the sndAttemptLogin sender, expected return value is the login name if successful
+      /// @brief result type for the sndAttemptLogin sender, contains bool that's true if logged in, false otherwise. If logged in
+      //         .second will contain username.
       using LoginStatus = std::pair<bool, std::string>;
       using LoginResult = std::expected<LoginStatus, ctb::Error>;
 
@@ -110,6 +111,9 @@ namespace ctb
 
       // will throw an exception if called when status() returns anything but Ready
       void checkStatus() noexcept(false);
+
+      // debug logging, no-op in release builds
+      asio::awaitable<void> traceHtml(std::string session_id);
    };
 
 }   // namespace ctb

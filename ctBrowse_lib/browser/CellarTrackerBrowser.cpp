@@ -97,15 +97,10 @@ namespace ctb
          if (retry >= num_retries)
          {
 
-#if SPDLOG_ACTIVE_LEVEL == SPDLOG_LEVEL_TRACE
-
-            auto html_result = co_await m_browser->coroRuntimeEval(session_id, "document.documentElement.outerHTML");
-            SPDLOG_TRACE("document.documentElement.outerHTML: \r\n{}", html_result ? html_result->result.value : html_result.error().formattedMessage());
-#endif
-
             SPDLOG_DEBUG("coroRuntimeEval still returned an error after {} tries, throwing an exception ({})",
                          retry,
                          retval.error().formattedMessage());
+            co_await traceHtml(session_id);
 
             co_return std::unexpected{ Error{ std::move(retval.error()) } };
          }
@@ -136,7 +131,7 @@ namespace ctb
    namespace
    {
       constexpr auto LOGGED_IN_STR  = "logged_in:"sv;   // actual return value will be "logged_in:welcome <username>"
-      constexpr auto LOGGED_OUT_STR = "logged_out"sv;
+      //constexpr auto LOGGED_OUT_STR = "logged_out"sv;
 
       bool loggedIn(const RuntimeEvalResult& result)
       {
@@ -156,9 +151,10 @@ namespace ctb
    {
       try
       {
-         const auto check_login_status_js = format(params::FMT_CHECK_LOGIN_STATUS_JS, LOGGED_IN_STR, LOGGED_OUT_STR);
+         const auto check_login_status_js = format(params::FMT_CHECK_LOGIN_STATUS_JS, LOGGED_IN_STR, LOGGED_IN_STR);
 
          auto eval_result = co_await coroEvalWithRetry(session_id, check_login_status_js);
+         co_await traceHtml(session_id);
          if (loggedIn(eval_result))
          {
             co_return LoginStatus{ true, getLoginName(eval_result) };
@@ -234,6 +230,8 @@ namespace ctb
             eval_result = co_await coroEvalWithRetry(session->sessionId(), std::string{ params::SUBMIT_LOGIN_FORM_EXPRESSION });
 
             // Now check again and return final result.
+            //steady_timer timer{ m_browser->getExecutor(), 2s };
+            //co_await timer.async_wait(use_awaitable);
             co_return co_await coroCheckLoginStatus(session->sessionId());
          }
          catch (...)
@@ -268,6 +266,19 @@ namespace ctb
       if (current_status != Status::Ready)
          throw ctb::Error(Error::Category::GeneralError, constants::FMT_ERROR_HEADLESS_BROWSER_INVALID_STATUS, current_status);
    }
+
+   awaitable<void> ctb::CellarTrackerBrowser::traceHtml(std::string session_id)
+   {
+#if SPDLOG_ACTIVE_LEVEL == SPDLOG_LEVEL_TRACE
+
+      auto html_result = co_await m_browser->coroRuntimeEval(move(session_id), "document.documentElement.outerHTML");
+      SPDLOG_TRACE("document.documentElement.outerHTML: \r\n{}",
+                   html_result ? html_result->result.value : html_result.error().formattedMessage());
+#endif
+      co_return;
+   }
+
+
 
 
 }   // namespace ctb

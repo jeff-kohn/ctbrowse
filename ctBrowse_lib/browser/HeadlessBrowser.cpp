@@ -281,7 +281,6 @@ namespace ctb
          }
          else
          {
-            // PAGE_LOAD
             page_loaded = true;
             SPDLOG_DEBUG("Page.loadEventFired event received for url {}", retval.url);
          }

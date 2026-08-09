@@ -15,7 +15,7 @@
 #if defined(NDEBUG)
    #define SPDLOG_ACTIVE_LEVEL 2   // SPDLOG_LEVEL_INFO   
 #else
-   #define SPDLOG_ACTIVE_LEVEL 0   // SPDLOG_LEVEL_TRACE
+   #define SPDLOG_ACTIVE_LEVEL 1   // SPDLOG_LEVEL_DEBUG
 #endif
 // NOLINTEND cppcoreguidelines-macro-usage
 

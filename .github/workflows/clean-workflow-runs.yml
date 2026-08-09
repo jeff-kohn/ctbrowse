@@ -12,20 +12,20 @@ jobs:
       contents: read
 
     steps:
-      - name: Delete workflow clean runs
+      - name: Delete utility job runs
         uses: Mattraks/delete-workflow-runs@v2.1.0
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
           keep_minimum_runs: 0
-          delete_workflow_pattern: clean
+          delete_workflow_pattern: clean|Copilot
 
       - name: Delete failed/canceled runs
         uses: Mattraks/delete-workflow-runs@v2.1.0
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
-          delete_run_by_conclusion_pattern: 'Unsuccessful'
+          delete_run_by_conclusion_pattern: action_required,cancelled,failure,skipped
 
       - name: Delete old build runs
         uses: Mattraks/delete-workflow-runs@v2.1.0
