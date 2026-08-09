@@ -14,7 +14,7 @@ namespace ctb
    {
       static constexpr auto unreserved = [](char c)
       {
-         return std::isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~';
+         return std::isalnum(static_cast<unsigned char>(c)) || c == '-' || c == '_' || c == '.' || c == '~';
       };
 
       std::string result;
@@ -24,7 +24,7 @@ namespace ctb
          if (unreserved(c))
             result += c;
          else
-            std::format_to(std::back_inserter(result), "%{:02X}", c);
+            std::format_to(std::back_inserter(result), "%{:02X}", static_cast<unsigned char>(c));
       }
       return result;
    }
@@ -40,7 +40,7 @@ namespace ctb
             auto         hex = text.substr(i + 1, 2);
             unsigned int value{};
             auto [ptr, ec] = std::from_chars(hex.data(), hex.data() + hex.size(), value, 16);
-            if (ec == std::errc{})
+            if (ec == std::errc{} and ptr == hex.data() + hex.size())
             {
                result += static_cast<char>(value);
                i      += 2;
