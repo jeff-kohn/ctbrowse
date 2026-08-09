@@ -10,7 +10,6 @@ jobs:
     permissions:
       actions: write
       contents: read
-
     steps:
       - name: Delete utility job runs
         uses: Mattraks/delete-workflow-runs@v2.1.0
@@ -18,14 +17,15 @@ jobs:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
           keep_minimum_runs: 0
-          delete_workflow_pattern: clean|Copilot
+          delete_workflow_pattern: 'clean-workflow-runs|Running Copilot Code Review'
 
       - name: Delete failed/canceled runs
         uses: Mattraks/delete-workflow-runs@v2.1.0
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
-          delete_run_by_conclusion_pattern: action_required,cancelled,failure,skipped
+          delete_run_by_conclusion_pattern: 'action_required,cancelled,failure,skipped'
+          delete_workflow_pattern: '*'  # Target ALL workflows
 
       - name: Delete old build runs
         uses: Mattraks/delete-workflow-runs@v2.1.0
@@ -34,7 +34,7 @@ jobs:
           repository: ${{ github.repository }}
           keep_minimum_runs: 1
           retain_days: 30
-          delete_workflow_pattern: ci
+          delete_workflow_pattern: 'ci'
 
   get-packages:
     name: Get Packages
