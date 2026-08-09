@@ -2,7 +2,8 @@
 
 #include "App.h"
 #include "controls/ElasticPropertyValueBase.h"
-
+#include <ctb/tables/table_data.h>
+#include <ctb/tables/detail/field_helpers.h>
 
 namespace ctb::app
 {

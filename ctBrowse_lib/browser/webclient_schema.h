@@ -47,6 +47,7 @@ namespace ctb
          "Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });"
          "Object.defineProperty(navigator, 'deviceMemory', { get : () => 16 });";
 
+
       inline constexpr const char* SET_USER_AGENT_PARAMS = R"({
           "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
           "acceptLanguage": "en-US,en;q=0.9",
@@ -78,30 +79,13 @@ namespace ctb
                 return "{}:" + username;
             }}
             
-            // Check for logged-out specific elements
-            let spans = document.querySelectorAll('button span');
-            let hasSignInBtn = Array.from(spans).some(span => span.innerText.trim() === 'Sign In');
-            let hasPasswordField = document.querySelector('input[type="password"]');
-            let isLoginPage = window.location.href.includes('password.asp') || window.location.href.includes('login');
-            
-            if (hasSignInBtn || hasPasswordField || isLoginPage) {{
-                return "{}";
-            }}
-            
-            return "ERROR: Could not determine logon status, page may not have finished loading.";
-        }})())";
-
-         
-/* R"((() => {{ 
             let lightbox = document.getElementById('lightbox');
             if (lightbox && lightbox.getAttribute('data-username')) {{
                 return "{}:" + lightbox.getAttribute('data-username');
             }}
-            if (document.querySelector('input[type="password"]') || window.location.href.includes('login')) {{
-                return "{}";
-            }}
-            return "{}";
-        }})())";*/
+
+            return "ERROR: Not logged in or could not determine logon status, page may not have finished loading.";
+        }})())";
 
 
       /// @brief Format string for JS expression to populate the login form inputs.
@@ -116,6 +100,7 @@ namespace ctb
             passField.dispatchEvent(new Event('input', {{ bubbles: true }}));
             return 'SUCCESS';
         }})())";
+
 
       /// @brief JavaScript expression to click the submit button
       inline constexpr std::string_view SUBMIT_LOGIN_FORM_EXPRESSION =

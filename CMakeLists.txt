@@ -13,12 +13,10 @@ endif()
 
 # Options that can be set by users of this project (eg through -D on the cmake command line).
 # These are pre-configured by the presets or resonable defaults, but can be overridden when needed.
-option(CTB_BUILD_TESTS "Enable building tests and test infrastructure. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }." ${PROJECT_IS_TOP_LEVEL})
-
-# option(CTB_BUILD_EXAMPLES "Enable building example programs. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }."              ${PROJECT_IS_TOP_LEVEL} )
-option(CTB_CPPCHECK_BUILD_SCAN "Enable CppCheck in-build scanning. Default: OFF. Values: { ON, OFF }." "OFF")
-option(CTB_CPPCHECK_PROJECT_SCAN "Enable CppCheck project scanning in the 'code_analysis target. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }." ${PROJECT_IS_TOP_LEVEL})
-option(CTB_CLANG_TIDY_BUILD_SCAN "Enable clang-tidy in-build scanning. Default: OFF. Values: { ON, OFF }." "OFF")
+option(CTB_BUILD_TESTS             "Enable building tests and test infrastructure. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }." ${PROJECT_IS_TOP_LEVEL})
+option(CTB_CPPCHECK_BUILD_SCAN     "Enable CppCheck in-build scanning. Default: OFF. Values: { ON, OFF }." "OFF")
+option(CTB_CPPCHECK_PROJECT_SCAN   "Enable CppCheck project scanning in the 'code_analysis target.   Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }." ${PROJECT_IS_TOP_LEVEL})
+option(CTB_CLANG_TIDY_BUILD_SCAN   "Enable clang-tidy in-build scanning. Default: OFF. Values: { ON, OFF }." "OFF")
 option(CTB_CLANG_TIDY_PROJECT_SCAN "Enable clang-tidy project scanning in the 'code_analysis target. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }." ${PROJECT_IS_TOP_LEVEL})
 option(CTB_USE_PRECOMPILED_HEADERS "Use precompiled headers during build. Default: OFF. Values: { ON, OFF }." "OFF")
 
@@ -50,7 +48,6 @@ if(PROJECT_IS_TOP_LEVEL)
          list(APPEND CTB_COMPILE_OPTIONS /std:c++latest /Zf $<$<CONFIG:Release,ReleaseMinSize,RelWithDebInfo>:/GL>)
       else()
          list(APPEND CTB_COMPILE_OPTIONS -Wno-unqualified-std-cast-call)
-         # for other compilers we're using Ninja so generate compile_commands.json
          set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
       endif()
 
@@ -89,10 +86,8 @@ endif()
 
 add_compile_definitions(STDEXEC_ASIO_USES_STANDALONE=1 STDEXEC_ASIO_USES_BOOST=0)
 find_package(asio CONFIG REQUIRED)
-find_package(cpr CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(glaze CONFIG)
-find_package(HtmlParser CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(stdexec CONFIG REQUIRED)
 

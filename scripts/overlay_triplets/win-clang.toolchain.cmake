@@ -9,6 +9,12 @@ endfunction()
 
 get_vcpkg_triplet_variables()
 
+# This project does not use C++20/23 modules. Disable CMake's automatic module dependency
+# scanning (enabled by default for Clang + Ninja when CXX_STANDARD >= 20), which otherwise
+# generates a .modmap dyndep file per translation unit and can inject scan-derived flags that
+# are not visible in compile_commands.json, causing spurious PCH/predefined-macro mismatches.
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF CACHE BOOL "")
+
 # set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "Embedded")
 
 # Set Windows definitions:

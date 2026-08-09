@@ -69,7 +69,8 @@ namespace ctb
       [[nodiscard]] senders::AnySender<senders::HttpFileContents> sndDownloadLabel(uint64_t wine_id) noexcept(false);
 
 
-      /// @brief result type for the sndAttemptLogin sender, expected return value is the login name if successful
+      /// @brief result type for the sndAttemptLogin sender, contains bool that's true if logged in, false otherwise. If logged in
+      //         .second will contain username.
       using LoginStatus = std::pair<bool, std::string>;
       using LoginResult = std::expected<LoginStatus, ctb::Error>;
 
@@ -81,7 +82,7 @@ namespace ctb
 
    private:
       static constexpr uint16_t JS_EVAL_RETRY_COUNT          = 4U;
-      static constexpr double   JS_EVAL_RETRY_BACKOFF_FACTOR = 1.5;
+      static constexpr double   JS_EVAL_RETRY_BACKOFF_FACTOR = 2.0;
       static constexpr auto     JS_RETRY_INITIAL_DELAY       = 100ms;
 
       indirect<HeadlessBrowser> m_browser;
@@ -92,19 +93,27 @@ namespace ctb
       // happen if an exception escapes the ASIO coroutine.
       asio::awaitable<std::string> coroGetLabelImageUrl(std::string session_id) noexcept(false);
 
-      asio::awaitable<LoginStatus> coroCheckLoginStatus(std::string session_id);
+      asio::awaitable<LoginResult> coroCheckLoginStatus(std::string session_id) noexcept;
 
       asio::awaitable<RuntimeEvalResult> coroEvalWithRetry(std::string session_id, std::string source_js) noexcept(false);
 
+      /// @brief non-throwing version of coroEvalWithRetry returns an expected.
+      using ExpectedEvalResult = std::expected<RuntimeEvalResult, ctb::Error>;
+
+      /// @brief non-throwing version of coroEvalWithRetry, also supports overriding retry params
+      /// @return expected value is RuntimeEvalResult, unexpected/error value is ctb::Error
       template<DurationType DurationT>
-      asio::awaitable<RuntimeEvalResult> coroEvalWithRetry(std::string session_id,
+      asio::awaitable<ExpectedEvalResult> coroEvalWithRetry(std::string session_id,
                                                            std::string source_js,
                                                            uint16_t    num_retries,
                                                            DurationT   retry_delay,
-                                                           double      backoff_factor) noexcept(false);
+                                                           double      backoff_factor) noexcept;
 
       // will throw an exception if called when status() returns anything but Ready
       void checkStatus() noexcept(false);
+
+      // debug logging, no-op in release builds
+      asio::awaitable<void> traceHtml(std::string session_id);
    };
 
 }   // namespace ctb

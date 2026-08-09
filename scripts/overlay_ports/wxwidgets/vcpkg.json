@@ -33,7 +33,6 @@
     "libpng",
     "libwebp",
     "nanosvg",
-    "opengl",
     {
       "name": "pcre2",
       "default-features": false

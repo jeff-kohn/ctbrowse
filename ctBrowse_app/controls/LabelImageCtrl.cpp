@@ -1,5 +1,6 @@
 #include "LabelImageCtrl.h"
 
+#include <ctb/model/CtDatasetMgr.h>
 #include <wx/mstream.h>
 #include <wx/sizer.h>
 

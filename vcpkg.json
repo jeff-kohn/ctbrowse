@@ -1,17 +1,15 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-  "name": "ct-search",
-  "version": "0.1.0",
+  "name": "ct-browse",
+  "version": "0.5.0",
   "dependencies": [
     "asio",
     "boost-algorithm",
     "boost-unordered",
     "catch2",
-    "cpr",
     "enchantum",
     "fmt",
     "frozen",
-    "htmlparser",
     {
       "name": "glaze",
       "features": [
@@ -24,13 +22,11 @@
         "fonts",
         "media",
         "example",
-        "secretstore",
-        "webview"
+        "secretstore"
       ]
     },
     "spdlog",
-    "stdexec",
-    "webview2"
+    "stdexec"
   ],
   "builtin-baseline": "39344dff01c5a5a0134caf2624cdd492f05d30ea"
 }

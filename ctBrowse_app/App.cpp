@@ -9,6 +9,8 @@
 #include "App.h"
 #include "MainFrame.h"
 
+#include <ctb/model/CtDatasetMgr.h>
+
 #include <wx/fileconf.h>
 #include <wx/msgdlg.h>
 #include <wx/stdpaths.h>
@@ -20,6 +22,9 @@
 
 namespace ctb::app
 {
+
+   App::~App() = default;   // needed for indirect<> pimpl
+
 
    App::App()
    {
@@ -121,7 +126,7 @@ namespace ctb::app
 
          // but check to make sure user hasn't overridden it.
          auto cfg = getConfig(constants::CONFIG_PATH_DATA_FOLDERS);
-         path = cfg->Read(wxFromSV(folder_name), path).ToStdString();
+         path     = cfg->Read(wxFromSV(folder_name), path).ToStdString();
          tryExpandEnvironmentVars(path);
 
          fs::create_directories(path);
@@ -171,7 +176,7 @@ namespace ctb::app
 
    void App::fireShutdown()
    {
-      m_dataset_mgr.requestShutdown();
+      m_dataset_mgr->requestShutdown();
    }
 
    void App::configureDatasetMgr()
@@ -190,9 +195,9 @@ namespace ctb::app
             // todo: in future use preferences to store custom paths for browser and its data dir, port as well.
             // for now the defaults are fine, will be easy to update later.
          }
-         m_dataset_mgr.init(opts);
-         m_dataset_mgr.setTableFolder(getDataFolder(AppFolder::Tables));
-         m_dataset_mgr.setLabelImageFolder(getDataFolder(AppFolder::Labels));
+         m_dataset_mgr->init(opts);
+         m_dataset_mgr->setTableFolder(getDataFolder(AppFolder::Tables));
+         m_dataset_mgr->setLabelImageFolder(getDataFolder(AppFolder::Labels));
 
          // initiate login verification if we have a credential.
          CtCredentialPersist cred_store{};
@@ -202,7 +207,7 @@ namespace ctb::app
                [this, cred = std::move(cred)] mutable -> void
                {
                   std::this_thread::sleep_for(1000ms);
-                  m_dataset_mgr.checkBrowserLoginAsync(std::move(*cred),
+                  m_dataset_mgr->checkBrowserLoginAsync(std::move(*cred),
                                                        [](LoginResult result)
                                                        {
                                                           if (result && result->first)

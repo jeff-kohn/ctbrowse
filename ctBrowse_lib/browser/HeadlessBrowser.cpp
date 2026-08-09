@@ -1,6 +1,6 @@
 #include "HeadlessBrowser.h"
-#include "json_serialization.h"
 #include "async/senders.h"
+#include "json_serialization.h"
 
 #include "ctb/utility_templates.h"
 
@@ -66,7 +66,8 @@ namespace ctb
             auto ec = glz::read_json(t, msg.result->str);
             if (ec)
             {
-               throw Error{ Error::Category::ParseError, "Couldn't parse result from headless browser command response: {}", glz::format_error(ec) };
+               throw Error{ Error::Category::ParseError, "Couldn't parse result from headless browser command response: {}",
+                            glz::format_error(ec) };
             }
             return t;
          }
@@ -162,7 +163,7 @@ namespace ctb
       if (!fs::exists(data_dir) and !createFolderPath(data_dir))
       {
          throw Error{ Error::Category::GeneralError,
-                        "Couldn't launch headless web browser, data dir \"{}\" does not exist and could not be created.", data_dir };
+                      "Couldn't launch headless web browser, data dir \"{}\" does not exist and could not be created.", data_dir };
       }
 
       // First we need to launch the browser process.
@@ -178,7 +179,7 @@ namespace ctb
    void HeadlessBrowser::stop()
    {
       if (m_status.load() == Status::ShuttingDown or m_status.load() == Status::Stopped) return;
-         
+
       m_status.store(Status::ShuttingDown);
       postCommand(commands::CLOSE_BROWSER, {}, {});
       m_ws_client.close();
@@ -229,11 +230,11 @@ namespace ctb
       subscribeEvents(session_id, std::array{ events::PAGE_LOAD, events::PAGE_FRAME_NAVIGATED, events::PAGE_DOM_LOADED });
       co_await coroEnablePageEvents(session_id);
 
-      JsonPropMap stealth_params{
-         { params::SOURCE, std::string{ params::STEALTH_NAVIGATOR_NEW_DOC_SCRIPT } }
-      };
-      auto result = co_await coroSendCommand(commands::ADD_NEW_DOC_SCRIPT, stealth_params, session_id);
-      result      = co_await coroSendCommand(commands::SET_USER_AGENT, params::SET_USER_AGENT_PARAMS, session_id);
+      //JsonPropMap stealth_params{
+      //   { params::SOURCE, std::string{ params::STEALTH_NAVIGATOR_NEW_DOC_SCRIPT } }
+      //};
+      //auto result = co_await coroSendCommand(commands::ADD_NEW_DOC_SCRIPT, stealth_params, session_id);
+      auto result = co_await coroSendCommand(commands::SET_USER_AGENT, params::SET_USER_AGENT_PARAMS, session_id);
 
       // send the navigate command
       JsonPropMap params{
@@ -256,7 +257,8 @@ namespace ctb
       while (retval.url.empty() || !page_loaded || !dom_loaded)
       {
          auto event_msg = co_await coroAwaitEvent(session_id);
-         if (!event_msg.method.has_value() or !event_msg.params.has_value()) throw Error{ "HeadlessBrowser received invalid event message." };
+         if (!event_msg.method.has_value() or !event_msg.params.has_value())
+            throw Error{ "HeadlessBrowser received invalid event message." };
 
          if (event_msg.method.value() == events::PAGE_FRAME_NAVIGATED)
          {
@@ -267,7 +269,8 @@ namespace ctb
                retval.url = frame_url.value_or("");
                if (retval.url != url)
                {
-                  SPDLOG_DEBUG("Warning: Page.navigate navigated to url ({}) that doesn't match original requested url ({})", retval.url, url);
+                  SPDLOG_DEBUG(
+                     "Warning: Page.navigate navigated to url ({}) that doesn't match original requested url ({})", retval.url, url);
                }
             }
          }
@@ -278,7 +281,6 @@ namespace ctb
          }
          else
          {
-            // PAGE_LOAD
             page_loaded = true;
             SPDLOG_DEBUG("Page.loadEventFired event received for url {}", retval.url);
          }
@@ -290,7 +292,7 @@ namespace ctb
 
    asio::awaitable<HeadlessBrowser::EvalReturnValue> HeadlessBrowser::coroRuntimeEval(string session_id, string expression) noexcept
    {
-      co_await asio::dispatch(*m_ctx, asio::use_awaitable);   // NOLINT(clang-analyzer-core.NullDereference) false positive in asio::awaitable coroutine frame internals
+      co_await asio::dispatch( *m_ctx, asio::use_awaitable);
 
       JsonPropMap params{
          { params::RETURN_BY_VAL, true             },
@@ -369,7 +371,8 @@ namespace ctb
       {
          asio::co_spawn(
             *m_ctx,
-            [this, cmd = move(command), params = move(parameters), id = move(session_id)] -> asio::awaitable<void> // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
+            [this, cmd = move(command), params = move(parameters),
+             id = move(session_id)] -> asio::awaitable<void>   // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
             {
                try
                {
@@ -502,7 +505,7 @@ namespace ctb
             if (retries == 0)
             {
                m_status.store(Status::Stopped);
-               m_browser_handles = {}; // kills edge if process hung
+               m_browser_handles = {};   // kills edge if process hung
                SPDLOG_DEBUG("HeadlessBrowser couldn't establish connection with browser. {}", error.formattedMessage());
             }
             else
@@ -582,7 +585,7 @@ namespace ctb
    {
       asio::co_spawn(
          *m_ctx,
-         [func = move(func)]() mutable -> asio::awaitable<void> // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
+         [func = move(func)]() mutable -> asio::awaitable<void>   // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
          {
             func();
             co_return;
@@ -595,7 +598,8 @@ namespace ctb
    {
       asio::co_spawn(
          *m_ctx,
-         [this, func = move(func), delay]() mutable -> asio::awaitable<void> // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
+         [this, func = move(func),
+          delay]() mutable -> asio::awaitable<void>   // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
          {
             asio::steady_timer timer(*m_ctx, delay);
             co_await timer.async_wait(asio::use_awaitable);

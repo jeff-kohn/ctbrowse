@@ -14,6 +14,7 @@
 #include "views/DatasetMultiView.h"
 
 #include <ctb/model/DatasetEventSource.h>
+#include <ctb/model/CtDatasetMgr.h>
 #include <ctb/utility_chrono.h>
 #include <ctb/utility_http.h>
 
@@ -465,24 +466,36 @@ namespace ctb::app
             throw Error{ cred_result.error() };
          }
 
+         auto tables = dlg.selectedTables();
+         rng::for_each(tables,
+                       [this](auto table_id)
+                       {
+                          setStatusText(constants::FMT_STATUS_TABLE_DOWNLOADING, getTableDescription(table_id));
+                       });
 
-         wxGetApp().getDatasetManager().downloadTablesAsync(dlg.selectedTables(), *cred_result,
-                                                            [this](TableResult result)
-                                                            {
-                                                               CallAfter(
-                                                                  [this, result = std::move(result)]
-                                                                  {
-                                                                     if (result)
-                                                                     {
-                                                                        SetStatusText(format(""));
-                                                                     }
-                                                                     else
-                                                                     {
-                                                                        SetStatusText(result.error().formattedMessage());
-                                                                     }
-                                                                  });
-                                                            });
-
+         wxGetApp().getDatasetManager().downloadTablesAsync(
+            tables,
+            *cred_result,
+            [this](TableResult result)
+            {
+               CallAfter(
+                  [this, result = std::move(result)]
+                  {
+                     if (result)
+                     {
+                        auto ds = getDataset(false);
+                        if (ds and ds->getTableId() == result->table_id)
+                        {
+                           wxPostEvent(this, wxCommandEvent{ wxEVT_MENU, CMD_EDIT_REFRESH_DATA });
+                        }
+                        setStatusText(constants::FMT_STATUS_TABLE_DOWNLOADED, getTableDescription(result->table_id));
+                     }
+                     else
+                     {
+                        SetStatusText(result.error().formattedMessage());
+                     }
+                  });
+            });
       }
       catch (...)
       {
