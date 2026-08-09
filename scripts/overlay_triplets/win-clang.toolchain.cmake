@@ -9,6 +9,12 @@ endfunction()
 
 get_vcpkg_triplet_variables()
 
+# This project does not use C++20/23 modules. Disable CMake's automatic module dependency
+# scanning (enabled by default for Clang + Ninja when CXX_STANDARD >= 20), which otherwise
+# generates a .modmap dyndep file per translation unit and can inject scan-derived flags that
+# are not visible in compile_commands.json, causing spurious PCH/predefined-macro mismatches.
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF CACHE BOOL "")
+
 # set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "Embedded")
 
 # Set Windows definitions:
@@ -21,6 +27,18 @@ string(APPEND windows_defs " /D_WIN32_WINNT=0x0A00 /DWINVER=0x0A00") # tweak for
 # Try to ignore /WX and -werror; A lot of ports mess up the compiler detection and add wrong flags!
 set(ignore_werror "/WX-")
 cmake_language(DEFER CALL add_compile_options "/WX-") # make sure the flag is added at the end!
+
+# Pin the explicit clang target triple so clang-cl invocations are deterministic regardless of
+# whether CMake is launched from the VS IDE or a command-line/script build. Without this,
+# clang-cl's implicit default-triple resolution can differ subtly between callers, causing
+# "definition of macro ... does not match definition in precompiled header" warnings.
+if(VCPKG_TARGET_ARCHITECTURE STREQUAL "x64")
+  set(CLANG_TARGET_TRIPLE "--target=amd64-pc-windows-msvc")
+elseif(VCPKG_TARGET_ARCHITECTURE STREQUAL "x86")
+  set(CLANG_TARGET_TRIPLE "--target=i686-pc-windows-msvc")
+else()
+  message(FATAL_ERROR "Unsupported VCPKG_TARGET_ARCHITECTURE: \"${VCPKG_TARGET_ARCHITECTURE}\".")
+endif()
 
 # Set runtime library.
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<STREQUAL:${VCPKG_CRT_LINKAGE},dynamic>:DLL>" CACHE STRING "")
@@ -62,13 +80,13 @@ if(VCPKG_USE_LTO)
   set(CLANG_CXX_LTO_FLAGS "-flto -fuse-ld=lld-link -fwhole-program-vtables")
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_CL_NOLOGO} ${windows_defs} ${VCPKG_C_FLAGS} ${CLANG_FLAGS} ${CHARSET_FLAG} ${ignore_werror}" CACHE STRING "")
+set(CMAKE_C_FLAGS "${CMAKE_CL_NOLOGO} ${windows_defs} ${CLANG_TARGET_TRIPLE} ${VCPKG_C_FLAGS} ${CLANG_FLAGS} ${CHARSET_FLAG} ${ignore_werror}" CACHE STRING "")
 set(CMAKE_C_FLAGS_DEBUG "/Od /Ob0 /GS /RTC1 /FC ${VCPKG_C_FLAGS_DEBUG} ${VCPKG_CRT_FLAG}d ${VCPKG_DBG_FLAG} /D_DEBUG" CACHE STRING "")
 set(CMAKE_C_FLAGS_RELEASE "/O2 /Oi ${CLANG_FLAGS_RELEASE} ${VCPKG_C_FLAGS_RELEASE} ${VCPKG_CRT_FLAG} ${CLANG_C_LTO_FLAGS} ${VCPKG_DBG_FLAG} /DNDEBUG" CACHE STRING "")
 set(CMAKE_C_FLAGS_MINSIZEREL "/O1 /Oi /Ob1 /GS- ${CLANG_FLAGS_RELEASE} ${VCPKG_C_FLAGS_RELEASE} ${VCPKG_CRT_FLAG} ${CLANG_C_LTO_FLAGS} /DNDEBUG" CACHE STRING "")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "/O2 /Oi /Ob1 /GS- ${CLANG_FLAGS_RELEASE} ${VCPKG_C_FLAGS_RELEASE} ${VCPKG_CRT_FLAG} ${CLANG_C_LTO_FLAGS} ${VCPKG_DBG_FLAG} /DNDEBUG" CACHE STRING "")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CL_NOLOGO} /EHsc /GR ${windows_defs} ${VCPKG_CXX_FLAGS} ${CLANG_FLAGS} ${CHARSET_FLAG} ${std_cxx_flags} ${ignore_werror}" CACHE STRING "")
+set(CMAKE_CXX_FLAGS "${CMAKE_CL_NOLOGO} /EHsc /GR ${windows_defs} ${CLANG_TARGET_TRIPLE} ${VCPKG_CXX_FLAGS} ${CLANG_FLAGS} ${CHARSET_FLAG} ${std_cxx_flags} ${ignore_werror}" CACHE STRING "")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /FC ${VCPKG_CXX_FLAGS_DEBUG}" CACHE STRING "")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${VCPKG_CXX_FLAGS_RELEASE} ${CLANG_CXX_LTO_FLAGS}" CACHE STRING "")
 set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} ${VCPKG_CXX_FLAGS_RELEASE} ${CLANG_CXX_LTO_FLAGS}" CACHE STRING "")
@@ -130,3 +148,4 @@ unset(windows_defs)
 unset(ignore_werror)
 unset(VCPKG_DBG_FLAG)
 unset(VCPKG_CRT_FLAG)
+unset(CLANG_TARGET_TRIPLE)
