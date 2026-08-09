@@ -1,91 +1,98 @@
 <#
-  .SYNOPSIS
-  Build project using the specified CMake Preset
+.SYNOPSIS
+   Runs cmake configure and build commands for the specified target.
 
-  .DESCRIPTION
-   This script will build the specified preset/configuration from the command line.
-   Cmake should be in your path, if not you should run this script from a VS Developer
-   Command Prompt.
+.DESCRIPTION
+    Builds the ctBrowse project for Windows using the specific CMake preset. This script assumes that the build preset's name contains
+    the configure preset name followed by "-release" or "-whatever". If configure preset can't be extracted from the build preset and you
+    don't specify -SkipConfigure, you'll probably get a cmake error about invalid configure preset name.
 
-  .PARAMETER Preset
-  Specifies the CMake build preset to use. Defaults to "win-msvc-release".
 
-  .PARAMETER Config
-  Optionally specify the build configuration for multi-config presets that don't specify
-  one. No default supplied since some presets will already specify a build configuration.
+.PARAMETER BuildPreset
+    Name of the build preset to use (case-sensitive). Defaults to 'win-msvc-x64-release'
 
-  .PARAMETER Rebuild
-  If this switch is supplied, the --clean-first build will be passed to cmake for a clean build.
-  Clean build DOES not delete CMake cache or re-run configure, it just deletes existing build binaries.
+.PARAMETER Target
+    Specifies the build target (case-sensitive). Defaults to "ALL_BUILD".
+    Can also be "install" "code_analysis" or a specific project target. Presets using
+    ninja generator will need to specify "all" instead of "ALL_BUILD" for the default target.
 
-  .PARAMETER RunTests
-  This switch causes cmake to run unit tests
+.PARAMETER SkipConfigure
+    If set, skips the cmake configure step and runs only the build command.
 
-  .EXAMPLE
-  PS> scripts/Build-Preset.ps1 -Preset="win-msvc-release" 
-  .EXAMPLE
-  PS> scripts/Build-Preset.ps1 win-debug 
+.PARAMETER Rebuild
+    If set, passes --clean-first to cmake for a clean build.
 
-  .EXAMPLE
-  PS> scripts/Build-Preset.ps1 -Config="Debug" -Rebuild -RunTests
+.EXAMPLE
+    .\build.ps1
+    Builds with default preset (win-msvc-x64-release) and ALL_BUILD target.
 
+.EXAMPLE
+    .\build.ps1 -BuildPreset 'win-msvc-x86-debug' -Target 'install'
+    Builds with x86 debug preset and creates install package/folder.
+
+.EXAMPLE
+    .\build.ps1 -SkipConfigure -Target 'code_analysis'
+   Runs code analysis without reconfiguring cmake.
 #>
 
+[CmdletBinding()]
+param(
+   [string]$BuildPreset = 'win-msvc-x64-release',
 
-param
-(
-   [string] $Preset = "dev-vscode",
-   [string] $Config = "",
-   [string] $Target = "all",
-   [switch] $Rebuild,
-   [switch] $RunTests
+   [string]$Target = 'ALL_BUILD',
+
+   [switch]$SkipConfigure,
+
+   [switch]$Rebuild
 )
 
 $ErrorActionPreference = 'Stop'
 
-$RepoDir = Split-Path $PSScriptRoot
-$saved_location = Get-Location
-Set-Location $RepoDir
-
-try
+function Get-ConfigPreset([string] $BuildPresetName)
 {
-   Write-Host "Building project for $Preset using repo dir $RepoDir..." -ForegroundColor Cyan
-
-   $BuildDir = "$RepoDir/build/$Preset"
-   if ( !(Test-Path "$BuildDir/CMakeCache.txt") )
-   {
-      Write-Host "`r`nBuild directory $BuildDir not found. Run configure before building.`r`n"
-      exit (-1)
+   $lastDash = $BuildPresetName.LastIndexOf('-')
+   $ConfigPreset = if ($lastDash -ge 0) {
+      $BuildPresetName.Substring(0, $lastDash)
    }
-
-   if ($Config)
-   {
-      $ConfigArg = "--config=$Config"
+   else {
+      $BuildPresetName  # fallback if no '-' exists
    }
-
-   if ( $Rebuild )
-   {
-      cmake --build --preset=$Preset $ConfigArg --target=$Target --clean-first
-   }
-   else
-   {
-      cmake --build --preset=$Preset $ConfigArg --target=$Target
-   }
-
-   if ( $RunTests )
-   {
-      if ($Config)
-      {
-         $ConfigArg = "-C $Config"
-      }
-      else{
-         $ConfigArg = ""
-      }
-      Write-Host "`r`n`tctest --preset $Preset $ConfigArg --output-on-failure --output-junit `"$Preset.test_results.xml`"`r`n"
-      ctest --preset $Preset $Config --output-on-failure --output-junit "$Preset.test_results.xml"
-   }
+   return $ConfigPreset
 }
-finally
-{
-   Set-Location $saved_location
+
+
+# Main Entry Point
+try {
+   $repoDir = Split-Path -Parent $PSScriptRoot
+   $savedLocation = Get-Location
+
+   Set-Location $repoDir
+
+   Write-Host "Building ctBrowse for $BuildPreset... using repo dir $repoDir"
+
+   if (-not $SkipConfigure)
+   {
+      $PresetName = Get-ConfigPreset -BuildPresetName $BuildPreset
+      $ConfigureArgs = @("--preset=$PresetName", "-Wno-author")
+
+      Write-Host "Running configure..."
+      cmake @ConfigureArgs
+      if ($LASTEXITCODE -ne 0) { throw "CMake configure failed with exit code $LASTEXITCODE" }
+   }
+
+   $BuildArgs = @("--build", "--preset=$BuildPreset", "--target=$Target")
+   if ($Rebuild)
+   {
+      Write-Host "Running clean/build for target $Target..."
+      $BuildArgs += "--clean-first"
+   }
+   else {
+      Write-Host "Running build for target $Target..."
+   }
+
+   cmake @BuildArgs
+   if ($LASTEXITCODE -ne 0) { throw "CMake build ($BuildPreset) failed with exit code $LASTEXITCODE" }
+}
+finally {
+   Set-Location $savedLocation
 }

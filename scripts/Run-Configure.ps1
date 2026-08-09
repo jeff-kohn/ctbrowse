@@ -8,7 +8,7 @@
    Command Prompt.
 
   .PARAMETER Preset
-  Optional - defaults to "dev"
+  Optional - defaults to "win-msvc"
 
   .PARAMETER WipeClean
   Optional - pass true to delete contents of the build director for this preset before
