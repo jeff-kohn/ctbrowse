@@ -51,7 +51,7 @@
       "inherits": [ "build-dir", "vcpkg-win-static" ],
       "generator": "Visual Studio 18 2026",
       "architecture": "x64",
-      "toolset": "v145",
+      "toolset": "v145,host=x64,version=14.51",
       "cacheVariables": {
         "CTB_BUILD_TESTS": "OFF",
         "CTB_USE_PRECOMPILED_HEADERS": "ON"

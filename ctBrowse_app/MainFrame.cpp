@@ -888,6 +888,8 @@ namespace ctb::app
 
    void MainFrame::setDataset(const DatasetPtr& dataset)
    {
+      wxWindowUpdateLocker lock{ this };
+
       // clean up existing view and dataset. setting dataset to nullptr will fire the DatasetRemoved event so UI elements can
       // perform cleanup if necessary.
       m_event_source->setDataset(nullptr);
