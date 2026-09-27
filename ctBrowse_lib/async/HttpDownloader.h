@@ -32,7 +32,7 @@ namespace ctb
    class HttpDownloader
    {
    public:
-      using HttpHeaders        = std::unordered_map<std::string, std::string>;
+      using HttpHeaders        = glz::http_headers;
       using HttpResult         = std::expected<glz::response, std::error_code>;
       using HttpResultCallback = std::move_only_function<void(HttpResult)>;
 

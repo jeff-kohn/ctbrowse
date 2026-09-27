@@ -80,7 +80,7 @@ namespace ctb::senders
       std::string content_type_header{};
       if (auto it = response.response_headers.find(ctb::headers::CONTENT_TYPE_KEY); it != response.response_headers.end())
       {
-         content_type_header = it->second;
+         content_type_header = it->value;
       }
       // we got a table (or some sort of body), package the result.
       return RawTableData{ .data        = move(response.response_body),
