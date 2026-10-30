@@ -175,7 +175,7 @@ namespace ctb::app
       // We don't actually create the child view until a dataset is opened.
       createMenuBar();
       createToolBar();
-      m_status_bar = CreateStatusBar();
+      m_status_bar = CreateStatusBar(2);
 
       // Dataset event
       m_dataset_events.setDefaultHandler(
@@ -920,11 +920,15 @@ namespace ctb::app
    void MainFrame::updateStatusBarCounts()
    {
       std::string summary{};
+      std::string row_pos{};
       if (m_event_source->hasDataset())
       {
-         summary = m_event_source->getDataset()->getDataSummary();
+         auto ds = m_event_source->getDataset();
+         summary = ds->getDataSummary();
+         row_pos = format("Current Row : {}/{}", ds->rowPosition() + 1, ds->rowCount());
       }
-      SetStatusText(summary);
+      SetStatusText(summary, 0);
+      SetStatusText(row_pos, 1);
    }
 
 

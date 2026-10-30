@@ -47,6 +47,8 @@ target_sources(${TARGET_NAME}
      "MainFrame.h"
      "wx_helpers.h"
 
+     "controls/AlignedStatusBarCtrl.cpp"
+     "controls/AlignedStatusBarCtrl.h"
      "controls/CheckBoxFilterCtrl.cpp"
      "controls/CheckBoxFilterCtrl.h"
      "controls/DrinkWindowCtrl.h"

@@ -253,7 +253,6 @@ namespace ctb
                if (el.tagName.toLowerCase() === 'a') return el.href; let img = el.querySelector('img');
                if (img) return img.src; return 'ERROR: no image source found in element'; })())";
 
-
       auto retval = co_await coroEvalWithRetry(session_id, expression);
       SPDLOG_DEBUG("HeadlessBrowser::coroRuntimeEval returned label URL '{}'", retval.result.value);
       co_return retval.result.value;
@@ -267,7 +266,7 @@ namespace ctb
          throw ctb::Error(Error::Category::GeneralError, constants::FMT_ERROR_HEADLESS_BROWSER_INVALID_STATUS, current_status);
    }
 
-   awaitable<void> ctb::CellarTrackerBrowser::traceHtml(std::string session_id)
+   awaitable<void> ctb::CellarTrackerBrowser::traceHtml([[maybe_unused]] std::string session_id)
    {
 #if SPDLOG_ACTIVE_LEVEL == SPDLOG_LEVEL_TRACE
 
@@ -277,9 +276,6 @@ namespace ctb
 #endif
       co_return;
    }
-
-
-
 
 }   // namespace ctb
 
