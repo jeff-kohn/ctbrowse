@@ -70,6 +70,7 @@ target_sources(${TARGET_NAME}
       "CtDatasetMgr.cpp"
       "CtDatasetOptions.cpp"
       "DatasetEventSource.cpp"
+      "ctb_export.cpp"
       "log.cpp"
       "ProReviewsCache.cpp"
       "ScopedHandle.h"
