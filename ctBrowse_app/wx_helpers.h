@@ -59,6 +59,19 @@ namespace ctb::app
                                                       | rng::to<wxArrayString>();
    }
 
+   /// @brief serialize a range of integer values to a delimited string
+   template<rng::input_range Rng, typename I = rng::range_value_t<Rng>>
+   requires std::is_same_v<std::decay_t<rng::range_value_t<Rng>>, I> and std::is_integral_v<I>
+   std::string serializeIntegrals(Rng rg, char delim = ';')
+   {
+      std::ostringstream str{};
+      for (I i : rg)
+      {
+         str << i << delim;
+      }
+      return str.str();
+   }
+
 
    /// @brief small object that sets a frame window's status text on destruction
    ///
@@ -116,6 +129,12 @@ namespace ctb::app
       wxConfigBase& m_config; // NOLINT 
 
    };
+
+   template<EnumType EnumT>
+   wxString wxEnumToString(EnumT e)
+   {
+      return wxFromSV(enum_to_string(e));
+   }
 
 
 } // namespace ctb::app

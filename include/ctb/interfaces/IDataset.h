@@ -70,6 +70,9 @@ namespace ctb
       /// @brief Retrieves a one-line text summary of the data in the table
       [[nodiscard]] virtual auto getDataSummary() const -> std::string = 0;
 
+
+      [[nodiscard]] virtual auto getAvailableFields() const -> std::vector<Prop> = 0;
+
       /// @brief Retrieves the schema information for a specified property.
       ///
       /// @param prop_id - The identifier of the property whose schema is to be retrieved.

@@ -136,7 +136,7 @@ namespace ctb::app
          // ready-to-drink filter, matches if any formula  besides "fast" calculates RTD >= 0, only shows for RTD view
          auto props = {
             RtdQtyDefault,   RtdQtyLinear,       RtdQtyBellCurve,    RtdQtyEarlyCurve,
-            RtdQtyLateCurve, RtdQtyFastMaturing, RtdQtyEarlyAndLate, RtdQtyBottlesPerYear,
+            RtdQtyLateCurve, RtdQtyEarlyAndLate, RtdQtyBottlesPerYear,
          };
          CtPropertyFilter filter{ LBL_CHECK_READY_TO_DRINK, props, FILTER_AVAILABLE_MIN_QTY,
                                   CtPropFilterPredicate{ CtPredicateType::GreaterEqual } };

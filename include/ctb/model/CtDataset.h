@@ -92,6 +92,11 @@ namespace ctb
          m_collection_name = name;
       }
 
+      auto getAvailableFields() const -> std::vector<Prop> override
+      {
+         return Traits::Schema | vws::keys | rng::to<std::vector>();
+      }
+
       /// @brief Retrieves a short text summary of the data in the table
       auto getDataSummary() const -> std::string override
       {
@@ -450,7 +455,7 @@ namespace ctb
       auto advanceRow(int32_t increment) noexcept -> bool override
       {
          auto new_pos = m_current_row + increment;
-         if (new_pos < rowCount())
+         if (new_pos >= 0 and new_pos < rowCount())
          {
             m_current_row = new_pos;
             return true;
@@ -563,7 +568,7 @@ namespace ctb
          }
       }
 
-      bool applySubStringFilter(const SubStringFilter& search_filter)
+      bool applySubStringFilter(SubStringFilter search_filter)
       {
          // clear any existing substring filter first, since we can only have one at a time. The
          // new filter will be applied if there are any matches. If no matches, substring filter

@@ -25,6 +25,8 @@ namespace ctb::constants
    inline constexpr const char* CMD_EDIT_REFRESH_DATA_TIP           = "Reload the current collection's data";
    inline constexpr const char* CMD_EDIT_CLEAR_FILTERS_LBL          = "Clear Filters";
    inline constexpr const char* CMD_EDIT_CLEAR_FILTERS_TIP          = "Remove all active data filters.";
+   inline constexpr const char* CMD_EDIT_EXPORT_DATA                = "Export Data\tCtrl+Shift+E";
+
    inline constexpr const char* CMD_COLLECTION_BOTTLE_INVENTORY_LBL = "&Bottle Inventory\tCtrl+B";
    inline constexpr const char* CMD_COLLECTION_BOTTLE_INVENTORY_TIP = "View Individual Bottle Inventory";
    inline constexpr const char* CMD_COLLECTION_CONSUMED_LBL         = "&Consumed Wine History";
@@ -88,6 +90,9 @@ namespace ctb::constants
    inline constexpr const char* CONFIG_VAL_DEFAULT_SYNC_TABLES      = "DefaultSyncTables";
    inline constexpr const char* CONFIG_VAL_SYNC_ON_STARTUP          = "SyncOnStartup";
 
+   inline constexpr const char* FMT_CONFIG_PATH_DATASET_EXPORT      = "/Preferences/Export/{}";                                                                
+
+
    inline constexpr const char* CONFIG_PATH_GRID_OPTIONS            = "/Preferences/GridOptions";
    inline constexpr const char* CONFIG_VAL_DEFAULT_IN_STOCK_ONLY    = "DefaultInStockOnly";
                                                                     
@@ -105,6 +110,7 @@ namespace ctb::constants
    inline constexpr const char* FMT_STATUS_TABLE_DOWNLOADED         = "Successfully downloaded '{}'.";
    inline constexpr const char* FMT_STATUS_TABLE_DOWNLOADING        = "Downloading file '{}'...";
    inline constexpr const char* FMT_TITLE_TYPED_ERROR               = "{} Error";
+   inline constexpr const char* FMT_EXPORT_DATASET_TITLE            = "Export Dataset '{}'";
                                                                     
    inline constexpr const char* INFO_MSG_NO_MATCHING_ROWS           = "No rows matched the search text.";
    inline constexpr const char* ERROR_USER_CANCELED                 = "User canceled operation.";
@@ -173,10 +179,19 @@ namespace ctb::constants
    inline constexpr const char* LBL_TAG_NAME                      = "Tag Name";
    inline constexpr const char* LBL_TASTING_NOTE                  = "Tasting Note";
    inline constexpr const char* LBL_TASTING_CT_SUMMARY            = "CT Stats:";
+   inline constexpr const char* LBL_TARGET_FILE_PATH              = "Target File &Path:";
+   inline constexpr const char* LBL_SAVE_EXPORT_DATASET_DEFAULT   = "Save as &Default for this Collection";
+
+
 
    inline constexpr const char* LBL_VALUATION                     = "Valuation";
    inline constexpr const char* LBL_VARIETAL                      = "Master Varietal:";
    inline constexpr const char* LBL_VINTAGE                       = "Vintage:";
+
+   inline constexpr const char* LBL_DATA_OPTIONS                  = "Data Options";
+   inline constexpr const char* LBL_SELECTED_PROPERTIES           = "Properties";
+   inline constexpr const char* OPT_USE_DATASET_FILTERS           = "Use Current Filters";
+   inline constexpr const char* OPT_EXPORT_RAW_DATA               = "Export All Data Rows";
 
    inline constexpr const char* DETAILS_CMD_LINK_NOTE             = "(Opens in default browser)";
    inline constexpr const char* DETAILS_CMD_LINK_WINE_DETAILS     = "View Wine on CellarTracker.com";
@@ -193,6 +208,7 @@ namespace ctb::constants
    inline constexpr bool CONFIG_VAL_IN_STOCK_FILTER_DEFAULT     = true;
 
    // app-specific error messages.
+   inline constexpr const char* ERROR_STR_NO_EXPORT_PROPS_SELECTED  = "No properties selected. You must select at least one property.";
    inline constexpr const char* ERROR_STR_LABEL_CACHE_SHUT_DOWN     = "Label cache object is shutting down.";
    inline constexpr const char* ERROR_STR_NO_CONFIG_STORE           = "No configuration store available.";
    inline constexpr const char* ERROR_STR_ORPHANED_SIZER            = "No configuration store available.";

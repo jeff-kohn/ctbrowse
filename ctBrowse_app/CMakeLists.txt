@@ -68,6 +68,8 @@ target_sources(${TARGET_NAME}
 
      "dialogs/CredentialDialog.cpp"
      "dialogs/CredentialDialog.h"
+     "dialogs/ExportDatasetDialog.cpp"
+     "dialogs/ExportDatasetDialog.h"
      "dialogs/TableSyncDialog.cpp"
      "dialogs/TableSyncDialog.h"
 

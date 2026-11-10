@@ -9,12 +9,14 @@
 #include "App.h"
 #include "CtCredentialManager.h"
 
+#include "dialogs/ExportDatasetDialog.h"
 #include "dialogs/TableSyncDialog.h"
 #include "model/DatasetDefaultOptions.h"
 #include "views/DatasetMultiView.h"
 
-#include <ctb/model/DatasetEventSource.h>
+#include <ctb/ctb_export.h>
 #include <ctb/model/CtDatasetMgr.h>
+#include <ctb/model/DatasetEventSource.h>
 #include <ctb/utility_chrono.h>
 #include <ctb/utility_http.h>
 
@@ -198,6 +200,8 @@ namespace ctb::app
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuEditRefreshUpdateUI, this, CMD_EDIT_REFRESH_DATA);
       Bind(wxEVT_MENU, &MainFrame::onMenuEditClearFilters, this, CMD_EDIT_CLEAR_FILTERS);
       Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuEditClearFiltersUpdateUI, this, CMD_EDIT_CLEAR_FILTERS);
+      Bind(wxEVT_MENU, &MainFrame::onMenuEditExportData, this, CMD_EDIT_EXPORT_CELLAR);
+      Bind(wxEVT_UPDATE_UI, &MainFrame::onMenuEditExportDataUpdateUI, this, CMD_EDIT_EXPORT_CELLAR);
 
       // Collection menu handlers
       Bind(wxEVT_MENU, &MainFrame::onMenuCollection, this, CmdId::CMD_COLLECTION_MY_CELLAR);
@@ -298,6 +302,9 @@ namespace ctb::app
       menu_edit->Append(menu_edit_clear);
       m_menu_bar->Append(menu_edit, wxGetStockLabel(wxID_EDIT));
 
+      // Edit|Export submenu
+      menu_edit->AppendSeparator();
+      menu_edit->Append(CMD_EDIT_EXPORT_CELLAR, constants::CMD_EDIT_EXPORT_DATA);
 
       // Collection Menu
       auto* menu_data = new wxMenu();
@@ -549,6 +556,57 @@ namespace ctb::app
          {
             enable = true;
          }
+      }
+      event.Enable(enable);
+   }
+
+   void MainFrame::onMenuEditExportData(wxCommandEvent& event)
+   {
+      using enum CtProp;
+      try
+      {
+         auto ds = getDataset(true);
+
+         if (ds->getTableId() == TableId::Notes)
+         {
+            doTastingNotesExport();
+            return;
+         }
+         ExportDatasetDialog dlg(this, getDataset(true));
+
+         if (dlg.ShowModal() == wxID_CANCEL) return;
+
+         auto target_path = dlg.targetFilePath();
+         auto props       = dlg.selectedProperties();
+         auto export_data = exportData(getDataset(), props);
+         saveTextToFile(target_path, export_data, true);
+      }
+      catch (...)
+      {
+         wxGetApp().displayErrorMessage(packageError(), true);
+      }
+   }
+
+   void MainFrame::onMenuEditExportDataUpdateUI(wxUpdateUIEvent& event)
+   {
+      bool enable = false;
+      auto ds     = getDataset(false);
+
+      if (ds)
+      {
+         switch (ds->getTableId())
+         {
+            case TableId::Availability: [[fallthrough]];
+            case TableId::Consumed    : [[fallthrough]];
+            case TableId::Inventory   : [[fallthrough]];
+            case TableId::List        : [[fallthrough]];
+            case TableId::Pending     : [[fallthrough]];
+            case TableId::Notes       :
+               enable = true;
+               break;
+            default:
+               break;
+         };
       }
       event.Enable(enable);
    }
@@ -875,6 +933,12 @@ namespace ctb::app
          wxGetApp().displayErrorMessage(packageError());
       }
       updateStatusBarCounts();
+   }
+
+
+   void MainFrame::doTastingNotesExport()
+   {
+      
    }
 
 

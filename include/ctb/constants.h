@@ -136,6 +136,7 @@ namespace ctb::constants
    inline constexpr const char* STATUS_DOWNLOAD_COMPLETE          = "Download operation completed.";
    inline constexpr const char* STATUS_DOWNLOAD_FAILED            = "Download operation failed.";
    inline constexpr const char* TITLE_DOWNLOAD_DATA               = "Download Data";
+   inline constexpr const char* TITLE_EXPORT_DATA                 = "Export Dataset";
 
    // table names
    inline constexpr const char* TABLE_NAME_LIST         = "My Wine Collection";

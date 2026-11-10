@@ -93,6 +93,8 @@ namespace ctb::app
       void onMenuEditRefreshUpdateUI(wxUpdateUIEvent& event);
       void onMenuEditClearFilters(wxCommandEvent& event);
       void onMenuEditClearFiltersUpdateUI(wxUpdateUIEvent& event);
+      void onMenuEditExportData(wxCommandEvent& event);
+      void onMenuEditExportDataUpdateUI(wxUpdateUIEvent& event);
 
       // Collection menu handlers
       void onMenuCollection(wxCommandEvent&);
@@ -125,6 +127,7 @@ namespace ctb::app
       // implementation details
       void clearSearchFilter();
       void doSearchFilter();
+      void doTastingNotesExport();
       auto getDataset(bool throw_on_null = true) -> DatasetPtr;
       void setDataset(const DatasetPtr& dataset);
       void updateStatusBarCounts();

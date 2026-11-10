@@ -26,6 +26,7 @@ namespace ctb
       WineName,
       Vintage,
       WineAndVintage,   // calculated, not from CSV
+      WineAndSize,      // calculated export field, contains "(size)" for non-standard bottle sizes.
       Country,
       Locale,
       Region,

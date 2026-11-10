@@ -39,6 +39,7 @@ namespace ctb::app
       CMD_FILE_SETTINGS,
       CMD_EDIT_REFRESH_DATA,
       CMD_EDIT_CLEAR_FILTERS,
+      CMD_EDIT_EXPORT_CELLAR,
       CMD_FILTER_TREE_COLLAPSE_EXPAND,
       CMD_FILTER_TREE_DESELECT_ALL,
       CMD_FILTER_TREE_TOGGLE_CHECKED,
@@ -69,6 +70,7 @@ namespace ctb::app
    {
       Root,
       Defaults,
+      Exports,
       Favorites,
       Labels,
       Tables,

@@ -60,7 +60,8 @@ namespace ctb
          { Prop::BottleNote,       FieldSchema { Prop::BottleNote,       PropType::String,     13 }},
          { Prop::PendingStoreName, FieldSchema { Prop::PendingStoreName, PropType::String,     11 }},
          { Prop::PendingOrderDate, FieldSchema { Prop::PendingOrderDate, PropType::Date,       12 }},
-         { Prop::WineAndVintage,   FieldSchema { Prop::WineAndVintage,   PropType::String,     {} }},
+         { Prop::WineAndVintage,   FieldSchema{ Prop::WineAndVintage,    PropType::String,     {} }},
+         { Prop::WineAndSize,      FieldSchema{ Prop::WineAndSize,       PropType::String,     {} }},
       });
 
       /// @brief list of display columns that will show in the list view
@@ -141,7 +142,10 @@ namespace ctb
          validateYear(rec[Vintage]);
 
          rec[WineAndVintage] = getWineAndVintage(rec);
-      }
+
+         auto size           = rec[Size].asStringView();
+         rec[WineAndSize]    = size == constants::LBL_SIZE_750ml ? rec[WineName]
+                                                                 : ctb::format("{} ({})", rec[WineName].asStringView(), size);      }
    };
 
    using BottleInventoryTable = CtDataTable<BottleInventoryTraits>;
