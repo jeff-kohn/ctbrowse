@@ -24,7 +24,7 @@ namespace ctb
    using enchantum::index_to_enum;
 
    template<typename T>
-   auto& enum_names = enchantum::names<T>;
+   const auto& enum_names = enchantum::names<T>;
 
    using std::to_underlying;
 

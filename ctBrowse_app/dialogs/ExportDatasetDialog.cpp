@@ -8,16 +8,7 @@
 
 namespace ctb::app
 {
-   namespace
-   {
-      [[nodiscard]] CtProp itemDataAsEnum(wxCheckListBox* checklist, unsigned int index)
-      {
-         assert(checklist && "invalid wxCheckListBox* is nullptr");
-      }
-
-   }   // namespace
-
-
+   
    ExportDatasetDialog::ExportDatasetDialog(wxWindow* parent, DatasetPtr dataset)
       : wxDialog{
            parent,
@@ -42,7 +33,7 @@ namespace ctb::app
       // handle transfer for non-validator members before calling base.
       m_path_text_ctl->SetValue(m_export_options.target_path.c_str());
 
-      rng::for_each(vws::iota(0u, m_checklist_ctl->GetCount()),
+      rng::for_each(vws::iota(0U, m_checklist_ctl->GetCount()),
                     [this](unsigned int idx)
                     {
                        auto prop_data = clientDataToProp(idx);
@@ -76,7 +67,7 @@ namespace ctb::app
       dlg_sizer->AddSpacer(SPACER_HEIGHT);
 
       // this static box sizer contains the property check-list
-      auto* props_sizer = new wxStaticBoxSizer{ wxVERTICAL, this, LBL_SELECTED_PROPERTIES};
+      auto* props_sizer = new wxStaticBoxBase{ wxVERTICAL, this, LBL_SELECTED_PROPERTIES};
       dlg_sizer->Add(props_sizer, wxSizerFlags{}.Border().DoubleHorzBorder().Expand());
 
       // check list box control for export property selection
@@ -84,7 +75,7 @@ namespace ctb::app
       props_sizer->Add(m_checklist_ctl,wxSizerFlags{}.Expand().DoubleBorder());
       for (auto prop : m_dataset_props)
       {
-         m_checklist_ctl->Append(wxEnumToString(prop), reinterpret_cast<void*>(prop));
+         m_checklist_ctl->Append(wxEnumToString(prop), wxUIntToPtr(std::to_underlying(prop)));
       }
 
       // radio group label and option buttons
@@ -94,8 +85,8 @@ namespace ctb::app
       //dlg_sizer->Add(radio_box_ctl, wxSizerFlags{}.Expand().DoubleHorzBorder());
 
       // target path label
-      auto* static_text = new wxStaticText(this, wxID_ANY, constants::LBL_TARGET_FILE_PATH);
-      dlg_sizer->Add(static_text, wxSizerFlags().DoubleBorder(wxLEFT | wxTOP));
+      auto* static_text = new wxStaticBox(this, wxID_ANY, constants::LBL_TARGET_FILE_PATH);
+      dlg_sizer->Add(static_text, wxSizerFlagBits().DoubleBorder(wxLEFT | wxTOP));
 
       // Sizer for the target path UI elements
       auto* target_path_sizer = new wxBoxSizer{wxHORIZONTAL};
@@ -107,7 +98,7 @@ namespace ctb::app
       target_path_sizer->Add(m_path_text_ctl, wxSizerFlags{1}.Border(wxLEFT|wxBOTTOM));
 
       // Browse button for target path
-      auto* browse_btn_ctl = new wxBitmapButton(this, wxID_ANY, wxArtProvider::GetBitmapBundle(wxART_FILE_OPEN, wxART_BUTTON));
+      auto* browse_btn_ctl = new wxBitmapButton(this, wxID_ANY, wxArtProvider::GetBitmapBundle(CMD_FILE_OPEN, wxEVT_BUTTON));
       target_path_sizer->Add(browse_btn_ctl, wxSizerFlags{}.Center().Border(wxRIGHT|wxBOTTOM));
       // we want to force the button to be square and the same height as the edit.
       const int h = m_path_text_ctl->GetBestSize().y;
@@ -152,7 +143,7 @@ namespace ctb::app
    {
       try
       {
-         bool any_checked = rng::any_of(vws::iota(0u, m_checklist_ctl->GetCount()),
+         bool any_checked = rng::any_of(vws::iota(0U, m_checklist_ctl->GetCount()),
                                         [this](unsigned int i)
                                         {
                                            return m_checklist_ctl->IsChecked(i);
@@ -167,7 +158,7 @@ namespace ctb::app
    }
 
 
-   void ExportDatasetDialog::onBrowseClicked(wxCommandEvent& event)
+   void ExportDatasetDialog::onBrowseClicked([[maybe_unused]] wxCommandEvent& event)
    {
       try
       {
@@ -196,7 +187,7 @@ namespace ctb::app
    void ExportDatasetDialog::getSelectedProps() noexcept(false)
    {
 
-      m_export_options.props_to_export = vws::iota(0u, m_checklist_ctl->GetCount())
+      m_export_options.props_to_export = vws::iota(0U, m_checklist_ctl->GetCount())
                        | vws::filter(std::bind_front(&wxCheckListBox::IsChecked, m_checklist_ctl))
                        | vws::transform(
                             [this](unsigned int i)

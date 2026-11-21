@@ -548,7 +548,7 @@ namespace ctb::app
    }
 
 
-   void MainFrame::onMenuEditClearFiltersUpdateUI(wxUpdateUIEvent& event)
+   void MainFrame::onMenuEditClearFiltersUpdateUI([[maybe_unused]] wxUpdateUIEvent& event)
    {
       bool enable = false;
       if (auto dataset = getDataset(false); dataset != nullptr)
@@ -561,7 +561,7 @@ namespace ctb::app
       event.Enable(enable);
    }
 
-   void MainFrame::onMenuEditExportData(wxCommandEvent& event)
+   void MainFrame::onMenuEditExportData([[maybe_unused]] wxCommandEvent& event)
    {
       using enum CtProp;
       try
@@ -589,7 +589,7 @@ namespace ctb::app
       }
    }
 
-   void MainFrame::onMenuEditExportDataUpdateUI(wxUpdateUIEvent& event)
+   void MainFrame::onMenuEditExportDataUpdateUI([[maybe_unused]] wxUpdateUIEvent& event)
    {
       bool enable = false;
       auto ds     = getDataset(false);

@@ -4,7 +4,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <charconv>
-#include <ctype.h>
+#include <cctype>
 #include <format>
 
 
@@ -39,8 +39,8 @@ namespace ctb
          {
             auto         hex = text.substr(i + 1, 2);
             unsigned int value{};
-            auto [ptr, ec] = std::from_chars(hex.data(), hex.data() + hex.size(), value, 16);
-            if (ec == std::errc{} and ptr == hex.data() + hex.size())
+            auto [ptr, ec] = std::from_chars(hex.data(), hex.data() + hex.size(), value, 16); // NOLINT [cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers]	
+            if (ec == std::errc{} and ptr == hex.data() + hex.size())                         // NOLINT [cppcoreguidelines-pro-bounds-pointer-arithmetic]	
             {
                result += static_cast<char>(value);
                i      += 2;

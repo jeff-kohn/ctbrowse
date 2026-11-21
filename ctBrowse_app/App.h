@@ -79,11 +79,16 @@ namespace ctb::app
 
    /// @brief app object for the application.
    ///
-   class App : public wxApp
+   class App final : public wxApp
    {
    public:
       App();
-      ~App();
+      ~App() final;
+
+      App(const App&)            = delete;
+      App(App&&)                 = delete;
+      App& operator=(const App&) = delete;
+      App& operator=(App&&)      = delete;
 
       /// @brief called by the framework on app startup, this is the place for program initialization
       ///

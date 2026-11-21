@@ -21,8 +21,8 @@ namespace ctb::app
 
    struct CtDatasetExportOptions
    {
-      static inline constexpr std::string_view DEFAULT_EXTENSION      = "txt";
-      static inline constexpr std::string_view DEFAULT_EXTENSION_NAME = "Tab Separated Values";
+      static constexpr std::string_view DEFAULT_EXTENSION      = "txt";
+      static constexpr std::string_view DEFAULT_EXTENSION_NAME = "Tab Separated Values";
 
       // which table the export options are for.
       TableId table_id{ TableId::List };
@@ -46,7 +46,7 @@ namespace ctb::app
 
    /// @brief serialize the options to the config store
    /// @param options 
-   void saveDefaultExportOptions(const CtDatasetExportOptions &options) noexcept(false);
+   void saveDefaultExportOptions(const CtDatasetExportOptions &export_options) noexcept(false);
 
 
 }   // namespace ctb

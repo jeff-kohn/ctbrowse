@@ -371,8 +371,8 @@ namespace ctb
       {
          asio::co_spawn(
             *m_ctx,
-            [this, cmd = move(command), params = move(parameters),
-             id = move(session_id)] -> asio::awaitable<void>   // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
+            [this, cmd = move(command), params = move(parameters), // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
+             id = move(session_id)] -> asio::awaitable<void>   
             {
                try
                {
@@ -598,8 +598,8 @@ namespace ctb
    {
       asio::co_spawn(
          *m_ctx,
-         [this, func = move(func),
-          delay]() mutable -> asio::awaitable<void>   // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
+         [this, func = move(func),                             // NOLINT [cppcoreguidelines-avoid-capturing-lambda-coroutines]
+          delay]() mutable -> asio::awaitable<void>   
          {
             asio::steady_timer timer(*m_ctx, delay);
             co_await timer.async_wait(asio::use_awaitable);

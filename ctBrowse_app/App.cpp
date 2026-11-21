@@ -206,7 +206,8 @@ namespace ctb::app
             std::jthread{
                [this, cred = std::move(cred)] mutable -> void
                {
-                  std::this_thread::sleep_for(1000ms);
+                  // NOLINTNEXTLINE [cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers]	
+                  std::this_thread::sleep_for(1000ms);                     
                   m_dataset_mgr->checkBrowserLoginAsync(std::move(*cred),
                                                        [](LoginResult result)
                                                        {

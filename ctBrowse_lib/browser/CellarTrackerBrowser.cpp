@@ -206,6 +206,8 @@ namespace ctb
             const auto fill_form_js = format(params::FMT_FILL_LOGIN_FORM_JS, cred.username(), cred.password());
 
             SPDLOG_DEBUG("Attempting to fill login form fields...");
+
+            // NOLINTNEXTLINE [cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers]
             auto eval_result =
                co_await coroEvalWithRetry(session->sessionId(), fill_form_js, JS_EVAL_RETRY_COUNT, 50ms, JS_EVAL_RETRY_BACKOFF_FACTOR);
             if (!eval_result)

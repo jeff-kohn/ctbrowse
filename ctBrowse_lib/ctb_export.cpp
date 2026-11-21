@@ -3,9 +3,9 @@
 
 namespace ctb
 {
-   namespace detail
+   namespace
    {
-      auto joinValues = [](auto&& fields, char sep)
+      const auto joinValues = [](auto&& fields, char sep)
       {
          return fields | vws::join_with(sep) | rng::to<std::string>();
       };
@@ -17,8 +17,6 @@ namespace ctb
 
    [[nodiscard]] std::string exportData(const DatasetPtr& ds, std::span<std::pair<CtProp, std::string>> prop_mappings, char sep_char)
    {
-      using namespace detail;
-
       if (!ds or !ds->rowCount()) return "";
 
       if (rng::end(prop_mappings) != rng::find_if(prop_mappings, [&](const auto& mapping) { return !ds->hasProperty(mapping.first); }))
@@ -71,7 +69,7 @@ namespace ctb
 
       auto props_to_export = props | vws::transform(getPropMapping) | rng::to<std::vector>();
 
-      return exportData(ds, props_to_export);
+      return exportData(ds, props_to_export, sep_char);
    }
 
 

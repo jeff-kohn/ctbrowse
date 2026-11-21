@@ -177,7 +177,7 @@ namespace ctb
    bool DatasetMgrAsyncImpl::shutdownRequested() const
    {
       // there should be a const-friendly stop_requested() on the scope object, then we wouldn't need the cast...
-      return const_cast<exec::async_scope&>(m_job_scope).get_stop_source().stop_requested();
+      return const_cast<exec::async_scope&>(m_job_scope).get_stop_source().stop_requested(); // NOLINT
    }
 
 
