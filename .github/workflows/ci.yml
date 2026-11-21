@@ -99,7 +99,8 @@ jobs:
 
   clang_build:
     name: "Run-Clang-Tidy"
-    runs-on: windows-2025-vs2026
+    # VS2022 image: the MSVC 14.5x STL on the vs2026 image requires Clang 22+, newer than the image's LLVM.
+    runs-on: windows-2025
     env:
       PRESET_NAME: "ci-static-analysis"
 
