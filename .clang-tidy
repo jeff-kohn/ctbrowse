@@ -55,4 +55,9 @@ CheckOptions:
 
 ExcludeHeaderFilterRegex: '.*[/\\](3rdParty|build|vcpkg_installed)[/\\].*'
 HeaderFilterRegex:        '.*[/\\][^/\\]*(ctBrowse|ctb)[^/\\]*[/\\].*'
-ExtraArgsBefore: ['--driver-mode=cl']
+
+# Disable clang's typo correction. When a TU has compile errors (e.g. clang-tidy parsing without the PCH),
+# clang attaches "did you mean X?" fix-its to them, and 'run-clang-tidy -fix' applies them, silently replacing
+# valid identifiers with unrelated look-alikes (wxStaticBoxSizer -> wxStaticBoxBase, etc).
+# (Must be in ExtraArgsBefore: ExtraArgs are appended after the '--' in compile_commands.json and get treated as file names.)
+ExtraArgsBefore: ['--driver-mode=cl', '-Xclang', '-fno-spell-checking']

@@ -85,7 +85,7 @@ jobs:
       with:
          name: msvc_vcpkg_logs
          path: |
-            ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+            ${{ github.workspace }}/vcpkg/buildtrees/*/*.log
             ${{ github.workspace }}/build/**/vcpkg-manifest-install.log
             ${{ github.workspace }}/build/**/CMakeFiles\CMakeConfigureLog.yaml
          retention-days: 3    
