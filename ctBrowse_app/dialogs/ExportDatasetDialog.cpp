@@ -1,9 +1,13 @@
 #include "ExportDatasetDialog.h"
 
+#include <wx/artprov.h>
 #include <wx/bmpbuttn.h>
 #include <wx/filedlg.h>
 #include <wx/radiobox.h>
 #include <wx/radiobut.h>
+#include <wx/sizer.h>
+#include <wx/statbox.h>
+#include <wx/stattext.h>
 #include <wx/valgen.h>
 
 namespace ctb::app
@@ -67,7 +71,7 @@ namespace ctb::app
       dlg_sizer->AddSpacer(SPACER_HEIGHT);
 
       // this static box sizer contains the property check-list
-      auto* props_sizer = new wxStaticBoxBase{ wxVERTICAL, this, LBL_SELECTED_PROPERTIES};
+      auto* props_sizer = new wxStaticBoxSizer{ wxVERTICAL, this, LBL_SELECTED_PROPERTIES};
       dlg_sizer->Add(props_sizer, wxSizerFlags{}.Border().DoubleHorzBorder().Expand());
 
       // check list box control for export property selection
@@ -85,8 +89,8 @@ namespace ctb::app
       //dlg_sizer->Add(radio_box_ctl, wxSizerFlags{}.Expand().DoubleHorzBorder());
 
       // target path label
-      auto* static_text = new wxStaticBox(this, wxID_ANY, constants::LBL_TARGET_FILE_PATH);
-      dlg_sizer->Add(static_text, wxSizerFlagBits().DoubleBorder(wxLEFT | wxTOP));
+      auto* static_text = new wxStaticText(this, wxID_ANY, constants::LBL_TARGET_FILE_PATH);
+      dlg_sizer->Add(static_text, wxSizerFlags{}.DoubleBorder(wxLEFT | wxTOP));
 
       // Sizer for the target path UI elements
       auto* target_path_sizer = new wxBoxSizer{wxHORIZONTAL};
@@ -98,7 +102,7 @@ namespace ctb::app
       target_path_sizer->Add(m_path_text_ctl, wxSizerFlags{1}.Border(wxLEFT|wxBOTTOM));
 
       // Browse button for target path
-      auto* browse_btn_ctl = new wxBitmapButton(this, wxID_ANY, wxArtProvider::GetBitmapBundle(CMD_FILE_OPEN, wxEVT_BUTTON));
+      auto* browse_btn_ctl = new wxBitmapButton(this, wxID_ANY, wxArtProvider::GetBitmapBundle(wxART_FILE_OPEN, wxART_BUTTON));
       target_path_sizer->Add(browse_btn_ctl, wxSizerFlags{}.Center().Border(wxRIGHT|wxBOTTOM));
       // we want to force the button to be square and the same height as the edit.
       const int h = m_path_text_ctl->GetBestSize().y;
