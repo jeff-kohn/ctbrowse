@@ -121,6 +121,7 @@ namespace ctb::app
 
       // event bindings.
       m_dataset_events.addHandler(DatasetEvent::Id::DatasetInitialize, [this](const DatasetEvent& event) { onDatasetInitialize(event);  });
+      m_dataset_events.addHandler(DatasetEvent::Id::DatasetRenamed,    [this](const DatasetEvent& event) { onDatasetRenamed(event);     });
    }
 
 
@@ -224,14 +225,21 @@ namespace ctb::app
    void DatasetOptionsView::onDatasetInitialize(const DatasetEvent& event)
    {
       assert(event.dataset);
-      m_dataset_title->SetLabelText(event.dataset->getCollectionName());
 
-      TransferDataToWindow();
-      forceLayoutUpdate(this);
+      onDatasetRenamed(event);
 
       // We don't do this from the event handler, let all subscribers handle event
       // first, also we need a non-const dataset* anyways
       CallAfter(&DatasetOptionsView::checkFilters);
+   }
+
+   void DatasetOptionsView::onDatasetRenamed(const DatasetEvent& event)
+   {
+      assert(event.dataset);
+      m_dataset_title->SetLabelText(event.dataset->getCollectionName());
+
+      TransferDataToWindow();
+      forceLayoutUpdate(this);
    }
 
 

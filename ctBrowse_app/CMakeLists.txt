@@ -43,6 +43,8 @@ target_sources(${TARGET_NAME}
      "app_constants.h"
      "CtCredentialManager.cpp"
      "CtCredentialManager.h"
+     "CtDatasetExportOptions.cpp"
+     "CtDatasetExportOptions.h"
      "MainFrame.cpp"
      "MainFrame.h"
      "wx_helpers.h"

@@ -27,7 +27,8 @@ namespace ctb
          DatasetSorted,            /// fired when a dataset has been sorted
          DatasetFiltered,          /// fired when a dataset has been filtered
          DatasetSubStringFilter,   /// fired when a substring filter has been applied to the dataset
-         RowSelected,              /// fired when the user selects a row
+         RowSelected,              /// fired when the user selects a row,
+         DatasetRenamed            /// fired when a dataset's settings are saved with a new collection name.
       };
 
       /// @brief Identifier for the type of event this object represents.

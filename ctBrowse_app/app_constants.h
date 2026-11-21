@@ -91,8 +91,9 @@ namespace ctb::constants
    inline constexpr const char* CONFIG_VAL_SYNC_ON_STARTUP          = "SyncOnStartup";
 
    inline constexpr const char* FMT_CONFIG_PATH_DATASET_EXPORT      = "/Preferences/Export/{}";                                                                
-
-
+   inline constexpr const char* CONFIG_VAL_EXPORT_OPTIONS           = "ExportOptions";
+   inline constexpr const char* FMT_EXPORT_OPTIONS_SERIALIZE_ERROR  = "Failed to save default export options. {}";
+   
    inline constexpr const char* CONFIG_PATH_GRID_OPTIONS            = "/Preferences/GridOptions";
    inline constexpr const char* CONFIG_VAL_DEFAULT_IN_STOCK_ONLY    = "DefaultInStockOnly";
                                                                     
@@ -181,8 +182,6 @@ namespace ctb::constants
    inline constexpr const char* LBL_TASTING_CT_SUMMARY            = "CT Stats:";
    inline constexpr const char* LBL_TARGET_FILE_PATH              = "Target File &Path:";
    inline constexpr const char* LBL_SAVE_EXPORT_DATASET_DEFAULT   = "Save as &Default for this Collection";
-
-
 
    inline constexpr const char* LBL_VALUATION                     = "Valuation";
    inline constexpr const char* LBL_VARIETAL                      = "Master Varietal:";

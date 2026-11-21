@@ -1,7 +1,7 @@
 #include "HeadlessBrowser.h"
 #include "async/senders.h"
-#include "json_serialization.h"
 
+#include "ctb/json_serialization.h"
 #include "ctb/utility_templates.h"
 
 #include <asio/experimental/awaitable_operators.hpp>

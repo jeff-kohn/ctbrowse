@@ -8,10 +8,11 @@
 #pragma once
 
 #include "App.h"
+#include "CtDatasetExportOptions.h"
+
 #include <ctb/interfaces/IDataset.h>
 #include <ctb/tables/CtSchema.h>
 #include <ctb/tables/table_data.h>
-
 #include <wx/checkbox.h>
 #include <wx/checklst.h>
 #include <wx/dialog.h>
@@ -33,9 +34,6 @@ namespace ctb::app
    public:
       ExportDatasetDialog(wxWindow* parent, DatasetPtr dataset);
 
-      static inline constexpr std::string_view DEFAULT_EXTENSION      = "txt";
-      static inline constexpr std::string_view DEFAULT_EXTENSION_NAME = "Tab Separated Values";
-
       enum class DataSelection
       {
          Filtered,
@@ -43,18 +41,11 @@ namespace ctb::app
       };
 
 
-      std::vector<CtProp> selectedProperties() const
+      template<typename SelfT>
+      auto&& exportOptions(this SelfT&& self) noexcept
       {
-         return m_selected_props | rng::to<std::vector>();
+         return std::forward<SelfT>(self).m_export_options;
       }
-      void selectProperties(std::span<CtProp> props);
-
-
-      std::string targetFilePath() const
-      {
-         return m_target_path.generic_string();
-      }
-      void setTargetFilePath(std::string_view path);
 
       bool TransferDataToWindow() override;
       bool TransferDataFromWindow() override;
@@ -64,24 +55,18 @@ namespace ctb::app
       void onOkClicked(wxCommandEvent& event);
       void onOkUpdateUI(wxUpdateUIEvent& event);
       void onBrowseClicked(wxCommandEvent& event);
-      void onBrowseUpdateUI(wxUpdateUIEvent& event);
 
-      void getSelectedProps() noexcept(false);    // throws on empty
-      void getTargetFilePath() noexcept(false);   // throws on empty
-      CtProp clientDataToProp(unsigned int index);
-      void loadDefaults();
-      void saveDefaults();
-      void applyDefaults(std::string_view dataset_name);
+      void getSelectedProps() noexcept(false);              // throws on empty
+      void getTargetFilePath() noexcept(false);             // throws on empty
+      auto clientDataToProp(unsigned int index) -> CtProp;
 
       using PropSet = std::set<CtProp>;
 
-      wxTextCtrl*     m_path_text_ctl{};
-      wxCheckListBox* m_checklist_ctl{};
-      PropSet         m_dataset_props{};
-      PropSet         m_selected_props{};
-      bool            m_save_default_flag{ false };
-      std::string     m_dataset_name{};
-      fs::path        m_target_path{};
+      wxTextCtrl*            m_path_text_ctl{};
+      wxCheckListBox*        m_checklist_ctl{};
+      CtDatasetExportOptions m_export_options{};
+      PropSet                m_dataset_props{};
+      bool                   m_save_default_flag{ false };
    };
 
 

@@ -1,6 +1,6 @@
 #pragma once
 /*
-CSV for C++, version 5.0.0
+CSV for C++, version 5.8.0
 https://github.com/vincentlaucsb/csv-parser
 
 MIT License
@@ -28,52 +28,40 @@ SOFTWARE.
 
 #ifndef CSV_HPP
 #define CSV_HPP
-
-
 #include <algorithm>
+#include <array>
 #include <atomic>
-#include <condition_variable>
-#include <exception>
-#include <functional>
-#include <iterator>
-#include <memory>
-#include <mutex>
-#include <stdexcept>
-#include <string>
-#include <type_traits>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
-/** @file
- *  @brief Defines functionality needed for basic CSV parsing
- */
-
-
-#include <algorithm>
+#include <cassert>
+#include <cctype>
+#include <chrono>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include <deque>
 #include <exception>
 #include <fstream>
 #include <functional>
+#include <iostream>
+#include <istream>
 #include <iterator>
+#include <limits>
 #include <memory>
+#include <mutex>
+#include <set>
 #include <sstream>
+#include <stdexcept>
 #include <string>
+#include <system_error>
+#include <tuple>
+#include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
-/** @file
- *  A standalone header file containing shared code
- */
-
-#include <algorithm>
-#include <array>
-#include <cassert>
-#include <cmath>
-#include <cstdlib>
-#include <deque>
-#include <memory>
 #if !defined(CSV_ENABLE_THREADS) || CSV_ENABLE_THREADS
-#include <mutex>
 #endif
 
 #if defined(_WIN32)
@@ -87,12 +75,6 @@ SOFTWARE.
 # include <unistd.h>
 #endif
 
- /** Helper macro which should be #defined as "inline"
-  *  in the single header version
-  */
-#define CSV_INLINE inline
-#include <type_traits>
-
 #if defined(__EMSCRIPTEN__)
 #undef CSV_ENABLE_THREADS
 #define CSV_ENABLE_THREADS 0
@@ -101,7 +83,13 @@ SOFTWARE.
 #endif
 
 // Minimal portability macros (Hedley subset) with CSV_ prefix.
-#if defined(__clang__) || defined(__GNUC__)
+#if defined(CSV_CODE_COVERAGE)
+    #define CSV_CONST
+    #define CSV_PURE
+    #define CSV_FORCE_INLINE inline
+    #define CSV_PRIVATE
+    #define CSV_NON_NULL(...)
+#elif defined(__clang__) || defined(__GNUC__)
     #define CSV_CONST __attribute__((__const__))
     #define CSV_PURE __attribute__((__pure__))
     #define CSV_FORCE_INLINE inline __attribute__((__always_inline__))
@@ -135,15 +123,24 @@ SOFTWARE.
 #  define CSV_MSVC_POP
 #endif
 
-// This library uses C++ exceptions for error reporting in public APIs.
+// Detect compiler exception support to select the optional throwing APIs.
 #if defined(__cpp_exceptions) || defined(_CPPUNWIND) || defined(__EXCEPTIONS)
-    #define CSV_EXCEPTIONS_ENABLED 1
+#define CSV_EXCEPTIONS_ENABLED 1
 #else
-    #define CSV_EXCEPTIONS_ENABLED 0
+#define CSV_EXCEPTIONS_ENABLED 0
 #endif
 
-#if !CSV_EXCEPTIONS_ENABLED
-    #error "csv-parser requires C++ exceptions. Enable exception handling (for example, remove -fno-exceptions or use /EHsc)."
+// Keep complete handlers out of compiler-disabled builds: unreachable branches
+// would still need named catch variables and exception-only declarations.
+// Usage: CSV_TRY { ... } CSV_CATCH((const Error& error), { ... })
+// Parenthesize the catch declaration so template commas remain one argument.
+// Keep preprocessing directives outside the catch-body macro argument.
+#if CSV_EXCEPTIONS_ENABLED
+#define CSV_TRY try
+#define CSV_CATCH(exception_declaration, ...) catch exception_declaration __VA_ARGS__
+#else
+#define CSV_TRY
+#define CSV_CATCH(exception_declaration, ...)
 #endif
 
 // Detect C++ standard version BEFORE namespace to properly include string_view
@@ -154,12 +151,12 @@ SOFTWARE.
 #  define CSV_CPLUSPLUS __cplusplus
 #endif
 
-#if CSV_CPLUSPLUS >= 202002L
-#define CSV_HAS_CXX20
-#endif
-
 #if CSV_CPLUSPLUS >= 202302L
 #define CSV_HAS_CXX23
+#endif
+
+#if CSV_CPLUSPLUS >= 202002L
+#define CSV_HAS_CXX20
 #endif
 
 #if CSV_CPLUSPLUS >= 201703L
@@ -197,7 +194,6 @@ SOFTWARE.
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-
 
 #ifndef NONSTD_SV_LITE_H_INCLUDED
 #define NONSTD_SV_LITE_H_INCLUDED
@@ -268,7 +264,7 @@ SOFTWARE.
 
 #ifndef nssv_CONFIG_NO_EXCEPTIONS
 # if defined(_MSC_VER)
-#  include <cstddef>    // for _HAS_EXCEPTIONS
+// for _HAS_EXCEPTIONS
 # endif
 # if defined(__cpp_exceptions) || defined(__EXCEPTIONS) || (_HAS_EXCEPTIONS)
 #  define nssv_CONFIG_NO_EXCEPTIONS  0
@@ -325,8 +321,6 @@ SOFTWARE.
 
 #if nssv_CONFIG_CONVERSION_STD_STRING_FREE_FUNCTIONS
 
-#include <string>
-
 namespace nonstd {
 
 template< class CharT, class Traits, class Allocator = std::allocator<CharT> >
@@ -355,7 +349,6 @@ using namespace std::literals::string_view_literals;
 
 inline namespace literals {
 inline namespace string_view_literals {
-
 
 constexpr std::string_view operator""_sv( const char* str, size_t len ) noexcept  // (1)
 {
@@ -607,22 +600,16 @@ using std::operator<<;
 
 // Additional includes:
 
-#include <algorithm>
-#include <cassert>
-#include <iterator>
-#include <limits>
-#include <string>   // std::char_traits<>
+// std::char_traits<>
 
 #if ! nssv_CONFIG_NO_STREAM_INSERTION
 # include <ostream>
 #endif
 
 #if ! nssv_CONFIG_NO_EXCEPTIONS
-# include <stdexcept>
 #endif
 
 #if nssv_CPP11_OR_GREATER
-# include <type_traits>
 #endif
 
 // Clang, GNUC, MSVC warning suppression macros:
@@ -1846,8 +1833,6 @@ using sv_lite::to_string_view;
 
 #if nssv_HAVE_STD_HASH
 
-#include <functional>
-
 namespace std {
 
 template<>
@@ -2171,12 +2156,27 @@ namespace csv {
          */
         constexpr size_t CSV_CHUNK_SIZE_DEFAULT = 10000000; // 10MB
 
+        /** Type used to represent the location of a CSV byte within a larger chunk. */
+        typedef std::uint32_t CSVChunkIndex;
+
+        CONSTEXPR_VALUE_14 CSVChunkIndex CSV_CHUNK_INDEX_MAX = (std::numeric_limits<CSVChunkIndex>::max)();
+
+        CONSTEXPR_VALUE_14 size_t CSV_CHUNK_SIZE_MAX = CSV_CHUNK_INDEX_MAX;
+
         /** Minimum supported custom chunk size for CSVFormat::chunk_size().
          *
          * This lower bound allows memory-constrained environments to reduce parser
          * buffer size while avoiding pathological tiny-buffer overhead.
          */
         constexpr size_t CSV_CHUNK_SIZE_FLOOR = 500 * 1024; // 500KB
+
+        /** Bytes read from the start of a source to resolve its format (header,
+         *  delimiter guessing) before the first parsing window.
+         *
+         *  The mmap backend rewinds this preview to its last complete row, so the
+         *  boundary fuzzer uses this value to place syntax at mmap's first window.
+         */
+        constexpr size_t CSV_HEAD_PREVIEW_SIZE = 500000;
 
         /** Default minimum source size before speculative parallel parsing is considered. */
         constexpr size_t CSV_SPECULATIVE_PARALLEL_MIN_BYTES = 50ull * 1024ull * 1024ull; // 50MB
@@ -2244,26 +2244,184 @@ namespace csv {
 
     /** Offset to convert char into array index. */
     constexpr unsigned CHAR_OFFSET = std::numeric_limits<char>::is_signed ? 128 : 0;
-}
 
-/** @file
- *  @brief Shared exception message templates and throw helpers.
- */
+    /**
+    * @enum CSVConversionError
+    * @brief Non-throwing CSVField conversion result.
+    *
+    * Returned by CSVField::as() inside std::expected, and used internally by
+    * CSVField::get() and CSVField::try_get() to keep throwing and non-throwing
+    * conversions on the same rules.
+    *
+    * @sa csv_conversion_error_message()
+    */
+    enum class CSVConversionError {
+        /** Conversion succeeded. */
+        None = 0,
 
+        /** The field is not compatible with the requested target type. */
+        NotANumber,
 
-#include <set>
-#include <stdexcept>
-#include <string>
-#include <system_error>
+        /** The parsed value does not fit in the requested target type. */
+        Overflow,
 
+        /** A floating point field was requested as an integral type. */
+        FloatToInt,
 
-namespace csv {
+        /** A negative value was requested as an unsigned type. */
+        NegativeToUnsigned
+    };
+
     namespace internals {
+        typedef const char* csv_error_message;
+
+        static CONSTEXPR_VALUE_14 csv_error_message CSV_CONVERSION_ERROR_MESSAGES[] = {
+            "",
+            "Not a number.",
+            "Overflow error.",
+            "Attempted to convert a floating point value to an integral type.",
+            "Negative numbers cannot be converted to unsigned types."
+        };
+    }
+
+    /** Return a stable human-readable description for a CSVConversionError. */
+    inline const char* csv_conversion_error_message(CSVConversionError error) noexcept {
+        const size_t index = static_cast<size_t>(error);
+        return index < (sizeof(internals::CSV_CONVERSION_ERROR_MESSAGES) / sizeof(internals::CSV_CONVERSION_ERROR_MESSAGES[0]))
+            ? internals::CSV_CONVERSION_ERROR_MESSAGES[index]
+            : internals::CSV_CONVERSION_ERROR_MESSAGES[static_cast<size_t>(CSVConversionError::NotANumber)];
+    }
+
+    /** Operational failures reported through CSVError. */
+    enum class CSVErrorCode {
+        None,                /**< Success, including end-of-stream without a row. */
+        InvalidArgument,     /**< Invalid operation input, such as a null stream or zero batch size. */
+        InvalidFormat,       /**< Conflicting parsing characters or an unresolved delimiter query. */
+        InvalidChunkSize,    /**< Configured read-window size is outside the supported byte limits. */
+        OpenFailed,          /**< A native file could not be opened, including initial input mapping. */
+        MappingFailed,       /**< A subsequent input-file region could not be memory-mapped; see CSVError::system. */
+        ReadFailed,          /**< The input stream reported an I/O failure rather than ordinary EOF. */
+        WriteFailed,         /**< Writing, flushing, or closing the output failed. */
+        UnsupportedEncoding, /**< A UTF-16/UTF-32 BOM was found; transcode the input to UTF-8 first. */
+        RowTooLarge,         /**< A complete record could not fit within the configured read window. */
+        RowLengthMismatch,   /**< A record's field count violates the configured variable-column policy. */
+        ColumnNotFound,      /**< A requested name is absent from the visible column schema. */
+        IndexOutOfBounds,    /**< A row/column position exceeds the visible schema or physical record width. */
+        ConversionFailed,   /**< A DataFrame field/key conversion failed; context describes the cause. */
+        MissingKeyColumn,    /**< Keyed construction has an empty key-column name or a name absent from the schema. */
+        KeyNotFound,         /**< A requested row key is absent from the frame's key index. */
+        DuplicateKey,        /**< A key conflicts with an existing row under the requested insertion/duplicate policy. */
+        UnkeyedFrame,        /**< A key-based operation was requested on a positional-only frame. */
+        ReadOnlyProxy,       /**< Mutation was requested through a cell, row, or column without edit permission. */
+        InvalidProxy,        /**< A proxy is unbound or a column proxy was invalidated by structural mutation. */
+        KeyColumnProtected,  /**< Removing the column that supplies the frame's stored keys is prohibited. */
+        UnsupportedOperation, /**< The operation cannot be performed for this frame, such as inserting into a custom-key frame. */
+        SizeLimitExceeded    /**< Combined preserved string-view key bytes exceed std::string::max_size(). */
+    };
+
+    /** A diagnostic whose text remains valid for the lifetime of the error.
+     *  Static messages are borrowed; dynamic messages are owned. Copies preserve
+     *  that lifetime, and moved-from errors are cleared. Success and EOF clear
+     *  the error without allocating.
+     *  Explicit errors cover library validation and I/O, not allocation failures
+     *  or exceptions thrown by user callbacks. Partial progress is not rolled back.
+     */
+    struct CSVError {
+        CSVErrorCode code = CSVErrorCode::None;
+        std::error_code system;
+        /** Diagnostic text; use set_context() to replace it with an owned copy. */
+        csv::string_view context;
+
+        CSVError() = default;
+        /** Copy runtime text, including temporary strings and exception messages. */
+        CSVError(CSVErrorCode value, csv::string_view message) : code(value) {
+            this->set_context(message);
+        }
+        CSVError(const CSVError& other)
+            : code(other.code), system(other.system), context(other.context) {
+            if (other.owned_context_) this->set_context(other.context);
+        }
+        CSVError(CSVError&& other) noexcept
+            : code(other.code), system(other.system), context(other.context),
+              owned_context_(std::move(other.owned_context_)) {
+            other.clear();
+        }
+        CSVError& operator=(const CSVError& other) {
+            if (this != &other) {
+                CSVError copy(other);
+                *this = std::move(copy);
+            }
+            return *this;
+        }
+        CSVError& operator=(CSVError&& other) noexcept {
+            if (this != &other) {
+                code = other.code;
+                system = other.system;
+                context = other.context;
+                owned_context_ = std::move(other.owned_context_);
+                other.clear();
+            }
+            return *this;
+        }
+
+        /** Borrow text that must remain valid for the program's lifetime. */
+        static CSVError from_static(CSVErrorCode value, csv::string_view message) noexcept {
+            CSVError error;
+            error.code = value;
+            error.context = message;
+            return error;
+        }
+
+        /** Replace the context with an owned copy; accepts views into this error. */
+        void set_context(csv::string_view message) {
+            std::unique_ptr<char[]> buffer;
+            if (!message.empty()) {
+                buffer.reset(new char[message.size()]);
+                std::memcpy(buffer.get(), message.data(), message.size());
+            }
+            context = message.empty() ? csv::string_view()
+                : csv::string_view(buffer.get(), message.size());
+            owned_context_ = std::move(buffer);
+        }
+        explicit operator bool() const noexcept { return code != CSVErrorCode::None; }
+        void clear() noexcept {
+            code = CSVErrorCode::None;
+            system.clear();
+            context = csv::string_view();
+            owned_context_.reset();
+        }
+        std::string message() const {
+            const std::string text = context.empty() ? std::string() : std::string(context);
+            return system ? text + ": " + system.message() : text;
+        }
+
+    private:
+        // Keep success and borrowed static diagnostics allocation-free.
+        std::unique_ptr<char[]> owned_context_;
+    };
+
+    namespace internals {
+        inline bool fail(CSVError& error, CSVErrorCode code, csv::string_view message) {
+            error = CSVError(code, message);
+            return false;
+        }
+
+        // Use only for literals or other text with static lifetime. Runtime
+        // pointers (notably exception::what()) must use the owning fail().
+        inline bool fail_static(CSVError& error, CSVErrorCode code, csv::string_view message) noexcept {
+            error = CSVError::from_static(code, message);
+            return false;
+        }
+    
         CONSTEXPR_VALUE_14 char ERROR_CANNOT_OPEN_FILE[] = "Cannot open file ";
         CONSTEXPR_VALUE_14 char ERROR_FAILED_OPEN_WRITE[] = "Failed to open file for writing: ";
         CONSTEXPR_VALUE_14 char ERROR_STREAM_READ_FAILURE[] = "StreamParser read failure";
         CONSTEXPR_VALUE_14 char ERROR_UNSUPPORTED_ENCODING_SUFFIX[] =
             " encoded CSV input is not supported directly. Please transcode to UTF-8 before parsing.";
+        CONSTEXPR_VALUE_14 char ERROR_UNSUPPORTED_UTF16[] =
+            "UTF-16 encoded CSV input is not supported directly. Please transcode to UTF-8 before parsing.";
+        CONSTEXPR_VALUE_14 char ERROR_UNSUPPORTED_UTF32[] =
+            "UTF-32 encoded CSV input is not supported directly. Please transcode to UTF-8 before parsing.";
         CONSTEXPR_VALUE_14 char ERROR_ROW_TOO_SHORT[] = "Line too short ";
         CONSTEXPR_VALUE_14 char ERROR_ROW_TOO_LONG[] = "Line too long ";
         CONSTEXPR_VALUE_14 char ERROR_ROW_LARGER_THAN_CHUNK_PREFIX[] =
@@ -2360,6 +2518,23 @@ namespace csv {
             return err_msg;
         }
 
+#if CSV_EXCEPTIONS_ENABLED
+        /** Translate explicit library failures while preserving legacy exception categories. */
+        inline void throw_error(const CSVError& error) {
+            switch (error.code) {
+            case CSVErrorCode::None:
+                return;
+            case CSVErrorCode::MappingFailed:
+                throw std::system_error(error.system, std::string(error.context));
+            case CSVErrorCode::InvalidArgument:
+            case CSVErrorCode::InvalidChunkSize:
+                throw std::invalid_argument(std::string(error.context));
+            case CSVErrorCode::SizeLimitExceeded:
+                throw std::length_error(std::string(error.context));
+            default:
+                throw std::runtime_error(std::string(error.context));
+            }
+        }
         [[noreturn]] inline void throw_cannot_open_file(csv::string_view filename) {
             throw std::runtime_error(make_prefixed_message(ERROR_CANNOT_OPEN_FILE, filename));
         }
@@ -2412,18 +2587,12 @@ namespace csv {
         [[noreturn]] inline void throw_column_index_out_of_range() {
             throw std::out_of_range(ERROR_COLUMN_INDEX_OUT_OF_RANGE);
         }
+#endif
     }
 }
 
-/** @file
- *  @brief CSV scalar type classification adapter.
- */
-
-
-#include <cstdint>
-
 /*
-classify_scalar, version 1.0.0
+classify_scalar, version 1.1.2
 https://github.com/vincentlaucsb/classify_scalar
 
 MIT License
@@ -2449,18 +2618,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 #if defined(CLASSIFY_SCALAR_VERSION)
-#if CLASSIFY_SCALAR_VERSION >= 10000
+#if CLASSIFY_SCALAR_VERSION >= 10102
 #define CLASSIFY_SCALAR_SKIP_HEADER
 #else
 #error "A newer classify_scalar.hpp was included after an older copy. Include the newest copy first."
 #endif
 #else
 #define CLASSIFY_SCALAR_VERSION_MAJOR 1
-#define CLASSIFY_SCALAR_VERSION_MINOR 0
-#define CLASSIFY_SCALAR_VERSION_PATCH 0
-#define CLASSIFY_SCALAR_VERSION 10000
+#define CLASSIFY_SCALAR_VERSION_MINOR 1
+#define CLASSIFY_SCALAR_VERSION_PATCH 2
+#define CLASSIFY_SCALAR_VERSION 10102
 #endif
 
 #ifndef CLASSIFY_SCALAR_SKIP_HEADER
@@ -2469,16 +2637,6 @@ SOFTWARE.
 #pragma warning(push)
 #pragma warning(disable : 4127)
 #endif
-
-#include <array>
-#include <cassert>
-#include <cmath>
-#include <cstddef>
-#include <cstdint>
-#include <cstring>
-#include <limits>
-#include <tuple>
-#include <type_traits>
 
 #if defined(_MSVC_LANG)
 #define CLASSIFY_SCALAR_CPLUSPLUS _MSVC_LANG
@@ -2513,7 +2671,9 @@ SOFTWARE.
 #define CLASSIFY_SCALAR_CONST
 #endif
 
-#if defined(_MSC_VER)
+#if defined(CLASSIFY_SCALAR_DISABLE_FORCE_INLINE)
+#define CLASSIFY_SCALAR_FORCE_INLINE inline
+#elif defined(_MSC_VER)
 #define CLASSIFY_SCALAR_FORCE_INLINE __forceinline
 #elif defined(__clang__) || defined(__GNUC__)
 #define CLASSIFY_SCALAR_FORCE_INLINE inline __attribute__((__always_inline__))
@@ -2550,11 +2710,18 @@ SOFTWARE.
 #if CLASSIFY_SCALAR_CPLUSPLUS >= 201703L
 #include <charconv>
 #include <string_view>
-#include <system_error>
 #endif
 
-#if defined(CLASSIFY_SCALAR_HAS_CXX17) && !defined(_LIBCPP_VERSION)
+#if defined(CLASSIFY_SCALAR_HAS_CXX17) && !defined(CLASSIFY_SCALAR_DISABLE_STD_FLOAT_FROM_CHARS)
+// A build-system compile/link probe may override the standard feature macro.
+// A negative probe must not fall through to the feature-macro fallback.
+#if defined(CLASSIFY_SCALAR_USE_STD_FLOAT_FROM_CHARS)
+#if CLASSIFY_SCALAR_USE_STD_FLOAT_FROM_CHARS
 #define CLASSIFY_SCALAR_HAS_STD_FLOAT_FROM_CHARS
+#endif
+#elif defined(__cpp_lib_to_chars) && __cpp_lib_to_chars >= 201611L
+#define CLASSIFY_SCALAR_HAS_STD_FLOAT_FROM_CHARS
+#endif
 #endif
 
 namespace classify_scalar {
@@ -2585,9 +2752,9 @@ enum ScalarKind : int {
     scalar_uint64 = 10,
     /// Well-formed decimal integer outside the int64 range.
     scalar_bigint = 11,
-    /// Floating-point literal parsed as double.
+    /// Floating-point literal parsed as finite double.
     scalar_float = 12,
-	/// High precision floating-point literal (reserved for future use, not currently returned by classify_scalar).
+    /// Well-formed floating-point literal outside the built-in finite double conversion envelope.
     scalar_bigfloat = 13,
     /// Conservative ISO date/date-time value, stored as UTC unix milliseconds when parsed.
     scalar_timestamp = 14,
@@ -3093,8 +3260,6 @@ CLASSIFY_SCALAR_CONSTEXPR_VALUE_14 std::uint64_t signed_integer_limits[3] = {
     int64_positive_limit,
     int64_negative_limit
 };
-CLASSIFY_SCALAR_CONSTEXPR_VALUE_14 long double int64_min_long_double = static_cast<long double>(int64_min_value);
-CLASSIFY_SCALAR_CONSTEXPR_VALUE_14 long double int64_max_long_double = static_cast<long double>(int64_max_value);
 
 namespace parsing {
 
@@ -3109,9 +3274,9 @@ CLASSIFY_SCALAR_FORCE_INLINE const char* apply_leading_sign(parse_state& state) 
     const parse_state::Sign sign = parse_sign(first_char);
     if (sign != parse_state::no_sign) {
         state.sign = sign;
-        state.numeric_first = state.sign == parse_state::negative_sign
-            ? state.first
-            : state.first + 1;
+        // Keep '-' visible to floating parsers, but skip '+' because from_chars
+        // implementations commonly reject a leading plus for floating input.
+        state.numeric_first = state.first + (sign == parse_state::positive_sign ? 1 : 0);
         return state.first + 1;
     }
 
@@ -3225,6 +3390,9 @@ CLASSIFY_SCALAR_FORCE_INLINE std::int64_t days_from_civil(int year, const int mo
     return era * 146097 + static_cast<std::int64_t>(doe) - 719468;
 }
 
+// Accepts an ISO date or date-time with optional seconds, fraction, and Z or
+// signed HH:MM/HHMM offset. Fractions are truncated or padded to milliseconds;
+// output rejects instants before the Unix epoch.
 CLASSIFY_SCALAR_FORCE_INLINE bool parse_iso_timestamp(
     const char* first,
     const char* last,
@@ -3279,6 +3447,7 @@ CLASSIFY_SCALAR_FORCE_INLINE bool parse_iso_timestamp(
             if (current != last && *current == '.') {
                 ++current;
                 const char* fraction_first = current;
+                // Keep millisecond precision while consuming all fractional digits.
                 while (current != last && ascii_digits[static_cast<unsigned char>(*current)]) {
                     if (current - fraction_first < 3)
                         millisecond = millisecond * 10 + (*current - '0');
@@ -3325,6 +3494,7 @@ CLASSIFY_SCALAR_FORCE_INLINE bool parse_iso_timestamp(
     if (!out)
         return true;
 
+    // Convert the parsed local clock time and offset to UTC milliseconds.
     const std::int64_t timezone_offset_milliseconds =
         static_cast<std::int64_t>(timezone_sign)
         * (static_cast<std::int64_t>(timezone_hour) * 60 + timezone_minute)
@@ -3337,6 +3507,7 @@ CLASSIFY_SCALAR_FORCE_INLINE bool parse_iso_timestamp(
         + millisecond
         - timezone_offset_milliseconds;
 
+    // The unsigned output cannot represent instants before the Unix epoch.
     if (timestamp < 0)
         return false;
 
@@ -3427,18 +3598,108 @@ CLASSIFY_SCALAR_FORCE_INLINE bool parse_bare_hex_integer(
     return parse_integer_digits(state, current, last, 16U, out) == integer_parse_valid;
 }
 
-CLASSIFY_SCALAR_FORCE_INLINE long double pow10_integer(const int exponent) noexcept {
-    long double value = 1.0L;
-    const long double factor = exponent >= 0 ? 10.0L : 0.1L;
-    const int iterations = exponent >= 0 ? exponent : -exponent;
-    for (int i = 0; i < iterations; ++i)
-        value *= factor;
+template<typename Output>
+CLASSIFY_SCALAR_FORCE_INLINE ScalarKind finish_integer(
+    const std::int64_t parsed_integer,
+    Output& output) noexcept {
+    output.template set<scalar_int64>(parsed_integer);
+    return integer::classify_integer_kind(parsed_integer);
+}
+
+} // namespace parsing
+
+namespace floating {
+
+enum { powers_of_10_count = 19 };
+
+// 10^0..10^18 are exact on common x86 extended long double and cover the
+// precision envelope where the C++11 fallback parser tries to match legacy
+// csv-parser data_type() / from_chars-style double results.
+CLASSIFY_SCALAR_CONSTEXPR_VALUE_14 std::array<long double, powers_of_10_count> POWERS_OF_10 = {{
+    1.0L,
+    10.0L,
+    100.0L,
+    1000.0L,
+    10000.0L,
+    100000.0L,
+    1000000.0L,
+    10000000.0L,
+    100000000.0L,
+    1000000000.0L,
+    10000000000.0L,
+    100000000000.0L,
+    1000000000000.0L,
+    10000000000000.0L,
+    100000000000000.0L,
+    1000000000000000.0L,
+    10000000000000000.0L,
+    100000000000000000.0L,
+    1000000000000000000.0L,
+}};
+
+CLASSIFY_SCALAR_FORCE_INLINE long double pow10_positive_integer(const int exponent) noexcept {
+    if (exponent < powers_of_10_count)
+        return POWERS_OF_10[static_cast<std::size_t>(exponent)];
+
+    long double value = POWERS_OF_10[powers_of_10_count - 1];
+    for (int i = powers_of_10_count - 1; i < exponent; ++i)
+        value *= 10.0L;
 
     return value;
 }
 
+CLASSIFY_SCALAR_FORCE_INLINE long double pow10_integer(const int exponent) noexcept {
+    const int abs_exponent = exponent >= 0 ? exponent : -exponent;
+    const long double value = pow10_positive_integer(abs_exponent);
+    return exponent >= 0 ? value : 1.0L / value;
+}
+
+enum class floating_parse_status {
+    invalid,
+    parsed,
+    bigfloat
+};
+
+CLASSIFY_SCALAR_FORCE_INLINE floating_parse_status parse_floating_exponent(
+    const char*& current,
+    const char* last,
+    int* out) noexcept {
+    assert(current != last);
+    assert(*current == 'e' || *current == 'E');
+
+    ++current;
+    if (current == last)
+        return floating_parse_status::invalid;
+
+    bool exponent_negative = false;
+    const parse_state::Sign exponent_sign = parsing::parse_sign(static_cast<unsigned char>(*current));
+    if (exponent_sign != parse_state::no_sign) {
+        exponent_negative = exponent_sign == parse_state::negative_sign;
+        ++current;
+        if (current == last)
+            return floating_parse_status::invalid;
+    }
+
+    int exponent = 0;
+    while (current != last && ascii_digits[static_cast<unsigned char>(*current)]) {
+        if (exponent <= 500)
+            exponent = (exponent * 10) + (*current - '0');
+
+        ++current;
+    }
+
+    if (current != last)
+        return floating_parse_status::invalid;
+
+    if (exponent > 500)
+        return floating_parse_status::bigfloat;
+
+    *out = exponent_negative ? -exponent : exponent;
+    return floating_parse_status::parsed;
+}
+
 template<char DecimalSymbol>
-CLASSIFY_SCALAR_FORCE_INLINE bool parse_floating_ascii(
+CLASSIFY_SCALAR_FORCE_INLINE floating_parse_status parse_floating_ascii(
     const parse_state& state,
     double* out) noexcept {
     const char* current = state.numeric_first;
@@ -3448,75 +3709,78 @@ CLASSIFY_SCALAR_FORCE_INLINE bool parse_floating_ascii(
     if (state.sign == parse_state::negative_sign)
         ++current;
 
-    long double parsed = 0.0L;
+    long double integral_part = 0;
+    std::uint64_t integral_digits = 0;
+    bool integral_digits_fit = true;
+    long double decimal_part = 0;
+    unsigned places_after_decimal = 0;
+    int exponent = 0;
     bool has_digit = false;
 
+    // Keep this split integral/fractional accumulation shape. A simpler
+    // mantissa * pow10(exponent) implementation is mathematically equivalent,
+    // but it can round to the neighboring double for user-visible CHECK_EQ
+    // cases that legacy csv-parser data_type() handled exactly.
+
     while (current != last && ascii_digits[static_cast<unsigned char>(*current)]) {
-        parsed = (parsed * 10.0L) + static_cast<unsigned char>(*current - '0');
+        const unsigned char digit = static_cast<unsigned char>(*current - '0');
+        // Accumulate exactly before floating conversion so values near int64
+        // boundaries do not lose bits when long double is only double precision.
+        if (integral_digits_fit && integral_digits <= (std::numeric_limits<std::uint64_t>::max() - digit) / 10) {
+            integral_digits = integral_digits * 10 + digit;
+        } else {
+            if (integral_digits_fit) {
+                integral_part = static_cast<long double>(integral_digits);
+                integral_digits_fit = false;
+            }
+            integral_part = (integral_part * 10.0L) + digit;
+        }
         has_digit = true;
         ++current;
     }
+    if (integral_digits_fit)
+        integral_part = static_cast<long double>(integral_digits);
 
     if (current != last && static_cast<unsigned char>(*current) == static_cast<unsigned char>(DecimalSymbol)) {
         ++current;
-        long double place = 0.1L;
         while (current != last && ascii_digits[static_cast<unsigned char>(*current)]) {
-            parsed += static_cast<unsigned char>(*current - '0') * place;
-            place *= 0.1L;
+            const unsigned char digit = static_cast<unsigned char>(*current - '0');
+            decimal_part += digit / pow10_integer(static_cast<int>(++places_after_decimal));
             has_digit = true;
             ++current;
         }
     }
 
     if (!has_digit)
-        return false;
+        return floating_parse_status::invalid;
 
     if (current != last && (*current == 'e' || *current == 'E')) {
-        ++current;
-        if (current == last)
-            return false;
-
-        bool exponent_negative = false;
-        const parse_state::Sign exponent_sign = parse_sign(static_cast<unsigned char>(*current));
-        if (exponent_sign != parse_state::no_sign) {
-            exponent_negative = exponent_sign == parse_state::negative_sign;
-            ++current;
-            if (current == last)
-                return false;
-        }
-
-        int exponent = 0;
-        while (current != last && ascii_digits[static_cast<unsigned char>(*current)]) {
-            if (exponent > 500)
-                return false;
-
-            exponent = (exponent * 10) + (*current - '0');
-            ++current;
-        }
-
-        if (current != last)
-            return false;
-
-        parsed *= pow10_integer(exponent_negative ? -exponent : exponent);
+        const floating_parse_status exponent_status = parse_floating_exponent(current, last, &exponent);
+        if (exponent_status != floating_parse_status::parsed)
+            return exponent_status;
     }
 
     if (current != last)
-        return false;
+        return floating_parse_status::invalid;
 
+    if (exponent > 308 || exponent < -308)
+        return floating_parse_status::bigfloat;
+
+    long double parsed = (integral_part + decimal_part) * pow10_integer(exponent);
     if (state.sign == parse_state::negative_sign)
         parsed = -parsed;
 
     const double as_double = static_cast<double>(parsed);
     if (!std::isfinite(as_double))
-        return false;
+        return floating_parse_status::bigfloat;
 
     if (out)
         *out = as_double;
 
-    return true;
+    return floating_parse_status::parsed;
 }
 
-CLASSIFY_SCALAR_FORCE_INLINE bool parse_floating_dot(
+CLASSIFY_SCALAR_FORCE_INLINE floating_parse_status parse_floating_dot(
     const parse_state& state,
     double* out) noexcept {
     const char* first = state.numeric_first;
@@ -3524,25 +3788,51 @@ CLASSIFY_SCALAR_FORCE_INLINE bool parse_floating_dot(
     const std::size_t size = static_cast<std::size_t>(last - first);
     assert(first != last);
     if (size > 4096)
-        return false;
+        return floating_parse_status::bigfloat;
 
 #ifdef CLASSIFY_SCALAR_HAS_STD_FLOAT_FROM_CHARS
     double parsed = 0;
     const std::from_chars_result result = std::from_chars(first, last, parsed);
-    if (result.ec != std::errc() || result.ptr != last || !std::isfinite(parsed))
-        return false;
+    if (result.ptr != last)
+        return floating_parse_status::invalid;
+    if (result.ec == std::errc::result_out_of_range || !std::isfinite(parsed))
+        return floating_parse_status::bigfloat;
+    if (result.ec != std::errc())
+        return floating_parse_status::invalid;
 
     if (out)
         *out = parsed;
 
-    return true;
+    return floating_parse_status::parsed;
 #else
     return parse_floating_ascii<'.'>(state, out);
 #endif
 }
 
+#ifdef CLASSIFY_SCALAR_HAS_STD_FLOAT_FROM_CHARS
 template<char DecimalSymbol>
-CLASSIFY_SCALAR_FORCE_INLINE bool parse_floating_with_decimal(
+CLASSIFY_SCALAR_FORCE_INLINE floating_parse_status normalize_floating_point_separator(
+    const char* first,
+    const char* last,
+    char* buffer) noexcept {
+    std::size_t i = 0;
+    for (const char* current = first; current != last; ++current, ++i) {
+        const unsigned char c = static_cast<unsigned char>(*current);
+        if (is_ascii_space(static_cast<char>(c)))
+            return floating_parse_status::invalid;
+        if (c == '.')
+            return floating_parse_status::invalid;
+
+        buffer[i] = c == static_cast<unsigned char>(DecimalSymbol) ? '.' : static_cast<char>(c);
+    }
+
+    buffer[static_cast<std::size_t>(last - first)] = '\0';
+    return floating_parse_status::parsed;
+}
+#endif
+
+template<char DecimalSymbol>
+CLASSIFY_SCALAR_FORCE_INLINE floating_parse_status parse_floating_with_decimal(
     const parse_state& state,
     double* out) noexcept {
     const char* first = state.numeric_first;
@@ -3550,47 +3840,63 @@ CLASSIFY_SCALAR_FORCE_INLINE bool parse_floating_with_decimal(
     const std::size_t size = static_cast<std::size_t>(last - first);
     assert(first != last);
     if (size > 4096)
-        return false;
+        return floating_parse_status::bigfloat;
 
 #ifdef CLASSIFY_SCALAR_HAS_STD_FLOAT_FROM_CHARS
     char buffer[4097];
-    std::size_t i = 0;
-    for (const char* current = first; current != last; ++current, ++i) {
-        const unsigned char c = static_cast<unsigned char>(*current);
-        if (is_ascii_space(static_cast<char>(c)))
-            return false;
-        if (DecimalSymbol != '.' && c == '.')
-            return false;
-
-        buffer[i] = c == static_cast<unsigned char>(DecimalSymbol) ? '.' : static_cast<char>(c);
-    }
-    buffer[size] = '\0';
+    const floating_parse_status normalize_status =
+        normalize_floating_point_separator<DecimalSymbol>(first, last, buffer);
+    if (normalize_status != floating_parse_status::parsed)
+        return normalize_status;
 
     double parsed = 0;
     const std::from_chars_result result = std::from_chars(buffer, buffer + size, parsed);
-    if (result.ec != std::errc() || result.ptr != buffer + size || !std::isfinite(parsed))
-        return false;
+    if (result.ptr != buffer + size)
+        return floating_parse_status::invalid;
+    if (result.ec == std::errc::result_out_of_range || !std::isfinite(parsed))
+        return floating_parse_status::bigfloat;
+    if (result.ec != std::errc())
+        return floating_parse_status::invalid;
 
     if (out)
         *out = parsed;
 
-    return true;
+    return floating_parse_status::parsed;
 #else
     return parse_floating_ascii<DecimalSymbol>(state, out);
 #endif
 }
 
 template<char DecimalSymbol>
-CLASSIFY_SCALAR_FORCE_INLINE bool parse_floating(
+struct floating_parser {
+    CLASSIFY_SCALAR_FORCE_INLINE static floating_parse_status parse(
+        const parse_state& state,
+        double* out) noexcept {
+        return parse_floating_with_decimal<DecimalSymbol>(state, out);
+    }
+};
+
+template<>
+struct floating_parser<'.'> {
+    CLASSIFY_SCALAR_FORCE_INLINE static floating_parse_status parse(
+        const parse_state& state,
+        double* out) noexcept {
+        return parse_floating_dot(state, out);
+    }
+};
+
+template<char DecimalSymbol>
+CLASSIFY_SCALAR_FORCE_INLINE floating_parse_status parse_floating(
     const parse_state& state,
     double* out) noexcept {
-    return DecimalSymbol == '.'
-        ? parse_floating_dot(state, out)
-        : parse_floating_with_decimal<DecimalSymbol>(state, out);
+    return floating_parser<DecimalSymbol>::parse(state, out);
 }
 
 CLASSIFY_SCALAR_FORCE_INLINE bool floating_is_integral(const double value, std::int64_t* out) noexcept {
-    if (value < int64_min_long_double || value > int64_max_long_double)
+    // The nearest double to INT64_MAX is 2^63, which is outside int64 even on
+    // platforms where long double has no extra precision (notably MSVC).
+    if (value < static_cast<double>(int64_min_value)
+            || value >= -static_cast<double>(int64_min_value))
         return false;
 
     const std::int64_t integer = static_cast<std::int64_t>(value);
@@ -3603,14 +3909,6 @@ CLASSIFY_SCALAR_FORCE_INLINE bool floating_is_integral(const double value, std::
         *out = integer;
 
     return true;
-}
-
-template<typename Output>
-CLASSIFY_SCALAR_FORCE_INLINE ScalarKind finish_integer(
-    const std::int64_t parsed_integer,
-    Output& output) noexcept {
-    output.template set<scalar_int64>(parsed_integer);
-    return integer::classify_integer_kind(parsed_integer);
 }
 
 CLASSIFY_SCALAR_FORCE_INLINE ScalarKind finish_floating(
@@ -3631,7 +3929,7 @@ CLASSIFY_SCALAR_FORCE_INLINE ScalarKind finish_floating(
     Output& output) noexcept {
     std::int64_t parsed_integer = 0;
     if (floating_is_integral(parsed_float, &parsed_integer))
-        return finish_integer(parsed_integer, output);
+        return parsing::finish_integer(parsed_integer, output);
 
     output.template set<scalar_float>(parsed_float);
     return scalar_float;
@@ -3649,7 +3947,7 @@ CLASSIFY_SCALAR_FORCE_INLINE ScalarKind finish_floating(
     }
 }
 
-} // namespace parsing
+} // namespace floating
 
 template<char DecimalSymbol = '.', bool IntegralFloatingAsInteger = true>
 struct builtin_numeric_policy {
@@ -3673,8 +3971,12 @@ struct builtin_numeric_policy {
         parse_state& state,
         Output& output) const noexcept {
         double parsed_float = 0;
-        return parsing::parse_floating<DecimalSymbol>(state, &parsed_float)
-            ? parsing::finish_floating<IntegralFloatingAsInteger>(parsed_float, output)
+        const floating::floating_parse_status status = floating::parse_floating<DecimalSymbol>(state, &parsed_float);
+        if (status == floating::floating_parse_status::parsed)
+            return floating::finish_floating<IntegralFloatingAsInteger>(parsed_float, output);
+
+        return status == floating::floating_parse_status::bigfloat
+            ? scalar_bigfloat
             : scalar_string;
     }
 
@@ -3761,7 +4063,7 @@ struct builtin_numeric_policy {
         parse_state& state,
         const char* value_first,
         Output& output) const noexcept {
-		// Use overflow checks for numbers with 19 or more digits, which can exceed 64-bit limits.
+        // Use overflow checks for numbers with 19 or more digits, which can exceed 64-bit limits.
         // Shorter numbers are common enough that it's worth skipping the checks for them.
         // Testing note: yes this was a significant optimization.
         return state.last - value_first < 19
@@ -3904,7 +4206,7 @@ CLASSIFY_SCALAR_FORCE_INLINE bool parse_float_with_decimal(
     if (value_first == state.last)
         return false;
 
-    return parsing::parse_floating<DecimalSymbol>(state, &out);
+    return floating::parse_floating<DecimalSymbol>(state, &out) == floating::floating_parse_status::parsed;
 }
 
 } // namespace detail
@@ -4028,6 +4330,9 @@ CLASSIFY_SCALAR_FORCE_INLINE typename std::enable_if<
 
     std::int64_t parsed = 0;
     if (current + 2 <= state.last && current[0] == '0' && (current[1] == 'x' || current[1] == 'X')) {
+        if (current + 2 == state.last)
+            return false;
+
         state.current = current + 1;
         if (!detail::parsing::parse_hex_integer(state, &parsed))
             return false;
@@ -4098,6 +4403,14 @@ CLASSIFY_SCALAR_FORCE_INLINE bool parse_scalar(
     return true;
 }
 
+/// String-literal overload for built-in scalar parse_scalar().
+template<ScalarKind Kind, bool TrimAsciiWhitespace = true, std::size_t Size>
+CLASSIFY_SCALAR_FORCE_INLINE bool parse_scalar(
+    const char (&value)[Size],
+    typename detail::scalar_home<Kind>::type& out) noexcept {
+    return parse_scalar<Kind, TrimAsciiWhitespace>(value, value + Size - 1, out);
+}
+
 /// Parse a signed integer directly into the requested C++ integer type.
 template<typename IntegerType, bool TrimAsciiWhitespace = true>
 CLASSIFY_SCALAR_FORCE_INLINE typename std::enable_if<
@@ -4126,6 +4439,18 @@ CLASSIFY_SCALAR_FORCE_INLINE typename std::enable_if<
 
     out = static_cast<IntegerType>(integer);
     return true;
+}
+
+/// String-literal overload for signed integer parse_scalar<T>().
+template<typename IntegerType, bool TrimAsciiWhitespace = true, std::size_t Size>
+CLASSIFY_SCALAR_FORCE_INLINE typename std::enable_if<
+    std::is_integral<IntegerType>::value
+        && std::is_signed<IntegerType>::value
+        && !std::is_same<IntegerType, bool>::value,
+    bool>::type parse_scalar(
+    const char (&value)[Size],
+    IntegerType& out) noexcept {
+    return parse_scalar<IntegerType, TrimAsciiWhitespace>(value, value + Size - 1, out);
 }
 
 #ifdef CLASSIFY_SCALAR_HAS_CXX17
@@ -4178,7 +4503,6 @@ CLASSIFY_SCALAR_FORCE_INLINE typename std::enable_if<
 
 #endif // CLASSIFY_SCALAR_SKIP_HEADER
 
-
 namespace csv {
     /** Enumerates the different CSV field types recognized by this library. */
     enum class DataType {
@@ -4201,6 +4525,65 @@ namespace csv {
     static_assert(DataType::CSV_INT64 < DataType::CSV_DOUBLE, "Integer types should come before floating point value types.");
 
     namespace internals {
+        /** Cached scalar classification and parsed value for one CSV field. */
+        struct CSVFieldScalar {
+            DataType type = DataType::UNKNOWN;
+            std::int64_t integer = 0;
+            long double floating = 0;
+            std::uint64_t timestamp = 0;
+            bool boolean = false;
+        };
+
+        struct CSVFieldScalarOutput {
+            CSVFieldScalar& value;
+
+            template<classify_scalar::ScalarKind Kind>
+            typename std::enable_if<
+                Kind == classify_scalar::scalar_int8
+                || Kind == classify_scalar::scalar_int16
+                || Kind == classify_scalar::scalar_int32
+                || Kind == classify_scalar::scalar_int64,
+                void>::type set(std::int64_t parsed) const noexcept {
+                value.integer = parsed;
+            }
+
+            template<classify_scalar::ScalarKind Kind>
+            typename std::enable_if<Kind == classify_scalar::scalar_float, void>::type set(long double parsed) const noexcept {
+                value.floating = parsed;
+            }
+
+            template<classify_scalar::ScalarKind Kind>
+            typename std::enable_if<Kind == classify_scalar::scalar_bool, void>::type set(bool parsed) const noexcept {
+                value.boolean = parsed;
+            }
+
+            template<classify_scalar::ScalarKind Kind>
+            typename std::enable_if<Kind == classify_scalar::scalar_timestamp, void>::type set(std::uint64_t parsed) const noexcept {
+                value.timestamp = parsed;
+            }
+        };
+
+        inline CSVFieldScalar classify_field_scalar(csv::string_view in) {
+            CSVFieldScalar scalar;
+            if (in.empty()) {
+                scalar.type = DataType::CSV_NULL;
+                return scalar;
+            }
+
+            const char* first = in.data();
+            const char* last = first + in.size();
+            typedef classify_scalar::policy_pack<
+                classify_scalar::builtin_numeric_policy<'.', false>,
+                classify_scalar::builtin_timestamp_policy,
+                classify_scalar::builtin_bool_policy
+            > csv_field_policy_pack;
+
+            scalar.type = classify_scalar::classify_scalar<
+                DataType,
+                true>(first, last, CSVFieldScalarOutput{ scalar }, csv_field_policy_pack());
+            return scalar;
+        }
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
         inline DataType data_type(csv::string_view in);
 #endif
@@ -4223,20 +4606,11 @@ namespace csv {
                 true>(first, last, classify_scalar::classify_only_output(), csv_field_policy_pack());
         }
     }
-}
 
-/** @file
- *  Defines an object used to store CSV format settings
- */
-
-#include <iterator>
-#include <stdexcept>
-#include <string>
-#include <vector>
-
-
-namespace csv {
+    class CSVFormat;
     namespace internals {
+        /** Read a delimiter after configuration has been validated and resolved to one candidate. */
+        char resolved_delimiter(const CSVFormat& format) noexcept;
         template<typename RowSink, typename ParsePolicy, typename FieldPolicy, typename RowPolicy>
         class CSVParserCore;
         namespace parser {
@@ -4283,7 +4657,14 @@ namespace csv {
          *
          *  @throws `std::runtime_error` thrown if trim, quote, or possible delimiting characters overlap
          */
-        CSVFormat& delimiter(char delim);
+#if CSV_EXCEPTIONS_ENABLED
+        CSVFormat& delimiter(char delim) {
+        CSVError error;
+        this->try_delimiter(delim, error);
+        internals::throw_error(error);
+        return *this;
+    }
+#endif
 
         /** Sets a list of potential delimiters
          *
@@ -4291,32 +4672,109 @@ namespace csv {
          *  
          *  @throws `std::runtime_error` thrown if trim, quote, or possible delimiting characters overlap
          */
-        CSVFormat& delimiter(const std::vector<char> & delim);
+#if CSV_EXCEPTIONS_ENABLED
+        CSVFormat& delimiter(const std::vector<char> & delims) {
+        CSVError error;
+        this->try_delimiter(delims, error);
+        internals::throw_error(error);
+        return *this;
+    }
+#endif
 
         /** Sets the whitespace characters to be trimmed
          *
          *  @throws `std::runtime_error` thrown if trim, quote, or possible delimiting characters overlap
          */
-        CSVFormat& trim(const std::vector<char> & ws);
+#if CSV_EXCEPTIONS_ENABLED
+        CSVFormat& trim(const std::vector<char> & whitespace) {
+        CSVError error;
+        this->try_trim(whitespace, error);
+        internals::throw_error(error);
+        return *this;
+    }
+#endif
 
         /** Sets the quote character
          *
          *  @throws `std::runtime_error` thrown if trim, quote, or possible delimiting characters overlap
          */
-        CSVFormat& quote(char quote);
+#if CSV_EXCEPTIONS_ENABLED
+        CSVFormat& quote(char quote) {
+        CSVError error;
+        this->try_quote(quote, error);
+        internals::throw_error(error);
+        return *this;
+    }
+#else
+        // Prevent a char from silently selecting quote(bool).
+        CSVFormat& quote(char) = delete;
+#endif
+
+        /** Set parsing characters, returning false and preserving the format on invalid input. */
+        bool try_delimiter(char delim, CSVError& error) {
+        return this->try_delimiter(std::vector<char>{delim}, error);
+    }
+        bool try_delimiter(const std::vector<char>& delims, CSVError& error) {
+        if (!validate_characters(delims, this->trim_chars, this->quote_char, error)) return false;
+        this->possible_delimiters = delims;
+        return true;
+    }
+        bool try_trim(const std::vector<char>& whitespace, CSVError& error) {
+        if (!validate_characters(this->possible_delimiters, whitespace, this->quote_char, error)) return false;
+        this->trim_chars = whitespace;
+        return true;
+    }
+        bool try_quote(char quote, CSVError& error) {
+        if (!validate_characters(this->possible_delimiters, this->trim_chars, quote, error)) return false;
+        this->no_quote = false;
+        this->quote_char = quote;
+        return true;
+    }
+
+        /** Set a valid chunk size, preserving the previous value on failure. */
+        bool try_chunk_size(size_t size, CSVError& error) {
+        error.clear();
+        if (size < internals::CSV_CHUNK_SIZE_FLOOR) {
+            return internals::fail(error, CSVErrorCode::InvalidChunkSize,
+                internals::make_chunk_size_error(internals::CSV_CHUNK_SIZE_FLOOR, size));
+        }
+        const size_t max_chunk_size = internals::CSV_CHUNK_SIZE_MAX;
+        if (size > max_chunk_size) {
+            return internals::fail(error, CSVErrorCode::InvalidChunkSize,
+                internals::make_chunk_size_ceiling_error(max_chunk_size, size));
+        }
+        this->_chunk_size = size;
+        return true;
+    }
+
+        /** Retrieve a resolved delimiter; unresolved candidate lists report InvalidFormat. */
+        bool try_get_delim(char& out, CSVError& error) const;
 
         /** Sets the column names.
          *
          *  @note Unsets any values set by header_row()
          */
-        CSVFormat& column_names(const std::vector<std::string>& names);
+        CSVFormat& column_names(const std::vector<std::string>& names) {
+        this->col_names = names;
+        this->header = -1;
+        this->col_names_explicitly_set_ = true;
+        return *this;
+    }
 
         /** Sets the header row
          *
          *  @param[in] row Row index containing column names; negative means no header row.
          *  @note Unsets any values set by column_names()
          */
-        CSVFormat& header_row(int row);
+        CSVFormat& header_row(int row) {
+        if (row < 0) this->variable_column_policy = VariableColumnPolicy::KEEP;
+
+        this->header = row;
+        this->header_explicitly_set_ = true;
+        this->col_names = {};
+        this->col_names_explicitly_set_ = false;
+        return *this;
+    }
 
         /** Tells the parser that this CSV has no header row
          *
@@ -4360,13 +4818,20 @@ namespace csv {
         /** Sets the chunk size used when reading the CSV
          *
          *  @param[in] size Chunk size in bytes (minimum: CSV_CHUNK_SIZE_FLOOR)
-         *  @throws std::invalid_argument if size < CSV_CHUNK_SIZE_FLOOR or size > UINT32_MAX
+         *  @throws std::invalid_argument if size < CSV_CHUNK_SIZE_FLOOR or size > CSV_CHUNK_SIZE_MAX
          *
          *  Use this when constructing a CSVReader from a filename and individual rows
          *  may exceed the default 10MB chunk size. The value is passed to CSVReader at
          *  construction time, before any data is read.
          */
-        CSVFormat& chunk_size(size_t size);
+#if CSV_EXCEPTIONS_ENABLED
+        CSVFormat& chunk_size(size_t size) {
+        CSVError error;
+        this->try_chunk_size(size, error);
+        internals::throw_error(error);
+        return *this;
+    }
+#endif
 
         /** Enable or disable parser threading at runtime.
          *
@@ -4397,15 +4862,20 @@ namespace csv {
             return *this;
         }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-        char get_delim() const {
-            // This error should never be received by end users.
-            if (this->possible_delimiters.size() > 1) {
-                throw std::runtime_error(internals::ERROR_MULTIPLE_DELIMITERS);
-            }
-
-            return this->possible_delimiters.at(0);
+        /** Enable parser-time scalar classification for typed consumers.
+         *
+         *  Disabled by default so normal string-only parsing keeps the historical
+         *  lazy classification cost model.
+         */
+        CONSTEXPR_14 CSVFormat& eager_field_classification(bool enabled = true) {
+            this->_eager_field_classification = enabled;
+            return *this;
         }
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#if CSV_EXCEPTIONS_ENABLED
+        char get_delim() const;
+#endif
 
         CONSTEXPR bool is_quoting_enabled() const { return !this->no_quote; }
         CONSTEXPR char get_quote_char() const { return this->quote_char; }
@@ -4425,6 +4895,7 @@ namespace csv {
         }
         CONSTEXPR size_t get_speculative_parallel_threads() const { return this->_speculative_parallel_threads; }
         CONSTEXPR size_t get_speculative_parallel_min_bytes() const { return this->_speculative_parallel_min_bytes; }
+        CONSTEXPR bool is_eager_field_classification_enabled() const { return this->_eager_field_classification; }
         CONSTEXPR bool should_use_speculative_parallel(size_t source_size, size_t n_threads) const {
 #if CSV_ENABLE_THREADS
             return this->_threading
@@ -4439,17 +4910,16 @@ namespace csv {
 #endif
         
         /** CSVFormat preset for delimiter inference with header/n_cols inference enabled. */
-        CSV_INLINE static CSVFormat guess_csv() {
-            CSVFormat format;
-            format.delimiter({ ',', '|', '\t', ';', '^' })
-                .quote('"');
-            // Assign header directly rather than via header_row() so that
-            // header_explicitly_set_ remains false — the guesser must be free
-            // to detect the real header row at construction time.
-            format.header = 0;
+        static CSVFormat guess_csv() {
+        CSVFormat format;
+        format.possible_delimiters = { ',', '|', '\t', ';', '^' };
+        // Assign header directly rather than via header_row() so that
+        // header_explicitly_set_ remains false — the guesser must be free
+        // to detect the real header row at construction time.
+        format.header = 0;
 
-            return format;
-        }
+        return format;
+    }
 
         bool guess_delim() const {
             return this->possible_delimiters.size() > 1;
@@ -4459,10 +4929,34 @@ namespace csv {
         template<typename RowSink, typename ParsePolicy, typename FieldPolicy, typename RowPolicy>
         friend class internals::CSVParserCore;
         friend internals::parser::CSVParserDriverBase;
+        friend char internals::resolved_delimiter(const CSVFormat& format) noexcept;
         
     private:
-        /**< Throws an error if delimiters and trim characters overlap */
-        void assert_no_char_overlap();
+        static bool validate_characters(
+            const std::vector<char>& candidates, const std::vector<char>& whitespace,
+            char quote, CSVError& error) {
+        error.clear();
+        if (candidates.empty()) {
+            return internals::fail_static(error, CSVErrorCode::InvalidFormat, "At least one delimiter is required.");
+        }
+        const std::set<char> delims(candidates.begin(), candidates.end());
+        const std::set<char> trims(whitespace.begin(), whitespace.end());
+        std::set<char> offenders;
+
+        for (std::set<char>::const_iterator it = delims.begin(); it != delims.end(); ++it) {
+            if (trims.find(*it) != trims.end()) offenders.insert(*it);
+        }
+
+        // Make sure quote character is not contained in possible delimiters
+        // or whitespace characters.
+        if (delims.find(quote) != delims.end() || trims.find(quote) != trims.end()) {
+            offenders.insert(quote);
+        }
+        if (!offenders.empty()) {
+            return internals::fail(error, CSVErrorCode::InvalidFormat, internals::make_char_overlap_error(offenders));
+        }
+        return true;
+    }
 
         /**< Set of possible delimiters */
         std::vector<char> possible_delimiters = { ',' };
@@ -4505,25 +4999,11 @@ namespace csv {
 
         /**< Minimum source size before speculative parallel parsing is considered */
         size_t _speculative_parallel_min_bytes = internals::CSV_SPECULATIVE_PARALLEL_MIN_BYTES;
+
+        /**< Whether to precompute field scalar classifications during parsing */
+        bool _eager_field_classification = false;
     };
 }
-
-
-/** @file
- *  @brief Contains CSV parser source-adapter declarations and format helpers.
- */
-
-#include <algorithm>
-#include <array>
-#include <cmath>
-#include <exception>
-#include <fstream>
-#include <limits>
-#include <memory>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
 
 #if !defined(__EMSCRIPTEN__)
 /* Copyright 2017 https://github.com/mandreyel
@@ -4637,12 +5117,6 @@ inline size_t make_offset_page_aligned(size_t offset) noexcept
 } // namespace mio
 
 #endif // MIO_PAGE_HEADER
-
-
-#include <iterator>
-#include <string>
-#include <system_error>
-#include <cstdint>
 
 #ifdef _WIN32
 # ifndef WIN32_LEAN_AND_MEAN
@@ -5155,8 +5629,6 @@ mmap_sink make_mmap_sink(const MappingToken& token, std::error_code& error)
 #ifndef MIO_STRING_UTIL_HEADER
 #define MIO_STRING_UTIL_HEADER
 
-#include <type_traits>
-
 namespace mio {
 namespace detail {
 
@@ -5302,9 +5774,6 @@ template<
 } // namespace mio
 
 #endif // MIO_STRING_UTIL_HEADER
-
-
-#include <algorithm>
 
 #ifndef _WIN32
 # include <unistd.h>
@@ -5798,7 +6267,6 @@ bool operator>=(const basic_mmap<AccessMode, ByteT>& a,
 
 #endif // MIO_BASIC_MMAP_IMPL
 
-
 #endif // MIO_MMAP_HEADER
 /* Copyright 2017 https://github.com/mandreyel
  *
@@ -5903,9 +6371,8 @@ inline size_t make_offset_page_aligned(size_t offset) noexcept
 
 // #include "mio/mmap.hpp"
 
-
-#include <system_error> // std::error_code
-#include <memory> // std::shared_ptr
+// std::error_code
+// std::shared_ptr
 
 namespace mio {
 
@@ -6287,25 +6754,7 @@ using shared_ummap_sink = basic_shared_mmap_sink<unsigned char>;
 #endif // MIO_SHARED_MMAP_HEADER
 
 #endif
-/** @file
- *  @brief SIMD-accelerated skip for runs of non-special CSV bytes.
- *
- *  Conservative design: any byte that could be the delimiter, quote character,
- *  \n, or \r causes an early return.
- *
- *  Uses 4x cmpeq rather than a lookup-table shuffle because CSV has only four
- *  sentinel characters. vpshufb (shuffle) truncates index bytes to their low
- *  nibble, causing aliasing across 16-byte boundaries and silently skipping
- *  real delimiters. The cmpeq approach is alias-free and equally fast for
- *  small sentinel sets.
- *
- *  UTF-8 safe: all CSV structural bytes are single-byte ASCII; multi-byte
- *  sequences (values > 0x7F) are never misidentified as special.
- */
-#include <array>
-#include <cstdint>
-
-
+ 
 #if !defined(CSV_NO_SIMD) && (defined(__AVX2__) || (defined(_MSC_VER) && defined(_M_AVX) && _M_AVX >= 2))
 #define CSV_SIMD_AVX2 1
 #elif !defined(CSV_NO_SIMD) && (defined(__SSE2__) || (defined(_MSC_VER) && (defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2))))
@@ -6455,18 +6904,7 @@ namespace csv {
 #endif
             return pos;
         }
-    }
-}
-
-#include <memory>
-#include <stdexcept>
-#include <unordered_map>
-#include <string>
-#include <vector>
-
-
-namespace csv {
-    namespace internals {
+    
         struct ColNames;
         using ColNamesPtr = std::shared_ptr<ColNames>;
         using ConstColNamesPtr = std::shared_ptr<const ColNames>;
@@ -6485,20 +6923,61 @@ namespace csv {
                 set_col_names(names);
             }
 
-            const std::vector<std::string>& get_col_names() const noexcept;
-            void set_col_names(const std::vector<std::string>&);
-            int index_of(csv::string_view) const;
+            const std::vector<std::string>& get_col_names() const noexcept {
+            return this->col_names;
+        }
+            void set_col_names(const std::vector<std::string>& cnames) {
+            this->col_names = cnames;
+            this->col_pos.clear();
+
+            for (size_t i = 0; i < cnames.size(); i++) {
+                if (this->_policy == csv::ColumnNamePolicy::CASE_INSENSITIVE) {
+                    // For case-insensitive lookup, cache a lowercase version
+                    // of the column name in the map
+                    std::string lower(cnames[i]);
+                    std::transform(lower.begin(), lower.end(), lower.begin(),
+                        [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+                    this->col_pos[lower] = i;
+                } else {
+                    this->col_pos[cnames[i]] = i;
+                }
+            }
+        }
+            int index_of(csv::string_view col_name) const {
+            if (this->_policy == csv::ColumnNamePolicy::CASE_INSENSITIVE) {
+                std::string lower(col_name);
+                std::transform(lower.begin(), lower.end(), lower.begin(),
+                    [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+                auto pos = this->col_pos.find(lower);
+                return (pos != this->col_pos.end()) ? (int)pos->second : CSV_NOT_FOUND;
+            }
+
+            auto pos = this->col_pos.find(std::string(col_name));
+            return (pos != this->col_pos.end()) ? (int)pos->second : CSV_NOT_FOUND;
+        }
 
             /** Sets the column name lookup policy.
              *  Must be called before set_col_names() for CI policy to take effect.
              */
-            void set_policy(csv::ColumnNamePolicy policy);
+            void set_policy(csv::ColumnNamePolicy policy) {
+            this->_policy = policy;
+        }
+            csv::ColumnNamePolicy get_policy() const noexcept {
+            return this->_policy;
+        }
 
             bool empty() const noexcept { return this->col_names.empty(); }
-            size_t size() const noexcept;
+            inline size_t size() const noexcept { return this->col_names.size(); }
 
             /** Retrieve column name by index. Throws if index is out of bounds. */
-            const std::string& operator[](size_t i) const;
+#if CSV_EXCEPTIONS_ENABLED
+            const std::string& operator[](size_t i) const {
+            if (i >= this->col_names.size())
+                throw_column_index_out_of_bounds();
+
+            return this->col_names[i];
+        }
+#endif
 
         private:
             std::vector<std::string> col_names;
@@ -6508,32 +6987,8 @@ namespace csv {
     }
 }
 
-/** @file
- *  @brief Focused CSV byte parser core.
- */
-
-
-#include <algorithm>
-#include <array>
-#include <cstdint>
-#include <memory>
-#include <utility>
-#include <vector>
-
-/** @file
- *  Defines the data type used for storing information about a CSV row
- */
-
-#include <chrono>
-#include <cstdint>
-#include <cmath>
-#include <iterator>
-#include <memory> // For CSVField
-#include <limits> // For CSVField
-#include <unordered_set>
-#include <string>
-#include <sstream>
-#include <vector>
+// For CSVField
+// For CSVField
 
 #ifdef CSV_HAS_CXX17
 #include <optional>
@@ -6551,18 +7006,7 @@ namespace csv {
 #ifdef CSV_HAS_CXX20
 #include <ranges>
 #endif
-/** @file
- *  @brief Internal JSON serialization helpers for row-like CSV data.
- */
-
-
-#include <cstring>
-#include <stdexcept>
-#include <string>
-#include <unordered_map>
-#include <vector>
-
-
+ 
 namespace csv {
     namespace internals {
         /** Escape sequences for ASCII control characters that must be encoded in JSON. */
@@ -6642,6 +7086,67 @@ namespace csv {
             return out;
         }
 
+        CSV_CONST inline bool is_ascii_space(char c) noexcept {
+            return c == ' ' || (c >= '\t' && c <= '\r');
+        }
+
+        /** Append a numeric field as a JSON number.
+         *
+         *  data_type() accepts surrounding whitespace, a '+' sign, leading zeros,
+         *  and a '.' without a digit on one side, none of which JSON allows.
+         */
+        inline void append_json_number(std::string& out, csv::string_view value) noexcept {
+            size_t first = 0;
+            size_t last = value.size();
+            while (first < last && is_ascii_space(value[first])) {
+                ++first;
+            }
+
+            while (last > first && is_ascii_space(value[last - 1])) {
+                --last;
+            }
+
+            if (first < last && (value[first] == '+' || value[first] == '-')) {
+                if (value[first] == '-') {
+                    out += '-';
+                }
+                ++first;
+            }
+
+            while (first + 1 < last
+                && value[first] == '0'
+                && value[first + 1] >= '0'
+                && value[first + 1] <= '9') {
+                ++first;
+            }
+
+            if (first < last && value[first] == '.') {
+                out += '0';
+            }
+
+            for (size_t i = first; i < last; ++i) {
+                out += value[i];
+                if (value[i] == '.' && (i + 1 == last || value[i + 1] < '0' || value[i + 1] > '9')) {
+                    out += '0';
+                }
+            }
+        }
+
+        /** JSON has no hexadecimal literal, so write 0x-prefixed integers in decimal. */
+        inline bool append_json_hex_integer(std::string& out, csv::string_view value) {
+            if (value.find_first_of("xX") == csv::string_view::npos) {
+                return false;
+            }
+
+            long long parsed = 0;
+            if (!classify_scalar::parse_hex(value.data(), value.data() + value.size(), parsed)) {
+                return false;
+            }
+
+            out += std::to_string(parsed);
+            return true;
+        }
+
         class JsonConverter {
         public:
             JsonConverter() = default;
@@ -6657,18 +7162,50 @@ namespace csv {
             }
 
             template<typename FieldAt>
-            std::string row_to_json(size_t field_count, FieldAt field_at, const std::vector<std::string>& subset = {}) const {
-                return subset.empty()
-                    ? this->row_to_json_all(field_count, field_at)
-                    : this->row_to_json_subset(field_count, field_at, subset);
+            std::string row_to_json(size_t field_count, FieldAt field_at) const {
+                return row_to_json_all(field_count, field_at);
             }
 
             template<typename FieldAt>
-            std::string row_to_json_array(size_t field_count, FieldAt field_at, const std::vector<std::string>& subset = {}) const {
-                return subset.empty()
-                    ? this->row_to_json_array_all(field_count, field_at)
-                    : this->row_to_json_array_subset(field_count, field_at, subset);
+            std::string row_to_json_array(size_t field_count, FieldAt field_at) const {
+                return row_to_json_array_all(field_count, field_at);
             }
+
+            template<typename FieldAt>
+            std::string try_row_to_json(size_t field_count, FieldAt field_at,
+                const std::vector<std::string>& subset, CSVError& error) const {
+                error.clear();
+                return subset.empty() ? row_to_json_all(field_count, field_at)
+                    : row_to_json_subset(field_count, field_at, subset, error);
+            }
+
+            template<typename FieldAt>
+            std::string try_row_to_json_array(size_t field_count, FieldAt field_at,
+                const std::vector<std::string>& subset, CSVError& error) const {
+                error.clear();
+                return subset.empty() ? row_to_json_array_all(field_count, field_at)
+                    : row_to_json_array_subset(field_count, field_at, subset, error);
+            }
+
+#if CSV_EXCEPTIONS_ENABLED
+            template<typename FieldAt>
+            std::string row_to_json(size_t field_count, FieldAt field_at,
+                const std::vector<std::string>& subset) const {
+                CSVError error;
+                auto out = try_row_to_json(field_count, field_at, subset, error);
+                throw_error(error);
+                return out;
+            }
+
+            template<typename FieldAt>
+            std::string row_to_json_array(size_t field_count, FieldAt field_at,
+                const std::vector<std::string>& subset) const {
+                CSVError error;
+                auto out = try_row_to_json_array(field_count, field_at, subset, error);
+                throw_error(error);
+                return out;
+            }
+#endif
 
         private:
             template<typename FieldAt>
@@ -6692,13 +7229,14 @@ namespace csv {
             std::string row_to_json_subset(
                 size_t field_count,
                 FieldAt field_at,
-                const std::vector<std::string>& subset
+                const std::vector<std::string>& subset, CSVError& error
             ) const {
                 std::string out = "{";
                 bool first = true;
 
                 for (const auto& column : subset) {
-                    const size_t index = this->index_of(column);
+                    const size_t index = this->index_of(column, error);
+                    if (error) return {};
                     if (index >= field_count) {
                         continue;
                     }
@@ -6736,13 +7274,14 @@ namespace csv {
             std::string row_to_json_array_subset(
                 size_t field_count,
                 FieldAt field_at,
-                const std::vector<std::string>& subset
+                const std::vector<std::string>& subset, CSVError& error
             ) const {
                 std::string out = "[";
                 bool first = true;
 
                 for (const auto& column : subset) {
-                    const size_t index = this->index_of(column);
+                    const size_t index = this->index_of(column, error);
+                    if (error) return {};
                     if (index >= field_count) {
                         continue;
                     }
@@ -6762,7 +7301,11 @@ namespace csv {
             void append_json_value(std::string& out, csv::string_view value) const {
                 const DataType type = internals::data_type(value);
                 if (type >= DataType::CSV_INT8 && type <= DataType::CSV_DOUBLE) {
-                    out.append(value.data(), value.size());
+                    if (type > DataType::CSV_INT64 || !append_json_hex_integer(out, value)) {
+                        append_json_number(out, value);
+                    }
+                } else if (type == DataType::CSV_NULL) {
+                    out += "null";
                 } else {
                     out += '"';
                     append_json_escaped(out, value);
@@ -6770,10 +7313,12 @@ namespace csv {
                 }
             }
 
-            size_t index_of(const std::string& column) const {
+            size_t index_of(const std::string& column, CSVError& error) const {
                 const auto it = column_positions_.find(column);
                 if (it == column_positions_.end()) {
-                    throw_column_not_found(column);
+                    fail(error, CSVErrorCode::ColumnNotFound,
+                        make_prefixed_message(ERROR_COLUMN_NOT_FOUND, column));
+                    return 0;
                 }
 
                 return it->second;
@@ -6783,64 +7328,93 @@ namespace csv {
             std::vector<std::string> escaped_object_keys_;
             std::unordered_map<std::string, size_t> column_positions_;
         };
-    }
-}
-
-/** @file
- *  @brief Internal data structures for CSV parsing
- * 
- *  This file contains the low-level structures used by the parser to store
- *  CSV data before it's exposed through the public CSVRow/CSVField API.
- * 
- *  Data flow: Parser -> RawCSVData -> CSVRow -> CSVField
- */
-
-
-#include <memory>
-
-/** @file
- *  @brief Shared limits for parser backing storage
- */
-
-
-#include <cstdint>
-#include <limits>
-
-
-namespace csv {
-    namespace internals {
+    
         namespace memory {
-            CONSTEXPR_VALUE_14 std::uint32_t INVALID_REALIZED_OFFSET = (std::numeric_limits<std::uint32_t>::max)();
-        }
-    }
-}
+            /** Stable sidecar storage for parser-time CSVFieldScalar values.
+             *
+             *  This intentionally mirrors RawCSVFieldList allocation semantics:
+             *  scalar values are stored in fixed-size blocks whose addresses stay
+             *  stable while the parser appends later fields from the same chunk.
+             *  Cross-thread visibility is provided by the row queue mutex plus
+             *  atomic size/block publication, matching RawCSVFieldList.
+             */
+            class CSVFieldScalarList {
+            public:
+                CSVFieldScalarList(size_t single_buffer_capacity = (size_t)(internals::PAGE_SIZE / sizeof(CSVFieldScalar))) :
+                    block_capacity_(single_buffer_capacity == 0 ? 1 : single_buffer_capacity) {
+                    const size_t max_fields = internals::CSV_CHUNK_SIZE_DEFAULT + 1;
+                    const size_t block_count = (max_fields + this->block_capacity_ - 1) / this->block_capacity_;
+                    this->blocks_.reserve(block_count);
+                    this->blocks_.resize(block_count);
+                }
 
-/** @file
- *  @brief Stable sidecar storage for parser-realized quoted field bytes
- */
+                CSVFieldScalarList(const CSVFieldScalarList&) = delete;
 
+                CSVFieldScalarList(CSVFieldScalarList&& other) noexcept
+                    : block_capacity_(other.block_capacity_),
+                      blocks_(std::move(other.blocks_)) {
+                    this->size_.store(other.size_.load(std::memory_order_acquire), std::memory_order_release);
+                    this->block_count_.store(other.block_count_.load(std::memory_order_acquire), std::memory_order_release);
+                    other.size_.store(0, std::memory_order_release);
+                    other.block_count_.store(0, std::memory_order_release);
+                }
 
-#include <algorithm>
-#include <cassert>
-#include <cstdint>
+                void emplace_back(const CSVFieldScalar& scalar) {
+                    const size_t offset = this->size_.load(std::memory_order_acquire);
+                    const size_t page_no = offset / this->block_capacity_;
+                    const size_t buffer_idx = offset % this->block_capacity_;
 
-/** @file
- *  @brief Stable append-only arenas used by parser backing storage
- */
+                    if (page_no >= this->block_count_.load(std::memory_order_acquire)) {
+                        this->allocate_block(page_no);
+                    }
 
+                    this->blocks_[page_no].get()[buffer_idx] = scalar;
+                    this->size_.store(offset + 1, std::memory_order_release);
+                }
 
-#include <algorithm>
-#include <atomic>
-#include <cassert>
-#include <cstdint>
-#include <memory>
-#include <utility>
-#include <vector>
+                size_t size() const noexcept {
+                    return this->size_.load(std::memory_order_acquire);
+                }
 
+                bool empty() const noexcept {
+                    return this->size() == 0;
+                }
 
-namespace csv {
-    namespace internals {
-        namespace memory {
+                void reserve_for_source_size(size_t source_size) {
+                    const size_t max_fields = source_size + 1;
+                    const size_t block_count = (max_fields + this->block_capacity_ - 1) / this->block_capacity_;
+                    if (block_count > this->blocks_.size()) {
+                        this->blocks_.resize(block_count);
+                    }
+                }
+
+                inline const CSVFieldScalar& operator[](size_t n) const {
+                    assert(n < this->size_.load(std::memory_order_acquire));
+                    const size_t page_no = n / this->block_capacity_;
+                    const size_t buffer_idx = n % this->block_capacity_;
+                    assert(page_no < this->block_count_.load(std::memory_order_acquire));
+                    return this->blocks_[page_no].get()[buffer_idx];
+                }
+
+            private:
+                size_t block_capacity_;
+                std::vector<std::unique_ptr<CSVFieldScalar[]>> blocks_;
+                std::atomic<size_t> size_{ 0 };
+                std::atomic<size_t> block_count_{ 0 };
+
+                void allocate_block(size_t page_no) {
+                    if (page_no >= this->blocks_.size()) {
+                        this->blocks_.resize((std::max)(page_no + 1, this->blocks_.size() * 2));
+                    }
+
+                    if (!this->blocks_[page_no]) {
+                        this->blocks_[page_no] = std::unique_ptr<CSVFieldScalar[]>(new CSVFieldScalar[this->block_capacity_]);
+                    }
+
+                    this->block_count_.store(page_no + 1, std::memory_order_release);
+                }
+            };
+        
             /** Variable-size block arena used for quote realization bytes.
              *
              *  Quote fields can be larger than the default page and blocks may grow,
@@ -6853,9 +7427,9 @@ namespace csv {
                 struct Allocation {
                     Allocation() : offset(0), data(nullptr) {}
 
-                    Allocation(std::uint32_t offset_, T* data_) : offset(offset_), data(data_) {}
+                    Allocation(CSVChunkIndex offset_, T* data_) : offset(offset_), data(data_) {}
 
-                    std::uint32_t offset = 0;
+                    CSVChunkIndex offset = 0;
                     T* data = nullptr;
                 };
 
@@ -6965,9 +7539,9 @@ namespace csv {
                 std::atomic<size_t> size_{ 0 };
                 std::atomic<size_t> block_count_{ 0 };
 
-                std::uint32_t checked_offset(size_t value) const noexcept {
-                    assert(value <= INVALID_REALIZED_OFFSET);
-                    return static_cast<std::uint32_t>(value);
+                CSVChunkIndex checked_offset(size_t value) const noexcept {
+                    assert(value <= CSV_CHUNK_INDEX_MAX);
+                    return static_cast<CSVChunkIndex>(value);
                 }
 
                 void allocate_block(size_t required_capacity) {
@@ -7030,19 +7604,12 @@ namespace csv {
                     return *this->blocks_[this->block_count_.load(std::memory_order_acquire) - 1];
                 }
             };
-        }
-    }
-}
-
-
-namespace csv {
-    namespace internals {
-        namespace memory {
+        
             class RawCSVQuoteArena {
             public:
                 RawCSVQuoteArena() : arena_(internals::PAGE_SIZE) {}
 
-                std::uint32_t append(csv::string_view bytes) {
+                CSVChunkIndex append(csv::string_view bytes) {
                     if (bytes.empty()) {
                         return this->checked_offset(this->arena_.size());
                     }
@@ -7068,27 +7635,12 @@ namespace csv {
             private:
                 RawCSVBlockArena<char> arena_;
 
-                std::uint32_t checked_offset(size_t value) const noexcept {
-                    assert(value <= INVALID_REALIZED_OFFSET);
-                    return static_cast<std::uint32_t>(value);
+                CSVChunkIndex checked_offset(size_t value) const noexcept {
+                    assert(value <= CSV_CHUNK_INDEX_MAX);
+                    return static_cast<CSVChunkIndex>(value);
                 }
             };
-        }
-    }
-}
-
-/** @file
- *  @brief Compact parser metadata for a single CSV field
- */
-
-
-#include <cassert>
-#include <cstdint>
-
-
-namespace csv {
-    namespace internals {
-        namespace memory {
+        
             /** A barebones class used for describing CSV fields */
             struct RawCSVField {
                 RawCSVField() = default;
@@ -7097,18 +7649,18 @@ namespace csv {
                     size_t _length,
                     bool _is_realized = false
                 ) noexcept {
-                    assert(_start <= INVALID_REALIZED_OFFSET);
-                    assert(_length <= INVALID_REALIZED_OFFSET);
-                    start = static_cast<std::uint32_t>(_start);
-                    length = static_cast<std::uint32_t>(_length);
+                    assert(_start <= CSV_CHUNK_INDEX_MAX);
+                    assert(_length <= CSV_CHUNK_INDEX_MAX);
+                    start = static_cast<CSVChunkIndex>(_start);
+                    length = static_cast<CSVChunkIndex>(_length);
                     is_realized = _is_realized;
                 }
 
                 /** Raw row-relative start, or quote-arena logical start when is_realized is true. */
-                std::uint32_t start = 0;
+                CSVChunkIndex start = 0;
 
                 /** Field length in the selected backing storage. */
-                std::uint32_t length = 0;
+                CSVChunkIndex length = 0;
 
                 /** True when start/length refer to RawCSVData::quote_arena instead of RawCSVData::data. */
                 bool is_realized = false;
@@ -7117,26 +7669,7 @@ namespace csv {
                     return is_realized;
                 }
             };
-        }
-    }
-}
-
-/** @file
- *  @brief Stable storage for RawCSVField metadata
- */
-
-
-#include <algorithm>
-#include <atomic>
-#include <cassert>
-#include <memory>
-#include <utility>
-#include <vector>
-
-
-namespace csv {
-    namespace internals {
-        namespace memory {
+        
             /** A class used for efficiently storing RawCSVField objects and expanding as necessary
              *
              *  @par Implementation
@@ -7233,15 +7766,10 @@ namespace csv {
                 }
             };
         }
-    }
-}
-
-
-namespace csv {
-    namespace internals {
+    
         class JsonConverter;
 
-        using memory::INVALID_REALIZED_OFFSET;
+        using memory::CSVFieldScalarList;
         using memory::RawCSVField;
         using memory::RawCSVFieldList;
         using memory::RawCSVQuoteArena;
@@ -7255,7 +7783,13 @@ namespace csv {
             std::shared_ptr<void> _data = nullptr;
             csv::string_view data = "";
 
+            /** Absolute byte offset where this parsed chunk starts in the source. */
+            size_t source_start = 0;
+
             internals::RawCSVFieldList fields;
+
+            /** Optional parser-time scalar sidecar; empty unless eager classification is enabled. */
+            internals::CSVFieldScalarList field_scalars;
 
             /** Parser-time sidecar bytes for fields whose quoted contents contained doubled quotes. */
             internals::RawCSVQuoteArena quote_arena;
@@ -7271,15 +7805,14 @@ namespace csv {
              *  Used by get_field_impl() to skip trim work in the common no-trim case.
              */
             bool has_ws_trimming = false;
+
+            bool has_field_scalars() const noexcept {
+                return !this->field_scalars.empty();
+            }
         };
 
         using RawCSVDataPtr = std::shared_ptr<RawCSVData>;
-    }
-}
-
-
-namespace csv {
-    namespace internals {
+    
         template<typename RowSink, typename ParsePolicy, typename FieldPolicy, typename RowPolicy>
         class CSVParserCore;
         struct CSVRowRowPolicy;
@@ -7290,73 +7823,70 @@ namespace csv {
             struct CSVRowFragment;
         }
 
+        namespace data_frame { struct RowViewAccessor; }
+
         static const std::string ERROR_NAN = "Not a number.";
         static const std::string ERROR_OVERFLOW = "Overflow error.";
         static const std::string ERROR_FLOAT_TO_INT =
             "Attempted to convert a floating point value to an integral type.";
         static const std::string ERROR_NEG_TO_UNSIGNED = "Negative numbers cannot be converted to unsigned types.";
     
-        // Inside CSVField::get() or wherever you materialize the value
-        csv::string_view get_trimmed(csv::string_view sv, const WhitespaceMap& ws_flags) noexcept;
-    }
+        // Applied when CSVRow exposes a field view with configured whitespace trimming.
+        inline csv::string_view get_trimmed(csv::string_view sv, const WhitespaceMap& ws_flags) noexcept {
+            // Lazy trim only when requested
+            size_t start = 0;
+            while (start < sv.size() && ws_flags[sv[start] + CHAR_OFFSET]) {
+                ++start;
+            }
 
-    /**
-    * @enum CSVConversionError
-    * @brief Non-throwing CSVField conversion result.
-    *
-    * Returned by CSVField::as() inside std::expected, and used internally by
-    * CSVField::get() and CSVField::try_get() to keep throwing and non-throwing
-    * conversions on the same rules.
-    *
-    * @sa csv_conversion_error_message()
-    */
-    enum class CSVConversionError {
-        /** Conversion succeeded. */
-        None = 0,
+            size_t end = sv.size();
+            while (end > start && ws_flags[sv[end - 1] + CHAR_OFFSET]) {
+                --end;
+            }
 
-        /** The field is not compatible with the requested target type. */
-        NotANumber,
-
-        /** The parsed value does not fit in the requested target type. */
-        Overflow,
-
-        /** A floating point field was requested as an integral type. */
-        FloatToInt,
-
-        /** A negative value was requested as an unsigned type. */
-        NegativeToUnsigned
-    };
-
-    namespace internals {
-        typedef const char* csv_error_message;
-
-        static CONSTEXPR_VALUE_14 csv_error_message CSV_CONVERSION_ERROR_MESSAGES[] = {
-            "",
-            "Not a number.",
-            "Overflow error.",
-            "Attempted to convert a floating point value to an integral type.",
-            "Negative numbers cannot be converted to unsigned types."
-        };
-    }
-
-    /** Return a stable human-readable description for a CSVConversionError. */
-    inline const char* csv_conversion_error_message(CSVConversionError error) noexcept {
-        const size_t index = static_cast<size_t>(error);
-        return index < (sizeof(internals::CSV_CONVERSION_ERROR_MESSAGES) / sizeof(internals::CSV_CONVERSION_ERROR_MESSAGES[0]))
-            ? internals::CSV_CONVERSION_ERROR_MESSAGES[index]
-            : internals::CSV_CONVERSION_ERROR_MESSAGES[static_cast<size_t>(CSVConversionError::NotANumber)];
+            return sv.substr(start, end - start);
+        }
     }
 
     /**
     * @class CSVField
     * @brief Data type representing individual CSV values.
     *        CSVFields can be obtained by using CSVRow::operator[]
+    *
+    * Ordinary queries and conversions are logically const: they may populate a
+    * private lazy cache, but preserve the field's text and interpretation.
+    * Custom decimal parsing explicitly changes interpretation and is non-const.
     */
     class CSVField {
     public:
         /** Constructs a CSVField from a string_view */
         constexpr explicit CSVField(csv::string_view _sv) noexcept
             : sv(_sv.data() ? _sv : csv::string_view("")) {}
+
+        CSVField(csv::string_view _sv, const internals::CSVFieldScalar& scalar) noexcept
+            : sv(_sv.data() ? _sv : csv::string_view("")),
+              type_(scalar.type) {
+            switch (scalar.type) {
+            case DataType::CSV_INT8:
+            case DataType::CSV_INT16:
+            case DataType::CSV_INT32:
+            case DataType::CSV_INT64:
+                this->value_.integer = scalar.integer;
+                break;
+            case DataType::CSV_DOUBLE:
+            case DataType::CSV_BIGINT:
+                this->value_.floating = scalar.floating;
+                break;
+            case DataType::CSV_TIMESTAMP:
+                this->value_.timestamp = scalar.timestamp;
+                break;
+            case DataType::CSV_BOOL:
+                this->value_.boolean = scalar.boolean;
+                break;
+            default:
+                break;
+            }
+        }
 
         operator csv::string_view() const noexcept {
             return this->sv;
@@ -7387,18 +7917,20 @@ namespace csv {
         *  @warning Currently, conversions to floating point types are not
         *           checked for loss of precision
         *
-        *  @warning Any string_views returned are only guaranteed to be valid
-        *           if the parent CSVRow is still alive. If you are concerned
-        *           about object lifetimes, then grab a std::string or a
-        *           numeric value.
+        *  @warning Returned string views borrow the source text. Retain a row
+        *           or field iterator for its parsing buffer, or request an owning
+        *           std::string or numeric value.
         *
         */
-        template<typename T = std::string> T get() {
+#if CSV_EXCEPTIONS_ENABLED
+        template<typename T = std::string> T get() const {
             T out{};
-            const CSVConversionError err = check_convert(out);
+            CSVConversionError err;
+            try_get(out, err);
             if (err != CSVConversionError::None) throw std::runtime_error(csv_conversion_error_message(err));
             return out;
         }
+#endif
 
 #ifdef CSV_HAS_STD_EXPECTED
         /**
@@ -7413,9 +7945,10 @@ namespace csv {
          * @sa csv_conversion_error_message()
          */
         template<typename T = std::string>
-        std::expected<T, CSVConversionError> as() {
+        std::expected<T, CSVConversionError> as() const {
             T out{};
-            const CSVConversionError err = check_convert(out);
+            CSVConversionError err;
+            try_get(out, err);
             return (err != CSVConversionError::None)
                 ? std::expected<T, CSVConversionError>(std::unexpected(err))
                 : std::expected<T, CSVConversionError>(out);
@@ -7438,8 +7971,18 @@ namespace csv {
          *  @endcode
          */
         template<typename T = std::string>
-        bool try_get(T& out) noexcept {
-            return check_convert(out) == CSVConversionError::None;
+        bool try_get(T& out) const noexcept {
+            CSVConversionError error;
+            return try_get(out, error);
+        }
+
+        /** Convert with the same rules as try_get(), retaining the failure reason.
+         *  On failure, out is unchanged and error identifies the conversion failure.
+         */
+        template<typename T>
+        bool try_get(T& out, CSVConversionError& error) const noexcept {
+            error = check_convert(out);
+            return error == CSVConversionError::None;
         }
 
 #ifdef CSV_HAS_CXX17
@@ -7452,7 +7995,7 @@ namespace csv {
          *  @note Requires C++17 or later.
          */
         template<typename T>
-        operator std::optional<T>() {
+        operator std::optional<T>() const {
             T out{};
             return try_get(out) ? std::optional<T>(out) : std::nullopt;
         }
@@ -7462,7 +8005,7 @@ namespace csv {
          *  @tparam T An integral type (int, long, long long, etc.)
          */
         template<typename T = long long>
-        bool try_parse_hex(T& parsedValue) {
+        bool try_parse_hex(T& parsedValue) const {
             static_assert(std::is_integral<T>::value,
                 "try_parse_hex only works with integral types (int, long, long long, etc.)");
 
@@ -7475,19 +8018,66 @@ namespace csv {
          *  @note This method also updates this field's type
          *
          */
-        bool try_parse_decimal(long double& dVal, const char decimalSymbol = '.');
+        bool try_parse_decimal(long double& dVal, const char decimalSymbol = '.') {
+        // If field has already been parsed to empty, no need to do it aagin:
+        if (this->type_ == DataType::CSV_NULL)
+                    return false;
+
+        if (this->type_ == DataType::UNKNOWN)
+            this->get_value();
+
+        if (this->type_ == DataType::CSV_NULL)
+            return false;
+
+        if (this->type_ == DataType::CSV_STRING || this->type_ == DataType::CSV_DOUBLE) {
+            double parsed_value = 0;
+            if (!classify_scalar::parse_float(this->sv.data(), this->sv.data() + this->sv.size(), parsed_value, decimalSymbol)) {
+                if (this->type_ == DataType::CSV_DOUBLE)
+                    this->type_ = DataType::CSV_STRING;
+                return false;
+            }
+
+            this->cache_parsed_value(DataType::CSV_DOUBLE, parsed_value);
+        }
+
+        // Integral types are not affected by decimalSymbol and need not be parsed again
+
+        // Either we already had an integral type before, or we we just got any numeric type now.
+        if (this->type_ >= DataType::CSV_INT8 && this->type_ <= DataType::CSV_DOUBLE) {
+            dVal = this->numeric_value_as_long_double();
+            return true;
+        }
+
+        // CSV_NULL or CSV_STRING, not numeric
+        return false;
+    }
 
         /** Parse this field as Unix milliseconds.
          *
          *  Timestamp-classified values return their parsed epoch value. Integral
          *  values are treated as already being Unix milliseconds.
          */
-        bool try_parse_timestamp(std::uint64_t& out) noexcept;
+        bool try_parse_timestamp(std::uint64_t& out) const noexcept {
+        if (this->type_ == DataType::UNKNOWN)
+            this->get_value();
+
+        if (this->type_ == DataType::CSV_TIMESTAMP) {
+            out = this->value_.timestamp;
+            return true;
+        }
+
+        if (this->stores_integral() && this->value_.integer >= 0) {
+            out = static_cast<std::uint64_t>(this->value_.integer);
+            return true;
+        }
+
+        return false;
+    }
 
         /** Parse this field as Unix milliseconds in a 64-bit unsigned integer. */
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
         template<typename T>
-        bool try_parse_timestamp(T& out) noexcept;
+        bool try_parse_timestamp(T& out) const noexcept;
 #else
         template<typename T>
         internals::enable_if_t<
@@ -7495,7 +8085,7 @@ namespace csv {
             && (sizeof(T) >= sizeof(std::uint64_t)),
             bool
         >
-        try_parse_timestamp(T& out) noexcept {
+        try_parse_timestamp(T& out) const noexcept {
             std::uint64_t milliseconds = 0;
             if (!this->try_parse_timestamp(milliseconds))
                 return false;
@@ -7507,7 +8097,7 @@ namespace csv {
 
         /** Parse this field as a timestamp duration since the Unix epoch. */
         template<typename Rep, typename Period>
-        bool try_parse_timestamp(std::chrono::duration<Rep, Period>& out) noexcept {
+        bool try_parse_timestamp(std::chrono::duration<Rep, Period>& out) const noexcept {
             std::uint64_t milliseconds = 0;
             if (!this->try_parse_timestamp(milliseconds))
                 return false;
@@ -7519,7 +8109,7 @@ namespace csv {
 
         /** Parse this field as a std::chrono::system_clock time point. */
         template<typename Duration>
-        bool try_parse_timestamp(std::chrono::time_point<std::chrono::system_clock, Duration>& out) noexcept {
+        bool try_parse_timestamp(std::chrono::time_point<std::chrono::system_clock, Duration>& out) const noexcept {
             std::uint64_t milliseconds = 0;
             if (!this->try_parse_timestamp(milliseconds))
                 return false;
@@ -7548,7 +8138,7 @@ namespace csv {
             static_assert(std::is_arithmetic<T>::value,
                 "T should be a numeric value.");
 
-            const_cast<CSVField*>(this)->get_value();
+            this->get_value();
             if (this->type_ < DataType::CSV_INT8 || this->type_ > DataType::CSV_DOUBLE || this->type_ == DataType::CSV_BIGINT) {
                 return false;
             }
@@ -7560,32 +8150,32 @@ namespace csv {
         CONSTEXPR csv::string_view get_sv() const noexcept { return this->sv; }
 
         /** Returns true if field is an empty string or string of whitespace characters */
-        inline bool is_null() noexcept { return type() == DataType::CSV_NULL; }
+        inline bool is_null() const noexcept { return type() == DataType::CSV_NULL; }
 
         /** Returns true if field is a non-numeric, non-empty string */
-        inline bool is_str() noexcept { return type() == DataType::CSV_STRING; }
+        inline bool is_str() const noexcept { return type() == DataType::CSV_STRING; }
 
         /** Returns true if field is an integer or float */
-        inline bool is_num() noexcept {
+        inline bool is_num() const noexcept {
             return type() >= DataType::CSV_INT8 && type() <= DataType::CSV_DOUBLE;
         }
 
         /** Returns true if field is an integer */
-        inline bool is_int() noexcept {
+        inline bool is_int() const noexcept {
             return (type() >= DataType::CSV_INT8) && (type() <= DataType::CSV_INT64);
         }
 
         /** Returns true if field is a floating point value */
-        inline bool is_float() noexcept { return type() == DataType::CSV_DOUBLE; }
+        inline bool is_float() const noexcept { return type() == DataType::CSV_DOUBLE; }
 
         /** Returns true if field is a boolean value */
-        inline bool is_bool() noexcept { return type() == DataType::CSV_BOOL; }
+        inline bool is_bool() const noexcept { return type() == DataType::CSV_BOOL; }
 
         /** Returns true if field is a timestamp value */
-        inline bool is_timestamp() noexcept { return type() == DataType::CSV_TIMESTAMP; }
+        inline bool is_timestamp() const noexcept { return type() == DataType::CSV_TIMESTAMP; }
 
         /** Return the type of the underlying CSV data */
-        inline DataType type() noexcept {
+        inline DataType type() const noexcept {
             this->get_value();
             return type_;
         }
@@ -7644,21 +8234,21 @@ namespace csv {
             }
         };
 
-        FieldValue value_;        /**< Cached typed values. */
+        mutable FieldValue value_; /**< Cached typed values; logically const reads may populate them. */
         csv::string_view sv = ""; /**< A pointer to this field's text */
-        DataType type_ = DataType::UNKNOWN; /**< Cached data type value */
+        mutable DataType type_ = DataType::UNKNOWN; /**< Cached data type value */
 
-        CONSTEXPR_14 bool stores_integral() const noexcept {
+        bool stores_integral() const noexcept {
             return type_ >= DataType::CSV_INT8 && type_ <= DataType::CSV_INT64;
         }
 
-        CONSTEXPR_14 long double numeric_value_as_long_double() const noexcept {
+        long double numeric_value_as_long_double() const noexcept {
             return stores_integral()
                 ? static_cast<long double>(value_.integer)
                 : value_.floating;
         }
 
-        CONSTEXPR_14 void cache_parsed_value(DataType parsed_type, long double parsed_value) noexcept {
+        void cache_parsed_value(DataType parsed_type, long double parsed_value) noexcept {
             type_ = parsed_type;
 
             if (parsed_type >= DataType::CSV_INT8 && parsed_type <= DataType::CSV_INT64) {
@@ -7672,7 +8262,23 @@ namespace csv {
         /** Shared validation + conversion kernel used by get(), try_get(), and as().
          *  Assigns to @p out and returns CSVConversionError::None on success.
          */
-        CSVConversionError check_convert(bool& out) noexcept {
+        CSVConversionError check_convert(std::string& out) const noexcept {
+            out.assign(this->sv.data(), this->sv.size());
+            return CSVConversionError::None;
+        }
+
+        CSVConversionError check_convert(csv::string_view& out) const noexcept {
+            out = this->sv;
+            return CSVConversionError::None;
+        }
+
+        CSVConversionError check_convert(long double& out) const noexcept {
+            if (!is_num()) return CSVConversionError::NotANumber;
+            out = this->numeric_value_as_long_double();
+            return CSVConversionError::None;
+        }
+
+        CSVConversionError check_convert(bool& out) const noexcept {
             if (this->type() != DataType::CSV_BOOL)
                 return CSVConversionError::NotANumber;
 
@@ -7681,7 +8287,7 @@ namespace csv {
         }
 
         template<typename Rep, typename Period>
-        CSVConversionError check_convert(std::chrono::duration<Rep, Period>& out) noexcept {
+        CSVConversionError check_convert(std::chrono::duration<Rep, Period>& out) const noexcept {
             if (this->type() != DataType::CSV_TIMESTAMP)
                 return CSVConversionError::NotANumber;
 
@@ -7691,7 +8297,7 @@ namespace csv {
         }
 
         template<typename Duration>
-        CSVConversionError check_convert(std::chrono::time_point<std::chrono::system_clock, Duration>& out) noexcept {
+        CSVConversionError check_convert(std::chrono::time_point<std::chrono::system_clock, Duration>& out) const noexcept {
             if (this->type() != DataType::CSV_TIMESTAMP)
                 return CSVConversionError::NotANumber;
 
@@ -7701,7 +8307,7 @@ namespace csv {
         }
 
         template<typename T>
-        CSVConversionError check_convert(T& out) noexcept {
+        CSVConversionError check_convert(T& out) const noexcept {
             IF_CONSTEXPR(std::is_arithmetic<T>::value) {
                 if (!this->is_num())
                     return CSVConversionError::NotANumber;
@@ -7734,7 +8340,7 @@ namespace csv {
         }
 
         /** Check to see if value has been cached previously before evaluating. */
-        inline void get_value() noexcept {
+        inline void get_value() const noexcept {
             if ((int)type_ < 0) {
                 if (this->sv.empty()) {
                     type_ = DataType::CSV_NULL;
@@ -7762,6 +8368,7 @@ namespace csv {
         template<typename RowSink, typename ParsePolicy, typename FieldPolicy, typename RowPolicy>
         friend class internals::CSVParserCore;
         friend struct internals::CSVRowRowPolicy;
+        friend struct internals::data_frame::RowViewAccessor;
         friend internals::parser::CSVParserDriverBase;
         friend struct internals::speculative::CSVRowFragment;
 
@@ -7780,20 +8387,74 @@ namespace csv {
         /** Return the number of fields in this row */
         CONSTEXPR size_t size() const noexcept { return row_length; }
 
+        /** Return the absolute byte offset where this row starts in the source. */
+        size_t byte_offset() const noexcept {
+            return this->data ? this->data->source_start + this->data_start : 0;
+        }
+
         /** @name Value Retrieval */
         ///@{
+        /** Checked field retrieval. Inspect error before using the returned field.
+         *  The field's view remains valid only while this row's storage is alive.
+         */
+        CSVField try_field(size_t index, CSVError& error) const;
+        CSVField try_field(csv::string_view name, CSVError& error) const;
+
+#if CSV_EXCEPTIONS_ENABLED
+        /** Return the field at @p n. Throws std::runtime_error if the index is out of bounds. */
         CSVField operator[](size_t n) const;
-        CSVField operator[](csv::string_view) const;
-        inline std::string to_json(const std::vector<std::string>& subset = {}) const {
+        /** Return the field named @p col_name. Throws std::runtime_error if the name is absent. */
+        CSVField operator[](csv::string_view col_name) const {
+        auto & col_names = this->data->col_names;
+        auto col_pos = col_names->index_of(col_name);
+        if (col_pos > -1) {
+            return this->operator[](col_pos);
+        }
+
+        internals::throw_column_not_found(col_name);
+    }
+#endif
+#if !CSV_EXCEPTIONS_ENABLED
+        /** Serialize all named fields. */
+        inline std::string to_json() const {
             const auto* converter = this->get_json_converter();
-            return converter == nullptr ? "{}"
-                : converter->row_to_json(this->size(), [this](size_t i) { return this->get_field(i); }, subset);
+            return converter ? converter->row_to_json(this->size(),
+                [this](size_t i) { return this->get_field(i); }) : "{}";
+        }
+        /** Serialize all named fields as an array. */
+        inline std::string to_json_array() const {
+            const auto* converter = this->get_json_converter();
+            return converter ? converter->row_to_json_array(this->size(),
+                [this](size_t i) { return this->get_field(i); }) : "[]";
+        }
+#endif
+        /** Serialize a subset, reporting unknown column names. */
+        inline std::string try_to_json(const std::vector<std::string>& subset, CSVError& error) const {
+            error.clear();
+            const auto* converter = this->get_json_converter();
+            return converter ? converter->try_row_to_json(this->size(),
+                [this](size_t i) { return this->get_field(i); }, subset, error) : "{}";
+        }
+        inline std::string try_to_json_array(const std::vector<std::string>& subset, CSVError& error) const {
+            error.clear();
+            const auto* converter = this->get_json_converter();
+            return converter ? converter->try_row_to_json_array(this->size(),
+                [this](size_t i) { return this->get_field(i); }, subset, error) : "[]";
+        }
+#if CSV_EXCEPTIONS_ENABLED
+        inline std::string to_json(const std::vector<std::string>& subset = {}) const {
+            CSVError error;
+            auto out = try_to_json(subset, error);
+            internals::throw_error(error);
+            return out;
         }
         inline std::string to_json_array(const std::vector<std::string>& subset = {}) const {
-            const auto* converter = this->get_json_converter();
-            return converter == nullptr ? "[]"
-                : converter->row_to_json_array(this->size(), [this](size_t i) { return this->get_field(i); }, subset);
+            CSVError error;
+            auto out = try_to_json_array(subset, error);
+            internals::throw_error(error);
+            return out;
         }
+#endif
 
         /** Retrieve this row's associated column names */
         const std::vector<std::string>& get_col_names() const {
@@ -7808,12 +8469,26 @@ namespace csv {
         /** Convert this CSVRow into an unordered map.
          *  The keys are the column names and the values are the corresponding field values.
          */
-        std::unordered_map<std::string, std::string> to_unordered_map() const;
+#if CSV_EXCEPTIONS_ENABLED
+        std::unordered_map<std::string, std::string> to_unordered_map() const {
+        CSVError error;
+        auto out = try_to_unordered_map(error);
+        if (error) throw std::out_of_range(std::string(error.context));
+        return out;
+    }
+#endif
 
         /** Convert a selected subset of columns into an unordered map. */
+#if CSV_EXCEPTIONS_ENABLED
         std::unordered_map<std::string, std::string> to_unordered_map(
             const std::vector<std::string>& subset
-        ) const;
+        ) const {
+        CSVError error;
+        auto out = try_to_unordered_map(error, subset);
+        internals::throw_error(error);
+        return out;
+    }
+#endif
 
         #ifdef CSV_HAS_CXX20
         /** Convert this CSVRow into a std::ranges::input_range of string_views.
@@ -7834,7 +8509,13 @@ namespace csv {
          * @note This is less efficient than indexed access via `operator[]` because
          *       it materializes all fields as owning strings.
          */
-        operator std::vector<std::string>() const;
+        operator std::vector<std::string>() const {
+        std::vector<std::string> ret;
+        for (size_t i = 0; i < size(); i++)
+            ret.push_back(std::string(this->get_field(i)));
+
+        return ret;
+    }
 
         /** Return a string_view of the raw bytes of this row as they appear in
          *  the underlying parse buffer, up to (but not including) the trailing
@@ -7843,72 +8524,281 @@ namespace csv {
          *  @warning The view is only valid for as long as the CSVRow (and its
          *           associated data chunk) remains alive.
          */
-        csv::string_view raw_str() const noexcept;
+        csv::string_view raw_str() const noexcept {
+        if (!data) return csv::string_view();
+        const csv::string_view full = data->data;
+        if (data_start >= full.size()) return csv::string_view();
+
+        if (data_end != (std::numeric_limits<size_t>::max)()
+            && data_end >= data_start
+            && data_end <= full.size()) {
+            return full.substr(data_start, data_end - data_start);
+        }
+
+        const size_t end = full.find('\n', data_start);
+        const size_t len = (end == csv::string_view::npos)
+            ? (full.size() - data_start)
+            : (end - data_start);
+        return full.substr(data_start, len);
+    }
         ///@}
 
-        /** A random access iterator over the contents of a CSV row.
-         *  Each iterator points to a CSVField.
+        /** Iterator producing short-lived CSVField values with independent lazy
+         *  conversion caches. Use `const auto& field` or `auto field` in field loops.
+         *  Returned fields borrow their text; retain a row or iterator for that chunk.
+         *  Iterators retain their original row span even if the source row is reused.
+         *
+         *  The legacy category is input_iterator_tag because C++11 forward iterators
+         *  require references. C++20 iterator_concept supports random access, including
+         *  standard reverse adaptors. Navigation never materializes a field wrapper.
          */
         class iterator {
         public:
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-            using value_type = CSVField;
-            using difference_type = int;
-            using pointer = std::shared_ptr<CSVField>;
-            using reference = CSVField & ;
-            using iterator_category = std::random_access_iterator_tag;
-#endif
-            iterator(const CSVRow*, int i);
+            /** Temporary arrow proxy owning a field value, without a heap allocation.
+             *  Its field borrows the same chunk storage as a dereferenced field.
+             */
+            class pointer {
+            public:
+                explicit pointer(const CSVField& field) noexcept : field_(field) {}
+                CSVField* operator->() noexcept {
+        return &this->field_;
+    }
+                const CSVField* operator->() const noexcept {
+        return &this->field_;
+    }
 
-            reference operator*() const;
-            pointer operator->() const;
-
-            iterator operator++(int);
-            iterator& operator++();
-            iterator operator--(int);
-            iterator& operator--();
-            iterator operator+(difference_type n) const;
-            iterator operator-(difference_type n) const;
-            iterator& operator+=(difference_type n);
-            iterator& operator-=(difference_type n);
-            difference_type operator-(const iterator& other) const noexcept;
-
-            /** Two iterators are equal if they point to the same field */
-            CONSTEXPR bool operator==(const iterator& other) const noexcept {
-                return this->i == other.i;
+            private:
+                CSVField field_;
             };
 
-            CONSTEXPR bool operator!=(const iterator& other) const noexcept { return !operator==(other); }
-
-#ifndef NDEBUG
-            friend CSVRow;
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+            using value_type = CSVField;
+            using difference_type = std::ptrdiff_t;
+            using reference = CSVField;
+            using iterator_category = std::input_iterator_tag;
+#ifdef CSV_HAS_CXX20
+            using iterator_concept = std::random_access_iterator_tag;
 #endif
+#endif
+            iterator() = default;
+            iterator(const CSVRow* row, difference_type index) noexcept;
+
+            reference operator*() const {
+        // Reuse row decoding, trimming and eager-scalar handling with an immutable
+        // span snapshot. Never consult the source CSVRow: readers reuse that object.
+        const CSVRow snapshot(this->data_, this->data_start_, this->fields_start_, this->row_length_);
+        return snapshot.make_field(static_cast<size_t>(this->index_), this->data_);
+    }
+            pointer operator->() const {
+        return pointer(**this);
+    }
+            reference operator[](difference_type n) const {
+        return *(*this + n);
+    }
+
+            iterator operator++(int) noexcept {
+        iterator previous = *this;
+        ++(*this);
+        return previous;
+    }
+            iterator& operator++() noexcept {
+        return *this += 1;
+    }
+            iterator operator--(int) noexcept {
+        iterator previous = *this;
+        --(*this);
+        return previous;
+    }
+            iterator& operator--() noexcept {
+        return *this -= 1;
+    }
+            iterator operator+(difference_type n) const noexcept {
+        iterator result = *this;
+        result += n;
+        return result;
+    }
+            iterator operator-(difference_type n) const noexcept {
+        iterator result = *this;
+        result -= n;
+        return result;
+    }
+            iterator& operator+=(difference_type n) noexcept {
+        this->index_ += n;
+        return *this;
+    }
+            iterator& operator-=(difference_type n) noexcept {
+        this->index_ -= n;
+        return *this;
+    }
+            difference_type operator-(const iterator& other) const noexcept {
+        return this->index_ - other.index_;
+    }
+            inline friend iterator operator+(difference_type n, const iterator& it) noexcept {
+        return it + n;
+    }
+
+            bool operator==(const iterator& other) const noexcept {
+        return this->data_ == other.data_ && this->data_start_ == other.data_start_
+            && this->fields_start_ == other.fields_start_ && this->row_length_ == other.row_length_
+            && this->index_ == other.index_;
+    }
+            bool operator!=(const iterator& other) const noexcept {
+        return !(*this == other);
+    }
+            bool operator<(const iterator& other) const noexcept {
+        return this->index_ < other.index_;
+    }
+            bool operator>(const iterator& other) const noexcept {
+        return other < *this;
+    }
+            bool operator<=(const iterator& other) const noexcept {
+        return !(other < *this);
+    }
+            bool operator>=(const iterator& other) const noexcept {
+        return !(*this < other);
+    }
 
         private:
-            const CSVRow * daddy = nullptr;                      // Pointer to parent
-            internals::RawCSVDataPtr data = nullptr;             // Keep data alive for lifetime of iterator
-            std::shared_ptr<CSVField> field = nullptr;           // Current field pointed at
-            int i = 0;                                           // Index of current field
+            internals::RawCSVDataPtr data_;
+            size_t data_start_ = 0;
+            size_t fields_start_ = 0;
+            size_t row_length_ = 0;
+            difference_type index_ = 0;
         };
 
-        /** A reverse iterator over the contents of a CSVRow. */
-        using reverse_iterator = std::reverse_iterator<iterator>;
+        /** Reverse field-value iterator available since C++11. Uses the same
+         *  temporary-field semantics as iterator, without a persistent field cache.
+         *  Use this type in C++11-17: legacy std::reverse_iterator requires references.
+         */
+        class reverse_iterator {
+        public:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+            using value_type = iterator::value_type;
+            using difference_type = iterator::difference_type;
+            using pointer = iterator::pointer;
+            using reference = iterator::reference;
+            using iterator_category = std::input_iterator_tag;
+#ifdef CSV_HAS_CXX20
+            using iterator_concept = std::random_access_iterator_tag;
+#endif
+#endif
+            reverse_iterator() = default;
+            explicit reverse_iterator(iterator base) noexcept : base_(std::move(base)) {}
+
+            reference operator*() const {
+        return this->base_[-1];
+    }
+            pointer operator->() const {
+        return pointer(**this);
+    }
+            reference operator[](difference_type n) const {
+        return *(*this + n);
+    }
+
+            reverse_iterator operator++(int) noexcept {
+        reverse_iterator previous = *this;
+        ++(*this);
+        return previous;
+    }
+            reverse_iterator& operator++() noexcept {
+        return *this += 1;
+    }
+            reverse_iterator operator--(int) noexcept {
+        reverse_iterator previous = *this;
+        --(*this);
+        return previous;
+    }
+            reverse_iterator& operator--() noexcept {
+        return *this -= 1;
+    }
+            reverse_iterator operator+(difference_type n) const noexcept {
+        return reverse_iterator(this->base_ - n);
+    }
+            reverse_iterator operator-(difference_type n) const noexcept {
+        return reverse_iterator(this->base_ + n);
+    }
+            reverse_iterator& operator+=(difference_type n) noexcept {
+        this->base_ -= n;
+        return *this;
+    }
+            reverse_iterator& operator-=(difference_type n) noexcept {
+        this->base_ += n;
+        return *this;
+    }
+            difference_type operator-(const reverse_iterator& other) const noexcept {
+        return other.base_ - this->base_;
+    }
+            inline friend reverse_iterator operator+(difference_type n, const reverse_iterator& it) noexcept {
+        return it + n;
+    }
+
+            bool operator==(const reverse_iterator& other) const noexcept {
+        return this->base_ == other.base_;
+    }
+            bool operator!=(const reverse_iterator& other) const noexcept {
+        return !(*this == other);
+    }
+            bool operator<(const reverse_iterator& other) const noexcept {
+        return other.base_ < this->base_;
+    }
+            bool operator>(const reverse_iterator& other) const noexcept {
+        return other < *this;
+    }
+            bool operator<=(const reverse_iterator& other) const noexcept {
+        return !(other < *this);
+    }
+            bool operator>=(const reverse_iterator& other) const noexcept {
+        return !(*this < other);
+    }
+
+            /** The forward iterator one past the field this iterator produces. */
+            iterator base() const noexcept {
+        return this->base_;
+    }
+
+        private:
+            iterator base_;
+        };
+
+        /** Materialize named values; unknown names or absent header positions report an error. */
+        std::unordered_map<std::string, std::string> try_to_unordered_map(CSVError& error) const {
+        return to_unordered_map_impl(nullptr, error);
+    }
+        std::unordered_map<std::string, std::string> try_to_unordered_map(
+            CSVError& error, const std::vector<std::string>& subset) const {
+        return to_unordered_map_impl(&subset, error);
+    }
 
         /** @name Iterators
-         *  @brief Each iterator points to a CSVField object.
+         *  @brief Iteration produces field values with independent conversion caches.
          */
          ///@{
-        iterator begin() const;
-        iterator end() const noexcept;
-        reverse_iterator rbegin() const noexcept;
-        reverse_iterator rend() const;
+        iterator begin() const noexcept {
+        return iterator(this, 0);
+    }
+        iterator end() const noexcept {
+        return iterator(this, static_cast<iterator::difference_type>(this->size()));
+    }
+        reverse_iterator rbegin() const noexcept {
+        return reverse_iterator(this->end());
+    }
+        reverse_iterator rend() const noexcept {
+        return reverse_iterator(this->begin());
+    }
         ///@}
 
     private:
+        std::unordered_map<std::string, std::string> to_unordered_map_impl(
+            const std::vector<std::string>* subset, CSVError& error) const;
+
         /** Shared implementation for field access (handles quoting and caching). */
         inline csv::string_view get_field_impl(size_t index, const internals::RawCSVDataPtr& _data) const {
+#if CSV_EXCEPTIONS_ENABLED
             if (index >= this->size())
                 throw std::runtime_error(internals::CSV_ERROR_INDEX_OUT_OF_BOUNDS);
+#else
+            CSV_DEBUG_ASSERT(index < this->size());
+#endif
 
             const size_t field_index = this->fields_start + index;
             const auto field = _data->fields[field_index];
@@ -7927,13 +8817,27 @@ namespace csv {
             return field_str;
         }
 
+        CSVField make_field(size_t index, const internals::RawCSVDataPtr& _data) const {
+        const csv::string_view field = this->get_field_impl(index, _data);
+        const size_t field_index = this->fields_start + index;
+        if (_data->has_field_scalars() && field_index < _data->field_scalars.size()) {
+            return CSVField(field, _data->field_scalars[field_index]);
+        }
+
+        return CSVField(field);
+    }
+
         /** Retrieve a string view corresponding to the specified index */
-        csv::string_view get_field(size_t index) const;
+        csv::string_view get_field(size_t index) const {
+        return this->get_field_impl(index, this->data);
+    }
 
         /** Iterator-safe field access using explicit data pointer 
          *  (prevents accessing freed data when CSVRow is reassigned)
          */
-        csv::string_view get_field_safe(size_t index, internals::RawCSVDataPtr _data) const;
+        csv::string_view get_field_safe(size_t index, internals::RawCSVDataPtr _data) const {
+        return this->get_field_impl(index, _data);
+    }
 
         const internals::JsonConverter* get_json_converter() const {
             if (this->data.get() == nullptr) {
@@ -7966,52 +8870,38 @@ namespace csv {
 #ifdef _MSC_VER
 #pragma region CSVField::get Specializations
 #endif
+#if CSV_EXCEPTIONS_ENABLED
     /** Retrieve this field's original string */
     template<>
-    inline std::string CSVField::get<std::string>() {
+    inline std::string CSVField::get<std::string>() const {
         return std::string(this->sv);
     }
 
     /** Retrieve a view over this field's string
      *
-     *  @warning This string_view is only guaranteed to be valid as long as this
-     *           CSVRow is still alive.
+     *  @warning The source text must outlive the returned view. A retained row
+     *           or field iterator keeps its parsing buffer alive.
      */
     template<>
-    CONSTEXPR_14 csv::string_view CSVField::get<csv::string_view>() {
+    CONSTEXPR_14 csv::string_view CSVField::get<csv::string_view>() const {
         return this->sv;
     }
 
     /** Retrieve this field's value as a long double */
     template<>
-    inline long double CSVField::get<long double>() {
+    inline long double CSVField::get<long double>() const {
         if (!is_num())
             throw std::runtime_error(internals::ERROR_NAN);
 
         return this->numeric_value_as_long_double();
     }
 
-    /** Non-throwing retrieval of field as std::string */
-    template<>
-    inline bool CSVField::try_get<std::string>(std::string& out) noexcept {
-        out = std::string(this->sv);
-        return true;
-    }
+#endif
 
-    /** Non-throwing retrieval of field as csv::string_view */
+    // Preserve the existing constexpr view-retrieval API.
     template<>
-    CONSTEXPR_14 bool CSVField::try_get<csv::string_view>(csv::string_view& out) noexcept {
+    CONSTEXPR_14 bool CSVField::try_get<csv::string_view>(csv::string_view& out) const noexcept {
         out = this->sv;
-        return true;
-    }
-
-    /** Non-throwing retrieval of field as long double */
-    template<>
-    inline bool CSVField::try_get<long double>(long double& out) noexcept {
-        if (!is_num())
-            return false;
-
-        out = this->numeric_value_as_long_double();
         return true;
     }
 #ifdef _MSC_VER
@@ -8033,42 +8923,9 @@ namespace csv {
     }
 }
 
-/** @file
- *  @brief Shared contracts for row deque implementations
- */
-
-
-
-#include <vector>
-
 #if CSV_ENABLE_THREADS
-/** @file
- *  @brief Thread-safe deque for producer-consumer patterns
- * 
- *  Generic container used for cross-thread communication in the CSV parser.
- *  Parser thread pushes rows, main thread pops them.
- *
- *  Design notes: see THREADSAFE_DEQUE_DESIGN.md for protocol details,
- *  invariants, and producer/consumer timing diagrams.
- */
-
-
-#include <atomic>
+ 
 #include <condition_variable>
-#include <deque>
-#include <mutex>
-#include <utility>
-#include <vector>
-
-/** @file
- *  @brief Shared helpers for batch-backed row queues.
- */
-
-
-#include <cstddef>
-#include <deque>
-#include <iterator>
-#include <vector>
 
 namespace csv {
     namespace internals {
@@ -8112,12 +8969,7 @@ namespace csv {
 
             return drain_count;
         }
-    }
-}
-
-
-namespace csv {
-    namespace internals {
+    
         /** A std::deque wrapper which allows multiple read and write threads to concurrently
          *  access it along with providing read threads the ability to wait for the deque
          *  to become populated.
@@ -8200,6 +9052,22 @@ namespace csv {
                 }
 
                 return item;
+            }
+
+            /** Copy the front item without removing it.
+             *
+             *  Returns false when the queue is empty. The copy and emptiness
+             *  check share one critical section so the consumer observes a
+             *  coherent front item while the producer appends rows.
+             */
+            bool try_copy_front(T& item) const {
+                std::lock_guard<std::mutex> lock{ this->_lock };
+                if (this->size_ == 0) {
+                    return false;
+                }
+
+                item = this->batches_.front()[this->front_index_];
+                return true;
             }
 
             /** Move up to @p max_items rows into a caller-owned batch buffer under one lock.
@@ -8309,17 +9177,7 @@ namespace csv {
 }
 
 #else
-/** @file
- *  @brief Single-threaded row deque implementation
- */
-
-
-#include <cstddef>
-#include <deque>
-#include <iterator>
-#include <utility>
-#include <vector>
-
+ 
 namespace csv {
     namespace internals {
         /** Minimal row queue used when parser threading is disabled.
@@ -8378,6 +9236,16 @@ namespace csv {
                 return item;
             }
 
+            /** Copy the front item without removing it. */
+            bool try_copy_front(T& item) const {
+                if (this->records_.empty()) {
+                    return false;
+                }
+
+                item = this->records_.front();
+                return true;
+            }
+
             /** Move up to @p max_items rows into a caller-owned batch buffer. */
             size_t drain_front(std::vector<T>& out, size_t max_items) {
                 const size_t drain_count = this->records_.size() < max_items ? this->records_.size() : max_items;
@@ -8425,10 +9293,6 @@ namespace csv {
 
 #endif
 
-#include <cstddef>
-#include <type_traits>
-#include <utility>
-
 #ifdef CSV_HAS_CXX20
 #include <concepts>
 #endif
@@ -8451,6 +9315,7 @@ namespace csv {
             { q.push_back(std::move(item)) } -> std::same_as<void>;
             { q.append_rows(std::move(batch)) } -> std::same_as<void>;
             { q.pop_front() } -> std::same_as<T>;
+            { cq.try_copy_front(item) } -> std::same_as<bool>;
             { q.drain_front(batch, n) } -> std::same_as<size_t>;
             { cq.empty() } -> std::same_as<bool>;
             { cq.is_waitable() } -> std::same_as<bool>;
@@ -8467,12 +9332,7 @@ namespace csv {
             static_assert(RowDequeLike<ThreadSafeDeque<int>, int>, "Selected ThreadSafeDeque alias must satisfy RowDequeLike contract");
 #endif
 #endif
-    }
-}
-
-
-namespace csv {
-    namespace internals {
+    
         constexpr const int UNINITIALIZED_FIELD = -1;
 
         /** Helper constexpr function to initialize an array with all the elements set to value. */
@@ -8547,9 +9407,6 @@ namespace csv {
             return make_ws_flags(flags.data(), flags.size());
         }
 
-        /** Return the number of leading BOM bytes to skip, or throw for unsupported Unicode encodings. */
-        CSV_INLINE size_t get_bom_skip_or_throw(csv::string_view data, bool& utf8_bom);
-
         /** Explicit DFA state at a parse boundary.
          *
          *  This is intentionally about parser control flow, not field metadata.
@@ -8582,11 +9439,15 @@ namespace csv {
 
         struct ParserChunkOptions {
             ParserChunkOptions() noexcept = default;
-            explicit ParserChunkOptions(ParserDFAState initial_state, bool scan_bom = true) noexcept
-                : initial_state(initial_state), scan_bom(scan_bom) {}
+            explicit ParserChunkOptions(
+                ParserDFAState initial_state,
+                size_t source_start = 0
+            ) noexcept
+                : initial_state(initial_state),
+                  source_start(source_start) {}
 
             ParserDFAState initial_state;
-            bool scan_bom = true;
+            size_t source_start = 0;
         };
 
         struct ParserChunkResult {
@@ -8606,7 +9467,16 @@ namespace csv {
         };
 
         struct CSVParseWindowResult {
+            /** Source bytes fully consumed by this window, including skipped_prefix_length. */
             size_t complete_prefix_length = 0;
+
+            /** Leading source bytes consumed without being parsed (a UTF-8 BOM). */
+            size_t skipped_prefix_length = 0;
+
+            /** Whether this window produced at least one complete row. */
+            bool completed_row() const noexcept {
+                return this->complete_prefix_length > this->skipped_prefix_length;
+            }
         };
     }
 
@@ -8632,6 +9502,7 @@ namespace csv {
          *  Owns RawCSVData/RawCSVFieldList setup and appends RawCSVField metadata
          *  exactly as the historical parser core did.
          */
+        template<bool EagerClassify = false>
         struct CSVRowFieldPolicy {
             void begin_chunk(
                 RawCSVDataPtr& data_ptr,
@@ -8679,11 +9550,45 @@ namespace csv {
                     stored_length,
                     is_realized
                 );
+                this->append_scalar(
+                    data,
+                    fields[fields.size() - 1],
+                    row_start,
+                    std::integral_constant<bool, EagerClassify>()
+                );
                 return fields[fields.size() - 1];
             }
 
         private:
-            std::uint32_t append_realized_quoted_field(
+            void append_scalar(
+                RawCSVData&,
+                const RawCSVField&,
+                size_t,
+                std::false_type
+            ) const {}
+
+            void append_scalar(
+                RawCSVData& data,
+                const RawCSVField& field,
+                size_t row_start,
+                std::true_type
+            ) const {
+                csv::string_view field_str;
+                if (field.has_realized_storage()) {
+                    field_str = data.quote_arena.view(field.start, field.length);
+                }
+                else {
+                    field_str = csv::string_view(data.data).substr(row_start + field.start, field.length);
+                }
+
+                if (data.has_ws_trimming) {
+                    field_str = internals::get_trimmed(field_str, data.ws_flags);
+                }
+
+                data.field_scalars.emplace_back(internals::classify_field_scalar(field_str));
+            }
+
+            CSVChunkIndex append_realized_quoted_field(
                 RawCSVData& data,
                 size_t field_start,
                 size_t field_length,
@@ -8697,15 +9602,13 @@ namespace csv {
                 // than scanning quote-heavy fields twice in the parser hot path.
                 auto allocation = data.quote_arena.allocate_contiguous(field_str.size());
                 char* out = allocation.data;
-                for (size_t i = 0; i < field_str.size(); ++i) {
-                    if (data.parse_flags[field_str[i] + CHAR_OFFSET] == ParseFlags::QUOTE
+                size_t i = 0;
+                while (i < field_str.size()) {
+                    const bool doubled_quote = data.parse_flags[field_str[i] + CHAR_OFFSET] == ParseFlags::QUOTE
                         && i + 1 < field_str.size()
-                        && data.parse_flags[field_str[i + 1] + CHAR_OFFSET] == ParseFlags::QUOTE) {
-                        *(out++) = field_str[i++];
-                        continue;
-                    }
-
+                        && data.parse_flags[field_str[i + 1] + CHAR_OFFSET] == ParseFlags::QUOTE;
                     *(out++) = field_str[i];
+                    i += doubled_quote ? 2 : 1;
                 }
 
                 realized_length = static_cast<size_t>(out - allocation.data);
@@ -8763,7 +9666,7 @@ namespace csv {
         template<
             typename RowSink = RowCollection,
             typename ParsePolicy = PermissiveParsePolicy,
-            typename FieldPolicy = CSVRowFieldPolicy,
+            typename FieldPolicy = CSVRowFieldPolicy<false>,
             typename RowPolicy = CSVRowRowPolicy>
         class CSVParserCore {
         public:
@@ -8829,9 +9732,6 @@ namespace csv {
                 return quote_escape_flag(parse_flag(ch), this->quote_escape_);
             }
 
-            /** Whether or not this CSV has a UTF-8 byte order mark. */
-            CONSTEXPR bool utf8_bom() const { return this->utf8_bom_; }
-
             void set_output(RowSink& output) noexcept {
                 this->output_ = &output;
             }
@@ -8884,6 +9784,20 @@ namespace csv {
                     std::move(owner),
                     output,
                     ParserChunkOptions(this->initial_state_)
+                );
+            }
+
+            ParserChunkResult parse_chunk(
+                csv::string_view chunk,
+                std::shared_ptr<void> owner,
+                RowSink& output,
+                size_t source_start
+            ) {
+                return this->parse_chunk(
+                    chunk,
+                    std::move(owner),
+                    output,
+                    ParserChunkOptions(this->initial_state_, source_start)
                 );
             }
 
@@ -8948,9 +9862,6 @@ namespace csv {
                 this->pending_linefeed_ = start_state.pending_linefeed;
                 this->data_pos_ = 0;
                 this->current_row_start() = 0;
-                if (this->scan_bom_for_current_chunk_) {
-                    this->strip_unicode_bom();
-                }
 
                 auto& in = this->data_ptr_->data;
 
@@ -9068,14 +9979,9 @@ namespace csv {
             bool field_has_double_quote_ = false;
             ParserDFAState initial_state_;
             ParserDFAState ending_state_;
-            bool scan_bom_for_current_chunk_ = true;
 
             /** Where we are in the current data block. */
             size_t data_pos_ = 0;
-
-            /** Whether or not an attempt to find Unicode BOM has been made. */
-            bool unicode_bom_scan_ = false;
-            bool utf8_bom_ = false;
 
             RowSink* output_ = nullptr;
             ParsePolicy policy_;
@@ -9191,16 +10097,6 @@ namespace csv {
                 this->emit_row(std::move(current_row_));
             }
 
-            /** Handle possible Unicode byte order mark. */
-            void strip_unicode_bom() {
-                auto& data = this->data_ptr_->data;
-
-                if (!this->unicode_bom_scan_) {
-                    this->data_pos_ += get_bom_skip_or_throw(data, this->utf8_bom_);
-                    this->unicode_bom_scan_ = true;
-                }
-            }
-
             ParserChunkResult parse_prepared_chunk(
                 csv::string_view chunk,
                 std::shared_ptr<void> owner,
@@ -9212,10 +10108,11 @@ namespace csv {
                 this->reset_data_ptr();
                 this->data_ptr_->_data = std::move(owner);
                 this->data_ptr_->data = chunk;
+                this->data_ptr_->source_start = options.source_start;
                 this->data_ptr_->fields.reserve_for_source_size(chunk.size());
+                this->data_ptr_->field_scalars.reserve_for_source_size(chunk.size());
                 this->data_ptr_->quote_arena.reserve_for_source_size(chunk.size());
                 this->initial_state_ = options.initial_state;
-                this->scan_bom_for_current_chunk_ = options.scan_bom;
                 this->current_row_ = this->row_policy_.make_initial_row(this->data_ptr_);
                 this->policy_.begin_chunk(this->data_ptr_);
                 this->policy_.begin_row(this->current_row_);
@@ -9233,18 +10130,10 @@ namespace csv {
                 this->initial_state_ = this->ending_state_.pending_linefeed
                     ? this->ending_state_
                     : ParserDFAState{};
-                this->scan_bom_for_current_chunk_ = true;
                 return remainder;
             }
         };
-    }
-}
-
-
-#include <cstddef>
-
-namespace csv {
-    namespace internals {
+    
         namespace speculative {
         struct SpeculativeParseDiagnostics {
             size_t chunks = 0;
@@ -9271,9 +10160,15 @@ namespace csv {
     }
 }
 
-
 namespace csv {
     namespace internals {
+        /** Return leading BOM bytes to skip, reporting unsupported Unicode encodings.
+         *
+         *  BOM handling happens at the source-window level (CSVParseOrchestrator and
+         *  format guessing); CSVParserCore only ever sees BOM-free bytes.
+         */
+        size_t get_bom_skip(csv::string_view data, bool& utf8_bom, CSVError& error);
+
         namespace parser {
         struct GuessScore {
             size_t header;
@@ -9281,39 +10176,163 @@ namespace csv {
             double score;
         };
 
-        CSV_INLINE GuessScore calculate_score(csv::string_view head, const CSVFormat& format);
+        inline GuessScore calculate_score(csv::string_view head, const CSVFormat& format) {
+            // Frequency counter of row length
+            std::unordered_map<size_t, size_t> row_tally = { { 0, 0 } };
+
+            // Map row lengths to row num where they first occurred
+            std::unordered_map<size_t, size_t> row_when = { { 0, 0 } };
+
+            // Parse the CSV using the low-level constructor that takes pre-built flag
+            // tables — bypasses format resolution entirely and avoids recursion back
+            // into guess_format.
+            std::vector<CSVRow> rows;
+
+            const char delimiter = resolved_delimiter(format);
+            const auto parse_flags = format.is_quoting_enabled()
+                ? make_parse_flags(delimiter, format.get_quote_char())
+                : make_parse_flags(delimiter);
+            const auto ws_flags = make_ws_flags(format.get_trim_chars());
+            auto head_owner = std::make_shared<std::string>(std::string(head));
+            CSVParserCore<std::vector<CSVRow>> parser(parse_flags, ws_flags);
+            parser.parse_chunk(*head_owner, head_owner, rows);
+            parser.end_feed();
+
+            for (size_t i = 0; i < rows.size(); i++) {
+                auto& row = rows[i];
+
+                // Ignore zero-length rows
+                if (row.size() > 0) {
+                    if (row_tally.find(row.size()) != row_tally.end()) {
+                        row_tally[row.size()]++;
+                    }
+                    else {
+                        row_tally[row.size()] = 1;
+                        row_when[row.size()] = i;
+                    }
+                }
+            }
+
+            double final_score = 0;
+            size_t header_row = 0;
+            size_t mode_row_length = 0;
+
+            // Choose the row-length group with the largest width * frequency score.
+            for (auto& pair : row_tally) {
+                const size_t row_size = pair.first;
+                const size_t row_count = pair.second;
+                const double score = (double)(row_size * row_count);
+                if (score > final_score) {
+                    final_score = score;
+                    mode_row_length = row_size;
+                    header_row = row_when[row_size];
+                }
+            }
+
+            // Prefer the first row as header when it is at least as wide as the winning group.
+            size_t first_row_length = rows.size() > 0 ? rows[0].size() : 0;
+            if (first_row_length >= mode_row_length && first_row_length > 0) {
+                header_row = 0;
+            }
+
+            return { header_row, mode_row_length, final_score };
+        }
 
         /** Guess the delimiter used by a delimiter-separated values file. */
-        CSV_INLINE CSVGuessResult guess_format(
-            csv::string_view head,
-            const std::vector<char>& delims = { ',', '|', '\t', ';', '^', '~' }
-        );
+        inline CSVGuessResult guess_format(
+            csv::string_view head, const std::vector<char>& delims, CSVError& error) {
+            error.clear();
+            if (delims.empty()) {
+                fail_static(error, CSVErrorCode::InvalidFormat, "At least one delimiter is required.");
+                return {',', 0, 0};
+            }
+            /** Score each row-length group for every candidate delimiter.
+             *  The highest score (row_length * count) wins, even if that
+             *  row length is not the most frequent.
+             *
+             *  Header detection: If the first row is at least as wide as the
+             *  winning group, use row 0. Otherwise use that group's first row.
+             */
+            // The parser core does not handle BOMs, so strip one here (once, not
+            // per candidate). This also rejects UTF-16/UTF-32 before guessing
+            // scores mis-decoded bytes.
+            bool utf8_bom = false;
+            const size_t bom_skip = get_bom_skip(head, utf8_bom, error);
+            if (error) return {',', 0, 0};
+            head = head.substr(bom_skip);
+
+            CSVFormat format;
+            size_t max_score = 0;
+            size_t header = 0;
+            size_t n_cols = 0;
+            char current_delim = delims[0];
+
+            for (char cand_delim : delims) {
+                if (!format.try_delimiter(cand_delim, error)) return {',', 0, 0};
+                auto result = calculate_score(head, format);
+
+                if ((size_t)result.score > max_score) {
+                    max_score = (size_t)result.score;
+                    current_delim = cand_delim;
+                    header = result.header;
+                    n_cols = result.mode_row_length;
+                }
+            }
+
+            return { current_delim, (int)header, n_cols };
+        }
 
         /** Read the first 500KB from a seekless stream source. */
         template<typename TStream,
-            csv::enable_if_t<std::is_base_of<std::istream, TStream>::value, int>  = 0>
-        std::string get_csv_head_stream(TStream& source) {
-            const size_t limit = 500000;
+            csv::enable_if_t<std::is_base_of<std::istream, TStream>::value, int> = 0>
+        std::string get_csv_head_stream(TStream& source, CSVError& error) {
+            error.clear();
+#if !CSV_EXCEPTIONS_ENABLED
+            if (source.exceptions() != std::ios::goodbit) {
+                fail_static(error, CSVErrorCode::InvalidArgument,
+                    "Explicit CSV reads require a non-throwing stream exception mask.");
+                return {};
+            }
+#endif
+            const size_t limit = CSV_HEAD_PREVIEW_SIZE;
             std::string buf(limit, '\0');
-            source.read(&buf[0], (std::streamsize)limit);
+            CSV_TRY {
+                source.read(&buf[0], static_cast<std::streamsize>(limit));
+            }
+            CSV_CATCH((const std::ios_base::failure&), {
+                if (!source.eof() || source.bad()) {
+                    fail_static(error, CSVErrorCode::ReadFailed, ERROR_STREAM_READ_FAILURE);
+                    return {};
+                }
+            })
+            if (source.bad() || (source.fail() && !source.eof())) {
+                fail_static(error, CSVErrorCode::ReadFailed, ERROR_STREAM_READ_FAILURE);
+                return {};
+            }
             buf.resize(static_cast<size_t>(source.gcount()));
             return buf;
         }
 
 #if defined(__EMSCRIPTEN__)
         /** Open a file-backed source and read the first 500KB through the stream path. */
-        CSV_INLINE std::string get_csv_head_stream(csv::string_view filename);
+        std::string get_csv_head_stream(csv::string_view filename, CSVError& error);
 #endif
 
 #if !defined(__EMSCRIPTEN__)
         /** Read the first 500KB from a filename using mmap.
          *  Also returns the total file size so callers avoid a second mmap open.
          */
-        CSV_INLINE std::pair<std::string, size_t> get_csv_head_mmap(csv::string_view filename);
+        std::pair<std::string, size_t> get_csv_head_mmap(csv::string_view filename, CSVError& error);
 #endif
 
         /** Compatibility shim selecting stream on Emscripten and mmap otherwise. */
-        CSV_INLINE std::string get_csv_head(csv::string_view filename);
+        inline std::string get_csv_head(csv::string_view filename, CSVError& error) {
+#if defined(__EMSCRIPTEN__)
+            return get_csv_head_stream(filename, error);
+#else
+            return get_csv_head_mmap(filename, error).first;
+#endif
+        }
 
         struct ResolvedFormat {
             CSVFormat format;
@@ -9341,11 +10360,24 @@ namespace csv {
         *  @note Score = (row_length * count_of_rows_with_that_length)
         *  @note Also returns inferred mode-width column count (CSVGuessResult::n_cols)
          */
+    /** Infer a file's format, reporting source and encoding failures. */
+    inline CSVGuessResult try_guess_format(csv::string_view filename, CSVError& error,
+        const std::vector<char>& delims = { ',', '|', '\t', ';', '^', '~' }) {
+        error.clear();
+        auto head = internals::parser::get_csv_head(filename, error);
+        if (error) return {',', 0, 0};
+        return internals::parser::guess_format(head, delims, error);
+    }
+
+#if CSV_EXCEPTIONS_ENABLED
     inline CSVGuessResult guess_format(csv::string_view filename,
         const std::vector<char>& delims = { ',', '|', '\t', ';', '^', '~' }) {
-        auto head = internals::parser::get_csv_head(filename);
-        return internals::parser::guess_format(head, delims);
+        CSVError error;
+        auto result = try_guess_format(filename, error, delims);
+        internals::throw_error(error);
+        return result;
     }
+#endif
 
     namespace internals {
         namespace parser {
@@ -9367,7 +10399,7 @@ namespace csv {
                 size_t base_offset,
                 size_t serial_chunk_size,
                 bool source_exhausted,
-                RowCollection& output
+                RowCollection& output, CSVError& error
             ) = 0;
         };
 
@@ -9389,7 +10421,7 @@ namespace csv {
         class CSVParserDriverBase : public CSVParserCore<> {
         public:
             CSVParserDriverBase() = default;
-            CSVParserDriverBase(const CSVFormat&, const ColNamesPtr&);
+            CSVParserDriverBase(const CSVFormat& source_format, const ColNamesPtr& col_names) : CSVParserCore<>(source_format, col_names) {}
             CSVParserDriverBase(
                 const ParseFlagMap& parse_flags,
                 const WhitespaceMap& ws_flags
@@ -9397,8 +10429,11 @@ namespace csv {
 
             virtual ~CSVParserDriverBase() {}
 
+            /** Source errors are read by the consumer only after joining its scheduler. */
+            const CSVError& error() const noexcept { return error_; }
+
             /** Whether or not we have reached the end of source */
-            bool eof() { return this->eof_; }
+            bool eof() const noexcept { return this->eof_; }
 
             ResolvedFormat get_resolved_format() { return this->format; }
 
@@ -9420,13 +10455,14 @@ namespace csv {
             virtual bool utf8_bom() const noexcept {
                 return this->parse_orchestrator_
                     ? this->parse_orchestrator_->utf8_bom()
-                    : CSVParserCore<>::utf8_bom();
+                    : false;
             }
 
         protected:
             /** @name Current Stream/File State */
             ///@{
             bool eof_ = false;
+            CSVError error_;
 
             ResolvedFormat format;
 
@@ -9438,12 +10474,61 @@ namespace csv {
 
             virtual std::string& get_csv_head() = 0;
 
-            void resolve_format_from_head(const CSVFormat& format);
+            void resolve_format_from_head(const CSVFormat& source_format) {
+            auto head = this->get_csv_head();
+            if (error_) return;
+            // Setters reject empty candidates, but moving a format can leave its
+            // source vector empty. Validate that boundary before using resolved access.
+            if (source_format.possible_delimiters.empty()) {
+                fail_static(error_, CSVErrorCode::InvalidFormat, "At least one delimiter is required.");
+                return;
+            }
+
+            ResolvedFormat resolved;
+            resolved.format = source_format;
+
+            const bool infer_delimiter = source_format.guess_delim();
+            const bool infer_header = !source_format.header_explicitly_set_
+                && (infer_delimiter || !source_format.col_names_explicitly_set_);
+            const bool infer_n_cols = (source_format.get_header() < 0 && source_format.get_col_names().empty());
+
+            if (infer_delimiter || infer_header || infer_n_cols) {
+                auto guess_result = guess_format(head, source_format.get_possible_delims(), error_);
+                if (error_) return;
+                if (infer_delimiter) {
+                    if (!resolved.format.try_delimiter(guess_result.delim, error_)) return;
+                }
+
+                if (infer_header) {
+                    // Inferred header should not clear user-provided column names.
+                    resolved.format.header = guess_result.header_row;
+                }
+
+                resolved.n_cols = guess_result.n_cols;
+            }
+
+            const char delimiter = resolved_delimiter(resolved.format);
+            if (resolved.format.no_quote) {
+                this->set_parse_flags(
+                    make_parse_flags(delimiter),
+                    delimiter,
+                    delimiter
+                );
+            }
+            else {
+                this->set_parse_flags(
+                    make_parse_flags(delimiter, resolved.format.quote_char),
+                    delimiter,
+                    resolved.format.quote_char
+                );
+            }
+
+            this->format = resolved;
+        }
         };
         }
     }
 }
-
 
 #if !defined(__EMSCRIPTEN__)
 namespace csv {
@@ -9469,7 +10554,24 @@ namespace csv {
                 csv::string_view filename,
                 const CSVFormat& format,
                 const ColNamesPtr& col_names = nullptr
+            ) : CSVParserDriverBase(format, col_names) {
+            this->_filename = std::string(filename);
+            auto head_and_size = get_csv_head_mmap(filename, error_);
+            if (error_) return;
+            this->head_ = std::move(head_and_size.first);
+            this->source_size_ = head_and_size.second;
+            this->resolve_format_from_head(format);
+            if (error_) return;
+
+            this->parse_orchestrator_ = make_csv_parse_orchestrator(
+                this->parse_flags_,
+                this->whitespace_flags(),
+                format,
+                this->source_size_,
+                col_names,
+                true
             );
+        }
 
             ~MmapParser();
 
@@ -9481,14 +10583,40 @@ namespace csv {
             void next(size_t bytes) override;
 
         private:
-            void finalize_loaded_chunk(
+            /** Parse a loaded window and rewind mmap_pos to its incomplete tail.
+             *  Returns whether the window completed at least one row.
+             */
+            bool finalize_loaded_chunk(
                 csv::string_view chunk,
                 std::shared_ptr<void> owner,
                 size_t length,
                 size_t chunk_size
+            ) {
+            const size_t base_offset = this->mmap_pos - length;
+            const bool source_exhausted = this->mmap_pos == this->source_size_;
+            CSVParseWindowResult result = this->parse_orchestrator_->parse_window(
+                chunk,
+                std::move(owner),
+                base_offset,
+                chunk_size,
+                source_exhausted,
+                this->output(), error_
             );
+            if (error_) return false;
 
-            size_t read_window_size(size_t chunk_size) const noexcept;
+            if (source_exhausted) {
+                this->eof_ = true;
+            }
+
+            this->mmap_pos -= (length - result.complete_prefix_length);
+            return result.completed_row();
+        }
+
+            size_t read_window_size(size_t chunk_size) const noexcept {
+            return this->parse_orchestrator_
+                ? this->parse_orchestrator_->read_window_size(chunk_size)
+                : chunk_size;
+        }
 
             std::string _filename;
             size_t mmap_pos = 0;
@@ -9499,22 +10627,11 @@ namespace csv {
 }
 #endif
 
-/** @file
- *  @brief Runtime read scheduling for CSVReader.
- */
-
-
-#include <exception>
-#include <functional>
-#include <utility>
-
-
 #ifdef CSV_HAS_CXX20
 #include <concepts>
 #endif
 
 #if CSV_ENABLE_THREADS
-#include <mutex>
 #include <thread>
 #endif
 
@@ -9645,9 +10762,11 @@ namespace csv {
             }
 
             void rethrow_exception_if_any() {
+#if CSV_EXCEPTIONS_ENABLED
                 if (auto eptr = this->take_exception()) {
                     std::rethrow_exception(eptr);
                 }
+#endif
             }
 
         private:
@@ -9656,12 +10775,12 @@ namespace csv {
             std::mutex exception_lock_;
 
             void run_now(std::function<void()> task) noexcept {
-                try {
+                CSV_TRY {
                     task();
                 }
-                catch (...) {
+                CSV_CATCH((...), {
                     this->adopt_exception(std::current_exception());
-                }
+                })
             }
         };
 
@@ -9742,9 +10861,11 @@ namespace csv {
             }
 
             void rethrow_exception_if_any() {
+#if CSV_EXCEPTIONS_ENABLED
                 if (auto eptr = this->take_exception()) {
                     std::rethrow_exception(eptr);
                 }
+#endif
             }
 
         private:
@@ -9812,13 +10933,190 @@ namespace csv {
     }
 }
 
+#if CSV_ENABLE_THREADS
+#include <condition_variable>
+#include <thread>
+#endif
 
+namespace csv {
+    namespace internals {
+        namespace parallel {
 
+        class IndexedTaskPool {
+        public:
+            explicit IndexedTaskPool(size_t worker_count)
+#if CSV_ENABLE_THREADS
+                : worker_count_(worker_count)
+#endif
+            {
+                this->start_workers(worker_count);
+            }
 
+            IndexedTaskPool(const IndexedTaskPool&) = delete;
+            IndexedTaskPool& operator=(const IndexedTaskPool&) = delete;
 
+            ~IndexedTaskPool() {
+                this->stop_workers();
+            }
 
-#include <cmath>
-#include <limits>
+            size_t worker_count() const noexcept {
+#if CSV_ENABLE_THREADS
+                return this->worker_count_;
+#else
+                return 0;
+#endif
+            }
+
+            template<typename Fn>
+            void parallel_for(size_t task_count, Fn&& fn) {
+                if (task_count == 0) {
+                    return;
+                }
+
+#if CSV_ENABLE_THREADS
+                if (this->workers_.empty()) {
+                    this->run_serial(task_count, std::forward<Fn>(fn));
+                    return;
+                }
+
+                std::exception_ptr captured_exception;
+                {
+                    std::unique_lock<std::mutex> lock(this->mutex_);
+                    this->current_task_ = std::forward<Fn>(fn);
+                    this->task_exception_ = nullptr;
+                    this->next_task_.store(0);
+                    this->task_count_ = task_count;
+                    this->active_workers_ = this->workers_.size();
+                    ++this->generation_;
+                }
+
+                this->task_ready_.notify_all();
+
+                {
+                    std::unique_lock<std::mutex> lock(this->mutex_);
+                    this->task_done_.wait(lock, [this]() {
+                        return this->completed_generation_ == this->generation_;
+                    });
+
+                    captured_exception = this->task_exception_;
+                    this->current_task_ = std::function<void(size_t, size_t)>();
+                    this->task_exception_ = nullptr;
+                }
+
+#if CSV_EXCEPTIONS_ENABLED
+                if (captured_exception) {
+                    std::rethrow_exception(captured_exception);
+                }
+#endif
+#else
+                this->run_serial(task_count, std::forward<Fn>(fn));
+#endif
+            }
+
+        private:
+            template<typename Fn>
+            void run_serial(size_t task_count, Fn&& fn) {
+                for (size_t task_index = 0; task_index < task_count; ++task_index) {
+                    fn(0, task_index);
+                }
+            }
+
+#if CSV_ENABLE_THREADS
+            size_t worker_count_ = 0;
+
+            void start_workers(size_t worker_count) {
+                if (worker_count <= 1) {
+                    return;
+                }
+
+                this->workers_.reserve(worker_count);
+                for (size_t worker_index = 0; worker_index < worker_count; ++worker_index) {
+                    this->workers_.push_back(std::thread(&IndexedTaskPool::worker_loop, this, worker_index));
+                }
+            }
+
+            void stop_workers() {
+                {
+                    std::lock_guard<std::mutex> lock(this->mutex_);
+                    this->stop_ = true;
+                    ++this->generation_;
+                }
+
+                this->task_ready_.notify_all();
+                for (size_t i = 0; i < this->workers_.size(); ++i) {
+                    if (this->workers_[i].joinable()) {
+                        this->workers_[i].join();
+                    }
+                }
+            }
+
+            void worker_loop(size_t worker_index) {
+                size_t seen_generation = 0;
+
+                for (;;) {
+                    {
+                        std::unique_lock<std::mutex> lock(this->mutex_);
+                        this->task_ready_.wait(lock, [this, &seen_generation]() {
+                            return this->stop_ || this->generation_ != seen_generation;
+                        });
+
+                        if (this->stop_) {
+                            return;
+                        }
+
+                        seen_generation = this->generation_;
+                    }
+
+                    for (;;) {
+                        const size_t task_index = this->next_task_.fetch_add(1);
+                        if (task_index >= this->task_count_) {
+                            break;
+                        }
+
+                        CSV_TRY {
+                            this->current_task_(worker_index, task_index);
+                        }
+                        CSV_CATCH((...), {
+                            std::lock_guard<std::mutex> lock(this->mutex_);
+                            if (!this->task_exception_) {
+                                this->task_exception_ = std::current_exception();
+                                this->next_task_.store(this->task_count_);
+                            }
+                            break;
+                        })
+                    }
+
+                    {
+                        std::lock_guard<std::mutex> lock(this->mutex_);
+                        if (--this->active_workers_ == 0) {
+                            this->completed_generation_ = seen_generation;
+                            this->task_done_.notify_one();
+                        }
+                    }
+                }
+            }
+
+            std::vector<std::thread> workers_;
+            std::mutex mutex_;
+            std::condition_variable task_ready_;
+            std::condition_variable task_done_;
+            std::function<void(size_t, size_t)> current_task_;
+            std::exception_ptr task_exception_ = nullptr;
+            std::atomic<size_t> next_task_{0};
+            size_t task_count_ = 0;
+            size_t active_workers_ = 0;
+            size_t generation_ = 0;
+            size_t completed_generation_ = 0;
+            bool stop_ = false;
+#else
+            void start_workers(size_t) {}
+            void stop_workers() {}
+#endif
+        };
+
+        }
+    }
+}
 
 #if CSV_ENABLE_THREADS
 
@@ -10251,9 +11549,6 @@ namespace csv {
 
 #endif
 
-
-
-
 namespace csv {
     namespace internals {
         namespace speculative {
@@ -10335,7 +11630,6 @@ namespace csv {
             csv::string_view chunk;
             std::shared_ptr<void> owner;
             bool starts_at_record_boundary = true;
-            bool scan_bom = true;
             ParserChunkResult parse_result;
             CSVRowFragment prefix_fragment;
             std::vector<CSVRow> complete_rows;
@@ -10358,7 +11652,6 @@ namespace csv {
             result.owner = owner;
             result.starts_at_record_boundary = starts_at_record_boundary
                 || parse_result.initial_state.pending_linefeed;
-            result.scan_bom = starts_at_record_boundary && sequence_number == 0;
             result.parse_result = parse_result;
 
             size_t first_complete_row = 0;
@@ -10401,8 +11694,9 @@ namespace csv {
             return result;
         }
 
+        template<typename Parser>
         inline std::vector<CSVRow> materialize_row_fragment(
-            CSVParserCore<std::vector<CSVRow>>& parser,
+            Parser& parser,
             const CSVRowFragment& fragment
         ) {
             std::vector<CSVRow> rows;
@@ -10414,14 +11708,15 @@ namespace csv {
                 fragment.bytes,
                 fragment.owner,
                 rows,
-                ParserChunkOptions(ParserDFAState(), false)
+                ParserChunkOptions(ParserDFAState(), fragment.offset)
             );
             parser.end_feed();
             return rows;
         }
 
+        template<typename Parser>
         inline ParsedChunkRows repair_parsed_chunk_rows(
-            CSVParserCore<std::vector<CSVRow>>& parser,
+            Parser& parser,
             const ParsedChunkRows& chunk,
             ParserDFAState corrected_initial_state
         ) {
@@ -10431,7 +11726,7 @@ namespace csv {
                 chunk.chunk,
                 chunk.owner,
                 parsed_rows,
-                ParserChunkOptions(corrected_initial_state, chunk.scan_bom)
+                ParserChunkOptions(corrected_initial_state, chunk.offset)
             );
 
             return split_parsed_chunk_rows(
@@ -10450,34 +11745,46 @@ namespace csv {
          *  The SIGMOD-style speculative path treats input sourcing as an
          *  external concern. This parser core only needs delimiter/whitespace state.
          */
-        class ChunkParserCore : public CSVParserCore<std::vector<CSVRow>> {
+        template<bool EagerClassify = false>
+        class ChunkParserCoreT : public CSVParserCore<
+            std::vector<CSVRow>,
+            PermissiveParsePolicy,
+            CSVRowFieldPolicy<EagerClassify>,
+            CSVRowRowPolicy> {
+            using Base = CSVParserCore<
+                std::vector<CSVRow>,
+                PermissiveParsePolicy,
+                CSVRowFieldPolicy<EagerClassify>,
+                CSVRowRowPolicy>;
+
         public:
-            ChunkParserCore(
+            ChunkParserCoreT(
                 const ParseFlagMap& parse_flags,
                 const WhitespaceMap& ws_flags
-            ) : CSVParserCore<std::vector<CSVRow>>(parse_flags, ws_flags) {}
+            ) : Base(parse_flags, ws_flags) {}
 
-            ChunkParserCore(
+            ChunkParserCoreT(
                 const ParseFlagMap& parse_flags,
                 const WhitespaceMap& ws_flags,
                 const ColNamesPtr& col_names
-            ) : CSVParserCore<std::vector<CSVRow>>(parse_flags, ws_flags, col_names) {}
+            ) : Base(parse_flags, ws_flags, col_names) {}
         };
+
+        using ChunkParserCore = ChunkParserCoreT<false>;
         }
     }
 }
-
 
 #if CSV_ENABLE_THREADS
 
 namespace csv {
     namespace internals {
         namespace speculative {
-        template<typename RowSink>
+        template<typename RowSink, typename Parser = CSVParserCore<std::vector<CSVRow>>>
         class SpeculativeParseValidator {
         public:
             SpeculativeParseValidator(
-                CSVParserCore<std::vector<CSVRow>>& repair_parser,
+                Parser& repair_parser,
                 RowSink& output,
                 ParserDFAState initial_state = ParserDFAState()
             ) : repair_parser_(repair_parser),
@@ -10559,7 +11866,7 @@ namespace csv {
                 this->pending_suffix_ = CSVRowFragment();
             }
 
-            CSVParserCore<std::vector<CSVRow>>& repair_parser_;
+            Parser& repair_parser_;
             RowSink& output_;
             ParserDFAState expected_start_state_;
             CSVRowFragment pending_suffix_;
@@ -10569,12 +11876,6 @@ namespace csv {
     }
 }
 
-#endif
-
-
-#if CSV_ENABLE_THREADS
-#include <condition_variable>
-#include <thread>
 #endif
 
 #if CSV_ENABLE_THREADS
@@ -10589,7 +11890,6 @@ namespace csv {
             std::shared_ptr<void> owner;
             ChunkSpeculation speculation;
             bool starts_at_record_boundary = false;
-            bool scan_bom = false;
         };
 
         struct ParallelCSVParseResult {
@@ -10607,8 +11907,7 @@ namespace csv {
             size_t chunk_size,
             const SpeculativeScanner& scanner,
             size_t base_offset = 0,
-            size_t first_sequence_number = 0,
-            bool scan_bom_for_first_chunk = true
+            size_t first_sequence_number = 0
         ) {
             std::vector<SpeculativeParseChunk> chunks;
             if (chunk_size == 0) {
@@ -10628,7 +11927,6 @@ namespace csv {
                 chunk.owner = owner;
                 chunk.speculation = scanner.speculate(sequence_number, chunk.offset, bytes);
                 chunk.starts_at_record_boundary = first_chunk;
-                chunk.scan_bom = first_chunk && scan_bom_for_first_chunk;
 
                 // The first chunk in a speculative window starts at a known row
                 // boundary because source windows must be aligned to incomplete-row
@@ -10644,6 +11942,7 @@ namespace csv {
             return chunks;
         }
 
+        template<bool EagerClassify = false>
         class ParallelCSVParser {
         public:
             ParallelCSVParser(
@@ -10654,19 +11953,17 @@ namespace csv {
             ) : parse_flags_(parse_flags),
                 ws_flags_(ws_flags),
                 col_names_(col_names),
-                worker_count_(worker_count == 0 ? 1 : worker_count) {
-                this->start_workers();
+                task_pool_(worker_count == 0 ? 1 : worker_count) {
+                this->init_worker_parsers();
             }
 
-            ~ParallelCSVParser() {
-                this->stop_workers();
-            }
+            ~ParallelCSVParser() {}
 
             ParallelCSVParser(const ParallelCSVParser&) = delete;
             ParallelCSVParser& operator=(const ParallelCSVParser&) = delete;
 
             ParsedChunkRows parse_chunk(const SpeculativeParseChunk& chunk) const {
-                ChunkParserCore parser(this->parse_flags_, this->ws_flags_, this->col_names_);
+                ChunkParserCoreT<EagerClassify> parser(this->parse_flags_, this->ws_flags_, this->col_names_);
                 return this->parse_chunk_with(parser, chunk);
             }
 
@@ -10685,8 +11982,8 @@ namespace csv {
                 std::vector<ParsedChunkRows> parsed(chunks.size());
                 this->parse_chunks_into(chunks, parsed);
 
-                ChunkParserCore repair_parser(this->parse_flags_, this->ws_flags_, this->col_names_);
-                SpeculativeParseValidator<RowSink> validator(repair_parser, output);
+                ChunkParserCoreT<EagerClassify> repair_parser(this->parse_flags_, this->ws_flags_, this->col_names_);
+                SpeculativeParseValidator<RowSink, ChunkParserCoreT<EagerClassify>> validator(repair_parser, output);
                 for (size_t i = 0; i < parsed.size(); ++i) {
                     validator.validate_and_release(std::move(parsed[i]));
                 }
@@ -10710,7 +12007,7 @@ namespace csv {
 
         private:
             ParsedChunkRows parse_chunk_with(
-                CSVParserCore<std::vector<CSVRow>>& parser,
+                ChunkParserCoreT<EagerClassify>& parser,
                 const SpeculativeParseChunk& chunk
             ) const {
                 std::vector<CSVRow> rows;
@@ -10718,7 +12015,7 @@ namespace csv {
                     chunk.bytes,
                     chunk.owner,
                     rows,
-                    ParserChunkOptions(chunk.speculation.assumed_start_state, chunk.scan_bom)
+                    ParserChunkOptions(chunk.speculation.assumed_start_state, chunk.offset)
                 );
 
                 ParsedChunkRows result = split_parsed_chunk_rows(
@@ -10730,7 +12027,6 @@ namespace csv {
                     chunk.starts_at_record_boundary,
                     chunk.offset
                 );
-                result.scan_bom = chunk.scan_bom;
                 return result;
             }
 
@@ -10738,12 +12034,12 @@ namespace csv {
                 const std::vector<SpeculativeParseChunk>& chunks,
                 std::vector<ParsedChunkRows>& parsed
             ) {
-                if (this->worker_count_ > 1 && chunks.size() > 1) {
+                if (this->task_pool_.worker_count() > 1 && chunks.size() > 1) {
                     this->parse_chunks_parallel(chunks, parsed);
                     return;
                 }
 
-                ChunkParserCore parser(this->parse_flags_, this->ws_flags_, this->col_names_);
+                ChunkParserCoreT<EagerClassify> parser(this->parse_flags_, this->ws_flags_, this->col_names_);
                 for (size_t i = 0; i < chunks.size(); ++i) {
                     parsed[i] = this->parse_chunk_with(parser, chunks[i]);
                 }
@@ -10753,140 +12049,37 @@ namespace csv {
                 const std::vector<SpeculativeParseChunk>& chunks,
                 std::vector<ParsedChunkRows>& parsed
             ) {
-                if (this->workers_.empty()) {
-                    ChunkParserCore parser(this->parse_flags_, this->ws_flags_, this->col_names_);
-                    for (size_t i = 0; i < chunks.size(); ++i) {
-                        parsed[i] = this->parse_chunk_with(parser, chunks[i]);
-                    }
+                this->task_pool_.parallel_for(chunks.size(), [this, &chunks, &parsed](
+                    size_t worker_index,
+                    size_t task_index
+                ) {
+                    CSV_DEBUG_ASSERT(worker_index < this->worker_parsers_.size());
+                    parsed[task_index] = this->parse_chunk_with(
+                        this->worker_parsers_[worker_index],
+                        chunks[task_index]
+                    );
+                });
+            }
+
+            void init_worker_parsers() {
+                const size_t worker_count = this->task_pool_.worker_count();
+                if (worker_count <= 1) {
                     return;
                 }
 
-                std::exception_ptr worker_exception;
-                {
-                    std::unique_lock<std::mutex> lock(this->work_mutex_);
-                    this->active_chunks_ = &chunks;
-                    this->active_parsed_ = &parsed;
-                    this->next_task_ = 0;
-                    this->completed_workers_ = 0;
-                    this->failed_ = false;
-                    this->worker_exception_ = nullptr;
-                    this->generation_++;
-                }
-
-                this->work_ready_.notify_all();
-
-                {
-                    std::unique_lock<std::mutex> lock(this->work_mutex_);
-                    this->work_done_.wait(lock, [this]() {
-                        return this->completed_workers_ == this->workers_.size();
-                    });
-                    worker_exception = this->worker_exception_;
-                    this->active_chunks_ = nullptr;
-                    this->active_parsed_ = nullptr;
-                }
-
-                if (worker_exception) {
-                    std::rethrow_exception(worker_exception);
-                }
-            }
-
-            void start_workers() {
-                if (this->worker_count_ <= 1) {
-                    return;
-                }
-
-                this->workers_.reserve(this->worker_count_);
-                for (size_t i = 0; i < this->worker_count_; ++i) {
-                    this->workers_.push_back(std::thread(&ParallelCSVParser::worker_loop, this));
-                }
-            }
-
-            void stop_workers() {
-                {
-                    std::lock_guard<std::mutex> lock(this->work_mutex_);
-                    this->stop_ = true;
-                    this->generation_++;
-                }
-                this->work_ready_.notify_all();
-
-                for (size_t i = 0; i < this->workers_.size(); ++i) {
-                    if (this->workers_[i].joinable()) {
-                        this->workers_[i].join();
-                    }
-                }
-            }
-
-            void worker_loop() {
-                ChunkParserCore parser(this->parse_flags_, this->ws_flags_, this->col_names_);
-                size_t observed_generation = 0;
-
-                for (;;) {
-                    {
-                        std::unique_lock<std::mutex> lock(this->work_mutex_);
-                        this->work_ready_.wait(lock, [this, &observed_generation]() {
-                            return this->stop_ || this->generation_ != observed_generation;
-                        });
-
-                        if (this->stop_) {
-                            return;
-                        }
-                        observed_generation = this->generation_;
-                    }
-
-                    for (;;) {
-                        size_t task = 0;
-                        const std::vector<SpeculativeParseChunk>* chunks = nullptr;
-                        std::vector<ParsedChunkRows>* parsed = nullptr;
-                        {
-                            std::lock_guard<std::mutex> lock(this->work_mutex_);
-                            if (this->failed_ || this->next_task_ >= this->active_chunks_->size()) {
-                                break;
-                            }
-
-                            task = this->next_task_++;
-                            chunks = this->active_chunks_;
-                            parsed = this->active_parsed_;
-                        }
-
-                        try {
-                            (*parsed)[task] = this->parse_chunk_with(parser, (*chunks)[task]);
-                        }
-                        catch (...) {
-                            std::lock_guard<std::mutex> lock(this->work_mutex_);
-                            this->failed_ = true;
-                            if (!this->worker_exception_) {
-                                this->worker_exception_ = std::current_exception();
-                            }
-                            break;
-                        }
-                    }
-
-                    {
-                        std::lock_guard<std::mutex> lock(this->work_mutex_);
-                        this->completed_workers_++;
-                        if (this->completed_workers_ == this->workers_.size()) {
-                            this->work_done_.notify_one();
-                        }
-                    }
+                this->worker_parsers_.reserve(worker_count);
+                for (size_t i = 0; i < worker_count; ++i) {
+                    this->worker_parsers_.push_back(
+                        ChunkParserCoreT<EagerClassify>(this->parse_flags_, this->ws_flags_, this->col_names_)
+                    );
                 }
             }
 
             ParseFlagMap parse_flags_;
             WhitespaceMap ws_flags_;
             ColNamesPtr col_names_;
-            size_t worker_count_;
-            std::vector<std::thread> workers_;
-            std::mutex work_mutex_;
-            std::condition_variable work_ready_;
-            std::condition_variable work_done_;
-            const std::vector<SpeculativeParseChunk>* active_chunks_ = nullptr;
-            std::vector<ParsedChunkRows>* active_parsed_ = nullptr;
-            size_t next_task_ = 0;
-            size_t completed_workers_ = 0;
-            size_t generation_ = 0;
-            bool stop_ = false;
-            bool failed_ = false;
-            std::exception_ptr worker_exception_;
+            internals::parallel::IndexedTaskPool task_pool_;
+            std::vector<ChunkParserCoreT<EagerClassify>> worker_parsers_;
         };
         }
     }
@@ -10894,10 +12087,10 @@ namespace csv {
 
 #endif
 
-
 namespace csv {
     namespace internals {
         namespace parser {
+        template<bool EagerClassify = false>
         class CSVParseOrchestrator : public ICSVParseOrchestrator {
         public:
             CSVParseOrchestrator(
@@ -10937,7 +12130,7 @@ namespace csv {
                         this->worker_count_
                     ));
                 if (this->use_speculative_parallel_) {
-                    this->speculative_parser_.reset(new speculative::ParallelCSVParser(
+                    this->speculative_parser_.reset(new speculative::ParallelCSVParser<EagerClassify>(
                         this->parse_flags_,
                         this->ws_flags_,
                         this->worker_count_,
@@ -10963,7 +12156,14 @@ namespace csv {
             }
 
             SpeculativeParseDiagnostics diagnostics() const noexcept override {
+#if CSV_ENABLE_THREADS
+                this->lock_speculative_diagnostics_();
+                const SpeculativeParseDiagnostics diagnostics = this->speculative_diagnostics_;
+                this->unlock_speculative_diagnostics_();
+                return diagnostics;
+#else
                 return this->speculative_diagnostics_;
+#endif
             }
 
             size_t read_window_size(size_t chunk_size) const noexcept override {
@@ -10984,7 +12184,7 @@ namespace csv {
             }
 
             bool utf8_bom() const noexcept override {
-                return this->serial_parser_.utf8_bom();
+                return this->utf8_bom_;
             }
 
             void reset_with_initial_state(ParserDFAState state) noexcept override {
@@ -11001,8 +12201,60 @@ namespace csv {
                 size_t base_offset,
                 size_t serial_chunk_size,
                 bool source_exhausted,
-                RowCollection& output
+                RowCollection& output, CSVError& error
             ) override {
+                // BOM handling is a source-window concern: detect it once on the
+                // first window, reject unsupported encodings before any parser
+                // (serial or speculative) sees the bytes, and hand parsers a
+                // BOM-free view. Source adapters speak in original source-byte
+                // offsets, so the skipped bytes are added back to the completed
+                // prefix. That also keeps a re-read of the first window (e.g. an
+                // mmap head that completed no row, issue #337) from starting at
+                // the BOM again.
+                //
+                // Both adapters' first windows include the pre-read head buffer
+                // (up to 500KB); streams may append more bytes before parsing.
+                // A first window too short to classify a BOM therefore occurs
+                // only at end of input.
+                size_t bom_skip = 0;
+                if (!this->bom_scanned_) {
+                    bom_skip = get_bom_skip(chunk, this->utf8_bom_, error);
+                    if (error) return {};
+                    this->bom_scanned_ = true;
+                }
+
+                CSVParseWindowResult result = this->dispatch_window(
+                    chunk.substr(bom_skip),
+                    std::move(owner),
+                    base_offset + bom_skip,
+                    serial_chunk_size,
+                    source_exhausted,
+                    output
+                );
+                result.complete_prefix_length += bom_skip;
+                result.skipped_prefix_length = bom_skip;
+                return result;
+            }
+
+        private:
+#if CSV_ENABLE_THREADS
+            void lock_speculative_diagnostics_() const noexcept {
+                while (this->speculative_diagnostics_lock_.test_and_set(std::memory_order_acquire)) {}
+            }
+
+            void unlock_speculative_diagnostics_() const noexcept {
+                this->speculative_diagnostics_lock_.clear(std::memory_order_release);
+            }
+#endif
+
+            CSVParseWindowResult dispatch_window(
+                csv::string_view chunk,
+                std::shared_ptr<void> owner,
+                size_t base_offset,
+                size_t serial_chunk_size,
+                bool source_exhausted,
+                RowCollection& output
+            ) {
 #if CSV_ENABLE_THREADS
                 if (this->use_speculative_parallel_
                     && this->worker_count_ > 1
@@ -11018,22 +12270,22 @@ namespace csv {
                     );
                 }
 #else
-                (void)base_offset;
                 (void)serial_chunk_size;
 #endif
 
                 return this->parse_serial_window(
                     chunk,
                     std::move(owner),
+                    base_offset,
                     source_exhausted,
                     output
                 );
             }
 
-        private:
             CSVParseWindowResult parse_serial_window(
                 csv::string_view chunk,
                 std::shared_ptr<void> owner,
+                size_t base_offset,
                 bool source_exhausted,
                 RowCollection& output
             ) {
@@ -11041,7 +12293,8 @@ namespace csv {
                 const ParserChunkResult parse_result = this->serial_parser_.parse_chunk(
                     chunk,
                     std::move(owner),
-                    output
+                    output,
+                    base_offset
                 );
                 result.complete_prefix_length = parse_result.complete_prefix_length;
                 if (source_exhausted) {
@@ -11065,9 +12318,7 @@ namespace csv {
                     owner,
                     serial_chunk_size,
                     this->scanner_,
-                    base_offset,
-                    0,
-                    base_offset == 0
+                    base_offset
                 );
 
                 const speculative::ParallelCSVParseResult parse_result = this->speculative_parser_->parse_chunks(
@@ -11077,20 +12328,34 @@ namespace csv {
                 );
 
                 result.complete_prefix_length = parse_result.complete_prefix_length;
+                this->lock_speculative_diagnostics_();
                 this->speculative_diagnostics_.merge(parse_result.diagnostics);
+                this->unlock_speculative_diagnostics_();
                 return result;
             }
 #endif
 
-            CSVParserCore<> serial_parser_;
+            CSVParserCore<
+                RowCollection,
+                PermissiveParsePolicy,
+                CSVRowFieldPolicy<EagerClassify>,
+                CSVRowRowPolicy> serial_parser_;
             SpeculativeParseDiagnostics speculative_diagnostics_;
+#if CSV_ENABLE_THREADS
+            /** Keeps cumulative diagnostics coherent while a parser window is merged. */
+            mutable std::atomic_flag speculative_diagnostics_lock_ = ATOMIC_FLAG_INIT;
+#endif
+
+            /** Whether the first source window has been checked for a Unicode BOM. */
+            bool bom_scanned_ = false;
+            bool utf8_bom_ = false;
 #if CSV_ENABLE_THREADS
             ParseFlagMap parse_flags_;
             WhitespaceMap ws_flags_;
             speculative::SpeculativeScanner scanner_;
             bool use_speculative_parallel_ = false;
             size_t worker_count_ = 1;
-            std::unique_ptr<speculative::ParallelCSVParser> speculative_parser_;
+            std::unique_ptr<speculative::ParallelCSVParser<EagerClassify>> speculative_parser_;
 #endif
         };
 
@@ -11103,20 +12368,31 @@ namespace csv {
             bool enable_speculative_parallel,
             bool source_size_known
         ) {
-            return std::unique_ptr<ICSVParseOrchestrator>(new CSVParseOrchestrator(
-                parse_flags,
-                ws_flags,
-                format,
-                source_size,
-                col_names,
-                enable_speculative_parallel,
-                source_size_known
-            ));
+            if (format.is_eager_field_classification_enabled()) {
+                return std::unique_ptr<ICSVParseOrchestrator>(new CSVParseOrchestrator<true>(
+                    parse_flags,
+                    ws_flags,
+                    format,
+                    source_size,
+                    col_names,
+                    enable_speculative_parallel,
+                    source_size_known
+                ));
+            }
+
+            return std::unique_ptr<ICSVParseOrchestrator>(new CSVParseOrchestrator<false>(
+                    parse_flags,
+                    ws_flags,
+                    format,
+                    source_size,
+                    col_names,
+                    enable_speculative_parallel,
+                    source_size_known
+                ));
         }
         }
     }
 }
-
 
 namespace csv {
     namespace internals {
@@ -11152,6 +12428,7 @@ namespace csv {
             ) : CSVParserDriverBase(format, col_names),
                 source_(source) {
                 this->resolve_format_from_head(format);
+                if (this->error_) return;
                 this->parse_orchestrator_ = make_csv_parse_orchestrator(
                     this->parse_flags_,
                     this->whitespace_flags(),
@@ -11183,12 +12460,12 @@ namespace csv {
             ~StreamParser() {}
 
             std::string& get_csv_head() override {
-                leftover_ = get_csv_head_stream(this->source_);
+                leftover_ = get_csv_head_stream(this->source_, this->error_);
                 return this->leftover_;
             }
 
             void next(size_t bytes = CSV_CHUNK_SIZE_DEFAULT) override {
-                if (this->eof()) return;
+                if (this->eof() || this->error_) return;
 
                 auto chunk_owner = std::make_shared<std::string>();
                 auto& chunk = *chunk_owner;
@@ -11207,7 +12484,22 @@ namespace csv {
                     ? window_size - chunk.size()
                     : bytes;
                 std::unique_ptr<char[]> buf(new char[read_size]);
-                source_.read(buf.get(), (std::streamsize)read_size);
+#if !CSV_EXCEPTIONS_ENABLED
+                if (source_.exceptions() != std::ios::goodbit) {
+                    fail_static(this->error_, CSVErrorCode::InvalidArgument,
+                        "Explicit CSV reads require a non-throwing stream exception mask.");
+                    return;
+                }
+#endif
+                CSV_TRY {
+                    source_.read(buf.get(), static_cast<std::streamsize>(read_size));
+                }
+                CSV_CATCH((const std::ios_base::failure&), {
+                    if (!source_.eof() || source_.bad()) {
+                        fail_static(this->error_, CSVErrorCode::ReadFailed, ERROR_STREAM_READ_FAILURE);
+                        return;
+                    }
+                })
 
                 const size_t n = static_cast<size_t>(source_.gcount());
 
@@ -11216,8 +12508,9 @@ namespace csv {
                 // Check for real I/O errors only (bad bit indicates unrecoverable error).
                 // failbit alone is not fatal - it's set on EOF or when requesting bytes
                 // beyond available data, which is normal behavior for stringstreams.
-                if (source_.bad()) {
-                    throw_stream_read_failure();
+                if (source_.bad() || (source_.fail() && !source_.eof())) {
+                    fail_static(this->error_, CSVErrorCode::ReadFailed, ERROR_STREAM_READ_FAILURE);
+                    return;
                 }
 
                 const bool source_exhausted = source_.eof() || chunk.empty();
@@ -11227,8 +12520,9 @@ namespace csv {
                     this->stream_pos_,
                     bytes,
                     source_exhausted,
-                    this->output()
+                    this->output(), this->error_
                 );
+                if (this->error_) return;
 
                 if (source_exhausted) {
                     this->eof_ = true;
@@ -11272,7 +12566,6 @@ namespace csv {
     }
 }
 
-
 /** The all encompassing namespace */
 namespace csv {
     /** @class CSVReader
@@ -11283,9 +12576,10 @@ namespace csv {
      *  - Custom behavior can be defined by overriding bad_row_handler in a subclass
      *
      *  **Streaming semantics:** CSVReader is a single-pass streaming reader. Every read
-     *  operation — read_row(), the iterator interface — pulls rows permanently
-     *  from the internal queue. Rows consumed by one interface are not visible to another.
-     *  There is no rewind or seek.
+     *  operation — read_row(), read_chunk(), and the iterator interface — pulls rows
+     *  permanently from the internal queue. Rows consumed by one interface are not
+     *  visible to another. has_next_row()/try_has_next_row() can check for a
+     *  logical next row without consuming it, but there is no rewind or seek.
      *
     *  **Ownership and sharing:** CSVReader is non-copyable and move-enabled. It manages
     *  live parsing state (worker thread, internal queue, and optional owned stream), so
@@ -11314,6 +12608,7 @@ namespace csv {
          *       See `include/internal/ARCHITECTURE.md` § "CSVReader::iterator is single-pass by design"
          *       for the full rationale.
          */
+#if CSV_EXCEPTIONS_ENABLED
         class iterator {
         public:
             #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -11326,7 +12621,10 @@ namespace csv {
 
             iterator() = default;
             iterator(CSVReader* reader) : daddy(reader) {}
-            iterator(CSVReader*, CSVRow&&);
+            iterator(CSVReader* _daddy, CSVRow&& _row) :
+        daddy(_daddy) {
+        row = std::move(_row);
+    }
 
             /** Access the CSVRow held by the iterator */
             CONSTEXPR_14 reference operator*() { return this->row; }
@@ -11336,8 +12634,21 @@ namespace csv {
             CONSTEXPR_14 pointer operator->() { return &(this->row); }
             CONSTEXPR_14 pointer operator->() const { return const_cast<pointer>(&(this->row)); }
 
-            iterator& operator++();   /**< Pre-increment iterator */
-            iterator operator++(int); /**< Post-increment iterator */
+            iterator& operator++() {
+        if (!daddy->read_row(this->row)) {
+            this->daddy = nullptr; // this == end()
+        }
+
+        return *this;
+    }   /**< Pre-increment iterator */
+            iterator operator++(int) {
+        auto temp = *this;
+        if (!daddy->read_row(this->row)) {
+            this->daddy = nullptr; // this == end()
+        }
+
+        return temp;
+    } /**< Post-increment iterator */
 
             /** Returns true if iterators were constructed from the same CSVReader
              *  and point to the same row
@@ -11352,6 +12663,7 @@ namespace csv {
             CSVRow row;                   // Current row
             size_t i = 0;               // Index of current row
         };
+#endif
 
         /** @name Constructors
          *  Constructors for iterating over large files and parsing in-memory sources.
@@ -11369,24 +12681,52 @@ namespace csv {
          * @note When writing tests that validate I/O behavior, test both filename and stream constructors.
          * @see StreamParser for the stream-based alternative.
          */
-        CSVReader(csv::string_view filename, const CSVFormat& format = CSVFormat::guess_csv())
-            : _format(format),
-              read_scheduler_(format.is_threading_enabled()) {
-#if defined(__EMSCRIPTEN__)
-            this->owned_stream = std::unique_ptr<std::istream>(
-                new std::ifstream(std::string(filename), std::ios::binary)
-            );
+        /** Open a reader, returning null on initialization failure.
+         *  A borrowed stream must outlive the reader and any pending worker.
+         *  In a no-exceptions build it must have a non-throwing exception mask.
+         */
+        static std::unique_ptr<CSVReader> try_open(
+            csv::string_view filename, CSVError& error,
+            const CSVFormat& format = CSVFormat::guess_csv()) {
+        error.clear();
+        std::unique_ptr<CSVReader> reader(new CSVReader(format, initialize_tag{}));
+        reader->open_file(filename, format);
+        error = reader->error_;
+        return error ? nullptr : std::move(reader);
+    }
 
-            if (!(*this->owned_stream)) {
-                internals::throw_cannot_open_file(filename);
-            }
+        template<typename TStream,
+            csv::enable_if_t<std::is_base_of<std::istream, TStream>::value, int> = 0>
+        static std::unique_ptr<CSVReader> try_open(
+            TStream& source, CSVError& error,
+            const CSVFormat& format = CSVFormat::guess_csv()) {
+            error.clear();
+            std::unique_ptr<CSVReader> reader(new CSVReader(format, initialize_tag{}));
+            reader->init_from_stream(source, format);
+            error = reader->error_;
+            return error ? nullptr : std::move(reader);
+        }
 
-            this->init_from_stream(*this->owned_stream, format);
-#else
-            this->init_parser(std::unique_ptr<internals::parser::CSVParserDriverBase>(
-                new internals::parser::MmapParser(filename, format, this->col_names)
-            ));
+        static std::unique_ptr<CSVReader> try_open(
+            std::unique_ptr<std::istream> source, CSVError& error,
+            const CSVFormat& format = CSVFormat::guess_csv());
+
+#ifdef CSV_HAS_STD_EXPECTED
+        template<typename Source>
+        static std::expected<std::unique_ptr<CSVReader>, CSVError> try_open(
+            Source&& source, const CSVFormat& format = CSVFormat::guess_csv()) {
+            CSVError error;
+            auto reader = try_open(std::forward<Source>(source), error, format);
+            if (error) return std::unexpected(std::move(error));
+            return reader;
+        }
 #endif
+
+#if CSV_EXCEPTIONS_ENABLED
+        CSVReader(csv::string_view filename, const CSVFormat& format = CSVFormat::guess_csv())
+            : CSVReader(format, initialize_tag{}) {
+            open_file(filename, format);
+            internals::throw_error(error_);
         }
 
         /** @brief Construct CSVReader from std::istream
@@ -11403,10 +12743,10 @@ namespace csv {
          */
         template<typename TStream,
             csv::enable_if_t<std::is_base_of<std::istream, TStream>::value, int> = 0>
-        CSVReader(TStream &source, CSVFormat format = CSVFormat::guess_csv())
-            : _format(format),
-              read_scheduler_(format.is_threading_enabled()) {
-            this->init_from_stream(source, format);
+        CSVReader(TStream& source, const CSVFormat& format = CSVFormat::guess_csv())
+            : CSVReader(format, initialize_tag{}) {
+            init_from_stream(source, format);
+            internals::throw_error(error_);
         }
 
         /** @brief Construct CSVReader from an owned std::istream
@@ -11416,15 +12756,14 @@ namespace csv {
          */
         CSVReader(std::unique_ptr<std::istream> source,
             const CSVFormat& format = CSVFormat::guess_csv())
-            : _format(format),
-              owned_stream(std::move(source)),
-              read_scheduler_(format.is_threading_enabled()) {
-            if (!this->owned_stream) {
+            : CSVReader(format, initialize_tag{}) {
+            owned_stream = std::move(source);
+            if (!owned_stream)
                 throw std::invalid_argument(internals::ERROR_READER_NULL_STREAM);
-            }
-
-            this->init_from_stream(*this->owned_stream, format);
+            init_from_stream(*owned_stream, format);
+            internals::throw_error(error_);
         }
+#endif
         ///@}
 
         CSVReader(const CSVReader&) = delete;             ///< Not copyable
@@ -11484,7 +12823,82 @@ namespace csv {
          * **Example:**
          * \snippet tests/test_read_csv.cpp CSVField Example
          */
-        bool read_row(CSVRow &row);
+#if CSV_EXCEPTIONS_ENABLED
+        bool read_row(CSVRow &row) {
+        CSVError error;
+        const bool read = try_read_row(row, error);
+        internals::throw_error(error);
+        return read;
+    }
+#endif
+        /** Retrieve a row, distinguishing EOF (false, no error) from failure.
+         *  A failure is terminal. Successfully consumed rows are not rolled back.
+         */
+        bool try_read_row(CSVRow& row, CSVError& error) {
+        error.clear();
+        while (this->check_for_rows()) {
+            if (this->records->empty())
+                continue;
+                
+            if (this->accept_row(this->records->pop_front(), &row, nullptr))
+                return true;
+        }
+
+        error = error_;
+        return false;
+    }
+
+        /** Check whether a logical next row is available without consuming it.
+         *
+         * This may read from the source and block while parsing completes. Rows
+         * excluded by the active variable-column policy may be discarded while
+         * searching for the next row that a consumption API would return.
+         *
+         * @returns `true` if the next call to a row-consumption API can produce a
+         *          row, or `false` after ordinary exhaustion.
+         *
+         * @note This reader remains a single-consumer object. Do not call this
+         *       concurrently with other reader operations.
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        bool has_next_row() {
+        CSVError error;
+        const bool has_row = try_has_next_row(error);
+        internals::throw_error(error);
+        return has_row;
+    }
+#endif
+        /** Check for a logical next row, distinguishing exhaustion from failure.
+         *  This has the same blocking, filtering, and non-consumption semantics
+         *  as has_next_row(). Returns false with a clear error at ordinary exhaustion.
+         */
+        bool try_has_next_row(CSVError& error) {
+        error.clear();
+        while (this->check_for_rows()) {
+            CSVRow candidate;
+            if (!this->records->try_copy_front(candidate)) {
+                continue;
+            }
+
+            if (this->row_is_returnable(candidate)) {
+                return true;
+            }
+
+            if (error_) {
+                error = error_;
+                return false;
+            }
+
+            // Keep this lookahead loop separate from try_read_row(): only callers
+            // requesting a peek should pay for the locked front-row copy. Under
+            // CSVReader's single-consumer contract, the copied front remains the
+            // queue front until this discard.
+            this->records->pop_front();
+        }
+
+        error = error_;
+        return false;
+    }
 
         /** Read up to `max_rows` rows into a caller-owned batch buffer.
          *
@@ -11507,12 +12921,54 @@ namespace csv {
          * **Example:**
          * \snippet tests/test_read_csv_file.cpp CSVReader read_chunk Example
          */
-        bool read_chunk(std::vector<CSVRow>& out, size_t max_rows);
-        iterator begin();
+#if CSV_EXCEPTIONS_ENABLED
+        bool read_chunk(std::vector<CSVRow>& out, size_t max_rows) {
+        if (max_rows == 0) { out.clear(); return false; }
+        CSVError error;
+        const bool read = try_read_chunk(out, max_rows, error);
+        internals::throw_error(error);
+        return read;
+    }
+        iterator begin() {
+        CSVRow row;
+        if (!this->read_row(row)) {
+            return this->end();
+        }
+        return CSVReader::iterator(this, std::move(row));
+    }
         CSV_CONST iterator end() const noexcept;
+#endif
+        /** Clear out and read a batch. Failure may leave a successfully consumed prefix.
+         *  max_rows must be nonzero. Inspect error even when out contains rows.
+         */
+        bool try_read_chunk(std::vector<CSVRow>& out, size_t max_rows, CSVError& error) {
+        error.clear();
+        out.clear();
 
-        /** Returns true if we have reached end of file */
-        bool eof() const noexcept { return this->parser->eof(); }
+        if (max_rows == 0) {
+            return internals::fail_static(error, CSVErrorCode::InvalidArgument, "read_chunk() requires a non-zero row count.");
+        }
+
+        while (out.size() < max_rows) {
+            if (check_for_rows()) {
+                if (this->records->empty()) {
+                    continue;
+                }
+
+                const size_t before_size = out.size();
+                this->drain_rows_into_chunk(out, max_rows);
+                if (error_) { error = error_; return false; }
+
+                if (out.size() == before_size) {
+                    continue;
+                }
+            }
+            else { error = error_; return !error && !out.empty(); }
+        }
+
+        return true;
+    }
+
         ///@}
 
         /** @name CSV Metadata */
@@ -11522,7 +12978,17 @@ namespace csv {
          * The returned format reflects delimiter/header inference and the active
          * column names after construction.
          */
-        CSVFormat get_format() const;
+        CSVFormat get_format() const {
+        CSVFormat new_format = this->_format;
+
+        // Since users are normally not allowed to set
+        // column names and header row simulatenously,
+        // we will set the backing variables directly here
+        new_format.col_names = this->col_names->get_col_names();
+        new_format.header = this->_format.header;
+
+        return new_format;
+    }
 
         /** Return the active column names in CSV order. */
         const std::vector<std::string>& get_col_names() const{
@@ -11543,11 +13009,11 @@ namespace csv {
 
         /** @name CSV Metadata: Attributes */
         ///@{
-        /** Whether or not the file or stream contains valid CSV rows,
-         *  not including the header.
+        /** Whether no data rows have been successfully returned yet.
          *
-         *  @note Gives an accurate answer regardless of when it is called.
-         *
+         *  This is historical consumption metadata equivalent to `n_rows() == 0`;
+         *  it does not report whether unread rows remain. Use has_next_row() or
+         *  try_has_next_row() for non-consuming lookahead.
          */
         CONSTEXPR bool empty() const noexcept { return this->n_rows() == 0; }
 
@@ -11578,7 +13044,11 @@ namespace csv {
          */
 
         /** Sets this reader's column names and associated data */
-        void set_col_names(const std::vector<std::string>&);
+        void set_col_names(const std::vector<std::string>& names) {
+        this->col_names->set_policy(this->_format.get_column_name_policy());
+        this->col_names->set_col_names(names);
+        this->n_cols = names.size();
+    }
 
         /** @name CSV Settings **/
         ///@{
@@ -11611,14 +13081,57 @@ namespace csv {
          *  Functions that actively drive parser execution and produce rows.
          */
         ///@{
-        bool read_csv(size_t bytes = internals::CSV_CHUNK_SIZE_DEFAULT);
+        bool read_csv(size_t bytes = internals::CSV_CHUNK_SIZE_DEFAULT) {
+        // SCHEDULED READ FUNCTION: Runs asynchronously when runtime threading
+        // is enabled, or synchronously when CSVFormat::threading(false) is active.
+        //
+        // Threading model:
+        // 1. notify_all() - signals read_row() that worker is active
+        // 2. parser->next() - reads and parses bytes (10MB chunks)
+        // 3. kill_all() - signals read_row() that worker is done
+        //
+        // Operational errors stay on the source adapter until the consumer joins.
+        // In exception-enabled builds, CSVReadScheduler catches exceptions and rethrows
+        // them on the consumer thread. Bug #282 fixed cases where worker
+        // exceptions were swallowed, causing std::terminate().
+        
+        // Tell read_row() to listen for CSV rows
+        this->records->notify_all();
+
+        CSV_TRY {
+            this->parser->set_output(*this->records);
+            this->parser->next(bytes);
+
+            if (!parser->error() && !this->header_trimmed) {
+                this->trim_header();
+            }
+        }
+        CSV_CATCH((...), {
+            this->records->kill_all();
+            throw;
+        })
+
+        // Tell read_row() to stop waiting
+        this->records->kill_all();
+
+        return true;
+    }
         ///@}
 
         /**@}*/
 
     private:
+        struct initialize_tag {};
+        CSVReader(const CSVFormat& format, initialize_tag)
+            : _format(format), read_scheduler_(format.is_threading_enabled()) {}
+        CSVError error_;
+        void open_file(csv::string_view filename, const CSVFormat& format);
+
         /** Whether or not rows before header were trimmed */
         bool header_trimmed = false;
+
+        /** How many rows up to and including the header have been trimmed */
+        int header_rows_trimmed_ = 0;
         
         /** @name Reader Scheduling: Flags and State */
         ///@{
@@ -11629,6 +13142,7 @@ namespace csv {
 
         void move_state_from(CSVReader& other) noexcept {
             this->_format = std::move(other._format);
+            this->error_ = std::move(other.error_);
             this->col_names = std::move(other.col_names);
             this->parser = std::move(other.parser);
             this->records = std::move(other.records);
@@ -11636,6 +13150,7 @@ namespace csv {
             this->n_cols = other.n_cols;
             this->_n_rows = other._n_rows;
             this->header_trimmed = other.header_trimmed;
+            this->header_rows_trimmed_ = other.header_rows_trimmed_;
             this->_chunk_size = other._chunk_size;
             this->_read_requested = other._read_requested;
             this->read_scheduler_.set_threading_enabled(this->_format.is_threading_enabled());
@@ -11647,6 +13162,7 @@ namespace csv {
             this->n_cols = 0;
             this->_n_rows = 0;
             this->header_trimmed = false;
+            this->header_rows_trimmed_ = 0;
             this->_read_requested = false;
             this->_chunk_size = internals::CSV_CHUNK_SIZE_DEFAULT;
         }
@@ -11659,11 +13175,27 @@ namespace csv {
         /** Shared parser installation after source-specific bootstrap has completed
          *  in concrete parser implementations.
          */
-        void init_parser(std::unique_ptr<internals::parser::CSVParserDriverBase> parser);
+        void init_parser(std::unique_ptr<internals::parser::CSVParserDriverBase> parser_impl) {
+        if (parser_impl->error()) {
+            error_ = parser_impl->error();
+            return;
+        }
+        auto resolved = parser_impl->get_resolved_format();
+        this->_format = resolved.format;
+        this->_chunk_size = this->_format.get_chunk_size();
+        this->n_cols = resolved.n_cols;
+
+        if (!this->_format.col_names.empty()) {
+            this->set_col_names(this->_format.col_names);
+        }
+
+        this->parser = std::move(parser_impl);
+        this->initial_read();
+    }
 
         template<typename TStream,
             csv::enable_if_t<std::is_base_of<std::istream, TStream>::value, int> = 0>
-        void init_from_stream(TStream& source, CSVFormat format) {
+        void init_from_stream(TStream& source, const CSVFormat& format) {
             this->init_parser(
                 std::unique_ptr<internals::parser::CSVParserDriverBase>(
                     new internals::parser::StreamParser<TStream>(source, format, this->col_names)
@@ -11671,14 +13203,49 @@ namespace csv {
             );
         }
 
-        /** Read initial chunk to get metadata */
+        /** Read until the header row is consumed (or EOF) to get metadata */
         void initial_read() {
+        // Issue #337: A single read window may end before the header row when
+        // earlier rows are long, so keep reading until the header is consumed.
+        do {
+            const int trimmed_before = this->header_rows_trimmed_;
             this->read_scheduler_.run([this] { this->read_csv(this->_chunk_size); });
             this->read_scheduler_.join();
             this->read_scheduler_.rethrow_exception_if_any();
-        }
+            if (parser->error()) {
+                error_ = parser->error();
+                return;
+            }
 
-        void trim_header();
+            // trim_header() drains the queue until the header is consumed, so an
+            // untrimmed header with no progress means the read produced no rows.
+            if (!this->header_trimmed && !this->parser->eof()
+                && this->header_rows_trimmed_ == trimmed_before) {
+                internals::fail(error_, CSVErrorCode::RowTooLarge,
+                    internals::make_row_larger_than_chunk_message(this->_chunk_size));
+                return;
+            }
+        } while (!this->header_trimmed && !this->parser->eof());
+    }
+
+        void trim_header() {
+        if (!this->header_trimmed) {
+            // The rows up to and including the header may arrive over several
+            // reads, so track progress instead of assuming one read holds them all.
+            while (this->header_rows_trimmed_ <= this->_format.header && !this->records->empty()) {
+                if (this->header_rows_trimmed_ == this->_format.header && this->col_names->empty()) {
+                    this->set_col_names(this->records->pop_front());
+                }
+                else {
+                    this->records->pop_front();
+                }
+
+                this->header_rows_trimmed_++;
+            }
+
+            this->header_trimmed = this->header_rows_trimmed_ > this->_format.header;
+        }
+    }
         ///@}
 
         /** @name Reading Helpers
@@ -11686,8 +13253,28 @@ namespace csv {
          *  Shared consumer-side logic used by both single-row and batch reads.
          */
         ///@{
+        /** Mark parser progress and apply variable-column policy.
+         *  A THROW-policy mismatch records a terminal error in error_.
+         */
+        bool row_is_returnable(const CSVRow& candidate);
+
         /** Apply variable-column policy to a parsed row and emit it if accepted. */
-        bool accept_row(CSVRow&& candidate, CSVRow* single_row, std::vector<CSVRow>* batch_rows);
+        bool accept_row(CSVRow&& candidate, CSVRow* single_row, std::vector<CSVRow>* batch_rows) {
+        if (!this->row_is_returnable(candidate)) {
+            return false;
+        }
+
+        if (single_row != nullptr) {
+            *single_row = std::move(candidate);
+        } else if (batch_rows != nullptr) {
+            batch_rows->push_back(std::move(candidate));
+        } else {
+            return false;
+        }
+
+        this->_n_rows++;
+        return true;
+    }
 
         /**
          * Try to pull more rows from the queue, returning false if we're done.
@@ -11695,18 +13282,60 @@ namespace csv {
          * Returns true if parsing is still parsing, or the queue has hot and fresh
          * rows ready.
          */
-        bool check_for_rows();
+        bool check_for_rows() {
+        if (error_) return false;
+        if (!this->records->empty()) return true;
+
+        if (this->read_scheduler_.wait_if_active(
+            [this] { return this->records->is_waitable(); },
+            [this] { this->records->wait(); }
+        )) {
+            return true;
+        }
+
+        this->read_scheduler_.join();
+        this->read_scheduler_.rethrow_exception_if_any();
+        if (parser->error()) {
+            error_ = parser->error();
+            return false;
+        }
+
+        if (this->parser->eof()) return false;
+
+        if (this->_read_requested && this->records->empty()) {
+            return internals::fail(error_, CSVErrorCode::RowTooLarge,
+                internals::make_row_larger_than_chunk_message(this->_chunk_size));
+        }
+
+        this->read_scheduler_.run(
+            [this] { this->read_csv(this->_chunk_size); },
+            [this] { this->records->notify_all(); }
+        );
+        this->read_scheduler_.rethrow_exception_if_any();
+        // The parser may still be running. Inspect its error only after join().
+        this->_read_requested = true;
+        return true;
+    }
 
         /** Drain as many already-queued rows as possible into a caller-owned chunk buffer.
          *
          *  Applies the same variable-column filtering policy as read_row(), but amortizes
          *  queue synchronization across many rows.
          */
-        void drain_rows_into_chunk(std::vector<CSVRow>& out, size_t max_rows);
+        void drain_rows_into_chunk(std::vector<CSVRow>& out, size_t max_rows) {
+        std::vector<CSVRow> drained;
+        drained.reserve(max_rows - out.size());
+        this->records->drain_front(drained, max_rows - out.size());
+
+        for (size_t i = 0; i < drained.size(); ++i) {
+            this->accept_row(std::move(drained[i]), nullptr, &out);
+            if (error_) break;
+        }
+    }
         ///@}
     };
 
-    #ifdef CSV_HAS_CXX20
+    #if defined(CSV_HAS_CXX20) && CSV_EXCEPTIONS_ENABLED
     static_assert(
         internals::csv_write_rows_input_range<CSVReader>,
         "CSVReader must remain compatible with csv::DelimWriter::write_rows()."
@@ -11714,1852 +13343,147 @@ namespace csv {
     #endif
 }
 
+#ifdef CSV_HAS_CXX20
+#include <ranges>
+#endif
 
 namespace csv {
+namespace internals {
+    // Keep the field itself alive through conversion: a DataFrameCell may
+    // own an edited string, so a view into a temporary cell would dangle.
+    template<typename Field>
+    class CheckedFieldValue {
+    public:
+        template<typename Row>
+        CheckedFieldValue(Row& row, size_t index, CSVError& error)
+            : field_(row.try_field(index, error)), error_(&error) {}
+
+        template<typename Consumer>
+        void with_view(Consumer&& consumer) const {
+            // A failed try_field() need not return a readable field. Consume
+            // immediately so even an owning get_sv() result outlives the call.
+            if (!*error_) std::forward<Consumer>(consumer)(field_.get_sv());
+        }
+
+    private:
+        Field field_;
+        const CSVError* error_;
+    };
+
+    /** Borrow a row and error state for synchronous, single-pass field access.
+     *  A failed access ends iteration and preserves the first error. Consumers
+     *  must check that error before accepting any values already consumed.
+     */
+    template<typename Row>
+    class CheckedFieldRange {
+        using field_type = typename std::decay<decltype(std::declval<Row&>()
+            .try_field(size_t{0}, std::declval<CSVError&>()))>::type;
+
+    public:
+        using field_value = CheckedFieldValue<field_type>;
+
+        class iterator {
+        public:
+            using iterator_category = std::input_iterator_tag;
+            using value_type = field_value;
+            using difference_type = std::ptrdiff_t;
+            using reference = field_value;
+            using pointer = void;
+
+            iterator() = default;
+            iterator(const CheckedFieldRange* owner, size_t index)
+                : owner_(owner), index_(index) {}
+
+            field_value operator*() const {
+                return field_value(*owner_->row_, index_, *owner_->error_);
+            }
+
+            iterator& operator++() {
+                if (!owner_->failed()) ++index_;
+                return *this;
+            }
+
+            iterator operator++(int) {
+                iterator previous = *this;
+                ++*this;
+                return previous;
+            }
+
+            bool operator==(const iterator& other) const {
+                return owner_ == other.owner_
+                    && (index_ == other.index_ || (owner_ && owner_->failed()));
+            }
+
+            bool operator!=(const iterator& other) const { return !(*this == other); }
+
+        private:
+            const CheckedFieldRange* owner_ = nullptr;
+            size_t index_ = 0;
+        };
+
+        CheckedFieldRange(Row& row, CSVError& error)
+            : row_(&row), error_(&error) {
+            if (error) return;
+            // Validate even zero-width proxies, before asking for their size.
+            if (!record_valid(row, 0)) {
+                fail_static(error, CSVErrorCode::InvalidProxy, "CSV row or column proxy is invalid.");
+                return;
+            }
+            size_ = row.size();
+        }
+
+        iterator begin() const { return iterator(this, 0); }
+        iterator end() const { return iterator(this, size_); }
+
+    private:
+        template<typename T>
+        static auto record_valid(const T& row, int) -> decltype(row.is_valid(), bool()) {
+            return row.is_valid();
+        }
+
+        template<typename T>
+        static bool record_valid(const T&, long) { return true; }
+
+        bool failed() const { return static_cast<bool>(*error_); }
+
+        Row* row_;
+        CSVError* error_;
+        size_t size_ = 0;
+    };
+
+    template<typename Row>
+    CheckedFieldRange<Row> checked_field_range(Row& row, CSVError& error) {
+        return CheckedFieldRange<Row>(row, error);
+    }
+}
+
     template<typename KeyType>
     class DataFrame;
     template<typename KeyType>
     class DataFrameColumn;
     template<typename KeyType>
     class DataFrameRow;
-
-    struct RowOverlay {
-        RowOverlay() = default;
-        RowOverlay(const RowOverlay&) = delete;
-        RowOverlay& operator=(const RowOverlay&) = delete;
-
-        RowOverlay(RowOverlay&& other) noexcept : values(std::move(other.values)) {
-            busy.clear(std::memory_order_release);
-        }
-
-        RowOverlay& operator=(RowOverlay&& other) noexcept {
-            if (this != &other) {
-                values = std::move(other.values);
-                busy.clear(std::memory_order_release);
-            }
-            return *this;
-        }
-
-        bool try_get_copy(size_t col_index, std::string& out) const {
-            row_overlay_lock_guard lock(this);
-            auto it = values.find(col_index);
-            if (it == values.end()) {
-                return false;
-            }
-
-            out = it->second;
-            return true;
-        }
-
-        /** Return a view into an edited cell without copying.
-         *
-         *  This exists for read-only batch scans such as schema/type inference,
-         *  where the caller immediately consumes the value and no concurrent
-         *  sparse-overlay edits are expected. General cell access should keep
-         *  using try_get_copy() or DataFrameCell so callers do not accidentally
-         *  retain a view across later mutation.
-         */
-        bool try_get_view(size_t col_index, csv::string_view& out) const {
-            row_overlay_lock_guard lock(this);
-            auto it = values.find(col_index);
-            if (it == values.end()) {
-                return false;
-            }
-
-            out = csv::string_view(it->second);
-            return true;
-        }
-
-        void set(size_t col_index, std::string value) {
-            row_overlay_lock_guard lock(this);
-            values[col_index] = std::move(value);
-        }
-
-        bool empty() const {
-            row_overlay_lock_guard lock(this);
-            return values.empty();
-        }
-
-    private:
-        struct row_overlay_lock_guard {
-            explicit row_overlay_lock_guard(const RowOverlay* overlay)
-                : busy(const_cast<std::atomic_flag&>(overlay->busy)) {
-                while (busy.test_and_set(std::memory_order_acquire)) {}
-            }
-
-            ~row_overlay_lock_guard() {
-                busy.clear(std::memory_order_release);
-            }
-
-            std::atomic_flag& busy;
-        };
-
-        mutable std::atomic_flag busy = ATOMIC_FLAG_INIT;
-        std::unordered_map<size_t, std::string> values;
-    };
-
-    struct RowOverlaySlot {
-        RowOverlaySlot() noexcept : ptr(nullptr) {}
-        RowOverlaySlot(const RowOverlaySlot&) = delete;
-        RowOverlaySlot& operator=(const RowOverlaySlot&) = delete;
-
-        RowOverlaySlot(RowOverlaySlot&& other) noexcept
-            : ptr(nullptr),
-            owned(std::move(other.owned)) {
-            RowOverlay* overlay = owned.get();
-            ptr.store(overlay, std::memory_order_release);
-            other.ptr.store(nullptr, std::memory_order_release);
-        }
-
-        RowOverlaySlot& operator=(RowOverlaySlot&& other) noexcept {
-            if (this != &other) {
-                owned = std::move(other.owned);
-                RowOverlay* overlay = owned.get();
-                ptr.store(overlay, std::memory_order_release);
-                other.ptr.store(nullptr, std::memory_order_release);
-            }
-
-            return *this;
-        }
-
-        RowOverlay* get() noexcept {
-            return ptr.load(std::memory_order_acquire);
-        }
-
-        const RowOverlay* get() const noexcept {
-            return ptr.load(std::memory_order_acquire);
-        }
-
-        RowOverlay* ensure() {
-            RowOverlay* overlay = this->get();
-            if (!overlay) {
-                owned.reset(new RowOverlay());
-                overlay = owned.get();
-                ptr.store(overlay, std::memory_order_release);
-            }
-
-            return overlay;
-        }
-
-    private:
-        std::atomic<RowOverlay*> ptr;
-        std::unique_ptr<RowOverlay> owned;
-    };
-
-    namespace internals {
-        template<typename Owner, typename Proxy, typename Accessor>
-        class indexed_proxy_iterator {
-        public:
-            using value_type = Proxy;
-            using difference_type = std::ptrdiff_t;
-            using pointer = const Proxy*;
-            using reference = const Proxy&;
-            using iterator_category = std::random_access_iterator_tag;
-
-            indexed_proxy_iterator() = default;
-            indexed_proxy_iterator(Owner* owner, size_t index, Accessor accessor = Accessor())
-                : owner_(owner), index_(index), accessor_(accessor) {}
-
-            reference operator*() const {
-                cached_proxy_ = accessor_(owner_, index_);
-                return cached_proxy_;
-            }
-
-            pointer operator->() const {
-                operator*();
-                return &cached_proxy_;
-            }
-
-            indexed_proxy_iterator& operator++() { ++index_; return *this; }
-            indexed_proxy_iterator operator++(int) { auto tmp = *this; ++index_; return tmp; }
-            indexed_proxy_iterator& operator--() { --index_; return *this; }
-            indexed_proxy_iterator operator--(int) { auto tmp = *this; --index_; return tmp; }
-
-            indexed_proxy_iterator operator+(difference_type n) const {
-                return indexed_proxy_iterator(owner_, static_cast<size_t>(index_ + n), accessor_);
-            }
-
-            indexed_proxy_iterator operator-(difference_type n) const {
-                return indexed_proxy_iterator(owner_, static_cast<size_t>(index_ - n), accessor_);
-            }
-
-            difference_type operator-(const indexed_proxy_iterator& other) const {
-                return static_cast<difference_type>(index_) - static_cast<difference_type>(other.index_);
-            }
-
-            bool operator==(const indexed_proxy_iterator& other) const {
-                return owner_ == other.owner_ && index_ == other.index_;
-            }
-
-            bool operator!=(const indexed_proxy_iterator& other) const {
-                return !(*this == other);
-            }
-
-        private:
-            Owner* owner_ = nullptr;
-            size_t index_ = 0;
-            Accessor accessor_;
-            mutable Proxy cached_proxy_;
-        };
-    }
-
-    /** Allows configuration of DataFrame behavior. */
-    class DataFrameOptions {
-    public:
-        DataFrameOptions() = default;
-
-        /** Policy for handling duplicate keys when creating a keyed DataFrame */
-        enum class DuplicateKeyPolicy {
-            THROW,      // Throw an error if a duplicate key is encountered
-            OVERWRITE,  // Overwrite the existing value with the new value
-            KEEP_FIRST  // Ignore the new value and keep the existing value
-        };
-
-        DataFrameOptions& set_duplicate_key_policy(DuplicateKeyPolicy value) {
-            this->duplicate_key_policy = value;
-            return *this;
-        }
-
-        DuplicateKeyPolicy get_duplicate_key_policy() const {
-            return this->duplicate_key_policy;
-        }
-
-        DataFrameOptions& set_key_column(const std::string& value) {
-            this->key_column = value;
-            return *this;
-        }
-
-        const std::string& get_key_column() const {
-            return this->key_column;
-        }
-
-        DataFrameOptions& set_throw_on_missing_key(bool value) {
-            this->throw_on_missing_key = value;
-            return *this;
-        }
-
-        bool get_throw_on_missing_key() const {
-            return this->throw_on_missing_key;
-        }
-
-    private:
-        std::string key_column;
-
-        DuplicateKeyPolicy duplicate_key_policy = DuplicateKeyPolicy::OVERWRITE;
-
-        /** Whether to throw an error if a key column value is missing when creating a keyed DataFrame */
-        bool throw_on_missing_key = true;
-    };
-
-    /** Persistent execution backend for batch-oriented DataFrame column work. */
-    class DataFrameExecutor {
-    public:
-        explicit DataFrameExecutor(size_t worker_count = default_worker_count()) {
-            this->start_workers(worker_count);
-        }
-
-        DataFrameExecutor(const DataFrameExecutor&) = delete;
-        DataFrameExecutor& operator=(const DataFrameExecutor&) = delete;
-
-        ~DataFrameExecutor() {
-            this->stop_workers();
-        }
-
-        size_t worker_count() const noexcept {
-#if CSV_ENABLE_THREADS
-            return workers_.size();
-#else
-            return 0;
-#endif
-        }
-
-        template<typename Fn>
-        void parallel_for(size_t task_count, Fn&& fn) {
-            if (task_count == 0) {
-                return;
-            }
-
-#if CSV_ENABLE_THREADS
-            if (workers_.empty() || task_count <= workers_.size()) {
-                this->run_serial(task_count, std::forward<Fn>(fn));
-                return;
-            }
-
-            std::exception_ptr captured_exception;
-            {
-                std::unique_lock<std::mutex> lock(mutex_);
-                current_task_ = std::forward<Fn>(fn);
-                task_exception_ = nullptr;
-                next_task_.store(0);
-                task_count_ = task_count;
-                active_workers_ = workers_.size();
-                ++generation_;
-            }
-
-            task_ready_.notify_all();
-
-            std::unique_lock<std::mutex> lock(mutex_);
-            task_done_.wait(lock, [this]() {
-                return completed_generation_ == generation_;
-            });
-
-            captured_exception = task_exception_;
-            current_task_ = std::function<void(size_t)>();
-            task_exception_ = nullptr;
-
-            if (captured_exception) {
-                std::rethrow_exception(captured_exception);
-            }
-#else
-            this->run_serial(task_count, std::forward<Fn>(fn));
-#endif
-        }
-
-    private:
-        template<typename Fn>
-        void run_serial(size_t task_count, Fn&& fn) {
-            for (size_t i = 0; i < task_count; ++i) {
-                fn(i);
-            }
-        }
-
-        static size_t default_worker_count() {
-#if CSV_ENABLE_THREADS
-            const unsigned int hw = std::thread::hardware_concurrency();
-            return hw > 0 ? static_cast<size_t>(hw) : 1;
-#else
-            return 0;
-#endif
-        }
-
-#if CSV_ENABLE_THREADS
-        void start_workers(size_t worker_count) {
-            workers_.reserve(worker_count);
-            for (size_t i = 0; i < worker_count; ++i) {
-                workers_.push_back(std::thread(&DataFrameExecutor::worker_loop, this));
-            }
-        }
-
-        void stop_workers() {
-            {
-                std::lock_guard<std::mutex> lock(mutex_);
-                stop_ = true;
-            }
-
-            task_ready_.notify_all();
-            for (auto& worker : workers_) {
-                if (worker.joinable())
-                    worker.join();
-            }
-        }
-
-        void worker_loop() {
-            size_t seen_generation = 0;
-            std::unique_lock<std::mutex> lock(mutex_);
-
-            while (true) {
-                task_ready_.wait(lock, [this, seen_generation]() {
-                    return stop_ || generation_ != seen_generation;
-                });
-
-                if (stop_) return;
-
-                const size_t local_generation = generation_;
-                seen_generation = local_generation;
-                lock.unlock();
-
-                while (true) {
-                    const size_t task_index = next_task_.fetch_add(1);
-                    if (task_index >= task_count_)
-                        break;
-
-                    try {
-                        current_task_(task_index);
-                    }
-                    catch (...) {
-                        lock.lock();
-                        if (!task_exception_) {
-                            task_exception_ = std::current_exception();
-                            next_task_.store(task_count_);
-                        }
-                        lock.unlock();
-                        break;
-                    }
-                }
-
-                lock.lock();
-                if (--active_workers_ == 0) {
-                    completed_generation_ = local_generation;
-                    task_done_.notify_one();
-                }
-            }
-        }
-
-        std::vector<std::thread> workers_;
-        std::mutex mutex_;
-        std::condition_variable task_ready_;
-        std::condition_variable task_done_;
-        std::function<void(size_t)> current_task_;
-        std::exception_ptr task_exception_ = nullptr;
-        std::atomic<size_t> next_task_{0};
-        size_t task_count_ = 0;
-        size_t active_workers_ = 0;
-        size_t generation_ = 0;
-        size_t completed_generation_ = 0;
-        bool stop_ = false;
-#else
-        void start_workers(size_t) {}
-        void stop_workers() {}
-#endif
-    };
-
-    class DataFrameCell : public CSVField {
-    public:
-        using CSVField::get;
-        using CSVField::get_sv;
-        using CSVField::is_float;
-        using CSVField::is_int;
-        using CSVField::is_null;
-        using CSVField::is_num;
-        using CSVField::is_str;
-        using CSVField::try_get;
-        using CSVField::type;
-
-        DataFrameCell() : CSVField(csv::string_view()), row(nullptr), row_overlay(nullptr), col_index(0), can_mutate(false) {}
-
-        DataFrameCell(const DataFrameCell& other)
-            : CSVField(csv::string_view()),
-            row(other.row),
-            row_overlay(other.row_overlay),
-            col_index(other.col_index),
-            can_mutate(other.can_mutate),
-            owned_value_(other.owned_value_) {
-            this->refresh_value();
-        }
-
-        DataFrameCell(DataFrameCell&& other) noexcept
-            : CSVField(csv::string_view()),
-            row(other.row),
-            row_overlay(other.row_overlay),
-            col_index(other.col_index),
-            can_mutate(other.can_mutate),
-            owned_value_(std::move(other.owned_value_)) {
-            this->refresh_value();
-        }
-
-        DataFrameCell(
-            const CSVRow* _row,
-            RowOverlay* _row_overlay,
-            size_t _col_index
-        ) : CSVField(csv::string_view()),
-            row(_row),
-            row_overlay(_row_overlay),
-            col_index(_col_index),
-            can_mutate(true) {
-            this->refresh_value();
-        }
-
-        DataFrameCell(
-            const CSVRow* _row,
-            const RowOverlay* _row_overlay,
-            size_t _col_index
-        ) : CSVField(csv::string_view()),
-            row(_row),
-            row_overlay(_row_overlay),
-            col_index(_col_index),
-            can_mutate(false) {
-            this->refresh_value();
-        }
-
-        DataFrameCell& operator=(const DataFrameCell& other) {
-            if (this != &other) {
-                row = other.row;
-                row_overlay = other.row_overlay;
-                col_index = other.col_index;
-                can_mutate = other.can_mutate;
-                owned_value_ = other.owned_value_;
-                this->refresh_value();
-            }
-
-            return *this;
-        }
-
-        DataFrameCell& operator=(DataFrameCell&& other) noexcept {
-            if (this != &other) {
-                row = other.row;
-                row_overlay = other.row_overlay;
-                col_index = other.col_index;
-                can_mutate = other.can_mutate;
-                owned_value_ = std::move(other.owned_value_);
-                this->refresh_value();
-            }
-
-            return *this;
-        }
-
-        DataFrameCell& operator=(csv::string_view value) {
-            return this->assign(std::string(value));
-        }
-
-        /** Const-friendly read access for proxy use in column iteration and callbacks. */
-        template<typename T = std::string>
-        T get() const {
-            return const_cast<DataFrameCell*>(this)->CSVField::template get<T>();
-        }
-
-        bool is_null() const noexcept {
-            return const_cast<DataFrameCell*>(this)->CSVField::is_null();
-        }
-
-        bool is_str() const noexcept {
-            return const_cast<DataFrameCell*>(this)->CSVField::is_str();
-        }
-
-        bool is_num() const noexcept {
-            return const_cast<DataFrameCell*>(this)->CSVField::is_num();
-        }
-
-        bool is_int() const noexcept {
-            return const_cast<DataFrameCell*>(this)->CSVField::is_int();
-        }
-
-        bool is_float() const noexcept {
-            return const_cast<DataFrameCell*>(this)->CSVField::is_float();
-        }
-
-        DataType type() const noexcept {
-            return const_cast<DataFrameCell*>(this)->CSVField::type();
-        }
-
-        template<typename T>
-        bool try_get(T& out) const noexcept {
-            return const_cast<DataFrameCell*>(this)->CSVField::template try_get<T>(out);
-        }
-
-    private:
-        void refresh_value() {
-            if (!row) {
-                CSVField::operator=(CSVField(csv::string_view()));
-                return;
-            }
-
-            if (row_overlay && row_overlay->try_get_copy(col_index, owned_value_)) {
-                CSVField::operator=(CSVField(csv::string_view(owned_value_)));
-                return;
-            }
-
-            owned_value_.clear();
-            CSVField::operator=(CSVField((*row)[col_index].template get<csv::string_view>()));
-        }
-
-        DataFrameCell& assign(std::string stored) {
-            if (!can_mutate || !row_overlay) {
-                throw std::runtime_error(internals::ERROR_CANNOT_EDIT_CONST_DF_CELL);
-            }
-
-            owned_value_ = stored;
-            const_cast<RowOverlay*>(row_overlay)->set(col_index, std::move(stored));
-            CSVField::operator=(CSVField(csv::string_view(owned_value_)));
-            return *this;
-        }
-
-        const CSVRow* row;
-        const RowOverlay* row_overlay;
-        size_t col_index;
-        bool can_mutate;
-        std::string owned_value_;
-    };
-
-    /**
-     * Proxy class that wraps a CSVRow and intercepts field access to check for edits.
-     * Provides transparent access to both original and edited cell values.
-     */
-    template<typename KeyType>
-    class DataFrameRow {
-    public:
-        /** Default constructor (creates an unbound proxy). */
-        DataFrameRow() : row(nullptr), frame(nullptr), row_index(0), row_overlay(nullptr), key_ptr(nullptr), can_mutate(false) {}
-
-        /** Construct a mutable DataFrameRow wrapper. */
-        DataFrameRow(
-            const CSVRow* _row,
-            DataFrame<KeyType>* _frame,
-            size_t _row_index,
-            RowOverlay* _edits,
-            const KeyType* _key
-        ) : row(_row), frame(_frame), row_index(_row_index), row_overlay(_edits), key_ptr(_key), can_mutate(true) {}
-
-        /** Construct a read-only DataFrameRow wrapper. */
-        DataFrameRow(
-            const CSVRow* _row,
-            const DataFrame<KeyType>* _frame,
-            size_t _row_index,
-            const RowOverlay* _edits,
-            const KeyType* _key
-        ) : row(_row), frame(_frame), row_index(_row_index), row_overlay(_edits), key_ptr(_key), can_mutate(false) {}
-
-        /** Access a field by column name, preserving edit support. */
-        DataFrameCell operator[](const std::string& col) {
-            return this->make_cell(this->find_column(col));
-        }
-
-        /** Access a field by position, preserving edit support. */
-        DataFrameCell operator[](size_t n) {
-            return this->make_cell(n);
-        }
-
-        /** Access a field by column name, checking edits first. */
-        DataFrameCell operator[](const std::string& col) const {
-            return this->make_cell(this->find_column(col));
-        }
-
-        /** Access a field by position, checking edits first. */
-        DataFrameCell operator[](size_t n) const {
-            return this->make_cell(n);
-        }
-
-        /** Get the number of fields in the row. */
-        size_t size() const { return row->size(); }
-
-        /** Check if the row is empty. */
-        bool empty() const { return row->empty(); }
-
-        /** Get column names. */
-        const std::vector<std::string>& get_col_names() const { return row->get_col_names(); }
-
-        /** Get the underlying CSVRow for compatibility. */
-        const CSVRow& get_underlying_row() const { return *row; }
-
-        /** Get the key for this row (only valid for keyed DataFrames). */
-        const KeyType& key() const { return *key_ptr; }
-
-        /** Delete this row from the parent DataFrame.
-         *
-         *  Structural mutation invalidates outstanding row and cell proxies.
-         */
-        bool erase() {
-            if (!can_mutate || !frame) {
-                throw std::runtime_error(internals::ERROR_CANNOT_ERASE_CONST_DF_ROW);
-            }
-
-            return const_cast<DataFrame<KeyType>*>(frame)->erase_at_index(row_index);
-        }
-
-        /** Convert to vector of strings for CSVWriter compatibility. */
-        operator std::vector<std::string>() const {
-            std::vector<std::string> result;
-            result.reserve(row->size());
-            
-            for (size_t i = 0; i < row->size(); i++) {
-                result.push_back(this->make_cell(i).template get<std::string>());
-            }
-            return result;
-        }
-
-        /** Convert to JSON. */
-        std::string to_json(const std::vector<std::string>& subset = {}) const {
-            const field_string_accessor field_at(this);
-            if (frame) {
-                return this->get_frame_json_converter().row_to_json(this->size(), field_at, subset);
-            }
-
-            return this->make_detached_json_converter().row_to_json(this->size(), field_at, subset);
-        }
-
-        /** Convert to JSON array. */
-        std::string to_json_array(const std::vector<std::string>& subset = {}) const {
-            const field_string_accessor field_at(this);
-            if (frame) {
-                return this->get_frame_json_converter().row_to_json_array(this->size(), field_at, subset);
-            }
-
-            return this->make_detached_json_converter().row_to_json_array(this->size(), field_at, subset);
-        }
-
-        #ifdef CSV_HAS_CXX20
-        /** Convert this DataFrameRow into a std::ranges::input_range of strings,
-         *  respecting the sparse overlay (edited values take precedence).
-         *
-         *  @note Requires C++20 or later.
-         */
-        auto to_sv_range() const {
-            return std::views::iota(size_t{0}, this->size())
-                | std::views::transform([this](size_t i) { return this->make_cell(i).template get<std::string>(); });
-        }
-        #endif
-
-    private:
-        struct field_string_accessor {
-            explicit field_string_accessor(const DataFrameRow* owner) : owner(owner) {}
-
-            std::string operator()(size_t i) const {
-                return owner->make_cell(i).template get<std::string>();
-            }
-
-            const DataFrameRow* owner;
-        };
-
-        const internals::JsonConverter& get_frame_json_converter() const {
-            return frame->json_converter_.get_or_create([this]() {
-                return std::make_shared<internals::JsonConverter>(frame->columns());
-            });
-        }
-
-        internals::JsonConverter make_detached_json_converter() const {
-            return internals::JsonConverter(this->get_col_names());
-        }
-
-        DataFrameCell make_cell(size_t col_index) {
-            return can_mutate
-                ? DataFrameCell(row, const_cast<RowOverlay*>(row_overlay), col_index)
-                : DataFrameCell(row, row_overlay, col_index);
-        }
-
-        DataFrameCell make_cell(size_t col_index) const {
-            return DataFrameCell(row, row_overlay, col_index);
-        }
-
-        size_t find_column(const std::string& col) const {
-            if (frame) {
-                return frame->find_column(col);
-            }
-
-            const internals::ConstColNamesPtr col_names = row->col_names_ptr();
-            const int position = col_names->index_of(col);
-            if (position == CSV_NOT_FOUND) {
-                internals::throw_column_not_found_out_of_range(col);
-            }
-
-            return static_cast<size_t>(position);
-        }
-
-        const CSVRow* row;
-        const DataFrame<KeyType>* frame;
-        size_t row_index;
-        const RowOverlay* row_overlay;
-        const KeyType* key_ptr;
-        bool can_mutate;
-    };
-
-    /** Lightweight non-owning view over one DataFrame column. */
-    template<typename KeyType>
-    class DataFrameColumn {
-    public:
-        struct cell_accessor {
-            DataFrameCell operator()(const DataFrameColumn<KeyType>* owner, size_t row_index) const {
-                return owner->operator[](row_index);
-            }
-        };
-
-        using iterator = internals::indexed_proxy_iterator<const DataFrameColumn<KeyType>, DataFrameCell, cell_accessor>;
-        using const_iterator = iterator;
-
-        DataFrameColumn() : frame_(nullptr), col_index_(0) {}
-
-        DataFrameColumn(const DataFrame<KeyType>* frame, size_t col_index)
-            : frame_(frame), col_index_(col_index) {}
-
-        /** Column name. */
-        const std::string& name() const {
-            return (*frame_->col_names_)[col_index_];
-        }
-
-        /** Zero-based column position. */
-        size_t index() const noexcept {
-            return col_index_;
-        }
-
-        /** Number of rows in the parent batch. */
-        size_t size() const noexcept {
-            return frame_->size();
-        }
-
-        /** Whether the parent batch contains no rows. */
-        bool empty() const noexcept {
-            return this->size() == 0;
-        }
-
-        /** Access a visible cell value by row index. */
-        DataFrameCell operator[](size_t row_index) const {
-            const auto& row = frame_->rows.at(row_index);
-            const auto* row_edits = frame_->find_row_edits(row_index);
-            return DataFrameCell(&row, row_edits, col_index_);
-        }
-
-        /** Access a visible cell value as a string_view without materializing a DataFrameCell.
-         *
-         *  Intended for immediate read-only scans. If the value comes from the
-         *  sparse edit overlay, the returned view points into overlay-owned
-         *  storage and must not be retained across DataFrame mutation.
-         */
-        csv::string_view get_sv(size_t row_index) const {
-            const auto& row = frame_->rows.at(row_index);
-            const auto* row_edits = frame_->find_row_edits(row_index);
-            csv::string_view edited_value;
-            if (row_edits && row_edits->try_get_view(col_index_, edited_value)) {
-                return edited_value;
-            }
-
-            return row[col_index_].template get<csv::string_view>();
-        }
-
-        /** Materialize this column as a vector of converted values. */
-        template<typename T = std::string>
-        std::vector<T> to_vector() const {
-            std::vector<T> values;
-            values.reserve(this->size());
-
-            for (size_t row_index = 0; row_index < this->size(); ++row_index) {
-                values.push_back((*this)[row_index].template get<T>());
-            }
-
-            return values;
-        }
-
-        /** Convert to a vector of strings. */
-        operator std::vector<std::string>() const {
-            return this->to_vector<std::string>();
-        }
-
-        #ifdef CSV_HAS_CXX20
-        /** Convert this DataFrameColumn into a std::ranges::input_range of strings.
-         *
-         *  @note Requires C++20 or later.
-         */
-        auto to_sv_range() const {
-            return std::views::iota(size_t{0}, this->size())
-                | std::views::transform([this](size_t row_index) {
-                    return (*this)[row_index].template get<std::string>();
-                });
-        }
-        #endif
-
-        /** Iterate over visible cells in this column. */
-        iterator begin() const { return iterator(this, 0); }
-        iterator end() const { return iterator(this, this->size()); }
-        const_iterator cbegin() const { return const_iterator(this, 0); }
-        const_iterator cend() const { return const_iterator(this, this->size()); }
-
-    private:
-        const DataFrame<KeyType>* frame_;
-        size_t col_index_;
-    };
-
-    template<typename KeyType = std::string>
-    class DataFrame {
-    public:
-        friend class DataFrameRow<KeyType>;
-        friend class DataFrameColumn<KeyType>;
-        using row_type = DataFrameRow<KeyType>;
-        using column_type = DataFrameColumn<KeyType>;
-
-        struct mutable_row_accessor {
-            DataFrameRow<KeyType> operator()(DataFrame<KeyType>* owner, size_t row_index) const {
-                return owner->make_row_proxy(row_index);
-            }
-        };
-
-        struct const_row_accessor {
-            DataFrameRow<KeyType> operator()(const DataFrame<KeyType>* owner, size_t row_index) const {
-                return owner->make_const_row_proxy(row_index);
-            }
-        };
-
-        /** Row-wise iterator over DataFrameRow entries. Provides access to rows with edit support. */
-        using iterator = internals::indexed_proxy_iterator<DataFrame<KeyType>, DataFrameRow<KeyType>, mutable_row_accessor>;
-
-        /** Row-wise const iterator over DataFrameRow entries. Provides read-only access to rows with edit support. */
-        using const_iterator = internals::indexed_proxy_iterator<const DataFrame<KeyType>, DataFrameRow<KeyType>, const_row_accessor>;
-
-        static_assert(
-            internals::is_hashable<KeyType>::value,
-            "DataFrame<KeyType> requires KeyType to be hashable (std::hash<KeyType> specialization required)."
-        );
-
-        static_assert(
-            internals::is_equality_comparable<KeyType>::value,
-            "DataFrame<KeyType> requires KeyType to be equality comparable (operator== required)."
-        );
-
-        static_assert(
-            std::is_default_constructible<KeyType>::value,
-            "DataFrame<KeyType> requires KeyType to be default-constructible."
-        );
-
-        using DuplicateKeyPolicy = DataFrameOptions::DuplicateKeyPolicy;
-
-        /** Construct an empty DataFrame. */
-        DataFrame() = default;
-
-        /**
-         * Construct an unkeyed DataFrame from a CSV reader.
-         * Rows are accessible by position only.
-         */
-        explicit DataFrame(CSVReader& reader) {
-            this->init_unkeyed_from_reader(reader);
-        }
-
-        /** Construct an unkeyed DataFrame from an existing batch of rows. */
-        explicit DataFrame(std::vector<CSVRow> rows) {
-            this->init_unkeyed_from_rows(rows);
-        }
-
-        /** Construct a keyed DataFrame from a CSV reader with options.
-         *
-         * @throws std::runtime_error if key column is empty or not found
-         */
-        explicit DataFrame(CSVReader& reader, const DataFrameOptions& options) {
-            this->init_from_reader(reader, options);
-        }
-
-        /** Construct a keyed DataFrame directly from a CSV file.
-         *
-         * @throws std::runtime_error if key column is empty or not found
-         */
-        DataFrame(
-            csv::string_view filename,
-            const DataFrameOptions& options,
-            CSVFormat format = CSVFormat::guess_csv()
-        ) {
-            CSVReader reader(filename, format);
-            this->init_from_reader(reader, options);
-        }
-
-        /** Construct a keyed DataFrame using a column name as the key.
-         *
-         * @throws std::runtime_error if key column is empty or not found
-         */
-        DataFrame(
-            CSVReader& reader,
-            const std::string& _key_column,
-            DuplicateKeyPolicy policy = DuplicateKeyPolicy::OVERWRITE,
-            bool throw_on_missing_key = true
-        ) : DataFrame(
-            reader,
-            DataFrameOptions()
-                .set_key_column(_key_column)
-                .set_duplicate_key_policy(policy)
-                .set_throw_on_missing_key(throw_on_missing_key)
-        ) {}
-
-        /** Construct a keyed DataFrame using a custom key function.
-         *
-         * @throws std::runtime_error if policy is THROW and duplicate keys are encountered
-         */
-        template<
-            typename KeyFunc,
-            csv::enable_if_t<csv::is_invocable_returning<KeyFunc, KeyType, const CSVRow&>::value, int> = 0
-        >
-        DataFrame(
-            CSVReader& reader,
-            KeyFunc key_func,
-            DuplicateKeyPolicy policy = DuplicateKeyPolicy::OVERWRITE
-        ) : col_names_(reader.col_names_ptr()) {
-            this->is_keyed = true;
-            this->build_from_key_function(reader, key_func, policy);
-        }
-
-        /** Construct a keyed DataFrame using a custom key function with options. */
-        template<
-            typename KeyFunc,
-            csv::enable_if_t<csv::is_invocable_returning<KeyFunc, KeyType, const CSVRow&>::value, int> = 0
-        >
-        DataFrame(
-            CSVReader& reader,
-            KeyFunc key_func,
-            const DataFrameOptions& options
-        ) : DataFrame(reader, key_func, options.get_duplicate_key_policy()) {}
-
-        /** Get the number of rows in the DataFrame. */
-        size_t size() const noexcept {
-            return rows.size();
-        }
-
-        /** Check if the DataFrame is empty (has no rows). */
-        bool empty() const noexcept {
-            return rows.empty();
-        }
-
-        /** Get the number of rows in the DataFrame. Alias for size(). */
-        size_t n_rows() const noexcept { return rows.size(); }
-        
-        /** Get the number of columns in the DataFrame. */
-        size_t n_cols() const noexcept { return col_names_->size(); }
-
-        /** Check if a column exists in the DataFrame. */
-        bool has_column(const std::string& name) const {
-            return this->index_of(name) != CSV_NOT_FOUND;
-        }
-
-        /** Get the index of a column by name. */
-        int index_of(const std::string& name) const {
-            return this->col_names_->index_of(name);
-        }
-
-        /** Get the column names in order. */
-        const std::vector<std::string>& columns() const noexcept { return this->col_names_->get_col_names(); }
-
-        /** Access a column view by position. */
-        DataFrameColumn<KeyType> column_view(size_t col_index) const {
-            if (col_index >= this->n_cols()) {
-                internals::throw_column_index_out_of_range();
-            }
-
-            return DataFrameColumn<KeyType>(this, col_index);
-        }
-
-        /** Access a column view by name. */
-        DataFrameColumn<KeyType> column_view(const std::string& name) const {
-            return this->column_view(this->find_column(name));
-        }
-
-        /**
-         * Access a row by position (unchecked).
-         *
-         * @note Disabled when KeyType is an integral type to prevent ambiguity with
-         *       operator[](const KeyType&). Use at(size_t) for positional access
-         *       on integer-keyed DataFrames.
-         *
-         * @throws std::out_of_range if index is out of bounds (via std::vector::at)
-         */
-        template<typename K = KeyType,
-            csv::enable_if_t<!std::is_integral<K>::value, int> = 0>
-        DataFrameRow<KeyType> operator[](size_t i) {
-            static_assert(std::is_same<K, KeyType>::value,
-                "Do not explicitly instantiate this template. Use at(size_t) for positional access.");
-            return this->at(i);
-        }
-
-        /** Access a row by position (unchecked, const version).
-         *  Disabled when KeyType is an integral type — use at(size_t) instead. */
-        template<typename K = KeyType,
-            csv::enable_if_t<!std::is_integral<K>::value, int> = 0>
-        DataFrameRow<KeyType> operator[](size_t i) const {
-            static_assert(std::is_same<K, KeyType>::value,
-                "Do not explicitly instantiate this template. Use at(size_t) for positional access.");
-            return this->at(i);
-        }
-
-        /**
-         * Access a row by position with bounds checking.
-         *
-         * @throws std::out_of_range if index is out of bounds
-         */
-        DataFrameRow<KeyType> at(size_t i) {
-            const auto& row = rows.at(i);
-            auto* row_edits = this->ensure_row_edits(i);
-            return DataFrameRow<KeyType>(&row, this, i, row_edits, this->key_ptr_at(i));
-        }
-        
-        /** Access a row by position with bounds checking (const version). */
-        DataFrameRow<KeyType> at(size_t i) const {
-            const auto& row = rows.at(i);
-            const RowOverlay* row_edits = this->find_row_edits(i);
-            return DataFrameRow<KeyType>(&row, this, i, row_edits, this->key_ptr_at(i));
-        }
-
-        /**
-         * Access a row by its key.
-         *
-         * @throws std::runtime_error if the DataFrame was not created with a key column
-         * @throws std::out_of_range if the key is not found
-         */
-        DataFrameRow<KeyType> operator[](const KeyType& key) {
-            this->require_keyed_frame();
-            auto position = this->position_of(key);
-            return DataFrameRow<KeyType>(&rows.at(position), this, position, this->ensure_row_edits(position), this->key_ptr_at(position));
-        }
-
-        /** Access a row by its key (const version). */
-        DataFrameRow<KeyType> operator[](const KeyType& key) const {
-            this->require_keyed_frame();
-            auto position = this->position_of(key);
-            const RowOverlay* row_edits = this->find_row_edits(position);
-            return DataFrameRow<KeyType>(&rows.at(position), this, position, row_edits, this->key_ptr_at(position));
-        }
-
-        /**
-         * Check if a key exists in the DataFrame.
-         *
-         * @throws std::runtime_error if the DataFrame was not created with a key column
-         */
-        bool contains(const KeyType& key) const {
-            this->require_keyed_frame();
-            this->ensure_key_index();
-            return key_index->find(key) != key_index->end();
-        }
-
-        /**
-         * Extract all values from a column with type conversion.
-         * Accounts for edited values in the overlay.
-         *
-         * @tparam T Target type for conversion (default: std::string)
-         * @throws std::out_of_range if column is not found
-         */
-        template<typename T = std::string>
-        std::vector<T> column(const std::string& name) const {
-            const size_t col_idx = this->find_column(name);
-            std::vector<T> values;
-
-            values.reserve(rows.size());
-            for (size_t row_index = 0; row_index < rows.size(); ++row_index) {
-                values.push_back(this->at(row_index)[col_idx].template get<T>());
-            }
-
-            return values;
-        }
-
-        /** Apply a batch-oriented function to each column, potentially in parallel.
-         *
-         * The callback receives a lightweight column view plus a mutable per-column
-         * state object from `states`.
-         *
-         * Callbacks may safely perform read-only access through the provided
-         * column view and any explicit read-only references they already hold to
-         * this batch-scoped DataFrame. Sparse-overlay cell edits through
-         * `DataFrameRow` or `DataFrameCell` are synchronized at row granularity,
-         * but structural mutations such as `erase()` are not thread-safe.
-         *
-         * @throws std::invalid_argument if `states.size() != n_cols()`
-         */
-        template<typename State, typename Fn>
-        void column_parallel_apply(
-            DataFrameExecutor& executor,
-            std::vector<State>& states,
-            Fn&& fn
-        ) const {
-            if (states.size() != this->n_cols()) {
-                throw std::invalid_argument(internals::ERROR_COLUMN_APPLY_STATE_COUNT);
-            }
-
-            executor.parallel_for(this->n_cols(), [this, &states, &fn](size_t column_index) {
-                fn(this->column_view(column_index), states[column_index]);
-            });
-        }
-
-        /** Apply a batch-oriented function to a selected subset of columns, potentially in parallel.
-         *
-         * The callback receives a lightweight column view plus a mutable
-         * per-selected-column state object from `states`.
-         *
-         * @throws std::invalid_argument if `states.size() != column_indices.size()`
-         * @throws std::out_of_range if any column index is invalid
-         */
-        template<typename State, typename Fn>
-        void column_parallel_apply(
-            DataFrameExecutor& executor,
-            const std::vector<size_t>& column_indices,
-            std::vector<State>& states,
-            Fn&& fn
-        ) const {
-            if (states.size() != column_indices.size()) {
-                throw std::invalid_argument(internals::ERROR_COLUMN_APPLY_SUBSET_STATE_COUNT);
-            }
-
-            this->validate_selected_columns(column_indices);
-
-            executor.parallel_for(column_indices.size(), [this, &column_indices, &states, &fn](size_t selected_index) {
-                const size_t column_index = column_indices[selected_index];
-                fn(this->column_view(column_index), states[selected_index]);
-            });
-        }
-
-        /** Apply a read-only batch function to each column, potentially in parallel.
-         *
-         * This overload is for callers who do not need one explicit mutable
-         * state object per column and prefer to manage any output storage
-         * externally.
-         */
-        template<typename Fn>
-        void column_parallel_apply(
-            DataFrameExecutor& executor,
-            Fn&& fn
-        ) const {
-            executor.parallel_for(this->n_cols(), [this, &fn](size_t column_index) {
-                fn(this->column_view(column_index));
-            });
-        }
-
-        /** Apply a read-only batch function to a selected subset of columns, potentially in parallel.
-         *
-         * This overload is for callers who want to process only specific
-         * columns and prefer to manage any output storage externally.
-         *
-         * @throws std::out_of_range if any column index is invalid
-         */
-        template<typename Fn>
-        void column_parallel_apply(
-            DataFrameExecutor& executor,
-            const std::vector<size_t>& column_indices,
-            Fn&& fn
-        ) const {
-            this->validate_selected_columns(column_indices);
-
-            executor.parallel_for(column_indices.size(), [this, &column_indices, &fn](size_t selected_index) {
-                fn(this->column_view(column_indices[selected_index]));
-            });
-        }
-
-        /**
-         * Group row positions using an arbitrary grouping function.
-         *
-         * @tparam GroupFunc Callable that takes a DataFrameRow and returns a hashable key
-         */
-        template<
-            typename GroupFunc,
-            typename GroupKey = invoke_result_t<GroupFunc, DataFrameRow<KeyType>>,
-            csv::enable_if_t<
-                internals::is_hashable<GroupKey>::value &&
-                internals::is_equality_comparable<GroupKey>::value,
-                int
-            > = 0
-        >
-        std::unordered_map<GroupKey, std::vector<size_t>> group_by(GroupFunc group_func) const {
-            std::unordered_map<GroupKey, std::vector<size_t>> grouped;
-
-            for (size_t i = 0; i < rows.size(); i++) {
-                GroupKey group_key = group_func(this->at(i));
-                grouped[group_key].push_back(i);
-            }
-
-            return grouped;
-        }
-
-        /**
-         * Group row positions by the value of a column.
-         *
-         * @throws std::out_of_range if column is not found
-         */
-        std::unordered_map<std::string, std::vector<size_t>> group_by(const std::string& name) const {
-            const size_t col_idx = this->find_column(name);
-            std::unordered_map<std::string, std::vector<size_t>> grouped;
-
-            for (size_t i = 0; i < rows.size(); i++) {
-                grouped[this->at(i)[col_idx].template get<std::string>()].push_back(i);
-            }
-
-            return grouped;
-        }
-
-        /** Get iterator to the first row. */
-        iterator begin() { return iterator(this, 0); }
-        
-        /** Get iterator past the last row. */
-        iterator end() { return iterator(this, this->size()); }
-
-        /** Get const iterator to the first row. */
-        const_iterator begin() const { return const_iterator(this, 0); }
-
-        /** Get const iterator past the last row. */
-        const_iterator end() const { return const_iterator(this, this->size()); }
-
-        /** Get const iterator to the first row (explicit). */
-        const_iterator cbegin() const { return const_iterator(this, 0); }
-
-        /** Get const iterator past the last row (explicit). */
-        const_iterator cend() const { return const_iterator(this, this->size()); }
-
-    private:
-        /** Whether this DataFrame was created with a key. */
-        bool is_keyed = false;
-        
-        /** Column names in order. */
-        internals::ConstColNamesPtr col_names_ = std::make_shared<internals::ColNames>();
-        
-        /** Internal storage for row data. */
-        std::vector<CSVRow> rows;
-
-        /** Stored keys for keyed DataFrames only. Empty for unkeyed frames. */
-        std::vector<KeyType> keys_;
-
-        /** Lazily-built index mapping keys to row positions (mutable for const methods). */
-        mutable std::unique_ptr<std::unordered_map<KeyType, size_t>> key_index;
-        mutable internals::lazy_shared_ptr<internals::JsonConverter> json_converter_;
-
-        /**
-         * Sparse per-row edit overlays. Slots stay cheap at load time; the
-         * heavier synchronized overlay map is allocated only for rows that are
-         * actually edited.
-         */
-        std::vector<RowOverlaySlot> edits;
-        std::shared_ptr<std::mutex> edits_creation_lock_{ new std::mutex() };
-
-        /** Initialize an unkeyed DataFrame from a CSV reader. */
-        void init_unkeyed_from_reader(CSVReader& reader) {
-            this->assert_fresh_storage(false);
-            this->is_keyed = false;
-            this->col_names_ = reader.col_names_ptr();
-
-            std::vector<CSVRow> batch;
-            while (reader.read_chunk(batch, dataframe_read_chunk_rows())) {
-                this->append_unkeyed_batch(batch);
-            }
-        }
-
-        /** Initialize an unkeyed DataFrame from an existing row batch. */
-        void init_unkeyed_from_rows(std::vector<CSVRow>& source_rows) {
-            this->assert_fresh_storage(false);
-            this->is_keyed = false;
-            this->col_names_ = source_rows.empty()
-                ? internals::ConstColNamesPtr(std::make_shared<internals::ColNames>())
-                : source_rows.front().col_names_ptr();
-            this->rows = std::move(source_rows);
-            this->edits.resize(this->rows.size());
-        }
-
-        /** Initialize a keyed DataFrame from a CSV reader using column-based key extraction. */
-        void init_from_reader(CSVReader& reader, const DataFrameOptions& options) {
-            this->assert_fresh_storage(false);
-            this->is_keyed = true;
-            this->col_names_ = reader.col_names_ptr();
-            const std::string key_column = options.get_key_column();
-
-            if (key_column.empty())
-                throw std::runtime_error(internals::ERROR_KEY_COLUMN_EMPTY);
-
-            if (this->col_names_->index_of(key_column) == CSV_NOT_FOUND)
-                throw std::runtime_error(std::string(internals::ERROR_KEY_COLUMN_NOT_FOUND) + key_column);
-
-            const bool throw_on_missing_key = options.get_throw_on_missing_key();
-
-            this->build_from_key_function(
-                reader,
-                [key_column, throw_on_missing_key](const CSVRow& row) -> KeyType {
-                    try {
-                        return row[key_column].template get<KeyType>();
-                    }
-                    catch (const std::exception& e) {
-                        if (throw_on_missing_key) {
-                            throw std::runtime_error(internals::ERROR_KEY_COLUMN_VALUE + std::string(e.what()));
-                        }
-
-                        return KeyType();
-                    }
-                },
-                options.get_duplicate_key_policy()
-            );
-        }
-
-        /** Build keyed DataFrame using a custom key extraction function. */
-        template<typename KeyFunc>
-        void build_from_key_function(
-            CSVReader& reader,
-            KeyFunc key_func,
-            DuplicateKeyPolicy policy
-        ) {
-            std::unordered_map<KeyType, size_t> key_to_pos;
-            this->assert_fresh_storage(true);
-
-            std::vector<CSVRow> batch;
-            while (reader.read_chunk(batch, dataframe_read_chunk_rows())) {
-                this->append_keyed_batch(batch, key_func, policy, key_to_pos);
-            }
-        }
-
-        static size_t dataframe_read_chunk_rows() noexcept {
-            return 50000;
-        }
-
-        template<typename Container>
-        static void reserve_for_append(Container& container, size_t additional) {
-            if (additional == 0) {
-                return;
-            }
-
-            const size_t required = container.size() + additional;
-            if (required <= container.capacity()) {
-                return;
-            }
-
-            const size_t current = container.capacity();
-            // Do not reserve exactly one batch ahead. DataFrame construction
-            // appends fixed-size read_chunk() batches, so exact reserves would
-            // force a reallocation on every batch for large inputs.
-            size_t next = current == 0 ? additional : current * 2;
-            if (next < required || next < current) {
-                next = required;
-            }
-
-            container.reserve(next);
-        }
-
-        void append_unkeyed_batch(std::vector<CSVRow>& batch) {
-            reserve_for_append(rows, batch.size());
-            reserve_for_append(edits, batch.size());
-
-            for (auto& row : batch) {
-                rows.push_back(std::move(row));
-                edits.emplace_back();
-            }
-        }
-
-        template<typename KeyFunc>
-        void append_keyed_batch(
-            std::vector<CSVRow>& batch,
-            KeyFunc& key_func,
-            DuplicateKeyPolicy policy,
-            std::unordered_map<KeyType, size_t>& key_to_pos
-        ) {
-            reserve_for_append(rows, batch.size());
-            reserve_for_append(keys_, batch.size());
-            reserve_for_append(edits, batch.size());
-
-            for (auto& row : batch) {
-                KeyType key = key_func(row);
-
-                auto existing = key_to_pos.find(key);
-                if (existing != key_to_pos.end()) {
-                    if (policy == DuplicateKeyPolicy::THROW)
-                        throw std::runtime_error(internals::ERROR_DUPLICATE_KEY);
-
-                    if (policy == DuplicateKeyPolicy::OVERWRITE)
-                        rows[existing->second] = std::move(row);
-
-                    continue;
-                }
-
-                rows.push_back(std::move(row));
-                keys_.push_back(key);
-                edits.emplace_back();
-                key_to_pos[key] = rows.size() - 1;
-            }
-        }
-
-        /** Find the index of a column by name. Throws if the column is not found. */
-        size_t find_column(const std::string& name) const {
-            return index_of(name) != CSV_NOT_FOUND ? static_cast<size_t>(index_of(name)) :
-                throw std::out_of_range(std::string(internals::ERROR_COLUMN_NOT_FOUND) + name);
-        }
-
-        /** Return the overlay for a specific row index. */
-        const RowOverlay* find_row_edits(size_t row_index) const {
-            return edits.at(row_index).get();
-        }
-
-        /** Return the row overlay, allocating it only when mutable access needs it. */
-        RowOverlay* ensure_row_edits(size_t row_index) {
-            RowOverlaySlot& slot = edits.at(row_index);
-            RowOverlay* overlay = slot.get();
-            if (overlay) {
-                return overlay;
-            }
-
-            std::lock_guard<std::mutex> lock(*edits_creation_lock_);
-            return slot.ensure();
-        }
-
-        DataFrameRow<KeyType> make_row_proxy(size_t row_index) {
-            const auto& row = rows.at(row_index);
-            return DataFrameRow<KeyType>(&row, this, row_index, this->ensure_row_edits(row_index), this->key_ptr_at(row_index));
-        }
-
-        DataFrameRow<KeyType> make_const_row_proxy(size_t row_index) const {
-            const auto& row = rows.at(row_index);
-            return DataFrameRow<KeyType>(&row, this, row_index, this->find_row_edits(row_index), this->key_ptr_at(row_index));
-        }
-
-        void erase_row_edits(size_t row_index) {
-            if (row_index < edits.size()) {
-                edits.erase(edits.begin() + row_index);
-            }
-        }
-
-        bool erase_at_index(size_t row_index) {
-            if (row_index >= rows.size()) {
-                return false;
-            }
-
-            this->erase_row_edits(row_index);
-            rows.erase(rows.begin() + row_index);
-            if (this->is_keyed) {
-                keys_.erase(keys_.begin() + row_index);
-            }
-            this->invalidate_key_index();
-            return true;
-        }
-
-        void validate_selected_columns(const std::vector<size_t>& column_indices) const {
-            for (size_t column_index : column_indices) {
-                if (column_index >= this->n_cols()) {
-                    throw std::out_of_range(internals::ERROR_COLUMN_APPLY_INVALID_INDEX);
-                }
-            }
-        }
-
-        /** Validate that this DataFrame was created with a key column. */
-        void require_keyed_frame() const {
-            if (!is_keyed)
-                throw std::runtime_error(internals::ERROR_UNKEYED_DATA_FRAME);
-        }
-
-        /** Invalidate the lazy key index after structural changes. */
-        void invalidate_key_index() {
-            key_index.reset();
-        }
-
-        /** Debug-only check that constructor helpers are starting from a pristine batch state. */
-        void assert_fresh_storage(bool expected_is_keyed) const {
-            CSV_DEBUG_ASSERT(this->rows.empty());
-            CSV_DEBUG_ASSERT(this->keys_.empty());
-            CSV_DEBUG_ASSERT(this->edits.empty());
-            CSV_DEBUG_ASSERT(this->key_index.get() == nullptr);
-            CSV_DEBUG_ASSERT(this->json_converter_.get() == nullptr);
-            CSV_DEBUG_ASSERT(this->is_keyed == expected_is_keyed);
-        }
-
-        /** Build the key index if it doesn't exist (lazy initialization). */
-        void ensure_key_index() const {
-            if (key_index) return;
-
-            key_index = std::unique_ptr<std::unordered_map<KeyType, size_t>>(
-                new std::unordered_map<KeyType, size_t>()
-            );
-
-            for (size_t i = 0; i < rows.size(); i++) {
-                (*key_index)[keys_[i]] = i;
-            }
-        }
-
-        /** Find the position of a key in the rows vector. */
-        size_t position_of(const KeyType& key) const {
-            this->ensure_key_index();
-            auto it = key_index->find(key);
-            return it == key_index->end() ? throw std::out_of_range(internals::ERROR_KEY_NOT_FOUND)
-                : it->second;
-        }
-
-        const KeyType* key_ptr_at(size_t row_index) const {
-            return this->is_keyed ? &keys_.at(row_index) : nullptr;
-        }
-    };
-
-    #ifdef CSV_HAS_CXX20
-    static_assert(
-        internals::csv_write_rows_input_range<DataFrame<>>,
-        "DataFrame must remain compatible with csv::DelimWriter::write_rows()."
-    );
-    #endif
 }
 
-
-#include <algorithm>
-#include <cstring>
-#include <istream>
-
-
-namespace csv {
-    namespace internals {
-        /**
-         * streambuf adapter over csv::string_view with no data copy.
-         *
-         * The underlying memory must remain valid and immutable for the entire
-         * lifetime of this stream object.
-         */
-        class StringViewStreamBuf : public std::streambuf {
-        public:
-            explicit StringViewStreamBuf(csv::string_view view) {
-                char* begin = const_cast<char*>(view.data());
-                char* end = begin + view.size();
-                this->setg(begin, begin, end);
-            }
-
-        protected:
-            std::streamsize xsgetn(char* s, std::streamsize count) override {
-                const std::streamsize avail = this->egptr() - this->gptr();
-                const std::streamsize n = std::min(avail, count);
-                if (n > 0) {
-                    std::memcpy(s, this->gptr(), static_cast<size_t>(n));
-                    this->gbump(static_cast<int>(n));
-                }
-                return n;
-            }
-
-            pos_type seekoff(off_type off, std::ios_base::seekdir dir,
-                std::ios_base::openmode which = std::ios_base::in) override {
-                if (!(which & std::ios_base::in)) {
-                    return pos_type(off_type(-1));
-                }
-
-                const auto begin = this->eback();
-                const auto curr = this->gptr();
-                const auto end = this->egptr();
-
-                off_type base = 0;
-                if (dir == std::ios_base::beg) {
-                    base = 0;
-                }
-                else if (dir == std::ios_base::cur) {
-                    base = static_cast<off_type>(curr - begin);
-                }
-                else if (dir == std::ios_base::end) {
-                    base = static_cast<off_type>(end - begin);
-                }
-                else {
-                    return pos_type(off_type(-1));
-                }
-
-                const off_type next = base + off;
-                const off_type size = static_cast<off_type>(end - begin);
-                if (next < 0 || next > size) {
-                    return pos_type(off_type(-1));
-                }
-
-                this->setg(begin, begin + next, end);
-                return pos_type(next);
-            }
-
-            pos_type seekpos(pos_type pos,
-                std::ios_base::openmode which = std::ios_base::in) override {
-                return this->seekoff(off_type(pos), std::ios_base::beg, which);
-            }
-        };
-
-        /**
-         * Lightweight istream over csv::string_view with zero copy.
-         *
-         * WARNING: The caller is responsible for ensuring the backing memory
-         * outlives this stream and any CSVReader parsing it.
-         */
-        class StringViewStream : public std::istream {
-        public:
-            explicit StringViewStream(csv::string_view view)
-                : std::istream(nullptr), _buf(view) {
-                this->rdbuf(&_buf);
-            }
-
-            StringViewStream(const StringViewStream&) = delete;
-            StringViewStream(StringViewStream&&) = delete;
-            StringViewStream& operator=(const StringViewStream&) = delete;
-            StringViewStream& operator=(StringViewStream&&) = delete;
-
-        private:
-            StringViewStreamBuf _buf;
-        };
-    }
-}
-
-
-#include <memory>
-#include <sstream>
-#include <string>
-#include <type_traits>
-#include <unordered_map>
-#include <utility>
-
-namespace csv {
-    /** Returned by get_file_info() */
-    struct CSVFileInfo {
-        std::string filename;               /**< Filename */
-        std::vector<std::string> col_names; /**< CSV column names */
-        char delim;                         /**< Delimiting character */
-        size_t n_rows;                      /**< Number of rows in a file */
-        size_t n_cols;                      /**< Number of columns in a CSV */
-        size_t parse_worker_count;          /**< Number of parser worker threads used */
-        internals::SpeculativeParseDiagnostics speculative_diagnostics;
-    };
-
-    /** @name Shorthand Parsing Functions
-     *  @brief Convenience functions for parsing small strings
-     */
-     ///@{
-
-    /** Parse CSV from a string view, copying the input into an owned buffer.
-     *
-     *  Safe for any string_view regardless of the caller's ownership of the
-     *  underlying memory.
-     *
-     *  @par Example
-     *  @snippet tests/test_read_csv.cpp Parse Example
-     */
-    inline CSVReader parse(csv::string_view in, const CSVFormat& format = CSVFormat::guess_csv()) {
-        std::unique_ptr<std::istream> ss(new std::stringstream(std::string(in)));
-        return CSVReader(std::move(ss), format);
-    }
-
-    /** Parse CSV from an in-memory view with zero copy.
-     *
-     *  WARNING: Non-owning path. The caller must ensure `in`'s backing memory
-     *  remains valid and immutable while the reader may request additional rows
-     *  from the source stream.
-     *
-     *  Rows already obtained from the reader remain valid, but unread rows
-     *  still depend on the source view staying alive.
-     */
-    inline CSVReader parse_unsafe(csv::string_view in, CSVFormat format = CSVFormat::guess_csv()) {
-        std::unique_ptr<std::istream> stream(new internals::StringViewStream(in));
-        return CSVReader(std::move(stream), format);
-    }
-
-    /** Parses a CSV string with no headers. */
-    inline CSVReader parse_no_header(csv::string_view in) {
-        CSVFormat format;
-        format.header_row(-1);
-        return parse(in, format);
-    }
-
-    /** Parse a RFC 4180 CSV string.
-     *
-     *  String literals have static storage duration, so the zero-copy path is
-     *  safe here.
-     *
-     *  @par Example
-     *  @snippet tests/test_read_csv.cpp Escaped Comma
-     */
-    inline CSVReader operator ""_csv(const char* in, size_t n) {
-        return parse_unsafe(csv::string_view(in, n));
-    }
-
-    /** A shorthand for csv::parse_no_header().
-     *
-     *  String literals have static storage duration, so the zero-copy path is
-     *  safe here.
-     */
-    inline CSVReader operator ""_csv_no_header(const char* in, size_t n) {
-        CSVFormat format;
-        format.header_row(-1);
-        return parse_unsafe(csv::string_view(in, n), format);
-    }
-    ///@}
-
-    /** @name Utility Functions */
-    ///@{
-    /** Infer SQL-friendly column data types from an existing CSVReader.
-     *
-     *  This consumes rows from `reader` using the chunked ETL path and returns
-     *  one inferred `DataType` per column name.
-     */
-    std::unordered_map<std::string, DataType> csv_data_types(CSVReader& reader);
-
-    /** Infer SQL-friendly column data types from any CSVReader constructor input.
-     *
-     *  This convenience overload forwards its arguments directly to
-     *  `CSVReader`, so it supports filenames, `std::istream` sources, owned
-     *  streams, and custom `CSVFormat` combinations without additional wrapper
-     *  code.
-     *
-     *  @par Example
-     *  @code
-     *  std::istringstream input("name,age\nAlice,30\nBob,41\n");
-     *  CSVFormat format;
-     *  format.delimiter(',').header_row(0);
-     *
-     *  auto dtypes = csv::csv_data_types(input, format);
-     *  @endcode
-     */
-    template<
-        typename... ReaderArgs,
-        csv::enable_if_t<std::is_constructible<CSVReader, ReaderArgs...>::value, int> = 0
-    >
-    inline std::unordered_map<std::string, DataType> csv_data_types(ReaderArgs&&... reader_args) {
-        CSVReader reader(std::forward<ReaderArgs>(reader_args)...);
-        return csv_data_types(reader);
-    }
-
-    /** Apply a per-column batch function over a CSVReader using a reusable executor.
-     *
-     *  Reads the source in chunks, promotes each chunk into a temporary DataFrame,
-     *  and applies `fn(column, states[column.index()])`.
-     *
-     *  Callbacks may treat each batch DataFrame as read-mostly, and sparse
-     *  overlay cell edits are synchronized at row granularity. If you need more
-     *  involved batch orchestration, use `CSVReader::read_chunk()` and construct
-     *  a batch-scoped `DataFrame` yourself.
-     *
-     *  @throws std::invalid_argument if `chunk_size == 0`
-     */
-    template<typename State, typename Fn>
-    inline void chunk_parallel_apply(
-        CSVReader& reader,
-        DataFrameExecutor& executor,
-        std::vector<State>& states,
-        Fn&& fn,
-        size_t chunk_size = 50000
-    ) {
-        if (chunk_size == 0) {
-            throw std::invalid_argument(internals::ERROR_CHUNK_PARALLEL_APPLY_ZERO);
+#if CSV_EXCEPTIONS_ENABLED
+namespace csv { namespace internals {
+    inline void throw_dataframe_error(const CSVError& error) {
+        switch (error.code) {
+        case CSVErrorCode::None:
+            return;
+        case CSVErrorCode::IndexOutOfBounds:
+            if (error.context == CSV_ERROR_INDEX_OUT_OF_BOUNDS) break;
+            throw std::out_of_range(std::string(error.context));
+        case CSVErrorCode::ColumnNotFound:
+        case CSVErrorCode::KeyNotFound:
+            throw std::out_of_range(std::string(error.context));
+        default:
+            break;
         }
-
-        std::vector<CSVRow> rows;
-        while (reader.read_chunk(rows, chunk_size)) {
-            DataFrame<> batch(std::move(rows));
-            batch.column_parallel_apply(executor, states, std::forward<Fn>(fn));
-        }
+        throw_error(error);
     }
-
-    /** Apply a per-column batch function over a CSVReader with a temporary executor.
-     *
-     *  This is the convenience overload for the common case where callers do not
-     *  need to reuse worker threads across multiple reader pipelines.
-     */
-    template<typename State, typename Fn>
-    inline void chunk_parallel_apply(
-        CSVReader& reader,
-        std::vector<State>& states,
-        Fn&& fn,
-        size_t chunk_size = 50000
-    ) {
-        DataFrameExecutor executor;
-        chunk_parallel_apply(reader, executor, states, std::forward<Fn>(fn), chunk_size);
-    }
-
-    /** Get basic information about a CSV file
-     *  @include programs/csv_info.cpp
-     */
-    inline CSVFileInfo get_file_info(const std::string& filename) {
-        CSVFormat reader_format = CSVFormat::guess_csv();
-
-        CSVReader reader(filename, reader_format);
-        CSVFormat format = reader.get_format();
-
-        std::vector<CSVRow> rows;
-        while (reader.read_chunk(rows, 50000)) {}
-
-        return {
-            filename,
-            reader.get_col_names(),
-            format.get_delim(),
-            reader.n_rows(),
-            reader.get_col_names().size(),
-            reader.parse_worker_count(),
-            reader.speculative_diagnostics()
-        };
-    }
-
-    /** Get the column names of a CSV file using just the first 500KB. */
-    inline std::vector<std::string> get_col_names(
-        csv::string_view filename,
-        const CSVFormat& format = CSVFormat::guess_csv()) {
-        auto head = internals::parser::get_csv_head(filename);
-        return parse_unsafe(head, format).get_col_names();
-    }
-
-    /** Find the position of a column in a CSV file or CSV_NOT_FOUND otherwise. */
-    inline long long get_col_pos(csv::string_view filename, csv::string_view col_name,
-        const CSVFormat& format = CSVFormat::guess_csv()) {
-        auto col_names = get_col_names(filename, format);
-        return col_names.empty() ? CSV_NOT_FOUND :
-            std::distance(col_names.begin(), std::find(col_names.begin(), col_names.end(), col_name));
-    }
-    ///@}
-}
-
-/** @file
-  *  A standalone header file for writing delimiter-separated files
-  */
-
-#include <cmath>
-#include <fstream>
-#include <iostream>
-#include <memory>
-#ifdef CSV_HAS_CXX20
-#include <ranges>
+}}
 #endif
-#include <stdexcept>
-#include <string>
-#include <tuple>
-#include <type_traits>
-#include <vector>
-
 
 namespace csv {
 namespace internals {
@@ -13669,8 +13593,8 @@ namespace internals {
             csv::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value, int> = 0
         >
         inline std::string to_string(T value) {
-            return (value >= 0) ? to_string((size_t)value)
-                : "-" + to_string((size_t)(value * -1));
+            return (value >= 0) ? to_string(static_cast<unsigned long long>(value))
+                : "-" + to_string(0ULL - static_cast<unsigned long long>(value));
         }
 
     /** to_string() for floating point numbers */
@@ -13733,6 +13657,21 @@ inline static void set_decimal_places(int precision) {
 }
 
 namespace internals {
+    template<typename T, typename = void>
+    struct has_checked_csv_fields : std::false_type {};
+
+    template<typename T>
+    struct has_checked_csv_fields<T, csv::void_t<
+        decltype(std::declval<const typename std::remove_reference<T>::type&>().size()),
+        decltype(std::declval<const typename std::remove_reference<T>::type&>()
+            .try_field(size_t{0}, std::declval<CSVError&>()).get_sv())>> : std::true_type {};
+
+    template<typename T>
+    struct is_data_frame : std::false_type {};
+
+    template<typename KeyType>
+    struct is_data_frame<DataFrame<KeyType>> : std::true_type {};
+
     /** SFINAE trait: detects if a type is iterable (has std::begin/end). */
     template<typename T, typename = void>
     struct is_iterable : std::false_type {};
@@ -13801,14 +13740,33 @@ namespace internals {
             : out(&_out), quote_minimal(_quote_minimal) {}
 
         /** Construct a DelimWriter that owns an output file stream. */
+#if CSV_EXCEPTIONS_ENABLED
         template<typename T = OutputStream,
             csv::enable_if_t<std::is_same<T, std::ofstream>::value, int> = 0>
         DelimWriter(const std::string& filename, bool _quote_minimal = true)
-            : owned_out(new std::ofstream(filename, std::ios::out)),
-            out(owned_out.get()),
-            quote_minimal(_quote_minimal) {
+            : DelimWriter(std::unique_ptr<OutputStream>(new OutputStream(filename, std::ios::out)),
+                _quote_minimal) {
             if (!owned_out->is_open())
                 internals::throw_failed_open_for_writing(filename);
+        }
+#endif
+
+        /** Open an owned output file, returning null on failure.
+         *  The returned writer owns its stream. Use try_close() to observe final I/O errors.
+         */
+        template<typename T = OutputStream,
+            csv::enable_if_t<std::is_same<T, std::ofstream>::value, int> = 0>
+        static std::unique_ptr<DelimWriter> try_open(
+            const std::string& filename, CSVError& error, bool quote_minimal = true
+        ) {
+            error.clear();
+            std::unique_ptr<OutputStream> stream(new OutputStream(filename, std::ios::out));
+            if (!stream->is_open()) {
+                internals::fail(error, CSVErrorCode::OpenFailed,
+                    std::string(internals::ERROR_FAILED_OPEN_WRITE) + filename);
+                return nullptr;
+            }
+            return std::unique_ptr<DelimWriter>(new DelimWriter(std::move(stream), quote_minimal));
         }
 
         DelimWriter(const DelimWriter&) = delete;
@@ -13820,7 +13778,7 @@ namespace internals {
             quote_minimal(other.quote_minimal),
             auto_flush_(other.auto_flush_),
             batch_buffer_(std::move(other.batch_buffer_)) {
-            if (owned_out) {
+            if (owned_out && out) {
                 out = owned_out.get();
             }
             other.out = nullptr;
@@ -13836,7 +13794,7 @@ namespace internals {
             auto_flush_ = other.auto_flush_;
             batch_buffer_ = std::move(other.batch_buffer_);
 
-            if (owned_out) {
+            if (owned_out && out) {
                 out = owned_out.get();
             }
 
@@ -13862,12 +13820,19 @@ namespace internals {
             return this->auto_flush_;
         }
 
-        /** Destructor will flush remaining data. */
+        /** Best-effort flush. Use try_flush() or try_close() to observe errors. */
         ~DelimWriter() {
-            if (out) {
+            // A failed write can have emitted a prefix. Never retry its buffered bytes
+            // during destruction; the caller has already received the I/O failure.
+            if (!out || !ready_for_destruction(*out, 0)) return;
+            CSV_TRY {
                 flush_batch();
                 out->flush();
             }
+            CSV_CATCH((...), {
+                // Destruction must not replace an active exception or terminate a caller
+                // that already handled a checked I/O failure.
+            })
         }
 
         /** Write a C-style array of strings as one delimited row. */
@@ -13884,8 +13849,38 @@ namespace internals {
             return *this;
         }
 
-        /** Write a row from any single argument accepted by operator<<
+        /** Write a complete DataFrame: visible column names followed by visible rows.
+         *  Sparse edits and row selections are included. A frame with no rows still
+         *  writes its header. The writer's delimiter, quoting, and buffering settings
+         *  apply, and auto-flush flushes the stream once at the end of the document.
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        template<typename KeyType>
+        DelimWriter& operator<<(const DataFrame<KeyType>& frame) {
+            append_range_fields(frame.columns());
+            end_record();
+            flush_batch_if_needed();
+
+#ifdef CSV_HAS_CXX20
+            return write_rows(frame);
+#else
+            // Older standards use the existing visible-row conversion path.
+            for (const auto& row : frame) {
+                append_range_fields(std::vector<std::string>(row));
+                end_record();
+                flush_batch_if_needed();
+            }
+            finish_write_call();
+            return *this;
+#endif
+        }
+
+#endif
+
+        /** Write a row from any single-row argument accepted by operator<<
          *  (std::vector, std::array, std::tuple, C-array, C++20 range, etc.).
+         *  Use operator<< when exceptions are enabled, or try_write_frame() in
+         *  either exception mode, for a complete DataFrame.
          *
          *  @code
          *  writer.write_row(my_vector);
@@ -13895,7 +13890,8 @@ namespace internals {
          *  SFINAE ensures this overload is only viable when the argument type
          *  is accepted by an existing operator<< overload.
          */
-        template<typename T>
+        template<typename T,
+            csv::enable_if_t<!internals::is_data_frame<typename std::decay<T>::type>::value, int> = 0>
         auto write_row(T&& record) -> decltype(*this << std::forward<T>(record)) {
             return *this << std::forward<T>(record);
         }
@@ -13926,6 +13922,9 @@ namespace internals {
          *  Buffered writers flush the batch when it grows large or when this call ends.
          *  Auto-flushing writers additionally flush the underlying stream once at the
          *  end of the bulk call.
+         *
+         *  Passing a DataFrame writes data rows only. Use operator<< to include
+         *  its column names as a header.
          *
          *  @note Requires C++20 or later.
          */
@@ -13971,7 +13970,7 @@ namespace internals {
          *  This includes std::vector<std::string>, std::vector<csv::string_view>,
          *  std::array, C++20 views, etc.
          *
-         *  @note Implementation detail: Uses SFINAE for runtime compatibility.
+         *  @note Available before C++20 through compile-time overload selection.
          */
         template<typename Range>
         typename std::enable_if<
@@ -13999,7 +13998,220 @@ namespace internals {
             out->flush();
         }
 
+        /** Write the same inputs accepted by write_row(), reporting stream failures.
+         *  CSVRow and DataFrame row/column proxies are accepted directly in C++11
+         *  and later in either exception mode. Field-access failures discard the
+         *  current buffered record while preserving previously buffered records.
+         *  With buffering enabled, success means accepted into the buffer; try_flush()
+         *  or try_close() observes completion. Output already written is not rolled back.
+         *  Checked operations require a stream exposing fail(). In exception-disabled
+         *  builds, standard streams must have their exception mask disabled.
+         */
+        template<typename T,
+            csv::enable_if_t<internals::has_checked_csv_fields<T>::value, int> = 0>
+        bool try_write_row(CSVError& error, T&& record) {
+            return this->checked_write(error, std::forward<T>(record));
+        }
+
+        template<typename... Args>
+        auto try_write_row(CSVError& error, Args&&... args)
+            -> decltype(this->write_row(std::forward<Args>(args)...), bool()) {
+            return this->checked_write(error, std::forward<Args>(args)...);
+        }
+
+        /** Write a complete DataFrame, including its header, and report failures.
+         *  Visible edits and structural column changes are preserved. A frame with
+         *  no data rows still writes its header.
+         */
+        template<typename KeyType>
+        bool try_write_frame(const DataFrame<KeyType>& frame, CSVError& error) {
+            return this->checked_write(error, frame);
+        }
+
+#ifdef CSV_HAS_CXX20
+        /** Write a batch using the same accepted row ranges and buffering policy as write_rows(). */
+        template<std::ranges::input_range Rows>
+            requires (internals::csv_write_rows_input_range<Rows>
+                || internals::has_checked_csv_fields<std::ranges::range_reference_t<Rows>>::value)
+        bool try_write_rows(Rows&& rows, CSVError& error) {
+            return this->checked_operation(error, [this, &rows, &error]() {
+                for (auto&& row : rows) {
+                    if (!this->append_checked_row(row, error, 0)) return false;
+                    this->flush_batch_if_needed();
+                    if (!this->check_write_status(error)) return false;
+                }
+                this->finish_write_call();
+                return true;
+            });
+        }
+#endif
+
+        /** Flush buffered data and the stream, reporting I/O errors. */
+        bool try_flush(CSVError& error) {
+            return this->checked_operation(error, [this]() {
+                this->flush();
+                return true;
+            });
+        }
+
+        /** Flush and close an owned output file, including after a flush failure.
+         *  Borrowed streams remain the caller's responsibility to close.
+         *  Further checked operations on a closed writer report InvalidArgument.
+         */
+        template<typename T = OutputStream,
+            csv::enable_if_t<std::is_same<T, std::ofstream>::value, int> = 0>
+        bool try_close(CSVError& error) {
+            error.clear();
+            if (!owned_out || !out) {
+                return internals::fail_static(error, CSVErrorCode::InvalidArgument,
+                    "try_close() requires an open, owned output file.");
+            }
+
+            const bool flushed = this->try_flush(error);
+            // Detach before closing so neither close errors nor a failed flush can
+            // trigger a second write from the writer's destructor.
+            out = nullptr;
+            CSV_TRY {
+                owned_out->close();
+            }
+            CSV_CATCH((const std::ios_base::failure& failure), {
+                if (flushed) internals::fail(error, CSVErrorCode::WriteFailed, failure.what());
+                return false;
+            })
+            if (!flushed) return false;
+            if (owned_out->fail()) {
+                return internals::fail_static(error, CSVErrorCode::WriteFailed, "Failed to close CSV output.");
+            }
+            return true;
+        }
+
     private:
+        DelimWriter(std::unique_ptr<OutputStream> stream, bool quote_minimal)
+            : owned_out(std::move(stream)), out(owned_out.get()), quote_minimal(quote_minimal) {}
+
+        // These probes preserve support for lightweight custom output streams in
+        // the existing unchecked API. Only checked calls require fail().
+        template<typename Stream>
+        static auto exceptions_disabled(const Stream& stream, int)
+            -> decltype(stream.exceptions(), bool()) {
+            return stream.exceptions() == std::ios_base::goodbit;
+        }
+
+        template<typename Stream>
+        static bool exceptions_disabled(const Stream&, long) { return true; }
+
+        template<typename Stream>
+        static auto ready_for_destruction(const Stream& stream, int)
+            -> decltype(stream.fail(), bool()) {
+#if CSV_EXCEPTIONS_ENABLED
+            return !stream.fail();
+#else
+            return !stream.fail() && exceptions_disabled(stream, 0);
+#endif
+        }
+
+        template<typename Stream>
+        static bool ready_for_destruction(const Stream&, long) { return true; }
+
+        template<typename Fn>
+        bool checked_operation(CSVError& error, Fn&& operation) {
+            error.clear();
+            if (!out) {
+                return internals::fail_static(error, CSVErrorCode::InvalidArgument, "CSV output is closed.");
+            }
+#if !CSV_EXCEPTIONS_ENABLED
+            if (!exceptions_disabled(*out, 0)) {
+                return internals::fail_static(error, CSVErrorCode::InvalidArgument,
+                    "Checked CSV output requires a stream with exceptions disabled.");
+            }
+#endif
+            if (out->fail()) {
+                return internals::fail_static(error, CSVErrorCode::WriteFailed, "CSV output stream has failed.");
+            }
+            CSV_TRY {
+                if (!std::forward<Fn>(operation)()) return false;
+            }
+            CSV_CATCH((const std::ios_base::failure& failure), {
+                return internals::fail(error, CSVErrorCode::WriteFailed, failure.what());
+            })
+            return this->check_write_status(error);
+        }
+
+        bool check_write_status(CSVError& error) const {
+            return !out->fail() || internals::fail_static(error, CSVErrorCode::WriteFailed,
+                "CSV output stream has failed.");
+        }
+
+        template<typename... Args>
+        bool checked_write(CSVError& error, Args&&... args) {
+            return this->checked_operation(error, [&]() {
+                return this->checked_write_call(error, std::forward<Args>(args)...);
+            });
+        }
+
+        template<typename T>
+        bool checked_write_call(CSVError& error, T&& record) {
+            return this->checked_write_record(std::forward<T>(record), error, 0);
+        }
+
+        template<typename T, typename U, typename... Rest>
+        bool checked_write_call(CSVError&, T&& first, U&& second, Rest&&... rest) {
+            this->write_row(std::forward<T>(first), std::forward<U>(second), std::forward<Rest>(rest)...);
+            return true;
+        }
+
+        template<typename KeyType>
+        bool checked_write_record(const DataFrame<KeyType>& frame, CSVError& error, int) {
+            append_range_fields(frame.columns());
+            end_record();
+            flush_batch_if_needed();
+            if (!this->check_write_status(error)) return false;
+            for (const auto& row : frame) {
+                if (!this->append_checked_row(row, error, 0)) return false;
+                flush_batch_if_needed();
+                if (!this->check_write_status(error)) return false;
+            }
+            finish_write_call();
+            return true;
+        }
+
+        template<typename Row>
+        auto checked_write_record(Row&& row, CSVError& error, int)
+            -> decltype(row.try_field(size_t{0}, error).get_sv(), bool()) {
+            if (!this->append_checked_row(row, error, 0)) return false;
+            finish_write_call();
+            return true;
+        }
+
+        template<typename Row>
+        bool checked_write_record(Row&& row, CSVError&, long) {
+            this->write_row(std::forward<Row>(row));
+            return true;
+        }
+
+        template<typename Row>
+        auto append_checked_row(Row&& row, CSVError& error, int)
+            -> decltype(row.try_field(size_t{0}, error).get_sv(), bool()) {
+            const size_t row_start = batch_buffer_.size();
+            append_range_fields(internals::checked_field_range(row, error));
+            if (error) {
+                // No bytes from this row have been sent yet. Discard its
+                // incomplete buffered record while retaining earlier rows.
+                batch_buffer_.resize(row_start);
+                return false;
+            }
+            end_record();
+            return true;
+        }
+
+#ifdef CSV_HAS_CXX20
+        template<typename Row>
+        bool append_checked_row(Row&& row, CSVError&, long) {
+            append_row_like(std::forward<Row>(row));
+            return true;
+        }
+#endif
+
         /** Append delimited fields from a range without terminating the record.
          *
          *  Shared by single-row writes and bulk row appends so escaping and
@@ -14011,13 +14223,25 @@ namespace internals {
             auto end = std::end(record);
 
             if (it != end) {
+                const size_t field_start = batch_buffer_.size();
                 write_field(*it);
                 ++it;
+                if (it == end) quote_lone_empty_field(field_start);
             }
 
             for (; it != end; ++it) {
                 batch_buffer_.push_back(Delim);
                 write_field(*it);
+            }
+        }
+
+        /** A row with one empty field would otherwise be a blank line, which
+         *  reads back as a row with no fields, so quote that field.
+         */
+        void quote_lone_empty_field(size_t field_start) {
+            if (batch_buffer_.size() == field_start) {
+                batch_buffer_.push_back(Quote);
+                batch_buffer_.push_back(Quote);
             }
         }
 
@@ -14058,6 +14282,13 @@ namespace internals {
             end_record();
         }
 #endif
+
+        // Preserve the owning checked field through serialization. This also
+        // avoids instantiating the string-conversion fallback in C++11/14.
+        template<typename Field>
+        void write_field(const internals::CheckedFieldValue<Field>& in) {
+            in.with_view([this](csv::string_view value) { write_escaped_field(value); });
+        }
 
         template<
             typename T,
@@ -14133,7 +14364,12 @@ namespace internals {
         /** Recursive template for writing std::tuples */
         template<size_t Index = 0, typename... T>
         typename std::enable_if<Index < sizeof...(T), void>::type write_tuple(const std::tuple<T...>& record) {
+            const size_t field_start = batch_buffer_.size();
             write_field(std::get<Index>(record));
+
+            CSV_MSVC_PUSH_DISABLE(4127)
+            IF_CONSTEXPR (sizeof...(T) == 1) quote_lone_empty_field(field_start);
+            CSV_MSVC_POP
 
             CSV_MSVC_PUSH_DISABLE(4127)
             IF_CONSTEXPR (Index + 1 < sizeof...(T)) batch_buffer_.push_back(Delim);
@@ -14229,122 +14465,3264 @@ namespace internals {
     ///@}
 }
 
+namespace csv {
+    struct RowOverlay {
+        RowOverlay() = default;
+        RowOverlay(const RowOverlay&) = delete;
+        RowOverlay& operator=(const RowOverlay&) = delete;
 
-/** @file
- *  Defines an object used to store CSV format settings
- */
+        RowOverlay(RowOverlay&& other) noexcept : values(std::move(other.values)) {
+            busy.clear(std::memory_order_release);
+        }
 
-#include <algorithm>
-#include <cstdint>
-#include <limits>
-#include <set>
+        RowOverlay& operator=(RowOverlay&& other) noexcept {
+            if (this != &other) {
+                values = std::move(other.values);
+                busy.clear(std::memory_order_release);
+            }
+            return *this;
+        }
 
+        bool try_get_copy(size_t col_index, std::string& out) const {
+            row_overlay_lock_guard lock(this);
+            auto it = values.find(col_index);
+            if (it == values.end()) {
+                return false;
+            }
+
+            out = it->second;
+            return true;
+        }
+
+        /** Return a view into an edited cell without copying.
+         *
+         *  This exists for read-only batch scans such as schema/type inference,
+         *  where the caller immediately consumes the value and no concurrent
+         *  sparse-overlay edits are expected. General cell access should keep
+         *  using try_get_copy() or DataFrameCell so callers do not accidentally
+         *  retain a view across later mutation.
+         */
+        bool try_get_view(size_t col_index, csv::string_view& out) const {
+            row_overlay_lock_guard lock(this);
+            auto it = values.find(col_index);
+            if (it == values.end()) {
+                return false;
+            }
+
+            out = csv::string_view(it->second);
+            return true;
+        }
+
+        void set(size_t col_index, std::string value) {
+            row_overlay_lock_guard lock(this);
+            values[col_index] = std::move(value);
+        }
+
+        bool empty() const {
+            row_overlay_lock_guard lock(this);
+            return values.empty();
+        }
+
+        RowOverlay snapshot() const {
+            row_overlay_lock_guard lock(this);
+            RowOverlay result;
+            result.values = values;
+            return result;
+        }
+
+    private:
+        struct row_overlay_lock_guard {
+            explicit row_overlay_lock_guard(const RowOverlay* overlay)
+                : busy(const_cast<std::atomic_flag&>(overlay->busy)) {
+                while (busy.test_and_set(std::memory_order_acquire)) {}
+            }
+
+            ~row_overlay_lock_guard() {
+                busy.clear(std::memory_order_release);
+            }
+
+            std::atomic_flag& busy;
+        };
+
+        mutable std::atomic_flag busy = ATOMIC_FLAG_INIT;
+        std::unordered_map<size_t, std::string> values;
+    };
+
+    struct RowOverlaySlot {
+        RowOverlaySlot() noexcept : ptr(nullptr) {}
+        RowOverlaySlot(const RowOverlaySlot&) = delete;
+        RowOverlaySlot& operator=(const RowOverlaySlot&) = delete;
+
+        RowOverlaySlot(RowOverlaySlot&& other) noexcept
+            : ptr(nullptr),
+            owned(std::move(other.owned)) {
+            RowOverlay* overlay = owned.get();
+            ptr.store(overlay, std::memory_order_release);
+            other.ptr.store(nullptr, std::memory_order_release);
+        }
+
+        RowOverlaySlot& operator=(RowOverlaySlot&& other) noexcept {
+            if (this != &other) {
+                owned = std::move(other.owned);
+                RowOverlay* overlay = owned.get();
+                ptr.store(overlay, std::memory_order_release);
+                other.ptr.store(nullptr, std::memory_order_release);
+            }
+
+            return *this;
+        }
+
+        RowOverlay* get() noexcept {
+            return ptr.load(std::memory_order_acquire);
+        }
+
+        const RowOverlay* get() const noexcept {
+            return ptr.load(std::memory_order_acquire);
+        }
+
+        RowOverlay* ensure() {
+            RowOverlay* overlay = this->get();
+            if (!overlay) {
+                owned.reset(new RowOverlay());
+                overlay = owned.get();
+                ptr.store(overlay, std::memory_order_release);
+            }
+
+            return overlay;
+        }
+
+    private:
+        std::atomic<RowOverlay*> ptr;
+        std::unique_ptr<RowOverlay> owned;
+    };
+
+    namespace internals {
+        namespace data_frame {
+            // Concrete backend identity only: deliberately no virtual functions.
+            struct RowBackend {};
+
+            struct CellBinding {
+                const RowOverlay* overlay;
+                size_t physical_column;
+            };
+
+            template<typename Container>
+            inline void reserve_next(Container& values) {
+                const size_t required = values.size() + 1;
+                if (required > values.capacity()) {
+                    values.reserve(std::max(required, values.capacity() * 2));
+                }
+            }
+
+            inline void validate_column(size_t index, size_t count) {
+                CSV_DEBUG_ASSERT(index < count);
+                (void)index; (void)count;
+            }
+
+            inline bool validate_row(const std::vector<std::string>& row, size_t columns, CSVError& error) {
+                error.clear();
+                if (columns == 0 && !row.empty()) {
+                    return fail_static(error, CSVErrorCode::InvalidArgument, "cannot insert a non-empty row into a DataFrame without columns");
+                }
+                if (row.size() != columns) {
+                    return fail_static(error, CSVErrorCode::InvalidArgument, "inserted row field count must match DataFrame column count");
+                }
+                return true;
+            }
+
+            inline std::vector<CSVRow> select_parsed_rows(
+                const std::vector<CSVRow>& rows, const std::vector<std::uint8_t>& mask, CSVError& error
+            ) {
+                error.clear();
+                if (mask.size() != rows.size()) {
+                    fail_static(error, CSVErrorCode::InvalidArgument, "selected row mask size must match DataFrame row count");
+                    return {};
+                }
+                std::vector<CSVRow> selected;
+                selected.reserve(static_cast<size_t>(std::count_if(mask.begin(), mask.end(),
+                    [](std::uint8_t value) { return value != 0; })));
+                for (size_t i = 0; i < rows.size(); ++i) {
+                    if (mask[i]) { selected.push_back(rows[i]); }
+                }
+                return selected;
+            }
+
+            /** Shared lossless owned-row construction for insertion and materialization. */
+            class RowStorageBuilder {
+            public:
+                explicit inline RowStorageBuilder(ConstColNamesPtr names) : names_(std::move(names)) {}
+
+                inline void begin_row() {
+                    // Offsets are chunk-local. Rotate between rows instead of accumulating
+                    // arbitrarily large offsets when rebuilding a large table.
+                    if (!data_ || bytes_ >= CSV_CHUNK_SIZE_DEFAULT || data_->fields.size() >= CSV_CHUNK_SIZE_DEFAULT) {
+                        data_ = std::make_shared<RawCSVData>();
+                        data_->col_names = std::const_pointer_cast<ColNames>(names_);
+                        bytes_ = 0;
+                    }
+                    field_start_ = data_->fields.size();
+                    data_->fields.reserve_for_source_size(field_start_ + names_->size());
+                }
+
+                inline void append_field(csv::string_view value) {
+                    const size_t offset = data_->quote_arena.append(value);
+                    data_->fields.emplace_back(offset, value.size(), true);
+                    bytes_ += value.size();
+                }
+
+                inline CSVRow finish_row() const {
+                    return CSVRow(data_, 0, field_start_, data_->fields.size() - field_start_);
+                }
+
+                static inline CSVRow make_row(const std::vector<std::string>& values, ConstColNamesPtr names) {
+                    RowStorageBuilder storage(std::move(names));
+                    storage.begin_row();
+                    for (const auto& value : values) { storage.append_field(csv::string_view(value)); }
+                    return storage.finish_row();
+                }
+
+                template<typename FieldAt>
+                static inline std::vector<CSVRow> insert_column(
+                    size_t count, ConstColNamesPtr names, size_t index,
+                    const std::string& default_value, const FieldAt& field_at
+                ) {
+                    std::vector<CSVRow> rebuilt;
+                    rebuilt.reserve(count);
+                    RowStorageBuilder storage(names);
+                    for (size_t row = 0; row < count; ++row) {
+                        storage.begin_row();
+                        for (size_t column = 0; column < names->size(); ++column) {
+                            if (column == index) { storage.append_field(csv::string_view(default_value)); }
+                            else {
+                                const auto value = field_at(row, column < index ? column : column - 1);
+                                storage.append_field(csv::string_view(value));
+                            }
+                        }
+                        rebuilt.push_back(storage.finish_row());
+                    }
+                    return rebuilt;
+                }
+
+            private:
+                ConstColNamesPtr names_;
+                RawCSVDataPtr data_;
+                size_t bytes_ = 0;
+                size_t field_start_ = 0;
+            };
+        
+            // Read the same decoded, trimmed field bytes without scalar metadata.
+            struct RowViewAccessor {
+                static inline csv::string_view view(const CSVRow& row, size_t column) {
+                    return row.get_field_impl(column, row.data);
+                }
+            };
+        
+            /** Direct parsed-row backend and stable physical backing for editing.
+             * First-edit promotion never moves or destroys this storage.
+             */
+            class CleanDataFrame : public RowBackend {
+            public:
+                CleanDataFrame() = default;
+                CleanDataFrame(const CleanDataFrame&) = delete;
+                CleanDataFrame& operator=(const CleanDataFrame&) = delete;
+                CleanDataFrame(CleanDataFrame&&) noexcept = default;
+                CleanDataFrame& operator=(CleanDataFrame&&) noexcept = default;
+
+                inline const ConstColNamesPtr& names() const noexcept { return names_; }
+                inline void set_names(ConstColNamesPtr names) { names_ = std::move(names); }
+                inline std::vector<CSVRow>& rows() noexcept { return rows_; }
+                inline const std::vector<CSVRow>& rows() const noexcept { return rows_; }
+                inline size_t n_cols() const noexcept { return names_->size(); }
+                inline const RowOverlay* find_edits(size_t) const noexcept { return nullptr; }
+
+                inline CellBinding bind(size_t, size_t column) const {
+                    validate_column(column, n_cols());
+                    return CellBinding{nullptr, column};
+                }
+
+                inline csv::string_view view(size_t row, size_t column) const {
+                    validate_column(column, n_cols());
+                    return RowViewAccessor::view(rows_[row], column);
+                }
+
+                inline CSVRow make_inserted_row(const std::vector<std::string>& row, CSVError& error) const {
+                    if (!validate_row(row, n_cols(), error)) return {};
+                    return RowStorageBuilder::make_row(row, names_);
+                }
+
+                inline void reserve_insert() { reserve_next(rows_); }
+                inline void insert_row(size_t index, CSVRow&& row) {
+                    rows_.insert(rows_.begin() + index, std::move(row));
+                }
+                inline void erase_row(size_t index) { rows_.erase(rows_.begin() + index); }
+
+                inline CleanDataFrame selected_rows(const std::vector<std::uint8_t>& mask, CSVError& error) const {
+                    CleanDataFrame selected;
+                    selected.names_ = names_;
+                    selected.rows_ = select_parsed_rows(rows_, mask, error);
+                    return selected;
+                }
+
+                inline void replace_rows(std::vector<CSVRow>&& rows, ConstColNamesPtr names) noexcept {
+                    rows_ = std::move(rows);
+                    names_ = std::move(names);
+                }
+
+            private:
+                ConstColNamesPtr names_ = std::make_shared<ColNames>();
+                std::vector<CSVRow> rows_;
+            };
+        
+            /** Overlay-aware backend. Owns visible schema and all column mutation logic.
+             * Physical rows stay in the stable clean backing; promotion leaves readers
+             * and proxies bound to the same objects. Structural operations are exclusive.
+             */
+            class DirtyDataFrame : public RowBackend {
+            public:
+                explicit inline DirtyDataFrame(CleanDataFrame& backing, bool allocate_edits = true)
+                    : backing_(&backing), names_(backing.names()) {
+                    if (allocate_edits) { edits_.resize(backing.rows().size()); }
+                }
+                DirtyDataFrame(const DirtyDataFrame&) = delete;
+                DirtyDataFrame& operator=(const DirtyDataFrame&) = delete;
+
+                inline void rebind(CleanDataFrame& backing) noexcept { backing_ = &backing; }
+                inline const ConstColNamesPtr& names() const noexcept { return names_; }
+                inline size_t n_cols() const noexcept { return names_->size(); }
+                inline const RowOverlay* find_edits(size_t row) const {
+                    // Empty slots exist only in an unpublished, exclusive mutation
+                    // backend. Published backends initialize every slot before release.
+                    return edits_.empty() ? nullptr : edits_[row].get();
+                }
+                inline RowOverlay* ensure_edits(size_t row) {
+                    if (auto* overlay = edits_[row].get()) { return overlay; }
+                    std::lock_guard<std::mutex> lock(creation_lock_);
+                    return edits_[row].ensure();
+                }
+                inline size_t physical_column(size_t column) const {
+                    return column_indices_.empty() ? column : column_indices_[column];
+                }
+                inline size_t logical_column(size_t physical) const {
+                    if (column_indices_.empty()) { return physical; }
+                    const auto position = std::find(column_indices_.begin(), column_indices_.end(), physical);
+                    CSV_DEBUG_ASSERT(position != column_indices_.end());
+                    return static_cast<size_t>(std::distance(column_indices_.begin(), position));
+                }
+                inline CellBinding bind(size_t row, size_t column) const {
+                    validate_column(column, n_cols());
+                    return CellBinding{find_edits(row), physical_column(column)};
+                }
+                inline csv::string_view view(size_t row, size_t column) const {
+                    const CellBinding cell = bind(row, column);
+                    csv::string_view value;
+                    if (cell.overlay && cell.overlay->try_get_view(cell.physical_column, value)) { return value; }
+                    return RowViewAccessor::view(backing_->rows()[row], cell.physical_column);
+                }
+                inline CSVRow make_inserted_row(const std::vector<std::string>& row, CSVError& error) const {
+                    if (!validate_row(row, n_cols(), error)) return {};
+                    if (column_indices_.empty() && n_cols() == backing_->n_cols()) { return RowStorageBuilder::make_row(row, backing_->names()); }
+                    std::vector<std::string> expanded(backing_->n_cols());
+                    for (size_t i = 0; i < row.size(); ++i) { expanded[physical_column(i)] = row[i]; }
+                    return RowStorageBuilder::make_row(expanded, backing_->names());
+                }
+                inline void reserve_insert() {
+                    backing_->reserve_insert();
+                    reserve_next(edits_);
+                }
+                inline void insert_row(size_t index, CSVRow&& row) {
+                    // Call reserve_insert before mutating keyed metadata. Slot moves
+                    // and CSVRow moves cannot allocate once capacity is available.
+                    backing_->insert_row(index, std::move(row));
+                    edits_.insert(edits_.begin() + index, RowOverlaySlot());
+                }
+                inline void erase_row(size_t index) {
+                    edits_.erase(edits_.begin() + index);
+                    backing_->erase_row(index);
+                }
+                inline bool erase_column(size_t index, int key_column, CSVError& error) {
+                    error.clear();
+                    if (index >= n_cols()) { return false; }
+                    const size_t physical = physical_column(index);
+                    if (key_column != CSV_NOT_FOUND && physical == static_cast<size_t>(key_column)) {
+                        return fail_static(error, CSVErrorCode::KeyColumnProtected, "cannot erase key column from DataFrame");
+                    }
+                    std::vector<std::string> columns = names_->get_col_names();
+                    columns.erase(columns.begin() + index);
+                    ColNamesPtr names = std::make_shared<ColNames>();
+                    names->set_policy(names_->get_policy());
+                    names->set_col_names(columns);
+                    std::vector<size_t> mapping = column_indices_;
+                    if (mapping.empty()) {
+                        mapping.reserve(backing_->n_cols());
+                        for (size_t i = 0; i < backing_->n_cols(); ++i) { mapping.push_back(i); }
+                    }
+                    mapping.erase(mapping.begin() + index);
+                    names_ = std::move(names);
+                    column_indices_ = std::move(mapping);
+                    return true;
+                }
+                inline std::unique_ptr<DirtyDataFrame> selected_rows(
+                    CleanDataFrame& selected, const std::vector<std::uint8_t>& mask
+                ) const {
+                    std::unique_ptr<DirtyDataFrame> result(new DirtyDataFrame(selected));
+                    result->names_ = names_;
+                    result->column_indices_ = column_indices_;
+                    size_t target = 0;
+                    for (size_t i = 0; i < mask.size(); ++i) {
+                        if (mask[i]) {
+                            if (const auto* overlay = find_edits(i)) {
+                                *result->edits_[target].ensure() = overlay->snapshot();
+                            }
+                            ++target;
+                        }
+                    }
+                    return result;
+                }
+
+                template<typename BeforeReplace>
+                inline bool insert_column(
+                    size_t index, const std::string& name, const std::string& default_value,
+                    int& key_column, const BeforeReplace& before_replace, CSVError& error
+                ) {
+                    error.clear();
+                    if (index > n_cols()) { return fail_static(error, CSVErrorCode::IndexOutOfBounds, "DataFrame insert_column index out of range"); }
+                    if (name.empty()) { return fail_static(error, CSVErrorCode::InvalidArgument, "inserted column name must not be empty"); }
+                    if (names_->index_of(name) != CSV_NOT_FOUND) {
+                        return fail_static(error, CSVErrorCode::InvalidArgument, "inserted column name must not duplicate an existing column");
+                    }
+                    // A retained short CSV row cannot supply every visible source field.
+                    // Check before materializing or preserving keys, so no unchecked field
+                    // access can turn an input-shape error into termination without exceptions.
+                    if (n_cols() != 0) {
+                        size_t last_physical = 0;
+                        for (size_t column = 0; column < n_cols(); ++column)
+                            last_physical = std::max(last_physical, physical_column(column));
+                        for (const auto& row : backing_->rows()) {
+                            if (last_physical >= row.size())
+                                return fail_static(error, CSVErrorCode::IndexOutOfBounds, CSV_ERROR_INDEX_OUT_OF_BOUNDS);
+                        }
+                    }
+                    std::vector<std::string> columns = names_->get_col_names();
+                    columns.insert(columns.begin() + index, name);
+                    ColNamesPtr names = std::make_shared<ColNames>();
+                    names->set_policy(names_->get_policy());
+                    names->set_col_names(columns);
+                    int new_key_column = key_column;
+                    if (key_column != CSV_NOT_FOUND) {
+                        const size_t logical = logical_column(static_cast<size_t>(key_column));
+                        new_key_column = static_cast<int>(logical + (index <= logical ? 1 : 0));
+                    }
+                    // Select a concrete materializer once. An unpublished clean-input
+                    // mutation backend has neither slot allocation nor per-field lookups.
+                    std::vector<CSVRow> rebuilt = edits_.empty() && column_indices_.empty()
+                        ? RowStorageBuilder::insert_column(backing_->rows().size(), names, index, default_value,
+                            [this](size_t row, size_t column) { return RowViewAccessor::view(backing_->rows()[row], column); })
+                        : RowStorageBuilder::insert_column(backing_->rows().size(), names, index, default_value,
+                            [this](size_t row, size_t column) -> std::string {
+                                const CellBinding cell = bind(row, column);
+                                std::string value;
+                                if (cell.overlay && cell.overlay->try_get_copy(cell.physical_column, value)) { return value; }
+                                return std::string(RowViewAccessor::view(backing_->rows()[row], cell.physical_column));
+                            });
+                    // Prepare everything before releasing parsed backing or view-key bytes.
+                    if (!before_replace(error)) return false;
+                    backing_->replace_rows(std::move(rebuilt), std::move(names));
+                    key_column = new_key_column;
+                    return true;
+                }
+
+            private:
+                CleanDataFrame* backing_;
+                ConstColNamesPtr names_;
+                std::vector<RowOverlaySlot> edits_;
+                std::vector<size_t> column_indices_;
+                std::mutex creation_lock_;
+            };
+        
+            /** C++11 tagged choice of concrete backends, without a vtable.
+             *
+             * The clean backing remains alive after first-edit publication. A reader
+             * that loaded the old pointer can safely finish without a per-read lock.
+             * Only structural operations (including moves) retire a dirty backend;
+             * those require exclusive access and invalidate proxies.
+             */
+            class DataFrameStorage {
+            public:
+                inline DataFrameStorage() : active_(&clean_) {}
+                DataFrameStorage(const DataFrameStorage&) = delete;
+                DataFrameStorage& operator=(const DataFrameStorage&) = delete;
+
+                inline DataFrameStorage(DataFrameStorage&& other) noexcept
+                    : clean_(std::move(other.clean_)), dirty_(std::move(other.dirty_)), active_(&clean_) {
+                    restore_choice();
+                    other.active_.store(&other.clean_, std::memory_order_release);
+                }
+                inline DataFrameStorage& operator=(DataFrameStorage&& other) noexcept {
+                    if (this != &other) {
+                        clean_ = std::move(other.clean_);
+                        dirty_ = std::move(other.dirty_);
+                        restore_choice();
+                        other.active_.store(&other.clean_, std::memory_order_release);
+                    }
+                    return *this;
+                }
+
+                // Both concrete backends use the same native row vector.
+                inline std::vector<CSVRow>& rows() noexcept { return clean_.rows(); }
+                inline const std::vector<CSVRow>& rows() const noexcept { return clean_.rows(); }
+                inline void set_names(ConstColNamesPtr names) { clean_.set_names(std::move(names)); }
+                inline const ConstColNamesPtr& names() const noexcept { return dispatch(Names()); }
+                inline size_t n_cols() const noexcept { return dispatch(Count()); }
+                inline CellBinding bind(size_t row, size_t column) const { return dispatch(Bind{row, column}); }
+                inline csv::string_view view(size_t row, size_t column) const { return dispatch(View{row, column}); }
+                inline CellBinding try_bind(size_t row, size_t column, CSVError& error) const {
+                    error.clear();
+                    if (row >= rows().size() || column >= n_cols()) {
+                        fail_static(error, CSVErrorCode::IndexOutOfBounds, ERROR_COLUMN_INDEX_OUT_OF_RANGE);
+                        return CellBinding{nullptr, 0};
+                    }
+                    const CellBinding binding = bind(row, column);
+                    if (binding.physical_column >= rows()[row].size()) {
+                        fail_static(error, CSVErrorCode::IndexOutOfBounds, CSV_ERROR_INDEX_OUT_OF_BOUNDS);
+                        return CellBinding{nullptr, 0};
+                    }
+                    return binding;
+                }
+
+                inline const RowOverlay* find_edits(const CSVRow* row) const {
+                    return dispatch(Edits{row_index(row)});
+                }
+                inline RowOverlay* ensure_edits(const CSVRow* row) {
+                    return promote().ensure_edits(row_index(row));
+                }
+                inline CSVRow make_inserted_row(const std::vector<std::string>& row, CSVError& error) const {
+                    return dispatch(MakeRow{row, error});
+                }
+                inline void reserve_insert() { dispatch_mutable(Reserve()); }
+                inline void insert_row(size_t index, CSVRow&& row) { dispatch_mutable(Insert{index, row}); }
+                inline void erase_row(size_t index) { dispatch_mutable(Erase{index}); }
+
+                inline bool erase_column(size_t index, int key_column, CSVError& error) {
+                    error.clear();
+                    if (index >= n_cols()) { return false; }
+                    return promote().erase_column(index, key_column, error);
+                }
+
+                template<typename BeforeReplace>
+                inline bool insert_column(
+                    size_t index, const std::string& name, const std::string& value,
+                    int& key_column, const BeforeReplace& before_replace, CSVError& error
+                ) {
+                    RowBackend* choice = active_.load(std::memory_order_acquire);
+                    if (choice == &clean_) {
+                        // Structural mutation is exclusive: this transient dirty backend
+                        // needs no overlay slots and never becomes visible to cell readers.
+                        DirtyDataFrame mutation(clean_, false);
+                        if (!mutation.insert_column(index, name, value, key_column, before_replace, error)) return false;
+                    }
+                    else {
+                        if (!static_cast<DirtyDataFrame*>(choice)->insert_column(index, name, value, key_column, before_replace, error)) return false;
+                        active_.store(&clean_, std::memory_order_release);
+                        dirty_.reset();
+                    }
+                    return true;
+                }
+
+                inline DataFrameStorage selected_rows(const std::vector<std::uint8_t>& mask, CSVError& error) const {
+                    DataFrameStorage selected;
+                    selected.clean_ = clean_.selected_rows(mask, error);
+                    if (error) return selected;
+                    const RowBackend* choice = active_.load(std::memory_order_acquire);
+                    if (choice != &clean_) {
+                        selected.dirty_ = static_cast<const DirtyDataFrame*>(choice)->selected_rows(selected.clean_, mask);
+                        selected.active_.store(selected.dirty_.get(), std::memory_order_release);
+                    }
+                    return selected;
+                }
+
+                inline bool pristine() const noexcept {
+                    return active_.load(std::memory_order_acquire) == &clean_ && rows().empty();
+                }
+
+            private:
+                template<typename Operation>
+                inline auto dispatch(const Operation& operation) const
+                    -> decltype(operation(std::declval<const CleanDataFrame&>())) {
+                    const RowBackend* choice = active_.load(std::memory_order_acquire);
+                    if (choice == &clean_) { return operation(clean_); }
+                    return operation(*static_cast<const DirtyDataFrame*>(choice));
+                }
+                template<typename Operation>
+                inline auto dispatch_mutable(const Operation& operation)
+                    -> decltype(operation(std::declval<CleanDataFrame&>())) {
+                    RowBackend* choice = active_.load(std::memory_order_acquire);
+                    if (choice == &clean_) { return operation(clean_); }
+                    return operation(*static_cast<DirtyDataFrame*>(choice));
+                }
+
+                inline DirtyDataFrame& promote() {
+                    RowBackend* choice = active_.load(std::memory_order_acquire);
+                    if (choice != &clean_) { return *static_cast<DirtyDataFrame*>(choice); }
+                    std::lock_guard<std::mutex> lock(transition_lock_);
+                    choice = active_.load(std::memory_order_acquire);
+                    if (choice == &clean_) {
+                        // Construct the schema and complete slot array before release.
+                        dirty_.reset(new DirtyDataFrame(clean_));
+                        choice = dirty_.get();
+                        active_.store(choice, std::memory_order_release);
+                    }
+                    return *static_cast<DirtyDataFrame*>(choice);
+                }
+                inline size_t row_index(const CSVRow* row) const noexcept {
+                    return static_cast<size_t>(row - rows().data());
+                }
+                inline void restore_choice() noexcept {
+                    if (dirty_) {
+                        dirty_->rebind(clean_);
+                        active_.store(dirty_.get(), std::memory_order_release);
+                    }
+                    else { active_.store(&clean_, std::memory_order_release); }
+                }
+
+                struct Names { template<typename B> const ConstColNamesPtr& operator()(const B& b) const { return b.names(); } };
+                struct Count { template<typename B> size_t operator()(const B& b) const { return b.n_cols(); } };
+                struct Bind {
+                    size_t row, column;
+                    template<typename B> CellBinding operator()(const B& b) const { return b.bind(row, column); }
+                };
+                struct View {
+                    size_t row, column;
+                    template<typename B> csv::string_view operator()(const B& b) const { return b.view(row, column); }
+                };
+                struct Edits {
+                    size_t row;
+                    template<typename B> const RowOverlay* operator()(const B& b) const { return b.find_edits(row); }
+                };
+                struct MakeRow {
+                    const std::vector<std::string>& row;
+                    CSVError& error;
+                    template<typename B> CSVRow operator()(const B& b) const { return b.make_inserted_row(row, error); }
+                };
+                struct Reserve { template<typename B> void operator()(B& b) const { b.reserve_insert(); } };
+                struct Insert {
+                    size_t index; CSVRow& row;
+                    template<typename B> void operator()(B& b) const { b.insert_row(index, std::move(row)); }
+                };
+                struct Erase {
+                    size_t index;
+                    template<typename B> void operator()(B& b) const { b.erase_row(index); }
+                };
+
+                CleanDataFrame clean_;
+                std::unique_ptr<DirtyDataFrame> dirty_;
+                std::mutex transition_lock_;
+                std::atomic<RowBackend*> active_;
+            };
+        }
+    }
+
+    class DataFrameCell : public CSVField {
+    public:
+#if CSV_EXCEPTIONS_ENABLED
+        using CSVField::get;
+#endif
+        using CSVField::get_sv;
+        using CSVField::is_float;
+        using CSVField::is_int;
+        using CSVField::is_null;
+        using CSVField::is_num;
+        using CSVField::is_str;
+        using CSVField::try_get;
+        using CSVField::type;
+
+        DataFrameCell() : CSVField(csv::string_view()), row_(nullptr), edit_context_(nullptr), col_index_(0), can_mutate_(false) {}
+
+        DataFrameCell(const DataFrameCell& other)
+            : CSVField(csv::string_view()),
+            row_(other.row_),
+            edit_context_(other.edit_context_),
+            col_index_(other.col_index_),
+            can_mutate_(other.can_mutate_),
+            frame_bound_(other.frame_bound_),
+            owned_value_(other.owned_value_) {
+            this->refresh_value();
+        }
+
+        DataFrameCell(DataFrameCell&& other) noexcept
+            : CSVField(csv::string_view()),
+            row_(other.row_),
+            edit_context_(other.edit_context_),
+            col_index_(other.col_index_),
+            can_mutate_(other.can_mutate_),
+            frame_bound_(other.frame_bound_),
+            owned_value_(std::move(other.owned_value_)) {
+            this->refresh_value();
+        }
+
+        DataFrameCell(
+            const CSVRow* _row,
+            RowOverlay* _row_overlay,
+            size_t _col_index
+        ) : CSVField(csv::string_view()),
+            row_(_row),
+            edit_context_(_row_overlay),
+            col_index_(_col_index),
+            can_mutate_(true) {
+            this->refresh_value(_row_overlay);
+        }
+
+        DataFrameCell(
+            const CSVRow* _row,
+            const RowOverlay* _row_overlay,
+            size_t _col_index
+        ) : CSVField(csv::string_view()),
+            row_(_row),
+            edit_context_(_row_overlay),
+            col_index_(_col_index),
+            can_mutate_(false) {
+            this->refresh_value(_row_overlay);
+        }
+
+        DataFrameCell& operator=(const DataFrameCell& other) {
+            if (this != &other) {
+                row_ = other.row_;
+                edit_context_ = other.edit_context_;
+                col_index_ = other.col_index_;
+                can_mutate_ = other.can_mutate_;
+                owned_value_ = other.owned_value_;
+                frame_bound_ = other.frame_bound_;
+                this->refresh_value();
+            }
+
+            return *this;
+        }
+
+        DataFrameCell& operator=(DataFrameCell&& other) noexcept {
+            if (this != &other) {
+                row_ = other.row_;
+                edit_context_ = other.edit_context_;
+                col_index_ = other.col_index_;
+                can_mutate_ = other.can_mutate_;
+                owned_value_ = std::move(other.owned_value_);
+                frame_bound_ = other.frame_bound_;
+                this->refresh_value();
+            }
+
+            return *this;
+        }
+
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameCell& operator=(csv::string_view value) {
+            CSVError error;
+            this->try_assign(value, error);
+            internals::throw_dataframe_error(error);
+            return *this;
+        }
+#endif
+
+        /** Assign through a mutable cell, preserving the current value on validation failure. */
+        bool try_assign(csv::string_view value, CSVError& error) {
+            error.clear();
+            if (!can_mutate_ || !edit_context_)
+                return internals::fail_static(error, CSVErrorCode::ReadOnlyProxy, internals::ERROR_CANNOT_EDIT_CONST_DF_CELL);
+            this->assign(std::string(value));
+            return true;
+        }
+
+        /** Const-friendly read access for proxy use in column iteration and callbacks. */
+#if CSV_EXCEPTIONS_ENABLED
+        template<typename T = std::string>
+        T get() const {
+            return CSVField::template get<T>();
+        }
+#endif
+
+        bool is_null() const noexcept {
+            return CSVField::is_null();
+        }
+
+        bool is_str() const noexcept {
+            return CSVField::is_str();
+        }
+
+        bool is_num() const noexcept {
+            return CSVField::is_num();
+        }
+
+        bool is_int() const noexcept {
+            return CSVField::is_int();
+        }
+
+        bool is_float() const noexcept {
+            return CSVField::is_float();
+        }
+
+        DataType type() const noexcept {
+            return CSVField::type();
+        }
+
+        template<typename T>
+        bool try_get(T& out) const noexcept {
+            return CSVField::template try_get<T>(out);
+        }
+
+        template<typename T>
+        bool try_get(T& out, CSVConversionError& error) const noexcept {
+            return CSVField::template try_get<T>(out, error);
+        }
+
+    private:
+        template<typename KeyType> friend class DataFrame;
+
+        // Frame-bound cells can defer overlay allocation until assignment. Cell
+        // reads retain the existing snapshot semantics; row proxies resolve afresh.
+        DataFrameCell(
+            const CSVRow* source, const RowOverlay* overlay, size_t column,
+            const internals::data_frame::DataFrameStorage* storage,
+            bool mutable_access
+        ) : CSVField(csv::string_view()), row_(source),
+            edit_context_(mutable_access ? static_cast<const void*>(storage) : static_cast<const void*>(overlay)),
+            col_index_(column), can_mutate_(mutable_access), frame_bound_(mutable_access) {
+            this->refresh_value(overlay);
+        }
+
+        const internals::data_frame::DataFrameStorage* storage() const {
+            return static_cast<const internals::data_frame::DataFrameStorage*>(edit_context_);
+        }
+
+        const RowOverlay* find_overlay() const {
+            if (frame_bound_) {
+                return this->storage()->find_edits(row_);
+            }
+            return static_cast<const RowOverlay*>(edit_context_);
+        }
+
+        void refresh_value() {
+            this->refresh_value(this->find_overlay());
+        }
+
+        void refresh_value(const RowOverlay* overlay) {
+            if (!row_) {
+                CSVField::operator=(CSVField(csv::string_view()));
+                return;
+            }
+
+            if (overlay && overlay->try_get_copy(col_index_, owned_value_)) {
+                CSVField::operator=(CSVField(csv::string_view(owned_value_)));
+                return;
+            }
+
+            owned_value_.clear();
+            CSVField::operator=(CSVField(internals::data_frame::RowViewAccessor::view(*row_, col_index_)));
+        }
+
+        DataFrameCell& assign(std::string stored) {
+            owned_value_ = stored;
+            auto* state = frame_bound_
+                ? const_cast<internals::data_frame::DataFrameStorage*>(this->storage()) : nullptr;
+            RowOverlay* overlay = state ? state->ensure_edits(row_)
+                : const_cast<RowOverlay*>(static_cast<const RowOverlay*>(edit_context_));
+            overlay->set(col_index_, std::move(stored));
+            CSVField::operator=(CSVField(csv::string_view(owned_value_)));
+            return *this;
+        }
+
+        const CSVRow* row_;
+        // Tagged context: standalone/read-only cells hold an overlay; mutable
+        // frame-bound cells hold the lazy handler. This uses existing padding
+        // for the tag instead of adding an owner pointer and row index per cell.
+        const void* edit_context_;
+        size_t col_index_;
+        bool can_mutate_;
+        bool frame_bound_ = false;
+        std::string owned_value_;
+    };
+
+    namespace internals {
+        template<typename Owner, typename Proxy, typename Accessor>
+        class indexed_proxy_iterator {
+        public:
+            using value_type = Proxy;
+            using difference_type = std::ptrdiff_t;
+            using pointer = const Proxy*;
+            using reference = const Proxy&;
+            using iterator_category = std::random_access_iterator_tag;
+
+            indexed_proxy_iterator() = default;
+            indexed_proxy_iterator(Owner* owner, size_t index, Accessor accessor = Accessor())
+                : owner_(owner), index_(index), accessor_(accessor) {}
+
+            reference operator*() const {
+                cached_proxy_ = accessor_(owner_, index_);
+                return cached_proxy_;
+            }
+
+            pointer operator->() const {
+                operator*();
+                return &cached_proxy_;
+            }
+
+            indexed_proxy_iterator& operator++() { ++index_; return *this; }
+            indexed_proxy_iterator operator++(int) { auto tmp = *this; ++index_; return tmp; }
+            indexed_proxy_iterator& operator--() { --index_; return *this; }
+            indexed_proxy_iterator operator--(int) { auto tmp = *this; --index_; return tmp; }
+
+            indexed_proxy_iterator operator+(difference_type n) const {
+                return indexed_proxy_iterator(owner_, static_cast<size_t>(index_ + n), accessor_);
+            }
+
+            indexed_proxy_iterator operator-(difference_type n) const {
+                return indexed_proxy_iterator(owner_, static_cast<size_t>(index_ - n), accessor_);
+            }
+
+            difference_type operator-(const indexed_proxy_iterator& other) const {
+                return static_cast<difference_type>(index_) - static_cast<difference_type>(other.index_);
+            }
+
+            bool operator==(const indexed_proxy_iterator& other) const {
+                return owner_ == other.owner_ && index_ == other.index_;
+            }
+
+            bool operator!=(const indexed_proxy_iterator& other) const {
+                return !(*this == other);
+            }
+
+        private:
+            Owner* owner_ = nullptr;
+            size_t index_ = 0;
+            Accessor accessor_;
+            mutable Proxy cached_proxy_;
+        };
+    }
+
+    template<typename KeyType>
+    class DataFrameColumn {
+    public:
+        struct cell_accessor {
+            DataFrameCell operator()(const DataFrameColumn<KeyType>* owner, size_t row_index) const {
+                return owner->make_cell(row_index, false);
+            }
+        };
+
+        using iterator = internals::indexed_proxy_iterator<const DataFrameColumn<KeyType>, DataFrameCell, cell_accessor>;
+        using const_iterator = iterator;
+
+        DataFrameColumn() : frame_(nullptr), mutable_frame_(nullptr), col_index_(0), generation_value_(0) {}
+
+        DataFrameColumn(const DataFrame<KeyType>* frame, size_t col_index)
+            : frame_(frame),
+            mutable_frame_(nullptr),
+            col_index_(col_index),
+            generation_(frame ? frame->column_generation_ : std::shared_ptr<size_t>()),
+            generation_value_(generation_ ? *generation_ : 0) {}
+
+        DataFrameColumn(DataFrame<KeyType>* frame, size_t col_index)
+            : frame_(frame),
+            mutable_frame_(frame),
+            col_index_(col_index),
+            generation_(frame ? frame->column_generation_ : std::shared_ptr<size_t>()),
+            generation_value_(generation_ ? *generation_ : 0) {}
+
+        /** Column name. */
+#if CSV_EXCEPTIONS_ENABLED
+        const std::string& name() const {
+            CSVError error;
+            this->require_valid(error);
+            internals::throw_dataframe_error(error);
+            return frame_->columns()[col_index_];
+        }
+#endif
+
+        /** Checked cell access, preserving mutability of the column proxy. */
+        DataFrameCell try_field(size_t row_index, CSVError& error) {
+            if (!this->require_valid(error)) return {};
+            return frame_->try_make_cell(row_index, col_index_, mutable_frame_ != nullptr, error);
+        }
+        DataFrameCell try_field(size_t row_index, CSVError& error) const {
+            if (!this->require_valid(error)) return {};
+            return frame_->try_make_cell(row_index, col_index_, false, error);
+        }
+        csv::string_view try_get_sv(size_t row_index, CSVError& error) const {
+            // Retain the explicit owner check for GCC's object-size diagnostics
+            // when an unbound proxy and the subsequent storage access are inlined.
+            if (!this->require_valid(error) || !frame_) return {};
+            const auto binding = frame_->storage_.try_bind(row_index, col_index_, error);
+            (void)binding;
+            return error ? csv::string_view() : frame_->cell_view(row_index, col_index_);
+        }
+        csv::string_view try_name(CSVError& error) const {
+            if (!this->require_valid(error) || !frame_) return {};
+            return csv::string_view(frame_->columns()[col_index_]);
+        }
+        template<typename T = std::string>
+        std::vector<T> try_to_vector(CSVError& error) const {
+            std::vector<T> values;
+            if (!this->require_valid(error)) return values;
+            values.reserve(this->size());
+            for (size_t i = 0; i < this->size(); ++i) {
+                auto cell = this->try_field(i, error);
+                if (error) return values;
+                T value{};
+                CSVConversionError conversion;
+                if (!cell.try_get(value, conversion)) {
+                    internals::fail_static(error, CSVErrorCode::ConversionFailed, csv_conversion_error_message(conversion));
+                    return values;
+                }
+                values.push_back(std::move(value));
+            }
+            return values;
+        }
+        bool try_erase(CSVError& error) {
+            if (!this->require_valid(error)) return false;
+            if (!mutable_frame_)
+                return internals::fail_static(error, CSVErrorCode::ReadOnlyProxy, "cannot erase column from const DataFrame");
+            return mutable_frame_->erase_column_at_index(col_index_, error);
+        }
+
+        /** Whether this column is bound to an existing position in the active schema. */
+        bool is_valid() const noexcept {
+            return frame_ && generation_ && *generation_ == generation_value_
+                && col_index_ < frame_->n_cols();
+        }
+
+        /** Zero-based column position. */
+        size_t index() const noexcept {
+            return col_index_;
+        }
+
+        /** Number of rows in the parent batch. */
+        size_t size() const noexcept {
+            if (!this->is_valid()) {
+                return 0;
+            }
+
+            return frame_->size();
+        }
+
+        /** Whether the parent batch contains no rows. */
+        bool empty() const noexcept {
+            return this->size() == 0;
+        }
+
+        /** Access a visible cell value by row index, allowing edits on mutable frames. */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameCell operator[](size_t row_index) {
+            CSVError error;
+            auto result = this->try_field(row_index, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /** Access a visible cell value by row index without allowing edits. */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameCell operator[](size_t row_index) const {
+            CSVError error;
+            auto result = this->try_field(row_index, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /** Access a visible cell value as a string_view without materializing a DataFrameCell.
+         *
+         *  Intended for immediate read-only scans. If the value comes from the
+         *  sparse edit overlay, the returned view points into overlay-owned
+         *  storage and must not be retained across DataFrame mutation.
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        csv::string_view get_sv(size_t row_index) const {
+            CSVError error;
+            auto result = this->try_get_sv(row_index, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /** Materialize this column as a vector of converted values. */
+#if CSV_EXCEPTIONS_ENABLED
+        template<typename T = std::string>
+        std::vector<T> to_vector() const {
+            CSVError error;
+            auto result = this->template try_to_vector<T>(error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /** Convert to a vector of strings. */
+#if CSV_EXCEPTIONS_ENABLED
+        operator std::vector<std::string>() const {
+            std::vector<std::string> result;
+            result.reserve(this->size());
+            for (size_t i = 0; i < this->size(); ++i)
+                result.emplace_back(this->make_cell(i, false).get_sv());
+            return result;
+        }
+#endif
+
+        /** Delete this column from the parent DataFrame.
+         *
+         *  Structural mutation invalidates outstanding row, column, and cell proxies.
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        bool erase() {
+            CSVError error;
+            const bool result = this->try_erase(error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+#if defined(CSV_HAS_CXX20) && CSV_EXCEPTIONS_ENABLED
+        /** Convert this DataFrameColumn into a std::ranges::input_range of strings.
+         *
+         *  @note Requires C++20 or later.
+         */
+        auto to_sv_range() const {
+            return std::views::iota(size_t{0}, this->size())
+                | std::views::transform([this](size_t row_index) {
+                    return std::string(this->make_cell(row_index, false).get_sv());
+                });
+        }
+#endif
+
+#if CSV_EXCEPTIONS_ENABLED
+        /** Iterate over visible cells in this column. */
+        iterator begin() const { return iterator(this, 0); }
+        iterator end() const { return iterator(this, this->size()); }
+        const_iterator cbegin() const { return const_iterator(this, 0); }
+        const_iterator cend() const { return const_iterator(this, this->size()); }
+
+#endif
+
+    private:
+        DataFrameCell make_cell(size_t row_index, bool mutable_access) const {
+#if CSV_EXCEPTIONS_ENABLED
+            CSVError error;
+            if (!this->require_valid(error) || !frame_->validate_row_index(row_index, error))
+                internals::throw_dataframe_error(error);
+#else
+            CSV_DEBUG_ASSERT(this->is_valid() && row_index < this->size());
+#endif
+            return frame_->make_cell(row_index, col_index_, mutable_access);
+        }
+
+        bool require_valid(CSVError& error) const {
+            error.clear();
+            if (!frame_ || !generation_ || *generation_ != generation_value_)
+                return internals::fail_static(error, CSVErrorCode::InvalidProxy,
+                    "DataFrameColumn proxy is invalid after structural column mutation");
+            return col_index_ < frame_->n_cols() || internals::fail_static(
+                error, CSVErrorCode::IndexOutOfBounds, internals::ERROR_COLUMN_INDEX_OUT_OF_RANGE);
+        }
+
+        const DataFrame<KeyType>* frame_;
+        DataFrame<KeyType>* mutable_frame_;
+        size_t col_index_;
+        std::shared_ptr<size_t> generation_;
+        size_t generation_value_;
+    };
+}
+
+#if CSV_ENABLE_THREADS
+#include <thread>
+#endif
 
 namespace csv {
-    CSV_INLINE CSVFormat& CSVFormat::delimiter(char delim) {
-        this->possible_delimiters = { delim };
-        this->assert_no_char_overlap();
-        return *this;
-    }
+    class DataFrameExecutor {
+    public:
+        explicit DataFrameExecutor(size_t worker_count = default_worker_count())
+            : task_pool_(worker_count) {}
 
-    CSV_INLINE CSVFormat& CSVFormat::delimiter(const std::vector<char> & delim) {
-        this->possible_delimiters = delim;
-        this->assert_no_char_overlap();
-        return *this;
-    }
+        DataFrameExecutor(const DataFrameExecutor&) = delete;
+        DataFrameExecutor& operator=(const DataFrameExecutor&) = delete;
 
-    CSV_INLINE CSVFormat& CSVFormat::quote(char quote) {
-        this->no_quote = false;
-        this->quote_char = quote;
-        this->assert_no_char_overlap();
-        return *this;
-    }
+        ~DataFrameExecutor() {}
 
-    CSV_INLINE CSVFormat& CSVFormat::trim(const std::vector<char> & chars) {
-        this->trim_chars = chars;
-        this->assert_no_char_overlap();
-        return *this;
-    }
-
-    CSV_INLINE CSVFormat& CSVFormat::column_names(const std::vector<std::string>& names) {
-        this->col_names = names;
-        this->header = -1;
-        this->col_names_explicitly_set_ = true;
-        return *this;
-    }
-
-    CSV_INLINE CSVFormat& CSVFormat::header_row(int row) {
-        if (row < 0) this->variable_column_policy = VariableColumnPolicy::KEEP;
-
-        this->header = row;
-        this->header_explicitly_set_ = true;
-        this->col_names = {};
-        this->col_names_explicitly_set_ = false;
-        return *this;
-    }
-
-    CSV_INLINE CSVFormat& CSVFormat::chunk_size(size_t size) {
-        if (size < internals::CSV_CHUNK_SIZE_FLOOR) {
-            throw std::invalid_argument(internals::make_chunk_size_error(internals::CSV_CHUNK_SIZE_FLOOR, size));
+        size_t worker_count() const noexcept {
+            return this->task_pool_.worker_count();
         }
-        const size_t max_chunk_size = (std::numeric_limits<std::uint32_t>::max)();
-        if (size > max_chunk_size) {
-            throw std::invalid_argument(internals::make_chunk_size_ceiling_error(max_chunk_size, size));
+
+        template<typename Fn>
+        void parallel_for(size_t task_count, Fn&& fn) {
+            if (task_count == 0) {
+                return;
+            }
+
+#if CSV_ENABLE_THREADS
+            const size_t workers = this->task_pool_.worker_count();
+            if (workers <= 1 || task_count <= workers) {
+                this->run_serial(task_count, std::forward<Fn>(fn));
+                return;
+            }
+
+            this->task_pool_.parallel_for(task_count, [&fn](size_t, size_t task_index) {
+                fn(task_index);
+            });
+#else
+            this->run_serial(task_count, std::forward<Fn>(fn));
+#endif
         }
-        this->_chunk_size = size;
-        return *this;
-    }
 
-    CSV_INLINE void CSVFormat::assert_no_char_overlap()
-    {
-        const std::set<char> delims(this->possible_delimiters.begin(), this->possible_delimiters.end());
-        const std::set<char> trims(this->trim_chars.begin(), this->trim_chars.end());
-        std::set<char> offenders;
-
-        for (std::set<char>::const_iterator it = delims.begin(); it != delims.end(); ++it) {
-            if (trims.find(*it) != trims.end()) {
-                offenders.insert(*it);
+    private:
+        template<typename Fn>
+        void run_serial(size_t task_count, Fn&& fn) {
+            for (size_t i = 0; i < task_count; ++i) {
+                fn(i);
             }
         }
 
-        // Make sure quote character is not contained in possible delimiters
-        // or whitespace characters.
-        if (delims.find(this->quote_char) != delims.end() ||
-            trims.find(this->quote_char) != trims.end()) {
-            offenders.insert(this->quote_char);
+        static size_t default_worker_count() {
+#if CSV_ENABLE_THREADS
+            const unsigned int hw = std::thread::hardware_concurrency();
+            return hw > 0 ? static_cast<size_t>(hw) : 1;
+#else
+            return 0;
+#endif
         }
 
-        if (!offenders.empty()) {
-            throw std::runtime_error(internals::make_char_overlap_error(offenders));
+        internals::parallel::IndexedTaskPool task_pool_;
+    };
+
+    class DataFrameOptions {
+    public:
+        DataFrameOptions() = default;
+
+        /** Policy for handling duplicate keys when creating a keyed DataFrame */
+        enum class DuplicateKeyPolicy {
+            THROW,      // Report an error if a duplicate key is encountered
+            OVERWRITE,  // Overwrite the existing value with the new value
+            KEEP_FIRST  // Ignore the new value and keep the existing value
+        };
+
+        DataFrameOptions& set_duplicate_key_policy(DuplicateKeyPolicy value) {
+            this->duplicate_key_policy = value;
+            return *this;
+        }
+
+        DuplicateKeyPolicy get_duplicate_key_policy() const {
+            return this->duplicate_key_policy;
+        }
+
+        DataFrameOptions& set_key_column(const std::string& value) {
+            this->key_column = value;
+            return *this;
+        }
+
+        const std::string& get_key_column() const {
+            return this->key_column;
+        }
+
+        DataFrameOptions& set_throw_on_missing_key(bool value) {
+            this->throw_on_missing_key = value;
+            return *this;
+        }
+
+        bool get_throw_on_missing_key() const {
+            return this->throw_on_missing_key;
+        }
+
+    private:
+        std::string key_column;
+
+        DuplicateKeyPolicy duplicate_key_policy = DuplicateKeyPolicy::OVERWRITE;
+
+        /** Whether missing or invalid key column values are errors when creating a keyed DataFrame */
+        bool throw_on_missing_key = true;
+    };
+
+    template<typename KeyType>
+    class DataFrameRow {
+    public:
+        /** Default constructor (creates an unbound proxy). */
+        DataFrameRow() : row(nullptr), frame(nullptr), row_index(0), row_overlay(nullptr), key_ptr(nullptr), can_mutate(false) {}
+
+        /** Construct a mutable DataFrameRow wrapper. */
+        DataFrameRow(
+            const CSVRow* _row,
+            DataFrame<KeyType>* _frame,
+            size_t _row_index,
+            RowOverlay* _edits,
+            const KeyType* _key
+        ) : row(_row), frame(_frame), row_index(_row_index), row_overlay(_edits), key_ptr(_key), can_mutate(true) {}
+
+        /** Construct a read-only DataFrameRow wrapper. */
+        DataFrameRow(
+            const CSVRow* _row,
+            const DataFrame<KeyType>* _frame,
+            size_t _row_index,
+            const RowOverlay* _edits,
+            const KeyType* _key
+        ) : row(_row), frame(_frame), row_index(_row_index), row_overlay(_edits), key_ptr(_key), can_mutate(false) {}
+
+        /** Access a field by column name, preserving edit support. */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameCell operator[](const std::string& col) {
+            return field_or_throw(*this, col);
+        }
+#endif
+
+        /** Access a field by position, preserving edit support. */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameCell operator[](size_t n) {
+            return field_or_throw(*this, n);
+        }
+#endif
+
+        /** Access a field by column name, checking edits first. */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameCell operator[](const std::string& col) const {
+            return field_or_throw(*this, col);
+        }
+#endif
+
+        /** Access a field by position, checking edits first. */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameCell operator[](size_t n) const {
+            return field_or_throw(*this, n);
+        }
+#endif
+
+        /** Checked cell access. Failure returns an unbound, read-only cell. */
+        DataFrameCell try_field(size_t index, CSVError& error) {
+            if (!this->validate_field(index, error)) return {};
+            return frame ? frame->try_make_cell(row_index, index, can_mutate, error) : this->make_cell(index);
+        }
+        DataFrameCell try_field(size_t index, CSVError& error) const {
+            if (!this->validate_field(index, error)) return {};
+            return frame ? frame->try_make_cell(row_index, index, false, error) : this->make_cell(index);
+        }
+        DataFrameCell try_field(const std::string& name, CSVError& error) {
+            const size_t index = this->try_find_column(name, error);
+            return error ? DataFrameCell() : this->try_field(index, error);
+        }
+        DataFrameCell try_field(const std::string& name, CSVError& error) const {
+            const size_t index = this->try_find_column(name, error);
+            return error ? DataFrameCell() : this->try_field(index, error);
+        }
+
+        bool try_erase(CSVError& error) {
+            error.clear();
+            if (!can_mutate || !frame)
+                return internals::fail_static(error, CSVErrorCode::ReadOnlyProxy, internals::ERROR_CANNOT_ERASE_CONST_DF_ROW);
+            return const_cast<DataFrame<KeyType>*>(frame)->erase_at_index(row_index);
+        }
+
+        /** Whether the proxy is bound. Structural mutation still invalidates proxies. */
+        bool is_valid() const noexcept { return row != nullptr; }
+
+        /** Get the number of visible fields in the row. */
+        size_t size() const { return frame ? frame->n_cols() : (row ? row->size() : 0); }
+
+        /** Check if the row is empty. */
+        bool empty() const { return this->size() == 0; }
+
+        /** Get column names. */
+        const std::vector<std::string>& get_col_names() const { return frame ? frame->columns() : row->get_col_names(); }
+
+        /** Get the underlying CSVRow without applying cell edits or column visibility.
+         *  Use row conversion to obtain the current visible values.
+         */
+        const CSVRow& get_underlying_row() const { return *row; }
+
+        /** Get the key for this row (only valid for keyed DataFrames). */
+        const KeyType& key() const { return *key_ptr; }
+
+        /** Delete this row from the parent DataFrame.
+         *
+         *  Structural mutation invalidates outstanding row and cell proxies.
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        bool erase() {
+            CSVError error;
+            const bool result = this->try_erase(error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /** Convert to vector of strings for CSVWriter compatibility. */
+#if CSV_EXCEPTIONS_ENABLED
+        operator std::vector<std::string>() const {
+            std::vector<std::string> result;
+            result.reserve(this->size());
+            
+            for (size_t i = 0; i < this->size(); i++) {
+                result.push_back(std::string(this->make_cell(i).get_sv()));
+            }
+            return result;
+        }
+#endif
+
+        /** Convert to JSON. */
+
+#if CSV_EXCEPTIONS_ENABLED
+        std::string to_json(const std::vector<std::string>& subset = {}) const {
+            CSVError error;
+            auto result = this->try_to_json(subset, error);
+            // JSON subset lookups historically use runtime_error.
+            internals::throw_error(error);
+            return result;
+        }
+#endif
+
+        /** Serialize selected visible columns, reporting lookup and physical-row bounds errors. */
+        std::string try_to_json(const std::vector<std::string>& subset, CSVError& error) const {
+            if (!this->validate_fields(subset, error)) return {};
+            const field_string_accessor field_at(this);
+            return frame ? this->get_frame_json_converter().try_row_to_json(this->size(), field_at, subset, error)
+                : this->make_detached_json_converter().try_row_to_json(this->size(), field_at, subset, error);
+        }
+
+        /** Convert to JSON array. */
+
+#if CSV_EXCEPTIONS_ENABLED
+        std::string to_json_array(const std::vector<std::string>& subset = {}) const {
+            CSVError error;
+            auto result = this->try_to_json_array(subset, error);
+            // JSON subset lookups historically use runtime_error.
+            internals::throw_error(error);
+            return result;
+        }
+#endif
+
+        /** Serialize selected visible columns, reporting lookup and physical-row bounds errors. */
+        std::string try_to_json_array(const std::vector<std::string>& subset, CSVError& error) const {
+            if (!this->validate_fields(subset, error)) return {};
+            const field_string_accessor field_at(this);
+            return frame ? this->get_frame_json_converter().try_row_to_json_array(this->size(), field_at, subset, error)
+                : this->make_detached_json_converter().try_row_to_json_array(this->size(), field_at, subset, error);
+        }
+
+#if defined(CSV_HAS_CXX20) && CSV_EXCEPTIONS_ENABLED
+        /** Convert this DataFrameRow into a std::ranges::input_range of strings,
+         *  respecting the sparse overlay (edited values take precedence).
+         *
+         *  @note Requires C++20 or later.
+         */
+        auto to_sv_range() const {
+            return std::views::iota(size_t{0}, this->size())
+                | std::views::transform([this](size_t i) { return std::string(this->make_cell(i).get_sv()); });
+        }
+#endif
+
+    private:
+#if CSV_EXCEPTIONS_ENABLED
+        // Preserve the proxy's constness when selecting checked access.
+        template<typename Self, typename Column>
+        static DataFrameCell field_or_throw(Self& self, const Column& column) {
+            CSVError error;
+            auto result = self.try_field(column, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        bool validate_field(size_t index, CSVError& error) const {
+            error.clear();
+            if (!row)
+                return internals::fail_static(error, CSVErrorCode::InvalidProxy, "DataFrameRow proxy is unbound");
+            if (index >= this->size())
+                return internals::fail_static(error, CSVErrorCode::IndexOutOfBounds, internals::ERROR_COLUMN_INDEX_OUT_OF_RANGE);
+            return true;
+        }
+
+        struct field_string_accessor {
+            explicit field_string_accessor(const DataFrameRow* owner) : owner(owner) {}
+
+            std::string operator()(size_t i) const {
+                return std::string(owner->make_cell(i).get_sv());
+            }
+
+            const DataFrameRow* owner;
+        };
+
+        const internals::JsonConverter& get_frame_json_converter() const {
+            return frame->json_converter_.get_or_create([this]() {
+                return std::make_shared<internals::JsonConverter>(frame->columns());
+            });
+        }
+
+        internals::JsonConverter make_detached_json_converter() const {
+            return internals::JsonConverter(this->get_col_names());
+        }
+
+        DataFrameCell make_cell(size_t col_index) {
+            if (frame) {
+                return frame->make_cell(row, row_index, col_index, can_mutate);
+            }
+
+            return can_mutate
+                ? DataFrameCell(row, const_cast<RowOverlay*>(row_overlay), col_index)
+                : DataFrameCell(row, row_overlay, col_index);
+        }
+
+        DataFrameCell make_cell(size_t col_index) const {
+            if (frame) {
+                return frame->make_cell(row, row_index, col_index, false);
+            }
+
+            return DataFrameCell(row, row_overlay, col_index);
+        }
+
+        size_t try_find_column(const std::string& col, CSVError& error) const {
+            error.clear();
+            if (!row) {
+                internals::fail_static(error, CSVErrorCode::InvalidProxy, "DataFrameRow proxy is unbound");
+                return 0;
+            }
+            if (frame) return frame->try_find_column(col, error);
+            const int position = row->col_names_ptr()->index_of(col);
+            if (position == CSV_NOT_FOUND) {
+                internals::fail(error, CSVErrorCode::ColumnNotFound, std::string(internals::ERROR_COLUMN_NOT_FOUND) + col);
+                return 0;
+            }
+            return static_cast<size_t>(position);
+        }
+
+        bool validate_fields(const std::vector<std::string>& subset, CSVError& error) const {
+            error.clear();
+            if (subset.empty()) {
+                for (size_t i = 0; i < this->size(); ++i) {
+                    this->try_field(i, error);
+                    if (error) return false;
+                }
+            } else {
+                for (const auto& name : subset) {
+                    this->try_field(name, error);
+                    if (error) return false;
+                }
+            }
+            return row || internals::fail_static(error, CSVErrorCode::InvalidProxy, "DataFrameRow proxy is unbound");
+        }
+
+        const CSVRow* row;
+        const DataFrame<KeyType>* frame;
+        size_t row_index;
+        const RowOverlay* row_overlay;
+        const KeyType* key_ptr;
+        bool can_mutate;
+    };
+
+    namespace internals {
+        namespace data_frame {
+            // Owning key types need no additional lifetime handling or runtime work.
+            template<typename KeyType>
+            class KeyStorage {
+            public:
+                template<typename InvalidateIndex>
+                inline bool preserve(std::vector<KeyType>&, const InvalidateIndex&, CSVError& error) const {
+                    error.clear();
+                    return true;
+                }
+            };
+
+            /** Keep established view keys alive when their parsed rows are replaced.
+             * Only key bytes are retained, rather than entire obsolete CSV chunks.
+             */
+            template<>
+            class KeyStorage<csv::string_view> {
+            public:
+                template<typename InvalidateIndex>
+                inline bool preserve(std::vector<csv::string_view>& keys, const InvalidateIndex& invalidate_index, CSVError& error) {
+                    error.clear();
+                    if (keys.empty()) {
+                        invalidate_index();
+                        this->storage_.reset();
+                        return true;
+                    }
+
+                    std::unique_ptr<std::string> storage(new std::string());
+                    size_t bytes = 0;
+                    for (const auto& key : keys) {
+                        if (key.size() > storage->max_size() - bytes) {
+                            return fail_static(error, CSVErrorCode::SizeLimitExceeded, "DataFrame key storage is too large");
+                        }
+                        bytes += key.size();
+                    }
+                    storage->reserve(bytes);
+                    for (const auto& key : keys) {
+                        if (!key.empty()) {
+                            storage->append(key.data(), key.size());
+                        }
+                    }
+
+                    // Form views only after the last append. Heap-own the string object
+                    // so even its small-string buffer stays stable across frame moves.
+                    std::vector<csv::string_view> preserved;
+                    preserved.reserve(keys.size());
+                    size_t offset = 0;
+                    for (const auto& key : keys) {
+                        preserved.emplace_back(storage->data() + offset, key.size());
+                        offset += key.size();
+                    }
+                    // Drop index views while both old backing stores are still alive.
+                    invalidate_index();
+                    keys.swap(preserved);
+                    this->storage_ = std::move(storage);
+                    return true;
+                }
+
+            private:
+                std::unique_ptr<std::string> storage_;
+            };
         }
     }
-}
 
-/** @file
- *  Defines an input iterator for csv::CSVReader
- */
+    template<typename KeyType = std::string>
+    class DataFrame {
+    public:
+        friend class DataFrameRow<KeyType>;
+        friend class DataFrameColumn<KeyType>;
+        using row_type = DataFrameRow<KeyType>;
+        using column_type = DataFrameColumn<KeyType>;
 
+        struct mutable_row_accessor {
+            DataFrameRow<KeyType> operator()(DataFrame<KeyType>* owner, size_t row_index) const {
+                return owner->make_row_proxy(row_index);
+            }
+        };
 
-namespace csv {
+        struct const_row_accessor {
+            DataFrameRow<KeyType> operator()(const DataFrame<KeyType>* owner, size_t row_index) const {
+                return owner->make_const_row_proxy(row_index);
+            }
+        };
+
+        /** Row-wise iterator over DataFrameRow entries. Provides access to rows with edit support. */
+        using iterator = internals::indexed_proxy_iterator<DataFrame<KeyType>, DataFrameRow<KeyType>, mutable_row_accessor>;
+
+        /** Row-wise const iterator over DataFrameRow entries. Provides read-only access to rows with edit support. */
+        using const_iterator = internals::indexed_proxy_iterator<const DataFrame<KeyType>, DataFrameRow<KeyType>, const_row_accessor>;
+
+        static_assert(
+            internals::is_hashable<KeyType>::value,
+            "DataFrame<KeyType> requires KeyType to be hashable (std::hash<KeyType> specialization required)."
+        );
+
+        static_assert(
+            internals::is_equality_comparable<KeyType>::value,
+            "DataFrame<KeyType> requires KeyType to be equality comparable (operator== required)."
+        );
+
+        static_assert(
+            std::is_default_constructible<KeyType>::value,
+            "DataFrame<KeyType> requires KeyType to be default-constructible."
+        );
+
+        using DuplicateKeyPolicy = DataFrameOptions::DuplicateKeyPolicy;
+
+        /** Construct an empty DataFrame. */
+        DataFrame() = default;
+
+        /**
+         * Construct an unkeyed DataFrame from a CSV reader.
+         * Rows are accessible by position only.
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        explicit DataFrame(CSVReader& reader) {
+            CSVError error;
+            this->init_unkeyed_from_reader(reader, error);
+            internals::throw_dataframe_error(error);
+        }
+#endif
+
+        /** Construct an unkeyed DataFrame directly from a CSV file.
+         *  By default, the delimiter and header are detected as for CSVReader.
+         *  Pass a CSVFormat to configure parsing explicitly.
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        explicit DataFrame(
+            csv::string_view filename,
+            CSVFormat format = CSVFormat::guess_csv()
+        ) {
+            CSVReader reader(filename, format);
+            CSVError error;
+            this->init_unkeyed_from_reader(reader, error);
+            internals::throw_dataframe_error(error);
+        }
+#endif
+
+        /** Construct an unkeyed DataFrame from an existing batch of rows. */
+        explicit DataFrame(std::vector<CSVRow> rows) {
+            this->init_unkeyed_from_rows(rows);
+        }
+
+        /** Construct a keyed DataFrame from a CSV reader with options.
+         *
+         * @throws std::runtime_error if key column is empty or not found
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        explicit DataFrame(CSVReader& reader, const DataFrameOptions& options) {
+            CSVError error;
+            this->init_from_reader(reader, options, error);
+            internals::throw_dataframe_error(error);
+        }
+#endif
+
+        /** Construct a keyed DataFrame directly from a CSV file.
+         *
+         * @throws std::runtime_error if key column is empty or not found
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrame(
+            csv::string_view filename,
+            const DataFrameOptions& options,
+            CSVFormat format = CSVFormat::guess_csv()
+        ) {
+            CSVReader reader(filename, format);
+            CSVError error;
+            this->init_from_reader(reader, options, error);
+            internals::throw_dataframe_error(error);
+        }
+#endif
+
+        /** Construct a keyed DataFrame using a column name as the key.
+         *
+         * @throws std::runtime_error if key column is empty or not found
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrame(
+            CSVReader& reader,
+            const std::string& _key_column,
+            DuplicateKeyPolicy policy = DuplicateKeyPolicy::OVERWRITE,
+            bool throw_on_missing_key = true
+        ) : DataFrame(
+            reader,
+            DataFrameOptions()
+                .set_key_column(_key_column)
+                .set_duplicate_key_policy(policy)
+                .set_throw_on_missing_key(throw_on_missing_key)
+        ) {}
+#endif
+
+        /** Construct a keyed DataFrame using a custom key function.
+         *
+         * @throws std::runtime_error if policy is THROW and duplicate keys are encountered
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        template<
+            typename KeyFunc,
+            csv::enable_if_t<csv::is_invocable_returning<KeyFunc, KeyType, const CSVRow&>::value, int> = 0
+        >
+        DataFrame(
+            CSVReader& reader,
+            KeyFunc key_func,
+            DuplicateKeyPolicy policy = DuplicateKeyPolicy::OVERWRITE
+        ) {
+            CSVError error;
+            this->init_custom_from_reader(reader, key_func, policy, error);
+            internals::throw_dataframe_error(error);
+        }
+
+        /** Construct a keyed DataFrame using a custom key function with options. */
+        template<
+            typename KeyFunc,
+            csv::enable_if_t<csv::is_invocable_returning<KeyFunc, KeyType, const CSVRow&>::value, int> = 0
+        >
+        DataFrame(
+            CSVReader& reader,
+            KeyFunc key_func,
+            const DataFrameOptions& options
+        ) : DataFrame(reader, key_func, options.get_duplicate_key_policy()) {}
+
+#endif
+
+        /** Read a frame, returning no object on validation or input failure. */
+        static std::unique_ptr<DataFrame> try_create(CSVReader& reader, CSVError& error) {
+            std::unique_ptr<DataFrame> result(new DataFrame());
+            if (!result->init_unkeyed_from_reader(reader, error)) return nullptr;
+            return result;
+        }
+
+        static std::unique_ptr<DataFrame> try_create(
+            CSVReader& reader, const DataFrameOptions& options, CSVError& error
+        ) {
+            std::unique_ptr<DataFrame> result(new DataFrame());
+            if (!result->init_from_reader(reader, options, error)) return nullptr;
+            return result;
+        }
+
+        static std::unique_ptr<DataFrame> try_create(
+            csv::string_view filename, CSVError& error,
+            const CSVFormat& format = CSVFormat::guess_csv()
+        ) {
+            auto reader = CSVReader::try_open(filename, error, format);
+            return reader ? try_create(*reader, error) : nullptr;
+        }
+
+        static std::unique_ptr<DataFrame> try_create(
+            csv::string_view filename, const DataFrameOptions& options, CSVError& error,
+            const CSVFormat& format = CSVFormat::guess_csv()
+        ) {
+            auto reader = CSVReader::try_open(filename, error, format);
+            return reader ? try_create(*reader, options, error) : nullptr;
+        }
+
+        template<typename KeyFunc,
+            csv::enable_if_t<csv::is_invocable_returning<KeyFunc, KeyType, const CSVRow&>::value, int> = 0>
+        static std::unique_ptr<DataFrame> try_create(
+            CSVReader& reader, KeyFunc key_func, CSVError& error,
+            DuplicateKeyPolicy policy = DuplicateKeyPolicy::OVERWRITE
+        ) {
+            std::unique_ptr<DataFrame> result(new DataFrame());
+            if (!result->init_custom_from_reader(reader, key_func, policy, error)) return nullptr;
+            return result;
+        }
+
+        template<typename KeyFunc,
+            csv::enable_if_t<csv::is_invocable_returning<KeyFunc, KeyType, const CSVRow&>::value, int> = 0>
+        static std::unique_ptr<DataFrame> try_create(
+            CSVReader& reader, KeyFunc key_func, const DataFrameOptions& options, CSVError& error
+        ) {
+            return try_create(reader, std::move(key_func), error, options.get_duplicate_key_policy());
+        }
+
+        /** Get the number of rows in the DataFrame. */
+        size_t size() const noexcept {
+            return storage_.rows().size();
+        }
+
+        /** Check if the DataFrame is empty (has no rows). */
+        bool empty() const noexcept {
+            return storage_.rows().empty();
+        }
+
+        /** Get the number of rows in the DataFrame. Alias for size(). */
+        size_t n_rows() const noexcept { return storage_.rows().size(); }
+        
+        /** Get the number of visible columns in the DataFrame. */
+        size_t n_cols() const noexcept { return storage_.n_cols(); }
+
+        /** Check if a column exists in the DataFrame. */
+        bool has_column(const std::string& name) const {
+            return this->index_of(name) != CSV_NOT_FOUND;
+        }
+
+        /** Get the index of a column by name. */
+        int index_of(const std::string& name) const {
+            return this->storage_.names()->index_of(name);
+        }
+
+        /** Get the column names in order. */
+        const std::vector<std::string>& columns() const noexcept { return this->storage_.names()->get_col_names(); }
+
+        /** Insert a new row at the specified index. Structural mutation invalidates outstanding row and cell proxies. */
+#if CSV_EXCEPTIONS_ENABLED
+        void insert_row(size_t index, const std::vector<std::string>& row) {
+            CSVError error;
+            this->try_insert_row(index, row, error);
+            internals::throw_dataframe_error(error);
+        }
+#endif
+
+        /** Insert a new column with empty values.
+         *  Materializes visible rows into fresh row storage and invalidates outstanding proxies.
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        void insert_column(size_t index, const std::string& name) {
+            this->insert_column(index, name, std::string());
+        }
+#endif
+
+        /** Insert a new column with a default value.
+         *  Materializes visible rows into fresh row storage and invalidates outstanding proxies.
+         *  Established row keys remain unchanged even when key-column values have been edited.
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        void insert_column(size_t index, const std::string& name, const std::string& default_value) {
+            CSVError error;
+            this->try_insert_column(index, name, default_value, error);
+            internals::throw_dataframe_error(error);
+        }
+#endif
+
+        /** Append a new column with empty values. */
+#if CSV_EXCEPTIONS_ENABLED
+        void append_column(const std::string& name) {
+            this->insert_column(this->n_cols(), name);
+        }
+#endif
+
+        /** Append a new column with a default value. */
+#if CSV_EXCEPTIONS_ENABLED
+        void append_column(const std::string& name, const std::string& default_value) {
+            this->insert_column(this->n_cols(), name, default_value);
+        }
+#endif
+
+        /** Build an unkeyed DataFrame containing rows whose corresponding mask entry is true.
+         *
+         *  CSVRow copies share the underlying parsed row storage, so this is intended for
+         *  filtered document views that should avoid reparsing or rematerializing fields.
+         *  Existing cell edits are copied; subsequent edits to either frame are independent.
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrame selected_rows(const std::vector<std::uint8_t>& include_rows) const {
+            CSVError error;
+            DataFrame result = this->try_selected_rows(include_rows, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /** Insert a row; validation failures leave the frame unchanged. */
+        bool try_insert_row(size_t index, const std::vector<std::string>& row, CSVError& error) {
+            error.clear();
+            if (index > this->size())
+                return internals::fail_static(error, CSVErrorCode::IndexOutOfBounds, "DataFrame insert_row index out of range");
+            CSVRow inserted_row = this->storage_.make_inserted_row(row, error);
+            if (error) return false;
+            if (this->is_keyed_) {
+                if (this->key_column_index_ == CSV_NOT_FOUND)
+                    return internals::fail_static(error, CSVErrorCode::UnsupportedOperation, "insert_row requires a column-keyed DataFrame");
+                CSVField field = inserted_row.try_field(static_cast<size_t>(this->key_column_index_), error);
+                if (error) return false;
+                KeyType key{};
+                CSVConversionError conversion;
+                if (!field.try_get(key, conversion)) {
+                    return internals::fail_static(error, CSVErrorCode::ConversionFailed, csv_conversion_error_message(conversion));
+                }
+                this->ensure_key_index();
+                if (this->key_index_->find(key) != this->key_index_->end())
+                    return internals::fail_static(error, CSVErrorCode::DuplicateKey, internals::ERROR_DUPLICATE_KEY);
+                this->storage_.reserve_insert();
+                reserve_for_append(this->keys_, 1);
+                this->keys_.insert(this->keys_.begin() + index, std::move(key));
+            } else { this->storage_.reserve_insert(); }
+            this->storage_.insert_row(index, std::move(inserted_row));
+            this->invalidate_key_index();
+            return true;
+        }
+
+        /** Materialize the visible schema after validating the requested insertion. */
+        bool try_insert_column(size_t index, const std::string& name, const std::string& value, CSVError& error) {
+            if (!this->storage_.insert_column(index, name, value, this->key_column_index_, [this](CSVError& failure) {
+                return !this->is_keyed_ || this->key_storage_.preserve(
+                    this->keys_, [this]() { this->invalidate_key_index(); }, failure);
+            }, error)) return false;
+            this->invalidate_column_proxies();
+            this->invalidate_json_converter();
+            return true;
+        }
+        bool try_insert_column(size_t index, const std::string& name, CSVError& error) {
+            return this->try_insert_column(index, name, std::string(), error);
+        }
+        bool try_append_column(const std::string& name, CSVError& error) {
+            return this->try_insert_column(this->n_cols(), name, error);
+        }
+        bool try_append_column(const std::string& name, const std::string& value, CSVError& error) {
+            return this->try_insert_column(this->n_cols(), name, value, error);
+        }
+
+        /** Selection preserves visible edits and returns an empty frame on failure. */
+        DataFrame try_selected_rows(const std::vector<std::uint8_t>& mask, CSVError& error) const {
+            DataFrame result;
+            result.storage_ = this->storage_.selected_rows(mask, error);
+            return result;
+        }
+
+        /** Access a column view by position. */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameColumn<KeyType> column_view(size_t col_index) {
+            CSVError error;
+            auto result = this->try_column_view(col_index, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /** Access a column view by position. */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameColumn<KeyType> column_view(size_t col_index) const {
+            CSVError error;
+            auto result = this->try_column_view(col_index, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /** Access a column view by name. */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameColumn<KeyType> column_view(const std::string& name) {
+            CSVError error;
+            auto result = this->try_column_view(name, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /** Access a column view by name. */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameColumn<KeyType> column_view(const std::string& name) const {
+            CSVError error;
+            auto result = this->try_column_view(name, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /**
+         * Access a row by position with bounds checking.
+         *
+         * @note Disabled when KeyType is an integral type to prevent ambiguity with
+         *       operator[](const KeyType&). Use at(size_t) for positional access
+         *       on integer-keyed DataFrames.
+         *
+         * @throws std::out_of_range if index is out of bounds
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        template<typename K = KeyType,
+            csv::enable_if_t<!std::is_integral<K>::value, int> = 0>
+        DataFrameRow<KeyType> operator[](size_t i) {
+            static_assert(std::is_same<K, KeyType>::value,
+                "Do not explicitly instantiate this template. Use at(size_t) for positional access.");
+            return this->at(i);
+        }
+
+        /** Access a row by position with bounds checking (const version).
+         *  Disabled when KeyType is an integral type — use at(size_t) instead. */
+        template<typename K = KeyType,
+            csv::enable_if_t<!std::is_integral<K>::value, int> = 0>
+        DataFrameRow<KeyType> operator[](size_t i) const {
+            static_assert(std::is_same<K, KeyType>::value,
+                "Do not explicitly instantiate this template. Use at(size_t) for positional access.");
+            return this->at(i);
+        }
+
+#endif
+
+        /**
+         * Access a row by position with bounds checking.
+         *
+         * @throws std::out_of_range if index is out of bounds
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameRow<KeyType> at(size_t i) {
+            CSVError error;
+            auto result = this->try_at(i, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+        
+        /** Access a row by position with bounds checking (const version). */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameRow<KeyType> at(size_t i) const {
+            CSVError error;
+            auto result = this->try_at(i, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /**
+         * Access a row by its key.
+         * Stored keys identify rows independently of subsequent key-column cell edits.
+         *
+         * @throws std::runtime_error if the DataFrame was not created with a key column
+         * @throws std::out_of_range if the key is not found
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameRow<KeyType> operator[](const KeyType& key) {
+            CSVError error;
+            auto result = this->try_find(key, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /** Access a row by its key (const version). */
+#if CSV_EXCEPTIONS_ENABLED
+        DataFrameRow<KeyType> operator[](const KeyType& key) const {
+            CSVError error;
+            auto result = this->try_find(key, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /**
+         * Check if a key exists in the DataFrame.
+         *
+         * @throws std::runtime_error if the DataFrame was not created with a key column
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        bool contains(const KeyType& key) const {
+            CSVError error;
+            const bool result = this->try_contains(key, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /**
+         * Extract all values from a column with type conversion.
+         * Accounts for edited values in the overlay.
+         *
+         * @tparam T Target type for conversion (default: std::string)
+         * @throws std::out_of_range if column is not found
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        template<typename T = std::string>
+        std::vector<T> column(const std::string& name) const {
+            CSVError error;
+            auto result = this->template try_column<T>(name, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /** Checked positional row access. Failed lookups return an unbound proxy. */
+        row_type try_at(size_t index, CSVError& error) {
+            if (!this->validate_row_index(index, error)) return {};
+            return this->make_row_proxy(index);
+        }
+        row_type try_at(size_t index, CSVError& error) const {
+            if (!this->validate_row_index(index, error)) return {};
+            return this->make_const_row_proxy(index);
+        }
+        row_type try_find(const KeyType& key, CSVError& error) {
+            const size_t index = this->try_position_of(key, error);
+            return error ? row_type() : this->make_row_proxy(index);
+        }
+        row_type try_find(const KeyType& key, CSVError& error) const {
+            const size_t index = this->try_position_of(key, error);
+            return error ? row_type() : this->make_const_row_proxy(index);
+        }
+        bool try_contains(const KeyType& key, CSVError& error) const {
+            error.clear();
+            if (!this->require_keyed_frame(error)) return false;
+            this->ensure_key_index();
+            return this->key_index_->find(key) != this->key_index_->end();
+        }
+        column_type try_column_view(size_t index, CSVError& error) {
+            if (!this->validate_column_index(index, error)) return {};
+            return column_type(this, index);
+        }
+        column_type try_column_view(size_t index, CSVError& error) const {
+            if (!this->validate_column_index(index, error)) return {};
+            return column_type(this, index);
+        }
+        column_type try_column_view(const std::string& name, CSVError& error) {
+            const size_t index = this->try_find_column(name, error);
+            return error ? column_type() : column_type(this, index);
+        }
+        column_type try_column_view(const std::string& name, CSVError& error) const {
+            const size_t index = this->try_find_column(name, error);
+            return error ? column_type() : column_type(this, index);
+        }
+        template<typename T = std::string>
+        std::vector<T> try_column(const std::string& name, CSVError& error) const {
+            const auto view = this->try_column_view(name, error);
+            return error ? std::vector<T>() : view.template try_to_vector<T>(error);
+        }
+
+        /** Apply a batch-oriented function to each column, potentially in parallel.
+         *
+         * The callback receives a lightweight column view plus a mutable per-column
+         * state object from `states`.
+         *
+         * Callbacks may safely perform read-only access through the provided
+         * column view and any explicit read-only references they already hold to
+         * this batch-scoped DataFrame. Sparse-overlay cell edits through
+         * `DataFrameRow` or `DataFrameCell` are synchronized at row granularity,
+         * but structural mutations such as `erase()` are not thread-safe.
+         *
+         * @throws std::invalid_argument if `states.size() != n_cols()`
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        template<typename State, typename Fn>
+        void column_parallel_apply(
+            DataFrameExecutor& executor,
+            std::vector<State>& states,
+            Fn&& fn
+        ) const {
+            CSVError error;
+            this->try_column_parallel_apply(executor, states, std::forward<Fn>(fn), error);
+            internals::throw_dataframe_error(error);
+        }
+#endif
+
+        template<typename State, typename Fn>
+        bool try_column_parallel_apply(
+            DataFrameExecutor& executor,
+            std::vector<State>& states,
+            Fn&& fn,
+            CSVError& error
+        ) const {
+            error.clear();
+            if (states.size() != this->n_cols()) {
+                return internals::fail_static(error, CSVErrorCode::InvalidArgument, internals::ERROR_COLUMN_APPLY_STATE_COUNT);
+            }
+
+            executor.parallel_for(this->n_cols(), [this, &states, &fn](size_t column_index) {
+                fn(column_type(this, column_index), states[column_index]);
+            });
+            return true;
+        }
+
+        /** Apply a batch-oriented function to a selected subset of columns, potentially in parallel.
+         *
+         * The callback receives a lightweight column view plus a mutable
+         * per-selected-column state object from `states`.
+         *
+         * @throws std::invalid_argument if `states.size() != column_indices.size()`
+         * @throws std::out_of_range if any column index is invalid
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        template<typename State, typename Fn>
+        void column_parallel_apply(
+            DataFrameExecutor& executor,
+            const std::vector<size_t>& column_indices,
+            std::vector<State>& states,
+            Fn&& fn
+        ) const {
+            CSVError error;
+            this->try_column_parallel_apply(executor, column_indices, states, std::forward<Fn>(fn), error);
+            internals::throw_dataframe_error(error);
+        }
+#endif
+
+        template<typename State, typename Fn>
+        bool try_column_parallel_apply(
+            DataFrameExecutor& executor,
+            const std::vector<size_t>& column_indices,
+            std::vector<State>& states,
+            Fn&& fn,
+            CSVError& error
+        ) const {
+            error.clear();
+            if (states.size() != column_indices.size()) {
+                return internals::fail_static(error, CSVErrorCode::InvalidArgument, internals::ERROR_COLUMN_APPLY_SUBSET_STATE_COUNT);
+            }
+
+            if (!this->validate_selected_columns(column_indices, error)) return false;
+
+            executor.parallel_for(column_indices.size(), [this, &column_indices, &states, &fn](size_t selected_index) {
+                const size_t column_index = column_indices[selected_index];
+                fn(column_type(this, column_index), states[selected_index]);
+            });
+            return true;
+        }
+
+        /** Apply a read-only batch function to each column, potentially in parallel.
+         *
+         * This overload is for callers who do not need one explicit mutable
+         * state object per column and prefer to manage any output storage
+         * externally.
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        template<typename Fn>
+        void column_parallel_apply(
+            DataFrameExecutor& executor,
+            Fn&& fn
+        ) const {
+            CSVError error;
+            this->try_column_parallel_apply(executor, std::forward<Fn>(fn), error);
+            internals::throw_dataframe_error(error);
+        }
+#endif
+
+        template<typename Fn>
+        bool try_column_parallel_apply(
+            DataFrameExecutor& executor,
+            Fn&& fn,
+            CSVError& error
+        ) const {
+            error.clear();
+            executor.parallel_for(this->n_cols(), [this, &fn](size_t column_index) {
+                fn(column_type(this, column_index));
+            });
+            return true;
+        }
+
+        /** Apply a read-only batch function to a selected subset of columns, potentially in parallel.
+         *
+         * This overload is for callers who want to process only specific
+         * columns and prefer to manage any output storage externally.
+         *
+         * @throws std::out_of_range if any column index is invalid
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        template<typename Fn>
+        void column_parallel_apply(
+            DataFrameExecutor& executor,
+            const std::vector<size_t>& column_indices,
+            Fn&& fn
+        ) const {
+            CSVError error;
+            this->try_column_parallel_apply(executor, column_indices, std::forward<Fn>(fn), error);
+            internals::throw_dataframe_error(error);
+        }
+#endif
+
+        template<typename Fn>
+        bool try_column_parallel_apply(
+            DataFrameExecutor& executor,
+            const std::vector<size_t>& column_indices,
+            Fn&& fn,
+            CSVError& error
+        ) const {
+            error.clear();
+            if (!this->validate_selected_columns(column_indices, error)) return false;
+
+            executor.parallel_for(column_indices.size(), [this, &column_indices, &fn](size_t selected_index) {
+                fn(column_type(this, column_indices[selected_index]));
+            });
+            return true;
+        }
+
+        /**
+         * Group row positions using an arbitrary grouping function.
+         *
+         * @tparam GroupFunc Callable that takes a DataFrameRow and returns a hashable key
+         */
+        template<
+            typename GroupFunc,
+            typename GroupKey = invoke_result_t<GroupFunc, DataFrameRow<KeyType>>,
+            csv::enable_if_t<
+                internals::is_hashable<GroupKey>::value &&
+                internals::is_equality_comparable<GroupKey>::value,
+                int
+            > = 0
+        >
+        std::unordered_map<GroupKey, std::vector<size_t>> group_by(GroupFunc group_func) const {
+            std::unordered_map<GroupKey, std::vector<size_t>> grouped;
+
+            for (size_t i = 0; i < storage_.rows().size(); i++) {
+                GroupKey group_key = group_func(this->make_const_row_proxy(i));
+                grouped[group_key].push_back(i);
+            }
+
+            return grouped;
+        }
+
+        /**
+         * Group row positions by the value of a column.
+         *
+         * @throws std::out_of_range if column is not found
+         */
+#if CSV_EXCEPTIONS_ENABLED
+        std::unordered_map<std::string, std::vector<size_t>> group_by(const std::string& name) const {
+            CSVError error;
+            auto result = this->try_group_by(name, error);
+            internals::throw_dataframe_error(error);
+            return result;
+        }
+#endif
+
+        /** Group visible string values, reporting lookup or short-row errors. */
+        std::unordered_map<std::string, std::vector<size_t>> try_group_by(const std::string& name, CSVError& error) const {
+            std::unordered_map<std::string, std::vector<size_t>> grouped;
+            const size_t column = this->try_find_column(name, error);
+            if (error) return grouped;
+            for (size_t i = 0; i < this->size(); ++i) {
+                const auto cell = this->try_make_cell(i, column, false, error);
+                if (error) return {};
+                grouped[std::string(cell.get_sv())].push_back(i);
+            }
+            return grouped;
+        }
+
+        /** Get iterator to the first row. */
+        iterator begin() { return iterator(this, 0); }
+        
+        /** Get iterator past the last row. */
+        iterator end() { return iterator(this, this->size()); }
+
+        /** Get const iterator to the first row. */
+        const_iterator begin() const { return const_iterator(this, 0); }
+
+        /** Get const iterator past the last row. */
+        const_iterator end() const { return const_iterator(this, this->size()); }
+
+        /** Get const iterator to the first row (explicit). */
+        const_iterator cbegin() const { return const_iterator(this, 0); }
+
+        /** Get const iterator past the last row (explicit). */
+        const_iterator cend() const { return const_iterator(this, this->size()); }
+
+    private:
+        /** Whether this DataFrame was created with a key. */
+        bool is_keyed_ = false;
+        
+        internals::data_frame::DataFrameStorage storage_;
+
+        /** Stored keys for keyed DataFrames only. Empty for unkeyed frames. */
+        std::vector<KeyType> keys_;
+        internals::data_frame::KeyStorage<KeyType> key_storage_;
+
+        /** Column index used for keyed frames constructed from a named column. */
+        int key_column_index_ = CSV_NOT_FOUND;
+
+        /** Lazily-built index mapping keys to row positions (mutable for const methods). */
+        mutable std::unique_ptr<std::unordered_map<KeyType, size_t>> key_index_;
+        mutable internals::lazy_shared_ptr<internals::JsonConverter> json_converter_;
+        std::shared_ptr<size_t> column_generation_{ new size_t(0) };
+
+        /** Initialize an unkeyed DataFrame from a CSV reader. */
+        bool init_unkeyed_from_reader(CSVReader& reader, CSVError& error) {
+            error.clear();
+            this->assert_fresh_storage(false);
+            this->storage_.set_names(reader.col_names_ptr());
+            std::vector<CSVRow> batch;
+            while (reader.try_read_chunk(batch, dataframe_read_chunk_rows(), error)) {
+                this->append_unkeyed_batch(batch);
+            }
+            return !error;
+        }
+
+        /** Initialize an unkeyed DataFrame from an existing row batch. */
+        void init_unkeyed_from_rows(std::vector<CSVRow>& source_rows) {
+            this->assert_fresh_storage(false);
+            this->is_keyed_ = false;
+            this->storage_.set_names(source_rows.empty()
+                ? internals::ConstColNamesPtr(std::make_shared<internals::ColNames>())
+                : source_rows.front().col_names_ptr());
+            this->storage_.rows() = std::move(source_rows);
+        }
+
+        /** Initialize a keyed DataFrame from a CSV reader using column-based key extraction. */
+        bool init_from_reader(CSVReader& reader, const DataFrameOptions& options, CSVError& error) {
+            error.clear();
+            this->assert_fresh_storage(false);
+            this->is_keyed_ = true;
+            this->storage_.set_names(reader.col_names_ptr());
+            const std::string& name = options.get_key_column();
+            if (name.empty())
+                return internals::fail_static(error, CSVErrorCode::MissingKeyColumn, internals::ERROR_KEY_COLUMN_EMPTY);
+            const int index = this->storage_.names()->index_of(name);
+            if (index == CSV_NOT_FOUND)
+                return internals::fail(error, CSVErrorCode::MissingKeyColumn, std::string(internals::ERROR_KEY_COLUMN_NOT_FOUND) + name);
+            this->key_column_index_ = index;
+            auto extract = [&options, &name](const CSVRow& row, KeyType& key, CSVError& failure) {
+                CSVField field = row.try_field(name, failure);
+                CSVConversionError conversion = CSVConversionError::None;
+                if (!failure && field.try_get(key, conversion)) return true;
+                if (!options.get_throw_on_missing_key()) {
+                    failure.clear();
+                    key = KeyType();
+                    return true;
+                }
+                if (!failure) {
+                    internals::fail_static(failure, CSVErrorCode::ConversionFailed, csv_conversion_error_message(conversion));
+                }
+                failure.set_context(std::string(internals::ERROR_KEY_COLUMN_VALUE) + std::string(failure.context));
+                return false;
+            };
+            return this->build_from_key_function(reader, extract, options.get_duplicate_key_policy(), error);
+        }
+
+        template<typename KeyFunc>
+        bool init_custom_from_reader(CSVReader& reader, KeyFunc& key_func, DuplicateKeyPolicy policy, CSVError& error) {
+            this->storage_.set_names(reader.col_names_ptr());
+            this->is_keyed_ = true;
+            auto extract = [&key_func](const CSVRow& row, KeyType& key, CSVError&) {
+                key = key_func(row);
+                return true;
+            };
+            return this->build_from_key_function(reader, extract, policy, error);
+        }
+
+        /** Build keyed DataFrame using a custom key extraction function. */
+        template<typename KeyFunc>
+        bool build_from_key_function(
+            CSVReader& reader, KeyFunc& key_func, DuplicateKeyPolicy policy, CSVError& error
+        ) {
+            error.clear();
+            std::unordered_map<KeyType, size_t> key_to_pos;
+            this->assert_fresh_storage(true);
+            std::vector<CSVRow> batch;
+            while (reader.try_read_chunk(batch, dataframe_read_chunk_rows(), error)) {
+                if (!this->append_keyed_batch(batch, key_func, policy, key_to_pos, error)) return false;
+            }
+            return !error;
+        }
+
+        static size_t dataframe_read_chunk_rows() noexcept {
+            return 50000;
+        }
+
+        template<typename Container>
+        static void reserve_for_append(Container& container, size_t additional) {
+            if (additional == 0) {
+                return;
+            }
+
+            const size_t required = container.size() + additional;
+            if (required <= container.capacity()) {
+                return;
+            }
+
+            const size_t current = container.capacity();
+            // Do not reserve exactly one batch ahead. DataFrame construction
+            // appends fixed-size read_chunk() batches, so exact reserves would
+            // force a reallocation on every batch for large inputs.
+            size_t next = current == 0 ? additional : current * 2;
+            if (next < required || next < current) {
+                next = required;
+            }
+
+            container.reserve(next);
+        }
+
+        void append_unkeyed_batch(std::vector<CSVRow>& batch) {
+            reserve_for_append(storage_.rows(), batch.size());
+
+            for (auto& row : batch) {
+                storage_.rows().push_back(std::move(row));
+            }
+        }
+
+        template<typename KeyFunc>
+        bool append_keyed_batch(
+            std::vector<CSVRow>& batch, KeyFunc& key_func, DuplicateKeyPolicy policy,
+            std::unordered_map<KeyType, size_t>& key_to_pos, CSVError& error
+        ) {
+            reserve_for_append(storage_.rows(), batch.size());
+            reserve_for_append(keys_, batch.size());
+            for (auto& row : batch) {
+                KeyType key{};
+                if (!key_func(row, key, error)) return false;
+                auto existing = key_to_pos.find(key);
+                if (existing != key_to_pos.end()) {
+                    if (policy == DuplicateKeyPolicy::THROW)
+                        return internals::fail_static(error, CSVErrorCode::DuplicateKey, internals::ERROR_DUPLICATE_KEY);
+                    if (policy == DuplicateKeyPolicy::OVERWRITE)
+                        storage_.rows()[existing->second] = std::move(row);
+                    continue;
+                }
+                storage_.rows().push_back(std::move(row));
+                keys_.push_back(key);
+                key_to_pos[key] = storage_.rows().size() - 1;
+            }
+            return true;
+        }
+
+        /** Find the index of a column by name. Throws if the column is not found. */
+        size_t try_find_column(const std::string& name, CSVError& error) const {
+            error.clear();
+            const int index = this->index_of(name);
+            if (index == CSV_NOT_FOUND) {
+                internals::fail(error, CSVErrorCode::ColumnNotFound, std::string(internals::ERROR_COLUMN_NOT_FOUND) + name);
+                return 0;
+            }
+            return static_cast<size_t>(index);
+        }
+
+        bool validate_row_index(size_t index, CSVError& error) const {
+            error.clear();
+            return index < this->size() || internals::fail_static(error, CSVErrorCode::IndexOutOfBounds, "DataFrame row index out of range");
+        }
+        bool validate_column_index(size_t index, CSVError& error) const {
+            error.clear();
+            return index < this->n_cols() || internals::fail_static(error, CSVErrorCode::IndexOutOfBounds, internals::ERROR_COLUMN_INDEX_OUT_OF_RANGE);
+        }
+        DataFrameCell try_make_cell(size_t row_index, size_t column_index, bool mutable_access, CSVError& error) const {
+            const auto binding = this->storage_.try_bind(row_index, column_index, error);
+            if (error) return {};
+            const auto* row = &this->storage_.rows()[row_index];
+            return mutable_access
+                ? DataFrameCell(row, binding.overlay, binding.physical_column, &this->storage_, true)
+                : DataFrameCell(row, binding.overlay, binding.physical_column);
+        }
+
+        DataFrameCell make_cell(size_t row_index, size_t column_index, bool mutable_access) const {
+            return this->make_cell(&this->storage_.rows()[row_index], row_index, column_index, mutable_access);
+        }
+
+        DataFrameCell make_cell(const CSVRow* row, size_t row_index, size_t column_index, bool mutable_access) const {
+            const auto binding = this->storage_.bind(row_index, column_index);
+            return mutable_access
+                ? DataFrameCell(row, binding.overlay, binding.physical_column, &this->storage_, true)
+                : DataFrameCell(row, binding.overlay, binding.physical_column);
+        }
+
+        csv::string_view cell_view(size_t row_index, size_t column_index) const {
+            return this->storage_.view(row_index, column_index);
+        }
+
+        DataFrameRow<KeyType> make_row_proxy(size_t row_index) {
+            const auto& row = storage_.rows()[row_index];
+            return DataFrameRow<KeyType>(&row, this, row_index, static_cast<RowOverlay*>(nullptr), this->key_ptr_at(row_index));
+        }
+
+        DataFrameRow<KeyType> make_const_row_proxy(size_t row_index) const {
+            const auto& row = storage_.rows()[row_index];
+            return DataFrameRow<KeyType>(&row, this, row_index, static_cast<const RowOverlay*>(nullptr), this->key_ptr_at(row_index));
+        }
+
+        bool erase_column_at_index(size_t column_index, CSVError& error) {
+            if (!this->storage_.erase_column(column_index, this->key_column_index_, error)) return false;
+            this->invalidate_column_proxies();
+            this->invalidate_json_converter();
+            return true;
+        }
+
+        bool erase_at_index(size_t row_index) {
+            if (row_index >= storage_.rows().size()) {
+                return false;
+            }
+
+            this->storage_.erase_row(row_index);
+            if (this->is_keyed_) {
+                keys_.erase(keys_.begin() + row_index);
+            }
+            this->invalidate_key_index();
+            return true;
+        }
+
+        bool validate_selected_columns(const std::vector<size_t>& column_indices, CSVError& error) const {
+            error.clear();
+            for (size_t index : column_indices) {
+                if (index >= this->n_cols())
+                    return internals::fail_static(error, CSVErrorCode::IndexOutOfBounds, internals::ERROR_COLUMN_APPLY_INVALID_INDEX);
+            }
+            return true;
+        }
+
+        /** Validate that this DataFrame was created with a key column. */
+        bool require_keyed_frame(CSVError& error) const {
+            if (!this->is_keyed_)
+                return internals::fail_static(error, CSVErrorCode::UnkeyedFrame, internals::ERROR_UNKEYED_DATA_FRAME);
+            return true;
+        }
+
+        /** Invalidate the lazy key index after structural changes. */
+        void invalidate_key_index() {
+            key_index_.reset();
+        }
+
+        /** Invalidate cached JSON column mapping after structural column changes. */
+        void invalidate_json_converter() {
+            json_converter_ = internals::lazy_shared_ptr<internals::JsonConverter>();
+        }
+
+        /** Invalidate outstanding column proxies after structural column changes. */
+        void invalidate_column_proxies() {
+            ++(*column_generation_);
+        }
+
+        /** Debug-only check that constructor helpers are starting from a pristine batch state. */
+        void assert_fresh_storage(bool expected_is_keyed) const {
+            CSV_DEBUG_ASSERT(this->storage_.rows().empty());
+            CSV_DEBUG_ASSERT(this->keys_.empty());
+            CSV_DEBUG_ASSERT(this->storage_.pristine());
+            CSV_DEBUG_ASSERT(this->key_index_.get() == nullptr);
+            CSV_DEBUG_ASSERT(this->json_converter_.get() == nullptr);
+            CSV_DEBUG_ASSERT(this->is_keyed_ == expected_is_keyed);
+        }
+
+        /** Build the key index if it doesn't exist (lazy initialization). */
+        void ensure_key_index() const {
+            if (key_index_) return;
+
+            key_index_ = std::unique_ptr<std::unordered_map<KeyType, size_t>>(
+                new std::unordered_map<KeyType, size_t>()
+            );
+
+            for (size_t i = 0; i < storage_.rows().size(); i++) {
+                (*key_index_)[keys_[i]] = i;
+            }
+        }
+
+        /** Find the position of a key in the rows vector. */
+        size_t try_position_of(const KeyType& key, CSVError& error) const {
+            error.clear();
+            if (!this->require_keyed_frame(error)) return 0;
+            this->ensure_key_index();
+            const auto found = this->key_index_->find(key);
+            if (found == this->key_index_->end()) {
+                internals::fail_static(error, CSVErrorCode::KeyNotFound, internals::ERROR_KEY_NOT_FOUND);
+                return 0;
+            }
+            return found->second;
+        }
+
+        const KeyType* key_ptr_at(size_t row_index) const {
+            return this->is_keyed_ ? &keys_[row_index] : nullptr;
+        }
+    };
+
+#if defined(CSV_HAS_CXX20) && CSV_EXCEPTIONS_ENABLED
+    static_assert(
+        internals::csv_write_rows_input_range<DataFrame<>>,
+        "DataFrame must remain compatible with csv::DelimWriter::write_rows()."
+    );
+#endif
+
+    namespace internals {
+        /**
+         * streambuf adapter over csv::string_view with no data copy.
+         *
+         * The underlying memory must remain valid and immutable for the entire
+         * lifetime of this stream object.
+         */
+        class StringViewStreamBuf : public std::streambuf {
+        public:
+            explicit StringViewStreamBuf(csv::string_view view) {
+                char* begin = const_cast<char*>(view.data());
+                char* end = begin + view.size();
+                this->setg(begin, begin, end);
+            }
+
+        protected:
+            std::streamsize xsgetn(char* s, std::streamsize count) override {
+                const std::streamsize avail = this->egptr() - this->gptr();
+                const std::streamsize n = std::min(avail, count);
+                if (n > 0) {
+                    std::memcpy(s, this->gptr(), static_cast<size_t>(n));
+                    this->gbump(static_cast<int>(n));
+                }
+                return n;
+            }
+
+            pos_type seekoff(off_type off, std::ios_base::seekdir dir,
+                std::ios_base::openmode which = std::ios_base::in) override {
+                if (!(which & std::ios_base::in)) {
+                    return pos_type(off_type(-1));
+                }
+
+                const auto begin = this->eback();
+                const auto curr = this->gptr();
+                const auto end = this->egptr();
+
+                off_type base = 0;
+                if (dir == std::ios_base::beg) {
+                    base = 0;
+                }
+                else if (dir == std::ios_base::cur) {
+                    base = static_cast<off_type>(curr - begin);
+                }
+                else if (dir == std::ios_base::end) {
+                    base = static_cast<off_type>(end - begin);
+                }
+                else {
+                    return pos_type(off_type(-1));
+                }
+
+                const off_type next = base + off;
+                const off_type size = static_cast<off_type>(end - begin);
+                if (next < 0 || next > size) {
+                    return pos_type(off_type(-1));
+                }
+
+                this->setg(begin, begin + next, end);
+                return pos_type(next);
+            }
+
+            pos_type seekpos(pos_type pos,
+                std::ios_base::openmode which = std::ios_base::in) override {
+                return this->seekoff(off_type(pos), std::ios_base::beg, which);
+            }
+        };
+
+        /**
+         * Lightweight istream over csv::string_view with zero copy.
+         *
+         * WARNING: The caller is responsible for ensuring the backing memory
+         * outlives this stream and any CSVReader parsing it.
+         */
+        class StringViewStream : public std::istream {
+        public:
+            explicit StringViewStream(csv::string_view view)
+                : std::istream(nullptr), _buf(view) {
+                this->rdbuf(&_buf);
+            }
+
+            StringViewStream(const StringViewStream&) = delete;
+            StringViewStream(StringViewStream&&) = delete;
+            StringViewStream& operator=(const StringViewStream&) = delete;
+            StringViewStream& operator=(StringViewStream&&) = delete;
+
+        private:
+            StringViewStreamBuf _buf;
+        };
+    }
+
+    /** Returned by the file inspection utilities. */
+    struct CSVFileInfo {
+        std::string filename;               /**< Filename */
+        std::vector<std::string> col_names; /**< CSV column names */
+        char delim;                         /**< Delimiting character */
+        size_t n_rows;                      /**< Number of rows in a file */
+        size_t n_cols;                      /**< Number of columns in a CSV */
+        size_t parse_worker_count;          /**< Number of parser worker threads used */
+        internals::SpeculativeParseDiagnostics speculative_diagnostics;
+    };
+
+    /** @name Shorthand Parsing Functions
+     *  @brief Convenience functions for parsing small strings
+     */
+     ///@{
+
+    /** Parse CSV from a string view, copying the input into an owned buffer.
+     *
+     *  Safe for any string_view regardless of the caller's ownership of the
+     *  underlying memory.
+     *
+     *  @par Example
+     *  @snippet tests/test_read_csv.cpp Parse Example
+     */
+    inline std::unique_ptr<CSVReader> try_parse(
+        csv::string_view in, CSVError& error, const CSVFormat& format = CSVFormat::guess_csv()
+    ) {
+        std::unique_ptr<std::istream> stream(new std::stringstream(std::string(in)));
+        return CSVReader::try_open(std::move(stream), error, format);
+    }
+
+#if CSV_EXCEPTIONS_ENABLED
+    inline CSVReader parse(csv::string_view in, const CSVFormat& format = CSVFormat::guess_csv()) {
+        CSVError error;
+        auto reader = try_parse(in, error, format);
+        internals::throw_error(error);
+        return std::move(*reader);
+    }
+#endif
+
+    /** Parse CSV from an in-memory view with zero copy.
+     *
+     *  WARNING: Non-owning path. The caller must ensure `in`'s backing memory
+     *  remains valid and immutable while the reader may request additional rows
+     *  from the source stream.
+     *
+     *  Rows already obtained from the reader remain valid, but unread rows
+     *  still depend on the source view staying alive.
+     */
+    inline std::unique_ptr<CSVReader> try_parse_unsafe(
+        csv::string_view in, CSVError& error, const CSVFormat& format = CSVFormat::guess_csv()
+    ) {
+        std::unique_ptr<std::istream> stream(new internals::StringViewStream(in));
+        return CSVReader::try_open(std::move(stream), error, format);
+    }
+
+#if CSV_EXCEPTIONS_ENABLED
+    inline CSVReader parse_unsafe(csv::string_view in, const CSVFormat& format = CSVFormat::guess_csv()) {
+        CSVError error;
+        auto reader = try_parse_unsafe(in, error, format);
+        internals::throw_error(error);
+        return std::move(*reader);
+    }
+#endif
+
+#if CSV_EXCEPTIONS_ENABLED
+    /** Parses a CSV string with no headers. */
+    inline CSVReader parse_no_header(csv::string_view in) {
+        CSVFormat format;
+        format.header_row(-1);
+        return parse(in, format);
+    }
+
+    /** Parse a RFC 4180 CSV string.
+     *
+     *  String literals have static storage duration, so the zero-copy path is
+     *  safe here.
+     *
+     *  @par Example
+     *  @snippet tests/test_read_csv.cpp Escaped Comma
+     */
+    inline CSVReader operator ""_csv(const char* in, size_t n) {
+        return parse_unsafe(csv::string_view(in, n));
+    }
+
+    /** A shorthand for csv::parse_no_header().
+     *
+     *  String literals have static storage duration, so the zero-copy path is
+     *  safe here.
+     */
+    inline CSVReader operator ""_csv_no_header(const char* in, size_t n) {
+        CSVFormat format;
+        format.header_row(-1);
+        return parse_unsafe(csv::string_view(in, n), format);
+    }
+#endif
+    ///@}
+
+    /** @name Utility Functions */
+    ///@{
+    /** Infer SQL-friendly column data types from an existing CSVReader.
+     *
+     *  This consumes rows from `reader` using the chunked ETL path and returns
+     *  one inferred `DataType` per column name.
+     */
+    std::unordered_map<std::string, DataType> try_csv_data_types(CSVReader& reader, CSVError& error);
+
+    /** Infer types from a filename, borrowed stream, or owned stream, reporting I/O errors. */
+    template<typename Source>
+    inline auto try_csv_data_types(
+        Source&& source, CSVError& error, const CSVFormat& format = CSVFormat::guess_csv()
+    ) -> decltype(CSVReader::try_open(std::forward<Source>(source), error, format),
+        std::unordered_map<std::string, DataType>()) {
+        auto reader = CSVReader::try_open(std::forward<Source>(source), error, format);
+        return reader ? try_csv_data_types(*reader, error) : std::unordered_map<std::string, DataType>();
+    }
+
+#if CSV_EXCEPTIONS_ENABLED
+    inline std::unordered_map<std::string, DataType> csv_data_types(CSVReader& reader) {
+        CSVError error;
+        auto result = try_csv_data_types(reader, error);
+        internals::throw_dataframe_error(error);
+        return result;
+    }
+
+    /** Infer SQL-friendly column data types from any CSVReader constructor input.
+     *
+     *  This convenience overload forwards its arguments directly to
+     *  `CSVReader`, so it supports filenames, `std::istream` sources, owned
+     *  streams, and custom `CSVFormat` combinations without additional wrapper
+     *  code.
+     *
+     *  @par Example
+     *  @code
+     *  std::istringstream input("name,age\nAlice,30\nBob,41\n");
+     *  CSVFormat format;
+     *  format.delimiter(',').header_row(0);
+     *
+     *  auto dtypes = csv::csv_data_types(input, format);
+     *  @endcode
+     */
+    template<
+        typename... ReaderArgs,
+        csv::enable_if_t<std::is_constructible<CSVReader, ReaderArgs...>::value, int> = 0
+    >
+    inline std::unordered_map<std::string, DataType> csv_data_types(ReaderArgs&&... reader_args) {
+        CSVReader reader(std::forward<ReaderArgs>(reader_args)...);
+        return csv_data_types(reader);
+    }
+#endif
+
+    namespace internals {
+        // Shared batch traversal lets callers inspect joined task errors before
+        // consuming another batch, including when the source never reaches EOF.
+        template<typename Fn>
+        inline bool try_for_each_csv_chunk(
+            CSVReader& reader, Fn&& fn, CSVError& error, size_t chunk_size) {
+            error.clear();
+            if (chunk_size == 0)
+                return fail_static(error, CSVErrorCode::InvalidArgument, ERROR_CHUNK_PARALLEL_APPLY_ZERO);
+            std::vector<CSVRow> rows;
+            while (reader.try_read_chunk(rows, chunk_size, error)) {
+                DataFrame<> batch(std::move(rows));
+                if (!fn(batch, error)) return false;
+            }
+            return !error;
+        }
+    }
+
+    /** Apply a per-column batch function over a CSVReader using a reusable executor.
+     *
+     *  Reads the source in chunks, promotes each chunk into a temporary DataFrame,
+     *  and applies `fn(column, states[column.index()])`.
+     *
+     *  Callbacks may treat each batch DataFrame as read-mostly, and sparse
+     *  overlay cell edits are synchronized at row granularity. If you need more
+     *  involved batch orchestration, use `CSVReader::read_chunk()` and construct
+     *  a batch-scoped `DataFrame` yourself.
+     *
+     *  @throws std::invalid_argument if `chunk_size == 0`
+     */
+    template<typename State, typename Fn>
+    inline bool try_chunk_parallel_apply(
+        CSVReader& reader,
+        DataFrameExecutor& executor,
+        std::vector<State>& states,
+        Fn&& fn,
+        CSVError& error,
+        size_t chunk_size = 50000
+    ) {
+        return internals::try_for_each_csv_chunk(reader,
+            [&executor, &states, &fn](DataFrame<>& batch, CSVError& failure) {
+                return batch.try_column_parallel_apply(executor, states, std::forward<Fn>(fn), failure);
+            }, error, chunk_size);
+    }
+
+#if CSV_EXCEPTIONS_ENABLED
+    template<typename State, typename Fn>
+    inline void chunk_parallel_apply(
+        CSVReader& reader,
+        DataFrameExecutor& executor,
+        std::vector<State>& states,
+        Fn&& fn,
+        size_t chunk_size = 50000
+    ) {
+        CSVError error;
+        try_chunk_parallel_apply(reader, executor, states, std::forward<Fn>(fn), error, chunk_size);
+        internals::throw_dataframe_error(error);
+    }
+#endif
+
+    /** Apply a per-column batch function over a CSVReader with a temporary executor.
+     *
+     *  This is the convenience overload for the common case where callers do not
+     *  need to reuse worker threads across multiple reader pipelines.
+     */
+    template<typename State, typename Fn>
+    inline bool try_chunk_parallel_apply(
+        CSVReader& reader,
+        std::vector<State>& states,
+        Fn&& fn,
+        CSVError& error,
+        size_t chunk_size = 50000
+    ) {
+        DataFrameExecutor executor;
+        return try_chunk_parallel_apply(reader, executor, states, std::forward<Fn>(fn), error, chunk_size);
+    }
+
+#if CSV_EXCEPTIONS_ENABLED
+    template<typename State, typename Fn>
+    inline void chunk_parallel_apply(
+        CSVReader& reader,
+        std::vector<State>& states,
+        Fn&& fn,
+        size_t chunk_size = 50000
+    ) {
+        CSVError error;
+        try_chunk_parallel_apply(reader, states, std::forward<Fn>(fn), error, chunk_size);
+        internals::throw_dataframe_error(error);
+    }
+#endif
+
+    /** Get basic information about a CSV file
+     *  @include programs/csv_info.cpp
+     */
+    inline CSVFileInfo try_get_file_info(const std::string& filename, CSVError& error) {
+        auto reader = CSVReader::try_open(filename, error);
+        if (!reader) return {};
+
+        CSVFormat format = reader->get_format();
+        const char delimiter = internals::resolved_delimiter(format);
+
+        std::vector<CSVRow> rows;
+        while (reader->try_read_chunk(rows, 50000, error)) {}
+        if (error) return {};
+
+        return {
+            filename,
+            reader->get_col_names(),
+            delimiter,
+            reader->n_rows(),
+            reader->get_col_names().size(),
+            reader->parse_worker_count(),
+            reader->speculative_diagnostics()
+        };
+    }
+
+#if CSV_EXCEPTIONS_ENABLED
+    inline CSVFileInfo get_file_info(const std::string& filename) {
+        CSVError error;
+        auto result = try_get_file_info(filename, error);
+        internals::throw_error(error);
+        return result;
+    }
+#endif
+
+    /** Get the column names of a CSV file using just the first 500KB. */
+    inline std::vector<std::string> try_get_col_names(
+        csv::string_view filename, CSVError& error,
+        const CSVFormat& format = CSVFormat::guess_csv()
+    ) {
+        auto head = internals::parser::get_csv_head(filename, error);
+        if (error) return {};
+        auto reader = try_parse_unsafe(head, error, format);
+        return reader ? reader->get_col_names() : std::vector<std::string>();
+    }
+
+    /** Find a column position, returning CSV_NOT_FOUND for an absent name or on failure.
+     *  An absent name is not an error; inspect error to distinguish an I/O failure.
+     */
+    inline long long try_get_col_pos(
+        csv::string_view filename, csv::string_view col_name, CSVError& error,
+        const CSVFormat& format = CSVFormat::guess_csv()
+    ) {
+        auto col_names = try_get_col_names(filename, error, format);
+        if (error) return CSV_NOT_FOUND;
+        const auto position = std::find(col_names.begin(), col_names.end(), col_name);
+        return position == col_names.end() ? CSV_NOT_FOUND
+            : static_cast<long long>(std::distance(col_names.begin(), position));
+    }
+
+#if CSV_EXCEPTIONS_ENABLED
+    /** Get the column names of a CSV file using just the first 500KB. */
+    inline std::vector<std::string> get_col_names(
+        csv::string_view filename,
+        const CSVFormat& format = CSVFormat::guess_csv()
+    ) {
+        CSVError error;
+        auto result = try_get_col_names(filename, error, format);
+        internals::throw_error(error);
+        return result;
+    }
+
+    /** Find the position of a column in a CSV file or CSV_NOT_FOUND otherwise. */
+    inline long long get_col_pos(
+        csv::string_view filename, csv::string_view col_name,
+        const CSVFormat& format = CSVFormat::guess_csv()
+    ) {
+        CSVError error;
+        const auto result = try_get_col_pos(filename, col_name, error, format);
+        internals::throw_error(error);
+        return result;
+    }
+#endif
+    ///@}
+
+    namespace internals {
+        
+#if CSV_EXCEPTIONS_ENABLED
+        
+#endif
+    
+        inline char resolved_delimiter(const CSVFormat& format) noexcept {
+            CSV_DEBUG_ASSERT(format.possible_delimiters.size() == 1);
+            return format.possible_delimiters.front();
+        }
+    }
+
+#if CSV_EXCEPTIONS_ENABLED
+    
+#endif
+
+#if CSV_EXCEPTIONS_ENABLED
+    inline char CSVFormat::get_delim() const {
+        CSVError error;
+        char value = 0;
+        this->try_get_delim(value, error);
+        internals::throw_error(error);
+        return value;
+    }
+#endif
+
+    inline bool CSVFormat::try_get_delim(char& out, CSVError& error) const {
+        error.clear();
+        if (this->possible_delimiters.size() != 1) {
+            return internals::fail_static(error, CSVErrorCode::InvalidFormat,
+                this->possible_delimiters.empty() ? "At least one delimiter is required."
+                    : internals::ERROR_MULTIPLE_DELIMITERS);
+        }
+        out = this->possible_delimiters.front();
+        return true;
+    }
+
+#if CSV_EXCEPTIONS_ENABLED
+    
+#endif
+
+    inline void CSVReader::open_file(csv::string_view filename, const CSVFormat& format) {
+#if defined(__EMSCRIPTEN__)
+        owned_stream.reset(new std::ifstream(std::string(filename), std::ios::binary));
+        if (!*owned_stream) {
+            internals::fail(error_, CSVErrorCode::OpenFailed,
+                internals::make_prefixed_message(internals::ERROR_CANNOT_OPEN_FILE, filename));
+            return;
+        }
+        init_from_stream(*owned_stream, format);
+#else
+        init_parser(std::unique_ptr<internals::parser::CSVParserDriverBase>(
+            new internals::parser::MmapParser(filename, format, col_names)));
+#endif
+    }
+
+    inline std::unique_ptr<CSVReader> CSVReader::try_open(
+        std::unique_ptr<std::istream> source, CSVError& error, const CSVFormat& format) {
+        error.clear();
+        if (!source) {
+            internals::fail_static(error, CSVErrorCode::InvalidArgument, internals::ERROR_READER_NULL_STREAM);
+            return nullptr;
+        }
+        std::unique_ptr<CSVReader> reader(new CSVReader(format, initialize_tag{}));
+        reader->owned_stream = std::move(source);
+        reader->init_from_stream(*reader->owned_stream, format);
+        error = reader->error_;
+        return error ? nullptr : std::move(reader);
+    }
+
+#ifdef _MSC_VER
+#pragma region Reading helpers
+#endif
+    
+#ifdef _MSC_VER
+#pragma endregion Reading helpers
+#endif
+
+#ifdef _MSC_VER
+#pragma region Format and header helpers
+#endif
+    
+    /** Install the active column names for this reader. */
+    
+#ifdef _MSC_VER
+#pragma endregion Format and header helpers
+#endif
+
+#ifdef _MSC_VER
+#pragma region Reading helpers
+#endif
+    inline bool CSVReader::row_is_returnable(const CSVRow& candidate) {
+        // Any queued record proves that the previous source window made
+        // progress, even when policy filtering excludes the record.
+        this->_read_requested = false;
+
+        const auto policy = this->_format.variable_column_policy;
+        const size_t next_row_size = candidate.size();
+
+        if (policy == VariableColumnPolicy::KEEP_NON_EMPTY && next_row_size == 0) {
+            return false;
+        }
+
+        if (next_row_size != this->n_cols &&
+            (policy == VariableColumnPolicy::THROW || policy == VariableColumnPolicy::IGNORE_ROW)) {
+            if (policy == VariableColumnPolicy::THROW) {
+                if (candidate.size() < this->n_cols) {
+                    return internals::fail(error_, CSVErrorCode::RowLengthMismatch,
+                        internals::make_prefixed_message(internals::ERROR_ROW_TOO_SHORT, candidate.raw_str()));
+                }
+
+                return internals::fail(error_, CSVErrorCode::RowLengthMismatch,
+                    internals::make_prefixed_message(internals::ERROR_ROW_TOO_LONG, candidate.raw_str()));
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+#ifdef _MSC_VER
+#pragma endregion Reading helpers
+#endif
+
+#ifdef _MSC_VER
+#pragma region Worker reading methods
+#endif
+
+    /**
+     * Read a chunk of CSV data.
+     *
+     * @note This method may run on a worker thread or synchronously on the caller
+     *       thread when CSVFormat::threading(false) is active. Only one read_csv()
+     *       invocation should be active at a time.
+     *
+     * @see csv::internals::CSVReadScheduler
+     * @see CSVReader::read_row()
+     */
+    
+#if CSV_EXCEPTIONS_ENABLED
+    
+#endif
+#ifdef _MSC_VER
+#pragma endregion Worker reading methods
+#endif
+
+#if CSV_EXCEPTIONS_ENABLED
     /** Return an iterator to the first row in the reader */
-    CSV_INLINE CSVReader::iterator CSVReader::begin() {
-        CSVRow row;
-        if (!this->read_row(row)) {
-            return this->end();
-        }
-        return CSVReader::iterator(this, std::move(row));
-    }
-
+    
     /** A placeholder for the imaginary past-the-end row in a CSV.
      *  Attempting to dereference this iterator is undefined.
      */
-    CSV_INLINE CSV_CONST CSVReader::iterator CSVReader::end() const noexcept {
+    CSV_CONST inline CSVReader::iterator CSVReader::end() const noexcept {
         return CSVReader::iterator();
-    }
-
-    CSV_INLINE CSVReader::iterator::iterator(CSVReader* _daddy, CSVRow&& _row) :
-        daddy(_daddy) {
-        row = std::move(_row);
     }
 
     /** Advance the iterator by one row. If this CSVReader has an
@@ -14354,41 +17732,121 @@ namespace csv {
      *  @note This iterator does **not** block the thread responsible for parsing CSV.
      *
      */
-    CSV_INLINE CSVReader::iterator& CSVReader::iterator::operator++() {
-        if (!daddy->read_row(this->row)) {
-            this->daddy = nullptr; // this == end()
-        }
-
-        return *this;
-    }
-
+    
     /** Post-increment iterator */
-    CSV_INLINE CSVReader::iterator CSVReader::iterator::operator++(int) {
-        auto temp = *this;
-        if (!daddy->read_row(this->row)) {
-            this->daddy = nullptr; // this == end()
-        }
+    
+#endif
 
-        return temp;
+    namespace internals {
+        
     }
-}
 
+#if CSV_EXCEPTIONS_ENABLED
+    inline CSVField CSVRow::operator[](size_t n) const {
+        if (n >= this->size()) throw std::runtime_error(internals::CSV_ERROR_INDEX_OUT_OF_BOUNDS);
+        return this->make_field(n, this->data);
+    }
+#endif
 
-namespace csv {
-    CSV_INLINE std::unordered_map<std::string, DataType> csv_data_types(CSVReader& reader) {
+#if CSV_EXCEPTIONS_ENABLED
+    
+#endif
+    inline CSVField CSVRow::try_field(size_t index, CSVError& error) const {
+        error.clear();
+        if (index >= size()) {
+            internals::fail_static(error, CSVErrorCode::IndexOutOfBounds, internals::CSV_ERROR_INDEX_OUT_OF_BOUNDS);
+            return CSVField(csv::string_view());
+        }
+        return make_field(index, data);
+    }
+
+    inline CSVField CSVRow::try_field(csv::string_view name, CSVError& error) const {
+        error.clear();
+        const int index = data && data->col_names ? data->col_names->index_of(name) : CSV_NOT_FOUND;
+        if (index == CSV_NOT_FOUND) {
+            internals::fail(error, CSVErrorCode::ColumnNotFound,
+                internals::make_prefixed_message(internals::ERROR_COLUMN_NOT_FOUND, name));
+            return CSVField(csv::string_view());
+        }
+        return try_field(static_cast<size_t>(index), error);
+    }
+
+    inline std::unordered_map<std::string, std::string> CSVRow::to_unordered_map_impl(
+        const std::vector<std::string>* subset, CSVError& error) const {
+        error.clear();
+        std::unordered_map<std::string, std::string> out;
+        if (!subset) {
+            if (!data || !data->col_names) return out;
+            const auto& names = get_col_names();
+            if (names.size() < size()) {
+                internals::fail_static(error, CSVErrorCode::IndexOutOfBounds, internals::ERROR_COLUMN_INDEX_OUT_OF_BOUNDS);
+                return out;
+            }
+            out.reserve(size());
+            for (size_t i = 0; i < size(); ++i) out[names[i]] = std::string(get_field(i));
+        } else {
+            out.reserve(subset->size());
+            for (const auto& name : *subset) {
+                auto field = try_field(name, error);
+                if (error) return out;
+                out[name] = std::string(field.get_sv());
+            }
+        }
+        return out;
+    }
+
+#if CSV_EXCEPTIONS_ENABLED
+    
+#endif
+
+#ifdef _MSC_VER
+#pragma region CSVRow Iterator
+#endif
+    
+    CSV_NON_NULL(2)
+    inline CSVRow::iterator::iterator(const CSVRow* row, difference_type index) noexcept
+        : data_(row->data), data_start_(row->data_start),
+          fields_start_(row->fields_start), row_length_(row->row_length), index_(index) {}
+
+#ifdef _MSC_VER
+#pragma endregion CSVRow Iterator
+#endif
+
+#if CSV_EXCEPTIONS_ENABLED
+    
+#endif
+
+    inline std::unordered_map<std::string, DataType> try_csv_data_types(CSVReader& reader, CSVError& error) {
+        error.clear();
         std::unordered_map<std::string, DataType> csv_dtypes;
         const auto col_names = reader.get_col_names();
         std::vector<std::unordered_map<DataType, size_t>> type_counts(col_names.size());
         constexpr size_t TYPE_CHUNK_SIZE = 5000;
 
-        chunk_parallel_apply(reader, type_counts,
-            [](DataFrame<>::column_type column, std::unordered_map<DataType, size_t>& counts) {
-                for (size_t row_index = 0; row_index < column.size(); ++row_index) {
-                    counts[internals::data_type(column.get_sv(row_index))]++;
+        // A task owns one column's count map and error slot. Collect errors only
+        // after the executor joins, rather than racing on the caller's error.
+        std::vector<CSVError> column_errors(col_names.size());
+        auto count_column = [&column_errors](DataFrame<>::column_type column,
+            std::unordered_map<DataType, size_t>& counts) {
+            CSVError& column_error = column_errors[column.index()];
+            for (size_t row_index = 0; row_index < column.size(); ++row_index) {
+                const auto value = column.try_get_sv(row_index, column_error);
+                if (column_error) return;
+                counts[internals::data_type(value)]++;
+            }
+        };
+        DataFrameExecutor executor;
+        if (!internals::try_for_each_csv_chunk(reader,
+            [&executor, &type_counts, &column_errors, &count_column](DataFrame<>& batch, CSVError& failure) {
+                if (!batch.try_column_parallel_apply(executor, type_counts, count_column, failure)) return false;
+                for (const auto& column_error : column_errors) {
+                    if (column_error) {
+                        failure = column_error;
+                        return false;
+                    }
                 }
-            },
-            TYPE_CHUNK_SIZE
-        );
+                return true;
+            }, error, TYPE_CHUNK_SIZE)) return {};
 
         for (size_t i = 0; i < col_names.size(); i++) {
             auto& col = type_counts[i];
@@ -14416,810 +17874,36 @@ namespace csv {
 
         return csv_dtypes;
     }
-}
 
-/** @file
- *  @brief Defines functionality needed for basic CSV parsing
- */
-
-
-namespace csv {
-#ifdef _MSC_VER
-#pragma region Reading helpers
-#endif
-    CSV_INLINE bool CSVReader::check_for_rows() {
-        if (!this->records->empty()) return true;
-
-        if (this->read_scheduler_.wait_if_active(
-            [this] { return this->records->is_waitable(); },
-            [this] { this->records->wait(); }
-        )) {
-            return true;
-        }
-
-        this->read_scheduler_.join();
-        this->read_scheduler_.rethrow_exception_if_any();
-
-        if (this->parser->eof()) return false;
-
-        if (this->_read_requested && this->records->empty()) {
-            internals::throw_row_too_large_for_chunk(this->_chunk_size);
-        }
-
-        this->read_scheduler_.run(
-            [this] { this->read_csv(this->_chunk_size); },
-            [this] { this->records->notify_all(); }
-        );
-        this->read_scheduler_.rethrow_exception_if_any();
-        this->_read_requested = true;
-        return true;
-    }
-
-#ifdef _MSC_VER
-#pragma endregion Reading helpers
-#endif
-
-#ifdef _MSC_VER
-#pragma region Format and header helpers
-#endif
-    CSV_INLINE void CSVReader::init_parser(
-        std::unique_ptr<internals::parser::CSVParserDriverBase> parser_impl
-    ) {
-        auto resolved = parser_impl->get_resolved_format();
-        this->_format = resolved.format;
-        this->_chunk_size = this->_format.get_chunk_size();
-        this->n_cols = resolved.n_cols;
-
-        if (!this->_format.col_names.empty()) {
-            this->set_col_names(this->_format.col_names);
-        }
-
-        this->parser = std::move(parser_impl);
-        this->initial_read();
-    }
-
-    CSV_INLINE CSVFormat CSVReader::get_format() const {
-        CSVFormat new_format = this->_format;
-
-        // Since users are normally not allowed to set
-        // column names and header row simulatenously,
-        // we will set the backing variables directly here
-        new_format.col_names = this->col_names->get_col_names();
-        new_format.header = this->_format.header;
-
-        return new_format;
-    }
-
-    CSV_INLINE void CSVReader::trim_header() {
-        if (!this->header_trimmed) {
-            for (int i = 0; i <= this->_format.header && !this->records->empty(); i++) {
-                if (i == this->_format.header && this->col_names->empty()) {
-                    this->set_col_names(this->records->pop_front());
-                }
-                else {
-                    this->records->pop_front();
-                }
-            }
-
-            this->header_trimmed = true;
-        }
-    }
-
-    /** Install the active column names for this reader. */
-    CSV_INLINE void CSVReader::set_col_names(const std::vector<std::string>& names)
-    {
-        this->col_names->set_policy(this->_format.get_column_name_policy());
-        this->col_names->set_col_names(names);
-        this->n_cols = names.size();
-    }
-#ifdef _MSC_VER
-#pragma endregion Format and header helpers
-#endif
-
-#ifdef _MSC_VER
-#pragma region Reading helpers
-#endif
-    CSV_INLINE bool CSVReader::accept_row(CSVRow&& candidate, CSVRow* single_row, std::vector<CSVRow>* batch_rows) {
-        const auto policy = this->_format.variable_column_policy;
-        const size_t next_row_size = candidate.size();
-
-        if (policy == VariableColumnPolicy::KEEP_NON_EMPTY && next_row_size == 0) {
-            return false;
-        }
-
-        if (next_row_size != this->n_cols &&
-            (policy == VariableColumnPolicy::THROW || policy == VariableColumnPolicy::IGNORE_ROW)) {
-            if (policy == VariableColumnPolicy::THROW) {
-                if (candidate.size() < this->n_cols) {
-                    internals::throw_line_too_short(candidate.raw_str());
-                }
-
-                internals::throw_line_too_long(candidate.raw_str());
-            }
-
-            return false;
-        }
-
-        if (single_row != nullptr) {
-            *single_row = std::move(candidate);
-        } else if (batch_rows != nullptr) {
-            batch_rows->push_back(std::move(candidate));
-        } else {
-            return false;
-        }
-
-        this->_n_rows++;
-        this->_read_requested = false;
-        return true;
-    }
-
-    CSV_INLINE void CSVReader::drain_rows_into_chunk(std::vector<CSVRow>& out, size_t max_rows) {
-        std::vector<CSVRow> drained;
-        drained.reserve(max_rows - out.size());
-        this->records->drain_front(drained, max_rows - out.size());
-
-        for (size_t i = 0; i < drained.size(); ++i) {
-            this->accept_row(std::move(drained[i]), nullptr, &out);
-        }
-    }
-#ifdef _MSC_VER
-#pragma endregion Reading helpers
-#endif
-
-#ifdef _MSC_VER
-#pragma region Worker reading methods
-#endif
-
-    /**
-     * Read a chunk of CSV data.
-     *
-     * @note This method may run on a worker thread or synchronously on the caller
-     *       thread when CSVFormat::threading(false) is active. Only one read_csv()
-     *       invocation should be active at a time.
-     *
-     * @see csv::internals::CSVReadScheduler
-     * @see CSVReader::read_row()
-     */
-    CSV_INLINE bool CSVReader::read_csv(size_t bytes) {
-        // SCHEDULED READ FUNCTION: Runs asynchronously when runtime threading
-        // is enabled, or synchronously when CSVFormat::threading(false) is active.
-        //
-        // Threading model:
-        // 1. notify_all() - signals read_row() that worker is active
-        // 2. parser->next() - reads and parses bytes (10MB chunks)
-        // 3. kill_all() - signals read_row() that worker is done
-        //
-        // Exception handling: CSVReadScheduler catches exceptions and rethrows
-        // them on the consumer thread. Bug #282 fixed cases where worker
-        // exceptions were swallowed, causing std::terminate().
-        
-        // Tell read_row() to listen for CSV rows
-        this->records->notify_all();
-
-        try {
-            this->parser->set_output(*this->records);
-            this->parser->next(bytes);
-
-            if (!this->header_trimmed) {
-                this->trim_header();
-            }
-        }
-        catch (...) {
-            this->records->kill_all();
-            throw;
-        }
-
-        // Tell read_row() to stop waiting
-        this->records->kill_all();
-
-        return true;
-    }
-
-    CSV_INLINE bool CSVReader::read_row(CSVRow &row) {
-        while (this->check_for_rows()) {
-            if (this->records->empty())
-                continue;
-                
-            if (this->accept_row(this->records->pop_front(), &row, nullptr))
-                return true;
-        }
-
-        return false;
-    }
-
-    CSV_INLINE bool CSVReader::read_chunk(std::vector<CSVRow>& out, size_t max_rows) {
-        out.clear();
-
-        if (max_rows == 0) {
-            return false;
-        }
-
-        while (out.size() < max_rows) {
-            if (check_for_rows()) {
-                if (this->records->empty()) {
-                    continue;
-                }
-
-                const size_t before_size = out.size();
-                this->drain_rows_into_chunk(out, max_rows);
-
-                if (out.size() == before_size) {
-                    continue;
-                }
-            }
-            else return !out.empty();
-        }
-
-        return true;
-    }
-#ifdef _MSC_VER
-#pragma endregion Worker reading methods
-#endif
-}
-
-/** @file
- *  Defines the data type used for storing information about a CSV row
- */
-
-#include <cassert>
-#include <functional>
-
-namespace csv {
-    namespace internals {
-        CSV_INLINE csv::string_view get_trimmed(csv::string_view sv, const WhitespaceMap& ws_flags) noexcept
-        {
-            // Lazy trim only when requested
-            size_t start = 0;
-            while (start < sv.size() && ws_flags[sv[start] + CHAR_OFFSET]) {
-                ++start;
-            }
-
-            size_t end = sv.size();
-            while (end > start && ws_flags[sv[end - 1] + CHAR_OFFSET]) {
-                --end;
-            }
-
-            return sv.substr(start, end - start);
-        }
-    }
-
-    /** Return a CSVField object corrsponding to the nth value in the row.
-     *
-     *  @note This method performs bounds checking, and will throw an
-     *        `std::runtime_error` if n is invalid.
-     *
-     *  @complexity
-     *  Constant, by calling csv::CSVRow::get_csv::string_view()
-     *
-     */
-    CSV_INLINE CSVField CSVRow::operator[](size_t n) const {
-        return CSVField(this->get_field(n));
-    }
-
-    /** Retrieve a value by its associated column name. If the column
-     *  specified can't be round, a runtime error is thrown.
-     *
-     *  @complexity
-     *  Constant. This calls the other CSVRow::operator[]() after
-     *  converting column names into indices using a hash table.
-     */
-    CSV_INLINE CSVField CSVRow::operator[](csv::string_view col_name) const {
-        auto & col_names = this->data->col_names;
-        auto col_pos = col_names->index_of(col_name);
-        if (col_pos > -1) {
-            return this->operator[](col_pos);
-        }
-
-        internals::throw_column_not_found(col_name);
-    }
-    CSV_INLINE CSVRow::operator std::vector<std::string>() const {
-        std::vector<std::string> ret;
-        for (size_t i = 0; i < size(); i++)
-            ret.push_back(std::string(this->get_field(i)));
-
-        return ret;
-    }
-
-    CSV_INLINE csv::string_view CSVRow::raw_str() const noexcept {
-        if (!data) return csv::string_view();
-        const csv::string_view full = data->data;
-        if (data_start >= full.size()) return csv::string_view();
-
-        if (data_end != (std::numeric_limits<size_t>::max)()
-            && data_end >= data_start
-            && data_end <= full.size()) {
-            return full.substr(data_start, data_end - data_start);
-        }
-
-        const size_t end = full.find('\n', data_start);
-        const size_t len = (end == csv::string_view::npos)
-            ? (full.size() - data_start)
-            : (end - data_start);
-        return full.substr(data_start, len);
-    }
-
-    /** Build a map from column names to values for a given row. */
-    CSV_INLINE std::unordered_map<std::string, std::string> CSVRow::to_unordered_map() const {
-        std::unordered_map<std::string, std::string> row_map;
-        row_map.reserve(this->size());
-
-        for (size_t i = 0; i < this->size(); i++) {
-            auto col_name = (*this->data->col_names)[i];
-            row_map[col_name] = this->operator[](i).get<std::string>();
-        }
-
-        return row_map;
-    }
-
-    /** Build a map from a subset of column names to values for a given row. */
-    CSV_INLINE std::unordered_map<std::string, std::string> CSVRow::to_unordered_map(
-        const std::vector<std::string>& subset
-    ) const {
-        std::unordered_map<std::string, std::string> row_map;
-        row_map.reserve(subset.size());
-
-        for (const auto& col_name : subset)
-            row_map[col_name] = this->operator[](col_name).get<std::string>();
-
-        return row_map;
-    }
-
-    CSV_INLINE csv::string_view CSVRow::get_field(size_t index) const
-    {
-        return this->get_field_impl(index, this->data);
-    }
-
-    CSV_INLINE csv::string_view CSVRow::get_field_safe(size_t index, internals::RawCSVDataPtr _data) const
-    {
-        return this->get_field_impl(index, _data);
-    }
-
-    CSV_INLINE bool CSVField::try_parse_decimal(long double& dVal, const char decimalSymbol) {
-        // If field has already been parsed to empty, no need to do it aagin:
-        if (this->type_ == DataType::CSV_NULL)
-                    return false;
-
-        if (this->type_ == DataType::UNKNOWN)
-            this->get_value();
-
-        if (this->type_ == DataType::CSV_NULL)
-            return false;
-
-        if (this->type_ == DataType::CSV_STRING || this->type_ == DataType::CSV_DOUBLE) {
-            double parsed_value = 0;
-            if (!classify_scalar::parse_float(this->sv.data(), this->sv.data() + this->sv.size(), parsed_value, decimalSymbol)) {
-                if (this->type_ == DataType::CSV_DOUBLE)
-                    this->type_ = DataType::CSV_STRING;
-                return false;
-            }
-
-            this->cache_parsed_value(DataType::CSV_DOUBLE, parsed_value);
-        }
-
-        // Integral types are not affected by decimalSymbol and need not be parsed again
-
-        // Either we already had an integral type before, or we we just got any numeric type now.
-        if (this->type_ >= DataType::CSV_INT8 && this->type_ <= DataType::CSV_DOUBLE) {
-            dVal = this->numeric_value_as_long_double();
-            return true;
-        }
-
-        // CSV_NULL or CSV_STRING, not numeric
-        return false;
-    }
-
-    CSV_INLINE bool CSVField::try_parse_timestamp(std::uint64_t& out) noexcept {
-        if (this->type_ == DataType::UNKNOWN)
-            this->get_value();
-
-        if (this->type_ == DataType::CSV_TIMESTAMP) {
-            out = this->value_.timestamp;
-            return true;
-        }
-
-        if (this->stores_integral() && this->value_.integer >= 0) {
-            out = static_cast<std::uint64_t>(this->value_.integer);
-            return true;
-        }
-
-        return false;
-    }
-
-#ifdef _MSC_VER
-#pragma region CSVRow Iterator
-#endif
-    /** Return an iterator pointing to the first field. */
-    CSV_INLINE CSVRow::iterator CSVRow::begin() const {
-        return CSVRow::iterator(this, 0);
-    }
-
-    /** Return an iterator pointing to just after the end of the CSVRow.
-     *
-     *  @warning Attempting to dereference the end iterator results
-     *           in dereferencing a null pointer.
-     */
-    CSV_INLINE CSVRow::iterator CSVRow::end() const noexcept {
-        return CSVRow::iterator(this, (int)this->size());
-    }
-
-    CSV_INLINE CSVRow::reverse_iterator CSVRow::rbegin() const noexcept {
-        return std::reverse_iterator<CSVRow::iterator>(this->end());
-    }
-
-    CSV_INLINE CSVRow::reverse_iterator CSVRow::rend() const {
-        return std::reverse_iterator<CSVRow::iterator>(this->begin());
-    }
-
-    CSV_INLINE CSV_NON_NULL(2)
-    CSVRow::iterator::iterator(const CSVRow* _reader, int _i)
-        : daddy(_reader), data(_reader->data), i(_i) {
-        if (_i < (int)this->daddy->size())
-            this->field = std::make_shared<CSVField>(
-                CSVField(this->daddy->get_field_safe(_i, this->data)));
-        else
-            this->field = nullptr;
-    }
-
-    CSV_INLINE CSVRow::iterator::reference CSVRow::iterator::operator*() const {
-        return *(this->field.get());
-    }
-
-    CSV_INLINE CSVRow::iterator::pointer CSVRow::iterator::operator->() const {
-        return this->field;
-    }
-
-    CSV_INLINE CSVRow::iterator& CSVRow::iterator::operator++() {
-        // Pre-increment operator
-        this->i++;
-        if (this->i < (int)this->daddy->size())
-            this->field = std::make_shared<CSVField>(
-                CSVField(this->daddy->get_field_safe(i, this->data)));
-        else // Reached the end of row
-            this->field = nullptr;
-        return *this;
-    }
-
-    CSV_INLINE CSVRow::iterator CSVRow::iterator::operator++(int) {
-        // Post-increment operator
-        auto temp = *this;
-        this->operator++();
-        return temp;
-    }
-
-    CSV_INLINE CSVRow::iterator& CSVRow::iterator::operator--() {
-        // Pre-decrement operator
-        this->i--;
-        this->field = std::make_shared<CSVField>(
-            CSVField(this->daddy->get_field_safe(this->i, this->data)));
-        return *this;
-    }
-
-    CSV_INLINE CSVRow::iterator CSVRow::iterator::operator--(int) {
-        // Post-decrement operator
-        auto temp = *this;
-        this->operator--();
-        return temp;
-    }
-    
-    CSV_INLINE CSVRow::iterator CSVRow::iterator::operator+(difference_type n) const {
-        // Allows for iterator arithmetic
-        return CSVRow::iterator(this->daddy, i + (int)n);
-    }
-
-    CSV_INLINE CSVRow::iterator CSVRow::iterator::operator-(difference_type n) const {
-        // Allows for iterator arithmetic
-        return CSVRow::iterator::operator+(-n);
-    }
-
-    CSV_INLINE CSVRow::iterator& CSVRow::iterator::operator+=(difference_type n) {
-        *this = *this + n;
-        return *this;
-    }
-
-    CSV_INLINE CSVRow::iterator& CSVRow::iterator::operator-=(difference_type n) {
-        *this = *this - n;
-        return *this;
-    }
-
-    CSV_INLINE CSVRow::iterator::difference_type CSVRow::iterator::operator-(const iterator& other) const noexcept {
-        return this->i - other.i;
-    }
-#ifdef _MSC_VER
-#pragma endregion CSVRow Iterator
-#endif
-}
-
-#include <algorithm>
-#include <cctype>
-
-namespace csv {
-    namespace internals {
-        CSV_INLINE const std::vector<std::string>& ColNames::get_col_names() const noexcept {
-            return this->col_names;
-        }
-
-        CSV_INLINE void ColNames::set_col_names(const std::vector<std::string>& cnames) {
-            this->col_names = cnames;
-            this->col_pos.clear();
-
-            for (size_t i = 0; i < cnames.size(); i++) {
-                if (this->_policy == csv::ColumnNamePolicy::CASE_INSENSITIVE) {
-                    // For case-insensitive lookup, cache a lowercase version
-                    // of the column name in the map
-                    std::string lower(cnames[i]);
-                    std::transform(lower.begin(), lower.end(), lower.begin(),
-                        [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-                    this->col_pos[lower] = i;
-                } else {
-                    this->col_pos[cnames[i]] = i;
-                }
-            }
-        }
-
-        CSV_INLINE int ColNames::index_of(csv::string_view col_name) const {
-            if (this->_policy == csv::ColumnNamePolicy::CASE_INSENSITIVE) {
-                std::string lower(col_name);
-                std::transform(lower.begin(), lower.end(), lower.begin(),
-                    [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-                auto pos = this->col_pos.find(lower);
-                return (pos != this->col_pos.end()) ? (int)pos->second : CSV_NOT_FOUND;
-            }
-
-            auto pos = this->col_pos.find(std::string(col_name));
-            return (pos != this->col_pos.end()) ? (int)pos->second : CSV_NOT_FOUND;
-        }
-
-        CSV_INLINE void ColNames::set_policy(csv::ColumnNamePolicy policy) {
-            this->_policy = policy;
-        }
-
-        CSV_INLINE size_t ColNames::size() const noexcept {
-            return this->col_names.size();
-        }
-
-        CSV_INLINE const std::string& ColNames::operator[](size_t i) const {
-            if (i >= this->col_names.size())
-                throw_column_index_out_of_bounds();
-
-            return this->col_names[i];
-        }
-    }
-}
-
-
-#include <unordered_map>
-#include <vector>
-
-namespace csv {
-    namespace internals {
-        namespace parser {
-        CSV_INLINE GuessScore calculate_score(csv::string_view head, const CSVFormat& format) {
-            // Frequency counter of row length
-            std::unordered_map<size_t, size_t> row_tally = { { 0, 0 } };
-
-            // Map row lengths to row num where they first occurred
-            std::unordered_map<size_t, size_t> row_when = { { 0, 0 } };
-
-            // Parse the CSV using the low-level constructor that takes pre-built flag
-            // tables — bypasses format resolution entirely and avoids recursion back
-            // into guess_format.
-            std::vector<CSVRow> rows;
-
-            const auto parse_flags = format.is_quoting_enabled()
-                ? make_parse_flags(format.get_delim(), format.get_quote_char())
-                : make_parse_flags(format.get_delim());
-            const auto ws_flags = make_ws_flags(format.get_trim_chars());
-            auto head_owner = std::make_shared<std::string>(std::string(head));
-            CSVParserCore<std::vector<CSVRow>> parser(parse_flags, ws_flags);
-            parser.parse_chunk(*head_owner, head_owner, rows);
-            parser.end_feed();
-
-            for (size_t i = 0; i < rows.size(); i++) {
-                auto& row = rows[i];
-
-                // Ignore zero-length rows
-                if (row.size() > 0) {
-                    if (row_tally.find(row.size()) != row_tally.end()) {
-                        row_tally[row.size()]++;
-                    }
-                    else {
-                        row_tally[row.size()] = 1;
-                        row_when[row.size()] = i;
-                    }
-                }
-            }
-
-            double final_score = 0;
-            size_t header_row = 0;
-            size_t mode_row_length = 0;
-
-            // Final score is equal to the largest row size times rows of that size.
-            for (auto& pair : row_tally) {
-                const size_t row_size = pair.first;
-                const size_t row_count = pair.second;
-                const double score = (double)(row_size * row_count);
-                if (score > final_score) {
-                    final_score = score;
-                    mode_row_length = row_size;
-                    header_row = row_when[row_size];
-                }
-            }
-
-            // Heuristic: If first row has >= columns than mode, use it as header.
-            size_t first_row_length = rows.size() > 0 ? rows[0].size() : 0;
-            if (first_row_length >= mode_row_length && first_row_length > 0) {
-                header_row = 0;
-            }
-
-            return { header_row, mode_row_length, final_score };
-        }
-
-        CSV_INLINE CSVGuessResult guess_format(csv::string_view head, const std::vector<char>& delims) {
-            /** For each delimiter, find out which row length was most common (mode).
-             *  The delimiter with the highest score (row_length * count) wins.
-             *
-             *  Header detection: If first row has >= columns than mode, use row 0.
-             *  Otherwise use the first row with the mode length.
-             */
-            CSVFormat format;
-            size_t max_score = 0;
-            size_t header = 0;
-            size_t n_cols = 0;
-            char current_delim = delims[0];
-
-            for (char cand_delim : delims) {
-                auto result = calculate_score(head, format.delimiter(cand_delim));
-
-                if ((size_t)result.score > max_score) {
-                    max_score = (size_t)result.score;
-                    current_delim = cand_delim;
-                    header = result.header;
-                    n_cols = result.mode_row_length;
-                }
-            }
-
-            return { current_delim, (int)header, n_cols };
-        }
-        }
-    }
-}
-
-
-#if !defined(__EMSCRIPTEN__)
-namespace csv {
-    namespace internals {
-        namespace parser {
-        CSV_INLINE MmapParser::MmapParser(
-            csv::string_view filename,
-            const CSVFormat& format,
-            const ColNamesPtr& col_names
-        ) : CSVParserDriverBase(format, col_names) {
-            this->_filename = filename.data();
-            auto head_and_size = get_csv_head_mmap(filename);
-            this->head_ = std::move(head_and_size.first);
-            this->source_size_ = head_and_size.second;
-            this->resolve_format_from_head(format);
-
-            this->parse_orchestrator_ = make_csv_parse_orchestrator(
-                this->parse_flags_,
-                this->whitespace_flags(),
-                format,
-                this->source_size_,
-                col_names,
-                true
-            );
-        }
-
-        CSV_INLINE MmapParser::~MmapParser() = default;
-
-        CSV_INLINE void MmapParser::finalize_loaded_chunk(
-            csv::string_view chunk,
-            std::shared_ptr<void> owner,
-            size_t length,
-            size_t chunk_size
-        ) {
-            const size_t base_offset = this->mmap_pos - length;
-            const bool source_exhausted = this->mmap_pos == this->source_size_;
-            CSVParseWindowResult result = this->parse_orchestrator_->parse_window(
-                chunk,
-                std::move(owner),
-                base_offset,
-                chunk_size,
-                source_exhausted,
-                this->output()
-            );
-
-            if (source_exhausted) {
-                this->eof_ = true;
-            }
-
-            this->mmap_pos -= (length - result.complete_prefix_length);
-        }
-
-        CSV_INLINE size_t MmapParser::read_window_size(size_t chunk_size) const noexcept {
-            return this->parse_orchestrator_
-                ? this->parse_orchestrator_->read_window_size(chunk_size)
-                : chunk_size;
-        }
-
-        CSV_INLINE void MmapParser::next(size_t bytes = CSV_CHUNK_SIZE_DEFAULT) {
-            // CRITICAL SECTION: Chunk Transition Logic
-            // This function reads 10MB chunks and must correctly handle fields that span
-            // chunk boundaries. The 'remainder' calculation below ensures partial fields
-            // are preserved for the next chunk.
-            //
-            // Bug #280: Field corruption occurred here when chunk transitions incorrectly
-            // split multi-byte characters or field boundaries.
-
-            // Reuse the pre-read head buffer (if any) as the first chunk.
-            // This avoids re-reading the same bytes that were already consumed
-            // for delimiter/header guessing.
-            if (!head_.empty()) {
-                auto head_owner = std::make_shared<std::string>(std::move(head_));
-                const size_t length = head_owner->size();
-                this->mmap_pos += length;
-
-                this->finalize_loaded_chunk(*head_owner, head_owner, length, bytes);
-                return;
-            }
-
-            // Create memory map
-            const size_t offset = this->mmap_pos;
-            const size_t remaining = (offset < this->source_size_)
-                ? (this->source_size_ - offset)
-                : 0;
-            const size_t length = std::min(remaining, this->read_window_size(bytes));
-            if (length == 0) {
-                // No more data to read; mark EOF and end feed
-                // (Prevent exception on empty mmap as reported by #267)
-                this->eof_ = true;
-                this->end_feed();
-                return;
-            }
-
-            std::error_code error;
-            auto mmap = mio::make_mmap_source(this->_filename, offset, length, error);
-            if (error) {
-                throw_mmap_failure(error, this->_filename, offset, length);
-            }
-            auto mmap_owner = std::make_shared<mio::basic_mmap_source<char>>(std::move(mmap));
-            this->mmap_pos += length;
-
-            auto mmap_ptr = mmap_owner.get();
-
-            // Create string view
-            csv::string_view chunk(mmap_ptr->data(), mmap_ptr->length());
-            this->finalize_loaded_chunk(chunk, mmap_owner, length, bytes);
-        }
-        }
-    }
-}
-#endif
-
-
-#include <system_error>
-
-namespace csv {
     namespace internals {
         namespace parser {
 #if defined(__EMSCRIPTEN__)
         // Opens the file and delegates to the template overload to avoid duplicating the read/resize logic.
-        CSV_INLINE std::string get_csv_head_stream(csv::string_view filename) {
+        inline std::string get_csv_head_stream(csv::string_view filename, CSVError& error) {
+            error.clear();
             std::ifstream infile(std::string(filename), std::ios::binary);
             if (!infile.is_open()) {
-                throw_cannot_open_file(filename);
+                fail(error, CSVErrorCode::OpenFailed, make_prefixed_message(ERROR_CANNOT_OPEN_FILE, filename));
+                return {};
             }
-            return get_csv_head_stream(infile);
+            return get_csv_head_stream(infile, error);
         }
 #endif
 
 #if !defined(__EMSCRIPTEN__)
-        CSV_INLINE std::pair<std::string, size_t> get_csv_head_mmap(csv::string_view filename) {
-            const size_t bytes = 500000;
+        inline std::pair<std::string, size_t> get_csv_head_mmap(csv::string_view filename, CSVError& failure) {
+            failure.clear();
+            const size_t bytes = CSV_HEAD_PREVIEW_SIZE;
             std::error_code error;
             auto mmap = mio::make_mmap_source(std::string(filename), 0, mio::map_entire_file, error);
             if (error) {
-                throw_cannot_open_file(filename);
+                // Native mapping APIs reject zero-length files. Confirm an empty,
+                // readable file before treating that failure as ordinary EOF.
+                std::ifstream input(std::string(filename), std::ios::binary | std::ios::ate);
+                if (input && input.tellg() == std::streampos(0)) return {};
+                fail(failure, CSVErrorCode::OpenFailed, make_prefixed_message(ERROR_CANNOT_OPEN_FILE, filename));
+                failure.system = error;
+                return {};
             }
             const size_t file_size = mmap.size();
             const size_t length = std::min(file_size, bytes);
@@ -15227,16 +17911,10 @@ namespace csv {
         }
 #endif
 
-        CSV_INLINE std::string get_csv_head(csv::string_view filename) {
-#if defined(__EMSCRIPTEN__)
-            return get_csv_head_stream(filename);
-#else
-            return get_csv_head_mmap(filename).first;
-#endif
-        }
         }
 
-        CSV_INLINE size_t get_bom_skip_or_throw(csv::string_view data, bool& utf8_bom) {
+        inline size_t get_bom_skip(csv::string_view data, bool& utf8_bom, CSVError& error) {
+            error.clear();
             utf8_bom = false;
 
             if (data.size() >= 4) {
@@ -15247,7 +17925,8 @@ namespace csv {
 
                 if ((b0 == 0xFF && b1 == 0xFE && b2 == 0x00 && b3 == 0x00)
                     || (b0 == 0x00 && b1 == 0x00 && b2 == 0xFE && b3 == 0xFF)) {
-                    throw_unsupported_encoding("UTF-32");
+                    fail_static(error, CSVErrorCode::UnsupportedEncoding, ERROR_UNSUPPORTED_UTF32);
+                    return 0;
                 }
             }
 
@@ -15267,7 +17946,8 @@ namespace csv {
                 const unsigned char b1 = static_cast<unsigned char>(data[1]);
 
                 if ((b0 == 0xFF && b1 == 0xFE) || (b0 == 0xFE && b1 == 0xFF)) {
-                    throw_unsupported_encoding("UTF-16");
+                    fail_static(error, CSVErrorCode::UnsupportedEncoding, ERROR_UNSUPPORTED_UTF16);
+                    return 0;
                 }
             }
 
@@ -15280,62 +17960,88 @@ namespace csv {
 #pragma region CSVParserDriverBase
 #endif
 
-        CSV_INLINE CSVParserDriverBase::CSVParserDriverBase(
-            const CSVFormat& source_format,
-            const ColNamesPtr& col_names
-        ) : CSVParserCore<>(source_format, col_names) {}
-
-        CSV_INLINE void CSVParserDriverBase::resolve_format_from_head(const CSVFormat& source_format) {
-            auto head = this->get_csv_head();
-
-            ResolvedFormat resolved;
-            resolved.format = source_format;
-
-            const bool infer_delimiter = source_format.guess_delim();
-            const bool infer_header = !source_format.header_explicitly_set_
-                && (infer_delimiter || !source_format.col_names_explicitly_set_);
-            const bool infer_n_cols = (source_format.get_header() < 0 && source_format.get_col_names().empty());
-
-            if (infer_delimiter || infer_header || infer_n_cols) {
-                auto guess_result = guess_format(head, source_format.get_possible_delims());
-                if (infer_delimiter) {
-                    resolved.format.delimiter(guess_result.delim);
-                }
-
-                if (infer_header) {
-                    // Inferred header should not clear user-provided column names.
-                    resolved.format.header = guess_result.header_row;
-                }
-
-                resolved.n_cols = guess_result.n_cols;
-            }
-
-            if (resolved.format.no_quote) {
-                this->set_parse_flags(
-                    make_parse_flags(resolved.format.get_delim()),
-                    resolved.format.get_delim(),
-                    resolved.format.get_delim()
-                );
-            }
-            else {
-                this->set_parse_flags(
-                    make_parse_flags(resolved.format.get_delim(), resolved.format.quote_char),
-                    resolved.format.get_delim(),
-                    resolved.format.quote_char
-                );
-            }
-
-            this->format = resolved;
-        }
 #ifdef _MSC_VER
 #pragma endregion
 #endif
+        
         }
     }
 }
 
+#if !defined(__EMSCRIPTEN__)
+namespace csv {
+    namespace internals {
+        namespace parser {
+        
+        inline MmapParser::~MmapParser() = default;
 
+        inline void MmapParser::next(size_t bytes = CSV_CHUNK_SIZE_DEFAULT) {
+            if (error_) return;
+            // CRITICAL SECTION: Chunk Transition Logic
+            // This function reads 10MB chunks and must correctly handle fields that span
+            // chunk boundaries. The 'remainder' calculation below ensures partial fields
+            // are preserved for the next chunk.
+            //
+            // Bug #280: Field corruption occurred here when chunk transitions incorrectly
+            // split multi-byte characters or field boundaries.
 
+            // Reuse the pre-read head buffer (if any) as the first chunk.
+            // This avoids re-reading the same bytes that were already consumed
+            // for delimiter/header guessing.
+            if (!head_.empty()) {
+                auto head_owner = std::make_shared<std::string>(std::move(head_));
+                const size_t length = head_owner->size();
+                this->mmap_pos += length;
+
+                const bool completed_row = this->finalize_loaded_chunk(*head_owner, head_owner, length, bytes);
+
+                // Issue #337: The head is capped at 500KB regardless of chunk_size,
+                // so it may end before the first row does. Only in that case fall
+                // through and map a full read window from the rewound position;
+                // otherwise return so construction doesn't parse an extra window
+                // (CSVReader::initial_read() keeps reading if the header row is
+                // still pending). Ask the parse result rather than comparing
+                // positions: a skipped UTF-8 BOM advances mmap_pos even when no
+                // row completed.
+                if (error_ || this->eof_ || completed_row) {
+                    return;
+                }
+            }
+
+            // Create memory map
+            const size_t offset = this->mmap_pos;
+            const size_t remaining = (offset < this->source_size_)
+                ? (this->source_size_ - offset)
+                : 0;
+            const size_t length = std::min(remaining, this->read_window_size(bytes));
+            if (length == 0) {
+                // No more data to read; mark EOF and end feed
+                // (Prevent exception on empty mmap as reported by #267)
+                this->eof_ = true;
+                this->end_feed();
+                return;
+            }
+
+            std::error_code error;
+            auto mmap = mio::make_mmap_source(this->_filename, offset, length, error);
+            if (error) {
+                fail(error_, CSVErrorCode::MappingFailed,
+                    make_mmap_failure_message(this->_filename, offset, length));
+                error_.system = error;
+                return;
+            }
+            auto mmap_owner = std::make_shared<mio::basic_mmap_source<char>>(std::move(mmap));
+            this->mmap_pos += length;
+
+            auto mmap_ptr = mmap_owner.get();
+
+            // Create string view
+            csv::string_view chunk(mmap_ptr->data(), mmap_ptr->length());
+            this->finalize_loaded_chunk(chunk, mmap_owner, length, bytes);
+        }
+        }
+    }
+}
 #endif
 
-
+#endif

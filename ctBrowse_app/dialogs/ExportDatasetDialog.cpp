@@ -14,7 +14,10 @@ namespace ctb::app
       {
          assert(checklist && "invalid wxCheckListBox* is nullptr");
       }
+
    }   // namespace
+
+
    ExportDatasetDialog::ExportDatasetDialog(wxWindow* parent, DatasetPtr dataset)
       : wxDialog{
            parent,
@@ -24,40 +27,26 @@ namespace ctb::app
            wxDefaultSize,
            wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER
    },
-        m_dataset_props{ dataset ? PropSet{ std::from_range, dataset->getAvailableFields() } : PropSet{} },
-        m_dataset_name{ dataset ? dataset->getCollectionName() : std::string{ "Dataset Export" } },
-        m_target_path{ ctb::format("{}/{}.{}",   //
-                                   wxGetApp().getDataFolder(AppFolder::Exports).generic_string(),
-                                   m_dataset_name,
-                                   DEFAULT_EXTENSION) }
+        m_export_options{ dataset ? getDefaultExportOptions(dataset) : CtDatasetExportOptions{} },
+        m_dataset_props{ dataset ? PropSet{ std::from_range, dataset->getAvailableFields() } : PropSet{} }
+
    {
-      loadDefaults();
       init();
    }
 
-
-   void ExportDatasetDialog::selectProperties(std::span<CtProp> props)
-   {
-      m_selected_props = props | rng::to<std::set>();
-   }
-
-   void ExportDatasetDialog::setTargetFilePath(std::string_view path)
-   {
-      m_target_path = path;
-   }
 
    bool ExportDatasetDialog::TransferDataToWindow()
    {
       wxWindowUpdateLocker lock_refresh{ this };
 
       // handle transfer for non-validator members before calling base.
-      m_path_text_ctl->SetValue(m_target_path.generic_string());
+      m_path_text_ctl->SetValue(m_export_options.target_path.c_str());
 
       rng::for_each(vws::iota(0u, m_checklist_ctl->GetCount()),
                     [this](unsigned int idx)
                     {
                        auto prop_data = clientDataToProp(idx);
-                       m_checklist_ctl->Check(idx, m_selected_props.contains(prop_data));
+                       m_checklist_ctl->Check(idx, m_export_options.props_to_export.contains(prop_data));
                     });
 
       return wxDialog::TransferDataToWindow();
@@ -99,10 +88,10 @@ namespace ctb::app
       }
 
       // radio group label and option buttons
-      dlg_sizer->AddSpacer(SPACER_HEIGHT);
-      auto choices = enum_names<DataSelection> | vws::transform(&wxFromSV) | rng::to<std::vector>();
-      auto* radio_box_ctl = new wxRadioBox{ this, wxID_ANY, LBL_DATA_OPTIONS, wxDefaultPosition, wxDefaultSize, static_cast<int>(choices.size()), choices.data(), 0, wxRA_SPECIFY_COLS}; 
-      dlg_sizer->Add(radio_box_ctl, wxSizerFlags{}.Expand().DoubleHorzBorder());
+      //dlg_sizer->AddSpacer(SPACER_HEIGHT);
+      //auto choices = enum_names<DataSelection> | vws::transform(&wxFromSV) | rng::to<std::vector>();
+      //auto* radio_box_ctl = new wxRadioBox{ this, wxID_ANY, LBL_DATA_OPTIONS, wxDefaultPosition, wxDefaultSize, static_cast<int>(choices.size()), choices.data(), 0, wxRA_SPECIFY_COLS}; 
+      //dlg_sizer->Add(radio_box_ctl, wxSizerFlags{}.Expand().DoubleHorzBorder());
 
       // target path label
       auto* static_text = new wxStaticText(this, wxID_ANY, constants::LBL_TARGET_FILE_PATH);
@@ -113,7 +102,7 @@ namespace ctb::app
       dlg_sizer->Add(target_path_sizer, wxSizerFlags{}.Border().Expand());
 
       // Textbox for target file path.
-      m_path_text_ctl = new wxTextCtrl(this, wxID_ANY, targetFilePath().c_str());
+      m_path_text_ctl = new wxTextCtrl(this, wxID_ANY, m_export_options.target_path.c_str());
       m_path_text_ctl->SetMinSize(FromDIP(wxSize{ PATH_CTL_MIN_WIDTH, -1 }));
       target_path_sizer->Add(m_path_text_ctl, wxSizerFlags{1}.Border(wxLEFT|wxBOTTOM));
 
@@ -138,7 +127,6 @@ namespace ctb::app
       Bind(wxEVT_UPDATE_UI, &ExportDatasetDialog::onOkUpdateUI, this, wxID_OK);
       Bind(wxEVT_BUTTON, &ExportDatasetDialog::onOkClicked, this, wxID_OK);
       browse_btn_ctl->Bind(wxEVT_BUTTON, &ExportDatasetDialog::onBrowseClicked, this);
-      browse_btn_ctl->Bind(wxEVT_UPDATE_UI, &ExportDatasetDialog::onBrowseUpdateUI, this);
    }
 
 
@@ -149,7 +137,7 @@ namespace ctb::app
          TransferDataFromWindow(); // for the checkbox validator, we retrieve the other props manually.
 
          if (m_save_default_flag)
-            saveDefaults();
+            saveDefaultExportOptions(m_export_options);
 
          event.Skip();
       }
@@ -169,7 +157,6 @@ namespace ctb::app
                                         {
                                            return m_checklist_ctl->IsChecked(i);
                                         });
-
         
          event.Enable(any_checked and !m_path_text_ctl->IsEmpty());
       }
@@ -191,10 +178,10 @@ namespace ctb::app
          // don't care 
       }
       wxFileDialog dialog{ this,
-                           ctb::format(constants::FMT_EXPORT_DATASET_TITLE, m_dataset_name),
-                           m_target_path.parent_path().generic_string(),
-                           m_target_path.filename().c_str(),
-                           ctb::format("{0} (*.{1})|*.{1}|All files (*.*)|*.*", DEFAULT_EXTENSION_NAME, DEFAULT_EXTENSION).c_str(),
+                           ctb::format(constants::FMT_EXPORT_DATASET_TITLE, m_export_options.collection_name),
+                           m_export_options.target_path.parent_path().generic_string(),
+                           m_export_options.target_path.filename().c_str(),
+                           ctb::format("{0} (*.{1})|*.{1}|All files (*.*)|*.*", CtDatasetExportOptions::DEFAULT_EXTENSION_NAME, CtDatasetExportOptions::DEFAULT_EXTENSION).c_str(),
                            wxFD_SAVE | wxFD_OVERWRITE_PROMPT };
 
       if (dialog.ShowModal() == wxID_CANCEL) return;
@@ -206,14 +193,10 @@ namespace ctb::app
    }
 
 
-   void ExportDatasetDialog::onBrowseUpdateUI(wxUpdateUIEvent& event)
-   {}
-
-
    void ExportDatasetDialog::getSelectedProps() noexcept(false)
    {
 
-      m_selected_props = vws::iota(0u, m_checklist_ctl->GetCount())
+      m_export_options.props_to_export = vws::iota(0u, m_checklist_ctl->GetCount())
                        | vws::filter(std::bind_front(&wxCheckListBox::IsChecked, m_checklist_ctl))
                        | vws::transform(
                             [this](unsigned int i)
@@ -222,7 +205,7 @@ namespace ctb::app
                             })
                        | std::ranges::to<std::set>();
 
-      if (m_selected_props.empty())
+      if (m_export_options.props_to_export.empty())
       {
          throw ctb::Error{ constants::ERROR_STR_NO_EXPORT_PROPS_SELECTED, Error::Category::GeneralError };
       }
@@ -240,21 +223,14 @@ namespace ctb::app
       if (!wxFileName::DirExists(parent_folder.c_str()))
          throw ctb::Error{ Error::Category::FileError, "Folder \"{}\" does not exist.",  parent_folder };
 
-      m_target_path = file_name.GetFullPath().utf8_string();
+      m_export_options.target_path = file_name.GetFullPath().utf8_string();
    }
 
-CtProp ExportDatasetDialog::clientDataToProp(unsigned int index)
-{
-   assert(m_checklist_ctl);
-   return static_cast<CtProp>(wxPtrToUInt(m_checklist_ctl->GetClientData(index)));
-}
+   CtProp ExportDatasetDialog::clientDataToProp(unsigned int index)
+   {
+      assert(m_checklist_ctl);
+      return static_cast<CtProp>(wxPtrToUInt(m_checklist_ctl->GetClientData(index)));
+   }
 
-void ExportDatasetDialog::loadDefaults()
-{
-}
-
-void ExportDatasetDialog::saveDefaults()
-{
-}
 
 }   // namespace ctb::app

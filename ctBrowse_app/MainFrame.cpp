@@ -422,6 +422,7 @@ namespace ctb::app
             auto options = CtDatasetOptions::retrieveOptions(dataset);
             CtDatasetOptions::saveOptions(options, file_path, true);
             SetTitle(ctb::format("{} - {}", dataset->getCollectionName(), constants::APP_NAME_LONG));
+            m_event_source->signal(DatasetEvent::Id::DatasetRenamed);
          }
       }
       catch (...)
@@ -576,8 +577,9 @@ namespace ctb::app
 
          if (dlg.ShowModal() == wxID_CANCEL) return;
 
-         auto target_path = dlg.targetFilePath();
-         auto props       = dlg.selectedProperties();
+         auto& options     = dlg.exportOptions();
+         auto target_path = options.target_path;
+         auto props       = options.props_to_export | rng::to<std::vector>();
          auto export_data = exportData(getDataset(), props);
          saveTextToFile(target_path, export_data, true);
       }
@@ -973,7 +975,16 @@ namespace ctb::app
          m_event_source->signal(DatasetEvent::Id::DatasetInitialize);
 
          // Force a complete redraw of everything
-         SetTitle(ctb::format("{} - {}", dataset->getCollectionName(), constants::APP_NAME_LONG));
+         auto collection_name = dataset->getCollectionName();
+         auto dataset_name    = getTableDescription(dataset->getTableId());
+         if (collection_name != dataset_name)
+         {
+            SetTitle(ctb::format("{} ({}) - {}", dataset->getCollectionName(), constants::APP_NAME_LONG, dataset_name));
+         }
+         else
+         {
+            SetTitle(ctb::format("{} - {}", dataset->getCollectionName(), constants::APP_NAME_LONG));
+         }
          Layout();
          SendSizeEvent();
          Update();

@@ -63,6 +63,7 @@ namespace ctb::app
 
       // Dataset-related event handlers
       void onDatasetInitialize(const DatasetEvent& event);
+      void onDatasetRenamed(const DatasetEvent& event);
       void checkFilters();
 
       /// @brief private ctor used by static create()

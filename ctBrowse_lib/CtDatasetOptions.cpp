@@ -1,5 +1,5 @@
 #include "ctb/model/CtDatasetOptions.h"
-#include "json_serialization.h"
+#include "ctb/json_serialization.h"
 
 #include <ctb/model/CtDataset.h>
 #include <ctb/model/ScopedDatasetFreeze.h>

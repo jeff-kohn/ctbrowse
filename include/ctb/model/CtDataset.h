@@ -77,7 +77,7 @@ namespace ctb
 
       /// @brief Returns the saved collection name.
       ///
-      /// defaults to getTableDescription()
+      /// defaults to getTableDescription() but can be overridden with a custom value for a specific configuration.
       ///
       /// @return A reference to the collection name string.
       auto getCollectionName() const -> const std::string& override
@@ -574,8 +574,11 @@ namespace ctb
          // new filter will be applied if there are any matches. If no matches, substring filter
          // will be cleared (we don't restore old one because previous search text is no longer
          // in the toolbar, which would be confusing).
-         m_substring_filter = {};
-         applyFilters();
+         if (m_substring_filter.has_value())
+         {
+            m_substring_filter = {};
+            applyFilters();
+         }
          auto filtered = vws::all(*m_current_view)
                        | vws::filter(search_filter)
                        | vws::transform(
@@ -589,13 +592,14 @@ namespace ctb
          m_substring_filter = search_filter;
          m_filtered_data.swap(filtered);
          m_current_view = &m_filtered_data;
+         m_current_row  = 0;
          return true;
       }
 
       void sortData()
       {
          // the fact that our TableSorter class deals with PropertyMaps is a problem, because we actually need to
-         // sort a vector<Recordc>. But that would make a table-neutral CtTableSort impossible. So we have to use an
+         // sort a vector<Record>. But that would make a table-neutral CtTableSort impossible. So we have to use an
          // adapter to allow us to use the sorter object.
          auto sort_adapter = [this](const Record& rec1, const Record& rec2) -> bool
          {
