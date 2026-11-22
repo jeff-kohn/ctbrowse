@@ -99,8 +99,7 @@ jobs:
 
   clang_build:
     name: "Run-Clang-Tidy"
-    # VS2022 image: the MSVC 14.5x STL on the vs2026 image requires Clang 22+, newer than the image's LLVM.
-    runs-on: windows-2025
+    runs-on: windows-2025-vs2026
     env:
       PRESET_NAME: "ci-static-analysis"
 
@@ -122,6 +121,19 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x64
+
+    # Use Visual Studio's bundled LLVM rather than the image's standalone install; the MSVC 14.5x STL
+    # requires Clang 22+. The win-clang toolchain file checks LLVMInstallDir first.
+    - name: Select Visual Studio LLVM
+      shell: pwsh
+      run: |
+        $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+        $vs_path = & $vswhere -latest -products * -property installationPath
+        $llvm_dir = Join-Path $vs_path 'VC\Tools\Llvm\x64'
+        if (-not (Test-Path (Join-Path $llvm_dir 'bin\clang-cl.exe'))) { Write-Error "clang-cl not found under $llvm_dir"; exit 1 }
+        "LLVMInstallDir=$llvm_dir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        "$llvm_dir\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+        & (Join-Path $llvm_dir 'bin\clang-cl.exe') --version
 
     - name: Install pre-reqs
       run: |

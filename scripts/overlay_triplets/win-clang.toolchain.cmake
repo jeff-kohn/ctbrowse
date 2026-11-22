@@ -43,8 +43,12 @@ set(CHARSET_FLAG "/utf-8")
 set(CMAKE_CL_NOLOGO "/nologo" CACHE STRING "")
 
 # Set compiler.
-find_program(CLANG-CL_EXECUTBALE NAMES "clang-cl" "clang-cl.exe" PATHS "$ENV{ProgramFiles}/LLVM" "$ENV{LLVMInstallDir}" PATH_SUFFIXES "bin" NO_DEFAULT_PATH)
-find_program(CLANG-CL_EXECUTBALE NAMES "clang-cl" "clang-cl.exe" PATHS "$ENV{ProgramFiles}/LLVM" "$ENV{LLVMInstallDir}" PATH_SUFFIXES "bin" )
+# LLVMInstallDir (if set) takes precedence, e.g. to select Visual Studio's bundled LLVM (VC/Tools/Llvm/x64).
+if(DEFINED ENV{LLVMInstallDir} AND NOT "$ENV{LLVMInstallDir}" STREQUAL "")
+  find_program(CLANG-CL_EXECUTBALE NAMES "clang-cl" "clang-cl.exe" PATHS "$ENV{LLVMInstallDir}" PATH_SUFFIXES "bin" NO_DEFAULT_PATH REQUIRED)
+endif()
+find_program(CLANG-CL_EXECUTBALE NAMES "clang-cl" "clang-cl.exe" PATHS "$ENV{ProgramFiles}/LLVM" PATH_SUFFIXES "bin" NO_DEFAULT_PATH)
+find_program(CLANG-CL_EXECUTBALE NAMES "clang-cl" "clang-cl.exe" PATHS "$ENV{ProgramFiles}/LLVM" PATH_SUFFIXES "bin" )
 
 if(NOT CLANG-CL_EXECUTBALE)
   message(SEND_ERROR "clang-cl was not found!") # Not a FATAL_ERROR due to being a toolchain!
