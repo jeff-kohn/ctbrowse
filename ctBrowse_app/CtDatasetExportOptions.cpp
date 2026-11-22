@@ -50,5 +50,11 @@ namespace ctb::app
       config->Write(constants::CONFIG_VAL_EXPORT_OPTIONS, serialized_result->c_str());
       
    }
+
+
+   void runAutoExportJobs(const fs::path &collection_folder, bool overwrite) noexcept
+   {
+      // For each saved collection file in the specified folder, load the dataset and then run an export to file.
+   }
 }   // namespace ctb::app
 

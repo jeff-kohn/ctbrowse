@@ -48,5 +48,6 @@ namespace ctb::app
    /// @param options 
    void saveDefaultExportOptions(const CtDatasetExportOptions &export_options) noexcept(false);
 
+   void runAutoExportJobs(const fs::path& collection_folder, bool overwrite = true) noexcept;
 
 }   // namespace ctb

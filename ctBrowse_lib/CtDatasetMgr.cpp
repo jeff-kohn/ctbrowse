@@ -179,6 +179,11 @@ namespace ctb
    }
 
 
+   void CtDatasetMgr::runExportJobsForTable(TableId table_id, const fs::path& collection_folder)
+   {
+
+   }
+
    void CtDatasetMgr::retrieveLabelImageAsync(uint64_t wine_id, ImageResultCallback result_callback)
    {
       if (!shutdownRequested()) m_impl->retrieveLabelImageAsync(wine_id, move(result_callback));

@@ -937,10 +937,10 @@ namespace ctb::app
       updateStatusBarCounts();
    }
 
-
    void MainFrame::doTastingNotesExport()
    {
-      
+      assert(false);
+      throw Error{ "Not implemented" };
    }
 
 
