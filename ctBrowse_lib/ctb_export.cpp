@@ -9,6 +9,8 @@ namespace ctb
       {
          return fields | vws::join_with(sep) | rng::to<std::string>();
       };
+
+
    }   // namespace detail
 
 
@@ -28,13 +30,21 @@ namespace ctb
       std::ostringstream strm{};
       strm << joinValues(prop_mappings | vws::transform([](const auto& mapping){ return mapping.second; }), sep_char) << '\n';
 
+      // These could have tab, CR/LF etc, so we have to clean them up.
+      std::set<CtProp> unwrap_props{ CtProp::TastingNotes, CtProp::BottleNote, CtProp::PrivateNote, CtProp::ConsumeNote };
+
       auto row_pos = ds->rowPosition();
       ds->moveFirst();
       do
       {
          strm << joinValues(prop_mappings | vws::transform([&](const auto& mapping)
                                                             {
-                                                               return ds->getProperty(mapping.first).asString();
+                                                               auto prop_string = ds->getProperty(mapping.first).asString();
+                                                               if (unwrap_props.contains(mapping.first))
+                                                               {
+                                                                  rng::replace_if(prop_string, [](char c) { return c == '\r' || c == '\n' || c == '\t'; }, ' ');
+                                                               }
+                                                               return prop_string;
                                                             }),
                                                             sep_char) << '\n';
       }

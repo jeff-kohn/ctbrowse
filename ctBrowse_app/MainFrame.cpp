@@ -567,12 +567,6 @@ namespace ctb::app
       try
       {
          auto ds = getDataset(true);
-
-         if (ds->getTableId() == TableId::Notes)
-         {
-            doTastingNotesExport();
-            return;
-         }
          ExportDatasetDialog dlg(this, getDataset(true));
 
          if (dlg.ShowModal() == wxID_CANCEL) return;
@@ -935,12 +929,6 @@ namespace ctb::app
          wxGetApp().displayErrorMessage(packageError());
       }
       updateStatusBarCounts();
-   }
-
-   void MainFrame::doTastingNotesExport()
-   {
-      assert(false);
-      throw Error{ "Not implemented" };
    }
 
 

@@ -127,7 +127,6 @@ namespace ctb::app
       // implementation details
       void clearSearchFilter();
       void doSearchFilter();
-      void doTastingNotesExport();
       auto getDataset(bool throw_on_null = true) -> DatasetPtr;
       void setDataset(const DatasetPtr& dataset);
       void updateStatusBarCounts();

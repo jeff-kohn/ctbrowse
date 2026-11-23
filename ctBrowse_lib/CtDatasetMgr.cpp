@@ -179,7 +179,7 @@ namespace ctb
    }
 
 
-   void CtDatasetMgr::runExportJobsForTable(TableId table_id, const fs::path& collection_folder)
+   void CtDatasetMgr::runExportJobsForTable([[maybe_unused]] TableId table_id, [[maybe_unused]] const fs::path& collection_folder)
    {
 
    }

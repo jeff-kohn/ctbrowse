@@ -52,7 +52,7 @@ namespace ctb::app
    }
 
 
-   void runAutoExportJobs(const fs::path &collection_folder, bool overwrite) noexcept
+   void runAutoExportJobs(const fs::path &collection_folder, [[maybe_unused]] bool overwrite) noexcept
    {
       if (!fs::exists(collection_folder)) return;
 
