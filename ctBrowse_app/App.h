@@ -141,10 +141,17 @@ namespace ctb::app
                                    Args&&... args) const   // NOLINT [cppcoreguidelines-missing-std-forward]
       {
          displayInfoMessage(ctb::format(fmt_str, std::forward<Args>(args)...));
-       //  displayInfoMessage(ctb::vformat(fmt_str, ctb::make_format_args(args...)));
       }
 
       void fireShutdown();
+
+      // Should any associated export collections be exported when a table is downloaded?
+      bool isAutoExportEnabled() const;
+      void setAutoExportEnabled(bool enabled);
+
+      // Should the default data sync be run on app startup?
+      bool isStartupSyncEnabled() const;
+      void setStartupSyncEnabled(bool enabled);
 
    private:
       MainFrame*                     m_main_frame{};

@@ -29,7 +29,7 @@ namespace ctb
    class ProReviewsCache
    {
    public:
-      ProReviewsCache(const ProReviewsCacheTable& tbl)
+      explicit ProReviewsCache(const ProReviewsCacheTable& tbl)
       {
          loadCache(tbl);
       }

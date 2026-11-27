@@ -22,7 +22,7 @@ namespace ctb::app::DatasetDefaultOptions
          auto default_path = getDefaultOptionsPath(table_id);
          if (fs::exists(default_path))
          {
-            return CtDatasetOptions::retrieveOptions(default_path);
+            return CtDatasetOptions::loadOptionsFile(default_path);
          }
       }
       catch (...)

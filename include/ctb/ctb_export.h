@@ -6,6 +6,12 @@
 namespace ctb
 {
 
+   struct ExportFieldMapping
+   {
+      
+
+   };
+
    /// @brief Export a dataset to columnar text format.
    /// @param ds       - dataset to export
    /// @param props    - properties to include

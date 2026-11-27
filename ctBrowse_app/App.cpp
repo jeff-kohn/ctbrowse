@@ -174,10 +174,35 @@ namespace ctb::app
       wxMessageBox(msg, title, wxICON_INFORMATION | wxOK, m_main_frame);
    }
 
+   bool App::isAutoExportEnabled() const
+   {
+      return true;
+   }
+
+
+   void App::setAutoExportEnabled([[maybe_unused]] bool enabled)
+   {
+      throw ctb::Error{ "Not implemented" };
+   }
+
+
+   bool App::isStartupSyncEnabled() const
+   {
+      return false;
+   }
+
+
+   void App::setStartupSyncEnabled([[maybe_unused]] bool enabled)
+   {
+      throw ctb::Error{ "Not implemented" };
+   }
+
+
    void App::fireShutdown()
    {
       m_dataset_mgr->requestShutdown();
    }
+
 
    void App::configureDatasetMgr()
    {

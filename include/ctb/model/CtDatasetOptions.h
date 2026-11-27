@@ -43,8 +43,7 @@ namespace ctb
 
       /// @brief Retrieve a CtDatasetOptions initialized from the specified json file
       /// @throw ctb::Error if file can't be read and loaded into object
-      static auto retrieveOptions(const fs::path& path) noexcept(false) -> CtDatasetOptions;
-
+      static auto loadOptionsFile(const fs::path& path) noexcept(false) -> CtDatasetOptions;
 
       /// @brief Save a CtDatasetOptions object to the specified json file
       /// @throw ctb::Error if saving file fails

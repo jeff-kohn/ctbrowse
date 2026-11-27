@@ -445,7 +445,7 @@ namespace ctb::app
 
          wxBusyCursor busy{};
          auto         path    = open_dialog.GetPath().utf8_string();
-         auto         options = CtDatasetOptions::retrieveOptions(path);
+         auto         options = CtDatasetOptions::loadOptionsFile(path);
          auto         dataset = loadDataset(options);
          setDataset(dataset);
       }
@@ -455,6 +455,48 @@ namespace ctb::app
       }
    }
 
+
+   namespace
+   {
+      auto getCollectionsForTable(TableId table_id, fs::path collection_folder) -> std::vector<CtDatasetOptions>
+      {
+         return enumFilesOfType(constants::STR_DATASET_COLLECTION_EXTENSION, collection_folder)
+              | vws::transform(&CtDatasetOptions::loadOptionsFile)
+              | vws::filter(
+                   [&table_id](const auto& options)
+                   {
+                      return options.table_id == table_id;
+                   })
+              | rng::to<std::vector>();
+      };
+
+      void runAutoExportsForTable(TableId table_id)
+      {
+         const auto export_collections_folder = wxGetApp().getDataFolder(AppFolder::Exports);
+         const auto export_collections        = getCollectionsForTable(table_id, export_collections_folder);
+
+         DatasetPtr ds{}; // don't load until we're sure we need it.
+
+         for (auto& collection : export_collections)
+         {
+            try
+            {
+               if (!ds)
+               {
+                  ds = wxGetApp().getDatasetManager().loadDataset(table_id);
+               }
+               collection.applyToDataset(ds);
+               // get export settings.
+            }
+            catch (...)
+            {
+               log::error("Error processing auto-export for collection '{}'. {}",
+                          collection.collection_name,
+                          packageError().formattedMessage());
+            }
+         }
+      }
+   }   // namespace
 
    void MainFrame::onMenuFileSyncData([[maybe_unused]] wxCommandEvent& event)
    {
@@ -566,15 +608,15 @@ namespace ctb::app
       using enum CtProp;
       try
       {
-         auto ds = getDataset(true);
+         auto                ds = getDataset(true);
          ExportDatasetDialog dlg(this, getDataset(true));
 
          if (dlg.ShowModal() == wxID_CANCEL) return;
 
          auto& options     = dlg.exportOptions();
-         auto target_path = options.target_path;
-         auto props       = options.props_to_export | rng::to<std::vector>();
-         auto export_data = exportData(getDataset(), props);
+         auto  target_path = options.target_path;
+         auto  props       = options.props_to_export | rng::to<std::vector>();
+         auto  export_data = exportData(getDataset(), props);
          saveTextToFile(target_path, export_data, true);
       }
       catch (...)
@@ -597,11 +639,8 @@ namespace ctb::app
             case TableId::Inventory   : [[fallthrough]];
             case TableId::List        : [[fallthrough]];
             case TableId::Pending     : [[fallthrough]];
-            case TableId::Notes       :
-               enable = true;
-               break;
-            default:
-               break;
+            case TableId::Notes       : enable = true; break;
+            default                   : break;
          };
       }
       event.Enable(enable);

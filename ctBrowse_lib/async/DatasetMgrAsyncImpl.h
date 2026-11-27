@@ -75,7 +75,7 @@ namespace ctb
       bool shutdownRequested() const;
 
 
-      /// @brief syncrhonous method to wait for shutdown to complete.Will return immediately
+      /// @brief synchronous method to wait for shutdown to complete.Will return immediately
       ///        if shutdown is already completed or not initiated
       /// @return - true if shutdown is complete, false if shutdown was not yet initiated
       bool waitForShutdown();

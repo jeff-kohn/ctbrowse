@@ -108,7 +108,7 @@ namespace ctb
 
 
       /// @brief Retrieves the pro reviews cache.
-      auto getProReviewsCache() -> ProReviewsCache&;
+      auto getProReviewsCache() -> const ProReviewsCache&;
 
 
       /// @brief Download the specified table from CellarTracker.com in the background and save it to the data
@@ -163,7 +163,6 @@ namespace ctb
 
    private:
       indirect<DatasetMgrAsyncImpl>  m_impl;
-      std::optional<ProReviewsCache> m_pro_cache{};
    };
 
 }   // namespace ctb

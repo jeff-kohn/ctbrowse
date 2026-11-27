@@ -2,6 +2,7 @@
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <frozen/map.h>
+#include <fmt/std.h>
 
 #include <fstream>
 #include <limits>
@@ -106,6 +107,24 @@ namespace ctb
          return path;
       else
          return path.substr(sep + 1);
+   }
+
+
+   auto enumFilesOfType(std::string_view file_extension, const fs::path& folder) -> std::vector<fs::path>
+   {
+      if (!fs::exists(folder))
+      {
+         SPDLOG_DEBUG("Could not enumerate files of type '' be cause folder '{}' does not exist", file_extension, folder);
+         return {};
+      }
+
+      // clang-format off 
+      return fs::directory_iterator{ folder }
+           | vws::filter( [](const auto& dir_entry)   { return dir_entry.is_regular_file(); })
+           | vws::transform([](const auto& dir_entry) { return dir_entry.path();            })
+           | vws::filter( [&](const auto& path)       { return boost::iequals(file_extension, path.extension().c_str()); })
+           | rng::to<std::vector>();
+      // clang-format on
    }
 
 
@@ -318,7 +337,7 @@ namespace ctb
 
       for (char ch : encoded_str)
       {
-         auto uch     = static_cast<unsigned char>(ch);  
+         auto uch     = static_cast<unsigned char>(ch);
          int  decoded = decode_table[uch];
          if (decoded == -1) continue;   // Safely skip newlines or invalid chars
 

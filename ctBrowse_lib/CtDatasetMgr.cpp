@@ -57,8 +57,8 @@ namespace ctb
       {
          m_impl->requestShutdown();
       }
-      catch (...) // NOLINT
-      {}   
+      catch (...)   // NOLINT
+      {}
    }
 
 
@@ -163,13 +163,10 @@ namespace ctb
    }
 
 
-   auto CtDatasetMgr::getProReviewsCache() -> ProReviewsCache&
+   auto CtDatasetMgr::getProReviewsCache() -> const ProReviewsCache&
    {
-      if (!m_pro_cache)
-      {
-         m_pro_cache = loadTableData<ProReviewsCacheTable>(getTableFolder(), TableId::Availability).value_or({});
-      }
-      return m_pro_cache.value();
+      static ProReviewsCache cache{ loadTableData<ProReviewsCacheTable>(getTableFolder(), TableId::Availability).value_or({}) };
+      return cache;
    }
 
 
@@ -180,9 +177,7 @@ namespace ctb
 
 
    void CtDatasetMgr::runExportJobsForTable([[maybe_unused]] TableId table_id, [[maybe_unused]] const fs::path& collection_folder)
-   {
-
-   }
+   {}
 
    void CtDatasetMgr::retrieveLabelImageAsync(uint64_t wine_id, ImageResultCallback result_callback)
    {

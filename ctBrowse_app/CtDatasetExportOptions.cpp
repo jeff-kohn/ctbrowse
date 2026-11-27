@@ -51,12 +51,5 @@ namespace ctb::app
       
    }
 
-
-   void runAutoExportJobs(const fs::path &collection_folder, [[maybe_unused]] bool overwrite) noexcept
-   {
-      if (!fs::exists(collection_folder)) return;
-
-      // For each saved collection file in the specified folder, load the dataset and then run an export to file.
-   }
 }   // namespace ctb::app
 

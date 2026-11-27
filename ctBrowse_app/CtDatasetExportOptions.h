@@ -10,9 +10,9 @@
 #include "App.h"
 
 #include <ctb/ctb.h>
+#include <ctb/interfaces/IDataset.h>
 #include <ctb/tables/CtSchema.h>
 #include <ctb/tables/table_data.h>
-#include <ctb/interfaces/IDataset.h>
 
 #include <string>
 
@@ -41,13 +41,19 @@ namespace ctb::app
    /// @brief get export options for a dataset
    ///
    /// collection name is the "primary key". if no saved options are found for the collection a default instance will be returned.
-   auto getDefaultExportOptions(const DatasetPtr& ds) -> CtDatasetExportOptions;
+   auto getDefaultExportOptions(const DatasetPtr &ds) -> CtDatasetExportOptions;
+
+
+   /// @brief
+   /// @param collection_name
+   /// @param table_id
+   /// @return
+   auto getOptionsForCollection(std::string_view collection_name, TableId table_id) -> std::expected<CtDatasetExportOptions, ctb::Error>;
 
 
    /// @brief serialize the options to the config store
-   /// @param options 
+   /// @param options
    void saveDefaultExportOptions(const CtDatasetExportOptions &export_options) noexcept(false);
 
-   void runAutoExportJobs(const fs::path& collection_folder, bool overwrite = true) noexcept;
 
-}   // namespace ctb
+}   // namespace ctb::app

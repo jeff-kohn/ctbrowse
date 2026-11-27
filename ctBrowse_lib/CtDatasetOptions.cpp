@@ -1,9 +1,9 @@
 #include "ctb/model/CtDatasetOptions.h"
 #include "ctb/json_serialization.h"
 
+#include <boost/algorithm/string/case_conv.hpp>
 #include <ctb/model/CtDataset.h>
 #include <ctb/model/ScopedDatasetFreeze.h>
-
 
 namespace ctb
 {
@@ -39,25 +39,28 @@ namespace ctb
       {
          dataset->applySort(active_sort);
       }
-      else {
-         failed(ctb::format("Dataset Options being applied to dataset '{}' contains invalid sort specification, this is probably a bug or an invalid options file.", table_id));
+      else
+      {
+         failed(ctb::format(
+            "Dataset Options being applied to dataset '{}' contains invalid sort specification, this is probably a bug or an invalid options file.",
+            table_id));
       }
 
       /// filter manager class stores the filters in a map, so we have to extract the key
       /// when applying the saved filters. For multi-val it's the CtPropId, for prop filters
       /// it's the filter name.
-      dataset->multivalFilters().assignFilters(multival_filters | 
-         vws::transform([](auto&& filter)
-            { 
-               return std::make_pair(filter.prop_id, std::forward<decltype(filter)>(filter)); 
-            }
-         ));
-      dataset->propFilters().assignFilters(prop_filters | 
-         vws::transform([](auto&& filter)
-            {  
-               return std::make_pair(filter.filter_name, std::forward<decltype(filter)>(filter)); 
-            }
-         ));
+      dataset->multivalFilters().assignFilters(multival_filters
+                                               | vws::transform(
+                                                  [](auto&& filter)
+                                                  {
+                                                     return std::make_pair(filter.prop_id, std::forward<decltype(filter)>(filter));
+                                                  }));
+      dataset->propFilters().assignFilters(prop_filters
+                                           | vws::transform(
+                                              [](auto&& filter)
+                                              {
+                                                 return std::make_pair(filter.filter_name, std::forward<decltype(filter)>(filter));
+                                              }));
 
       if (dataset->multivalFilters().size() < multival_filters.size() or dataset->propFilters().size() < prop_filters.size())
       {
@@ -81,7 +84,7 @@ namespace ctb
       collection_name  = dataset->getCollectionName();
       active_sort      = dataset->activeSort();
       multival_filters = dataset->multivalFilters().activeFilters() | vws::values | rng::to<std::vector>();
-      prop_filters     = dataset->propFilters().activeFilters()     | vws::values | rng::to<std::vector>();
+      prop_filters     = dataset->propFilters().activeFilters() | vws::values | rng::to<std::vector>();
 
       return true;
    }
@@ -95,7 +98,7 @@ namespace ctb
    }
 
 
-   /* static */ auto CtDatasetOptions::retrieveOptions(const fs::path& path) noexcept(false) -> CtDatasetOptions
+   /* static */ auto CtDatasetOptions::loadOptionsFile(const fs::path& path) noexcept(false) -> CtDatasetOptions
    {
       if (!fs::exists(path))
          throw Error{ ERROR_FILE_NOT_FOUND, Error::Category::FileError, constants::FMT_ERROR_FILE_NOT_FOUND, path.generic_string() };
@@ -124,10 +127,41 @@ namespace ctb
       }
 
       constexpr auto glz_opts = glz::opts{ .prettify = true };
-      auto ec = glz::write_file_json<glz_opts>(options, json_path.generic_string(), std::string{});
-      if (ec)
-         throw Error{ glz::format_error(ec), Error::Category::ParseError };
+      auto           ec       = glz::write_file_json<glz_opts>(options, json_path.generic_string(), std::string{});
+
+      if (ec) throw Error{ glz::format_error(ec), Error::Category::ParseError };
    }
 
 
-} // namespace ctb::app
+   //auto CtDatasetOptions::enumerateOptionFiles(const fs::path&  folder,   //
+   //                                            TableId          table_id,
+   //                                            std::string_view file_type) -> std::vector<CtDatasetOptions>
+   //{
+   //   std::vector<CtDatasetOptions> results{};
+
+   //   if (fs::exists(folder))
+   //   {
+   //      for (const auto& dir_entry : fs::directory_iterator{ folder })
+   //      {
+   //         if (dir_entry.is_regular_file())
+   //         {
+   //            auto file_path = dir_entry.path();
+   //            if (boost::iequals(file_type, file_path.extension().c_str()))
+   //            {
+   //               try
+   //               {
+   //                  results.push_back(CtDatasetOptions::retrieveOptions(file_path));
+   //               }
+   //               catch (...)
+   //               {
+   //                  SPDLOG_DEBUG("Error loading DatasetOptions from '{}'. {}", file_path.generic_string(), packageError().formattedMessage());
+   //               }
+   //            }
+   //         }
+   //      }
+   //   }
+
+   //   return results;
+   //}
+
+}   // namespace ctb

@@ -55,6 +55,13 @@ namespace ctb
    auto viewFilename(std::string& fq_path) noexcept -> std::string_view;
 
 
+   /// @brief Non-recursively searches the specified folder for files with given and returns the results
+   /// @param folder - filesystem folder to search
+   /// @param file_extension - extension to filter results by
+   /// @return vector containing the found file paths (may be empty in none were found)
+   auto enumFilesOfType(std::string_view file_extension, const fs::path& folder) -> std::vector<fs::path>;
+
+
    /// @brief Currently-supported code pages in addition
    enum class TextEncoding : uint32_t
    {
