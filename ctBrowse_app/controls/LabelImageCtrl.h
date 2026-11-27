@@ -28,7 +28,7 @@ namespace ctb::app
       class FetchLabelCallback
       {
       public:
-         FetchLabelCallback(const wxWeakRef<LabelImageCtrl>& notification_wnd) : m_wnd(notification_wnd)
+         explicit FetchLabelCallback(const wxWeakRef<LabelImageCtrl>& notification_wnd) : m_wnd(notification_wnd)
          {}
 
          void operator()(ImageResult result) const;
@@ -43,7 +43,7 @@ namespace ctb::app
       DECLARE_DATASET_WINDOW_FACTORY;
       friend class FetchLabelCallback;
 
-      LabelImageCtrl(const DatasetEventSourcePtr& source);
+      explicit LabelImageCtrl(const DatasetEventSourcePtr& source);
 
       void createWindow(wxWindow* parent) override;
       void labelUpdate(uint64_t wine_id, wxImage& image_result);

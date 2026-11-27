@@ -27,7 +27,7 @@ namespace ctb::app
 
       DECLARE_DATASET_WINDOW_FACTORY;
 
-      SortOptionsPanel(const DatasetEventSourcePtr& source) : Base{ source }
+      explicit SortOptionsPanel(const DatasetEventSourcePtr& source) : Base{ source }
       {}
 
       void createWindow(wxWindow* parent) override;

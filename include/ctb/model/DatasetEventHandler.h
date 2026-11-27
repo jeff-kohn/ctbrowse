@@ -39,7 +39,7 @@ namespace ctb
       using CallbackMap   = std::unordered_map<EventId, EventCallback>;
 
 
-      DatasetEventHandler(DatasetEventSourcePtr source) : m_source(std::move(source))
+      explicit DatasetEventHandler(DatasetEventSourcePtr source) : m_source(std::move(source))
       {
          if (!m_source)
          {

@@ -30,7 +30,7 @@ namespace ctb::app
 
    protected:
       // this class can only be constructed through derived classes
-      DetailsViewBase(const DatasetEventSourcePtr& source) : Base{ source }
+      explicit DetailsViewBase(const DatasetEventSourcePtr& source) : Base{ source }
       {}
 
       // Handles the window creation, since constructors only create the C++ object not the actual window. This implementation

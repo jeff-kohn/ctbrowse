@@ -30,7 +30,7 @@ namespace ctb::app
 
       /// @brief ctor for implicit window creation, no need to call create.
       ///
-      TableSyncDialog(wxWindow* parent);
+      explicit TableSyncDialog(wxWindow* parent);
 
       /// @brief create the window object
       ///

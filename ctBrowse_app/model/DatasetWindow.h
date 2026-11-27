@@ -26,7 +26,7 @@ namespace ctb::app
       ~DatasetWindow() noexcept override             = default;
 
    protected:
-      DatasetWindow(const DatasetEventSourcePtr& event_source) : m_dataset_events{ event_source }
+      explicit DatasetWindow(const DatasetEventSourcePtr& event_source) : m_dataset_events{ event_source }
       {}
 
       /// @brief returns a reference to the event source so derived classes can register event handlers.

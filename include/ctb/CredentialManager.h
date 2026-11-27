@@ -87,7 +87,7 @@ namespace ctb
       static constexpr int MAX_PASSWORD_LENGTH = 256;   /// max password length not including null terminator
 
 
-      CredentialManager(CredPromptType prompt) : m_prompt(std::move(prompt))
+      explicit CredentialManager(CredPromptType prompt) : m_prompt(std::move(prompt))
       {}
 
       CredentialManager() = default;

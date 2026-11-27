@@ -43,7 +43,7 @@ namespace ctb
       ///
       /// This class does not protect its internal implementation from concurrent access since
       /// it is meant to run on a single-threaded context.
-      CellarTrackerBrowser(ContextPtr io_ctx);
+      explicit CellarTrackerBrowser(ContextPtr io_ctx);
 
 
       /// @brief start the browser process.

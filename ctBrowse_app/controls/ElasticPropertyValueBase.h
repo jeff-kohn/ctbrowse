@@ -23,7 +23,7 @@ namespace ctb::app
       }
 
    protected:
-      ElasticPropertyValueBase(const DatasetEventSourcePtr& event_source);
+      explicit ElasticPropertyValueBase(const DatasetEventSourcePtr& event_source);
 
       /// @brief retrieve the value to be displayed in the control from the dataset
       ///

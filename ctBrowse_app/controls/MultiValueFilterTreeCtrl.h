@@ -50,7 +50,7 @@ namespace ctb::app
 
       DECLARE_DATASET_WINDOW_FACTORY;
 
-      MultiValueFilterTreeCtrl(const DatasetEventSourcePtr& source) : Base{ source }
+      explicit MultiValueFilterTreeCtrl(const DatasetEventSourcePtr& source) : Base{ source }
       {}
 
       void createWindow(wxWindow* parent) override;

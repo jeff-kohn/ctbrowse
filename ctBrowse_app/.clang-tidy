@@ -1,4 +1,5 @@
 Checks: "clang-diagnostic-*,cppcoreguidelines-*,modernize-*,cert-*, bugprone-*, readability-*, \
+  google-explicit-constructor, \
   -cppcoreguidelines-owning-memory, \
   -bugprone-easily-swappable-parameters, \
   -clang-analyzer-optin.core.EnumCastOutOfRange, \
