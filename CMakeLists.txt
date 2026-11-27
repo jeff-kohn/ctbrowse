@@ -84,7 +84,6 @@ else()
    endif()
 endif()
 
-add_compile_definitions(STDEXEC_ASIO_USES_STANDALONE=1 STDEXEC_ASIO_USES_BOOST=0)
 find_package(asio CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(glaze CONFIG)

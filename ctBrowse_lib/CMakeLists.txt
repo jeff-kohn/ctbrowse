@@ -119,6 +119,7 @@ target_link_libraries(${TARGET_NAME}
       glaze::glaze
       spdlog::spdlog
       STDEXEC::stdexec
+      STDEXEC::asioexec
       "$<$<PLATFORM_ID:Windows>:Credui>"
       "$<$<PLATFORM_ID:Windows>:shlwapi>"
       "$<$<PLATFORM_ID:Windows>:Shell32.lib>"

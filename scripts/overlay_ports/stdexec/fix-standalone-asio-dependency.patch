@@ -1,0 +1,49 @@
+diff --git a/cmake/Modules/ConfigureASIO.cmake b/cmake/Modules/ConfigureASIO.cmake
+index d39e498..2def1c9 100644
+--- a/cmake/Modules/ConfigureASIO.cmake
++++ b/cmake/Modules/ConfigureASIO.cmake
+@@ -71,8 +71,11 @@ if(STDEXEC_ENABLE_ASIO)
+     endif()
+ 
+   elseif(${STDEXEC_ASIO_USES_STANDALONE})
+-    include(cmake/import_standalone_asio.cmake)
+-    import_standalone_asio(TAG "asio-1-31-0" VERSION "1.31.0")
++    rapids_find_package(
++      asio REQUIRED
++      GLOBAL_TARGETS asio::asio
++      BUILD_EXPORT_SET stdexec-exports
++      INSTALL_EXPORT_SET stdexec-exports)
+ 
+     add_library(asioexec INTERFACE)
+     list(APPEND stdexec_export_targets asioexec)
+@@ -102,10 +105,10 @@ if(STDEXEC_ENABLE_ASIO)
+ 
+     target_compile_definitions(asioexec INTERFACE STDEXEC_ASIO_USES_STANDALONE)
+ 
+-    target_link_libraries(asioexec INTERFACE STDEXEC::stdexec asio)
++    target_link_libraries(asioexec INTERFACE STDEXEC::stdexec asio::asio)
+     if(STDEXEC_INSTALL)
+       install(
+-        TARGETS asioexec asio
++        TARGETS asioexec
+         EXPORT stdexec-exports
+         FILE_SET headers)
+     endif()
+diff --git a/include/exec/asio/use_sender.hpp b/include/exec/asio/use_sender.hpp
+index 74e6c96..10c2ee1 100644
+--- a/include/exec/asio/use_sender.hpp
++++ b/include/exec/asio/use_sender.hpp
+@@ -50,10 +50,13 @@ namespace experimental::execution::asio
+     concept error_code_like =
+       ::STDEXEC::__one_of<std::remove_cvref_t<Ty>, error_code, std::error_code>;
+ 
++#if STDEXEC_ASIO_USES_BOOST
++    // with standalone asio, error_code is std::error_code, so this would redefine the overload below
+     inline bool is_cancelled(std::error_code ec) noexcept
+     {
+       return ec == std::errc::operation_canceled;
+     }
++#endif
+ 
+     inline bool is_cancelled(error_code ec) noexcept
+     {

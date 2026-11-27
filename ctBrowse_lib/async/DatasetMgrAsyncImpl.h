@@ -9,6 +9,7 @@
 #include "async/IoManager.h"
 #include "async/senders.h"
 #include <exec/async_scope.hpp>
+#include <exec/static_thread_pool.hpp>
 
 namespace ctb
 {

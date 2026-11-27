@@ -26,7 +26,12 @@
       ]
     },
     "spdlog",
-    "stdexec"
+    {
+      "name": "stdexec",
+      "features": [
+        "asio-standalone"
+      ]
+    }
   ],
-  "builtin-baseline": "d186940b2f0c4e8e5b4ff804af57d2a26fbfa091"
+  "builtin-baseline": "99541cc939bf01ae3c42f928266d648f5acb88fd"
 }
