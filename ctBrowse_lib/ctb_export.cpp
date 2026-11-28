@@ -1,5 +1,5 @@
 #include "ctb/ctb_export.h"
-
+#include "ctb/utility.h"
 
 namespace ctb
 {
@@ -17,7 +17,7 @@ namespace ctb
    // clang-format off
    // because sometimes it does the stupidest, ugliest shit I swear
 
-   [[nodiscard]] std::string exportData(const DatasetPtr& ds, std::span<std::pair<CtProp, std::string>> prop_mappings, char sep_char)
+   [[nodiscard]] std::string serializeDataset(const DatasetPtr& ds, std::span<std::pair<CtProp, std::string>> prop_mappings, char sep_char)
    {
       if (!ds or !ds->rowCount()) return "";
 
@@ -55,7 +55,7 @@ namespace ctb
    }
 
 
-   [[nodiscard]] std::string exportData(const DatasetPtr& ds, std::span<CtProp> props, char sep_char)
+   [[nodiscard]] std::string serializeDataset(const DatasetPtr& ds, std::span<const CtProp> props, char sep_char)
    {
       using namespace detail;
 
@@ -79,7 +79,14 @@ namespace ctb
 
       auto props_to_export = props | vws::transform(getPropMapping) | rng::to<std::vector>();
 
-      return exportData(ds, props_to_export, sep_char);
+      return serializeDataset(ds, props_to_export, sep_char);
+   }
+
+
+   void exportDatasetToFile(const fs::path& target_path, const DatasetPtr & ds, std::span<const CtProp> props, char sep_char)
+   {
+      auto export_text = serializeDataset(ds, props, sep_char);
+      saveTextToFile(target_path, export_text, true);
    }
 
 

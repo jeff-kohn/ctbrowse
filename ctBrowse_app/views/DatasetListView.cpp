@@ -142,7 +142,8 @@ namespace ctb::app
             selectFirstRow();
             break;
 
-         case DatasetEvent::Id::RowSelected: break;
+         case DatasetEvent::Id::DatasetRenamed: [[fallthrough]];
+         case DatasetEvent::Id::RowSelected:    break;
 
          default: assert("Unexpected event type" and false);
       }

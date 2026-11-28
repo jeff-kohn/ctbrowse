@@ -7,6 +7,7 @@
 #include "ctb/model/ProReviewsCache.h"
 
 #include <stdexec/stop_token.hpp>
+#include <span>
 
 
 namespace ctb
@@ -127,14 +128,8 @@ namespace ctb
          }
       }
 
-      /// @brief Runs configured export jobs for the specified table.
-      ///
-      /// Any dataset collection files (*.ctb) in the specified folder that use the specified table as their source will
-      /// be run, but only if there is saved default export config for that collection that contains a target path. Collection
-      /// files that do not have a saved default config or use a different table will be skipped.
-      /// @param table_id - table that exports should be run for.
-      /// @param collection_folder - the folder where the export collections are stored.
-      void runExportJobsForTable(TableId table_id, const fs::path& collection_folder);
+      /// @brief 
+      void exportDatasetToFile(const DatasetPtr& ds, std::span<CtProp> export_columns, char sep_char = '\t');
 
 
       /// @brief Asynchronous function to retrieve a label image, either from local disk cache or HTTP download

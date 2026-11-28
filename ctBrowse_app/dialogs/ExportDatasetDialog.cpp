@@ -22,7 +22,7 @@ namespace ctb::app
            wxDefaultSize,
            wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER
    },
-        m_export_options{ dataset ? getDefaultExportOptions(dataset) : CtDatasetExportOptions{} },
+        m_export_options{ dataset ? getExportOptionsForDataset(dataset) : CtDatasetExportOptions{} },
         m_dataset_props{ dataset ? PropSet{ std::from_range, dataset->getAvailableFields() } : PropSet{} }
 
    {

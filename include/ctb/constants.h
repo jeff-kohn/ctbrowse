@@ -226,7 +226,7 @@ namespace ctb::constants
    inline constexpr const char* STR_YES         = "Yes";
    inline constexpr const char* STR_NO          = "No";
 
-   inline constexpr const char* STR_DATASET_COLLECTION_EXTENSION = "ctbc";
+   inline constexpr const char* STR_DATASET_COLLECTION_EXTENSION = ".ctbc";
 
 
    inline constexpr const char* LBL_SIZE_750ml  = "750ml";

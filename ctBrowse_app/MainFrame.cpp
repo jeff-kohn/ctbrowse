@@ -8,6 +8,7 @@
 #include "MainFrame.h"
 #include "App.h"
 #include "CtCredentialManager.h"
+#include "CtDatasetExportOptions.h"
 
 #include "dialogs/ExportDatasetDialog.h"
 #include "dialogs/TableSyncDialog.h"
@@ -472,7 +473,7 @@ namespace ctb::app
 
       void runAutoExportsForTable(TableId table_id)
       {
-         const auto export_collections_folder = wxGetApp().getDataFolder(AppFolder::Exports);
+         const auto export_collections_folder = wxGetApp().getDataFolder(AppFolder::Favorites) / "Export Collections";
          const auto export_collections        = getCollectionsForTable(table_id, export_collections_folder);
 
          DatasetPtr ds{}; // don't load until we're sure we need it.
@@ -486,7 +487,8 @@ namespace ctb::app
                   ds = wxGetApp().getDatasetManager().loadDataset(table_id);
                }
                collection.applyToDataset(ds);
-               // get export settings.
+               auto export_options = getExportOptionsForDataset(ds);
+               exportDatasetToFile(export_options.target_path, ds, export_options.props_to_export | rng::to<std::vector>());
             }
             catch (...)
             {
@@ -528,6 +530,11 @@ namespace ctb::app
             *cred_result,
             [this](TableResult result)
             {
+
+               // Run export on background thread
+               if (wxGetApp().isAutoExportEnabled() and result.has_value()) runAutoExportsForTable(result->table_id);
+
+               // Update ui on main thread
                CallAfter(
                   [this, result = std::move(result)]
                   {
@@ -616,8 +623,7 @@ namespace ctb::app
          auto& options     = dlg.exportOptions();
          auto  target_path = options.target_path;
          auto  props       = options.props_to_export | rng::to<std::vector>();
-         auto  export_data = exportData(getDataset(), props);
-         saveTextToFile(target_path, export_data, true);
+         exportDatasetToFile(target_path, getDataset(), props);
       }
       catch (...)
       {

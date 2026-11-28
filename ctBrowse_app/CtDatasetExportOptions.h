@@ -40,15 +40,15 @@ namespace ctb::app
 
    /// @brief get export options for a dataset
    ///
-   /// collection name is the "primary key". if no saved options are found for the collection a default instance will be returned.
-   auto getDefaultExportOptions(const DatasetPtr &ds) -> CtDatasetExportOptions;
+   /// collection name is the "primary key". if no saved options are found for the collection a default instance for the underlying table will be returned.
+   auto getExportOptionsForDataset(const DatasetPtr &ds) -> CtDatasetExportOptions;
 
 
    /// @brief
    /// @param collection_name
    /// @param table_id
    /// @return
-   auto getOptionsForCollection(std::string_view collection_name, TableId table_id) -> std::expected<CtDatasetExportOptions, ctb::Error>;
+   auto getExportOptionsForCollection(std::string_view collection_name) -> std::expected<CtDatasetExportOptions, ctb::Error>;
 
 
    /// @brief serialize the options to the config store

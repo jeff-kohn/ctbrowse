@@ -114,7 +114,7 @@ namespace ctb
    {
       if (!fs::exists(folder))
       {
-         SPDLOG_DEBUG("Could not enumerate files of type '' be cause folder '{}' does not exist", file_extension, folder);
+         SPDLOG_DEBUG("Could not enumerate files of type '{}' because folder '{}' does not exist", file_extension, folder);
          return {};
       }
 
@@ -122,7 +122,7 @@ namespace ctb
       return fs::directory_iterator{ folder }
            | vws::filter( [](const auto& dir_entry)   { return dir_entry.is_regular_file(); })
            | vws::transform([](const auto& dir_entry) { return dir_entry.path();            })
-           | vws::filter( [&](const auto& path)       { return boost::iequals(file_extension, path.extension().c_str()); })
+           | vws::filter( [&](const auto& path)       { return boost::iequals(file_extension, path.extension().string()); })
            | rng::to<std::vector>();
       // clang-format on
    }
